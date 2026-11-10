@@ -1,0 +1,5011 @@
+{
+ "generated": "2026-11-10",
+ "note": "A school's own site was the source; copies are 160px WebP in apps/web/public/schools. kept = in the SQL.",
+ "logos": [
+  {
+   "slug": "adeniran-ogunsanya-college-of-education",
+   "kind": "college",
+   "name": "Adeniran Ogunsanya College of Education",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: unreachable 200 text/html; charset=UTF-8"
+  },
+  {
+   "slug": "college-of-education-akamkpa",
+   "kind": "college",
+   "name": "College of Education, Akamkpa",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: page does not name the school"
+  },
+  {
+   "slug": "college-of-education-akwanga",
+   "kind": "college",
+   "name": "College of Education, Akwanga",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: page does not name the school"
+  },
+  {
+   "slug": "college-of-education-billiri",
+   "kind": "college",
+   "name": "College of Education, Billiri",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: page does not name the school"
+  },
+  {
+   "slug": "college-of-education-ekiadolor",
+   "kind": "college",
+   "name": "College of Education, Ekiadolor",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: page does not name the school"
+  },
+  {
+   "slug": "college-of-education-gindiri",
+   "kind": "college",
+   "name": "College of Education, Gindiri",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: page does not name the school"
+  },
+  {
+   "slug": "college-of-education-ilemona",
+   "kind": "college",
+   "name": "College of Education, Ilemona",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: page does not name the school"
+  },
+  {
+   "slug": "college-of-education-katsina-ala",
+   "kind": "college",
+   "name": "College of Education, Katsina-Ala",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: page does not name the school"
+  },
+  {
+   "slug": "college-of-education-lanlate",
+   "kind": "college",
+   "name": "College of Education, Lanlate",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: page does not name the school"
+  },
+  {
+   "slug": "college-of-education-oju",
+   "kind": "college",
+   "name": "College of Education, Oju",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: page does not name the school"
+  },
+  {
+   "slug": "college-of-education-waka-biu",
+   "kind": "college",
+   "name": "College of Education, Waka-Biu",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: page does not name the school"
+  },
+  {
+   "slug": "college-of-education-warri",
+   "kind": "college",
+   "name": "College of Education, Warri",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: page does not name the school"
+  },
+  {
+   "slug": "college-of-nursing-agbor",
+   "kind": "college",
+   "name": "College of Nursing, Agbor",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: page does not name the school"
+  },
+  {
+   "slug": "college-of-nursing-amachara",
+   "kind": "college",
+   "name": "College of Nursing, Amachara",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: page does not name the school"
+  },
+  {
+   "slug": "college-of-nursing-anua-uyo",
+   "kind": "college",
+   "name": "College of Nursing, Anua, Uyo",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: page does not name the school"
+  },
+  {
+   "slug": "college-of-nursing-asaba",
+   "kind": "college",
+   "name": "College of Nursing, Asaba",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: page does not name the school"
+  },
+  {
+   "slug": "college-of-nursing-baptist-medical-centre-saki",
+   "kind": "college",
+   "name": "College of Nursing, Baptist Medical Centre, Saki",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: page does not name the school"
+  },
+  {
+   "slug": "college-of-nursing-eket",
+   "kind": "college",
+   "name": "College of Nursing, Eket",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: page does not name the school"
+  },
+  {
+   "slug": "college-of-nursing-ikot-ekpene",
+   "kind": "college",
+   "name": "College of Nursing, Ikot-Ekpene",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: page does not name the school"
+  },
+  {
+   "slug": "college-of-nursing-iquita-oron",
+   "kind": "college",
+   "name": "College of Nursing, Iquita-Oron",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: page does not name the school"
+  },
+  {
+   "slug": "college-of-nursing-ituk-mbang",
+   "kind": "college",
+   "name": "College of Nursing, Ituk-Mbang",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: page does not name the school"
+  },
+  {
+   "slug": "college-of-nursing-sapele",
+   "kind": "college",
+   "name": "College of Nursing, Sapele",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: page does not name the school"
+  },
+  {
+   "slug": "college-of-nursing-st-charles-borromeo-hospital-onitsha",
+   "kind": "college",
+   "name": "College of Nursing, St. Charles Borromeo Hospital, Onitsha",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: page does not name the school"
+  },
+  {
+   "slug": "college-of-nursing-st-mary-s-joint-hospital-amaigbo",
+   "kind": "college",
+   "name": "College of Nursing, St. Mary’s Joint Hospital, Amaigbo",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: page does not name the school"
+  },
+  {
+   "slug": "college-of-nursing-umuahia",
+   "kind": "college",
+   "name": "College of Nursing, Umuahia",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: page does not name the school"
+  },
+  {
+   "slug": "kwara-state-college-of-health-technology-offa",
+   "kind": "college",
+   "name": "Kwara State College of Health Technology, Offa",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: unreachable 0 <urlopen error _ssl.c:1018: The handshak; page does not name the school"
+  },
+  {
+   "slug": "lagos-state-university-college-of-medicine",
+   "kind": "college",
+   "name": "Lagos State University College of Medicine",
+   "source_page": "https://lasucom.edu.ng",
+   "image_url": "https://lasucom.edu.ng/wp-content/uploads/2020/10/LOGO1232.png",
+   "bytes": 9696,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "osun-state-college-of-education-ilesa",
+   "kind": "college",
+   "name": "Osun State College of Education, Ilesa",
+   "source_page": "https://oscotechesaoke.edu.ng/oscosite/",
+   "image_url": "https://oscotechesaoke.edu.ng/oscosite/images/iconex.png",
+   "bytes": 8444,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "abdu-gusau-polytechnic-talata-mafara",
+   "kind": "polytechnic",
+   "name": "Abdu Gusau Polytechnic, Talata Mafara",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: unreachable 500 "
+  },
+  {
+   "slug": "abraham-adesanya-polytechnic-ijebu-igbo",
+   "kind": "polytechnic",
+   "name": "Abraham Adesanya Polytechnic, Ijebu-Igbo",
+   "source_page": "https://aapoly.edu.ng",
+   "image_url": "https://aapoly.edu.ng/wp-content/uploads/2026/11/aap-logo-img-1.png",
+   "bytes": 5638,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "abubakar-tatari-ali-polytechnic-bauchi",
+   "kind": "polytechnic",
+   "name": "Abubakar Tatari Ali Polytechnic, Bauchi",
+   "source_page": "https://atapoly.edu.ng/",
+   "image_url": "https://atapoly.edu.ng/assets/images/atapoly-logo.png",
+   "bytes": 3234,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "adamawa-state-polytechnic-yola",
+   "kind": "polytechnic",
+   "name": "Adamawa State Polytechnic, Yola",
+   "source_page": "https://adamawapoly.edu.ng",
+   "image_url": "https://adamawapoly.edu.ng/wp-content/uploads/2021/10/cropped-logo.png",
+   "bytes": 2322,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "adeseun-ogundoyin-polytechnic-eruwa",
+   "kind": "polytechnic",
+   "name": "Adeseun Ogundoyin Polytechnic, Eruwa",
+   "source_page": "https://aope.edu.ng/website/",
+   "image_url": "https://aope.edu.ng/website/wp-content/uploads/2026/02/aun.png",
+   "bytes": 7616,
+   "how": "apple-touch-icon",
+   "decision": "kept"
+  },
+  {
+   "slug": "ajayi-polytechnic-ikere-ekiti",
+   "kind": "polytechnic",
+   "name": "Ajayi Polytechnic, Ikere-Ekiti",
+   "source_page": "https://ajayipolytechnic.edu.ng",
+   "image_url": "https://ajayipolytechnic.edu.ng/assets/img/logo.png",
+   "bytes": 4080,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "akanu-ibiam-federal-polytechnic-unwana",
+   "kind": "polytechnic",
+   "name": "Akanu Ibiam Federal Polytechnic, Unwana",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: unreachable 0 <urlopen error [SSL: CERTIFICATE_VERIFY_; page does not name the school"
+  },
+  {
+   "slug": "akwa-ibom-state-polytechnic-ikot-osurua",
+   "kind": "polytechnic",
+   "name": "Akwa Ibom State Polytechnic, Ikot Osurua",
+   "source_page": "https://akwaibompoly.edu.ng",
+   "image_url": "https://akwaibompoly.edu.ng/wp-content/uploads/2025/10/Akwaibom-state-Logo-1.png",
+   "bytes": 3986,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "al-hikma-polytechnic-karu",
+   "kind": "polytechnic",
+   "name": "Al-Hikma Polytechnic, Karu",
+   "source_page": "https://alhikma.edu.ng",
+   "image_url": "https://alhikma.edu.ng/wp-content/uploads/2025/10/PROFESSIONAL-PHONE-TECHNICIAN-1024x1024.jpg",
+   "bytes": 8538,
+   "how": "header img",
+   "decision": "rejected in QA: photograph of a person, not a logo"
+  },
+  {
+   "slug": "american-polytechnic-wasimi",
+   "kind": "polytechnic",
+   "name": "American Polytechnic, Wasimi",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: page does not name the school"
+  },
+  {
+   "slug": "anambra-state-polytechnic-mgbakwu",
+   "kind": "polytechnic",
+   "name": "Anambra State Polytechnic, Mgbakwu",
+   "source_page": "https://anspoly.edu.ng",
+   "image_url": "https://anspoly.edu.ng/media/logo.png",
+   "bytes": 5598,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "auchi-polytechnic",
+   "kind": "polytechnic",
+   "name": "Auchi Polytechnic",
+   "source_page": "https://auchipoly.edu.ng/ap/",
+   "image_url": "https://auchipoly.edu.ng/ap/wp-content/uploads/2024/11/APllogo_lg.png",
+   "bytes": 3386,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "bayelsa-state-polytechnic-aguobiri",
+   "kind": "polytechnic",
+   "name": "Bayelsa State Polytechnic, Aguobiri",
+   "source_page": "https://bayelsastatepoly.edu.ng",
+   "image_url": "https://bayelsastatepoly.edu.ng/wp-content/uploads/2026/10/rector-byspoly-227x300.jpg",
+   "bytes": 5820,
+   "how": "header img",
+   "decision": "rejected in QA: photograph of a person, not a logo"
+  },
+  {
+   "slug": "bellarks-polytechnic-kwale",
+   "kind": "polytechnic",
+   "name": "Bellarks Polytechnic, Kwale",
+   "source_page": "https://bellarkspoly.edu.ng",
+   "image_url": "https://bellarkspoly.edu.ng/images/bellak_logo.jpg",
+   "bytes": 7800,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "benue-state-polytechnic-ugbokolo",
+   "kind": "polytechnic",
+   "name": "Benue State Polytechnic, Ugbokolo",
+   "source_page": "https://benpolyonline.edu.ng/host/",
+   "image_url": "https://benpolyonline.edu.ng/host/wp-content/uploads/2024/05/cropped-msLogo.png",
+   "bytes": 4252,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "best-solution-polytechnic-akure",
+   "kind": "polytechnic",
+   "name": "Best Solution Polytechnic, Akure",
+   "source_page": "https://www.bestpotech.edu.ng/",
+   "image_url": "https://www.bestpotech.edu.ng/_next/image?url=%2Fimages%2Flogos%2Fbestpotech-crest.png&w=96&q=75",
+   "bytes": 2986,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "binyaminu-usman-polytechnic-hadejia",
+   "kind": "polytechnic",
+   "name": "Binyaminu Usman Polytechnic, Hadejia",
+   "source_page": "https://bupoly.edu.ng/",
+   "image_url": "https://bupoly.edu.ng/wp-content/uploads/2016/07/cropped-bupoly-5.png",
+   "bytes": 9928,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "bolmor-polytechnic-ibadan",
+   "kind": "polytechnic",
+   "name": "Bolmor Polytechnic, Ibadan",
+   "source_page": "https://bpi.edu.ng",
+   "image_url": "https://bpi.edu.ng/wp-content/uploads/2025/04/bolmor-removebg-preview-114x104.png",
+   "bytes": 7000,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "brainfill-polytechnic-ikot-ekpene",
+   "kind": "polytechnic",
+   "name": "Brainfill Polytechnic, Ikot Ekpene",
+   "source_page": "https://brainfillpolytechnic.edu.ng",
+   "image_url": "https://brainfillpolytechnic.edu.ng/wp-content/uploads/2022/08/brain-fill-logo4-270x86.jpg",
+   "bytes": 2254,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "british-transatlantic-polytechnic-akure",
+   "kind": "polytechnic",
+   "name": "British Transatlantic Polytechnic, Akure",
+   "source_page": "https://www.britishpoly.edu.ng/",
+   "image_url": "https://www.britishpoly.edu.ng/wp-content/uploads/2023/02/Logo-removebg-preview.png",
+   "bytes": 8422,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "calvary-polytechnic",
+   "kind": "polytechnic",
+   "name": "Calvary Polytechnic",
+   "source_page": "https://calvarypoly.edu.ng/",
+   "image_url": "https://calvarypoly.edu.ng/uploads/frontend/images/logo8.jpeg?src=1794310164",
+   "bytes": 6666,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "captain-elechi-amadi-polytechnic-port-harcourt",
+   "kind": "polytechnic",
+   "name": "Captain Elechi Amadi Polytechnic, Port Harcourt",
+   "source_page": "https://ceapoly.edu.ng/",
+   "image_url": "https://ceapoly.edu.ng/wp-content/uploads/2026/08/ceapolylogo_edited-1.png",
+   "bytes": 3558,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "citi-polytechnic-bwari",
+   "kind": "polytechnic",
+   "name": "Citi Polytechnic, Bwari",
+   "source_page": "https://citipolytechnic.edu.ng/",
+   "image_url": "https://citipolytechnic.edu.ng/web/img/icon/phone-call.png",
+   "bytes": 3598,
+   "how": "header img",
+   "decision": "rejected in QA: generic telephone icon (a default site icon)"
+  },
+  {
+   "slug": "coastal-polytechnic-badagry",
+   "kind": "polytechnic",
+   "name": "Coastal Polytechnic, Badagry",
+   "source_page": "https://coastalpoly.edu.ng/",
+   "image_url": "https://coastalpoly.edu.ng/assets/images/favicon.png",
+   "bytes": 12312,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "college-of-administration-management-and-technology-potiskum",
+   "kind": "polytechnic",
+   "name": "College of Administration, Management and Technology, Potiskum",
+   "source_page": "https://coastlafia.edu.ng/",
+   "image_url": "https://coastlafia.edu.ng/wp-content/uploads/2023/02/cropped-Coast-Lafia-Logo-Asset.png",
+   "bytes": 4434,
+   "how": "header img",
+   "decision": "rejected in QA: the identical picture was found for several schools (a shared or default icon)"
+  },
+  {
+   "slug": "college-of-agriculture-science-and-technology-gujba",
+   "kind": "polytechnic",
+   "name": "College of Agriculture, Science and Technology, Gujba",
+   "source_page": "https://coastlafia.edu.ng/",
+   "image_url": "https://coastlafia.edu.ng/wp-content/uploads/2023/02/cropped-Coast-Lafia-Logo-Asset.png",
+   "bytes": 4434,
+   "how": "header img",
+   "decision": "rejected in QA: the identical picture was found for several schools (a shared or default icon)"
+  },
+  {
+   "slug": "college-of-agriculture-science-and-technology-lafia",
+   "kind": "polytechnic",
+   "name": "College of Agriculture, Science and Technology, Lafia",
+   "source_page": "https://coastlafia.edu.ng",
+   "image_url": "https://coastlafia.edu.ng/wp-content/uploads/2023/02/cropped-Coast-Lafia-Logo-Asset.png",
+   "bytes": 4434,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "covenant-polytechnic-aba",
+   "kind": "polytechnic",
+   "name": "Covenant Polytechnic, Aba",
+   "source_page": "https://covenantpolytechnic.com/",
+   "image_url": "https://covenantpolytechnic.com/img/logo-footer.jpg",
+   "bytes": 3600,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "cross-river-institute-of-technology-and-management-ugep",
+   "kind": "polytechnic",
+   "name": "Cross River Institute of Technology and Management, Ugep",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: page does not name the school; page does not name the school"
+  },
+  {
+   "slug": "crown-polytechnic-ado-ekiti",
+   "kind": "polytechnic",
+   "name": "Crown Polytechnic, Ado-Ekiti",
+   "source_page": "https://crownpolytechnic.edu.ng/",
+   "image_url": "https://crownpolytechnic.edu.ng/uploads/school_content/logo/front_logo-5f36ff762616f7.27654468.png",
+   "bytes": 3108,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "d-s-adegbenro-ict-polytechnic-itori",
+   "kind": "polytechnic",
+   "name": "D.S. Adegbenro ICT Polytechnic, Itori",
+   "source_page": "https://dsadegbenropoly.edu.ng/",
+   "image_url": "https://dsadegbenropoly.edu.ng/wp-content/uploads/2020/03/imageedit_1_4773329608-2.png",
+   "bytes": 4034,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "daboss-polytechnic",
+   "kind": "polytechnic",
+   "name": "Daboss Polytechnic",
+   "source_page": "https://www.dabosspolytechnic.edu.ng/",
+   "image_url": "https://www.dabosspolytechnic.edu.ng/wp-content/uploads/2024/01/Daboss-Polytechnic-Logo-PNG.png",
+   "bytes": 6104,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "delta-state-maritime-polytechnic-burutu",
+   "kind": "polytechnic",
+   "name": "Delta State Maritime Polytechnic, Burutu",
+   "source_page": "https://dsmt.edu.ng/",
+   "image_url": "https://dsmt.edu.ng/site/image/logo.png",
+   "bytes": 4302,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "delta-state-polytechnic-ogwashi-uku",
+   "kind": "polytechnic",
+   "name": "Delta State Polytechnic, Ogwashi-Uku",
+   "source_page": "https://mydspg.edu.ng",
+   "image_url": "https://mydspg.edu.ng/wp-content/uploads/2023/11/logo.jpg",
+   "bytes": 6858,
+   "how": "page img",
+   "decision": "kept"
+  },
+  {
+   "slug": "delta-state-polytechnic-otefe-oghara",
+   "kind": "polytechnic",
+   "name": "Delta State Polytechnic, Otefe-Oghara",
+   "source_page": "https://mydspg.edu.ng/",
+   "image_url": "https://mydspg.edu.ng/wp-content/uploads/2023/11/logo.jpg",
+   "bytes": 6858,
+   "how": "page img",
+   "decision": "rejected in QA: the identical picture was found for several schools (a shared or default icon)"
+  },
+  {
+   "slug": "distinct-polytechnic",
+   "kind": "polytechnic",
+   "name": "Distinct Polytechnic",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: unreachable 0 <urlopen error Tunnel connection failed:"
+  },
+  {
+   "slug": "dorben-polytechnic-bwari",
+   "kind": "polytechnic",
+   "name": "Dorben Polytechnic, Bwari",
+   "source_page": "https://www.dorbenpolytechnic.edu.ng/",
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: header img banner shaped; page img banner shaped; icon too small; header img banner shaped"
+  },
+  {
+   "slug": "eastern-polytechnic-port-harcourt",
+   "kind": "polytechnic",
+   "name": "Eastern Polytechnic, Port Harcourt",
+   "source_page": "https://easternpolytechnic.org/",
+   "image_url": "https://easternpolytechnic.org/web/wp-content/uploads/2021/04/Eastern-Polytechnic-Logo.png",
+   "bytes": 7472,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "edo-state-polytechnic-usen",
+   "kind": "polytechnic",
+   "name": "Edo State Polytechnic, Usen",
+   "source_page": "https://edopoly.edu.ng",
+   "image_url": "https://edopoly.edu.ng/wp-content/uploads/2022/03/EDO-POLY-LOGO2.png",
+   "bytes": 4126,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "ekiti-city-polytechnic",
+   "kind": "polytechnic",
+   "name": "Ekiti City Polytechnic",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: unreachable 0 <urlopen error Tunnel connection failed:; unreachable 0 <urlopen error Tunnel connection failed:"
+  },
+  {
+   "slug": "ekiti-state-college-of-agriculture-and-technology-isan-ekiti",
+   "kind": "polytechnic",
+   "name": "Ekiti State College of Agriculture and Technology, Isan-Ekiti",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: page does not name the school; page does not name the school"
+  },
+  {
+   "slug": "eko-college-of-management-and-technology-ikotun",
+   "kind": "polytechnic",
+   "name": "Eko College of Management and Technology (Ekocity), Ikotun",
+   "source_page": "https://new.ekocity.edu.ng/",
+   "image_url": "https://new.ekocity.edu.ng/wp-content/uploads/2020/10/cropped-ekocity-180x180.jpeg",
+   "bytes": 4546,
+   "how": "apple-touch-icon",
+   "decision": "kept"
+  },
+  {
+   "slug": "el-thomp-polytechnic-abak",
+   "kind": "polytechnic",
+   "name": "El-Thomp Polytechnic, Abak",
+   "source_page": "https://el-thomp-edu.ng/",
+   "image_url": "https://el-thomp-edu.ng/wp-content/uploads/2021/10/EL-TOMP-logo-transparent.png",
+   "bytes": 7408,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "enville-polytechnic-ikeja",
+   "kind": "polytechnic",
+   "name": "Enville Polytechnic, Ikeja",
+   "source_page": "https://envillepoly.edu.ng",
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: header img large jpeg (photo); apple-touch-icon 0"
+  },
+  {
+   "slug": "federal-polytechnic-ado-ekiti",
+   "kind": "polytechnic",
+   "name": "Federal Polytechnic, Ado-Ekiti",
+   "source_page": "https://fedpolyado.edu.ng/",
+   "image_url": "https://fedpolyado.edu.ng/logo.png",
+   "bytes": 6040,
+   "how": "apple-touch-icon",
+   "decision": "kept"
+  },
+  {
+   "slug": "federal-polytechnic-ayede",
+   "kind": "polytechnic",
+   "name": "Federal Polytechnic, Ayede",
+   "source_page": "https://fedpoffaonline.edu.ng/",
+   "image_url": "https://fedpoffaonline.edu.ng/wp-content/uploads/2025/11/cropped-baricon-1-180x180.png",
+   "bytes": 8334,
+   "how": "apple-touch-icon",
+   "decision": "rejected in QA: the identical picture was found for several schools (a shared or default icon)"
+  },
+  {
+   "slug": "federal-polytechnic-bali",
+   "kind": "polytechnic",
+   "name": "Federal Polytechnic, Bali",
+   "source_page": "https://fedpolybali.edu.ng/",
+   "image_url": "https://fedpolybali.edu.ng/media-resources/images/fpb-logo.png",
+   "bytes": 11328,
+   "how": "apple-touch-icon",
+   "decision": "kept"
+  },
+  {
+   "slug": "federal-polytechnic-bauchi",
+   "kind": "polytechnic",
+   "name": "Federal Polytechnic, Bauchi",
+   "source_page": "https://fptb.edu.ng",
+   "image_url": "https://fptb.edu.ng/wp-content/uploads/2025/05/FPTB-Logo-small.png",
+   "bytes": 11266,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "federal-polytechnic-bida",
+   "kind": "polytechnic",
+   "name": "Federal Polytechnic, Bida",
+   "source_page": "https://fedpolybida.edu.ng",
+   "image_url": "https://fedpolybida.edu.ng/fpb.png",
+   "bytes": 11970,
+   "how": "apple-touch-icon",
+   "decision": "kept"
+  },
+  {
+   "slug": "federal-polytechnic-damaturu",
+   "kind": "polytechnic",
+   "name": "Federal Polytechnic, Damaturu",
+   "source_page": "https://www.fedpodam.edu.ng/",
+   "image_url": "https://www.fedpodam.edu.ng/images/logo.png",
+   "bytes": 6152,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "federal-polytechnic-daura",
+   "kind": "polytechnic",
+   "name": "Federal Polytechnic, Daura",
+   "source_page": "https://fedpolydaura.edu.ng/",
+   "image_url": "https://fedpolydaura.edu.ng/wp-content/uploads/2023/05/cropped-Logo-2-300x82.png",
+   "bytes": 3986,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "federal-polytechnic-ede",
+   "kind": "polytechnic",
+   "name": "Federal Polytechnic, Ede",
+   "source_page": "https://fedpoffaonline.edu.ng/",
+   "image_url": "https://fedpoffaonline.edu.ng/wp-content/uploads/2025/11/cropped-baricon-1-180x180.png",
+   "bytes": 8334,
+   "how": "apple-touch-icon",
+   "decision": "rejected in QA: the identical picture was found for several schools (a shared or default icon)"
+  },
+  {
+   "slug": "federal-polytechnic-ekowe",
+   "kind": "polytechnic",
+   "name": "Federal Polytechnic, Ekowe",
+   "source_page": "https://fedpoffaonline.edu.ng/",
+   "image_url": "https://fedpoffaonline.edu.ng/wp-content/uploads/2025/11/cropped-baricon-1-180x180.png",
+   "bytes": 8334,
+   "how": "apple-touch-icon",
+   "decision": "rejected in QA: the identical picture was found for several schools (a shared or default icon)"
+  },
+  {
+   "slug": "federal-polytechnic-idah",
+   "kind": "polytechnic",
+   "name": "Federal Polytechnic, Idah",
+   "source_page": "https://fedpoffaonline.edu.ng/",
+   "image_url": "https://fedpoffaonline.edu.ng/wp-content/uploads/2025/11/cropped-baricon-1-180x180.png",
+   "bytes": 8334,
+   "how": "apple-touch-icon",
+   "decision": "rejected in QA: the identical picture was found for several schools (a shared or default icon)"
+  },
+  {
+   "slug": "federal-polytechnic-ilaro",
+   "kind": "polytechnic",
+   "name": "Federal Polytechnic Ilaro",
+   "source_page": "https://federalpolyilaro.edu.ng",
+   "image_url": "https://federalpolyilaro.edu.ng/images/logo.png",
+   "bytes": 10788,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "federal-polytechnic-ile-oluji",
+   "kind": "polytechnic",
+   "name": "Federal Polytechnic, Ile-Oluji",
+   "source_page": "https://fedpoffaonline.edu.ng/",
+   "image_url": "https://fedpoffaonline.edu.ng/wp-content/uploads/2025/11/cropped-baricon-1-180x180.png",
+   "bytes": 8334,
+   "how": "apple-touch-icon",
+   "decision": "rejected in QA: the identical picture was found for several schools (a shared or default icon)"
+  },
+  {
+   "slug": "federal-polytechnic-kabo",
+   "kind": "polytechnic",
+   "name": "Federal Polytechnic, Kabo",
+   "source_page": "https://fedpoffaonline.edu.ng/",
+   "image_url": "https://fedpoffaonline.edu.ng/wp-content/uploads/2025/11/cropped-baricon-1-180x180.png",
+   "bytes": 8334,
+   "how": "apple-touch-icon",
+   "decision": "rejected in QA: the identical picture was found for several schools (a shared or default icon)"
+  },
+  {
+   "slug": "federal-polytechnic-kaltungo",
+   "kind": "polytechnic",
+   "name": "Federal Polytechnic, Kaltungo",
+   "source_page": "https://fedpoffaonline.edu.ng/",
+   "image_url": "https://fedpoffaonline.edu.ng/wp-content/uploads/2025/11/cropped-baricon-1-180x180.png",
+   "bytes": 8334,
+   "how": "apple-touch-icon",
+   "decision": "rejected in QA: the identical picture was found for several schools (a shared or default icon)"
+  },
+  {
+   "slug": "federal-polytechnic-kaura-namoda",
+   "kind": "polytechnic",
+   "name": "Federal Polytechnic, Kaura Namoda",
+   "source_page": "https://fedpoffaonline.edu.ng/",
+   "image_url": "https://fedpoffaonline.edu.ng/wp-content/uploads/2025/11/cropped-baricon-1-180x180.png",
+   "bytes": 8334,
+   "how": "apple-touch-icon",
+   "decision": "rejected in QA: the identical picture was found for several schools (a shared or default icon)"
+  },
+  {
+   "slug": "federal-polytechnic-monguno",
+   "kind": "polytechnic",
+   "name": "Federal Polytechnic, Monguno",
+   "source_page": "https://fedpolymonguno.edu.ng",
+   "image_url": "https://fedpolymonguno.edu.ng/wp-content/uploads/2022/01/fpmlogo-1.png",
+   "bytes": 2732,
+   "how": "header img",
+   "decision": "rejected in QA: mark too small to read"
+  },
+  {
+   "slug": "federal-polytechnic-mubi",
+   "kind": "polytechnic",
+   "name": "Federal Polytechnic, Mubi",
+   "source_page": "https://fedpoffaonline.edu.ng/",
+   "image_url": "https://fedpoffaonline.edu.ng/wp-content/uploads/2025/11/cropped-baricon-1-180x180.png",
+   "bytes": 8334,
+   "how": "apple-touch-icon",
+   "decision": "rejected in QA: the identical picture was found for several schools (a shared or default icon)"
+  },
+  {
+   "slug": "federal-polytechnic-nasarawa",
+   "kind": "polytechnic",
+   "name": "Federal Polytechnic, Nasarawa",
+   "source_page": "https://fedpoffaonline.edu.ng/",
+   "image_url": "https://fedpoffaonline.edu.ng/wp-content/uploads/2025/11/cropped-baricon-1-180x180.png",
+   "bytes": 8334,
+   "how": "apple-touch-icon",
+   "decision": "rejected in QA: the identical picture was found for several schools (a shared or default icon)"
+  },
+  {
+   "slug": "federal-polytechnic-nekede",
+   "kind": "polytechnic",
+   "name": "Federal Polytechnic Nekede",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: unreachable 0 <urlopen error [SSL: CERTIFICATE_VERIFY_; page does not name the school"
+  },
+  {
+   "slug": "federal-polytechnic-ngodo-isuochi",
+   "kind": "polytechnic",
+   "name": "Federal Polytechnic, Ngodo Isuochi",
+   "source_page": "https://fedpoffaonline.edu.ng/",
+   "image_url": "https://fedpoffaonline.edu.ng/wp-content/uploads/2025/11/cropped-baricon-1-180x180.png",
+   "bytes": 8334,
+   "how": "apple-touch-icon",
+   "decision": "rejected in QA: the identical picture was found for several schools (a shared or default icon)"
+  },
+  {
+   "slug": "federal-polytechnic-nyak-shendam",
+   "kind": "polytechnic",
+   "name": "Federal Polytechnic, Nyak Shendam",
+   "source_page": "https://fedpoffaonline.edu.ng/",
+   "image_url": "https://fedpoffaonline.edu.ng/wp-content/uploads/2025/11/cropped-baricon-1-180x180.png",
+   "bytes": 8334,
+   "how": "apple-touch-icon",
+   "decision": "rejected in QA: the identical picture was found for several schools (a shared or default icon)"
+  },
+  {
+   "slug": "federal-polytechnic-of-oil-and-gas-bonny",
+   "kind": "polytechnic",
+   "name": "Federal Polytechnic of Oil and Gas, Bonny",
+   "source_page": "https://fedpolybonny.edu.ng",
+   "image_url": "https://fedpolybonny.edu.ng/wp-content/uploads/2025/11/fpoglogo1-2.png",
+   "bytes": 5056,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "federal-polytechnic-offa",
+   "kind": "polytechnic",
+   "name": "Federal Polytechnic, Offa",
+   "source_page": "https://fedpoffaonline.edu.ng",
+   "image_url": "https://fedpoffaonline.edu.ng/wp-content/uploads/2025/11/cropped-baricon-1-180x180.png",
+   "bytes": 8334,
+   "how": "apple-touch-icon",
+   "decision": "kept"
+  },
+  {
+   "slug": "federal-polytechnic-ohodo",
+   "kind": "polytechnic",
+   "name": "Federal Polytechnic, Ohodo",
+   "source_page": "https://fedpod.edu.ng",
+   "image_url": "https://fedpod.edu.ng/wp-content/uploads/2022/09/Ohodo_Logo-4-300x72.png",
+   "bytes": 2036,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "federal-polytechnic-oko",
+   "kind": "polytechnic",
+   "name": "Federal Polytechnic, Oko",
+   "source_page": "https://federalpolyoko.edu.ng",
+   "image_url": "https://federalpolyoko.edu.ng/wp-content/uploads/2026/03/Logo-Medium.png",
+   "bytes": 3832,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "federal-polytechnic-orogun",
+   "kind": "polytechnic",
+   "name": "Federal Polytechnic, Orogun",
+   "source_page": "https://www.fepo.edu.ng/",
+   "image_url": "https://www.fepo.edu.ng/wp-content/uploads/2023/04/fedporo-logo-2.png",
+   "bytes": 5180,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "federal-polytechnic-ugep",
+   "kind": "polytechnic",
+   "name": "Federal Polytechnic, Ugep",
+   "source_page": "https://fedpoffaonline.edu.ng/",
+   "image_url": "https://fedpoffaonline.edu.ng/wp-content/uploads/2025/11/cropped-baricon-1-180x180.png",
+   "bytes": 8334,
+   "how": "apple-touch-icon",
+   "decision": "rejected in QA: the identical picture was found for several schools (a shared or default icon)"
+  },
+  {
+   "slug": "federal-polytechnic-ukana",
+   "kind": "polytechnic",
+   "name": "Federal Polytechnic, Ukana",
+   "source_page": "https://fedpolyukana.edu.ng",
+   "image_url": "https://fedpolyukana.edu.ng/wp-content/uploads/2019/07/cropped-Logoukana-1-180x180.jpg",
+   "bytes": 6458,
+   "how": "apple-touch-icon",
+   "decision": "kept"
+  },
+  {
+   "slug": "federal-polytechnic-wannune",
+   "kind": "polytechnic",
+   "name": "Federal Polytechnic, Wannune",
+   "source_page": "https://fedpoffaonline.edu.ng/",
+   "image_url": "https://fedpoffaonline.edu.ng/wp-content/uploads/2025/11/cropped-baricon-1-180x180.png",
+   "bytes": 8334,
+   "how": "apple-touch-icon",
+   "decision": "rejected in QA: the identical picture was found for several schools (a shared or default icon)"
+  },
+  {
+   "slug": "fidei-polytechnic-gboko",
+   "kind": "polytechnic",
+   "name": "Fidei Polytechnic, Gboko",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: page does not name the school"
+  },
+  {
+   "slug": "first-city-polytechnic-abeokuta",
+   "kind": "polytechnic",
+   "name": "First City Polytechnic, Abeokuta",
+   "source_page": "https://firstcitypoly.edu.ng",
+   "image_url": "https://firstcitypoly.edu.ng/apple-touch-icon.png",
+   "bytes": 6738,
+   "how": "apple-touch-icon",
+   "decision": "kept"
+  },
+  {
+   "slug": "foundation-polytechnic-ikot-ekpene",
+   "kind": "polytechnic",
+   "name": "Foundation Polytechnic, Ikot Ekpene",
+   "source_page": "https://www.sfp.edu.ng/",
+   "image_url": "https://www.sfp.edu.ng/uploads/coylogo.jpg",
+   "bytes": 6068,
+   "how": "page img",
+   "decision": "rejected in QA: the identical picture was found for several schools (a shared or default icon)"
+  },
+  {
+   "slug": "gateway-polytechnic-saapade",
+   "kind": "polytechnic",
+   "name": "Gateway Polytechnic, Saapade",
+   "source_page": "https://new.gaposa.edu.ng/",
+   "image_url": "https://new.gaposa.edu.ng/wp-content/uploads/2022/04/Gaposa-Logo-300x248.png",
+   "bytes": 9502,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "gboko-polytechnic",
+   "kind": "polytechnic",
+   "name": "Gboko Polytechnic",
+   "source_page": "https://gbokopoly.edu.ng",
+   "image_url": "https://gbokopoly.edu.ng/images/favicon.png",
+   "bytes": 3272,
+   "how": "icon",
+   "decision": "kept"
+  },
+  {
+   "slug": "global-polytechnic-benin-city",
+   "kind": "polytechnic",
+   "name": "Global Polytechnic, Benin City",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: page does not name the school; page does not name the school"
+  },
+  {
+   "slug": "gombe-state-polytechnic-bajoga",
+   "kind": "polytechnic",
+   "name": "Gombe State Polytechnic, Bajoga",
+   "source_page": "https://gspb.edu.ng/",
+   "image_url": "https://gspb.edu.ng/img/headerlogo.png",
+   "bytes": 3212,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "gozie-anyachebelu-oragram-polytechnic-oraukwu",
+   "kind": "polytechnic",
+   "name": "Gozie Anyachebelu Oragram Polytechnic, Oraukwu",
+   "source_page": "https://gozpoly.com/about-us/",
+   "image_url": "https://gozpoly.com/wp-content/uploads/2024/09/cropped-PhotoStudio_1719600409721-1-180x180.jpeg",
+   "bytes": 4712,
+   "how": "apple-touch-icon",
+   "decision": "kept"
+  },
+  {
+   "slug": "graceland-polytechnic-offa",
+   "kind": "polytechnic",
+   "name": "Graceland Polytechnic, Offa",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: page does not name the school"
+  },
+  {
+   "slug": "grundtvig-polytechnic-oba",
+   "kind": "polytechnic",
+   "name": "Grundtvig Polytechnic, Oba",
+   "source_page": "https://grundtvigpolytechnic.com/",
+   "image_url": "https://grundtvigpolytechnic.com/wp-content/uploads/2020/09/Grundtvig-Polytechnic_Logo-307x115-1.png",
+   "bytes": 6436,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "harvard-polytechnic-ilorin",
+   "kind": "polytechnic",
+   "name": "Harvard Polytechnic, Ilorin",
+   "source_page": "https://harvardpolytechnic.edu.ng",
+   "image_url": "https://harvardpolytechnic.edu.ng/_next/image?url=%2Ficons%2Flogo.png&w=256&q=75",
+   "bytes": 9692,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "heritage-polytechnic-eket",
+   "kind": "polytechnic",
+   "name": "Heritage Polytechnic, Eket",
+   "source_page": "https://heritagepoly.edu.ng/",
+   "image_url": "https://heritagepoly.edu.ng/wp-content/uploads/2026/08/cc-icon-440x147.png",
+   "bytes": 2872,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "hussaini-adamu-federal-polytechnic-kazaure",
+   "kind": "polytechnic",
+   "name": "Hussaini Adamu Federal Polytechnic, Kazaure",
+   "source_page": "https://hafedpoly.edu.ng",
+   "image_url": "https://hafedpoly.edu.ng/logo.png",
+   "bytes": 8320,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "i-con-universal-polytechnic-osogbo",
+   "kind": "polytechnic",
+   "name": "I-Con Universal Polytechnic, Osogbo",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: unreachable 0 <urlopen error Tunnel connection failed:"
+  },
+  {
+   "slug": "ibadan-city-polytechnic",
+   "kind": "polytechnic",
+   "name": "Ibadan City Polytechnic",
+   "source_page": "https://icp.edu.ng",
+   "image_url": "https://icp.edu.ng/images/logo.png",
+   "bytes": 5668,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "ibom-metropolitan-polytechnic-atan-offot",
+   "kind": "polytechnic",
+   "name": "Ibom Metropolitan Polytechnic, Atan Offot",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: unreachable 0 <urlopen error Tunnel connection failed:"
+  },
+  {
+   "slug": "igbajo-polytechnic",
+   "kind": "polytechnic",
+   "name": "Igbajo Polytechnic",
+   "source_page": "https://www.igbajopolytechnic.edu.ng/",
+   "image_url": "https://www.igbajopolytechnic.edu.ng/images/logo.png?=1551355073",
+   "bytes": 4120,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "iheachukwu-madubuike-institute-of-technology-umunneochi",
+   "kind": "polytechnic",
+   "name": "Iheachukwu Madubuike Institute of Technology, Umunneochi",
+   "source_page": "https://imit.edu.ng",
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: icon 0; page does not name the school"
+  },
+  {
+   "slug": "imo-state-polytechnic-umuagwo",
+   "kind": "polytechnic",
+   "name": "Imo State Polytechnic, Umuagwo",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: unreachable 0 <urlopen error [SSL: CERTIFICATE_VERIFY_"
+  },
+  {
+   "slug": "inspire-polytechnic-yaba",
+   "kind": "polytechnic",
+   "name": "Inspire Polytechnic, Yaba",
+   "source_page": "https://inspirepolytechnic.edu.ng",
+   "image_url": "https://inspirepolytechnic.edu.ng/wp-content/themes/inspire/assets/media/logo.png",
+   "bytes": 4064,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "institute-of-management-and-technology",
+   "kind": "polytechnic",
+   "name": "Institute of Management and Technology",
+   "source_page": "https://imt.edu.ng",
+   "image_url": "https://imt.edu.ng/wp-content/uploads/2024/07/imt-logo-130x130.png",
+   "bytes": 5184,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "intercontinental-college-of-technology-makurdi",
+   "kind": "polytechnic",
+   "name": "Intercontinental College of Technology, Makurdi",
+   "source_page": "https://ictmakurdi.com/starme.php?hidf=5574896n46kn4kyb6n6nm77mu75m7u5m5",
+   "image_url": "https://ictmakurdi.com/images/ictm_logos.png",
+   "bytes": 5518,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "interlink-polytechnic-ijebu-jesa",
+   "kind": "polytechnic",
+   "name": "Interlink Polytechnic, Ijebu-Jesa",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: unreachable 0 <urlopen error [SSL: CERTIFICATE_VERIFY_"
+  },
+  {
+   "slug": "isa-mustapha-agwai-i-polytechnic-lafia",
+   "kind": "polytechnic",
+   "name": "Isa Mustapha Agwai I Polytechnic, Lafia",
+   "source_page": "https://imap.edu.ng/",
+   "image_url": "https://imap.edu.ng/wp-content/uploads/2021/01/imap_header_logo_ok.png",
+   "bytes": 3730,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "iwo-city-polytechnic",
+   "kind": "polytechnic",
+   "name": "Iwo City Polytechnic",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: unreachable 0 <urlopen error Tunnel connection failed:; page does not name the school"
+  },
+  {
+   "slug": "jigawa-state-polytechnic-dutse",
+   "kind": "polytechnic",
+   "name": "Jigawa State Polytechnic, Dutse",
+   "source_page": "https://jigpoly.edu.ng",
+   "image_url": "https://jigpoly.edu.ng/wp-content/uploads/2023/11/jsp_logo_square.png",
+   "bytes": 11800,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "kaduna-polytechnic",
+   "kind": "polytechnic",
+   "name": "Kaduna Polytechnic",
+   "source_page": "https://kadunapoly.edu.ng/",
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: unreachable 0 <urlopen error [SSL: CERTIFICATE_VERIFY_; icon 404; icon too small"
+  },
+  {
+   "slug": "kano-state-polytechnic",
+   "kind": "polytechnic",
+   "name": "Kano State Polytechnic",
+   "source_page": "https://kanopoly.edu.ng",
+   "image_url": "https://kanopoly.edu.ng/wp-content/uploads/2024/09/Kano-State-Polytechnic-logo.png",
+   "bytes": 12678,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "katsina-institute-of-technology-and-management",
+   "kind": "polytechnic",
+   "name": "Katsina Institute of Technology and Management",
+   "source_page": "https://ksitm.edu.ng",
+   "image_url": "https://ksitm.edu.ng/logo1.png",
+   "bytes": 5684,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "kebbi-state-polytechnic-dakingari",
+   "kind": "polytechnic",
+   "name": "Kebbi State Polytechnic, Dakingari",
+   "source_page": "https://kespodak.edu.ng/",
+   "image_url": "https://kespodak.edu.ng/assets/img/kes1.jpg",
+   "bytes": 4246,
+   "how": "apple-touch-icon",
+   "decision": "kept"
+  },
+  {
+   "slug": "kenule-beeson-saro-wiwa-polytechnic-bori",
+   "kind": "polytechnic",
+   "name": "Kenule Beeson Saro-Wiwa Polytechnic, Bori",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: unreachable 403 "
+  },
+  {
+   "slug": "kings-polytechnic-ubiaja",
+   "kind": "polytechnic",
+   "name": "Kings Polytechnic, Ubiaja",
+   "source_page": "https://kingspolytechnic.com/",
+   "image_url": "https://kingspolytechnic.com/images/brand/kpu-logo.png",
+   "bytes": 10290,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "kogi-state-polytechnic-lokoja",
+   "kind": "polytechnic",
+   "name": "Kogi State Polytechnic, Lokoja",
+   "source_page": "https://kogistatepolytechnic.edu.ng",
+   "image_url": "https://kogistatepolytechnic.edu.ng/wp-content/uploads/2021/03/cropped-favicon-180x180.jpg",
+   "bytes": 7240,
+   "how": "apple-touch-icon",
+   "decision": "kept"
+  },
+  {
+   "slug": "kwara-state-polytechnic",
+   "kind": "polytechnic",
+   "name": "Kwara State Polytechnic",
+   "source_page": "https://kwarastatepolytechnic.edu.ng",
+   "image_url": "https://kwarastatepolytechnic.edu.ng/images/logo-h.png",
+   "bytes": 4880,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "lagos-city-polytechnic-ikeja",
+   "kind": "polytechnic",
+   "name": "Lagos City Polytechnic, Ikeja",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: unreachable 0 <urlopen error Tunnel connection failed:; page does not name the school"
+  },
+  {
+   "slug": "landmark-polytechnic-aiyetoro",
+   "kind": "polytechnic",
+   "name": "Landmark Polytechnic, Aiyetoro",
+   "source_page": "https://landmarkpolytechnic.edu.ng",
+   "image_url": "https://landmarkpolytechnic.edu.ng/wp-content/uploads/2023/04/logo-1-e1681753530673.png",
+   "bytes": 2888,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "lens-polytechnic-offa",
+   "kind": "polytechnic",
+   "name": "Lens Polytechnic, Offa",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: unreachable 0 <urlopen error [SSL: CERTIFICATE_VERIFY_; page does not name the school"
+  },
+  {
+   "slug": "loam-polytechnic",
+   "kind": "polytechnic",
+   "name": "Loam Polytechnic",
+   "source_page": "https://www.loampolytechnic.edu.ng/",
+   "image_url": "https://www.loampolytechnic.edu.ng/school-logo.jpeg",
+   "bytes": 7478,
+   "how": "icon",
+   "decision": "kept"
+  },
+  {
+   "slug": "madonna-college-of-health-technology",
+   "kind": "polytechnic",
+   "name": "Madonna College of Health Technology",
+   "source_page": "https://macohtech.edu.ng",
+   "image_url": "https://macohtech.edu.ng/img/logo.png",
+   "bytes": 1544,
+   "how": "header img",
+   "decision": "rejected in QA: mark too small to read"
+  },
+  {
+   "slug": "mai-idris-alooma-polytechnic-geidam",
+   "kind": "polytechnic",
+   "name": "Mai Idris Alooma Polytechnic, Geidam",
+   "source_page": "https://miapoly.edu.ng",
+   "image_url": "https://miapoly.edu.ng/assets/logo.jpg",
+   "bytes": 10294,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "marist-polytechnic-enugu",
+   "kind": "polytechnic",
+   "name": "Marist Polytechnic, Enugu",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: unreachable 0 <urlopen error Tunnel connection failed:"
+  },
+  {
+   "slug": "maritime-academy-of-nigeria-oron",
+   "kind": "polytechnic",
+   "name": "Maritime Academy of Nigeria, Oron",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: page does not name the school"
+  },
+  {
+   "slug": "montgomery-polytechnic-ikere-ekiti",
+   "kind": "polytechnic",
+   "name": "Montgomery Polytechnic, Ikere-Ekiti",
+   "source_page": "https://montgomerypolytechnic.edu.ng",
+   "image_url": "https://montgomerypolytechnic.edu.ng/wp-content/uploads/2020/03/cropped-montgomery-logo-1-180x180.jpg",
+   "bytes": 7930,
+   "how": "apple-touch-icon",
+   "decision": "kept"
+  },
+  {
+   "slug": "moshood-abiola-polytechnic-abeokuta",
+   "kind": "polytechnic",
+   "name": "Moshood Abiola Polytechnic, Abeokuta",
+   "source_page": "https://mapoly.edu.ng",
+   "image_url": "https://mapoly.edu.ng/wordpress/wp-content/uploads/2021/08/cropped-mapoly_logo2.png",
+   "bytes": 2926,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "mustibrah-polytechnic-kano",
+   "kind": "polytechnic",
+   "name": "Mustibrah Polytechnic, Kano",
+   "source_page": "https://mustibrah.edu.ng/",
+   "image_url": "https://mustibrah.edu.ng/img/NEW-LOGO.png",
+   "bytes": 3690,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "nacabs-polytechnic-akwanga",
+   "kind": "polytechnic",
+   "name": "NACABS Polytechnic, Akwanga",
+   "source_page": "https://nacabspoly.edu.ng",
+   "image_url": "https://nacabspoly.edu.ng/static/img/nacabs_logo.png",
+   "bytes": 6030,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "nation-builders-polytechnic-asaba",
+   "kind": "polytechnic",
+   "name": "Nation Builders Polytechnic, Asaba",
+   "source_page": "https://nabcotech.edu.ng",
+   "image_url": "https://nabcotech.edu.ng/contents/templates/edubin/assets/images/logo.png",
+   "bytes": 4392,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "national-institute-of-construction-technology-and-management-uromi",
+   "kind": "polytechnic",
+   "name": "National Institute of Construction Technology and Management, Uromi",
+   "source_page": "https://www.nict.edu.ng/",
+   "image_url": "https://www.nict.edu.ng/wp-content/uploads/2025/07/cropped-logo.png",
+   "bytes": 8456,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "newland-polytechnic-ilorin",
+   "kind": "polytechnic",
+   "name": "Newland Polytechnic, Ilorin",
+   "source_page": "https://newlandpolytechnic.edu.ng",
+   "image_url": "https://newlandpolytechnic.edu.ng/assets/frontend/images/logo-with-text.png",
+   "bytes": 3854,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "niger-state-polytechnic-zungeru",
+   "kind": "polytechnic",
+   "name": "Niger State Polytechnic, Zungeru",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: unreachable 404 "
+  },
+  {
+   "slug": "nigerian-college-of-aviation-technology-zaria",
+   "kind": "polytechnic",
+   "name": "Nigerian College of Aviation Technology, Zaria",
+   "source_page": "https://ncat.gov.ng/",
+   "image_url": "https://ncat.gov.ng/wp-content/uploads/2026/10/WhatsApp-Image-2026-10-30-at-6.23.06-AM-150x150.jpeg",
+   "bytes": 7394,
+   "how": "header img",
+   "decision": "rejected in QA: photograph of a person, not a logo"
+  },
+  {
+   "slug": "nuhu-bamalli-polytechnic-zaria",
+   "kind": "polytechnic",
+   "name": "Nuhu Bamalli Polytechnic, Zaria",
+   "source_page": "https://nubapoly.edu.ng/",
+   "image_url": "https://nubapoly.edu.ng/index_files/logo_new-1.png",
+   "bytes": 3524,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "oduduwa-polytechnic-idimu",
+   "kind": "polytechnic",
+   "name": "Oduduwa Polytechnic, Idimu",
+   "source_page": "https://www.oduduwapolytechnic.edu.ng/",
+   "image_url": "https://oduduwapolytechnic.edu.ng/wp-content/plugins/under-construction-page/themes/images/favicon.png",
+   "bytes": 2318,
+   "how": "icon",
+   "decision": "rejected in QA: generic gear icon (a default site icon)"
+  },
+  {
+   "slug": "ogun-state-institute-of-technology-igbesa",
+   "kind": "polytechnic",
+   "name": "Ogun State Institute of Technology, Igbesa",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: page does not name the school; page does not name the school"
+  },
+  {
+   "slug": "osun-state-college-of-technology-esa-oke",
+   "kind": "polytechnic",
+   "name": "Osun State College of Technology, Esa-Oke",
+   "source_page": "https://oscotechesaoke.edu.ng/home/index.html",
+   "image_url": "https://oscotechesaoke.edu.ng/home/images/logo.png",
+   "bytes": 3098,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "osun-state-polytechnic-iree",
+   "kind": "polytechnic",
+   "name": "Osun State Polytechnic, Iree",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: unreachable 404 "
+  },
+  {
+   "slug": "our-saviour-institute-of-science-and-technology-enugu",
+   "kind": "polytechnic",
+   "name": "Our Saviour Institute of Science and Technology, Enugu",
+   "source_page": "https://osisat.edu.ng/poly/",
+   "image_url": "https://osisat.edu.ng/wp-content/uploads/2021/03/OSISAT-LOGO-e1616405958708.png",
+   "bytes": 3146,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "oyo-state-college-of-agriculture-and-technology-igboora",
+   "kind": "polytechnic",
+   "name": "Oyo State College of Agriculture and Technology, Igboora",
+   "source_page": "https://oyscatech.edu.ng",
+   "image_url": "https://oyscatech.edu.ng/favicon.ico",
+   "bytes": 884,
+   "how": "icon",
+   "decision": "rejected in QA: generic document icon (a default site icon)"
+  },
+  {
+   "slug": "paramount-polytechnic-ejigbo",
+   "kind": "polytechnic",
+   "name": "Paramount Polytechnic, Ejigbo",
+   "source_page": "https://paramountpolytechnic.edu.ng",
+   "image_url": "https://paramountpolytechnic.edu.ng/_next/image?url=%2Flogo-removebg-preview.png&w=3840&q=75",
+   "bytes": 12282,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "petroleum-training-institute-effurun",
+   "kind": "polytechnic",
+   "name": "Petroleum Training Institute, Effurun",
+   "source_page": "https://pti.edu.ng",
+   "image_url": "https://pti.edu.ng/wp-content/uploads/2021/05/PTI-LOGO.png",
+   "bytes": 3940,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "plateau-state-polytechnic-barkin-ladi",
+   "kind": "polytechnic",
+   "name": "Plateau State Polytechnic, Barkin Ladi",
+   "source_page": "https://plapoly.edu.ng/",
+   "image_url": "https://plapoly.edu.ng/assets/img/favicon.png",
+   "bytes": 2340,
+   "how": "icon",
+   "decision": "kept"
+  },
+  {
+   "slug": "raindrops-institute-of-management-and-technology-orsu",
+   "kind": "polytechnic",
+   "name": "Raindrops Institute of Management and Technology, Orsu",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: page does not name the school; page does not name the school"
+  },
+  {
+   "slug": "ronik-polytechnic-ejigbo",
+   "kind": "polytechnic",
+   "name": "Ronik Polytechnic, Ejigbo",
+   "source_page": "https://ronikpolytechnic.edu.ng",
+   "image_url": "https://ronikpolytechnic.edu.ng/wp-content/uploads/2025/07/Ronik-Polytechnic-logo-1.png",
+   "bytes": 3198,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "saf-polytechnic-iseyin",
+   "kind": "polytechnic",
+   "name": "SAF Polytechnic, Iseyin",
+   "source_page": "https://safpolytechnic.edu.ng/",
+   "image_url": "https://safpolytechnic.edu.ng/images/logo.png",
+   "bytes": 6868,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "shaka-polytechnic-benin-city",
+   "kind": "polytechnic",
+   "name": "Shaka Polytechnic, Benin City",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: page does not name the school"
+  },
+  {
+   "slug": "stars-polytechnic-ota",
+   "kind": "polytechnic",
+   "name": "Stars Polytechnic, Ota",
+   "source_page": "https://starspoly.edu.ng",
+   "image_url": "https://starspoly.edu.ng/images/logo.png",
+   "bytes": 2790,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "sure-foundation-polytechnic-ikot-akai",
+   "kind": "polytechnic",
+   "name": "Sure Foundation Polytechnic, Ikot Akai",
+   "source_page": "https://www.sfp.edu.ng/",
+   "image_url": "https://www.sfp.edu.ng/uploads/coylogo.jpg",
+   "bytes": 6068,
+   "how": "page img",
+   "decision": "rejected in QA: the identical picture was found for several schools (a shared or default icon)"
+  },
+  {
+   "slug": "taraba-state-polytechnic-suntai",
+   "kind": "polytechnic",
+   "name": "Taraba State Polytechnic, Suntai",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: unreachable 403 "
+  },
+  {
+   "slug": "temple-gate-polytechnic-aba",
+   "kind": "polytechnic",
+   "name": "Temple Gate Polytechnic, Aba",
+   "source_page": "https://tgp.edu.ng",
+   "image_url": "https://tgp.edu.ng/assets/img/new/logo.png",
+   "bytes": 5734,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "the-oke-ogun-polytechnic-saki",
+   "kind": "polytechnic",
+   "name": "The Oke-Ogun Polytechnic, Saki",
+   "source_page": "https://tops.edu.ng",
+   "image_url": "https://tops.edu.ng/wp-content/uploads/2024/02/logo-1-e1743252504215.png",
+   "bytes": 3336,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "the-polytechnic-adoka",
+   "kind": "polytechnic",
+   "name": "The Polytechnic, Adoka",
+   "source_page": "https://vineyardpoly.com/",
+   "image_url": "https://vineyardpoly.com/wp-content/uploads/2024/09/Vineyard-polytechnic-logo.png",
+   "bytes": 6542,
+   "how": "header img",
+   "decision": "rejected in QA: the identical picture was found for several schools (a shared or default icon)"
+  },
+  {
+   "slug": "the-polytechnic-ibadan",
+   "kind": "polytechnic",
+   "name": "The Polytechnic, Ibadan",
+   "source_page": "https://polyibadan.edu.ng",
+   "image_url": "https://polyibadan.edu.ng/images/img/pictures/TPI-logo-programme.jpg",
+   "bytes": 4134,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "the-polytechnic-igbo-owu",
+   "kind": "polytechnic",
+   "name": "The Polytechnic, Igbo-Owu",
+   "source_page": "https://thepolytechnicigboowu.edu.ng",
+   "image_url": "https://thepolytechnicigboowu.edu.ng/assets/logo-EUwWWaqZ.png",
+   "bytes": 4720,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "the-polytechnic-iresi",
+   "kind": "polytechnic",
+   "name": "The Polytechnic, Iresi",
+   "source_page": "https://thepolytechniciresi.edu.ng",
+   "image_url": "https://thepolytechniciresi.edu.ng/images/Irsei_index.png",
+   "bytes": 3110,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "timeon-kairos-polytechnic-agege",
+   "kind": "polytechnic",
+   "name": "TimeOn Kairos Polytechnic, Agege",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: unreachable 0 <urlopen error Tunnel connection failed:"
+  },
+  {
+   "slug": "trinity-polytechnic-uyo",
+   "kind": "polytechnic",
+   "name": "Trinity Polytechnic, Uyo",
+   "source_page": "https://trinitypoly.edu.ng",
+   "image_url": "https://trinitypoly.edu.ng/img/footer-logo.png",
+   "bytes": 8140,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "umaru-ali-shinkafi-polytechnic-sokoto",
+   "kind": "polytechnic",
+   "name": "Umaru Ali Shinkafi Polytechnic, Sokoto",
+   "source_page": "https://uasp.edu.ng",
+   "image_url": "https://uasp.edu.ng/assets/images/pre-logo1.png",
+   "bytes": 6222,
+   "how": "page img",
+   "decision": "kept"
+  },
+  {
+   "slug": "unique-college-of-management-and-technology-ikotun",
+   "kind": "polytechnic",
+   "name": "Unique College of Management and Technology, Ikotun",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: page does not name the school; page does not name the school"
+  },
+  {
+   "slug": "united-polytechnic-jos",
+   "kind": "polytechnic",
+   "name": "United Polytechnic, Jos",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: page does not name the school"
+  },
+  {
+   "slug": "vineyard-polytechnic-karu",
+   "kind": "polytechnic",
+   "name": "Vineyard Polytechnic, Karu",
+   "source_page": "https://vineyardpoly.com/",
+   "image_url": "https://vineyardpoly.com/wp-content/uploads/2024/09/Vineyard-polytechnic-logo.png",
+   "bytes": 6542,
+   "how": "header img",
+   "decision": "rejected in QA: the identical picture was found for several schools (a shared or default icon)"
+  },
+  {
+   "slug": "waziri-umaru-federal-polytechnic-birnin-kebbi",
+   "kind": "polytechnic",
+   "name": "Waziri Umaru Federal Polytechnic, Birnin Kebbi",
+   "source_page": "https://wufpbk.edu.ng/index/",
+   "image_url": "https://wufpbk.edu.ng/index/wp-content/uploads/2020/09/logo1-2.png",
+   "bytes": 2864,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "westland-polytechnic-ilobu",
+   "kind": "polytechnic",
+   "name": "Westland Polytechnic, Ilobu",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: page does not name the school"
+  },
+  {
+   "slug": "yaba-college-of-technology",
+   "kind": "polytechnic",
+   "name": "Yaba College of Technology",
+   "source_page": "https://yabatech.edu.ng",
+   "image_url": "https://yabatech.edu.ng/img/logss.png",
+   "bytes": 2478,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "abia-state-university",
+   "kind": "university",
+   "name": "Abia State University",
+   "source_page": "https://abiastateuniversity.edu.ng",
+   "image_url": "https://abiastateuniversity.edu.ng/absulogo.png",
+   "bytes": 5720,
+   "how": "apple-touch-icon",
+   "decision": "kept"
+  },
+  {
+   "slug": "abiola-ajimobi-technical-university-ibadan",
+   "kind": "university",
+   "name": "Abiola Ajimobi Technical University, Ibadan (formerly First Technical University)",
+   "source_page": "https://tech-u.edu.ng",
+   "image_url": "https://tech-u.edu.ng/wp-content/uploads/2025/08/TECH-U-LOGO.png",
+   "bytes": 6314,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "abubakar-tafawa-balewa-university-bauchi",
+   "kind": "university",
+   "name": "Abubakar Tafawa Balewa University, Bauchi",
+   "source_page": "https://atbu.edu.ng/",
+   "image_url": "https://atbu.edu.ng/wp-content/uploads/2021/05/logo-atbu-1024x270.png",
+   "bytes": 3644,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "achievers-university-owo",
+   "kind": "university",
+   "name": "Achievers University, Owo",
+   "source_page": "https://achievers.edu.ng",
+   "image_url": "https://www.achievers.edu.ng/wp-content/uploads/2019/06/new_logo-2.png",
+   "bytes": 6310,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "adamawa-state-university-mubi",
+   "kind": "university",
+   "name": "Adamawa State University, Mubi",
+   "source_page": "https://adsu.edu.ng/",
+   "image_url": "https://adsu.edu.ng/wp-content/uploads/2026/08/fin.jpg",
+   "bytes": 7676,
+   "how": "header img",
+   "decision": "rejected in QA: photograph of a person, not a logo"
+  },
+  {
+   "slug": "adekunle-ajasin-university-akungba-akoko",
+   "kind": "university",
+   "name": "Adekunle Ajasin University, Akungba-Akoko",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: unreachable 403 "
+  },
+  {
+   "slug": "adeleke-university-ede",
+   "kind": "university",
+   "name": "Adeleke University, Ede",
+   "source_page": "https://adelekeuniversity.edu.ng",
+   "image_url": "https://adelekeuniversity.edu.ng/wp-content/uploads/2022/12/logo-1-300x69.png",
+   "bytes": 4644,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "adeyemi-federal-university-of-education-ondo",
+   "kind": "university",
+   "name": "Adeyemi Federal University of Education, Ondo",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: page does not name the school; page does not name the school"
+  },
+  {
+   "slug": "admiralty-university-ibusa",
+   "kind": "university",
+   "name": "Admiralty University, Ibusa",
+   "source_page": "https://adun.edu.ng",
+   "image_url": "https://adun.edu.ng/images/logo.png",
+   "bytes": 2340,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "afe-babalola-university-ado-ekiti",
+   "kind": "university",
+   "name": "Afe Babalola University, Ado-Ekiti",
+   "source_page": "https://www.abuad.edu.ng/",
+   "image_url": "https://www.abuad.edu.ng/wp-content/uploads/2024/08/cropped-abuad_logo_1-180x180.png",
+   "bytes": 4364,
+   "how": "apple-touch-icon",
+   "decision": "kept"
+  },
+  {
+   "slug": "african-aviation-and-aerospace-university",
+   "kind": "university",
+   "name": "African Aviation and Aerospace University",
+   "source_page": "https://aaau.edu.ng",
+   "image_url": "https://aaau.edu.ng/wp-content/uploads/2023/06/AAAU-Favicon.png",
+   "bytes": 4710,
+   "how": "apple-touch-icon",
+   "decision": "kept"
+  },
+  {
+   "slug": "african-university-of-economics-abuja",
+   "kind": "university",
+   "name": "African University of Economics, Abuja",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: page does not name the school; page does not name the school"
+  },
+  {
+   "slug": "african-university-of-science-and-technology-abuja",
+   "kind": "university",
+   "name": "African University of Science and Technology, Abuja",
+   "source_page": "https://aust.edu.ng/",
+   "image_url": "https://aust.edu.ng/sites/default/files/AUST%20LOGO_1.png",
+   "bytes": 4404,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "ahmadu-bello-university",
+   "kind": "university",
+   "name": "Ahmadu Bello University",
+   "source_page": "https://abu.edu.ng",
+   "image_url": "https://abu.edu.ng/wp-content/uploads/2023/08/cropped-ABU-Logo-1-180x180.png",
+   "bytes": 12104,
+   "how": "apple-touch-icon",
+   "decision": "kept"
+  },
+  {
+   "slug": "air-force-institute-of-technology-kaduna",
+   "kind": "university",
+   "name": "Air Force Institute of Technology, Kaduna",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: page does not name the school"
+  },
+  {
+   "slug": "ajayi-crowther-university-ibadan",
+   "kind": "university",
+   "name": "Ajayi Crowther University, Ibadan",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: unreachable 403 "
+  },
+  {
+   "slug": "akwa-ibom-state-university-ikot-akpaden",
+   "kind": "university",
+   "name": "Akwa Ibom State University, Ikot Akpaden",
+   "source_page": "https://aksu.edu.ng/web/",
+   "image_url": "https://aksu.edu.ng/web/wp-content/themes/aksu-theme/assets/images/aksu-logo.png",
+   "bytes": 10536,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "al-ansar-university-maiduguri",
+   "kind": "university",
+   "name": "Al-Ansar University, Maiduguri",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: unreachable 0 <urlopen error [SSL: DH_KEY_TOO_SMALL] d; unreachable 200 text/html"
+  },
+  {
+   "slug": "al-bayan-university-ankpa",
+   "kind": "university",
+   "name": "Al-Bayan University, Ankpa",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: unreachable 0 <urlopen error [SSL: DH_KEY_TOO_SMALL] d; unreachable 200 text/html"
+  },
+  {
+   "slug": "al-hikmah-university-ilorin",
+   "kind": "university",
+   "name": "Al-Hikmah University, Ilorin",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: unreachable 200 text/html; page does not name the school"
+  },
+  {
+   "slug": "al-istiqama-university-sumaila",
+   "kind": "university",
+   "name": "Al-Istiqama University, Sumaila",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: unreachable 0 <urlopen error [SSL: DH_KEY_TOO_SMALL] d; unreachable 200 text/html"
+  },
+  {
+   "slug": "al-qalam-university-katsina",
+   "kind": "university",
+   "name": "Al-Qalam University, Katsina",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: unreachable 0 <urlopen error [SSL: DH_KEY_TOO_SMALL] d; unreachable 200 text/html"
+  },
+  {
+   "slug": "aletheia-university-ago-iwoye",
+   "kind": "university",
+   "name": "Aletheia University, Ago-Iwoye",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: unreachable 502 "
+  },
+  {
+   "slug": "alex-ekwueme-federal-university-ndufu-alike",
+   "kind": "university",
+   "name": "Alex Ekwueme Federal University, Ndufu-Alike",
+   "source_page": "https://funai.edu.ng",
+   "image_url": "https://funai.edu.ng/wp-content/uploads/2020/03/cropped-funai_Logo-1.png",
+   "bytes": 4034,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "aliko-dangote-university-of-science-and-technology-wudil",
+   "kind": "university",
+   "name": "Aliko Dangote University of Science and Technology, Wudil",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: unreachable 0 <urlopen error Tunnel connection failed:; page does not name the school"
+  },
+  {
+   "slug": "alvan-ikoku-federal-university-of-education-owerri",
+   "kind": "university",
+   "name": "Alvan Ikoku Federal University of Education, Owerri",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: page does not name the school"
+  },
+  {
+   "slug": "ambrose-alli-university",
+   "kind": "university",
+   "name": "Ambrose Alli University",
+   "source_page": "https://aauekpoma.edu.ng",
+   "image_url": "https://aauekpoma.edu.ng/wp-content/themes/aaue/assets/images/logo.png",
+   "bytes": 3628,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "american-open-university-abeokuta",
+   "kind": "university",
+   "name": "American Open University, Abeokuta",
+   "source_page": "https://www.aun.edu.ng",
+   "image_url": "https://www.aun.edu.ng/images/aun-logo-top.png",
+   "bytes": 6674,
+   "how": "header img",
+   "decision": "rejected in QA: the identical picture was found for several schools (a shared or default icon)"
+  },
+  {
+   "slug": "american-university-of-nigeria-yola",
+   "kind": "university",
+   "name": "American University of Nigeria, Yola",
+   "source_page": "https://aun.edu.ng",
+   "image_url": "https://aun.edu.ng/images/aun-logo-top.png",
+   "bytes": 6674,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "anchor-university-ayobo",
+   "kind": "university",
+   "name": "Anchor University, Ayobo",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: unreachable 0 The read operation timed out"
+  },
+  {
+   "slug": "arthur-jarvis-university-akpabuyo",
+   "kind": "university",
+   "name": "Arthur Jarvis University, Akpabuyo",
+   "source_page": "https://arthurjarvisuniversity.edu.ng",
+   "image_url": "https://arthurjarvisuniversity.edu.ng/wp-content/uploads/2026/11/cropped-AJU-LOGO-scaled.png",
+   "bytes": 5232,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "augustine-university-ilara-epe",
+   "kind": "university",
+   "name": "Augustine University, Ilara-Epe",
+   "source_page": "https://augustineuniversity.edu.ng",
+   "image_url": "https://augustineuniversity.edu.ng/images/ndps/NDPS-logo.JPG",
+   "bytes": 3536,
+   "how": "page img",
+   "decision": "rejected in QA: a padlock graphic with the national arms, not the school's mark"
+  },
+  {
+   "slug": "azman-university-kano",
+   "kind": "university",
+   "name": "Azman University, Kano",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: page does not name the school; page does not name the school"
+  },
+  {
+   "slug": "babcock-university",
+   "kind": "university",
+   "name": "Babcock University",
+   "source_page": "https://babcock.edu.ng",
+   "image_url": "https://babcock.edu.ng/curator/media/6981e3ee-aac8-48e8-882e-57bc104e7a8b.png?h=50&w=150&s=0341f68fd37c03d968cc0ace7cfe86d5",
+   "bytes": 4698,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "bamidele-olumilua-university-of-education-science-and-technology-ikere",
+   "kind": "university",
+   "name": "Bamidele Olumilua University of Education, Science and Technology, Ikere",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: unreachable 0 The read operation timed out; page does not name the school"
+  },
+  {
+   "slug": "bauchi-state-university-gadau",
+   "kind": "university",
+   "name": "Bauchi State University, Gadau",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: unreachable 0 <urlopen error Tunnel connection failed:"
+  },
+  {
+   "slug": "bayelsa-medical-university",
+   "kind": "university",
+   "name": "Bayelsa Medical University",
+   "source_page": "https://bmu.edu.ng",
+   "image_url": "https://bmu.edu.ng/static/images/logo.png",
+   "bytes": 7976,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "bayero-university-kano",
+   "kind": "university",
+   "name": "Bayero University Kano",
+   "source_page": "https://buk.edu.ng",
+   "image_url": "https://buk.edu.ng/sites/default/files/logo_2.png",
+   "bytes": 2844,
+   "how": "header img",
+   "decision": "rejected in QA: an unrecognisable blue shape, not clearly the school's mark"
+  },
+  {
+   "slug": "baze-university",
+   "kind": "university",
+   "name": "Baze University",
+   "source_page": "https://bazeuniversity.edu.ng",
+   "image_url": "https://bazeuniversity.edu.ng/assets/favicon.ico",
+   "bytes": 1846,
+   "how": "icon",
+   "decision": "kept"
+  },
+  {
+   "slug": "bells-university-of-technology-ota",
+   "kind": "university",
+   "name": "Bells University of Technology, Ota",
+   "source_page": "https://www.bellsuniversity.edu.ng/",
+   "image_url": "https://www.bellsuniversity.edu.ng/wp-content/uploads/cropped-Bells-Logo.2png.png",
+   "bytes": 9966,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "benson-idahosa-university-benin-city",
+   "kind": "university",
+   "name": "Benson Idahosa University, Benin City",
+   "source_page": "https://biu.edu.ng",
+   "image_url": "https://i0.wp.com/biu.edu.ng/wp-content/uploads/2025/03/BIU-logo-2-e1743115849454.png?fit=463%2C199&ssl=1",
+   "bytes": 4412,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "benue-state-university-of-agriculture-science-and-technology-ihugh",
+   "kind": "university",
+   "name": "Benue State University of Agriculture, Science and Technology, Ihugh",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: unreachable 0 <urlopen error _ssl.c:1018: The handshak; page does not name the school"
+  },
+  {
+   "slug": "bingham-university-karu",
+   "kind": "university",
+   "name": "Bingham University, Karu",
+   "source_page": "https://binghamuni.edu.ng/v2/",
+   "image_url": "https://binghamuni.edu.ng/v2/images/bhulogo.jfif",
+   "bytes": 6134,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "bowen-university-iwo",
+   "kind": "university",
+   "name": "Bowen University, Iwo",
+   "source_page": "https://bowen.edu.ng",
+   "image_url": "https://bowen.edu.ng/wp-content/uploads/2025/01/cropped-cropped-bowen-3.png-3.webp",
+   "bytes": 3496,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "british-canadian-university-obufu",
+   "kind": "university",
+   "name": "British Canadian University, Obufu",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: page does not name the school"
+  },
+  {
+   "slug": "caleb-university",
+   "kind": "university",
+   "name": "Caleb University",
+   "source_page": "https://calebuniversity.edu.ng",
+   "image_url": "https://calebuniversity.edu.ng/media/uploads/2026/02/cul_logo_rect.png",
+   "bytes": 2838,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "canadian-university-of-nigeria-abuja",
+   "kind": "university",
+   "name": "Canadian University of Nigeria, Abuja",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: page does not name the school; page does not name the school"
+  },
+  {
+   "slug": "capital-city-university-kano",
+   "kind": "university",
+   "name": "Capital City University, Kano",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: unreachable 0 <urlopen error Tunnel connection failed:; page does not name the school"
+  },
+  {
+   "slug": "caritas-university-enugu",
+   "kind": "university",
+   "name": "Caritas University, Enugu",
+   "source_page": "https://caritasuni.edu.ng",
+   "image_url": "https://caritasuni.edu.ng/apple-touch-icon.png",
+   "bytes": 3220,
+   "how": "apple-touch-icon",
+   "decision": "kept"
+  },
+  {
+   "slug": "cetep-city-university-yaba",
+   "kind": "university",
+   "name": "CETEP City University, Yaba",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: page does not name the school; unreachable 0 <urlopen error Tunnel connection failed:"
+  },
+  {
+   "slug": "chrisland-university-abeokuta",
+   "kind": "university",
+   "name": "Chrisland University, Abeokuta",
+   "source_page": "https://www.chrislanduniversity.edu.ng",
+   "image_url": "https://www.chrislanduniversity.edu.ng/images/clu-logo-white.png",
+   "bytes": 4130,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "christopher-university-mowe",
+   "kind": "university",
+   "name": "Christopher University, Mowe",
+   "source_page": "https://christopheruniversity.edu.ng/",
+   "image_url": "https://christopheruniversity.edu.ng/wp-content/uploads/2026/08/a66641a4dbc9ebd0de42661abbea710604ceddfc-1.png",
+   "bytes": 2440,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "chukwuemeka-odumegwu-ojukwu-university-uli",
+   "kind": "university",
+   "name": "Chukwuemeka Odumegwu Ojukwu University, Uli",
+   "source_page": "https://coou.edu.ng",
+   "image_url": "https://coou.edu.ng/uploads/img/logo.png?v=1782907028",
+   "bytes": 4160,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "city-university-abuja",
+   "kind": "university",
+   "name": "City University, Abuja",
+   "source_page": "https://www.lcu.edu.ng",
+   "image_url": "https://www.lcu.edu.ng/templates/gk_university/images/touch-device.png",
+   "bytes": 1614,
+   "how": "apple-touch-icon",
+   "decision": "rejected in QA: the identical picture was found for several schools (a shared or default icon)"
+  },
+  {
+   "slug": "claretian-university-of-nigeria-nekede",
+   "kind": "university",
+   "name": "Claretian University of Nigeria, Nekede",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: page does not name the school; page does not name the school"
+  },
+  {
+   "slug": "clifford-university-owerrinta",
+   "kind": "university",
+   "name": "Clifford University, Owerrinta",
+   "source_page": "https://clifforduni.edu.ng/",
+   "image_url": "https://clifforduni.edu.ng/wp-content/uploads/elementor/thumbs/science-thumbnail-1-q64ummp0wuxglq2xzlces8zbvnqvrlrfw37ap42xvk.png",
+   "bytes": 1886,
+   "how": "header img",
+   "decision": "rejected in QA: a laboratory photo banner, not a logo"
+  },
+  {
+   "slug": "coal-city-university-enugu",
+   "kind": "university",
+   "name": "Coal City University, Enugu",
+   "source_page": "https://ccu.edu.ng",
+   "image_url": "https://ccu.edu.ng/wp-content/uploads/thegem-logos/logo_e559315548326ef5da04ee5d34e1c7ad_1x.png",
+   "bytes": 3070,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "confluence-university-of-science-and-technology-osara",
+   "kind": "university",
+   "name": "Confluence University of Science and Technology, Osara",
+   "source_page": "https://custech.edu.ng",
+   "image_url": "https://custech.edu.ng/wp-content/uploads/2026/03/cropped-custechlogo-180x180.png",
+   "bytes": 12320,
+   "how": "apple-touch-icon",
+   "decision": "kept"
+  },
+  {
+   "slug": "cosmopolitan-university-abuja",
+   "kind": "university",
+   "name": "Cosmopolitan University, Abuja",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: page does not name the school; page does not name the school"
+  },
+  {
+   "slug": "covenant-university",
+   "kind": "university",
+   "name": "Covenant University",
+   "source_page": "https://covenantuniversity.edu.ng",
+   "image_url": "https://covenantuniversity.edu.ng/images/logos/covenant-university-logo-desktop.png",
+   "bytes": 4700,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "crawford-university-igbesa",
+   "kind": "university",
+   "name": "Crawford University, Igbesa",
+   "source_page": "https://crawforduniversity.edu.ng",
+   "image_url": "https://crawforduniversity.edu.ng/images/Crawford.png",
+   "bytes": 2030,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "crescent-university-abeokuta",
+   "kind": "university",
+   "name": "Crescent University, Abeokuta",
+   "source_page": "https://cuab.edu.ng/",
+   "image_url": "https://cuab.edu.ng/wp-content/uploads/2023/08/cuab-logo.svg",
+   "bytes": 3984,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "cross-river-university-of-education-and-entrepreneurship-akampa",
+   "kind": "university",
+   "name": "Cross River University of Education and Entrepreneurship, Akampa",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: unreachable 0 <urlopen error Tunnel connection failed:"
+  },
+  {
+   "slug": "david-umahi-federal-university-of-health-sciences-uburu",
+   "kind": "university",
+   "name": "David Umahi Federal University of Health Sciences, Uburu",
+   "source_page": "https://kdums.edu.ng",
+   "image_url": "https://kdums.edu.ng/images/dufuhsa_logoa.png",
+   "bytes": 6258,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "delta-state-university",
+   "kind": "university",
+   "name": "Delta State University",
+   "source_page": "https://delsu.edu.ng",
+   "image_url": "https://delsu.edu.ng/images/Logodelsu-rem.png",
+   "bytes": 5100,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "delta-state-university-of-science-and-technology-ozoro",
+   "kind": "university",
+   "name": "Delta State University of Science and Technology, Ozoro",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: unreachable 0 <urlopen error Tunnel connection failed:; page does not name the school"
+  },
+  {
+   "slug": "dennis-osadebay-university-asaba",
+   "kind": "university",
+   "name": "Dennis Osadebay University, Asaba",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: unreachable 0 <urlopen error [SSL: CERTIFICATE_VERIFY_"
+  },
+  {
+   "slug": "dominican-university-ibadan",
+   "kind": "university",
+   "name": "Dominican University, Ibadan",
+   "source_page": "https://www.dui.edu.ng/",
+   "image_url": "https://www.dui.edu.ng/images/log.png",
+   "bytes": 2474,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "dominion-university-ibadan",
+   "kind": "university",
+   "name": "Dominion University, Ibadan",
+   "source_page": "https://dominionuniversity.edu.ng",
+   "image_url": "https://dominionuniversity.edu.ng/wp-content/uploads/2021/09/New_Logo_DU_1-1.png",
+   "bytes": 2876,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "ebonyi-state-university-abakaliki",
+   "kind": "university",
+   "name": "Ebonyi State University, Abakaliki",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: unreachable 0 <urlopen error Tunnel connection failed:; unreachable 0 <urlopen error Tunnel connection failed:"
+  },
+  {
+   "slug": "ebonyi-state-university-of-ict-science-and-technology-oferekpe",
+   "kind": "university",
+   "name": "Ebonyi State University of ICT, Science and Technology, Oferekpe",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: page does not name the school; page does not name the school"
+  },
+  {
+   "slug": "edo-state-university-iyamho",
+   "kind": "university",
+   "name": "Edo State University, Iyamho",
+   "source_page": "https://edouniversity.edu.ng",
+   "image_url": "https://edouniversity.edu.ng/logo.png",
+   "bytes": 9696,
+   "how": "og:image",
+   "decision": "kept"
+  },
+  {
+   "slug": "edwin-clark-university-kiagbodo",
+   "kind": "university",
+   "name": "Edwin Clark University, Kiagbodo",
+   "source_page": "https://edwinclarkuniversity.edu.ng",
+   "image_url": "http://edwinclarkuniversity.edu.ng/wp-content/uploads/2023/09/cropped-ecu-logo-copy.jpg",
+   "bytes": 7740,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "ekiti-state-university",
+   "kind": "university",
+   "name": "Ekiti State University",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: unreachable 403 ; unreachable 403 ; unreachable 403 "
+  },
+  {
+   "slug": "eko-university-of-medical-and-health-sciences-ijanikin",
+   "kind": "university",
+   "name": "Eko University of Medical and Health Sciences, Ijanikin",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: unreachable 0 <urlopen error Tunnel connection failed:; page does not name the school"
+  },
+  {
+   "slug": "elizade-university-ilara-mokin",
+   "kind": "university",
+   "name": "Elizade University, Ilara-Mokin",
+   "source_page": "https://elizadeuniversity.edu.ng",
+   "image_url": "https://elizadeuniversity.edu.ng/img/eulogo.jpg",
+   "bytes": 1772,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "elrazi-medical-university-yargaya",
+   "kind": "university",
+   "name": "Elrazi Medical University, Yargaya",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: page does not name the school"
+  },
+  {
+   "slug": "enugu-state-university-of-science-and-technology",
+   "kind": "university",
+   "name": "Enugu State University of Science and Technology",
+   "source_page": "https://www.esut.edu.ng/",
+   "image_url": "https://www.esut.edu.ng/storage/favicon.webp",
+   "bytes": 4840,
+   "how": "apple-touch-icon",
+   "decision": "kept"
+  },
+  {
+   "slug": "eranova-university-abuja",
+   "kind": "university",
+   "name": "Eranova University, Abuja",
+   "source_page": "https://eranova.edu.ng",
+   "image_url": "https://eranova.edu.ng/wp-content/uploads/2026/04/eranova_logo_3.webp",
+   "bytes": 4816,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "european-university-of-nigeria-duboyi",
+   "kind": "university",
+   "name": "European University of Nigeria, Duboyi",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: page does not name the school; page does not name the school"
+  },
+  {
+   "slug": "euston-university-abakaliki",
+   "kind": "university",
+   "name": "Euston University, Abakaliki",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: unreachable 0 <urlopen error Tunnel connection failed:"
+  },
+  {
+   "slug": "evangel-university-akaeze",
+   "kind": "university",
+   "name": "Evangel University, Akaeze",
+   "source_page": "https://official.evangeluniversity.edu.ng/",
+   "image_url": "https://official.evangeluniversity.edu.ng/wp-content/uploads/2023/12/cropped-loggon-2-180x180.png",
+   "bytes": 2722,
+   "how": "apple-touch-icon",
+   "decision": "rejected in QA: a 16px icon blown up to pixels"
+  },
+  {
+   "slug": "federal-university-birnin-kebbi",
+   "kind": "university",
+   "name": "Federal University, Birnin Kebbi",
+   "source_page": "https://fubk.edu.ng",
+   "image_url": "https://fubk.edu.ng/assets/logo.webp",
+   "bytes": 11812,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "federal-university-dutse",
+   "kind": "university",
+   "name": "Federal University, Dutse",
+   "source_page": "https://fud.edu.ng",
+   "image_url": "https://fud.edu.ng/assets/fud-crest.png",
+   "bytes": 3434,
+   "how": "icon",
+   "decision": "kept"
+  },
+  {
+   "slug": "federal-university-dutsin-ma",
+   "kind": "university",
+   "name": "Federal University, Dutsin-Ma",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: unreachable 421 ; unreachable 403 "
+  },
+  {
+   "slug": "federal-university-gashua",
+   "kind": "university",
+   "name": "Federal University, Gashua",
+   "source_page": "https://fugashua.edu.ng",
+   "image_url": "https://fugashua.edu.ng/wp-content/uploads/2026/04/cropped-logo-Copy-180x180.png",
+   "bytes": 11036,
+   "how": "apple-touch-icon",
+   "decision": "kept"
+  },
+  {
+   "slug": "federal-university-gusau",
+   "kind": "university",
+   "name": "Federal University, Gusau",
+   "source_page": "https://www.fugusau.edu.ng",
+   "image_url": "https://www.fugusau.edu.ng/wp-content/uploads/2024/07/cropped-UniLogo4.png",
+   "bytes": 7952,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "federal-university-kashere",
+   "kind": "university",
+   "name": "Federal University, Kashere",
+   "source_page": "https://fukashere.edu.ng/",
+   "image_url": "https://fukashere.edu.ng/wp-content/uploads/2025/05/logoNew.png",
+   "bytes": 4396,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "federal-university-lafia",
+   "kind": "university",
+   "name": "Federal University, Lafia",
+   "source_page": "https://fulafia.edu.ng",
+   "image_url": "https://fulafia.edu.ng/wp-content/uploads/2025/09/fulafia.png",
+   "bytes": 11518,
+   "how": "apple-touch-icon",
+   "decision": "kept"
+  },
+  {
+   "slug": "federal-university-lokoja",
+   "kind": "university",
+   "name": "Federal University, Lokoja",
+   "source_page": "https://fulokoja.edu.ng",
+   "image_url": "https://fulokoja.edu.ng/assets/images/logo.png",
+   "bytes": 3484,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "federal-university-of-agriculture-abeokuta",
+   "kind": "university",
+   "name": "Federal University of Agriculture, Abeokuta",
+   "source_page": "https://funaab.edu.ng",
+   "image_url": "https://funaab.edu.ng/wp-content/uploads/2019/04/unaab-logo2-1.jpg",
+   "bytes": 2704,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "federal-university-of-agriculture-and-developmental-studies-iragbuji",
+   "kind": "university",
+   "name": "Federal University of Agriculture and Developmental Studies, Iragbuji",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: unreachable 0 <urlopen error _ssl.c:1018: The handshak"
+  },
+  {
+   "slug": "federal-university-of-agriculture-and-technology-obio-akpa",
+   "kind": "university",
+   "name": "Federal University of Agriculture and Technology, Obio-Akpa",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: page does not name the school; page does not name the school"
+  },
+  {
+   "slug": "federal-university-of-agriculture-and-technology-okeho",
+   "kind": "university",
+   "name": "Federal University of Agriculture and Technology, Okeho",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: page does not name the school; page does not name the school"
+  },
+  {
+   "slug": "federal-university-of-agriculture-bassambiri",
+   "kind": "university",
+   "name": "Federal University of Agriculture, Bassambiri",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: unreachable 0 <urlopen error _ssl.c:1018: The handshak; page does not name the school"
+  },
+  {
+   "slug": "federal-university-of-agriculture-mubi",
+   "kind": "university",
+   "name": "Federal University of Agriculture, Mubi",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: unreachable 0 <urlopen error _ssl.c:1018: The handshak; page does not name the school"
+  },
+  {
+   "slug": "federal-university-of-agriculture-zuru",
+   "kind": "university",
+   "name": "Federal University of Agriculture, Zuru",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: unreachable 0 <urlopen error _ssl.c:1018: The handshak; page does not name the school"
+  },
+  {
+   "slug": "federal-university-of-allied-health-sciences-enugu",
+   "kind": "university",
+   "name": "Federal University of Allied Health Sciences, Enugu",
+   "source_page": "https://fuahse.edu.ng",
+   "image_url": "https://fuahse.edu.ng/wp-content/uploads/2025/10/cropped-FUAHSE-logo-180x180.png",
+   "bytes": 9092,
+   "how": "apple-touch-icon",
+   "decision": "rejected in QA: the identical picture was found for several schools (a shared or default icon)"
+  },
+  {
+   "slug": "federal-university-of-applied-sciences-kachia",
+   "kind": "university",
+   "name": "Federal University of Applied Sciences, Kachia",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: page does not name the school; page does not name the school"
+  },
+  {
+   "slug": "federal-university-of-education-kontagora",
+   "kind": "university",
+   "name": "Federal University of Education, Kontagora",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: page does not name the school; page does not name the school"
+  },
+  {
+   "slug": "federal-university-of-education-pankshin",
+   "kind": "university",
+   "name": "Federal University of Education, Pankshin",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: page does not name the school; page does not name the school"
+  },
+  {
+   "slug": "federal-university-of-education-zaria",
+   "kind": "university",
+   "name": "Federal University of Education, Zaria",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: page does not name the school; page does not name the school"
+  },
+  {
+   "slug": "federal-university-of-environment-and-technology-tai",
+   "kind": "university",
+   "name": "Federal University of Environment and Technology, Tai",
+   "source_page": "https://futo.edu.ng/",
+   "image_url": "https://futo.edu.ng/images/logo.png",
+   "bytes": 2418,
+   "how": "header img",
+   "decision": "rejected in QA: the identical picture was found for several schools (a shared or default icon)"
+  },
+  {
+   "slug": "federal-university-of-health-science-and-technology-tsafe",
+   "kind": "university",
+   "name": "Federal University of Health Science and Technology, Tsafe",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: page does not name the school; page does not name the school"
+  },
+  {
+   "slug": "federal-university-of-health-sciences-azare",
+   "kind": "university",
+   "name": "Federal University of Health Sciences, Azare",
+   "source_page": "https://fuahse.edu.ng/",
+   "image_url": "https://fuahse.edu.ng/wp-content/uploads/2025/10/cropped-FUAHSE-logo-180x180.png",
+   "bytes": 9092,
+   "how": "apple-touch-icon",
+   "decision": "rejected in QA: the identical picture was found for several schools (a shared or default icon)"
+  },
+  {
+   "slug": "federal-university-of-health-sciences-ila-orangun",
+   "kind": "university",
+   "name": "Federal University of Health Sciences, Ila Orangun",
+   "source_page": "https://fuahse.edu.ng/",
+   "image_url": "https://fuahse.edu.ng/wp-content/uploads/2025/10/cropped-FUAHSE-logo-180x180.png",
+   "bytes": 9092,
+   "how": "apple-touch-icon",
+   "decision": "rejected in QA: the identical picture was found for several schools (a shared or default icon)"
+  },
+  {
+   "slug": "federal-university-of-health-sciences-katsina",
+   "kind": "university",
+   "name": "Federal University of Health Sciences, Katsina",
+   "source_page": "https://fuahse.edu.ng/",
+   "image_url": "https://fuahse.edu.ng/wp-content/uploads/2025/10/cropped-FUAHSE-logo-180x180.png",
+   "bytes": 9092,
+   "how": "apple-touch-icon",
+   "decision": "rejected in QA: the identical picture was found for several schools (a shared or default icon)"
+  },
+  {
+   "slug": "federal-university-of-health-sciences-kwale",
+   "kind": "university",
+   "name": "Federal University of Health Sciences, Kwale",
+   "source_page": "https://fuahse.edu.ng/",
+   "image_url": "https://fuahse.edu.ng/wp-content/uploads/2025/10/cropped-FUAHSE-logo-180x180.png",
+   "bytes": 9092,
+   "how": "apple-touch-icon",
+   "decision": "rejected in QA: the identical picture was found for several schools (a shared or default icon)"
+  },
+  {
+   "slug": "federal-university-of-health-sciences-otukpo",
+   "kind": "university",
+   "name": "Federal University of Health Sciences, Otukpo",
+   "source_page": "https://fuahse.edu.ng/",
+   "image_url": "https://fuahse.edu.ng/wp-content/uploads/2025/10/cropped-FUAHSE-logo-180x180.png",
+   "bytes": 9092,
+   "how": "apple-touch-icon",
+   "decision": "rejected in QA: the identical picture was found for several schools (a shared or default icon)"
+  },
+  {
+   "slug": "federal-university-of-medicine-and-medical-sciences-abeokuta",
+   "kind": "university",
+   "name": "Federal University of Medicine and Medical Sciences, Abeokuta",
+   "source_page": "https://www.unimed.edu.ng",
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: unreachable 0 <urlopen error Tunnel connection failed:; header img banner shaped; header img banner shaped"
+  },
+  {
+   "slug": "federal-university-of-petroleum-resources-effurun",
+   "kind": "university",
+   "name": "Federal University of Petroleum Resources, Effurun",
+   "source_page": "https://fupre.edu.ng/",
+   "image_url": "https://fupre.edu.ng/wp-content/uploads/2023/04/FUPRELogo.png",
+   "bytes": 2654,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "federal-university-of-science-and-technology-epe",
+   "kind": "university",
+   "name": "Federal University of Science and Technology, Epe",
+   "source_page": "https://fustkabo.edu.ng/",
+   "image_url": "https://fustkabo.edu.ng/themes/custom/fustkabo/images/logo.png",
+   "bytes": 12754,
+   "how": "header img",
+   "decision": "rejected in QA: the identical picture was found for several schools (a shared or default icon)"
+  },
+  {
+   "slug": "federal-university-of-science-and-technology-kabo",
+   "kind": "university",
+   "name": "Federal University of Science and Technology, Kabo",
+   "source_page": "https://fustkabo.edu.ng",
+   "image_url": "https://fustkabo.edu.ng/themes/custom/fustkabo/images/logo.png",
+   "bytes": 12754,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "federal-university-of-technology-akure",
+   "kind": "university",
+   "name": "Federal University of Technology, Akure",
+   "source_page": "https://futo.edu.ng/",
+   "image_url": "https://futo.edu.ng/images/logo.png",
+   "bytes": 2418,
+   "how": "header img",
+   "decision": "rejected in QA: the identical picture was found for several schools (a shared or default icon)"
+  },
+  {
+   "slug": "federal-university-of-technology-and-environmental-studies-iyin-ekiti",
+   "kind": "university",
+   "name": "Federal University of Technology and Environmental Studies, Iyin-Ekiti",
+   "source_page": "https://futo.edu.ng/",
+   "image_url": "https://futo.edu.ng/images/logo.png",
+   "bytes": 2418,
+   "how": "header img",
+   "decision": "rejected in QA: the identical picture was found for several schools (a shared or default icon)"
+  },
+  {
+   "slug": "federal-university-of-technology-babura",
+   "kind": "university",
+   "name": "Federal University of Technology, Babura",
+   "source_page": "https://futo.edu.ng/",
+   "image_url": "https://futo.edu.ng/images/logo.png",
+   "bytes": 2418,
+   "how": "header img",
+   "decision": "rejected in QA: the identical picture was found for several schools (a shared or default icon)"
+  },
+  {
+   "slug": "federal-university-of-technology-ikot-abasi",
+   "kind": "university",
+   "name": "Federal University of Technology, Ikot Abasi",
+   "source_page": "https://futo.edu.ng/",
+   "image_url": "https://futo.edu.ng/images/logo.png",
+   "bytes": 2418,
+   "how": "header img",
+   "decision": "rejected in QA: the identical picture was found for several schools (a shared or default icon)"
+  },
+  {
+   "slug": "federal-university-of-technology-minna",
+   "kind": "university",
+   "name": "Federal University of Technology, Minna",
+   "source_page": "https://futo.edu.ng/",
+   "image_url": "https://futo.edu.ng/images/logo.png",
+   "bytes": 2418,
+   "how": "header img",
+   "decision": "rejected in QA: the identical picture was found for several schools (a shared or default icon)"
+  },
+  {
+   "slug": "federal-university-of-technology-owerri",
+   "kind": "university",
+   "name": "Federal University of Technology, Owerri",
+   "source_page": "https://futo.edu.ng",
+   "image_url": "https://futo.edu.ng/images/logo.png",
+   "bytes": 2418,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "federal-university-of-transportation-daura",
+   "kind": "university",
+   "name": "Federal University of Transportation, Daura",
+   "source_page": "https://futd.edu.ng",
+   "image_url": "https://futd.edu.ng/_next/static/media/logo.14jo6.w5ccfqg.jpg?dpl=dpl_HyQ9fW7uykF862rv6sPfGpqY79YB",
+   "bytes": 12126,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "federal-university-otuoke",
+   "kind": "university",
+   "name": "Federal University, Otuoke",
+   "source_page": "https://fuotuoke.edu.ng",
+   "image_url": "https://fuotuoke.edu.ng/wp-content/themes/fuo-heritage/assets/img/fuo-crest.png",
+   "bytes": 10750,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "federal-university-oye-ekiti",
+   "kind": "university",
+   "name": "Federal University, Oye-Ekiti",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: unreachable 421 ; unreachable 403 "
+  },
+  {
+   "slug": "federal-university-wukari",
+   "kind": "university",
+   "name": "Federal University, Wukari",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: unreachable 421 ; unreachable 403 "
+  },
+  {
+   "slug": "fountain-university-osogbo",
+   "kind": "university",
+   "name": "Fountain University, Osogbo",
+   "source_page": "https://fuo.edu.ng",
+   "image_url": "https://fuo.edu.ng/img/logo/fuo-logo.png",
+   "bytes": 6032,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "franco-british-international-university-kaduna",
+   "kind": "university",
+   "name": "Franco British International University, Kaduna",
+   "source_page": "https://fbiu.edu.ng",
+   "image_url": "https://fbiu.edu.ng/wp-content/uploads/2023/07/Fronco-British-logo-3-448x136.png",
+   "bytes": 2618,
+   "how": "header img",
+   "decision": "rejected in QA: mark too small to read"
+  },
+  {
+   "slug": "gerar-university-of-medical-science-imope-ijebu",
+   "kind": "university",
+   "name": "Gerar University of Medical Science, Imope Ijebu",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: page does not name the school"
+  },
+  {
+   "slug": "glorious-vision-university-ogwa",
+   "kind": "university",
+   "name": "Glorious Vision University, Ogwa (formerly Samuel Adegboyega University)",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: unreachable 0 <urlopen error Tunnel connection failed:"
+  },
+  {
+   "slug": "godfrey-okoye-university-enugu",
+   "kind": "university",
+   "name": "Godfrey Okoye University, Enugu",
+   "source_page": "https://gouni.edu.ng/",
+   "image_url": "https://gouni.edu.ng/wp-content/uploads/2025/06/Uni-Logo-x2_2.png",
+   "bytes": 4274,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "gombe-state-university",
+   "kind": "university",
+   "name": "Gombe State University",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: unreachable 0 <urlopen error Tunnel connection failed:; page does not name the school"
+  },
+  {
+   "slug": "gombe-state-university-of-science-and-technology-kumo",
+   "kind": "university",
+   "name": "Gombe State University of Science and Technology, Kumo",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: page does not name the school; page does not name the school"
+  },
+  {
+   "slug": "greenfield-university-kaduna",
+   "kind": "university",
+   "name": "Greenfield University, Kaduna",
+   "source_page": "https://gfu.edu.ng",
+   "image_url": "https://gfu.edu.ng/wp-content/uploads/2020/10/Main-logo.png",
+   "bytes": 5374,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "greenland-university-jalingo",
+   "kind": "university",
+   "name": "Greenland University, Jalingo",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: page does not name the school"
+  },
+  {
+   "slug": "gregory-university-uturu",
+   "kind": "university",
+   "name": "Gregory University, Uturu",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: unreachable 403 ; page does not name the school"
+  },
+  {
+   "slug": "hallmark-university-ijebi-itele",
+   "kind": "university",
+   "name": "Hallmark University, Ijebi Itele",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: unreachable 0 <urlopen error Tunnel connection failed:"
+  },
+  {
+   "slug": "havilla-university-nde-ikom",
+   "kind": "university",
+   "name": "Havilla University, Nde-Ikom",
+   "source_page": "https://havillauniversity.edu.ng",
+   "image_url": "https://havillauniversity.edu.ng/images/havillalogomobile.png",
+   "bytes": 5568,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "hezekiah-university-umudi",
+   "kind": "university",
+   "name": "Hezekiah University, Umudi",
+   "source_page": "https://hezekiah.edu.ng",
+   "image_url": "https://hezekiah.edu.ng/assets/crest.png",
+   "bytes": 11338,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "hillside-university-of-science-and-technology-okemisi",
+   "kind": "university",
+   "name": "Hillside University of Science and Technology, Okemisi",
+   "source_page": "https://hust.edu.ng",
+   "image_url": "https://hust.edu.ng/wp-content/uploads/2024/11/cropped-Hust-logo.png-lanscape.webp",
+   "bytes": 4706,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "ibrahim-badamasi-babangida-university-lapai",
+   "kind": "university",
+   "name": "Ibrahim Badamasi Babangida University, Lapai",
+   "source_page": "https://ibbu.edu.ng/",
+   "image_url": "https://ibbu.edu.ng/wp-content/uploads/2023/12/logo.svg",
+   "bytes": 2874,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "iconic-open-university-sokoto",
+   "kind": "university",
+   "name": "Iconic Open University, Sokoto",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: page does not name the school; page does not name the school"
+  },
+  {
+   "slug": "igbinedion-university-okada",
+   "kind": "university",
+   "name": "Igbinedion University, Okada",
+   "source_page": "https://iuokada.edu.ng",
+   "image_url": "https://iuokada.edu.ng/wp-content/uploads/2023/05/IUO_logo-1-removebg-preview-1-300x300.png",
+   "bytes": 10652,
+   "how": "apple-touch-icon",
+   "decision": "kept"
+  },
+  {
+   "slug": "ignatius-ajuru-university-of-education-rumuolumeni",
+   "kind": "university",
+   "name": "Ignatius Ajuru University of Education, Rumuolumeni",
+   "source_page": "https://iaue.edu.ng",
+   "image_url": "https://iaue.edu.ng/wp-content/uploads/2025/09/iaue-Logo.jpeg",
+   "bytes": 4098,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "imo-state-university",
+   "kind": "university",
+   "name": "Imo State University",
+   "source_page": "https://imsu.edu.ng",
+   "image_url": "https://axxpoint-bucket.s3.us-west-2.amazonaws.com/IMSU/images/imsu_logo.png",
+   "bytes": 3354,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "james-hope-university-lagos",
+   "kind": "university",
+   "name": "James Hope University, Lagos",
+   "source_page": "https://jhu.edu.ng",
+   "image_url": "https://jhu.edu.ng/wp-content/uploads/2023/12/James-Hope-University.svg",
+   "bytes": 4138,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "jigawa-state-university-of-medical-and-allied-health-sciences-majia",
+   "kind": "university",
+   "name": "Jigawa State University of Medical and Allied Health Sciences, Majia",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: unreachable 0 <urlopen error Tunnel connection failed:; page does not name the school"
+  },
+  {
+   "slug": "jimoh-babalola-university-ilorin",
+   "kind": "university",
+   "name": "Jimoh Babalola University, Ilorin",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: page does not name the school"
+  },
+  {
+   "slug": "joseph-ayo-babalola-university-ikeji-arakeji",
+   "kind": "university",
+   "name": "Joseph Ayo Babalola University, Ikeji-Arakeji",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: page does not name the school"
+  },
+  {
+   "slug": "joseph-sarwuan-tarka-university-makurdi",
+   "kind": "university",
+   "name": "Joseph Sarwuan Tarka University, Makurdi",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: unreachable 0 <urlopen error _ssl.c:1018: The handshak"
+  },
+  {
+   "slug": "kaduna-state-university",
+   "kind": "university",
+   "name": "Kaduna State University",
+   "source_page": "https://kasu.edu.ng",
+   "image_url": "https://kasu.edu.ng/wp-content/uploads/2024/10/cropped-KASU-180x180.png",
+   "bytes": 6286,
+   "how": "apple-touch-icon",
+   "decision": "kept"
+  },
+  {
+   "slug": "kebbi-state-university-of-science-and-technology-aliero",
+   "kind": "university",
+   "name": "Kebbi State University of Science and Technology, Aliero",
+   "source_page": "https://ksusta.edu.ng",
+   "image_url": "https://ksusta.edu.ng/wp-content/uploads/2024/08/cropped-KEBBI-STATE-UNIVERSITY-O-3-220x86.png",
+   "bytes": 4006,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "kings-university-ode-omu",
+   "kind": "university",
+   "name": "Kings University, Ode Omu",
+   "source_page": "https://kingsuniversity.edu.ng",
+   "image_url": "https://kingsuniversity.edu.ng/assets/images/logo.png",
+   "bytes": 3920,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "kingsley-ozumba-mbadiwe-university-ogboko",
+   "kind": "university",
+   "name": "Kingsley Ozumba Mbadiwe University, Ogboko",
+   "source_page": "https://komu.edu.ng",
+   "image_url": "https://komu.edu.ng/favicon.ico",
+   "bytes": 2272,
+   "how": "icon",
+   "decision": "rejected in QA: mark too small to read"
+  },
+  {
+   "slug": "kola-daisi-university-ibadan",
+   "kind": "university",
+   "name": "Kola Daisi University, Ibadan",
+   "source_page": "https://koladaisiuniversity.edu.ng",
+   "image_url": "https://koladaisiuniversity.edu.ng/wp-content/uploads/2021/04/kdulogo.jpg",
+   "bytes": 6856,
+   "how": "og:image",
+   "decision": "kept"
+  },
+  {
+   "slug": "kwara-state-university-malete",
+   "kind": "university",
+   "name": "Kwara State University, Malete",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: page does not name the school"
+  },
+  {
+   "slug": "kwara-state-university-of-education-ilorin",
+   "kind": "university",
+   "name": "Kwara State University of Education, Ilorin",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: page does not name the school; page does not name the school"
+  },
+  {
+   "slug": "kwararafa-university-wukari",
+   "kind": "university",
+   "name": "Kwararafa University, Wukari",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: unreachable 0 <urlopen error Tunnel connection failed:"
+  },
+  {
+   "slug": "ladoke-akintola-university-of-technology",
+   "kind": "university",
+   "name": "Ladoke Akintola University of Technology",
+   "source_page": "https://lautech.edu.ng",
+   "image_url": "https://lautech.edu.ng/sites/default/files/LAUTECH_LOGO-removebg-preview_0.png",
+   "bytes": 3646,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "lagos-state-university",
+   "kind": "university",
+   "name": "Lagos State University",
+   "source_page": "https://lasu.edu.ng/home/",
+   "image_url": "https://lasu.edu.ng/home/img/logo1.png",
+   "bytes": 3306,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "lagos-state-university-of-education-ijanikin",
+   "kind": "university",
+   "name": "Lagos State University of Education, Ijanikin",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: unreachable 0 <urlopen error [SSL: CERTIFICATE_VERIFY_; page does not name the school"
+  },
+  {
+   "slug": "lagos-state-university-of-science-and-technology",
+   "kind": "university",
+   "name": "Lagos State University of Science and Technology",
+   "source_page": "https://lasustech.edu.ng",
+   "image_url": "https://lasustech.edu.ng/images/logo.png",
+   "bytes": 4914,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "landmark-university-omu-aran",
+   "kind": "university",
+   "name": "Landmark University, Omu-Aran",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: unreachable 0 <urlopen error [SSL: CERTIFICATE_VERIFY_"
+  },
+  {
+   "slug": "lead-city-university-ibadan",
+   "kind": "university",
+   "name": "Lead City University, Ibadan",
+   "source_page": "https://lcu.edu.ng",
+   "image_url": "https://lcu.edu.ng/templates/gk_university/images/touch-device.png",
+   "bytes": 1614,
+   "how": "apple-touch-icon",
+   "decision": "rejected in QA: the image is a web studio banner (GavickPro), not the school mark"
+  },
+  {
+   "slug": "leadership-university-abuja",
+   "kind": "university",
+   "name": "Leadership University, Abuja",
+   "source_page": "https://eranova.edu.ng/",
+   "image_url": "https://eranova.edu.ng/wp-content/uploads/2026/04/eranova_logo_3.webp",
+   "bytes": 4816,
+   "how": "header img",
+   "decision": "rejected in QA: the identical picture was found for several schools (a shared or default icon)"
+  },
+  {
+   "slug": "legacy-university-okija",
+   "kind": "university",
+   "name": "Legacy University, Okija",
+   "source_page": "https://www.legacyuniversity.edu.ng/",
+   "image_url": "https://www.legacyuniversity.edu.ng/img/core-img/logo.png",
+   "bytes": 6616,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "madonna-university-okija",
+   "kind": "university",
+   "name": "Madonna University, Okija",
+   "source_page": "https://www.madonnauniversity.edu.ng/",
+   "image_url": "https://www.madonnauniversity.edu.ng/wp-content/uploads/2026/06/Madonna_University_Logo_TextClear.webp",
+   "bytes": 13590,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "maranatha-university-lagos",
+   "kind": "university",
+   "name": "Maranatha University, Lagos",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: unreachable 0 <urlopen error [SSL: CERTIFICATE_VERIFY_; page does not name the school"
+  },
+  {
+   "slug": "maryam-abacha-american-university-of-nigeria-kano",
+   "kind": "university",
+   "name": "Maryam Abacha American University of Nigeria, Kano",
+   "source_page": "https://maaun.edu.ng",
+   "image_url": "https://i0.wp.com/maaun.edu.ng/wp-content/uploads/2020/02/tinywow_MAUUN-LOGO_8740867.png?fit=350%2C100&ssl=1",
+   "bytes": 5384,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "mcpherson-university-seriki-sotayo",
+   "kind": "university",
+   "name": "McPherson University, Seriki Sotayo",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: page does not name the school"
+  },
+  {
+   "slug": "mercy-medical-university-iwo",
+   "kind": "university",
+   "name": "Mercy Medical University, Iwo",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: page does not name the school"
+  },
+  {
+   "slug": "mewar-international-university-masaka",
+   "kind": "university",
+   "name": "Mewar International University, Masaka",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: unreachable 0 <urlopen error Tunnel connection failed:"
+  },
+  {
+   "slug": "michael-and-cecilia-ibru-university-agbara-otor",
+   "kind": "university",
+   "name": "Michael and Cecilia Ibru University, Agbara-Otor",
+   "source_page": "https://mciu.edu.ng",
+   "image_url": "https://mciu.edu.ng/assets/MCIU_LOGO.png",
+   "bytes": 5602,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "michael-okpara-university-of-agriculture",
+   "kind": "university",
+   "name": "Michael Okpara University of Agriculture",
+   "source_page": "https://mouau.edu.ng",
+   "image_url": "https://mouau.edu.ng/wp-content/uploads/2020/05/mouau_logo.jpg",
+   "bytes": 2750,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "miva-open-university-abuja",
+   "kind": "university",
+   "name": "Miva Open University, Abuja",
+   "source_page": "https://miva.edu.ng:443/",
+   "image_url": "https://miva-university.s3.eu-west-2.amazonaws.com/wp-content/uploads/2026/10/13113206/image-2611-1-1-1024x393.png",
+   "bytes": 3828,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "modibbo-adama-university",
+   "kind": "university",
+   "name": "Modibbo Adama University",
+   "source_page": "https://mau.edu.ng",
+   "image_url": "https://mau.edu.ng/mau.png",
+   "bytes": 10608,
+   "how": "apple-touch-icon",
+   "decision": "kept"
+  },
+  {
+   "slug": "moshood-abiola-university-of-science-and-technology-abeokuta",
+   "kind": "university",
+   "name": "Moshood Abiola University of Science and Technology, Abeokuta",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: page does not name the school; page does not name the school"
+  },
+  {
+   "slug": "mountain-top-university-ibafo",
+   "kind": "university",
+   "name": "Mountain Top University, Ibafo",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: page does not name the school"
+  },
+  {
+   "slug": "nasarawa-state-university-keffi",
+   "kind": "university",
+   "name": "Nasarawa State University, Keffi",
+   "source_page": "https://nsuk.edu.ng",
+   "image_url": "https://nsuk.edu.ng/api/media/file/logo-new.png",
+   "bytes": 10002,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "national-open-university-of-nigeria",
+   "kind": "university",
+   "name": "National Open University of Nigeria",
+   "source_page": "https://nou.edu.ng",
+   "image_url": "https://nou.edu.ng//wp-content/uploads/2021/12/Logo-shield-1.png",
+   "bytes": 3026,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "national-university-of-science-and-technology-abuja",
+   "kind": "university",
+   "name": "National University of Science and Technology, Abuja",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: page does not name the school; page does not name the school"
+  },
+  {
+   "slug": "new-city-university-ayetoro",
+   "kind": "university",
+   "name": "New City University, Ayetoro",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: page does not name the school; unreachable 0 <urlopen error Tunnel connection failed:"
+  },
+  {
+   "slug": "niger-delta-university",
+   "kind": "university",
+   "name": "Niger Delta University",
+   "source_page": "https://www.ndu.edu.ng/",
+   "image_url": "https://www.ndu.edu.ng/_next/image?url=https%3A%2F%2Fcms.ndu.edu.ng%2Fuploads%2Flogo_38adc601bd.png&w=256&q=100",
+   "bytes": 8314,
+   "how": "page img",
+   "decision": "kept"
+  },
+  {
+   "slug": "nigeria-police-academy-wudil",
+   "kind": "university",
+   "name": "Nigeria Police Academy, Wudil",
+   "source_page": "https://polac.edu.ng",
+   "image_url": "https://polac.edu.ng/assets/img/polac-logo.png",
+   "bytes": 3052,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "nigerian-army-university-biu",
+   "kind": "university",
+   "name": "Nigerian Army University, Biu",
+   "source_page": "https://naub.edu.ng/",
+   "image_url": "https://naub.edu.ng/wp-content/uploads/2026/01/logo.png",
+   "bytes": 5164,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "nigerian-british-university-asa",
+   "kind": "university",
+   "name": "Nigerian British University, Asa",
+   "source_page": "https://www.nbu.edu.ng/",
+   "image_url": "https://www.nbu.edu.ng/_next/static/media/logo.f145308e.png",
+   "bytes": 4172,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "nigerian-defence-academy",
+   "kind": "university",
+   "name": "Nigerian Defence Academy",
+   "source_page": "https://www.nda.edu.ng",
+   "image_url": "https://www.nda.edu.ng/storage/site/01KP5XVF8AHG15C00HHF2KKR72.png",
+   "bytes": 8590,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "nigerian-maritime-university-okerenkoko",
+   "kind": "university",
+   "name": "Nigerian Maritime University, Okerenkoko",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: page does not name the school; page does not name the school"
+  },
+  {
+   "slug": "nigerian-university-of-technology-and-management-apapa",
+   "kind": "university",
+   "name": "Nigerian University of Technology and Management, Apapa",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: page does not name the school; page does not name the school"
+  },
+  {
+   "slug": "nile-university-of-nigeria",
+   "kind": "university",
+   "name": "Nile University of Nigeria",
+   "source_page": "https://nileuniversity.edu.ng",
+   "image_url": "https://nileuniversity.edu.ng/wp-content/uploads/2021/05/Nile-University-of-Nigeria-Logo-Dark.avif",
+   "bytes": 4886,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "nnamdi-azikiwe-university",
+   "kind": "university",
+   "name": "Nnamdi Azikiwe University",
+   "source_page": "https://unizik.edu.ng",
+   "image_url": "https://cdn.jsdelivr.net/gh/unizik/website-assets@main/v1/assets/images/logo.webp",
+   "bytes": 6260,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "north-eastern-university-gombe",
+   "kind": "university",
+   "name": "North Eastern University, Gombe",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: unreachable 0 <urlopen error Tunnel connection failed:"
+  },
+  {
+   "slug": "northwest-university-sokoto",
+   "kind": "university",
+   "name": "Northwest University, Sokoto",
+   "source_page": "https://nwus.edu.ng",
+   "image_url": "https://themewant.com/products/wordpress/unipix/wp-content/uploads/2024/06/logo__five.svg",
+   "bytes": 5016,
+   "how": "header img",
+   "decision": "rejected in QA: the page's mark reads UNIPIX University, a different name"
+  },
+  {
+   "slug": "novena-university-ogume",
+   "kind": "university",
+   "name": "Novena University, Ogume",
+   "source_page": "https://novenauniversity.edu.ng",
+   "image_url": "https://novenauniversity.edu.ng/images/novena-crest.png",
+   "bytes": 4386,
+   "how": "og:image",
+   "decision": "kept"
+  },
+  {
+   "slug": "obafemi-awolowo-university",
+   "kind": "university",
+   "name": "Obafemi Awolowo University",
+   "source_page": "https://oauife.edu.ng",
+   "image_url": "https://oauife.edu.ng/wp-content/uploads/2022/09/cropped-oaulogo-180x180.png",
+   "bytes": 10924,
+   "how": "apple-touch-icon",
+   "decision": "kept"
+  },
+  {
+   "slug": "obong-university-obong-ntak",
+   "kind": "university",
+   "name": "Obong University, Obong Ntak",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: unreachable 404 "
+  },
+  {
+   "slug": "oduduwa-university-ipetumodu",
+   "kind": "university",
+   "name": "Oduduwa University, Ipetumodu",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: page does not name the school"
+  },
+  {
+   "slug": "ojaja-university-eiyenkorin",
+   "kind": "university",
+   "name": "Ojaja University, Eiyenkorin",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: unreachable 0 <urlopen error Tunnel connection failed:"
+  },
+  {
+   "slug": "olabisi-onabanjo-university",
+   "kind": "university",
+   "name": "Olabisi Onabanjo University",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: unreachable 502 ; unreachable 502 "
+  },
+  {
+   "slug": "olusegun-agagu-university-of-science-and-technology-okitipupa",
+   "kind": "university",
+   "name": "Olusegun Agagu University of Science and Technology, Okitipupa",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: page does not name the school; page does not name the school"
+  },
+  {
+   "slug": "omega-university-kaduna",
+   "kind": "university",
+   "name": "Omega University, Kaduna",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: page does not name the school; page does not name the school"
+  },
+  {
+   "slug": "osun-state-university-osogbo",
+   "kind": "university",
+   "name": "Osun State University, Osogbo",
+   "source_page": "https://uniosun.edu.ng",
+   "image_url": "https://uniosun.edu.ng/wp-content/uploads/2026/02/logo-2.png",
+   "bytes": 4246,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "pamo-university-of-medical-sciences-port-harcourt",
+   "kind": "university",
+   "name": "PAMO University of Medical Sciences, Port Harcourt",
+   "source_page": "http://new.pums.edu.ng/",
+   "image_url": "http://new.pums.edu.ng/wp-content/uploads/2021/08/PUMS-LOGO-02.png",
+   "bytes": 5152,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "pan-atlantic-university",
+   "kind": "university",
+   "name": "Pan-Atlantic University",
+   "source_page": "https://pau.edu.ng",
+   "image_url": "https://pau.edu.ng/wp-content/uploads/2023/06/PAU_Logo_Transparent.png",
+   "bytes": 5352,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "paul-university-awka",
+   "kind": "university",
+   "name": "Paul University, Awka",
+   "source_page": "https://pauluniversity.edu.ng",
+   "image_url": "https://pauluniversity.edu.ng/images/logo/pauluni_logo.png",
+   "bytes": 4758,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "peaceland-university-enugu",
+   "kind": "university",
+   "name": "PeaceLand University, Enugu",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: page does not name the school; page does not name the school"
+  },
+  {
+   "slug": "pearl-university-calabar",
+   "kind": "university",
+   "name": "Pearl University, Calabar",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: unreachable 403 "
+  },
+  {
+   "slug": "plateau-state-university-bokkos",
+   "kind": "university",
+   "name": "Plateau State University, Bokkos",
+   "source_page": "https://plasu.edu.ng",
+   "image_url": "https://plasu.edu.ng/wp-content/uploads/2026/09/cropped-38417684-3c64-4ffb-b76f-16b9dd12958e-180x180.webp",
+   "bytes": 5264,
+   "how": "apple-touch-icon",
+   "decision": "kept"
+  },
+  {
+   "slug": "precious-cornerstone-university-ibadan",
+   "kind": "university",
+   "name": "Precious Cornerstone University, Ibadan",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: unreachable 0 <urlopen error Tunnel connection failed:"
+  },
+  {
+   "slug": "prince-abubakar-audu-university-anyigba",
+   "kind": "university",
+   "name": "Prince Abubakar Audu University, Anyigba",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: unreachable 0 <urlopen error _ssl.c:1018: The handshak"
+  },
+  {
+   "slug": "redeemers-university-ede",
+   "kind": "university",
+   "name": "Redeemer's University, Ede",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: unreachable 0 <urlopen error [SSL: CERTIFICATE_VERIFY_"
+  },
+  {
+   "slug": "regnum-medical-university-lagos",
+   "kind": "university",
+   "name": "Regnum Medical University, Lagos",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: page does not name the school"
+  },
+  {
+   "slug": "renaissance-university-enugu",
+   "kind": "university",
+   "name": "Renaissance University, Enugu",
+   "source_page": "https://rnu.edu.ng",
+   "image_url": "https://rnu.edu.ng/assets/images/logo.png",
+   "bytes": 4370,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "rev-fr-moses-orshio-adasu-university-makurdi",
+   "kind": "university",
+   "name": "Rev. Fr. Moses Orshio Adasu University, Makurdi",
+   "source_page": "https://bsum.edu.ng",
+   "image_url": "https://bsum.edu.ng/img/logo/logo.png",
+   "bytes": 9704,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "rhema-university-obeama-asa",
+   "kind": "university",
+   "name": "Rhema University, Obeama-Asa",
+   "source_page": "https://rhemauniversity.edu.ng",
+   "image_url": "https://rhemauniversity.edu.ng/assets/images/corp-footer-img.gif",
+   "bytes": 2252,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "ritman-university-ikot-ekpene",
+   "kind": "university",
+   "name": "Ritman University, Ikot Ekpene",
+   "source_page": "https://ritmanuniversity.edu.ng",
+   "image_url": "https://ritmanuniversity.edu.ng/wp-content/uploads/2025/01/ritman-university-logo-transparent.png",
+   "bytes": 5980,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "rivers-state-university",
+   "kind": "university",
+   "name": "Rivers State University",
+   "source_page": "https://www.rsu.edu.ng",
+   "image_url": "https://www.rsu.edu.ng/wp-content/uploads/2022/02/cropped-rsu-2-180x180.png",
+   "bytes": 9854,
+   "how": "apple-touch-icon",
+   "decision": "rejected in QA: distorted crop of the mark"
+  },
+  {
+   "slug": "saisa-university-of-medical-sciences-and-technology-sokoto",
+   "kind": "university",
+   "name": "Saisa University of Medical Sciences and Technology, Sokoto",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: page does not name the school; unreachable 0 <urlopen error Tunnel connection failed:"
+  },
+  {
+   "slug": "salem-university-lokoja",
+   "kind": "university",
+   "name": "Salem University, Lokoja",
+   "source_page": "https://salemuniversity.edu.ng/",
+   "image_url": "https://salemuniversity.edu.ng/wp-content/uploads/2025/05/sulogot2-1024x269.png",
+   "bytes": 5876,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "sani-bello-university-kontagora",
+   "kind": "university",
+   "name": "Sani Bello University, Kontagora",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: unreachable 0 <urlopen error _ssl.c:1018: The handshak"
+  },
+  {
+   "slug": "skyline-university-nigeria-kano",
+   "kind": "university",
+   "name": "Skyline University Nigeria, Kano",
+   "source_page": "https://sun.edu.ng",
+   "image_url": "https://sun.edu.ng/wp-content/uploads/cropped-sun-1-180x180.png",
+   "bytes": 12224,
+   "how": "apple-touch-icon",
+   "decision": "kept"
+  },
+  {
+   "slug": "sokoto-state-university",
+   "kind": "university",
+   "name": "Sokoto State University",
+   "source_page": "https://www.ssu.edu.ng/",
+   "image_url": "https://files.cdn-files-a.com/uploads/9919225/400_filter_nobg_67350422b7b91.png",
+   "bytes": 11340,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "southern-atlantic-university-uyo",
+   "kind": "university",
+   "name": "Southern Atlantic University, Uyo",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: page does not name the school"
+  },
+  {
+   "slug": "southwestern-university-oku-owa",
+   "kind": "university",
+   "name": "Southwestern University, Oku Owa",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: page does not name the school"
+  },
+  {
+   "slug": "spiritan-university-nneochi",
+   "kind": "university",
+   "name": "Spiritan University, Nneochi",
+   "source_page": "https://spiritanuniversity.edu.ng",
+   "image_url": "https://spiritanuniversity.edu.ng/logo.png",
+   "bytes": 2704,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "state-university-of-medical-and-applied-sciences-igbo-eno",
+   "kind": "university",
+   "name": "State University of Medical and Applied Sciences, Igbo-Eno",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: page does not name the school; unreachable 0 <urlopen error Tunnel connection failed:"
+  },
+  {
+   "slug": "sule-lamido-university-kafin-hausa",
+   "kind": "university",
+   "name": "Sule Lamido University, Kafin Hausa",
+   "source_page": "https://slu.edu.ng",
+   "image_url": "https://slu.edu.ng/assets/images/uploads/2026/04/slu-logo.png",
+   "bytes": 4816,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "summit-university-offa",
+   "kind": "university",
+   "name": "Summit University, Offa",
+   "source_page": "https://summituniversity.edu.ng",
+   "image_url": "https://summituniversity.edu.ng/assets/img/profile/logo2.png",
+   "bytes": 11766,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "tansian-university-umunya",
+   "kind": "university",
+   "name": "Tansian University, Umunya",
+   "source_page": "https://tansianuniversity.edu.ng/",
+   "image_url": "https://tansianuniversity.edu.ng/tansian-logo.png",
+   "bytes": 10222,
+   "how": "icon",
+   "decision": "kept"
+  },
+  {
+   "slug": "taraba-state-university-jalingo",
+   "kind": "university",
+   "name": "Taraba State University, Jalingo",
+   "source_page": "https://www.tsuniversity.edu.ng/",
+   "image_url": "https://www.tsuniversity.edu.ng/_next/image?url=%2Fassets%2Ftsu_logo1.png&w=96&q=75",
+   "bytes": 5776,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "taraba-state-university-of-tropical-agriculture-and-climate-action-gembu",
+   "kind": "university",
+   "name": "Taraba State University of Tropical Agriculture, Science, Technology and Climate Action, Gembu",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: unreachable 0 <urlopen error _ssl.c:1018: The handshak"
+  },
+  {
+   "slug": "tazkiyah-university-kaduna",
+   "kind": "university",
+   "name": "Tazkiyah University, Kaduna",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: page does not name the school; page does not name the school"
+  },
+  {
+   "slug": "the-duke-medical-university-calabar",
+   "kind": "university",
+   "name": "The Duke Medical University, Calabar",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: page does not name the school"
+  },
+  {
+   "slug": "thomas-adewumi-university-oko-irese",
+   "kind": "university",
+   "name": "Thomas Adewumi University, Oko-Irese",
+   "source_page": "https://tau.edu.ng",
+   "image_url": "https://tau.edu.ng/assets/images/logo.png",
+   "bytes": 6920,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "transatlantic-university-of-medicine-and-health-sciences-umuchukwu",
+   "kind": "university",
+   "name": "Transatlantic University of Medicine and Health Sciences, Umuchukwu",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: unreachable 0 <urlopen error Tunnel connection failed:; unreachable 0 <urlopen error Tunnel connection failed:"
+  },
+  {
+   "slug": "trinity-university-ogun-state",
+   "kind": "university",
+   "name": "Trinity University, Ogun State",
+   "source_page": "https://www.trinityuniversity.edu.ng/",
+   "image_url": "https://www.trinityuniversity.edu.ng/wp-content/uploads/2021/08/cropped-site-logo-1.jpg",
+   "bytes": 3640,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "umaru-musa-yaradua-university-katsina",
+   "kind": "university",
+   "name": "Umaru Musa Yar'adua University, Katsina",
+   "source_page": "https://umyu.edu.ng",
+   "image_url": "https://umyu.edu.ng/wp-content/uploads/2026/02/UMUy.png",
+   "bytes": 8018,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "ummah-university-of-nigeria-abuja",
+   "kind": "university",
+   "name": "Ummah University of Nigeria, Abuja",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: page does not name the school; page does not name the school"
+  },
+  {
+   "slug": "unique-open-university-ojo",
+   "kind": "university",
+   "name": "Unique Open University, Ojo",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: page does not name the school"
+  },
+  {
+   "slug": "university-of-abuja",
+   "kind": "university",
+   "name": "University of Abuja",
+   "source_page": "https://www.uniabuja.edu.ng",
+   "image_url": "https://www.uniabuja.edu.ng/uploads/settings/16815763039597.png",
+   "bytes": 3510,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "university-of-africa-toru-orua",
+   "kind": "university",
+   "name": "University of Africa, Toru-Orua",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: unreachable 404 ; page does not name the school"
+  },
+  {
+   "slug": "university-of-agriculture-and-environmental-sciences-umuagwo",
+   "kind": "university",
+   "name": "University of Agriculture and Environmental Sciences, Umuagwo",
+   "source_page": "https://uaes.edu.ng",
+   "image_url": "https://uaes.edu.ng/apple-touch-icon.png",
+   "bytes": 7268,
+   "how": "apple-touch-icon",
+   "decision": "kept"
+  },
+  {
+   "slug": "university-of-benin",
+   "kind": "university",
+   "name": "University of Benin",
+   "source_page": "https://uniben.edu",
+   "image_url": "https://uniben.edu/images/uniben_logo.jpg",
+   "bytes": 3556,
+   "how": "icon",
+   "decision": "kept"
+  },
+  {
+   "slug": "university-of-calabar",
+   "kind": "university",
+   "name": "University of Calabar",
+   "source_page": "https://unical.edu.ng",
+   "image_url": "https://unical.edu.ng/admin/uploads/site/site_logo_6870269d8470d2.84348407.png",
+   "bytes": 7420,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "university-of-cross-river-state-calabar",
+   "kind": "university",
+   "name": "University of Cross River State, Calabar",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: unreachable 0 <urlopen error Tunnel connection failed:; unreachable 403 "
+  },
+  {
+   "slug": "university-of-delta-agbor",
+   "kind": "university",
+   "name": "University of Delta, Agbor",
+   "source_page": "https://unidel.edu.ng/",
+   "image_url": "https://unidel.edu.ng/wp-content/uploads/2026/08/logo-unidel-black.png",
+   "bytes": 2142,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "university-of-fortune-igbotako",
+   "kind": "university",
+   "name": "University of Fortune, Igbotako",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: page does not name the school; page does not name the school"
+  },
+  {
+   "slug": "university-of-ibadan",
+   "kind": "university",
+   "name": "University of Ibadan",
+   "source_page": "https://ui.edu.ng",
+   "image_url": "https://ui.edu.ng/sites/default/files/logo.gif",
+   "bytes": 10072,
+   "how": "icon",
+   "decision": "kept"
+  },
+  {
+   "slug": "university-of-ilesa",
+   "kind": "university",
+   "name": "University of Ilesa",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: page does not name the school; page does not name the school"
+  },
+  {
+   "slug": "university-of-ilorin",
+   "kind": "university",
+   "name": "University of Ilorin",
+   "source_page": "https://www.unilorin.edu.ng/",
+   "image_url": "https://www.unilorin.edu.ng/wp-content/uploads/2025/11/University-of-Ilorin-logo-icon.png",
+   "bytes": 6814,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "university-of-innovation-science-and-technology-omuma",
+   "kind": "university",
+   "name": "University of Innovation, Science and Technology, Omuma",
+   "source_page": "https://www.esut.edu.ng",
+   "image_url": "https://www.esut.edu.ng/storage/favicon.webp",
+   "bytes": 4840,
+   "how": "apple-touch-icon",
+   "decision": "rejected in QA: the identical picture was found for several schools (a shared or default icon)"
+  },
+  {
+   "slug": "university-of-jos",
+   "kind": "university",
+   "name": "University of Jos",
+   "source_page": "https://www.unijos.edu.ng",
+   "image_url": "https://www.unijos.edu.ng/sites/default/files/styles/medium/public/articles/LogoUJ_6.jpg?itok=s-p0giNY",
+   "bytes": 3986,
+   "how": "page img",
+   "decision": "kept"
+  },
+  {
+   "slug": "university-of-lagos",
+   "kind": "university",
+   "name": "University of Lagos",
+   "source_page": "https://unilag.edu.ng",
+   "image_url": "https://unilag.edu.ng/wp-content/uploads/2023/10/UNILAG-Logo-New-300x121.png",
+   "bytes": 4566,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "university-of-maiduguri",
+   "kind": "university",
+   "name": "University of Maiduguri",
+   "source_page": "https://unimaid.edu.ng",
+   "image_url": "https://unimaid.edu.ng/images/kanem-radio-logo.jpg",
+   "bytes": 5586,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "university-of-maritime-studies-oron",
+   "kind": "university",
+   "name": "University of Maritime Studies, Oron",
+   "source_page": "https://www.unn.edu.ng",
+   "image_url": "https://www.unn.edu.ng/wp-content/uploads/2016/06/logo.png",
+   "bytes": 3688,
+   "how": "header img",
+   "decision": "rejected in QA: the identical picture was found for several schools (a shared or default icon)"
+  },
+  {
+   "slug": "university-of-medical-sciences-ondo",
+   "kind": "university",
+   "name": "University of Medical Sciences, Ondo",
+   "source_page": "http://new.pums.edu.ng/",
+   "image_url": "http://new.pums.edu.ng/wp-content/uploads/2021/08/PUMS-LOGO-02.png",
+   "bytes": 5152,
+   "how": "header img",
+   "decision": "rejected in QA: the identical picture was found for several schools (a shared or default icon)"
+  },
+  {
+   "slug": "university-of-mkar-mkar",
+   "kind": "university",
+   "name": "University of Mkar, Mkar",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: unreachable 0 <urlopen error Tunnel connection failed:; page does not name the school"
+  },
+  {
+   "slug": "university-of-nigeria-nsukka",
+   "kind": "university",
+   "name": "University of Nigeria, Nsukka",
+   "source_page": "https://www.unn.edu.ng/",
+   "image_url": "https://www.unn.edu.ng/wp-content/uploads/2016/06/logo.png",
+   "bytes": 3688,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "university-of-offa",
+   "kind": "university",
+   "name": "University of Offa",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: page does not name the school; page does not name the school"
+  },
+  {
+   "slug": "university-of-port-harcourt",
+   "kind": "university",
+   "name": "University of Port Harcourt",
+   "source_page": "http://www.uniport.edu.ng/",
+   "image_url": "http://www.uniport.edu.ng/wp-content/themes/unipix/assets/images/logo/uniport_logo1.png",
+   "bytes": 5900,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "university-of-uyo",
+   "kind": "university",
+   "name": "University of Uyo",
+   "source_page": "https://uniuyo.edu.ng/",
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: header img banner shaped; apple-touch-icon too small; header img banner shaped; apple-touch-icon too small"
+  },
+  {
+   "slug": "usmanu-danfodiyo-university",
+   "kind": "university",
+   "name": "Usmanu Danfodiyo University",
+   "source_page": "https://www.udusok.edu.ng/",
+   "image_url": "https://www.udusok.edu.ng/wp-content/uploads/2018/08/udus-logo.png",
+   "bytes": 3038,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "venite-university-iloro-ekiti",
+   "kind": "university",
+   "name": "Venite University, Iloro-Ekiti",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: unreachable 403 "
+  },
+  {
+   "slug": "veritas-university",
+   "kind": "university",
+   "name": "Veritas University",
+   "source_page": "https://www.veritas.edu.ng/",
+   "image_url": "https://www.veritas.edu.ng/_next/static/media/logo.ee99fa95.svg",
+   "bytes": 5844,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "vision-university-ikogbo",
+   "kind": "university",
+   "name": "Vision University, Ikogbo",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: unreachable 0 <urlopen error Tunnel connection failed:"
+  },
+  {
+   "slug": "wellspring-university-evbuobanosa",
+   "kind": "university",
+   "name": "Wellspring University, Evbuobanosa",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: page does not name the school"
+  },
+  {
+   "slug": "wesley-university-ondo",
+   "kind": "university",
+   "name": "Wesley University, Ondo",
+   "source_page": "https://wesleyuni.edu.ng",
+   "image_url": "https://wesleyuni.edu.ng/public/apple-touch-icon.png",
+   "bytes": 9230,
+   "how": "apple-touch-icon",
+   "decision": "kept"
+  },
+  {
+   "slug": "western-delta-university-oghara",
+   "kind": "university",
+   "name": "Western Delta University, Oghara",
+   "source_page": "https://wdu.edu.ng",
+   "image_url": "https://wdu.edu.ng/uploads/2026/07/565de570-e4fc-479e-adfa-e5f0bea8ab17.png",
+   "bytes": 8288,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "westland-university-iwo",
+   "kind": "university",
+   "name": "Westland University, Iwo",
+   "source_page": null,
+   "image_url": null,
+   "bytes": 0,
+   "how": null,
+   "decision": "no logo: page does not name the school"
+  },
+  {
+   "slug": "wigwe-university-isiokpo",
+   "kind": "university",
+   "name": "Wigwe University, Isiokpo",
+   "source_page": "https://www.wigweuniversity.edu.ng/",
+   "image_url": "https://www.wigweuniversity.edu.ng/wp-content/uploads/2023/08/mainlogo.svg",
+   "bytes": 5752,
+   "how": "header img",
+   "decision": "kept"
+  },
+  {
+   "slug": "yobe-state-university-damaturu",
+   "kind": "university",
+   "name": "Yobe State University, Damaturu",
+   "source_page": "https://ysu.edu.ng/ysu/",
+   "image_url": "https://ysu.edu.ng/ysu/wp-content/uploads/2020/05/cropped-YSU-Logo1.png",
+   "bytes": 6826,
+   "how": "header img",
+   "decision": "kept"
+  }
+ ],
+ "email_domains": [
+  {
+   "slug": "gregory-university-uturu",
+   "domain": null,
+   "note": "no reachable page that names the school"
+  },
+  {
+   "slug": "obong-university-obong-ntak",
+   "domain": null,
+   "note": "no reachable page that names the school"
+  },
+  {
+   "slug": "tansian-university-umunya",
+   "domain": "tansianuniversity.edu.ng",
+   "page": "https://tansianuniversity.edu.ng/",
+   "seen_addresses_on": [],
+   "note": "confirmed: official site names the school, domain is .edu.ng/.edu"
+  },
+  {
+   "slug": "nigerian-british-university-asa",
+   "domain": "nbu.edu.ng",
+   "page": "https://www.nbu.edu.ng/",
+   "seen_addresses_on": [
+    "nbu.edu.ng"
+   ],
+   "note": "confirmed: official site names the school, domain is .edu.ng/.edu"
+  },
+  {
+   "slug": "adamawa-state-university-mubi",
+   "domain": "adsu.edu.ng",
+   "page": "https://adsu.edu.ng/",
+   "seen_addresses_on": [],
+   "note": "confirmed: official site names the school, domain is .edu.ng/.edu"
+  },
+  {
+   "slug": "bauchi-state-university-gadau",
+   "domain": null,
+   "note": "no reachable page that names the school"
+  },
+  {
+   "slug": "university-of-africa-toru-orua",
+   "domain": null,
+   "note": "no reachable page that names the school"
+  },
+  {
+   "slug": "university-of-mkar-mkar",
+   "domain": null,
+   "note": "no reachable page that names the school"
+  },
+  {
+   "slug": "abubakar-tafawa-balewa-university-bauchi",
+   "domain": "atbu.edu.ng",
+   "page": "https://atbu.edu.ng/",
+   "seen_addresses_on": [
+    "atbu.edu.ng"
+   ],
+   "note": "confirmed: official site names the school, domain is .edu.ng/.edu"
+  },
+  {
+   "slug": "university-of-cross-river-state-calabar",
+   "domain": null,
+   "note": "no reachable page that names the school"
+  },
+  {
+   "slug": "admiralty-university-ibusa",
+   "domain": "adun.edu.ng",
+   "page": "https://adun.edu.ng",
+   "seen_addresses_on": [
+    "adun.edu.ng"
+   ],
+   "note": "confirmed: official site names the school, domain is .edu.ng/.edu"
+  },
+  {
+   "slug": "nigerian-army-university-biu",
+   "domain": "naub.edu.ng",
+   "page": "https://naub.edu.ng/",
+   "seen_addresses_on": [
+    "naub.edu.ng"
+   ],
+   "note": "confirmed: official site names the school, domain is .edu.ng/.edu"
+  },
+  {
+   "slug": "university-of-delta-agbor",
+   "domain": "unidel.edu.ng",
+   "page": "https://unidel.edu.ng/",
+   "seen_addresses_on": [],
+   "note": "confirmed: official site names the school, domain is .edu.ng/.edu"
+  },
+  {
+   "slug": "clifford-university-owerrinta",
+   "domain": "clifforduni.edu.ng",
+   "page": "https://clifforduni.edu.ng/",
+   "seen_addresses_on": [
+    "clifforduni.edu.ng"
+   ],
+   "note": "confirmed: official site names the school, domain is .edu.ng/.edu"
+  },
+  {
+   "slug": "wellspring-university-evbuobanosa",
+   "domain": null,
+   "note": "no reachable page that names the school"
+  },
+  {
+   "slug": "federal-university-oye-ekiti",
+   "domain": null,
+   "note": "no reachable page that names the school"
+  },
+  {
+   "slug": "nigerian-maritime-university-okerenkoko",
+   "domain": null,
+   "note": "no reachable page that names the school"
+  },
+  {
+   "slug": "godfrey-okoye-university-enugu",
+   "domain": "gouni.edu.ng",
+   "page": "https://gouni.edu.ng/",
+   "seen_addresses_on": [
+    "gouni.edu.ng"
+   ],
+   "note": "confirmed: official site names the school, domain is .edu.ng/.edu"
+  },
+  {
+   "slug": "african-university-of-science-and-technology-abuja",
+   "domain": "aust.edu.ng",
+   "page": "https://aust.edu.ng/",
+   "seen_addresses_on": [
+    "aust.edu.ng"
+   ],
+   "note": "confirmed: official site names the school, domain is .edu.ng/.edu"
+  },
+  {
+   "slug": "delta-state-university-of-science-and-technology-ozoro",
+   "domain": null,
+   "note": "no reachable page that names the school"
+  },
+  {
+   "slug": "federal-university-of-petroleum-resources-effurun",
+   "domain": "fupre.edu.ng",
+   "page": "https://fupre.edu.ng/",
+   "seen_addresses_on": [
+    "fupre.edu.ng"
+   ],
+   "note": "confirmed: official site names the school, domain is .edu.ng/.edu"
+  },
+  {
+   "slug": "air-force-institute-of-technology-kaduna",
+   "domain": null,
+   "note": "no reachable page that names the school"
+  },
+  {
+   "slug": "nigerian-defence-academy",
+   "domain": "nda.edu.ng",
+   "page": "https://www.nda.edu.ng",
+   "seen_addresses_on": [
+    "nda.edu.ng"
+   ],
+   "note": "confirmed: official site names the school, domain is .edu.ng/.edu"
+  },
+  {
+   "slug": "miva-open-university-abuja",
+   "domain": "miva.edu.ng",
+   "page": "https://miva.edu.ng:443/",
+   "seen_addresses_on": [],
+   "note": "confirmed: official site names the school, domain is .edu.ng/.edu"
+  },
+  {
+   "slug": "aliko-dangote-university-of-science-and-technology-wudil",
+   "domain": null,
+   "note": "no reachable page that names the school"
+  },
+  {
+   "slug": "federal-university-kashere",
+   "domain": "fukashere.edu.ng",
+   "page": "https://fukashere.edu.ng/",
+   "seen_addresses_on": [
+    "fukashere.edu.ng"
+   ],
+   "note": "confirmed: official site names the school, domain is .edu.ng/.edu"
+  },
+  {
+   "slug": "capital-city-university-kano",
+   "domain": null,
+   "note": "no reachable page that names the school"
+  },
+  {
+   "slug": "north-eastern-university-gombe",
+   "domain": null,
+   "note": "no reachable page that names the school"
+  },
+  {
+   "slug": "al-qalam-university-katsina",
+   "domain": null,
+   "note": "no reachable page that names the school"
+  },
+  {
+   "slug": "federal-university-dutsin-ma",
+   "domain": null,
+   "note": "no reachable page that names the school"
+  },
+  {
+   "slug": "joseph-sarwuan-tarka-university-makurdi",
+   "domain": null,
+   "note": "no reachable page that names the school"
+  },
+  {
+   "slug": "salem-university-lokoja",
+   "domain": "salemuniversity.edu.ng",
+   "page": "https://salemuniversity.edu.ng/",
+   "seen_addresses_on": [
+    "salemuniversity.edu.ng"
+   ],
+   "note": "confirmed: official site names the school, domain is .edu.ng/.edu"
+  },
+  {
+   "slug": "al-hikmah-university-ilorin",
+   "domain": null,
+   "note": "no reachable page that names the school"
+  },
+  {
+   "slug": "ojaja-university-eiyenkorin",
+   "domain": null,
+   "note": "no reachable page that names the school"
+  },
+  {
+   "slug": "eko-university-of-medical-and-health-sciences-ijanikin",
+   "domain": null,
+   "note": "no reachable page that names the school"
+  },
+  {
+   "slug": "landmark-university-omu-aran",
+   "domain": null,
+   "note": "no reachable page that names the school"
+  },
+  {
+   "slug": "mewar-international-university-masaka",
+   "domain": null,
+   "note": "no reachable page that names the school"
+  },
+  {
+   "slug": "ibrahim-badamasi-babangida-university-lapai",
+   "domain": "ibbu.edu.ng",
+   "page": "https://ibbu.edu.ng/",
+   "seen_addresses_on": [
+    "ibbu.edu.ng"
+   ],
+   "note": "confirmed: official site names the school, domain is .edu.ng/.edu"
+  },
+  {
+   "slug": "christopher-university-mowe",
+   "domain": "christopheruniversity.edu.ng",
+   "page": "https://christopheruniversity.edu.ng/",
+   "seen_addresses_on": [
+    "christopheruniversity.edu.ng"
+   ],
+   "note": "confirmed: official site names the school, domain is .edu.ng/.edu"
+  },
+  {
+   "slug": "mcpherson-university-seriki-sotayo",
+   "domain": null,
+   "note": "no reachable page that names the school"
+  },
+  {
+   "slug": "hallmark-university-ijebi-itele",
+   "domain": null,
+   "note": "no reachable page that names the school"
+  },
+  {
+   "slug": "southwestern-university-oku-owa",
+   "domain": null,
+   "note": "no reachable page that names the school"
+  },
+  {
+   "slug": "federal-university-of-medicine-and-medical-sciences-abeokuta",
+   "domain": null,
+   "note": "no reachable page that names the school"
+  },
+  {
+   "slug": "university-of-medical-sciences-ondo",
+   "domain": "unimed.edu.ng",
+   "page": "https://www.unimed.edu.ng",
+   "seen_addresses_on": [],
+   "note": "confirmed: official site names the school, domain is .edu.ng/.edu"
+  },
+  {
+   "slug": "oduduwa-university-ipetumodu",
+   "domain": null,
+   "note": "no reachable page that names the school"
+  },
+  {
+   "slug": "joseph-ayo-babalola-university-ikeji-arakeji",
+   "domain": null,
+   "note": "no reachable page that names the school"
+  },
+  {
+   "slug": "ajayi-crowther-university-ibadan",
+   "domain": null,
+   "note": "no reachable page that names the school"
+  },
+  {
+   "slug": "trinity-university-ogun-state",
+   "domain": "trinityuniversity.edu.ng",
+   "page": "https://www.trinityuniversity.edu.ng/",
+   "seen_addresses_on": [
+    "trinityuniversity.edu.ng"
+   ],
+   "note": "confirmed: official site names the school, domain is .edu.ng/.edu"
+  },
+  {
+   "slug": "redeemers-university-ede",
+   "domain": null,
+   "note": "no reachable page that names the school"
+  },
+  {
+   "slug": "kwararafa-university-wukari",
+   "domain": null,
+   "note": "no reachable page that names the school"
+  },
+  {
+   "slug": "federal-university-wukari",
+   "domain": "fuwukari.edu.ng",
+   "page": "https://fuwukari.edu.ng/",
+   "seen_addresses_on": [
+    "fuwukari.edu.ng"
+   ],
+   "note": "confirmed: official site names the school, domain is .edu.ng/.edu"
+  },
+  {
+   "slug": "federal-polytechnic-mubi",
+   "domain": null,
+   "note": "no reachable page that names the school"
+  },
+  {
+   "slug": "federal-university-gusau",
+   "domain": "fugusau.edu.ng",
+   "page": "https://www.fugusau.edu.ng",
+   "seen_addresses_on": [
+    "fugusau.edu.ng"
+   ],
+   "note": "confirmed: official site names the school, domain is .edu.ng/.edu"
+  },
+  {
+   "slug": "calvary-polytechnic",
+   "domain": "calvarypoly.edu.ng",
+   "page": "https://calvarypoly.edu.ng/",
+   "seen_addresses_on": [
+    "calvarypoly.edu.ng"
+   ],
+   "note": "confirmed: official site names the school, domain is .edu.ng/.edu"
+  },
+  {
+   "slug": "prince-abubakar-audu-university-anyigba",
+   "domain": null,
+   "note": "no reachable page that names the school"
+  },
+  {
+   "slug": "federal-polytechnic-ado-ekiti",
+   "domain": "fedpolyado.edu.ng",
+   "page": "https://fedpolyado.edu.ng/",
+   "seen_addresses_on": [],
+   "note": "confirmed: official site names the school, domain is .edu.ng/.edu"
+  },
+  {
+   "slug": "federal-polytechnic-orogun",
+   "domain": "fepo.edu.ng",
+   "page": "https://www.fepo.edu.ng/",
+   "seen_addresses_on": [
+    "fepo.edu.ng"
+   ],
+   "note": "confirmed: official site names the school, domain is .edu.ng/.edu"
+  },
+  {
+   "slug": "federal-polytechnic-kaltungo",
+   "domain": null,
+   "note": "no reachable page that names the school"
+  },
+  {
+   "slug": "federal-polytechnic-idah",
+   "domain": null,
+   "note": "no reachable page that names the school"
+  },
+  {
+   "slug": "federal-polytechnic-nasarawa",
+   "domain": null,
+   "note": "no reachable page that names the school"
+  },
+  {
+   "slug": "federal-polytechnic-wannune",
+   "domain": null,
+   "note": "no reachable page that names the school"
+  },
+  {
+   "slug": "ekiti-city-polytechnic",
+   "domain": null,
+   "note": "no reachable page that names the school"
+  },
+  {
+   "slug": "federal-polytechnic-daura",
+   "domain": "fedpolydaura.edu.ng",
+   "page": "https://fedpolydaura.edu.ng/",
+   "seen_addresses_on": [
+    "fedpolydaura.edu.ng"
+   ],
+   "note": "confirmed: official site names the school, domain is .edu.ng/.edu"
+  },
+  {
+   "slug": "federal-polytechnic-ile-oluji",
+   "domain": null,
+   "note": "no reachable page that names the school"
+  },
+  {
+   "slug": "federal-polytechnic-ede",
+   "domain": null,
+   "note": "no reachable page that names the school"
+  },
+  {
+   "slug": "anchor-university-ayobo",
+   "domain": null,
+   "note": "no reachable page that names the school"
+  },
+  {
+   "slug": "igbajo-polytechnic",
+   "domain": "igbajopolytechnic.edu.ng",
+   "page": "https://www.igbajopolytechnic.edu.ng/",
+   "seen_addresses_on": [
+    "igbajopolytechnic.edu.ng"
+   ],
+   "note": "confirmed: official site names the school, domain is .edu.ng/.edu"
+  },
+  {
+   "slug": "federal-polytechnic-nyak-shendam",
+   "domain": null,
+   "note": "no reachable page that names the school"
+  },
+  {
+   "slug": "kenule-beeson-saro-wiwa-polytechnic-bori",
+   "domain": null,
+   "note": "no reachable page that names the school"
+  },
+  {
+   "slug": "federal-polytechnic-bali",
+   "domain": "fedpolybali.edu.ng",
+   "page": "https://fedpolybali.edu.ng/",
+   "seen_addresses_on": [],
+   "note": "confirmed: official site names the school, domain is .edu.ng/.edu"
+  },
+  {
+   "slug": "distinct-polytechnic",
+   "domain": null,
+   "note": "no reachable page that names the school"
+  },
+  {
+   "slug": "iwo-city-polytechnic",
+   "domain": null,
+   "note": "no reachable page that names the school"
+  },
+  {
+   "slug": "federal-polytechnic-damaturu",
+   "domain": "fedpodam.edu.ng",
+   "page": "https://www.fedpodam.edu.ng/",
+   "seen_addresses_on": [
+    "fedpodam.edu.ng"
+   ],
+   "note": "confirmed: official site names the school, domain is .edu.ng/.edu"
+  },
+  {
+   "slug": "captain-elechi-amadi-polytechnic-port-harcourt",
+   "domain": null,
+   "note": "ambiguous: pages show addresses on ['portharcourtpoly.edu.ng']"
+  },
+  {
+   "slug": "bamidele-olumilua-university-of-education-science-and-technology-ikere",
+   "domain": null,
+   "note": "no reachable page that names the school"
+  },
+  {
+   "slug": "federal-polytechnic-kaura-namoda",
+   "domain": null,
+   "note": "no reachable page that names the school"
+  },
+  {
+   "slug": "federal-polytechnic-ayede",
+   "domain": null,
+   "note": "no reachable page that names the school"
+  }
+ ]
+}

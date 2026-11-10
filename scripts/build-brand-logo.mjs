@@ -407,9 +407,10 @@ if (!SKIP_NATIVE) {
 await out(path.join(NATIVE, "icon-only.png"), await iconOn(1024, { scale: 0.7, bright: true }));
 /* The adaptive foreground: the mark alone, on transparency. Capacitor wraps
    it in a 16.7 per cent inset, so it is drawn in the inner 72 of 108 units
-   and must fit the guaranteed 66-unit circle: 0.62 of the file's width keeps
-   the mark's half-diagonal at 29 units. */
-await out(path.join(NATIVE, "icon-foreground.png"), await iconOn(1024, { scale: 0.62, transparent: true, dy: 0.02 }));
+   and must fit the guaranteed 66-unit circle: 0.68 of the file's width keeps
+   the mark's half-diagonal at about 30 of the 33 units of that circle's radius
+   (`src/lib/brand/native-icons.test.ts` holds it by pixel). */
+await out(path.join(NATIVE, "icon-foreground.png"), await iconOn(1024, { scale: 0.68, transparent: true, dy: 0.02 }));
 await out(path.join(NATIVE, "icon-background.png"), await iconOn(1024, { scale: 0, bright: true }));
 for (const dir of await readdir(ANDROID_RES)) {
   if (!dir.startsWith("mipmap-") || dir.includes("anydpi")) continue;
@@ -417,7 +418,7 @@ for (const dir of await readdir(ANDROID_RES)) {
   const { width: size } = await sharp(path.join(base, "ic_launcher.png")).metadata();
   await out(path.join(base, "ic_launcher.png"), await iconOn(size, { scale: 0.7, shape: "rounded", bright: true }));
   await out(path.join(base, "ic_launcher_round.png"), await iconOn(size, { scale: 0.64, shape: "circle", dy: 0.02, bright: true }));
-  await out(path.join(base, "ic_launcher_foreground.png"), await iconOn(size, { scale: 0.62, transparent: true, dy: 0.02 }));
+  await out(path.join(base, "ic_launcher_foreground.png"), await iconOn(size, { scale: 0.68, transparent: true, dy: 0.02 }));
   await out(path.join(base, "ic_launcher_background.png"), await iconOn(size, { scale: 0, bright: true }));
 }
 await out(IOS_ICON, await sharp(await iconOn(1024, { scale: 0.7, bright: true })).flatten({ background: BRIGHT_TOP }).removeAlpha().png().toBuffer());
