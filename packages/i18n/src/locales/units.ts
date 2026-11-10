@@ -246,8 +246,14 @@ export const unitsEn = {
   followUps: { one: "1 follow-up", other: "{count} follow-ups" },
   contacts: { one: "1 contact", other: "{count} contacts" },
   escalations: { one: "1 escalation", other: "{count} escalations" },
-  claims: { one: "1 claim", other: "{count} claims" },
-  pastDeadline: { one: "{count} is past its deadline", other: "{count} are past their deadline" },
+  guaranteeClaimsOpen: {
+    one: "1 Guarantee claim made before it retired still open",
+    other: "{count} Guarantee claims made before it retired still open",
+  },
+  shownPastDeadline: {
+    one: "{count} of the {shown} shown on this page is past its deadline",
+    other: "{count} of the {shown} shown on this page are past their deadline",
+  },
   pastPromisedTime: { one: "{count} past its promised time", other: "{count} past their promised time" },
 } satisfies Record<string, PluralForms>;
 
