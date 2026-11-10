@@ -153,9 +153,12 @@ describe("countOf in the light entry says exactly what it said with the dictiona
 });
 
 describe("the words carried to client code stay few", () => {
-  it.each(LOCALES)("%s is under 12.5 KB", (locale) => {
+  /* 12.5 KB to 13 KB (10 Nov 2026): four account banners (signed out, profile
+     confirmed, photo added, check your email) and "Add your photo" are said on
+     every screen by the root host, in every language. */
+  it.each(LOCALES)("%s is under 13 KB", (locale) => {
     expect(
       JSON.stringify(clientCopyOf(getDictionary(locale))).length
-    ).toBeLessThan(12_500);
+    ).toBeLessThan(13_000);
   });
 });

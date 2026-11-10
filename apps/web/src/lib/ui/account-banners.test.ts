@@ -17,7 +17,7 @@ const LIFECYCLE: Record<string, string> = {
   "password-changed": "Password changed",
   "email-verified": "Email confirmed",
   "profile-confirmed": "Thanks, your profile is confirmed.",
-  "photo-added": "Your photo is added",
+  "photo-added": "Photo added",
 };
 
 describe("the auth lifecycle banners", () => {
