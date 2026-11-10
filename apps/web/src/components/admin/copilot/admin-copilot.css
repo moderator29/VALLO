@@ -1,0 +1,61 @@
+@layer components {
+  .nf-copilot-launch {
+    position: fixed;
+    right: var(--nf-space-md);
+    bottom: calc(var(--nf-space-lg) + env(safe-area-inset-bottom, 0px));
+    z-index: 40;
+    display: grid;
+    place-items: center;
+    width: 52px;
+    height: 52px;
+    border-radius: var(--nf-radius-circle);
+    border: 1px solid var(--nf-brand-edge-soft);
+    background: var(--nf-brand-primary);
+    color: var(--nf-content-on-brand);
+    box-shadow: var(--nf-float-shadow);
+  }
+
+  .nf-copilot-thread {
+    display: grid;
+    gap: var(--nf-space-sm);
+    min-height: 12rem;
+  }
+
+  .nf-copilot-greeting {
+    margin: 0;
+    color: var(--nf-content-secondary);
+    font-size: var(--nf-text-body-sm);
+  }
+
+  .nf-copilot-turn {
+    margin: 0;
+    padding: var(--nf-space-sm) var(--nf-space-md);
+    border-radius: var(--nf-radius-card-sm);
+    font-size: var(--nf-text-body-sm);
+    line-height: 1.5;
+    white-space: pre-wrap;
+    max-width: 85%;
+  }
+
+  .nf-copilot-turn[data-role="user"] {
+    justify-self: end;
+    background: var(--nf-brand-tint-1);
+    color: var(--nf-content-primary);
+  }
+
+  .nf-copilot-turn[data-role="assistant"] {
+    justify-self: start;
+    background: var(--nf-surface-inset);
+    color: var(--nf-content-primary);
+  }
+
+
+  .nf-copilot-form {
+    display: flex;
+    gap: var(--nf-space-sm);
+  }
+
+  .nf-copilot-form .nf-field {
+    flex: 1;
+  }
+}
