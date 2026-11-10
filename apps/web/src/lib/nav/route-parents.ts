@@ -814,7 +814,7 @@ export const NON_NAVIGABLE: Readonly<Record<string, string>> = {
   "/api/paystack/reconcile": "processor reconciliation.",
   "/api/paystack/webhook": "processor webhook.",
   "/api/payluk/webhook": "processor webhook.",
-  "/api/escrowpay/webhook": "processor webhook (the protected rail, built switched off).",
+  "/api/escrowpay/webhook": "processor webhook (the new payment rail, built switched off).",
   "/api/dojah/webhook": "identity provider webhook.",
   "/api/identity-checks/[id]/[file]": "a staff-only identity file stream, not a page.",
   "/api/push/drain": "scheduled job, bearer token.",

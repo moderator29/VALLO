@@ -115,7 +115,7 @@ async function observe(
     if (error) return "error";
     const verdict = String(data) as Verdict;
     if (verdict === "amount_mismatch" || verdict === "id_mismatch") {
-      await deps.alert(`protected.${verdict}`, { arrangement_id: row.id, reference: row.reference, source });
+      await deps.alert(`protected_rail.${verdict}`, { arrangement_id: row.id, reference: row.reference, source });
     }
     return verdict;
   } catch {
@@ -190,7 +190,7 @@ export async function openProtectedPayment(
       if (verdict === "changed" || verdict === "same") return { outcome: "opened", arrangementId: row.id, status: report.status };
     }
     await observe(deps, row, "unknown", "vallo", { created_but_unread: true });
-    await deps.alert("protected.create_unread", { arrangement_id: row.id, reference: row.reference });
+    await deps.alert("protected_rail.create_unread", { arrangement_id: row.id, reference: row.reference });
     return { outcome: "unknown", arrangementId: row.id };
   }
   if (provablyNothing(created)) {
@@ -199,7 +199,7 @@ export async function openProtectedPayment(
     return { outcome: "failed", arrangementId: row.id };
   }
   await observe(deps, row, "unknown", "vallo", { why: created.ok ? "unread" : created.kind });
-  await deps.alert("protected.create_unknown", { arrangement_id: row.id, reference: row.reference });
+  await deps.alert("protected_rail.create_unknown", { arrangement_id: row.id, reference: row.reference });
   return { outcome: "unknown", arrangementId: row.id };
 }
 
@@ -282,7 +282,7 @@ export async function confirmProtectedMilestone(deps: ProtectedRailDeps, input: 
     await observe(deps, row, "protected", "provider_response", { release_refused: done.ok ? "" : done.kind });
     return { outcome: "refused", reason: done.ok ? "unknown" : done.kind };
   }
-  await deps.alert("protected.release_unknown", { arrangement_id: row.id, reference: row.reference });
+  await deps.alert("protected_rail.release_unknown", { arrangement_id: row.id, reference: row.reference });
   return { outcome: "unknown" };
 }
 
@@ -306,7 +306,7 @@ export async function raiseProtectedDispute(
   if (statement.length < 10) return { outcome: "refused", reason: "statement_too_short" };
   const verdict = await observe(deps, row, "disputed", "vallo", { opened_by: side, statement });
   if (verdict !== "changed") return { outcome: "refused", reason: `store:${verdict}` };
-  await deps.alert("protected.dispute_opened", { arrangement_id: row.id, reference: row.reference, opened_by: side });
+  await deps.alert("protected_rail.dispute_opened", { arrangement_id: row.id, reference: row.reference, opened_by: side });
   return { outcome: "submitted" };
 }
 
