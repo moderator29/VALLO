@@ -43,6 +43,30 @@ per screen (P1.1, reopened: the earlier "not needed" assessment contradicts
 the founder's brief), the free commercial map (still CARTO, non-commercial
 tiles), the payment rail design pass.
 
+## 9 to 10 November 2026, lead (after the founder's rulings)
+
+- Rent payment closed in code, not only in words (a9a5481eb): one switch,
+  `lib/rent/payment-open.ts`, `RENT_PAYMENT_OPEN = false`. Both rent money
+  actions refuse before reading anything, `/rent/pay/[inspectionId]` shows the
+  agreed figures and "Payment for rentals is not open on Vallo yet" with no pay
+  button, and a rent agreement's pay choice says the same instead of falling
+  back to card. Stays, rooms and restaurants unchanged. Before this a renter
+  could reach a card payment for rent (live: 0 rent payments ever made).
+- Money copy leftovers (a18b5ed94): host CSV column "Payment reference", the
+  legacy partner-hold refusals no longer say escrow, PRODUCT.md rule updated.
+- CI, first full run on the branch (run 42664578399): 8 failures. 7 fixed in
+  cbcd8f511. The 8th (slice-coverage priceCheck, the map layer reaching the
+  `meta` namespace) is the map agent's and lands with its commit.
+- Protected payment adapter, phase 2 (c45ca458a):
+  `lib/payments/providers/escrowpay/`, built switched off. It invents nothing:
+  no base URL, the client sends nothing while `DOCUMENTED` is false, the
+  status table is empty and webhooks are refused. The switch
+  `payments_escrowpay_on` fails closed. Nothing imports it yet. Next: the
+  provider's sandbox documentation (audit 10.2), then phase 3.
+- Both agents (map, docs) stopped on the account's weekly limit on 9 Nov at
+  about 17:30 UTC and were resumed on 10 Nov at 02:00 UTC with their work
+  intact.
+
 ## Agents (8 November 2026, early hours)
 
 | Agent | Done | Now | Next |
