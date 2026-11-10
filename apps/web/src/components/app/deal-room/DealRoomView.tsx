@@ -12,6 +12,7 @@ import { OfferStateChip } from "@/components/app/offers/OfferParts";
 import type { DealRoom } from "@/lib/offers/types";
 import { DealSheets, type SheetKind } from "./DealSheets";
 import { DocumentsPanel } from "./DocumentsPanel";
+import type { DealThreadMessage } from "@/lib/offers/thread";
 import { ActivityPanel, InspectionPanel, MessagesPanel, NegotiationPanel, OverviewPanel } from "./Panels";
 import { RECORD_STAGE_BUTTON, ROOM_TABS, ROOM_TAB_LABEL, hasOpenQuestion, nextRecordableStage, trackFor, type RoomTab } from "./model";
 import "@/components/ui/underline-tabs.css";
@@ -28,7 +29,7 @@ type StageTarget = "due_diligence" | "documentation" | "closing" | "completed";
  * phone, in the side column on a desktop). When nothing is waiting on the
  * viewer, the room says whose turn it is and offers the conversation instead.
  */
-export function DealRoomView({ room, nowMs, initialTab = "overview" }: { room: DealRoom; nowMs: number; initialTab?: RoomTab }) {
+export function DealRoomView({ room, nowMs, initialTab = "overview", thread = [] }: { room: DealRoom; nowMs: number; initialTab?: RoomTab; thread?: DealThreadMessage[] }) {
   const [tab, setTab] = useState<RoomTab>(initialTab);
   const [sheet, setSheet] = useState<SheetKind | null>(null);
   const [stage, setStage] = useState<StageTarget | null>(null);
@@ -82,9 +83,9 @@ export function DealRoomView({ room, nowMs, initialTab = "overview" }: { room: D
         <>
           <p className="nf-body text-[var(--nf-content-secondary)]">{room.next?.detail ?? (live ? "Nothing is waiting on you." : "This offer is closed. Nothing is waiting.")}</p>
           {live && room.conversationId ? (
-            <ButtonLink href={`/messages/${room.conversationId}`} variant="secondary" size="lg" full leadingIcon="chat-bubble" data-testid="primary-action">
+            <Button variant="secondary" size="lg" full leadingIcon="chat-bubble" onClick={() => pickTab("messages")} data-testid="primary-action">
               Open the conversation
-            </ButtonLink>
+            </Button>
           ) : (
             <ButtonLink href={`/listing/${offer.listingId}`} variant="secondary" size="lg" full data-testid="primary-action">
               Return to property
@@ -150,7 +151,7 @@ export function DealRoomView({ room, nowMs, initialTab = "overview" }: { room: D
             <NegotiationPanel room={room} />
           </section>
           <section data-panel="messages" className="nf-room__panel" hidden={tab !== "messages"} aria-label="Messages">
-            <MessagesPanel room={room} />
+            <MessagesPanel room={room} thread={thread} />
           </section>
           <section data-panel="inspection" className="nf-room__panel" hidden={tab !== "inspection"} aria-label="Inspection">
             <InspectionPanel room={room} />

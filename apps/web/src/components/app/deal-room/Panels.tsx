@@ -15,6 +15,8 @@ import {
   sideWord,
 } from "@/lib/offers/words";
 import type { DealRoom } from "@/lib/offers/types";
+import type { DealThreadMessage } from "@/lib/offers/thread";
+import { DealMessages } from "./DealMessages";
 import { Facts, OfferFigures } from "@/components/app/offers/OfferParts";
 import { fourAnswers, latestVersion } from "./model";
 
@@ -124,7 +126,7 @@ export function NegotiationPanel({ room, newVersion }: { room: DealRoom; newVers
   );
 }
 
-export function MessagesPanel({ room }: { room: DealRoom }) {
+export function MessagesPanel({ room, thread }: { room: DealRoom; thread: DealThreadMessage[] }) {
   if (!room.conversationId) {
     return (
       <State
@@ -137,20 +139,7 @@ export function MessagesPanel({ room }: { room: DealRoom }) {
       />
     );
   }
-  return (
-    <div className="grid gap-md" data-testid="panel-messages">
-      <Panel variant="card" className="p-card grid gap-sm">
-        <h3 className="nf-h4">The conversation for this offer</h3>
-        <p className="nf-body text-[var(--nf-content-secondary)]">
-          Messages about this offer live in your Messages, in the same thread as the offer card, so there is one place to talk and nothing is split across two inboxes.
-        </p>
-        <ButtonLink href={`/messages/${room.conversationId}`} variant="primary" size="lg" full leadingIcon="chat-bubble" data-testid="open-conversation">
-          Open the conversation
-        </ButtonLink>
-      </Panel>
-      <p className="nf-body-sm text-[var(--nf-content-muted)]">Keep the talk and the money on Vallo. Be careful if anyone asks you to pay outside the platform. Vallo never asks for a deposit to secure a property.</p>
-    </div>
-  );
+  return <DealMessages conversationId={room.conversationId} messages={thread} counterpartyName={room.offer.counterpartyName} live={room.offer.state === "open" || room.offer.state === "agreed"} />;
 }
 
 export function InspectionPanel({ room }: { room: DealRoom }) {
@@ -178,7 +167,16 @@ export function InspectionPanel({ room }: { room: DealRoom }) {
       </Panel>
       <Panel variant="card" className="p-card grid gap-xs">
         <h3 className="nf-h4">Inspection report</h3>
-        {report ? (
+        {room.inspectionReport ? (
+          <>
+            <p className="nf-body text-[var(--nf-content-secondary)]">The eight-item report from the joined inspection, dated {formatWhen(room.inspectionReport.submittedAt)}, with {room.inspectionReport.photoCount} photograph{room.inspectionReport.photoCount === 1 ? "" : "s"}. It records what was seen. It is not a check of title.</p>
+            <ListGroup>
+              {room.inspectionReport.items.map((i) => (
+                <ListRow key={i.item} title={i.item.charAt(0).toUpperCase() + i.item.slice(1)} sub={i.note ?? undefined} value={<span className="nf-caption">{i.checked ? "Checked" : "Not checked"}</span>} />
+              ))}
+            </ListGroup>
+          </>
+        ) : report ? (
           <>
             <p className="nf-body text-[var(--nf-content-secondary)]">An inspection report is attached to this deal. It records eight items with photographs, dated. It is a record of what was seen, not a check of title.</p>
             <p className="nf-body-sm text-[var(--nf-content-muted)]">Uploaded {report.uploadedAt ? formatWhen(report.uploadedAt) : ""}.</p>

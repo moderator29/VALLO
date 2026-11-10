@@ -7,6 +7,7 @@ import { OfferConfirmation } from "@/components/app/offers/OfferConfirmation";
 import { resolveSession } from "@/lib/actions/session";
 import { requestNow } from "@/lib/format/when";
 import { getDealRoom } from "@/lib/offers/queries";
+import { readDealThread } from "@/lib/offers/thread";
 import { dealRoomHref } from "@/lib/offers/routes";
 
 export const metadata: Metadata = { title: "Deal Room", robots: { index: false, follow: false } };
@@ -32,6 +33,7 @@ export default async function DealRoomPage({
   const room = await getDealRoom(id);
   if (!room) notFound();
 
+  const thread = await readDealThread(session.supabase, room.conversationId, session.user.id);
   const sent = (Array.isArray(query.sent) ? query.sent[0] : query.sent) === "1" && room.viewerSide === "buyer";
   if (sent) {
     return (
@@ -45,7 +47,7 @@ export default async function DealRoomPage({
   return (
     <main className="nf-page nf-md">
       <PageFrame title="Deal Room" fallback="/offers" width="wide">
-        <DealRoomView room={room} nowMs={requestNow()} initialTab={parseTab(query.tab)} />
+        <DealRoomView room={room} nowMs={requestNow()} initialTab={parseTab(query.tab)} thread={thread} />
       </PageFrame>
     </main>
   );

@@ -148,6 +148,19 @@ begin
   if public.admin_sale_offer_detail(ag)::text ~* 'storage_path|body' then raise exception 'E2E_FAIL admin saw path or messages'; end if;
   if public.admin_sale_doc_access((select id from public.deal_documents limit 1), 'too short') ->> 'status' <> 'reason_required' then raise exception 'E2E_FAIL staff doc reason'; end if;
 
+  -- the joined inspection's report reaches the room: ticks and a photo count, no path
+  declare insp uuid; begin
+    insert into public.inspection_requests (listing_id, requester_id) values (lst, buyer) returning id into insp;
+    insert into public.inspection_reports values (insp, buyer, now());
+    insert into public.inspection_report_items values (insp, 'kitchen', true, 'ok'), (insp, 'safety', false, null);
+    insert into public.inspection_report_photos (inspection_id, storage_path) values (insp, 'secret/path.jpg');
+    update public.deal_agreements set status = 'awaiting_parties', sale_stage = 'negotiating' where id = ag;
+    perform public.sale_offer_link_inspection_as(buyer, ag, insp);
+    r := public.sale_offer_room_as(seller, ag);
+    if jsonb_array_length(r #> '{inspection_report,items}') <> 2 or (r #>> '{inspection_report,photo_count}')::int <> 1 then raise exception 'E2E_FAIL report in room: %', r -> 'inspection_report'; end if;
+    if r::text like '%secret/path%' then raise exception 'E2E_FAIL photo path leaked'; end if;
+    update public.deal_agreements set status = 'cancelled' where id = ag;
+  end;
   -- ADVERSARIAL: a self-approved identity document is not eligibility
   insert into public.agent_documents (uploader_id, kind, review_status, reviewed_by) values (poor, 'identity', 'approved', poor);
   if (private.sale_eligibility(poor, lst) ->> 'eligible')::boolean then raise exception 'E2E_FAIL self-approved id counted'; end if;

@@ -177,6 +177,8 @@ export type DealRoom = {
   mandate: MandateLine;
   conversationId: string | null;
   inspectionId: string | null;
+  /** The submitted eight-item report of the joined inspection: ticks, notes and a photo count. Null until it exists. */
+  inspectionReport?: { submittedAt: string; items: { item: string; checked: boolean; note: string | null }[]; photoCount: number } | null;
   /** Buyer's eligibility OUTCOME only. Never an id number, image or date of birth. */
   buyerEligible: boolean;
   /** A concern is open on this deal (it went through the reports desk). */

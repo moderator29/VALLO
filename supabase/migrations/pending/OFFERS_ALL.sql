@@ -1445,6 +1445,13 @@ begin
     'mandate', private.sale_mandate_line(ag.listing_id),
     'conversation_id', private.sale_conversation(ag.listing_id, ag.renter_id, ag.owner_id),
     'inspection_id', ag.inspection_id,
+    -- The eight-item report a buyer's inspection produced: ticks and notes and a photo COUNT, never a file path.
+    'inspection_report', (select jsonb_build_object(
+        'submitted_at', r.submitted_at,
+        'items', coalesce((select jsonb_agg(jsonb_build_object('item', i.item, 'checked', i.checked, 'note', i.note) order by i.item)
+                             from public.inspection_report_items i where i.inspection_id = r.inspection_id), '[]'::jsonb),
+        'photo_count', (select count(*) from public.inspection_report_photos p where p.inspection_id = r.inspection_id))
+      from public.inspection_reports r where r.inspection_id = ag.inspection_id and r.submitted_at is not null),
     -- The seller learns the OUTCOME. Never an id number, an image or a date of birth.
     'buyer_eligible', (private.sale_eligibility(ag.renter_id, ag.listing_id) ->> 'eligible')::boolean);
 end;

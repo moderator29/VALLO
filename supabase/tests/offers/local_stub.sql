@@ -24,6 +24,9 @@ create table public.listing_mandates (id uuid primary key default gen_random_uui
 create table public.conversations (id uuid primary key default gen_random_uuid(), guest_id uuid not null, agent_id uuid not null, listing_id uuid, context_kind text default 'listing', unique (guest_id, agent_id, listing_id));
 create table public.messages (id uuid primary key default gen_random_uuid(), conversation_id uuid not null references public.conversations(id), sender_id uuid not null, body text not null);
 create table public.inspection_requests (id uuid primary key default gen_random_uuid(), listing_id uuid, requester_id uuid);
+create table public.inspection_reports (inspection_id uuid primary key references public.inspection_requests(id), author_id uuid, submitted_at timestamptz);
+create table public.inspection_report_items (inspection_id uuid, item text, checked boolean default false, note text, primary key (inspection_id, item));
+create table public.inspection_report_photos (id uuid primary key default gen_random_uuid(), inspection_id uuid, storage_path text);
 create table public.identity_verifications (id uuid primary key default gen_random_uuid(), subject_id uuid, outcome text);
 create table public.identity_checks (id uuid primary key default gen_random_uuid(), subject_id uuid, status text);
 create table public.agent_documents (id uuid primary key default gen_random_uuid(), uploader_id uuid, kind text, review_status public.document_review_status default 'pending', reviewed_by uuid);

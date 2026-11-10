@@ -204,6 +204,15 @@ export function dealRoomOf(raw: J, fmtBase?: never): DealRoom {
     mandate: mandateOf(raw.mandate),
     conversationId: s(raw.conversation_id),
     inspectionId: s(raw.inspection_id),
+    inspectionReport: (() => {
+      const r = raw.inspection_report as J | null | undefined;
+      if (!r || !r.submitted_at) return null;
+      return {
+        submittedAt: String(r.submitted_at),
+        items: ((Array.isArray(r.items) ? r.items : []) as J[]).map((i) => ({ item: String(i.item), checked: b(i.checked), note: s(i.note) })),
+        photoCount: n(r.photo_count),
+      };
+    })(),
     buyerEligible: b(raw.buyer_eligible),
     disputed: b(offerRaw.disputed),
     openQuestion: b(offerRaw.open_question),
