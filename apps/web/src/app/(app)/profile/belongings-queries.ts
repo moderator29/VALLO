@@ -99,6 +99,7 @@ async function readOpenAgreements(supabase: Client): Promise<number | null> {
     const { count, error } = await supabase
       .from("deal_agreements")
       .select("id", { count: "exact", head: true })
+      .neq("kind", "sale")
       .in("status", ["awaiting_parties", "in_review", "approved", "rejected"]);
     return error ? null : (count ?? 0);
   } catch {

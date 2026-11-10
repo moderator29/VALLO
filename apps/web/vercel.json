@@ -42,6 +42,10 @@
       "schedule": "20 * * * *"
     },
     {
+      "path": "/api/cron/offers-sweep",
+      "schedule": "35 * * * *"
+    },
+    {
       "path": "/api/cron/complete-stays",
       "schedule": "30 2 * * *"
     },

@@ -1093,6 +1093,7 @@ a fall is emerald. The line is alerts raised per day.
 | paystack-reconcile | Vercel Cron `10 * * * *` | hourly at :10 | 3 h | matches Paystack charges to the ledger |
 | pg-cron-watch | Vercel Cron `20 * * * *` | hourly at :20 | 3 h | watches the database's own jobs and raises failures |
 | complete-stays | Vercel Cron `30 2 * * *` | daily 03:30 | 26 h | completes stays whose check-out has passed |
+| offers-sweep | Vercel Cron `35 * * * *` | hourly :35 | 4 h | expires sale offers past their date and reminds the side whose answer is waiting |
 | inventory-drift | Vercel Cron `45 2 * * *` | daily 03:45 | 26 h | checks room inventory against bookings |
 | account-purge | Vercel Cron `15 3 * * *` | daily 04:15 | 26 h | honours account deletions after thirty days |
 | saved-search-alerts | Vercel Cron `40 7 * * *` | daily 08:40 | 26 h | tells people about new matches for saved searches |
@@ -1148,7 +1149,7 @@ a fall is emerald. The line is alerts raised per day.
 | vallo_send_feature_notices | pg_cron `10 17 * * *` | daily 18:10 | | sends the daily feature notices to members who opted in, one topic at a time (A5, `private.send_feature_notices`) |
 | vallo_send_gentle_nudges | pg_cron `20 10 * * *` | daily 11:20 | | sends the gentle nudges to members who opted in, never more than the opt-in allows (A6, `private.send_gentle_nudges`) |
 
-21 Vercel Cron jobs and 42 pg_cron jobs in all. The numbers are derived,
+22 Vercel Cron jobs and 42 pg_cron jobs in all. The numbers are derived,
 not remembered: the Vercel list is `VERCEL_JOBS` in
 `lib/admin/reads/jobs.ts`, held equal to `vercel.json` by a test, and the
 database list is `PG_CRON_JOBS` in the same file, held equal by

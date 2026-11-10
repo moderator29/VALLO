@@ -38,6 +38,8 @@ Columns: Frame (on PageFrame or StepFrame), Light, Dark, 360, Notes.
 | `/admin/field-speed` | FE | PageHead |  |  |  | PageHead (AD-01). Not seen: needs a staff session |
 | `/admin/front-door` | FE | PageHead |  |  |  | PageHead (AD-01). Not seen: needs a staff session |
 | `/admin/handbook` | FE | PageHead |  |  |  | PageHead (AD-01); own loading added. Not seen: needs a staff session |
+| `/admin/handbook/manual` | DOCS | DocShell |  |  |  | DOCS: staff manual on the document kit. Not seen: needs a staff session (type-checked, linted, route covered by coverage test). |
+| `/admin/handbook/manual/[slug]` | DOCS | DocShell |  |  |  | DOCS: staff manual on the document kit. Not seen: needs a staff session (type-checked, linted, route covered by coverage test). |
 | `/admin/handbook/position` | FE | PageHead |  |  |  | PageHead (AD-01); own loading added. Not seen: needs a staff session |
 | `/admin/kyc` | PAGES | PageHead |  |  |  | PageHead (AD-01: the one console header; DeskHeads wrap it). Not seen: needs a staff session |
 | `/admin/kyc/guide` | PAGES | PageHead |  |  |  | PageHead (AD-01: the one console header; DeskHeads wrap it). Not seen: needs a staff session |
@@ -45,6 +47,8 @@ Columns: Frame (on PageFrame or StepFrame), Light, Dark, 360, Notes.
 | `/admin/listings/[id]` | PAGES | PageHead |  |  |  | PageHead (AD-01: the one console header; DeskHeads wrap it). Not seen: needs a staff session |
 | `/admin/lookup` | FE | PageHead |  |  |  | PageHead (AD-01). Not seen: needs a staff session |
 | `/admin/money` | PAGES | PageHead |  |  |  | PageHead (AD-01: the one console header; DeskHeads wrap it). Not seen: needs a staff session |
+| `/admin/offers` | UI | PageHead | fixture | fixture | fixture | Offers and deals desk: overview metrics with definitions, filterable table. Seen through the preview fixtures only (needs a staff session live) |
+| `/admin/offers/[id]` | UI | PageHead | fixture | fixture | fixture | Deal inspection and intervention. Fixture preview only |
 | `/admin/operations` | FE | PageHead |  |  |  | PageHead (AD-01); own loading added. Not seen: needs a staff session |
 | `/admin/operations/providers` | FE | PageHead |  |  |  | PageHead (AD-01): was a raw h1; own loading added. Not seen: needs a staff session |
 | `/admin/oversight` | FE | PageHead |  |  |  | PageHead (AD-01). Not seen: needs a staff session |
@@ -363,6 +367,7 @@ Columns: Frame (on PageFrame or StepFrame), Light, Dark, 360, Notes.
 | Page | Owner | Frame | Light | Dark | 360 | Notes |
 |---|---|---|---|---|---|---|
 | `/listing/[id]` | FE |  |  |  |  |  |
+| `/listing/[id]/offer` | UI | StepFrame | fixture | fixture | fixture | Offer flow: requirements, amount, payment, summary. Fixture preview only |
 | `/listing/[id]/trust` | FE |  |  |  |  |  |
 | `/listing/[id]/visit` | FE |  |  |  |  |  |
 | `/listing/[id]/visit/[inspectionId]` | FE |  |  |  |  |  |
@@ -393,6 +398,8 @@ Columns: Frame (on PageFrame or StepFrame), Light, Dark, 360, Notes.
 
 | Page | Owner | Frame | Light | Dark | 360 | Notes |
 |---|---|---|---|---|---|---|
+| `/offers` | UI | PageFrame | fixture | fixture | fixture | My offers: Made and Received with true counts. Fixture preview only |
+| `/offers/[id]` | UI | PageFrame | fixture | fixture | fixture | The Deal Room, both sides. Fixture preview only |
 | `/offline` | FE |  |  |  |  |  |
 
 ## Member: passport

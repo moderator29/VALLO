@@ -127,7 +127,7 @@ export function MotionScene({
   }, [ambient]);
 
   return (
-    <div ref={rootRef} className={["nf-scene", className ?? ""].filter(Boolean).join(" ")} {...(theme ? { "data-theme": theme } : {})} data-anchor={anchor} data-quiet={quiet || undefined} data-testid={testId}>
+    <div ref={rootRef} className={["nf-scene", className ?? ""].filter(Boolean).join(" ")} {...(theme ? { "data-theme": theme } : {})} data-anchor={anchor} data-quiet={quiet || undefined} data-testid={testId} style={{ "--nf-scene-ratio": String(Math.max(art.ratio ?? 4 / 3, 1.4)) } as CSSProperties}>
       <div className={["nf-scene__stage", stageClassName ?? ""].filter(Boolean).join(" ")} aria-hidden="true">
         <span className="nf-scene__bed" />
         {backdrop ? (

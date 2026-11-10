@@ -380,6 +380,7 @@ const PUBLIC_API_PATHS = new Set([
   /* C2: calendar sync, behind the cron bearer and CALENDAR_SYNC_ENABLED. */
   "/api/cron/calendar-sync",
   "/api/cron/complete-stays",
+  "/api/cron/offers-sweep",
   /* Crypto payments read back from the provider, behind the cron bearer. */
   "/api/cron/crypto-reconcile",
   /* Escrow arrangements read back from the payment partner, behind the cron bearer. */

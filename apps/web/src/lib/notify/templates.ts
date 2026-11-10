@@ -5,6 +5,7 @@ import {
   guaranteeClaimDecided,
   type AgreementEmailData,
 } from "../email/agreement-messages";
+import { offerEmail, type OfferTemplate } from "../email/offer-messages";
 import { staffAccessGranted } from "../email/staff-messages";
 import { isStaffPosition } from "../admin/staff-positions";
 import {
@@ -323,6 +324,24 @@ function agreementChange(render: (data: AgreementChangeData) => EmailMessage): O
   );
 }
 
+function offerTemplateFor(key: OfferTemplate): OutboxTemplate {
+  return {
+    needs: (payload) => ({ listings: ids(str(payload, "listing_id")) }),
+    build: (payload, context) => {
+      const agreementId = str(payload, "agreement_id");
+      if (!agreementId) return null;
+      const listingId = str(payload, "listing_id");
+      return offerEmail(key, {
+        name: context.recipient.name,
+        listingTitle: listingId ? (context.lookups.listing(listingId)?.title ?? null) : null,
+        amountMinor: num(payload, "amount_minor"),
+        reference: str(payload, "reference"),
+        agreementId,
+      });
+    },
+  };
+}
+
 /* -------------------------------------------------------- lifecycle reads */
 
 /** The property title an inspection payload names, or null (and then no email). */
@@ -443,6 +462,12 @@ export const OUTBOX_TEMPLATES: Readonly<Record<string, OutboxTemplate>> = {
      when an agreement is cancelled. Both parties get their own row. */
   "agreement.submitted": agreementChange((data) => agreementSubmitted(data)),
   "agreement.cancelled": agreementChange((data) => agreementCancelled(data)),
+
+  /* Offers and the Deal Room (10 November 2026): written by private.sale_tell.
+     Every one links into /offers/<id> and says nothing has been charged. */
+  ...Object.fromEntries(
+    (["offer.received", "offer.countered", "offer.agreed", "offer.declined", "offer.withdrawn", "offer.expired", "offer.reminder", "offer.info_requested", "offer.info_provided", "offer.stage", "offer.document", "offer.disputed", "offer.cancelled"] as const).map((key) => [key, offerTemplateFor(key)]),
+  ),
 
   /* Written by private.enqueue_guarantee_claim_email when a claim is filed. */
   "guarantee.claim_opened": {

@@ -586,19 +586,12 @@
    * A night island in both themes: the picture and the scrim are its ground.
    */
   .nf-rmh {
-    min-block-size: 32rem;
     border: var(--nf-border-width) solid color-mix(in oklab, var(--nf-brand-primary) 34%, var(--nf-surface-artwork));
-  }
-  .nf-rmh .nf-scene__stage {
-    min-block-size: 32rem;
   }
   .nf-rmh .nf-scene__words {
     max-inline-size: 40rem;
   }
-  .nf-rmh .nf-scene__veil {
-    background: linear-gradient(180deg, transparent 0%, transparent 20%, color-mix(in oklab, var(--nf-surface-artwork) 58%, transparent) 48%, var(--nf-surface-artwork) 88%);
-  }
-  @media (min-width: 48rem) {
+  @container (min-width: 44rem) {
     .nf-rmh .nf-scene__veil {
       background: linear-gradient(90deg, var(--nf-surface-artwork) 20%, color-mix(in oklab, var(--nf-surface-artwork) 55%, transparent) 55%, transparent 78%);
     }
@@ -671,7 +664,6 @@
     pointer-events: none;
   }
   @media (min-width: 48rem) {
-    .nf-rmh,
     .nf-rmh .nf-scene__stage {
       min-block-size: 29rem;
     }
@@ -1413,7 +1405,7 @@
   }
   .nf-rmo__art {
     position: relative;
-    aspect-ratio: 16 / 9;
+    aspect-ratio: 3 / 2;
   }
   .nf-rmo__art img {
     object-fit: cover;
@@ -1423,16 +1415,16 @@
     inset: 0;
     z-index: 0;
     pointer-events: none;
-    background: linear-gradient(180deg, transparent 0%, transparent 22%, color-mix(in oklab, var(--nf-surface-artwork) 70%, transparent) 40%, var(--nf-surface-artwork) 52%);
+    background: linear-gradient(180deg, transparent 0%, transparent 40%, color-mix(in oklab, var(--nf-surface-artwork) 70%, transparent) 62%, var(--nf-surface-artwork) 78%);
   }
   .nf-rmo__object {
     position: absolute;
-    inset: var(--nf-space-md) var(--nf-space-md) auto auto;
+    inset: var(--nf-space-xs) var(--nf-space-xs) auto auto;
     z-index: 1;
     display: grid;
     place-items: center;
-    inline-size: 5rem;
-    block-size: 5rem;
+    inline-size: 3.5rem;
+    block-size: 3.5rem;
     border: var(--nf-border-width) solid color-mix(in oklab, var(--nf-content-primary) 22%, transparent);
     border-radius: var(--nf-radius-xl);
     background: color-mix(in oklab, var(--nf-brand-primary) 30%, transparent);
@@ -1444,7 +1436,7 @@
     z-index: 1;
     display: grid;
     gap: var(--nf-space-sm);
-    margin-block-start: calc(var(--nf-space-2xl) * -1);
+    margin-block-start: 0;
     padding: 0 var(--nf-space-md) var(--nf-space-lg);
   }
   .nf-rmo__title {
@@ -1559,11 +1551,7 @@
 
   /* ------------------------------------------------------------ the verification header */
   .nf-rmvb {
-    min-block-size: 15rem;
     border: var(--nf-border-width) solid color-mix(in oklab, var(--nf-brand-primary) 30%, var(--nf-surface-artwork));
-  }
-  .nf-rmvb .nf-scene__stage {
-    min-block-size: 15rem;
   }
   .nf-rmvb__title {
     margin: 0;

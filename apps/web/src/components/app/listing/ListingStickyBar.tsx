@@ -10,6 +10,7 @@ import { ButtonLink } from "@/components/ui/Button";
 import { AuthGate } from "@/components/auth/AuthGate";
 import { ActionBar } from "@/components/ui/ActionBar";
 import "@/app/css/catalogue.css";
+import "@/components/app/offers/offers.css";
 
 /**
  * The listing's pinned action bar.
@@ -75,6 +76,8 @@ export function ListingStickyBar({
   moveInLabel,
   moveInFromLabel,
   secondaryShortLabel,
+  inspect = null,
+  sheen = false,
   sidePanelFromLg = false,
   stackOnPhone = false,
 }: {
@@ -117,6 +120,13 @@ export function ListingStickyBar({
   moveInFromLabel?: string;
   /** The ghost half's one-word label on a phone, e.g. "Breakdown". */
   secondaryShortLabel?: string;
+  /**
+   * Schedule Inspection, beside Contact Agent, on a property for sale where
+   * the primary is Make an offer. A quiet icon on a phone, labelled from `sm`.
+   */
+  inspect?: StickyAction | null;
+  /** One sheen on the primary, for Make an offer. Off under reduced motion, Calm and Off. */
+  sheen?: boolean;
   /**
    * The page draws its own sticky side panel from `lg` (the listing page's
    * booking panel), carrying the same action. The bar then stands down from
@@ -286,6 +296,7 @@ export function ListingStickyBar({
           payment on a stay. A fourth combination would mean a new market, and a
           new market has to be described here anyway.
         */}
+        <div className={inspect ? "nf-detail-foot__pair" : "contents"}>
         {secondary && secondaryIcon === "document" ? (
           /* The move-in ledger is a page anybody may read, so it does not
              gate. A phone gets the short word and the glyph; the full label
@@ -319,6 +330,23 @@ export function ListingStickyBar({
           </AuthGate>
         ) : null}
 
+        {inspect ? (
+          <AuthGate action="inspect">
+            <ButtonLink
+              href={inspect.href}
+              variant="ghost"
+              leadingIcon="calendar-booking"
+              aria-label={inspect.label}
+              className="nf-detail-foot__secondary"
+              data-testid="sticky-inspect"
+            >
+              <span className="nf-btn__label hidden sm:inline">{inspect.label}</span>
+            </ButtonLink>
+          </AuthGate>
+        ) : null}
+
+        </div>
+
         {action && (
           <AuthGate action={variant === "rental" ? "inspect" : "pay"}>
             <ButtonLink
@@ -326,7 +354,7 @@ export function ListingStickyBar({
               variant="primary"
               size="md"
               leadingIcon={variant === "rental" ? "calendar-booking" : undefined}
-              className="nf-detail-foot__action"
+              className={sheen ? "nf-detail-foot__action nf-ofr-sheen" : "nf-detail-foot__action"}
               data-testid="sticky-action"
             >
               {action.label}

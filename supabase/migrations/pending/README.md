@@ -66,3 +66,13 @@ tables exist). Part 4 only tidied the tables added on 7 and 8 November, so
 the tables Roommates itself added still carry write grants no policy backs:
 `revoke_write_grants_with_no_policy_2026-11-09.sql` finishes that job and is
 still waiting.
+
+## Offers and the Deal Room (10 November 2026): ONE file to paste
+
+`OFFERS_ALL.sql`, built by `build_offers_all.sh` from `offers_01_sale_agreements.sql`,
+`offers_02_sale_doors.sql` and `offers_03_reads_documents_admin.sql`. NOT APPLIED.
+Safe to run twice. Rollback: `rollback/offers_rollback.sql` (the two enum values
+`withdrawn` and `expired` cannot be dropped and are harmless). Tested on a local
+Postgres: `supabase/tests/offers/` (end to end, and a race of two sellers and two
+tabs accepting at once). Until it runs, the offers screens degrade to "not
+available" and nothing else changes.

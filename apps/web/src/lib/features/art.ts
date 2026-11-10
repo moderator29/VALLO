@@ -19,6 +19,8 @@ export type ArtSlot = {
   fit: "cover" | "contain";
   /** Where a cover photograph is anchored, as CSS `object-position`. */
   focus?: string;
+  /** Width over height of the file, so a banner can give the picture a box of its own and never crop a face. */
+  ratio?: number;
 };
 
 export const FEATURE_ART = {
@@ -28,13 +30,13 @@ export const FEATURE_ART = {
   // edge over a Vallo gradient; the two scene plates (`cover`) carry their own
   // night-blue ground. `backdrop` is the empty blue-hour room behind a banner
   // when a cut-out needs a bed of its own.
-  roommatesHero: { src: "/brand/features/roommatesHero.webp", fit: "contain", focus: "50% 50%" },
-  roommatesPromo: { src: "/brand/features/roommatesPromo.webp", fit: "contain", focus: "50% 50%" },
-  roommatesOnboarding: { src: "/brand/features/roommatesOnboarding.webp", fit: "cover", focus: "50% 45%" },
-  roommatesPublished: { src: "/brand/features/roommatesPublished.webp", fit: "contain", focus: "50% 50%" },
-  circleHero: { src: "/brand/features/circleHero.webp", fit: "cover", focus: "50% 40%" },
-  circlePromo: { src: "/brand/features/circlePromo.webp", fit: "contain", focus: "50% 50%" },
-  backdrop: { src: "/brand/features/backdrop.webp", fit: "cover", focus: "50% 50%" },
+  roommatesHero: { src: "/brand/features/roommatesHero.webp", fit: "contain", focus: "50% 50%", ratio: 1.333 },
+  roommatesPromo: { src: "/brand/features/roommatesPromo.webp", fit: "contain", focus: "50% 50%", ratio: 1.312 },
+  roommatesOnboarding: { src: "/brand/features/roommatesOnboarding.webp", fit: "cover", focus: "50% 45%", ratio: 1.500 },
+  roommatesPublished: { src: "/brand/features/roommatesPublished.webp", fit: "contain", focus: "50% 50%", ratio: 1.200 },
+  circleHero: { src: "/brand/features/circleHero.webp", fit: "cover", focus: "50% 40%", ratio: 1.499 },
+  circlePromo: { src: "/brand/features/circlePromo.webp", fit: "contain", focus: "50% 50%", ratio: 0.938 },
+  backdrop: { src: "/brand/features/backdrop.webp", fit: "cover", focus: "50% 50%", ratio: 1.778 },
 } as const satisfies Record<string, ArtSlot>;
 
 export type FeatureArtName = keyof typeof FEATURE_ART;

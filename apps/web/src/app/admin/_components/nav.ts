@@ -158,7 +158,11 @@ export const ADMIN_PRIMARY: AdminDestination[] = [
     countKeys: ["agreements"],
     countLabel: "agreements waiting for review before payment opens",
     /* The review threshold, the signals and the incident switch. */
-    children: [{ key: "agreement-settings", href: "/admin/agreements/settings", icon: ui("sliders"), label: "Risk settings" }],
+    children: [
+      { key: "agreement-settings", href: "/admin/agreements/settings", icon: ui("sliders"), label: "Risk settings" },
+      /* Offers on properties for sale, from first offer to the end of the deal. */
+      { key: "offers", href: "/admin/offers", icon: ui("scale"), label: "Offers and deals" },
+    ],
   },
   {
     key: "bookings",

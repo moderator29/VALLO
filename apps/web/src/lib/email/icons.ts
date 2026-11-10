@@ -148,6 +148,8 @@ export type EmailKind =
   | "stayReviewRequest"
   // Messages
   | "unreadMessages"
+  // Offers and the Deal Room
+  | "dealUpdate"
   // Tables
   | "reservationConfirmed"
   | "reservationCancelled"
@@ -269,6 +271,7 @@ export const EMAIL_PLAN: Readonly<Record<EmailKind, Plan>> = {
   paymentHostReceived: p("payment", "earnings"),
   paymentRentReceipt: p("payment", "pay"),
   stayReviewRequest: p("stay", "calendar-booked"),
+  dealUpdate: p("message", "envelope"),
   unreadMessages: p("message", "local-talks"),
 
   reservationConfirmed: p("table", "restaurant"),

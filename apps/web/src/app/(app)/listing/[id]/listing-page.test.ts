@@ -23,7 +23,7 @@ const page = withoutComments(readFileSync(join(__dirname, "page.tsx"), "utf8"));
 describe("Schedule a visit", () => {
   it("links to the viewing flow for this listing", () => {
     expect(page).toContain("const visitHref = `/listing/${listing.id}/visit`;");
-    expect(page).toMatch(/isVisit\s*\?\s*\{ label: t\.catalogue\.detail\.scheduleVisit, href: visitHref \}/);
+    expect(page).toMatch(/isVisit\s*\?\s*(offerAction \?\? )?\{ label: t\.catalogue\.detail\.scheduleVisit, href: visitHref \}/);
   });
 
   it("is for a real home to rent or to buy, never an example", () => {

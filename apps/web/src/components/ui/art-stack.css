@@ -1,0 +1,38 @@
+/*
+ * ART STACK (10 November 2026). A banner whose picture must never be cropped:
+ * on a phone the picture gets a box of its own at its own shape (the slot's
+ * `ratio`), the words sit below it over a fade, and a wide banner goes back
+ * to words over the picture. Used by the Circle hero and the community cover.
+ * Mark the root `data-art-stack`, its art `data-art-stack-art`, its scrim
+ * `data-art-stack-scrim` and its words `data-art-stack-body`, and set
+ * `--nf-art-ratio` on the root.
+ */
+@layer components {
+  [data-art-stack] {
+    container-type: inline-size;
+  }
+  [data-art-stack] > [data-art-stack-art] {
+    inset: 0 0 auto 0;
+    aspect-ratio: var(--nf-art-ratio, 1.5);
+    animation: none;
+  }
+  [data-art-stack] > [data-art-stack-scrim] {
+    background: linear-gradient(180deg, transparent 0, transparent calc(100cqi / var(--nf-art-ratio, 1.5) * 0.55), color-mix(in oklab, var(--nf-surface-artwork) 70%, transparent) calc(100cqi / var(--nf-art-ratio, 1.5) * 0.82), var(--nf-surface-artwork) calc(100cqi / var(--nf-art-ratio, 1.5) + 0.25rem));
+  }
+  [data-art-stack] > [data-art-stack-body] {
+    padding-block-start: calc(100cqi / var(--nf-art-ratio, 1.5) - var(--nf-space-lg));
+  }
+  @container (min-width: 44rem) {
+    [data-art-stack] > [data-art-stack-art] {
+      --nf-art-pos: 92% 100%;
+      inset: 0;
+      aspect-ratio: auto;
+    }
+    [data-art-stack] > [data-art-stack-scrim] {
+      background: linear-gradient(180deg, color-mix(in oklab, var(--nf-surface-artwork) 10%, transparent) 0%, color-mix(in oklab, var(--nf-surface-artwork) 55%, transparent) 45%, var(--nf-surface-artwork) 100%);
+    }
+    [data-art-stack] > [data-art-stack-body] {
+      padding-block-start: var(--nf-space-2xl);
+    }
+  }
+}

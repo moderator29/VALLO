@@ -99,10 +99,11 @@ async function toRows(db: SupabaseClient<Database>, rows: AgreementRow[]): Promi
 export async function readAgreementQueue(db: SupabaseClient<Database>): Promise<AgreementQueue> {
   try {
     const [waiting, decided] = await Promise.all([
-      db.from("deal_agreements").select("*").eq("status", "in_review").order("submitted_at", { ascending: true }).limit(200),
+      db.from("deal_agreements").select("*").eq("status", "in_review").neq("kind", "sale").order("submitted_at", { ascending: true }).limit(200),
       db
         .from("deal_agreements")
         .select("*")
+        .neq("kind", "sale")
         .in("status", ["approved", "rejected", "paid"])
         .order("decided_at", { ascending: false })
         .limit(40),

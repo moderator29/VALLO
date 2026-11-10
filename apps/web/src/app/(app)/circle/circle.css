@@ -819,7 +819,9 @@
     min-block-size: clamp(14rem, 48vw, 18rem);
     overflow: hidden;
     border-radius: var(--nf-radius-island);
-    background: var(--nf-surface-artwork);
+    background:
+      radial-gradient(90% 70% at 70% 0%, color-mix(in oklab, var(--nf-brand-primary) 34%, transparent), transparent 70%),
+      var(--nf-surface-artwork);
     color: var(--nf-content-primary);
     box-shadow: var(--nf-elevation-floating);
   }
