@@ -1,10 +1,10 @@
 /*
- * THE APP OPEN LOGO ON THE WEBSITE (founder ruling (a); the controller is
+ * THE APP OPEN LOGO (founder ruling (a); the controller is
  * components/motion/launch-script.ts). A dark ground in both themes, the
  * animated lockup centred, the version line at the foot, and the hand into
  * the page: the layer fades while the lockup grows a touch, on the
- * compositor only. It never takes a pointer event. The native shell never
- * draws it (Agent NATIVE's launch plays there).
+ * compositor only. It never takes a pointer event. Plays on both the
+ * website and the native shell.
  */
 @layer components {
   .nf-launch {
@@ -67,10 +67,8 @@
   :root:is([data-motion="calm"], [data-motion="off"]) .nf-launch[data-launch="leave"] .nf-launch__art {
     transform: none;
   }
-  /* Never twice: the shell's own launch plays there. */
-  :root[data-native] .nf-launch {
-    display: none;
-  }
+  /* The overlay now plays on the native shell too (the web artwork is the
+     single source for both surfaces), so no native bail-out here. */
 
   /* THE ANIMATED MARK INSIDE THE APP (sign-in, the empty home): the ring
      draws and the towers rise once, from `vallo-mark-draw.svg`; Calm and Off
