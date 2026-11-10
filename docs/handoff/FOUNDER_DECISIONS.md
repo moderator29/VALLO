@@ -50,3 +50,34 @@ handoff disagrees, these win (after the verbatim brief).
 | 9 Nov 2026 | THE VALLO GUARANTEE IS RETIRED, everywhere it is promised: Terms section 14, the privacy policy, the disclaimer, CautionControls, the admin money desk, the docs chapters and the assistant. No reduced version, no waiting for a lawyer. Terms section 14 becomes "What Vallo does, and what it does not do": we check members' identity and review listings before they go live; Vallo never holds your money; card payments are handled by Paystack and the owner's share reaches their bank in the same transaction; payment held by a licensed bank until you confirm is NOT open yet, and when it opens we will say so with a new Terms version and date; Vallo is not a party to your tenancy or sale, is not agent for either side, and does not guarantee the transaction; and if something goes wrong we investigate using the inspection report and the platform's messages as the record, act on members who break the rules (including suspension and removal), give you the evidence we hold, and refund anything Vallo itself charged. Bump the Terms version and date and show existing members (about 30) the change once at next sign-in. Never rewrite what a member was already shown. |
 | 9 Nov 2026 | PAYLUK CLEARING: the audit (PAYMENTS_MIGRATION_AUDIT.md) and its order are approved, under four rules. Nothing is deleted before the new rail works: COMPAT-KEEP stays dormant and failing closed until Phase 6. DEAD-REMOVE in code goes once a fresh check shows nothing imports it (the 9 rows, their tests, and docs/payments/payluk-source/). Database objects are NEVER dropped automatically (including ledger_record_payluk_commission): they go into the founder's one end-of-batch SQL block, each with a line on what it was and why it is safe. Applied migrations, APPLIED.txt, rollback snapshots and every historical ledger or arrangement row are never touched; a removal that breaks a test means a misclassification, never a changed test. Also for that block: the redundant trigger provider_arrangements_00_payable (superseded by _00_payable_gate). The founder sees Payluk again only at Phase 6. |
 | 9 Nov 2026 | EVERYTHING ABOVE IS APPROVED. Do not come back for permission on any of it: come back with the work, and with one SQL block at the end of the batch. |
+
+
+## 10 November 2026: Admin Console 2.0
+
+The founder sent a very large brief (an enterprise-scale "ADMIN CONSOLE 2.0":
+every department, a CRM, social publishing, VALLO University, a 30-file SQL
+set). Given the size, the lead proposed a phased build and the founder chose
+the scope below. The rest of the giant brief is NOT being built in this
+batch; it stays as a long-term reference for later phases.
+
+Confirmed this round:
+- The AI copilot on every desk: build it now (real, ongoing AI API cost,
+  approved). A shared engine was built once and every desk reuses it; it
+  answers from the role's job description and a short, real context string
+  the desk computes, never invents a figure, never takes an action itself.
+- Social media desk: no platform API keys, no publishing integration, ever.
+  A planning and reporting tool only: calendar, drafts and campaigns, a
+  media library, an approval step, and a record of what was actually posted
+  by hand. Built to last, not a month-one placeholder.
+- Build order this round: the staff-system foundation (two new positions,
+  Business Development Executive and Social Media Manager, on the existing
+  Track K staff system, not a new parallel RBAC) plus one full desk
+  (Business Development) and the Social Media desk and a lighter COO
+  overview page.
+- The three documentation-versus-code questions from 9 Nov are confirmed:
+  listing reviewers (not moderators) hold property-case restriction
+  authority; a support reply shows the staff member's first name; approving
+  a listing also publishes it in the same action. The staff manual already
+  matched the code on all three; nothing needed changing.
+- The staff manual should be downloadable to a phone: not yet built, next
+  round.
