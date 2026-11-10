@@ -15,6 +15,7 @@ import { MODERATOR_CAN, MODERATOR_CANNOT } from "@/lib/social/areas-model";
 import type { DocChapter, DocSection } from "./chapters";
 import { DocsFlow } from "./DocsFlow";
 import { DocFlow } from "@/components/docs/DocFlow";
+import { DocTable } from "@/components/docs/DocTable";
 import { PAY_INSIDE_VALLO } from "./facts";
 import { EULA_ZERO_TOLERANCE } from "@/lib/legal/eula-copy";
 
@@ -117,20 +118,20 @@ export const GETTING_AROUND: DocChapter = {
             Under Settings, then {look.label}, then {look.motion}, you choose how much the app
             moves. {look.motionNote}
           </p>
-          <ul role="list">
-            <li>
-              <strong>{look.motionCinematic}.</strong> {look.motionCinematicSub}
-            </li>
-            <li>
-              <strong>{look.motionStandard}.</strong> {look.motionStandardSub}
-            </li>
-            <li>
-              <strong>{look.motionCalm}.</strong> {look.motionCalmSub}
-            </li>
-            <li>
-              <strong>{look.motionOff}.</strong> {look.motionOffSub}
-            </li>
-          </ul>
+          <DocTable
+            caption="The motion levels"
+            captionHidden
+            columns={[
+              { key: "level", label: "Level" },
+              { key: "does", label: "What moves" },
+            ]}
+            rows={[
+              { id: "cinematic", cells: { level: <strong>{look.motionCinematic}</strong>, does: look.motionCinematicSub } },
+              { id: "standard", cells: { level: <strong>{look.motionStandard}</strong>, does: look.motionStandardSub } },
+              { id: "calm", cells: { level: <strong>{look.motionCalm}</strong>, does: look.motionCalmSub } },
+              { id: "off", cells: { level: <strong>{look.motionOff}</strong>, does: look.motionOffSub } },
+            ]}
+          />
           <p>Three switches sit under the levels:</p>
           <ul role="list">
             <li>
@@ -605,25 +606,21 @@ export const MESSAGES: DocChapter = {
       id: "message-tools",
       heading: "Reply, forward, delete and call",
       body: (
-        <ul role="list">
-          <li>
-            <strong>Reply</strong> to one message, so everyone sees which you mean. On a phone, swipe it.
-          </li>
-          <li>
-            <strong>Forward</strong> a message to another conversation.
-          </li>
-          <li>
-            <strong>Delete for me</strong> removes a message from your view only.
-          </li>
-          <li>
-            <strong>Delete for everyone</strong> removes it for both sides, for 2 days and 12 hours after
-            it was sent.
-          </li>
-          <li>
-            <strong>Call</strong> by voice or video from inside the conversation, so the call stays on
-            Vallo.
-          </li>
-        </ul>
+        <DocTable
+          caption="What you can do with a message"
+          captionHidden
+          columns={[
+            { key: "action", label: "Action" },
+            { key: "does", label: "What it does" },
+          ]}
+          rows={[
+            { id: "reply", cells: { action: <strong>Reply</strong>, does: "To one message, so everyone sees which you mean. On a phone, swipe it." } },
+            { id: "forward", cells: { action: <strong>Forward</strong>, does: "Sends a message to another conversation." } },
+            { id: "delete-me", cells: { action: <strong>Delete for me</strong>, does: "Removes a message from your view only." } },
+            { id: "delete-all", cells: { action: <strong>Delete for everyone</strong>, does: "Removes it for both sides, for 2 days and 12 hours after it was sent." } },
+            { id: "call", cells: { action: <strong>Call</strong>, does: "By voice or video from inside the conversation, so the call stays on Vallo." } },
+          ]}
+        />
       ),
     },
     {

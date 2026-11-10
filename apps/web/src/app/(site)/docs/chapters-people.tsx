@@ -14,6 +14,7 @@ import { VERIFICATION_ORDER } from "@/lib/trust/verification";
 import { MAX_BLOCK_NIGHTS } from "@/lib/agent/calendar-model";
 import type { DocChapter } from "./chapters";
 import { DocFlow } from "@/components/docs/DocFlow";
+import { DocTable } from "@/components/docs/DocTable";
 import { HOTEL_ROOM_BY_CARD, PAY_INSIDE_VALLO, PRICE_IS_THE_PRICE, STAYS_PAID_BY_CARD } from "./facts";
 
 /**
@@ -473,20 +474,22 @@ export const UNDERSTANDING_A_LISTING: DocChapter = {
       id: "light",
       heading: "Read the light row",
       body: (
-        <ul role="list">
-          <li>
-            <strong>The grid.</strong> Band A (20 hours a day or more), mostly on, patchy, rarely on, or
-            no grid supply.
-          </li>
-          <li>
-            <strong>The backup.</strong> None, a generator, an inverter, solar, or generator and
-            inverter, and how many hours a day it runs.
-          </li>
-          <li>
-            <strong>The meter.</strong> Whether the unit is on a prepaid meter.
-          </li>
-          <li>If the lister has not answered, the listing says so. Message them to ask.</li>
-        </ul>
+        <>
+          <DocTable
+            caption="What the light row says"
+            captionHidden
+            columns={[
+              { key: "part", label: "Part" },
+              { key: "answers", label: "The answers a lister can give" },
+            ]}
+            rows={[
+              { id: "grid", icon: "bolt", cells: { part: <strong>The grid</strong>, answers: "Band A (20 hours a day or more), mostly on, patchy, rarely on, or no grid supply." } },
+              { id: "backup", icon: "bolt", cells: { part: <strong>The backup</strong>, answers: "None, a generator, an inverter, solar, or generator and inverter, and how many hours a day it runs." } },
+              { id: "meter", icon: "bolt", cells: { part: <strong>The meter</strong>, answers: "Whether the unit is on a prepaid meter." } },
+            ]}
+          />
+          <p>If the lister has not answered, the listing says so. Message them to ask.</p>
+        </>
       ),
     },
     {
