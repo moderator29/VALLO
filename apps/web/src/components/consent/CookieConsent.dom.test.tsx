@@ -30,9 +30,10 @@ describe("the cookie bar", () => {
     expect(copy.banner.body).toMatch(/Nothing from the last two is used until you choose/);
   });
 
+});
+
+describe.skipIf(!hasBrowser && !process.env.CI)("the cookie bar (axe)", () => {
   it("has no axe violations", async () => {
-    if (!(await hasBrowser())) return;
-    const result = await axe(bar());
-    expect(result.violations).toEqual([]);
+    expect(await axe(`<h1>Vallo</h1>${bar()}`)).toEqual([]);
   });
 });
