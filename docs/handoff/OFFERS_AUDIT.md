@@ -194,3 +194,22 @@ documentation pages, three widths, both themes, no sideways scroll).
 | P3-4 | `WasThisHelpful` (docs) used a bare `useTransition`; the repo's weak-signal rule failed its test | **Fixed** (`useSafeTransition`) |
 | P3-5 | Docs: coverage test proven to fail on a fake route and pass on the real tree; every captured step is captioned as an example screen | ok |
 | P3-6 | The older 22 chapters were searched for stale terms but not re-read against their screens | Left, stated by the docs agent |
+
+---
+
+## FINAL GATES (run on the last pushed tree, 11 November 2026)
+
+| Gate | Result |
+|---|---|
+| `tsc --noEmit` whole project | clean |
+| vitest, whole suite | 14,572 passed, 1 failed, 6 skipped. The one failure is `lib/nav/route-files.test.ts` naming `/api/build`: the route file was never committed because `.gitignore` line 10 (`build/`) swallows `src/app/api/build/`. Pre-existing and not part of this work, but a real production bug (DeployWatch calls it and would get a 404). Not touched. |
+| check-no-em-dash, check-css-tokens, check-valuation-words, state-sweep | clean |
+| Local database: `supabase/tests/offers` e2e and race | E2E_OK, RACE_OK (run before the final commits; the SQL has not changed since) |
+
+### Known gaps, stated plainly
+
+- Nothing ran against a live database or a live account. Screens were seen through fixture previews only.
+- Motion was reviewed as CSS and still frames, not watched. Sheets were opened at 390 dark only; light, 360 and 1280 are unchecked for them. Document upload to a signed link, row keyboard navigation and the `/` shortcut were not driven in a browser.
+- Structured offer cards in the message thread are not built (deliberate, P1-2); the Activity tab and the in-room thread carry the events.
+- Fix after verification returns by Back with the draft kept; `/verification` has no return path.
+- The SQL in `supabase/migrations/pending/OFFERS_ALL.sql` is not applied. Until it is, the screens show "not available" and nothing else changes.
