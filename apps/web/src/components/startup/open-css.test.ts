@@ -56,14 +56,14 @@ describe("the first HTML", () => {
   it("puts the screen first in the body and the controller in the head, before the first paint", () => {
     const head = layout.indexOf("<head>");
     const body = layout.indexOf("<body>");
-    const script = layout.indexOf("OPEN_SCRIPT");
+    const script = layout.indexOf("__html: OPEN_SCRIPT");
     const screen = layout.indexOf("<OpeningScreen />");
     expect(head).toBeGreaterThan(-1);
     expect(script).toBeGreaterThan(head);
     expect(script).toBeLessThan(body);
     expect(screen).toBeGreaterThan(body);
     // nothing but comments sits between the body tag and the screen
-    expect(layout.slice(body + "<body>".length, screen).trim()).toBe("");
+    expect(layout.slice(body + "<body>".length, screen).replace(/[{}\s]/g, "")).toBe("");
     expect(layout).toContain('import "@/components/startup/open.css"');
   });
   it("adds no <style> element, which the Content Security Policy forbids", () => {
