@@ -154,7 +154,7 @@
     margin: 0;
     font-family: var(--nf-font-display);
     font-size: var(--nf-text-display);
-    font-weight: 800;
+    font-weight: 700;
     line-height: 0.98;
     letter-spacing: -0.035em;
   }
@@ -302,7 +302,7 @@
   .nf-rmfr__n {
     font-family: var(--nf-font-display);
     font-size: 5rem;
-    font-weight: 800;
+    font-weight: 700;
     line-height: 0.9;
     color: var(--nf-spark-ink);
   }
@@ -310,7 +310,7 @@
     margin: 0;
     font-family: var(--nf-font-display);
     font-size: var(--nf-text-h1);
-    font-weight: 800;
+    font-weight: 700;
     line-height: 1.05;
     letter-spacing: -0.03em;
   }
@@ -626,7 +626,7 @@
     margin: 0;
     font-family: var(--nf-font-display);
     font-size: var(--nf-text-display);
-    font-weight: 800;
+    font-weight: 700;
     letter-spacing: -0.035em;
     line-height: 1;
   }

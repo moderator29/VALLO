@@ -527,8 +527,9 @@ async function readInstitutionRows(db: SupabaseClient, stateCode: string | null 
       .order("name")
       .range(from, from + 999);
     if (stateCode) query = query.eq("state_code", stateCode);
-    const { data, error } = await query;
-    if (error) return { rows, error };
+    /* Handed back, not branched on: the one caller reports it (and retries without the extra columns). */
+    const { data, error: refused } = await query;
+    if (refused) return { rows, error: refused };
     const page = (data ?? []) as unknown as InstitutionRow[];
     rows.push(...page);
     if (page.length < 1000) break;
