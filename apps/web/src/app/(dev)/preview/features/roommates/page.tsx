@@ -85,7 +85,7 @@ export default async function PreviewRoommates({ searchParams }: { searchParams:
       );
       break;
     case "profile":
-      body = <RoommateProfileScreen read={{ state: "ok", profile: PROFILE }} groups={[]} t={t} now={NOW} userId={PROFILE.userId} />;
+      body = <RoommateProfileScreen read={{ state: "ok", profile: PROFILE }} groups={[]} t={t} now={NOW} userId={PROFILE.userId} gallery={ROOMS.flatMap((r) => r.photoUrls).slice(0, 4)} />;
       break;
     case "listing":
       body = <RoomListingScreen read={{ state: "ok", listing: ROOM_DETAIL, signedIn: true }} groups={[{ id: "g1", name: "UNILAG girls, 3 bed in Akoka" }]} t={t} now={NOW} />;

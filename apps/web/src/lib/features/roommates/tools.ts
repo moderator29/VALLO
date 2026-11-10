@@ -20,3 +20,9 @@ export function agreementText(w: AgreementWords, i: AgreementInput): string {
   lines.push("", w.rulesHead, ...rules.map((r, n) => `${n + 1}. ${r}`), "", w.note);
   return lines.join("\n");
 }
+
+/** Which Roommates shelf opens on Saved: the one asked for, else Rooms when it has items, else People when only it does. */
+export function openShelf(asked: "rooms" | "people" | undefined, rooms: number, people: number): "rooms" | "people" {
+  if (asked) return asked;
+  return rooms > 0 || people === 0 ? "rooms" : "people";
+}

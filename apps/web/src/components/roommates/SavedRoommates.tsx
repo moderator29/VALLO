@@ -5,6 +5,7 @@ import { getDictionary } from "@vallo/i18n";
 
 import { resolveSession } from "@/lib/actions/session";
 import { readRoomListing, readRoommateProfile } from "@/lib/features/roommates/queries";
+import { openShelf } from "@/lib/features/roommates/tools";
 import { requestNow } from "@/lib/format/when";
 import type { SavedCollection } from "@/lib/saved/collections";
 
@@ -31,10 +32,10 @@ const LIMIT = 24;
 export async function SavedRoommates({
   listFor,
   onlyKeys,
-  tab = "rooms",
+  tab,
   keep: carry = {},
 }: {
-  /** Which shelf is open: the posts or the people. */
+  /** Which shelf is open; unset opens the one that has items (rooms first). */
   tab?: "rooms" | "people";
   /** The page's own query (list, sort), kept when the tab changes. */
   keep?: Record<string, string | undefined>;
@@ -65,6 +66,7 @@ export async function SavedRoommates({
   if (!roomCards.length && !personCards.length) return null;
 
   const copy = getDictionary("en").roommates;
+  const active = openShelf(tab, roomCards.length, personCards.length);
   const today = lagosDay(requestNow());
   return (
     <section className="nf-rm-section mt-section" aria-labelledby="saved-roommates" data-testid="saved-roommates">
@@ -74,14 +76,14 @@ export async function SavedRoommates({
           const q = new URLSearchParams(Object.entries(carry).filter((e): e is [string, string] => Boolean(e[1])));
           q.set("rm", k);
           return (
-            <Link key={k} href={`/saved?${q.toString()}`} scroll={false} className="nf-rmsv__tab" aria-current={tab === k ? "page" : undefined}>
+            <Link key={k} href={`/saved?${q.toString()}`} scroll={false} className="nf-rmsv__tab" aria-current={active === k ? "page" : undefined}>
               {k === "rooms" ? copy.discover.rooms : copy.discover.people}
               {` (${k === "rooms" ? roomCards.length : personCards.length})`}
             </Link>
           );
         })}
       </nav>
-      {tab === "rooms" && roomCards.length ? (
+      {active === "rooms" && roomCards.length ? (
         <CardGrid kind="rooms" testId="saved-roommate-rooms">
           {roomCards.map((r) => (
             <li key={r.id}>
@@ -90,7 +92,7 @@ export async function SavedRoommates({
           ))}
         </CardGrid>
       ) : null}
-      {tab === "people" && personCards.length ? (
+      {active === "people" && personCards.length ? (
         <CardGrid testId="saved-roommate-people">
           {personCards.map((p) => (
             <li key={p.userId}>
@@ -99,7 +101,8 @@ export async function SavedRoommates({
           ))}
         </CardGrid>
       ) : null}
-      {(tab === "rooms" ? roomCards.length : personCards.length) === 0 ? <p className="nf-rm-panel__sub">{copy.feed.savedEmpty}</p> : null}
+      {(active === "rooms" ? roomCards.length : personCards.length) === 0 ? <p className="nf-rm-panel__sub">{copy.feed.savedEmpty}</p> : null}
     </section>
   );
 }
+

@@ -232,7 +232,7 @@ export default async function SavedPage({ searchParams }: { searchParams: Promis
       />
       {/* Vallo Roommates: saved posts and people, on the same lists. */}
       <SavedRoommates
-        tab={rm === "people" ? "people" : "rooms"}
+        tab={rm === "people" ? "people" : rm === "rooms" ? "rooms" : undefined}
         keep={{ list, sort }}
         onlyKeys={activeList?.keys ?? null}
         listFor={(kind, id) => (session.state === "signed-in" ? <AddToList collections={collections} itemKey={collectionKey(kind, id)} kind={kind} id={id} /> : undefined)}
