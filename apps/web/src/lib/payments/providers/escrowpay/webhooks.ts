@@ -15,6 +15,12 @@ import "server-only";
  * event key), trust the status in the body and never the arrival order, and
  * acknowledge an unknown event name without acting on it.
  */
+/**
+ * The header the provider signs with. TODO(provider-docs): unknown, so null,
+ * and the route therefore reads no header and refuses every delivery.
+ */
+export const ESCROWPAY_SIGNATURE_HEADER: string | null = null;
+
 export function verifyEscrowPaySignature(rawBody: string, header: string | null, secret: string | null): boolean {
   void rawBody;
   void header;

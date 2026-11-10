@@ -606,6 +606,9 @@ export async function reconcileArrangements(deps: ArrangementDeps, limit = 3): P
   const { data, error } = await deps.db
     .from("provider_arrangements")
     .select(ROW)
+    /* Payluk's rows only: an EscrowPay row is read back by its own adapter
+       (lib/money/protected-rail.ts), never through the Payluk client. */
+    .eq("provider", "payluk")
     .in("status", [...RECONCILE_STATUSES])
     .lt("updated_at", settled)
     .order("status_observed_at", { ascending: true, nullsFirst: true })

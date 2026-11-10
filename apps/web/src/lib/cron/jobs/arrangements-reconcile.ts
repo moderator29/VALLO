@@ -7,6 +7,7 @@ import { lagosToday } from "../../bookings/schema";
 import type { Db } from "../../money/member-wallet";
 import { reconcileArrangements, type ReconcileSummary } from "../../money/provider-arrangements";
 import { paylukContext } from "../../payments/providers/payluk";
+import { protectedRailDeps, providerReachable, reconcileProtected } from "../../money/protected-rail";
 
 /**
  * The escrow webhook's safety net. Every arrangement still waiting on the
@@ -28,18 +29,21 @@ export function arrangementsVerdict(summary: ReconcileSummary, configured: boole
 }
 
 export async function arrangementsReconcile(admin: AdminClient): Promise<JobVerdict> {
+  const alert = async (kind: string, detail: Record<string, unknown>) => {
+    await recordAlert({ kind, severity: "critical", detail });
+  };
+  const empty: ReconcileSummary = { read: 0, moved: 0, skipped: 0, failed: 0 };
   const ctx = paylukContext();
-  if (!ctx) return arrangementsVerdict({ read: 0, moved: 0, skipped: 0, failed: 0 }, false);
-  const summary = await reconcileArrangements(
-    {
-      db: admin as unknown as Db,
-      ctx,
-      todayLagos: lagosToday,
-      alert: async (kind, detail) => {
-        await recordAlert({ kind, severity: "critical", detail });
-      },
-    },
-    3,
-  );
-  return arrangementsVerdict(summary, true);
+  const payluk = ctx ? await reconcileArrangements({ db: admin as unknown as Db, ctx, todayLagos: lagosToday, alert }, 3) : empty;
+  /* The protected rail (EscrowPay) reads back its own rows through its own
+     adapter; while the provider is undocumented it reads nothing. */
+  const deps = protectedRailDeps(admin as unknown as Db, alert);
+  const escrowpay = providerReachable(deps) ? await reconcileProtected(deps, 3) : empty;
+  const summary: ReconcileSummary = {
+    read: payluk.read + escrowpay.read,
+    moved: payluk.moved + escrowpay.moved,
+    skipped: payluk.skipped + escrowpay.skipped,
+    failed: payluk.failed + escrowpay.failed,
+  };
+  return arrangementsVerdict(summary, ctx !== null || providerReachable(deps));
 }

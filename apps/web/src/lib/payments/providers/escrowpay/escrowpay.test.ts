@@ -140,8 +140,19 @@ describe("the switch", () => {
   });
 });
 
-describe("nothing outside the adapter reaches it yet", () => {
-  it("is imported by no product file", () => {
+/* Since 10 November 2026 the server's rail and its webhook reach the adapter,
+   and nothing else may: no page, no client component, no other money path. */
+const ALLOWED_IMPORTERS = new Set([
+  "lib/money/protected-rail.ts",
+  "lib/money/protected-rail.test.ts",
+  /* The server read and actions behind the screens (server-only). */
+  "lib/money/protected-read.ts",
+  "lib/money/protected-actions.ts",
+  "app/api/escrowpay/webhook/route.ts",
+]);
+
+describe("only the rail's server entry points reach the adapter", () => {
+  it("is imported by nothing else", () => {
     const SRC = join(__dirname, "..", "..", "..", "..");
     const hits: string[] = [];
     const walk = (dir: string) => {
@@ -149,12 +160,12 @@ describe("nothing outside the adapter reaches it yet", () => {
         const full = join(dir, name.name);
         if (name.isDirectory()) {
           if (name.name !== "node_modules" && !full.endsWith(join("providers", "escrowpay"))) walk(full);
-        } else if (/\.(ts|tsx)$/.test(name.name) && /providers\/escrowpay/.test(readFileSync(full, "utf8"))) {
+        } else if (/\.(ts|tsx)$/.test(name.name) && /from ["'][^"']*providers\/escrowpay/.test(readFileSync(full, "utf8"))) {
           hits.push(full.slice(SRC.length + 1));
         }
       }
     };
     walk(SRC);
-    expect(hits).toEqual([]);
+    expect(hits.filter((h) => !ALLOWED_IMPORTERS.has(h.split("\\").join("/")))).toEqual([]);
   });
 });

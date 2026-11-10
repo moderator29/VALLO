@@ -424,6 +424,8 @@ const EXPECTED_PUBLIC = new Set([
   "/api/paystack/webhook",
   /* Part B phase 15: Payluk webhooks, behind the HMAC-SHA512 signature. */
   "/api/payluk/webhook",
+  /* The protected rail's webhooks (EscrowPay, built switched off), behind the provider's signature. */
+  "/api/escrowpay/webhook",
   /* V-98: the home-screen widget, behind its device-bound token. */
   "/api/plans/next",
   "/api/push/drain",
@@ -571,6 +573,7 @@ describe("who may see the platform with no session", () => {
     for (const path of [
       "/api/paystack/webhook",
       "/api/payluk/webhook",
+      "/api/escrowpay/webhook",
       "/api/dojah/webhook",
       "/api/yellowcard/webhook",
       "/api/auth/email-hook",
