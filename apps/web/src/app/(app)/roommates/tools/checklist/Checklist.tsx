@@ -5,7 +5,6 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { Checkbox } from "@/components/ui/Check";
 import { useScopedCopy } from "@/lib/i18n/copy-scope";
-import { shareOrCopy } from "@/lib/ui/clipboard";
 import { banner } from "@/lib/ui/toast";
 import { bannerWithUndo } from "@/lib/ui/undo-banner";
 
@@ -71,10 +70,9 @@ export function Checklist() {
           size="md"
           leadingIcon="link"
           onClick={async () => {
-            const r = await shareOrCopy({ text, title: P.title });
-            if (r === "copied") banner.success(T.copied);
-            else if (r === "shared") banner.success(T.shared);
-            else if (r === "failed") banner.error(T.copyFailed);
+            const copied = await (navigator.clipboard ? navigator.clipboard.writeText(text).then(() => true, () => false) : Promise.resolve(false));
+            if (copied) banner.success(T.copied);
+            else banner.error(T.copyFailed);
           }}
         >
           {T.copy}

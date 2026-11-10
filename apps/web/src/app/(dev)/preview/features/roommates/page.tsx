@@ -19,6 +19,8 @@ import { GroupDashboardView } from "@/app/(app)/roommates/groups/[id]/_parts/Gro
 import { SplitCalculator } from "@/app/(app)/roommates/split/SplitCalculator";
 import { ProfileFlowScreen } from "@/app/(app)/roommates/profile/_parts/ProfileFlowScreen";
 import { PostFlowScreen } from "@/app/(app)/roommates/new/_parts/PostFlowScreen";
+import { Checklist } from "@/app/(app)/roommates/tools/checklist/Checklist";
+import { AgreementBuilder } from "@/app/(app)/roommates/tools/agreement/AgreementBuilder";
 import { ConnectedScreen } from "@/components/roommates/ConnectedScreen";
 import { KeyDoorArt } from "@/components/roommates/RoommatesArt";
 import { ListingReviewPanel } from "@/components/roommates/ListingReviewPanel";
@@ -166,6 +168,20 @@ export default async function PreviewRoommates({ searchParams }: { searchParams:
       break;
     case "nysc":
       body = <NyscView t={t} />;
+      break;
+    case "checklist":
+      body = (
+        <PageFrame title={t.tools.checklistPage.title} subtitle={t.tools.checklistPage.intro} fallback="/roommates" width="narrow">
+          <Checklist />
+        </PageFrame>
+      );
+      break;
+    case "agreement":
+      body = (
+        <PageFrame title={t.tools.agreementPage.title} subtitle={t.tools.agreementPage.intro} fallback="/roommates" width="narrow">
+          <AgreementBuilder />
+        </PageFrame>
+      );
       break;
     case "connected":
       body = <ConnectedScreen interestId="i1" userId={PROFILE.userId} name="Tolu Adebayo" />;

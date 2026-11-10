@@ -159,7 +159,7 @@ function Header({ p, t: copy, now }: { p: RoommateProfileView; t: RoommatesCopy;
   const school = p.institution ? p.institution.name : null;
   const study = [p.course, p.studyLevel].filter(Boolean).join(", ");
   return (
-    <header className="nf-rmv-head" data-theme="dark">
+    <header className="nf-rmv-head" data-theme="dark" data-trusted={p.badges.includes("identity") && p.badges.length >= 2 ? "" : undefined}>
       <span className="nf-rmv-head__glow" aria-hidden="true" />
       <PersonFace person={p} size="xl" />
       <div className="nf-rmv-head__words">
