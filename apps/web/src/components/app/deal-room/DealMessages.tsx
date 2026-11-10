@@ -1,13 +1,13 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useRef, useState } from "react";
+import { Fragment, useRef, useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { Panel } from "@/components/ui/Panel";
 import { State } from "@/components/ui/State";
 import { banner } from "@/lib/ui/toast";
 import { sendMessage } from "@/lib/messages/actions";
-import { formatWhen } from "@/lib/offers/format";
+import { formatDay, formatWhen } from "@/lib/offers/format";
 import type { DealThreadMessage } from "@/lib/offers/thread";
 
 /**
@@ -44,33 +44,62 @@ export function DealMessages({ conversationId, messages, counterpartyName, live 
     }
   };
 
+  const grow = (el: HTMLTextAreaElement) => {
+    el.style.height = "auto";
+    el.style.height = `${Math.min(el.scrollHeight, 144)}px`;
+  };
+
+  let lastDay = "";
   return (
     <div className="grid gap-md" data-testid="panel-messages">
       {messages.length === 0 ? (
         <State kind="empty" compact icon="chat-duo" title="No messages yet" body={`Say hello to ${counterpartyName}. Messages here are the same conversation as in your Messages.`} />
       ) : (
-        <ol className="grid gap-xs" aria-label="Messages about this offer">
-          {messages.map((m) => (
-            <li key={m.id} className={m.mine ? "justify-self-end text-end" : "justify-self-start"} style={{ maxInlineSize: "85%" }}>
-              <Panel variant="card" className="p-sm grid gap-3xs">
-                <p className="nf-body whitespace-pre-wrap [overflow-wrap:anywhere]">{m.body}</p>
-                <p className="nf-caption text-[var(--nf-content-muted)]">{m.mine ? "You" : counterpartyName} · {formatWhen(m.at)}</p>
-              </Panel>
-            </li>
-          ))}
-        </ol>
+        <Panel variant="card" className="p-card">
+          <ol className="nf-msgs" aria-label="Messages about this offer">
+            {messages.map((m) => {
+              const day = formatDay(m.at);
+              const sep = day !== lastDay;
+              lastDay = day;
+              return (
+                <Fragment key={m.id}>
+                  {sep ? <li className="nf-msgs__day">{day}</li> : null}
+                  <li className="nf-msg" data-mine={m.mine ? "" : undefined}>
+                    <p className="nf-body whitespace-pre-wrap [overflow-wrap:anywhere]">{m.body}</p>
+                    <time className="nf-msg__time" dateTime={m.at}>
+                      {m.mine ? "You" : counterpartyName} · {formatWhen(m.at)}
+                    </time>
+                  </li>
+                </Fragment>
+              );
+            })}
+          </ol>
+        </Panel>
       )}
       {live ? (
         <form
-          className="grid gap-xs"
+          className="nf-composer"
           onSubmit={(e) => {
             e.preventDefault();
             void send();
           }}
         >
-          <label className="sr-only" htmlFor="deal-message">Message</label>
-          <textarea id="deal-message" className="nf-input min-h-[5rem] w-full" value={text} onChange={(e) => setText(e.target.value)} maxLength={4000} placeholder={`Message ${counterpartyName}`} />
-          <Button type="submit" variant="primary" size="lg" full loading={busy} disabled={text.trim().length === 0} data-testid="deal-message-send">
+          <label className="sr-only" htmlFor="deal-message">
+            Message
+          </label>
+          <textarea
+            id="deal-message"
+            rows={1}
+            value={text}
+            maxLength={4000}
+            placeholder={`Message ${counterpartyName}`}
+            enterKeyHint="send"
+            onChange={(e) => {
+              setText(e.target.value);
+              grow(e.target);
+            }}
+          />
+          <Button type="submit" variant="primary" leadingIcon="send" loading={busy} disabled={text.trim().length === 0} data-testid="deal-message-send">
             Send
           </Button>
         </form>

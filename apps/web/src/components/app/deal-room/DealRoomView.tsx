@@ -1,11 +1,11 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useLayoutEffect, useRef, useState } from "react";
 import { ActionBar } from "@/components/ui/ActionBar";
 import { Button, ButtonLink } from "@/components/ui/Button";
 import { Panel } from "@/components/ui/Panel";
 import { RemoteImage } from "@/components/ui/RemoteImage";
-import { StatusTrack, type TrackStep } from "@/components/app/status/StatusTrack";
+import { FourStrip, StageRail } from "./StageRail";
 import { UiIcon } from "@/design-system/icons/UiIcon";
 import { Disclosure } from "@/components/app/Disclosure";
 import { OfferStateChip } from "@/components/app/offers/OfferParts";
@@ -46,7 +46,8 @@ export function DealRoomView({ room, nowMs, initialTab = "overview", thread = []
     }
   }, []);
 
-  const steps: TrackStep[] = trackFor(room).map((s) => ({ key: s.key, label: s.label, state: s.state, ...(s.note ? { note: s.note } : {}), ...(s.when ? { when: s.when } : {}) }));
+  const track = trackFor(room);
+  const steps = track;
   const at = steps.findIndex((x) => x.state === "current" || x.state === "failed");
   const here = steps[at >= 0 ? at : steps.length - 1];
   const progressLine = here ? `Step ${(at >= 0 ? at : steps.length - 1) + 1} of ${steps.length}: ${here.label}${here.note ? `, ${here.note.toLowerCase()}` : ""}` : "Progress";
@@ -75,7 +76,7 @@ export function DealRoomView({ room, nowMs, initialTab = "overview", thread = []
       {primary ? (
         <>
           <p className="nf-body text-[var(--nf-content-secondary)]">{room.next?.detail}</p>
-          <Button variant="primary" size="lg" full onClick={primary.run} {...(primary.icon ? { leadingIcon: primary.icon } : {})} data-testid="primary-action">
+          <Button variant="primary" size="lg" full className="nf-ofr-sheen" onClick={primary.run} {...(primary.icon ? { leadingIcon: primary.icon } : {})} data-testid="primary-action">
             {primary.label}
           </Button>
         </>
@@ -126,14 +127,16 @@ export function DealRoomView({ room, nowMs, initialTab = "overview", thread = []
         </div>
       </header>
 
+      <FourStrip room={room} nowMs={nowMs} />
+
       <div className="lg:hidden">
         <Disclosure inline label={progressLine} hint={progressHint} data-testid="deal-progress">
-          <StatusTrack steps={steps} label="Deal progress" testId="deal-track" />
+          <StageRail steps={track} testId="deal-track" />
         </Disclosure>
       </div>
-      <div className="hidden lg:block">
-        <StatusTrack steps={steps} label="Deal progress" title="Progress" testId="deal-track-wide" />
-      </div>
+      <Panel variant="card" className="hidden p-card lg:block">
+        <StageRail steps={track} testId="deal-track-wide" />
+      </Panel>
 
       <div className="nf-room__tabs lg:hidden">
         <RoomTabs options={phoneOptions} value={tab} onChange={pickTab} />
@@ -171,7 +174,7 @@ export function DealRoomView({ room, nowMs, initialTab = "overview", thread = []
       <div className="nf-room__foot-spacer lg:hidden" aria-hidden="true" />
       {primary ? (
         <ActionBar className="lg:hidden">
-          <Button variant="primary" size="lg" full onClick={primary.run} data-testid="foot-action">
+          <Button variant="primary" size="lg" full className="nf-ofr-sheen" onClick={primary.run} data-testid="foot-action">
             {primary.label}
           </Button>
         </ActionBar>
@@ -182,8 +185,21 @@ export function DealRoomView({ room, nowMs, initialTab = "overview", thread = []
   );
 }
 
-/** The section tabs: a row of words on a hairline that scrolls sideways on a phone and never wraps. */
+/** The section tabs: words on a hairline that scrolls sideways on a phone; one ink bar slides to the chosen tab. */
 function RoomTabs({ options, value, onChange }: { options: { value: RoomTab; label: string }[]; value: RoomTab; onChange: (tab: RoomTab) => void }) {
+  const row = useRef<HTMLDivElement | null>(null);
+  const ink = useRef<HTMLSpanElement | null>(null);
+  useLayoutEffect(() => {
+    const place = () => {
+      const el = row.current?.querySelector<HTMLElement>(`[data-tab-key="${value}"]`);
+      if (!el || !ink.current) return;
+      ink.current.style.transform = `translateX(${el.offsetLeft}px) scaleX(${el.offsetWidth})`;
+      el.scrollIntoView({ block: "nearest", inline: "nearest" });
+    };
+    place();
+    window.addEventListener("resize", place);
+    return () => window.removeEventListener("resize", place);
+  }, [value]);
   const move = (event: React.KeyboardEvent<HTMLDivElement>) => {
     const at = options.findIndex((o) => o.value === value);
     const step = event.key === "ArrowRight" ? 1 : event.key === "ArrowLeft" ? -1 : 0;
@@ -197,12 +213,13 @@ function RoomTabs({ options, value, onChange }: { options: { value: RoomTab; lab
   };
   return (
     <div className="nf-utabs" data-testid="room-tabs">
-      <div className="nf-utabs__row" role="tablist" aria-label="Deal Room sections" onKeyDown={move}>
+      <div ref={row} className="nf-utabs__row" role="tablist" aria-label="Deal Room sections" onKeyDown={move}>
         {options.map((o) => (
           <button key={o.value} type="button" role="tab" data-tab-key={o.value} aria-selected={o.value === value} aria-current={o.value === value ? "page" : undefined} tabIndex={o.value === value ? 0 : -1} className="nf-utabs__tab" onClick={() => onChange(o.value)}>
             {o.label}
           </button>
         ))}
+        <span ref={ink} className="nf-room__ink" aria-hidden="true" />
       </div>
     </div>
   );
