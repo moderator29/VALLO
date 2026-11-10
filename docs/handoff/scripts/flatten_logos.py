@@ -5,7 +5,8 @@ Opaque files are left alone. Rewrites each WebP in place (still 160 x 160, quali
 import io, sys, glob
 from PIL import Image
 # found by eye on the contact sheets: dark-grey and mid-blue lettering the contrast rule put on navy
-WHITE = {"abubakar-tafawa-balewa-university-bauchi", "benue-state-polytechnic-ugbokolo"}
+WHITE = {"abubakar-tafawa-balewa-university-bauchi", "benue-state-polytechnic-ugbokolo", "gboko-polytechnic", "ibrahim-badamasi-babangida-university-lapai", "isa-mustapha-agwai-i-polytechnic-lafia"}
+NAVY = {"havilla-university-nde-ikom"}
 for f in sorted(glob.glob(sys.argv[1] + "/*.webp")):
     im = Image.open(f).convert("RGBA")
     px = list(im.getdata())
@@ -24,7 +25,8 @@ for f in sorted(glob.glob(sys.argv[1] + "/*.webp")):
     # the ground that gives the logo's ink the most contrast (navy has luminance 0.1, white 1.0)
     on_navy = sum(abs(lum(p) - 0.1) for p in inked) / max(1, len(inked))
     on_white = sum(abs(lum(p) - 1.0) for p in inked) / max(1, len(inked))
-    ground = (11, 28, 61, 255) if (not white_box and on_navy > on_white and f.rsplit('/', 1)[1][:-5] not in WHITE) else (255, 255, 255, 255)
+    slug = f.rsplit('/', 1)[1][:-5]
+    ground = (11, 28, 61, 255) if (slug in NAVY or (not white_box and on_navy > on_white and slug not in WHITE)) else (255, 255, 255, 255)
     bg = Image.new("RGBA", im.size, ground)
     bg.alpha_composite(im)
     for q in (85, 78, 70, 60):

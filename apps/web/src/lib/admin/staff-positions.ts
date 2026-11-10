@@ -33,6 +33,10 @@ export const STAFF_POSITIONS = [
   "ceo",
   "business_development_executive",
   "social_media_manager",
+  "marketing_manager",
+  "content_manager",
+  "technical_administrator",
+  "customer_support_lead",
 ] as const;
 export type StaffPosition = (typeof STAFF_POSITIONS)[number];
 
@@ -347,6 +351,109 @@ export const JOB_DESCRIPTIONS: Record<StaffPosition, JobDescription> = {
       ...ALWAYS_EXPECTED,
     ],
     escalate: ["Anything that could be read as a company statement on a legal, safety or financial matter: the COO before it is posted."],
+  },
+  marketing_manager: {
+    title: "Marketing Manager",
+    summary:
+      "Plans Vallo's marketing campaigns and promotions, tracks what they bring in, and keeps campaign budgets honest.",
+    reportsTo: "COO",
+    scopes: ["marketing"],
+    responsibilities: [
+      "Plan each campaign in the console: the objective, the channel, the audience, the dates and, where you are authorised, the budget.",
+      "Build the tracked link for every campaign (source, medium and campaign name) so sign-ups can be traced back to it.",
+      "Send each campaign to the COO or an admin for approval before it goes live, and act on any reason it is sent back with.",
+      "Log the numbers each campaign produces (spend, clicks, sign-ups, listings created, referrals) from the real dashboards, as they come in.",
+      "Read the acquisition figures the console already holds and say plainly when a figure is not available.",
+      "Work with the Social Media Manager on campaign posts, and with the Content Manager on campaign copy.",
+    ],
+    expectations: [
+      "Every figure you report is either read from the console or logged by you with its source in the note. Never round a number up or fill a gap with a guess.",
+      "A campaign goes live only after it is approved, and spends only what its approved budget says.",
+      "Marketing copy never promises a payment is safe, protected or guaranteed, and never mentions a member or a payment by name.",
+      "This role has no access to listings, support, moderation or any member's data.",
+      ...ALWAYS_EXPECTED,
+    ],
+    escalate: [
+      "A change to a budget after approval, or spend that would pass it: the COO before it is committed.",
+      "Anything that could be read as a company statement on a legal, safety or financial matter: the COO before it goes out.",
+    ],
+  },
+  content_manager: {
+    title: "Content Manager",
+    summary:
+      "Plans, writes and publishes Vallo's own content: guides, announcements, articles and brand material, through an approval step.",
+    reportsTo: "COO",
+    scopes: ["content"],
+    responsibilities: [
+      "Keep the editorial calendar: what is being written, who owns it and the date it is due.",
+      "Write and edit guides, announcements and articles in the console, and send each one for approval before it is published.",
+      "Record the link once an item is published, so the calendar is the true record of what went out.",
+      "Keep the brand library: the links and notes (voice, names, approved wording) that everyone writes from.",
+      "Watch the moderation queue's counts for the feed and raise anything unusual with the Head of Trust and Safety. You read the counts; the decisions stay with moderation.",
+      "Retire content that is out of date, and check the content health table each week for items that have slipped.",
+    ],
+    expectations: [
+      "Nothing about a member, a payment, a legal matter or an internal decision is published without the approval this role asks for.",
+      "Content never says a payment is safe, protected or guaranteed, and never describes Vallo as holding anyone's money.",
+      "Images and video belong in the social media library; this desk holds text and links only.",
+      "This role has no access to the moderation queue itself, to listings, support or any member's data.",
+      ...ALWAYS_EXPECTED,
+    ],
+    escalate: [
+      "A draft that touches a legal, safety or financial matter: the COO before it is sent for approval.",
+      "Feed content that looks harmful or illegal: the Head of Trust and Safety the same hour.",
+    ],
+  },
+  technical_administrator: {
+    title: "Technical Administrator",
+    summary:
+      "Watches the health of the platform from the console, keeps the record of technical incidents, and reads deployment information where authorised.",
+    reportsTo: "COO",
+    scopes: ["technical"],
+    responsibilities: [
+      "Read the health panel each morning: the scheduled jobs, the crash counts, the open alerts and which providers are configured.",
+      "Declare an incident when something is wrong, with its severity, and post an update every time the position changes.",
+      "Resolve an incident only with a written summary of what happened and what was done.",
+      "Read the deployment information the console shows (release, environment, region) when asked what is running.",
+      "Hand anything that needs a change to infrastructure, a key or the database to the people who hold that access, with the facts you saw.",
+    ],
+    expectations: [
+      "This desk is read-only. It never shows, asks for or stores a key, a password, a database credential or a secret, and you never paste one into an incident update.",
+      "The incident log is the record: what you knew, when, and what you did, in plain words.",
+      "A figure you cannot read is reported as not available, never as zero.",
+      "This role has no access to listings, support, moderation, money or any member's data.",
+      ...ALWAYS_EXPECTED,
+    ],
+    escalate: [
+      "An outage, a data incident or a payment failure affecting many members: the COO and the CEO at once.",
+      "Anything that suggests a key or credential has leaked: the COO immediately, and do not post the detail in the incident log.",
+    ],
+  },
+  customer_support_lead: {
+    title: "Customer Support Lead",
+    summary:
+      "Leads the support team: who works which tickets, what is escalated, the quality of the answers, and the policy the team answers from.",
+    reportsTo: "COO",
+    scopes: ["support", "support_lead"],
+    responsibilities: [
+      "Watch the team's workload each day: what is open, what is oldest, what is late and who is holding it.",
+      "Take unassigned tickets yourself and ask a colleague to release one that is stuck; claims free themselves after thirty minutes without a touch.",
+      "Work the escalation list, and hand each escalated ticket to the desk that can decide it, with the reason they will read first.",
+      "Review a sample of answered tickets every week against tone, accuracy, speed and policy, and give the agent the notes.",
+      "Report the support figures that the console can count: first response, time to resolve and the backlog.",
+      "Write the support policy notes the team answers from, and send each for approval before the team relies on it.",
+    ],
+    expectations: [
+      "Reviews are about the answer, not the person. Score on the four criteria and write what would have been better.",
+      "Never promise an outcome another desk decides, and never ask a member for a password, a card number or a one-time code.",
+      "A policy note is a draft until the COO or an admin approves it. The team works from approved notes only.",
+      ...ALWAYS_EXPECTED,
+    ],
+    escalate: [
+      "Anything about money that has not arrived or a refund that has not come back: finance, with the booking.",
+      "A member who says they are in danger: the Head of Trust and Safety and the COO immediately.",
+      "A pattern of late tickets you cannot clear with the team you have: the COO.",
+    ],
   },
 };
 
