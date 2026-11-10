@@ -16,9 +16,15 @@ spec = importlib.util.spec_from_file_location("h", os.path.join(os.path.dirname(
 src = open(spec.origin).read().replace("\nmain()\n", "\n")
 h = type(sys)("h"); exec(compile(src, spec.origin, "exec"), h.__dict__)
 
-h.PAUSE = 5.0
+h.PAUSE = 4.0
 first = json.load(open(sys.argv[1])); schools = {s["slug"]: s for s in json.load(open(sys.argv[2]))}
 log = open(sys.argv[4], "a") if len(sys.argv) > 4 else sys.stderr
+# optional 5th argument: an earlier log; schools it already verified are skipped (a rerun after a rate-limit stall)
+skip = set()
+if len(sys.argv) > 5:
+    for ln in open(sys.argv[5]):
+        if ln.startswith("{") and '"ok": true' in ln:
+            skip.add(json.loads(ln)["slug"])
 L = lambda *a: print(*a, file=log, flush=True)
 todo = {slug: r for slug, r in first.items() if r["wiki_title"]}
 known = {slug: urllib.parse.unquote(r["logo_source"].split("File:", 1)[1]).replace("_", " ") for slug, r in first.items() if r["logo_url"]}
@@ -90,6 +96,8 @@ def thumb(url, width, mime):
 
 out = {}
 for slug, f in chosen.items():
+    if slug in skip:
+        continue
     if f not in info or not info[f][0].startswith("https://upload.wikimedia.org/"):
         L(f"no file info for {slug} {f}")
         continue
@@ -102,7 +110,7 @@ for slug, f in chosen.items():
     tries.append(url)
     for cand in tries:
         time.sleep(h.PAUSE)
-        st, ct, body = h.get(cand, binary=True)
+        st, ct, body = h.get(cand, binary=True, tries=2)
         ok = st == 200 and ct.lower().startswith("image/") and len(body) > 100
         L(json.dumps(dict(slug=slug, url=cand, status=st, type=ct, ok=ok)))
         if ok:

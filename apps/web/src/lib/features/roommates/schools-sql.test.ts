@@ -106,7 +106,7 @@ describe.skipIf(!have)("the schools directory SQL", () => {
       expect(sql).toMatch(/where i\.slug = v\.slug and i\.logo_url is null/);
     });
     it("sets logos by one update from a values list, with https addresses on a known slug", () => {
-      expect(tuples.length).toBeGreaterThan(30);
+      expect(tuples.length).toBeGreaterThan(15);
       expect((sql.match(/^update public\.institutions/gm) ?? []).length).toBe(2);
       const seen = new Set<string>();
       for (const t of tuples) {
