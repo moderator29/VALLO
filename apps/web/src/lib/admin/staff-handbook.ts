@@ -22,7 +22,7 @@ export const STAFF_HANDBOOK: { heading: string; points: string[] }[] = [
   {
     heading: "Money",
     points: [
-      "Vallo never holds customer money. Never tell anybody that Vallo is holding their money, and never describe a wallet, a balance or escrow.",
+      "Vallo never holds customer money. Licensed payment partners hold payments and escrow, and the money is never in a Vallo account. Say so plainly when a member asks, and never tell anybody that Vallo is holding their money. A balance a member sees is what the partner holds for them, not Vallo funds.",
       "Never ask for, accept or pass on money from a member, a lister or anybody else, for any reason. There is no fee you may charge and no payment you may arrange.",
       "Vallo charges no inspection fee. If a member tells you they were asked for one, treat it as a report.",
       "Never give out account numbers, and never move a conversation or a payment off the platform.",

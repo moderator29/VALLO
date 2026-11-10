@@ -144,8 +144,8 @@ const DESKS_AND_ACCESS: ManualPage = {
           </ul>
           <DocCallout kind="warning" title="Never move money, never ask for it">
             <p>
-              Vallo never holds customer money. Never ask for, accept or pass on money from anyone, and never move a
-              conversation or a payment off the platform.
+              Vallo never holds customer money: licensed payment partners hold payments and escrow. Never ask for, accept
+              or pass on money from anyone, and never move a conversation or a payment off the platform.
             </p>
           </DocCallout>
         </>
@@ -389,7 +389,7 @@ const MONEY: ManualPage = {
     { href: "/admin/referrals", label: "Referrals" },
   ],
   glance: [
-    "Vallo never holds customer money, so there is no float to manage and no balance to chase.",
+    "Vallo never holds customer money (licensed payment partners do), so there is no Vallo float to manage and no Vallo balance to chase.",
     "A rate change is a new dated row, never an edit, and cannot start in the past.",
     "Zero is drawn as No fee, never as a blank: a deliberate zero and a missing value mean different things.",
     "A chargeback is worked from opened to won, or to lost and recovered.",
