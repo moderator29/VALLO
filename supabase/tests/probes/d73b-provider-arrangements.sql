@@ -21,18 +21,20 @@ declare
   r jsonb; arr uuid; v text; n int;
 begin
   -- 1.
-  if (select enabled from public.feature_flags where key = 'rentals_protected_pay') is distinct from false then
-    raise exception 'PROBE_FAIL d73b 1: rentals_protected_pay is not seeded off';
+  -- 10 November 2026: the superseded rentals_protected_pay row was retired
+  -- (the founder's end-of-batch block); absent reads as off, as it must.
+  if coalesce((select enabled from public.feature_flags where key = 'rentals_protected_pay'), false) then
+    raise exception 'PROBE_FAIL d73b 1: rentals_protected_pay reads on';
   end if;
-  -- 7 October 2026 (D77): private.rentals_protected_pay_on() now reads
-  -- payments_payluk_on (the escrow rail's switch); rentals_protected_pay is
-  -- superseded and read by nothing. The switch that matters is seeded off too.
-  -- The switch row exists (seeded by d77); the off state is set inside this
-  -- transaction, so the probe holds once the founder turns Payluk on.
-  if not exists (select 1 from public.feature_flags where key = 'payments_payluk_on') then
-    raise exception 'PROBE_FAIL d73b 1: the payments_payluk_on switch row is missing';
+  -- 10 November 2026: private.rentals_protected_pay_on() reads the new
+  -- provider's switch, payments_escrowpay_on (it read payments_payluk_on from
+  -- 7 October, D77). The row exists (seeded off by the categories file); the
+  -- off state is set inside this transaction, so the probe holds once the
+  -- founder turns the rail on.
+  if not exists (select 1 from public.feature_flags where key = 'payments_escrowpay_on') then
+    raise exception 'PROBE_FAIL d73b 1: the payments_escrowpay_on switch row is missing';
   end if;
-  update public.feature_flags set enabled = false where key = 'payments_payluk_on';
+  update public.feature_flags set enabled = false where key = 'payments_escrowpay_on';
   if private.rentals_protected_pay_on() then raise exception 'PROBE_FAIL d73b 1: reads on'; end if;
 
   -- 2.
@@ -63,7 +65,7 @@ begin
 
   r := public.provider_arrangement_open(ag, 'standard', null);
   if r ->> 'status' <> 'switched_off' then raise exception 'PROBE_FAIL d73b 1: open with the switch off: %', r; end if;
-  update public.feature_flags set enabled = true where key = 'payments_payluk_on';
+  update public.feature_flags set enabled = true where key = 'payments_escrowpay_on';
   if not private.rentals_protected_pay_on() then raise exception 'PROBE_FAIL d73b 1: the switch on does not read on'; end if;
 
   -- 3.

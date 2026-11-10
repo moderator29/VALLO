@@ -9,7 +9,7 @@
 --  PROBE 4  the listing wizard's fee acceptance is recorded where b3x reads it:
 --           rate_moved and mismatch refuse, recorded writes the row, and the
 --           publishing block (lister_fee_gate_blocking) then lets the listing in
---  PROBE 5  one Payluk switch: private.rentals_protected_pay_on() is payments_payluk_on
+--  PROBE 5  one switch: private.rentals_protected_pay_on() is payments_escrowpay_on (10 Nov 2026)
 --  PROBE 6  staff controls: forbidden to members, validated, audited; the kill switch
 --           needs a reason
 --  PROBE 7  the protected payment's open and funding ask the agreement gate
@@ -164,14 +164,15 @@ begin
     end;
   end if;
 
-  -- PROBE 5: one Payluk switch.
+  -- PROBE 5: one switch for protected rent. Since 10 November 2026 it is
+  -- the new provider's, payments_escrowpay_on (it was payments_payluk_on).
   if private.rentals_protected_pay_on() is distinct from
-     coalesce((select enabled from public.feature_flags where key = 'payments_payluk_on'), false) then
-    raise exception 'PROBE_FAIL d77 5: the escrow switch is not payments_payluk_on';
+     coalesce((select enabled from public.feature_flags where key = 'payments_escrowpay_on'), false) then
+    raise exception 'PROBE_FAIL d77 5: the protected rent switch is not payments_escrowpay_on';
   end if;
-  update public.feature_flags set enabled = not enabled where key = 'payments_payluk_on';
-  if private.rentals_protected_pay_on() is distinct from (select enabled from public.feature_flags where key = 'payments_payluk_on') then
-    raise exception 'PROBE_FAIL d77 5: the escrow switch did not follow payments_payluk_on';
+  update public.feature_flags set enabled = not enabled where key = 'payments_escrowpay_on';
+  if private.rentals_protected_pay_on() is distinct from (select enabled from public.feature_flags where key = 'payments_escrowpay_on') then
+    raise exception 'PROBE_FAIL d77 5: the protected rent switch did not follow payments_escrowpay_on';
   end if;
 
   -- PROBE 6: staff controls.

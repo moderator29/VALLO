@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { POPULAR_TOPICS } from "@/components/docs/DocSearchSheet";
+import { POPULAR_TOPICS } from "@/components/docs/popular-topics";
 
 /**
  * POPULAR TOPICS (R100) on the help centre itself: the same chips as the

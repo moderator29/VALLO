@@ -32,7 +32,7 @@ describe("the help centre's anchors", () => {
   });
 
   it("resolves every /help# link the search sheet and the product make", () => {
-    const files = ["components/docs/DocSearchSheet.tsx"];
+    const files = ["components/docs/popular-topics.ts"];
     const anchors = files.flatMap((file) =>
       [...readFileSync(join(SRC, file), "utf8").matchAll(/"\/help#([a-z0-9-]+)"/g)].map((m) => m[1] ?? ""),
     );
