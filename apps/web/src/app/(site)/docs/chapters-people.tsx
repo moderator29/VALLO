@@ -233,27 +233,22 @@ export const FINDING_A_PLACE: DocChapter = {
       id: "filters",
       heading: "Narrow it down with filters",
       body: (
-        <ul role="list">
-          <li>
-            <strong>Budget.</strong> A minimum, a maximum, or both, in naira.
-          </li>
-          <li>
-            <strong>Bedrooms and bathrooms.</strong> The least you need.
-          </li>
-          <li>
-            <strong>Guests.</strong> How many the place must take.
-          </li>
-          <li>
-            <strong>Amenities.</strong> Wi-Fi, air conditioning, kitchen, parking, pool, security,
-            backup power, running water and more. Every one you tick must be there.
-          </li>
-          <li>
-            <strong>Instant book.</strong> Only places you can book without waiting for the host.
-          </li>
-          <li>
-            <strong>Verified only.</strong> Only listings whose lister a person at Vallo has checked.
-          </li>
-        </ul>
+        <DocTable
+          caption="The filters"
+          captionHidden
+          columns={[
+            { key: "filter", label: "Filter" },
+            { key: "keeps", label: "What it keeps" },
+          ]}
+          rows={[
+            { id: "budget", cells: { filter: <strong>Budget</strong>, keeps: "A minimum, a maximum, or both, in naira." } },
+            { id: "rooms", cells: { filter: <strong>Bedrooms and bathrooms</strong>, keeps: "The least you need." } },
+            { id: "guests", cells: { filter: <strong>Guests</strong>, keeps: "How many the place must take." } },
+            { id: "amenities", cells: { filter: <strong>Amenities</strong>, keeps: "Wi-Fi, air conditioning, kitchen, parking, pool, security, backup power, running water and more. Every one you tick must be there." } },
+            { id: "instant", cells: { filter: <strong>Instant book</strong>, keeps: "Only places you can book without waiting for the host." } },
+            { id: "verified", cells: { filter: <strong>Verified only</strong>, keeps: "Only listings whose lister a person at Vallo has checked." } },
+          ]}
+        />
       ),
     },
     {
@@ -826,18 +821,19 @@ export const REVIEWS: DocChapter = {
       id: "who-can-review",
       heading: "Who can leave a review",
       body: (
-        <ul role="list">
-          <li>
-            <strong>A stay.</strong> The guest, after a completed booking.
-          </li>
-          <li>
-            <strong>A restaurant.</strong> Only a diner whose table was marked seated.
-          </li>
-          <li>
-            <strong>A tenancy.</strong> The tenant, about a month after moving in. The first question is
-            whether you paid anyone anything beyond what you paid on Vallo. That answer is private.
-          </li>
-        </ul>
+        <DocTable
+          caption="Who can leave a review"
+          captionHidden
+          columns={[
+            { key: "what", label: "For" },
+            { key: "who", label: "Who can review, and when" },
+          ]}
+          rows={[
+            { id: "stay", icon: "calendar-booking", cells: { what: <strong>A stay</strong>, who: "The guest, after a completed booking." } },
+            { id: "restaurant", icon: "utensils", cells: { what: <strong>A restaurant</strong>, who: "Only a diner whose table was marked seated." } },
+            { id: "tenancy", icon: "key", cells: { what: <strong>A tenancy</strong>, who: "The tenant, about a month after moving in. The first question is whether you paid anyone anything beyond what you paid on Vallo. That answer is private." } },
+          ]}
+        />
       ),
     },
     {
