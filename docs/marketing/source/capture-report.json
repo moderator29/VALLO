@@ -1279,7 +1279,7 @@
   },
   "n-home2": {
     "url": "/home",
-    "at": "2026-11-11T15:57:25.548Z",
+    "at": "2026-11-11T20:10:06.314Z",
     "kind": "mobile",
     "theme": "dark",
     "signedIn": true
@@ -2111,12 +2111,18 @@
     "signedIn": true
   },
   "v3-circle": {
-    "failed": "page.goto: Timeout 240000ms exceeded.",
-    "at": "2026-11-11T15:40:21.755Z"
+    "url": "/circle",
+    "at": "2026-11-11T20:02:52.288Z",
+    "kind": "mobile",
+    "theme": "dark",
+    "signedIn": true
   },
   "v3-circle-explore": {
-    "failed": "page.goto: Target page, context or browser has been closed",
-    "at": "2026-11-11T15:42:45.955Z"
+    "url": "/circle",
+    "at": "2026-11-11T20:03:13.757Z",
+    "kind": "mobile",
+    "theme": "dark",
+    "signedIn": true
   },
   "v3-drawer": {
     "url": "/home",
@@ -2201,21 +2207,21 @@
   },
   "v3-roommates": {
     "url": "/roommates",
-    "at": "2026-11-10T21:31:31.704Z",
+    "at": "2026-11-11T20:03:30.530Z",
     "kind": "mobile",
     "theme": "dark",
     "signedIn": true
   },
   "v3-roommates-2": {
     "url": "/roommates",
-    "at": "2026-11-10T21:31:59.135Z",
+    "at": "2026-11-11T20:03:51.814Z",
     "kind": "mobile",
     "theme": "dark",
     "signedIn": true
   },
   "v3-safety": {
     "url": "/roommates/safety",
-    "at": "2026-11-10T21:32:56.398Z",
+    "at": "2026-11-11T20:04:57.961Z",
     "kind": "mobile",
     "theme": "dark",
     "signedIn": true
@@ -2229,7 +2235,7 @@
   },
   "v3-schools": {
     "url": "/roommates/campus",
-    "at": "2026-11-10T21:32:37.067Z",
+    "at": "2026-11-11T20:04:19.138Z",
     "kind": "mobile",
     "theme": "dark",
     "signedIn": true
@@ -2250,7 +2256,7 @@
   },
   "v3-split": {
     "url": "/roommates/split?rent=1800000000&period=year&people=3",
-    "at": "2026-11-11T04:30:57.225Z",
+    "at": "2026-11-11T20:05:59.533Z",
     "kind": "mobile",
     "theme": "dark",
     "signedIn": true
