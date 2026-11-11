@@ -260,7 +260,7 @@ describe("which pages may be kept at all", () => {
   ])("never keeps %s", (path) => expect(pure.isKeepablePagePath(path)).toBe(false));
 
   it("was bumped, so the activate step clears caches the old worker wrote", () => {
-    expect(pure.CACHE_VERSION).toBe("v11");
+    expect(pure.CACHE_VERSION).toBe("v12");
   });
 });
 

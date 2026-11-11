@@ -2,6 +2,7 @@ import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
+import { ICON_VERSION } from "@/lib/theme/brand-assets";
 
 /*
  * V-78 / V-35: the service worker's asset cache key and the offline page's
@@ -97,8 +98,9 @@ describe("withKeptMark", () => {
 describe("the version", () => {
   it("was bumped, so the activate step clears the caches keyed the old way", () => {
     /* v5 (8 October 2026): visited pages kept per viewer, photographs and fonts.
-       v6 (13 October 2026): kept pages answer at once, marked, with a whole flag. */
-    expect(sw.CACHE_VERSION).toBe("v11");
+       v6 (13 October 2026): kept pages answer at once, marked, with a whole flag.
+       v12 (11 November 2026): the precached shell is served from the shell cache. */
+    expect(sw.CACHE_VERSION).toBe("v12");
   });
 });
 
@@ -130,5 +132,40 @@ describe("notification buttons (V-53)", () => {
   });
   it("carries no buttons when the sender sent none", () => {
     expect(sw.notificationFromPayload({ title: "x" }).options.actions).toEqual([]);
+  });
+});
+
+/*
+ * THE SHELL THE WORKER PRECACHES (11 November 2026).
+ *
+ * The brand refresh put a version stamp on every icon address
+ * (`lib/theme/brand-assets.ts`) and the worker's list was edited by hand to
+ * match. Nothing held the two together, so the next redraw would leave the
+ * worker precaching an address no page asks for, which is the shape of the
+ * fault that made the shell cache dead weight in the first place. These two
+ * read the shipped worker and refuse that drift.
+ */
+describe("the precached shell", () => {
+  const shellAssets = (): string[] => {
+    const line = /const SHELL_ASSETS = \[([^\]]*)\]/.exec(SOURCE);
+    expect(line).not.toBeNull();
+    return (line?.[1] ?? "")
+      .split(",")
+      .map((part) => part.trim().replace(/^"|"$/g, ""))
+      .filter((part) => part.startsWith("/"));
+  };
+
+  it("names the app icon at the version the brand is on", () => {
+    const icon = shellAssets().find((path) => path.startsWith("/pwa/icon-192.png"));
+    expect(icon).toBe(`/pwa/icon-192.png?v=${ICON_VERSION}`);
+  });
+
+  it("is answered from the shell cache, not written and never read", () => {
+    /* Each precached address must be reachable by the fetch handler: the
+       asset path only opens the ASSET cache, so the shell needs its own
+       branch or the bytes on the phone can never be served. */
+    expect(SOURCE).toContain("handleShellAsset");
+    expect(SOURCE).toContain("SHELL_ASSET_KEYS");
+    expect(SOURCE).toMatch(/const shellKey = shellAssetKey\(url\);/);
   });
 });

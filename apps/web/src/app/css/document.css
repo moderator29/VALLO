@@ -75,6 +75,25 @@
     --nf-state-success: var(--nf-doc-success, var(--nf-content-on-paper));
     --nf-state-error: var(--nf-doc-error, var(--nf-content-on-paper));
     --nf-state-warning: var(--nf-doc-attention, var(--nf-content-on-paper));
+    /* THE SURFACES TOO (11 November 2026). Re-answering the inks and leaving
+       the surfaces alone was half a contract: a part dropped inside the sheet
+       that paints a surface of its own (the legal preface's short-version
+       card and its contents block, the documentation kit's tables and flow)
+       took the NIGHT surface, while every word on it took the paper ink. On
+       dark that is near-black on near-navy: the legal and cookie pages
+       measured 1.01 to 1.12 to 1 against the 4.5 the text needs, which is
+       text nobody can read at all. The paper has its own light surfaces
+       (`--nf-doc-bg-inset`, `--nf-surface-on-paper`); they are named here so
+       a surface inside the sheet is paper-coloured for the same reason the
+       ink is paper-coloured, and so that a part written for the app needs to
+       know nothing about being on paper. */
+    --nf-surface-canvas: var(--nf-doc-bg, var(--nf-content-on-media));
+    --nf-surface-primary: var(--nf-doc-bg, var(--nf-content-on-media));
+    --nf-surface-elevated: var(--nf-doc-bg, var(--nf-content-on-media));
+    --nf-surface-secondary: var(--nf-surface-on-paper);
+    --nf-surface-raised: var(--nf-surface-on-paper);
+    --nf-surface-inset: var(--nf-doc-bg-inset, var(--nf-surface-on-paper));
+    --nf-well-fill: var(--nf-doc-bg-inset, var(--nf-surface-on-paper));
     /* The chart roles (tokens.css) are aliases of the inks re-answered above,
        and a custom property that names another is resolved where it is
        DECLARED, so the root's and every `[data-theme]` element's answer is

@@ -87,8 +87,10 @@
    fix was deployed, because a kept page copy (up to a week old) answers at
    once with the script names it was kept with. Bumping the version makes the
    activate step delete every kept page and script, so the next open takes the
-   deployed code. */
-const CACHE_VERSION = "v11";
+   deployed code. v12 (11 November 2026): the precached shell is served from
+   the shell cache, so the manifest and the app icon are actually there with no
+   network at all, instead of being written at install and never read. */
+const CACHE_VERSION = "v12";
 const SHELL_CACHE = `vallo-shell-${CACHE_VERSION}`;
 const ASSET_CACHE = `vallo-assets-${CACHE_VERSION}`;
 const IMAGE_CACHE = `vallo-images-${CACHE_VERSION}`;
@@ -105,6 +107,62 @@ const OFFLINE_URL = "/offline";
  * installed app still knows its own name and colours with no network.
  */
 const SHELL_ASSETS = [OFFLINE_URL, "/brand/vallo-mark.svg", "/pwa/icon-192.png?v=20261111", "/manifest.webmanifest"];
+
+/*
+ * THE SHELL IS ANSWERED FROM THE SHELL CACHE (11 November 2026).
+ *
+ * The install wrote these four addresses and nothing ever read three of them.
+ * `offlineFallback` reaches the offline document through a global
+ * `caches.match`, and that was the only read: an asset request goes to
+ * `handleAsset`, which opens the ASSET cache alone, so with no network
+ * `/manifest.webmanifest` and `/pwa/icon-192.png?v=20261111` both failed
+ * outright although their bytes were on the phone. (The icon failed twice
+ * over: `?v=` is not `dpl`, so `assetCacheKey` refuses it and the request was
+ * not intercepted at all.) `/brand/vallo-mark.svg` only answered because the
+ * landing page happens to ask for that same address while there IS a network,
+ * which put a second copy in the asset cache: the precache was never what
+ * saved it. So the comment above was describing an intention, not a
+ * behaviour, and the promise of an installed app that "still knows its own
+ * name and colours with no network" was not being kept.
+ *
+ * These addresses are therefore matched exactly (path and query, because the
+ * icon is version-stamped by `lib/theme/brand-assets.ts` and the stamp is the
+ * point of it) and answered from the shell cache. The match is the LAST thing
+ * the fetch handler tries, so an address that already has a strategy above
+ * keeps it: see the branch itself for why the mark is one of those.
+ */
+const SHELL_ASSET_KEYS = new Set(SHELL_ASSETS);
+
+function shellAssetKey(url) {
+  const asked = url.pathname + url.search;
+  return SHELL_ASSET_KEYS.has(asked) ? asked : null;
+}
+
+/*
+ * A shell address: the phone's copy, and NO background refetch behind it.
+ * Cache first on purpose, and sound for every address that reaches here. The
+ * icon is version-stamped, so its bytes cannot change at that address; the
+ * manifest and the offline document are refreshed by `refreshShellIfDue`, at
+ * most every SHELL_REFRESH_MS and never under Save-Data, so revalidating them
+ * here as well would fetch the shell again on every single request and spend
+ * the budget that function exists to keep. A miss is fetched once and kept.
+ */
+async function handleShellAsset(request, key) {
+  const shell = await caches.open(SHELL_CACHE);
+  const cached = await shell.match(key);
+  if (cached) return cached;
+  try {
+    const response = await fetch(request);
+    if (isStorableResponse(response)) {
+      shell.put(key, response.clone()).catch(() => {
+        /* Quota or a rejected key. The request is still answered. */
+      });
+    }
+    return response;
+  } catch {
+    return new Response("", { status: 504, statusText: "Offline" });
+  }
+}
 
 /* First path segment is enough to name a surface whose ASSETS must never be
    cached (the asset allowlist below is the primary rule; this is the floor). */
@@ -1262,6 +1320,18 @@ self.addEventListener("fetch", (event) => {
       event.respondWith(isImmutableAssetPath(url.pathname) ? handleImmutable(event, key) : handleAsset(request, key));
       return;
     }
+  }
+
+  /* A PRECACHED SHELL ADDRESS THE ASSET PATH CANNOT SERVE. Last, deliberately:
+     `/brand/vallo-mark.svg` is both a shell asset and ordinary brand artwork,
+     and it has a working strategy above (stale while revalidate, because a
+     mark can be redrawn at its own address). What falls through to here is the
+     version-stamped icon, whose `?v=` makes `assetCacheKey` refuse it, and the
+     manifest and the offline document, which no asset prefix covers. */
+  const shellKey = shellAssetKey(url);
+  if (shellKey) {
+    event.respondWith(handleShellAsset(request, shellKey));
+    return;
   }
 
   // Everything else, including every API and authenticated data response, is

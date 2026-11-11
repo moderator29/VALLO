@@ -386,7 +386,10 @@
 }
 .nf-g1step__eyebrow {
   margin-block-end: var(--nf-space-xs);
-  color: var(--nf-brand-primary);
+  /* The quiet brand ink, not the primary one: `--nf-brand-primary` is the ink
+     for a brand-filled control, and as 12px text on the night surface behind
+     this step it measured 4.07 to 1, under the 4.5 small text needs. */
+  color: var(--nf-brand-quiet);
   font-size: var(--nf-text-overline);
   font-weight: 600;
   letter-spacing: 0.08em;

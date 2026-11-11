@@ -1718,7 +1718,13 @@
   }
   .nf-rmnav__tab--on {
     background: var(--nf-rm-tint-2);
-    color: var(--nf-brand-primary);
+    /* The quiet brand ink, not the primary one. `--nf-brand-primary` is the
+       ink for a brand-filled control, and on the tinted tab behind it it
+       measured 3.63 to 1 on dark, under the 4.5 the 14px label needs, so the
+       tab that says where you are was the one word on the row nobody could
+       read. `--nf-brand-quiet` is the themed reading blue (it is what
+       `--nf-content-link` is made of) and clears the ratio in both themes. */
+    color: var(--nf-brand-quiet);
   }
 
   /* THE HOME DASHBOARD */

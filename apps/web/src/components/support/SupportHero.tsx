@@ -54,13 +54,18 @@ export function SupportHero({
     >
       <div className="flex items-start gap-group">
         <div className="min-w-0 flex-1">
-          <h1
+          {/* The section's own label, which is what `aria-labelledby` above
+              asks it to be, so it is an h2 under the page's title and not a
+              second h1 beside it. The page frame already names the screen
+              ("Help and support"); this names the block. It was already drawn
+              at the h2 size, so nothing on the screen moves. */}
+          <h2
             id="support-hero-title"
             className="nf-h2 break-words text-[var(--nf-content-primary)]"
             data-testid="support-greeting"
           >
             {greeting}
-          </h1>
+          </h2>
           <p className="nf-body-sm mt-row text-[var(--nf-content-secondary)]">{promise}</p>
         </div>
         <span className="grid size-16 shrink-0 place-items-center" aria-hidden="true" data-art="support">
