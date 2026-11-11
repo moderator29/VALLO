@@ -51,8 +51,8 @@ android {
          * release build, and `npm run sync:versions -- --check` in CI to fail
          * a build whose native versions no longer match the manifest.
          */
-        versionCode 10001000
-        versionName "1.0.1"
+        versionCode 10002000
+        versionName "1.0.2"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
