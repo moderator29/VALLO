@@ -47,6 +47,14 @@
     background: transparent;
   }
   :root .nf-g1step--overlay {
+    background: var(--nf-surface-canvas);
+  }
+  /* Only at night. The brand wash darkens and blues the night ground, so an
+     opaque canvas reads near black beside it; by day the ambient leaves the
+     ground at the canvas (/search and a routed frame both measured
+     rgb(245, 246, 248) in WebKit at 390), and a tint here would make the
+     overlay the one plane in the product that is not the page's colour. */
+  :root:not([data-theme="light"]) .nf-g1step--overlay {
     background: color-mix(in oklab, var(--nf-brand-primary) 8%, var(--nf-surface-canvas));
   }
   :root .nf-g1step__top,
