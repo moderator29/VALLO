@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 import {
   CANCELLATION_STOPS,
   PLATFORM_TERMS_V1,
+  boundedByRefundable,
   cancelStanding,
   freeCancellationOpen,
   freeToCancelUntil,
@@ -113,5 +114,38 @@ describe("cancelStanding and freeCancellationOpen", () => {
   it("does not call a partial first tier refundable", () => {
     const half = termsFromPolicyRules("p3", [{ refund_bps: 5000, hours_before: 24 }])!;
     expect(freeCancellationOpen(half, null)).toBe(false);
+  });
+});
+
+describe("boundedByRefundable", () => {
+  const now = new Date("2026-10-13T10:00:00Z");
+
+  /* The refund desk promises a host cancellation everything back. A goodwill
+     part refund has already handed 30,000 kobo of the 100,000 back, so only
+     70,000 is still refundable: the database refuses anything above that and
+     the booking cannot be cancelled at all until the figure is bounded. */
+  it("returns only what is still refundable after an earlier part refund", () => {
+    const full = refundForReasonUnderTerms("host_cancelled", 100_000, CHECK_IN, null, now);
+    expect(full.refundMinor).toBe(100_000);
+    const bounded = boundedByRefundable(full, 100_000, 30_000);
+    expect(bounded.refundMinor).toBe(70_000);
+    /* Retained stays `paid - refund`, which is the column the database writes
+       and the email prints. The 30,000 that went back earlier is its own row. */
+    expect(bounded.retainedMinor).toBe(30_000);
+  });
+
+  it("leaves a refund inside the bound exactly as the schedule decided", () => {
+    const half = refundForReasonUnderTerms("guest_choice", 100_000, CHECK_IN, null, new Date("2026-10-16T00:00:00Z"));
+    expect(half.refundMinor).toBe(50_000);
+    const bounded = boundedByRefundable(half, 100_000, 10_000);
+    expect(bounded.refundMinor).toBe(50_000);
+    expect(bounded.retainedMinor).toBe(50_000);
+  });
+
+  it("never goes below zero when everything has already gone back", () => {
+    const full = refundForReasonUnderTerms("host_cancelled", 100_000, CHECK_IN, null, now);
+    const bounded = boundedByRefundable(full, 100_000, 100_000);
+    expect(bounded.refundMinor).toBe(0);
+    expect(bounded.retainedMinor).toBe(100_000);
   });
 });
