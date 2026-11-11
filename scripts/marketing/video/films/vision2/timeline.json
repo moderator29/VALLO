@@ -1,10 +1,10 @@
 {
  "fps": 60,
- "duration": 87.692,
+ "duration": 101.538,
  "provisional": true,
  "voice": {
   "plan": [],
-  "end": 83.905
+  "end": 96.73
  },
  "music": {
   "bpm": 104,
@@ -13,15 +13,15 @@
   "intro_end": 2.3076923076923075,
   "drop": 4.615384615384615,
   "lifts": [
-   27.69230769230769,
-   46.153846153846146,
-   64.61538461538461
+   32.30769230769231,
+   53.07692307692307,
+   73.84615384615384
   ],
-  "logo_hit": 78.46153846153845,
-  "resolve": 80.76923076923076,
-  "badges": 83.07692307692307,
+  "logo_hit": 94.61538461538461,
+  "resolve": 96.92307692307692,
+  "badges": 99.23076923076923,
   "url": null,
-  "duration": 87.692
+  "duration": 101.538
  },
  "sentences": [
   {
@@ -57,115 +57,133 @@
   {
    "i": 6,
    "start": 18.823,
-   "end": 23.23,
-   "text": "Going away? Book a hotel or a shortlet. Going out? Reserve a table."
+   "end": 22.552,
+   "text": "Living with others? Split the total between you, line by line."
   },
   {
    "i": 7,
-   "start": 23.55,
-   "end": 25.584,
-   "text": "But Vallo is more than listings."
+   "start": 22.872,
+   "end": 27.279,
+   "text": "Going away? Book a hotel or a shortlet. Going out? Reserve a table."
   },
   {
    "i": 8,
-   "start": 25.904,
-   "end": 27.26,
-   "text": "This is Vallo Circle."
+   "start": 27.599,
+   "end": 32.006,
+   "text": "See the room, read the menu, and check every detail before you book."
   },
   {
    "i": 9,
-   "start": 27.58,
-   "end": 31.987,
-   "text": "Renters, owners, agents and professionals, sharing what they know about homes and areas."
+   "start": 32.326,
+   "end": 34.36,
+   "text": "But Vallo is more than listings."
   },
   {
    "i": 10,
-   "start": 32.307,
-   "end": 35.019,
-   "text": "Ask about a neighbourhood before you move in."
+   "start": 34.68,
+   "end": 36.035,
+   "text": "This is Vallo Circle."
   },
   {
    "i": 11,
-   "start": 35.339,
-   "end": 37.033,
-   "text": "Need someone to share with?"
+   "start": 36.355,
+   "end": 40.762,
+   "text": "Renters, owners, agents and professionals, sharing what they know about homes and areas."
   },
   {
    "i": 12,
-   "start": 37.353,
-   "end": 41.421,
-   "text": "Vallo Roommates helps you find a roommate, or a room to share."
+   "start": 41.082,
+   "end": 43.794,
+   "text": "Ask about a neighbourhood before you move in."
   },
   {
    "i": 13,
-   "start": 41.741,
-   "end": 46.487,
-   "text": "Look near your school, find other corps members, and read the safety checklist first."
+   "start": 44.114,
+   "end": 45.809,
+   "text": "Need someone to share with?"
   },
   {
    "i": 14,
-   "start": 46.807,
+   "start": 46.129,
    "end": 50.197,
-   "text": "A badge says exactly what was confirmed, and nothing more."
+   "text": "Vallo Roommates helps you find a roommate, or a room to share."
   },
   {
    "i": 15,
    "start": 50.517,
-   "end": 54.246,
-   "text": "Your Vallo passport shows every line, until you switch it off."
+   "end": 55.263,
+   "text": "Look near your school, find other corps members, and read the safety checklist first."
   },
   {
    "i": 16,
-   "start": 54.566,
-   "end": 58.633,
-   "text": "If you own, host or manage property, your account becomes a workspace."
+   "start": 55.583,
+   "end": 58.972,
+   "text": "A badge says exactly what was confirmed, and nothing more."
   },
   {
    "i": 17,
-   "start": 58.953,
-   "end": 61.665,
-   "text": "List a place yourself, with no agency fee."
+   "start": 59.292,
+   "end": 63.021,
+   "text": "Your Vallo passport shows every line, until you switch it off."
   },
   {
    "i": 18,
-   "start": 61.985,
-   "end": 68.087,
-   "text": "Ask the AI assistant about prices, areas or how renting works. Vallo speaks English, Hausa, Yorùbá and Igbo."
+   "start": 63.341,
+   "end": 67.409,
+   "text": "If you own, host or manage property, your account becomes a workspace."
   },
   {
    "i": 19,
-   "start": 68.407,
-   "end": 70.102,
-   "text": "This is only the start."
+   "start": 67.729,
+   "end": 70.441,
+   "text": "List a place yourself, with no agency fee."
   },
   {
    "i": 20,
-   "start": 70.422,
-   "end": 74.151,
-   "text": "We are building how Nigeria finds, understands and runs its spaces."
+   "start": 70.761,
+   "end": 74.49,
+   "text": "Track your bookings, read reviews, and manage your listings from anywhere."
   },
   {
    "i": 21,
-   "start": 74.471,
-   "end": 77.183,
-   "text": "Every home, every room, every table, every neighbour."
+   "start": 74.81,
+   "end": 80.911,
+   "text": "Ask the AI assistant about prices, areas or how renting works. Vallo speaks English, Hausa, Yorùbá and Igbo."
   },
   {
    "i": 22,
-   "start": 77.503,
-   "end": 80.553,
-   "text": "Live now on the App Store and Google Play."
+   "start": 81.231,
+   "end": 82.926,
+   "text": "This is only the start."
   },
   {
    "i": 23,
-   "start": 80.873,
-   "end": 81.89,
-   "text": "Download Vallo today."
+   "start": 83.246,
+   "end": 86.975,
+   "text": "We are building how Nigeria finds, understands and runs its spaces."
   },
   {
    "i": 24,
-   "start": 82.21,
-   "end": 83.905,
+   "start": 87.295,
+   "end": 90.007,
+   "text": "Every home, every room, every table, every neighbour."
+  },
+  {
+   "i": 25,
+   "start": 90.327,
+   "end": 93.378,
+   "text": "Live now on the App Store and Google Play."
+  },
+  {
+   "i": 26,
+   "start": 93.698,
+   "end": 94.715,
+   "text": "Download Vallo today."
+  },
+  {
+   "i": 27,
+   "start": 95.035,
+   "end": 96.73,
    "text": "Vallo. Real estate, done right."
   }
  ],
@@ -436,1053 +454,1263 @@
   },
   {
    "sentence": 6,
-   "word": "Going",
+   "word": "Living",
    "start": 18.823,
-   "end": 19.199
+   "end": 19.243
   },
   {
    "sentence": 6,
-   "word": "away?",
-   "start": 19.231,
-   "end": 19.532
-  },
-  {
-   "sentence": 6,
-   "word": "Book",
-   "start": 19.558,
-   "end": 19.858
-  },
-  {
-   "sentence": 6,
-   "word": "a",
-   "start": 19.884,
-   "end": 20.034
-  },
-  {
-   "sentence": 6,
-   "word": "hotel",
-   "start": 20.047,
-   "end": 20.423
-  },
-  {
-   "sentence": 6,
-   "word": "or",
-   "start": 20.455,
-   "end": 20.606
-  },
-  {
-   "sentence": 6,
-   "word": "a",
-   "start": 20.619,
-   "end": 20.769
-  },
-  {
-   "sentence": 6,
-   "word": "shortlet.",
-   "start": 20.782,
-   "end": 21.382
-  },
-  {
-   "sentence": 6,
-   "word": "Going",
-   "start": 21.435,
-   "end": 21.81
-  },
-  {
-   "sentence": 6,
-   "word": "out?",
-   "start": 21.843,
-   "end": 22.068
-  },
-  {
-   "sentence": 6,
-   "word": "Reserve",
-   "start": 22.088,
-   "end": 22.613
-  },
-  {
-   "sentence": 6,
-   "word": "a",
-   "start": 22.659,
-   "end": 22.809
-  },
-  {
-   "sentence": 6,
-   "word": "table.",
-   "start": 22.822,
-   "end": 23.197
-  },
-  {
-   "sentence": 7,
-   "word": "But",
-   "start": 23.55,
-   "end": 23.766
-  },
-  {
-   "sentence": 7,
-   "word": "Vallo",
-   "start": 23.785,
-   "end": 24.145
-  },
-  {
-   "sentence": 7,
-   "word": "is",
-   "start": 24.176,
-   "end": 24.32
-  },
-  {
-   "sentence": 7,
-   "word": "more",
-   "start": 24.332,
-   "end": 24.62
-  },
-  {
-   "sentence": 7,
-   "word": "than",
-   "start": 24.645,
-   "end": 24.933
-  },
-  {
-   "sentence": 7,
-   "word": "listings.",
-   "start": 24.958,
-   "end": 25.534
-  },
-  {
-   "sentence": 8,
-   "word": "This",
-   "start": 25.904,
-   "end": 26.197
-  },
-  {
-   "sentence": 8,
-   "word": "is",
-   "start": 26.223,
-   "end": 26.37
-  },
-  {
-   "sentence": 8,
-   "word": "Vallo",
-   "start": 26.382,
-   "end": 26.749
-  },
-  {
-   "sentence": 8,
-   "word": "Circle.",
-   "start": 26.781,
-   "end": 27.222
-  },
-  {
-   "sentence": 9,
-   "word": "Renters,",
-   "start": 27.58,
-   "end": 27.974
-  },
-  {
-   "sentence": 9,
-   "word": "owners,",
-   "start": 28.008,
-   "end": 28.346
-  },
-  {
-   "sentence": 9,
-   "word": "agents",
-   "start": 28.376,
-   "end": 28.713
-  },
-  {
-   "sentence": 9,
-   "word": "and",
-   "start": 28.743,
-   "end": 28.912
-  },
-  {
-   "sentence": 9,
-   "word": "professionals,",
-   "start": 28.926,
-   "end": 29.658
-  },
-  {
-   "sentence": 9,
-   "word": "sharing",
-   "start": 29.722,
-   "end": 30.116
-  },
-  {
-   "sentence": 9,
-   "word": "what",
-   "start": 30.15,
-   "end": 30.376
-  },
-  {
-   "sentence": 9,
-   "word": "they",
-   "start": 30.395,
-   "end": 30.621
-  },
-  {
-   "sentence": 9,
-   "word": "know",
-   "start": 30.64,
-   "end": 30.865
-  },
-  {
-   "sentence": 9,
-   "word": "about",
-   "start": 30.885,
-   "end": 31.166
-  },
-  {
-   "sentence": 9,
-   "word": "homes",
-   "start": 31.191,
-   "end": 31.473
-  },
-  {
-   "sentence": 9,
-   "word": "and",
-   "start": 31.497,
-   "end": 31.666
-  },
-  {
-   "sentence": 9,
-   "word": "areas.",
-   "start": 31.681,
-   "end": 31.962
-  },
-  {
-   "sentence": 10,
-   "word": "Ask",
-   "start": 32.307,
-   "end": 32.504
-  },
-  {
-   "sentence": 10,
-   "word": "about",
-   "start": 32.521,
-   "end": 32.849
-  },
-  {
-   "sentence": 10,
-   "word": "a",
-   "start": 32.878,
-   "end": 33.009
-  },
-  {
-   "sentence": 10,
-   "word": "neighbourhood",
-   "start": 33.02,
-   "end": 33.874
-  },
-  {
-   "sentence": 10,
-   "word": "before",
-   "start": 33.948,
-   "end": 34.342
-  },
-  {
-   "sentence": 10,
-   "word": "you",
-   "start": 34.376,
-   "end": 34.573
-  },
-  {
-   "sentence": 10,
-   "word": "move",
-   "start": 34.59,
-   "end": 34.853
-  },
-  {
-   "sentence": 10,
-   "word": "in.",
-   "start": 34.876,
-   "end": 35.007
-  },
-  {
-   "sentence": 11,
-   "word": "Need",
-   "start": 35.339,
-   "end": 35.622
-  },
-  {
-   "sentence": 11,
-   "word": "someone",
-   "start": 35.647,
-   "end": 36.143
-  },
-  {
-   "sentence": 11,
-   "word": "to",
-   "start": 36.186,
-   "end": 36.328
-  },
-  {
-   "sentence": 11,
-   "word": "share",
-   "start": 36.34,
-   "end": 36.694
-  },
-  {
-   "sentence": 11,
-   "word": "with?",
-   "start": 36.725,
-   "end": 37.009
-  },
-  {
-   "sentence": 12,
-   "word": "Vallo",
-   "start": 37.353,
-   "end": 37.72
-  },
-  {
-   "sentence": 12,
-   "word": "Roommates",
-   "start": 37.752,
-   "end": 38.413
-  },
-  {
-   "sentence": 12,
-   "word": "helps",
-   "start": 38.47,
-   "end": 38.837
-  },
-  {
-   "sentence": 12,
-   "word": "you",
-   "start": 38.869,
-   "end": 39.089
-  },
-  {
-   "sentence": 12,
-   "word": "find",
-   "start": 39.108,
-   "end": 39.402
-  },
-  {
-   "sentence": 12,
-   "word": "a",
-   "start": 39.427,
-   "end": 39.574
-  },
-  {
-   "sentence": 12,
-   "word": "roommate,",
-   "start": 39.587,
-   "end": 40.174
-  },
-  {
-   "sentence": 12,
-   "word": "or",
-   "start": 40.225,
-   "end": 40.372
-  },
-  {
-   "sentence": 12,
-   "word": "a",
-   "start": 40.384,
-   "end": 40.531
-  },
-  {
-   "sentence": 12,
-   "word": "room",
-   "start": 40.544,
-   "end": 40.837
-  },
-  {
-   "sentence": 12,
-   "word": "to",
-   "start": 40.863,
-   "end": 41.01
-  },
-  {
-   "sentence": 12,
-   "word": "share.",
-   "start": 41.022,
-   "end": 41.389
-  },
-  {
-   "sentence": 13,
-   "word": "Look",
-   "start": 41.741,
-   "end": 41.994
-  },
-  {
-   "sentence": 13,
-   "word": "near",
-   "start": 42.016,
-   "end": 42.269
-  },
-  {
-   "sentence": 13,
-   "word": "your",
-   "start": 42.291,
-   "end": 42.545
-  },
-  {
-   "sentence": 13,
-   "word": "school,",
-   "start": 42.567,
-   "end": 42.946
-  },
-  {
-   "sentence": 13,
-   "word": "find",
-   "start": 42.979,
-   "end": 43.232
-  },
-  {
-   "sentence": 13,
-   "word": "other",
-   "start": 43.254,
-   "end": 43.571
-  },
-  {
-   "sentence": 13,
-   "word": "corps",
-   "start": 43.598,
-   "end": 43.915
-  },
-  {
-   "sentence": 13,
-   "word": "members,",
-   "start": 43.942,
-   "end": 44.385
-  },
-  {
-   "sentence": 13,
-   "word": "and",
-   "start": 44.424,
-   "end": 44.613
-  },
-  {
-   "sentence": 13,
-   "word": "read",
-   "start": 44.63,
-   "end": 44.883
-  },
-  {
-   "sentence": 13,
-   "word": "the",
-   "start": 44.905,
-   "end": 45.095
-  },
-  {
-   "sentence": 13,
-   "word": "safety",
-   "start": 45.111,
-   "end": 45.491
-  },
-  {
-   "sentence": 13,
-   "word": "checklist",
-   "start": 45.524,
-   "end": 46.094
-  },
-  {
-   "sentence": 13,
-   "word": "first.",
-   "start": 46.143,
-   "end": 46.459
-  },
-  {
-   "sentence": 14,
-   "word": "A",
-   "start": 46.807,
-   "end": 46.937
-  },
-  {
-   "sentence": 14,
-   "word": "badge",
-   "start": 46.948,
-   "end": 47.273
-  },
-  {
-   "sentence": 14,
-   "word": "says",
-   "start": 47.301,
-   "end": 47.561
-  },
-  {
-   "sentence": 14,
-   "word": "exactly",
-   "start": 47.584,
-   "end": 48.039
-  },
-  {
-   "sentence": 14,
-   "word": "what",
-   "start": 48.078,
-   "end": 48.338
-  },
-  {
-   "sentence": 14,
-   "word": "was",
-   "start": 48.361,
-   "end": 48.556
-  },
-  {
-   "sentence": 14,
-   "word": "confirmed,",
-   "start": 48.573,
-   "end": 49.157
-  },
-  {
-   "sentence": 14,
-   "word": "and",
-   "start": 49.208,
-   "end": 49.403
-  },
-  {
-   "sentence": 14,
-   "word": "nothing",
-   "start": 49.42,
-   "end": 49.875
-  },
-  {
-   "sentence": 14,
-   "word": "more.",
-   "start": 49.914,
-   "end": 50.174
-  },
-  {
-   "sentence": 15,
-   "word": "Your",
-   "start": 50.517,
-   "end": 50.791
-  },
-  {
-   "sentence": 15,
-   "word": "Vallo",
-   "start": 50.815,
-   "end": 51.158
-  },
-  {
-   "sentence": 15,
-   "word": "passport",
-   "start": 51.188,
-   "end": 51.737
-  },
-  {
-   "sentence": 15,
-   "word": "shows",
-   "start": 51.785,
-   "end": 52.128
-  },
-  {
-   "sentence": 15,
-   "word": "every",
-   "start": 52.157,
-   "end": 52.501
-  },
-  {
-   "sentence": 15,
-   "word": "line,",
-   "start": 52.53,
-   "end": 52.805
-  },
-  {
-   "sentence": 15,
-   "word": "until",
-   "start": 52.829,
-   "end": 53.172
-  },
-  {
-   "sentence": 15,
-   "word": "you",
-   "start": 53.202,
-   "end": 53.407
-  },
-  {
-   "sentence": 15,
-   "word": "switch",
-   "start": 53.425,
-   "end": 53.837
-  },
-  {
-   "sentence": 15,
-   "word": "it",
-   "start": 53.873,
-   "end": 54.01
-  },
-  {
-   "sentence": 15,
-   "word": "off.",
-   "start": 54.022,
-   "end": 54.228
-  },
-  {
-   "sentence": 16,
-   "word": "If",
-   "start": 54.566,
-   "end": 54.697
-  },
-  {
-   "sentence": 16,
-   "word": "you",
-   "start": 54.708,
-   "end": 54.905
-  },
-  {
-   "sentence": 16,
-   "word": "own,",
-   "start": 54.922,
-   "end": 55.119
-  },
-  {
-   "sentence": 16,
-   "word": "host",
-   "start": 55.137,
-   "end": 55.399
-  },
-  {
-   "sentence": 16,
-   "word": "or",
-   "start": 55.422,
-   "end": 55.553
-  },
-  {
-   "sentence": 16,
-   "word": "manage",
-   "start": 55.565,
-   "end": 55.959
-  },
-  {
-   "sentence": 16,
-   "word": "property,",
-   "start": 55.993,
-   "end": 56.518
-  },
-  {
-   "sentence": 16,
-   "word": "your",
-   "start": 56.564,
-   "end": 56.826
-  },
-  {
-   "sentence": 16,
-   "word": "account",
-   "start": 56.849,
-   "end": 57.309
-  },
-  {
-   "sentence": 16,
-   "word": "becomes",
-   "start": 57.349,
-   "end": 57.808
-  },
-  {
-   "sentence": 16,
-   "word": "a",
-   "start": 57.848,
-   "end": 57.98
-  },
-  {
-   "sentence": 16,
-   "word": "workspace.",
-   "start": 57.991,
-   "end": 58.582
-  },
-  {
-   "sentence": 17,
-   "word": "List",
-   "start": 58.953,
-   "end": 59.247
-  },
-  {
-   "sentence": 17,
-   "word": "a",
-   "start": 59.272,
-   "end": 59.419
-  },
-  {
-   "sentence": 17,
-   "word": "place",
-   "start": 59.432,
-   "end": 59.799
-  },
-  {
-   "sentence": 17,
-   "word": "yourself,",
-   "start": 59.831,
-   "end": 60.418
-  },
-  {
-   "sentence": 17,
    "word": "with",
-   "start": 60.469,
-   "end": 60.762
+   "start": 19.28,
+   "end": 19.56
   },
   {
-   "sentence": 17,
-   "word": "no",
-   "start": 60.788,
-   "end": 60.935
+   "sentence": 6,
+   "word": "others?",
+   "start": 19.584,
+   "end": 20.004
   },
   {
-   "sentence": 17,
-   "word": "agency",
-   "start": 60.947,
-   "end": 61.388
+   "sentence": 6,
+   "word": "Split",
+   "start": 20.041,
+   "end": 20.391
   },
   {
-   "sentence": 17,
-   "word": "fee.",
-   "start": 61.426,
-   "end": 61.646
-  },
-  {
-   "sentence": 18,
-   "word": "Ask",
-   "start": 61.985,
-   "end": 62.181
-  },
-  {
-   "sentence": 18,
+   "sentence": 6,
    "word": "the",
-   "start": 62.198,
-   "end": 62.394
+   "start": 20.421,
+   "end": 20.631
   },
   {
-   "sentence": 18,
-   "word": "AI",
-   "start": 62.411,
-   "end": 62.542
+   "sentence": 6,
+   "word": "total",
+   "start": 20.65,
+   "end": 21
   },
   {
-   "sentence": 18,
-   "word": "assistant",
-   "start": 62.553,
-   "end": 63.14
+   "sentence": 6,
+   "word": "between",
+   "start": 21.03,
+   "end": 21.52
   },
   {
-   "sentence": 18,
+   "sentence": 6,
+   "word": "you,",
+   "start": 21.563,
+   "end": 21.773
+  },
+  {
+   "sentence": 6,
+   "word": "line",
+   "start": 21.791,
+   "end": 22.071
+  },
+  {
+   "sentence": 6,
+   "word": "by",
+   "start": 22.095,
+   "end": 22.235
+  },
+  {
+   "sentence": 6,
+   "word": "line.",
+   "start": 22.248,
+   "end": 22.528
+  },
+  {
+   "sentence": 7,
+   "word": "Going",
+   "start": 22.872,
+   "end": 23.247
+  },
+  {
+   "sentence": 7,
+   "word": "away?",
+   "start": 23.28,
+   "end": 23.58
+  },
+  {
+   "sentence": 7,
+   "word": "Book",
+   "start": 23.607,
+   "end": 23.907
+  },
+  {
+   "sentence": 7,
+   "word": "a",
+   "start": 23.933,
+   "end": 24.083
+  },
+  {
+   "sentence": 7,
+   "word": "hotel",
+   "start": 24.096,
+   "end": 24.472
+  },
+  {
+   "sentence": 7,
+   "word": "or",
+   "start": 24.504,
+   "end": 24.654
+  },
+  {
+   "sentence": 7,
+   "word": "a",
+   "start": 24.667,
+   "end": 24.818
+  },
+  {
+   "sentence": 7,
+   "word": "shortlet.",
+   "start": 24.831,
+   "end": 25.431
+  },
+  {
+   "sentence": 7,
+   "word": "Going",
+   "start": 25.483,
+   "end": 25.859
+  },
+  {
+   "sentence": 7,
+   "word": "out?",
+   "start": 25.892,
+   "end": 26.117
+  },
+  {
+   "sentence": 7,
+   "word": "Reserve",
+   "start": 26.136,
+   "end": 26.662
+  },
+  {
+   "sentence": 7,
+   "word": "a",
+   "start": 26.708,
+   "end": 26.858
+  },
+  {
+   "sentence": 7,
+   "word": "table.",
+   "start": 26.871,
+   "end": 27.246
+  },
+  {
+   "sentence": 8,
+   "word": "See",
+   "start": 27.599,
+   "end": 27.828
+  },
+  {
+   "sentence": 8,
+   "word": "the",
+   "start": 27.848,
+   "end": 28.078
+  },
+  {
+   "sentence": 8,
+   "word": "room,",
+   "start": 28.098,
+   "end": 28.404
+  },
+  {
+   "sentence": 8,
+   "word": "read",
+   "start": 28.43,
+   "end": 28.736
+  },
+  {
+   "sentence": 8,
+   "word": "the",
+   "start": 28.763,
+   "end": 28.992
+  },
+  {
+   "sentence": 8,
+   "word": "menu,",
+   "start": 29.012,
+   "end": 29.318
+  },
+  {
+   "sentence": 8,
+   "word": "and",
+   "start": 29.345,
+   "end": 29.574
+  },
+  {
+   "sentence": 8,
+   "word": "check",
+   "start": 29.594,
+   "end": 29.977
+  },
+  {
+   "sentence": 8,
+   "word": "every",
+   "start": 30.01,
+   "end": 30.393
+  },
+  {
+   "sentence": 8,
+   "word": "detail",
+   "start": 30.426,
+   "end": 30.885
+  },
+  {
+   "sentence": 8,
+   "word": "before",
+   "start": 30.925,
+   "end": 31.384
+  },
+  {
+   "sentence": 8,
+   "word": "you",
+   "start": 31.424,
+   "end": 31.653
+  },
+  {
+   "sentence": 8,
+   "word": "book.",
+   "start": 31.673,
+   "end": 31.979
+  },
+  {
+   "sentence": 9,
+   "word": "But",
+   "start": 32.326,
+   "end": 32.542
+  },
+  {
+   "sentence": 9,
+   "word": "Vallo",
+   "start": 32.56,
+   "end": 32.92
+  },
+  {
+   "sentence": 9,
+   "word": "is",
+   "start": 32.951,
+   "end": 33.095
+  },
+  {
+   "sentence": 9,
+   "word": "more",
+   "start": 33.108,
+   "end": 33.396
+  },
+  {
+   "sentence": 9,
+   "word": "than",
+   "start": 33.421,
+   "end": 33.709
+  },
+  {
+   "sentence": 9,
+   "word": "listings.",
+   "start": 33.734,
+   "end": 34.309
+  },
+  {
+   "sentence": 10,
+   "word": "This",
+   "start": 34.68,
+   "end": 34.973
+  },
+  {
+   "sentence": 10,
+   "word": "is",
+   "start": 34.999,
+   "end": 35.145
+  },
+  {
+   "sentence": 10,
+   "word": "Vallo",
+   "start": 35.158,
+   "end": 35.525
+  },
+  {
+   "sentence": 10,
+   "word": "Circle.",
+   "start": 35.557,
+   "end": 35.997
+  },
+  {
+   "sentence": 11,
+   "word": "Renters,",
+   "start": 36.355,
+   "end": 36.75
+  },
+  {
+   "sentence": 11,
+   "word": "owners,",
+   "start": 36.784,
+   "end": 37.122
+  },
+  {
+   "sentence": 11,
+   "word": "agents",
+   "start": 37.151,
+   "end": 37.489
+  },
+  {
+   "sentence": 11,
+   "word": "and",
+   "start": 37.518,
+   "end": 37.687
+  },
+  {
+   "sentence": 11,
+   "word": "professionals,",
+   "start": 37.702,
+   "end": 38.434
+  },
+  {
+   "sentence": 11,
+   "word": "sharing",
+   "start": 38.498,
+   "end": 38.892
+  },
+  {
+   "sentence": 11,
+   "word": "what",
+   "start": 38.926,
+   "end": 39.151
+  },
+  {
+   "sentence": 11,
+   "word": "they",
+   "start": 39.171,
+   "end": 39.396
+  },
+  {
+   "sentence": 11,
+   "word": "know",
+   "start": 39.416,
+   "end": 39.641
+  },
+  {
+   "sentence": 11,
    "word": "about",
-   "start": 63.191,
-   "end": 63.518
+   "start": 39.661,
+   "end": 39.942
+  },
+  {
+   "sentence": 11,
+   "word": "homes",
+   "start": 39.967,
+   "end": 40.248
+  },
+  {
+   "sentence": 11,
+   "word": "and",
+   "start": 40.273,
+   "end": 40.442
+  },
+  {
+   "sentence": 11,
+   "word": "areas.",
+   "start": 40.456,
+   "end": 40.738
+  },
+  {
+   "sentence": 12,
+   "word": "Ask",
+   "start": 41.082,
+   "end": 41.279
+  },
+  {
+   "sentence": 12,
+   "word": "about",
+   "start": 41.296,
+   "end": 41.625
+  },
+  {
+   "sentence": 12,
+   "word": "a",
+   "start": 41.653,
+   "end": 41.784
+  },
+  {
+   "sentence": 12,
+   "word": "neighbourhood",
+   "start": 41.796,
+   "end": 42.649
+  },
+  {
+   "sentence": 12,
+   "word": "before",
+   "start": 42.724,
+   "end": 43.118
+  },
+  {
+   "sentence": 12,
+   "word": "you",
+   "start": 43.152,
+   "end": 43.349
+  },
+  {
+   "sentence": 12,
+   "word": "move",
+   "start": 43.366,
+   "end": 43.629
+  },
+  {
+   "sentence": 12,
+   "word": "in.",
+   "start": 43.651,
+   "end": 43.783
+  },
+  {
+   "sentence": 13,
+   "word": "Need",
+   "start": 44.114,
+   "end": 44.398
+  },
+  {
+   "sentence": 13,
+   "word": "someone",
+   "start": 44.422,
+   "end": 44.918
+  },
+  {
+   "sentence": 13,
+   "word": "to",
+   "start": 44.962,
+   "end": 45.103
+  },
+  {
+   "sentence": 13,
+   "word": "share",
+   "start": 45.116,
+   "end": 45.47
+  },
+  {
+   "sentence": 13,
+   "word": "with?",
+   "start": 45.501,
+   "end": 45.784
+  },
+  {
+   "sentence": 14,
+   "word": "Vallo",
+   "start": 46.129,
+   "end": 46.496
+  },
+  {
+   "sentence": 14,
+   "word": "Roommates",
+   "start": 46.528,
+   "end": 47.188
+  },
+  {
+   "sentence": 14,
+   "word": "helps",
+   "start": 47.246,
+   "end": 47.613
+  },
+  {
+   "sentence": 14,
+   "word": "you",
+   "start": 47.644,
+   "end": 47.865
+  },
+  {
+   "sentence": 14,
+   "word": "find",
+   "start": 47.884,
+   "end": 48.177
+  },
+  {
+   "sentence": 14,
+   "word": "a",
+   "start": 48.203,
+   "end": 48.35
+  },
+  {
+   "sentence": 14,
+   "word": "roommate,",
+   "start": 48.362,
+   "end": 48.949
+  },
+  {
+   "sentence": 14,
+   "word": "or",
+   "start": 49,
+   "end": 49.147
+  },
+  {
+   "sentence": 14,
+   "word": "a",
+   "start": 49.16,
+   "end": 49.307
+  },
+  {
+   "sentence": 14,
+   "word": "room",
+   "start": 49.319,
+   "end": 49.613
+  },
+  {
+   "sentence": 14,
+   "word": "to",
+   "start": 49.638,
+   "end": 49.785
+  },
+  {
+   "sentence": 14,
+   "word": "share.",
+   "start": 49.798,
+   "end": 50.165
+  },
+  {
+   "sentence": 15,
+   "word": "Look",
+   "start": 50.517,
+   "end": 50.77
+  },
+  {
+   "sentence": 15,
+   "word": "near",
+   "start": 50.792,
+   "end": 51.045
+  },
+  {
+   "sentence": 15,
+   "word": "your",
+   "start": 51.067,
+   "end": 51.32
+  },
+  {
+   "sentence": 15,
+   "word": "school,",
+   "start": 51.342,
+   "end": 51.722
+  },
+  {
+   "sentence": 15,
+   "word": "find",
+   "start": 51.755,
+   "end": 52.008
+  },
+  {
+   "sentence": 15,
+   "word": "other",
+   "start": 52.03,
+   "end": 52.346
+  },
+  {
+   "sentence": 15,
+   "word": "corps",
+   "start": 52.374,
+   "end": 52.69
+  },
+  {
+   "sentence": 15,
+   "word": "members,",
+   "start": 52.718,
+   "end": 53.161
+  },
+  {
+   "sentence": 15,
+   "word": "and",
+   "start": 53.199,
+   "end": 53.389
+  },
+  {
+   "sentence": 15,
+   "word": "read",
+   "start": 53.406,
+   "end": 53.659
+  },
+  {
+   "sentence": 15,
+   "word": "the",
+   "start": 53.681,
+   "end": 53.87
+  },
+  {
+   "sentence": 15,
+   "word": "safety",
+   "start": 53.887,
+   "end": 54.267
+  },
+  {
+   "sentence": 15,
+   "word": "checklist",
+   "start": 54.3,
+   "end": 54.869
+  },
+  {
+   "sentence": 15,
+   "word": "first.",
+   "start": 54.919,
+   "end": 55.235
+  },
+  {
+   "sentence": 16,
+   "word": "A",
+   "start": 55.583,
+   "end": 55.713
+  },
+  {
+   "sentence": 16,
+   "word": "badge",
+   "start": 55.724,
+   "end": 56.049
+  },
+  {
+   "sentence": 16,
+   "word": "says",
+   "start": 56.077,
+   "end": 56.337
+  },
+  {
+   "sentence": 16,
+   "word": "exactly",
+   "start": 56.359,
+   "end": 56.814
+  },
+  {
+   "sentence": 16,
+   "word": "what",
+   "start": 56.854,
+   "end": 57.114
+  },
+  {
+   "sentence": 16,
+   "word": "was",
+   "start": 57.136,
+   "end": 57.331
+  },
+  {
+   "sentence": 16,
+   "word": "confirmed,",
+   "start": 57.348,
+   "end": 57.933
+  },
+  {
+   "sentence": 16,
+   "word": "and",
+   "start": 57.984,
+   "end": 58.179
+  },
+  {
+   "sentence": 16,
+   "word": "nothing",
+   "start": 58.196,
+   "end": 58.65
+  },
+  {
+   "sentence": 16,
+   "word": "more.",
+   "start": 58.69,
+   "end": 58.95
+  },
+  {
+   "sentence": 17,
+   "word": "Your",
+   "start": 59.292,
+   "end": 59.567
+  },
+  {
+   "sentence": 17,
+   "word": "Vallo",
+   "start": 59.591,
+   "end": 59.934
+  },
+  {
+   "sentence": 17,
+   "word": "passport",
+   "start": 59.964,
+   "end": 60.512
+  },
+  {
+   "sentence": 17,
+   "word": "shows",
+   "start": 60.56,
+   "end": 60.903
+  },
+  {
+   "sentence": 17,
+   "word": "every",
+   "start": 60.933,
+   "end": 61.276
+  },
+  {
+   "sentence": 17,
+   "word": "line,",
+   "start": 61.306,
+   "end": 61.58
+  },
+  {
+   "sentence": 17,
+   "word": "until",
+   "start": 61.604,
+   "end": 61.947
+  },
+  {
+   "sentence": 17,
+   "word": "you",
+   "start": 61.977,
+   "end": 62.183
+  },
+  {
+   "sentence": 17,
+   "word": "switch",
+   "start": 62.201,
+   "end": 62.613
+  },
+  {
+   "sentence": 17,
+   "word": "it",
+   "start": 62.648,
+   "end": 62.786
+  },
+  {
+   "sentence": 17,
+   "word": "off.",
+   "start": 62.797,
+   "end": 63.003
   },
   {
    "sentence": 18,
-   "word": "prices,",
-   "start": 63.546,
-   "end": 63.938
+   "word": "If",
+   "start": 63.341,
+   "end": 63.473
   },
   {
    "sentence": 18,
-   "word": "areas",
-   "start": 63.972,
-   "end": 64.298
+   "word": "you",
+   "start": 63.484,
+   "end": 63.681
+  },
+  {
+   "sentence": 18,
+   "word": "own,",
+   "start": 63.698,
+   "end": 63.895
+  },
+  {
+   "sentence": 18,
+   "word": "host",
+   "start": 63.912,
+   "end": 64.175
   },
   {
    "sentence": 18,
    "word": "or",
-   "start": 64.327,
-   "end": 64.457
+   "start": 64.198,
+   "end": 64.329
   },
   {
    "sentence": 18,
-   "word": "how",
-   "start": 64.469,
-   "end": 64.664
+   "word": "manage",
+   "start": 64.34,
+   "end": 64.734
   },
   {
    "sentence": 18,
-   "word": "renting",
-   "start": 64.681,
-   "end": 65.138
+   "word": "property,",
+   "start": 64.769,
+   "end": 65.294
   },
   {
    "sentence": 18,
-   "word": "works.",
-   "start": 65.178,
-   "end": 65.504
+   "word": "your",
+   "start": 65.339,
+   "end": 65.602
   },
   {
    "sentence": 18,
-   "word": "Vallo",
-   "start": 65.533,
-   "end": 65.859
+   "word": "account",
+   "start": 65.625,
+   "end": 66.084
   },
   {
    "sentence": 18,
-   "word": "speaks",
-   "start": 65.888,
-   "end": 66.279
+   "word": "becomes",
+   "start": 66.124,
+   "end": 66.584
   },
   {
    "sentence": 18,
-   "word": "English,",
-   "start": 66.313,
-   "end": 66.77
+   "word": "a",
+   "start": 66.624,
+   "end": 66.755
   },
   {
    "sentence": 18,
-   "word": "Hausa,",
-   "start": 66.81,
-   "end": 67.136
-  },
-  {
-   "sentence": 18,
-   "word": "Yorùbá",
-   "start": 67.165,
-   "end": 67.556
-  },
-  {
-   "sentence": 18,
-   "word": "and",
-   "start": 67.59,
-   "end": 67.786
-  },
-  {
-   "sentence": 18,
-   "word": "Igbo.",
-   "start": 67.803,
-   "end": 68.064
+   "word": "workspace.",
+   "start": 66.767,
+   "end": 67.358
   },
   {
    "sentence": 19,
-   "word": "This",
-   "start": 68.407,
-   "end": 68.753
+   "word": "List",
+   "start": 67.729,
+   "end": 68.023
   },
   {
    "sentence": 19,
-   "word": "is",
-   "start": 68.784,
-   "end": 68.957
+   "word": "a",
+   "start": 68.048,
+   "end": 68.195
   },
   {
    "sentence": 19,
-   "word": "only",
-   "start": 68.972,
-   "end": 69.318
+   "word": "place",
+   "start": 68.208,
+   "end": 68.574
   },
   {
    "sentence": 19,
-   "word": "the",
-   "start": 69.349,
-   "end": 69.608
+   "word": "yourself,",
+   "start": 68.606,
+   "end": 69.193
   },
   {
    "sentence": 19,
-   "word": "start.",
-   "start": 69.631,
-   "end": 70.064
+   "word": "with",
+   "start": 69.244,
+   "end": 69.538
+  },
+  {
+   "sentence": 19,
+   "word": "no",
+   "start": 69.564,
+   "end": 69.71
+  },
+  {
+   "sentence": 19,
+   "word": "agency",
+   "start": 69.723,
+   "end": 70.163
+  },
+  {
+   "sentence": 19,
+   "word": "fee.",
+   "start": 70.202,
+   "end": 70.422
   },
   {
    "sentence": 20,
-   "word": "We",
-   "start": 70.422,
-   "end": 70.547
-  },
-  {
-   "sentence": 20,
-   "word": "are",
-   "start": 70.557,
-   "end": 70.745
-  },
-  {
-   "sentence": 20,
-   "word": "building",
+   "word": "Track",
    "start": 70.761,
-   "end": 71.26
+   "end": 71.042
   },
   {
    "sentence": 20,
-   "word": "how",
-   "start": 71.303,
-   "end": 71.49
+   "word": "your",
+   "start": 71.067,
+   "end": 71.291
   },
   {
    "sentence": 20,
-   "word": "Nigeria",
-   "start": 71.507,
-   "end": 71.943
+   "word": "bookings,",
+   "start": 71.311,
+   "end": 71.761
   },
   {
    "sentence": 20,
-   "word": "finds,",
-   "start": 71.981,
-   "end": 72.293
+   "word": "read",
+   "start": 71.8,
+   "end": 72.025
   },
   {
    "sentence": 20,
-   "word": "understands",
-   "start": 72.32,
-   "end": 73.006
+   "word": "reviews,",
+   "start": 72.045,
+   "end": 72.438
   },
   {
    "sentence": 20,
    "word": "and",
-   "start": 73.066,
-   "end": 73.253
+   "start": 72.472,
+   "end": 72.641
   },
   {
    "sentence": 20,
-   "word": "runs",
-   "start": 73.269,
-   "end": 73.519
+   "word": "manage",
+   "start": 72.656,
+   "end": 72.993
   },
   {
    "sentence": 20,
-   "word": "its",
-   "start": 73.541,
-   "end": 73.728
+   "word": "your",
+   "start": 73.023,
+   "end": 73.248
   },
   {
    "sentence": 20,
-   "word": "spaces.",
-   "start": 73.744,
-   "end": 74.118
+   "word": "listings",
+   "start": 73.267,
+   "end": 73.717
+  },
+  {
+   "sentence": 20,
+   "word": "from",
+   "start": 73.756,
+   "end": 73.981
+  },
+  {
+   "sentence": 20,
+   "word": "anywhere.",
+   "start": 74.001,
+   "end": 74.451
   },
   {
    "sentence": 21,
-   "word": "Every",
-   "start": 74.471,
-   "end": 74.768
+   "word": "Ask",
+   "start": 74.81,
+   "end": 75.006
   },
   {
    "sentence": 21,
-   "word": "home,",
-   "start": 74.794,
-   "end": 75.031
+   "word": "the",
+   "start": 75.023,
+   "end": 75.218
   },
   {
    "sentence": 21,
-   "word": "every",
-   "start": 75.052,
-   "end": 75.349
+   "word": "AI",
+   "start": 75.235,
+   "end": 75.366
   },
   {
    "sentence": 21,
-   "word": "room,",
-   "start": 75.375,
-   "end": 75.612
+   "word": "assistant",
+   "start": 75.377,
+   "end": 75.965
   },
   {
    "sentence": 21,
-   "word": "every",
-   "start": 75.633,
-   "end": 75.93
+   "word": "about",
+   "start": 76.016,
+   "end": 76.342
   },
   {
    "sentence": 21,
-   "word": "table,",
-   "start": 75.956,
-   "end": 76.253
+   "word": "prices,",
+   "start": 76.371,
+   "end": 76.762
   },
   {
    "sentence": 21,
-   "word": "every",
-   "start": 76.279,
-   "end": 76.576
+   "word": "areas",
+   "start": 76.796,
+   "end": 77.123
   },
   {
    "sentence": 21,
-   "word": "neighbour.",
-   "start": 76.601,
-   "end": 77.136
+   "word": "or",
+   "start": 77.151,
+   "end": 77.282
+  },
+  {
+   "sentence": 21,
+   "word": "how",
+   "start": 77.293,
+   "end": 77.489
+  },
+  {
+   "sentence": 21,
+   "word": "renting",
+   "start": 77.506,
+   "end": 77.963
+  },
+  {
+   "sentence": 21,
+   "word": "works.",
+   "start": 78.002,
+   "end": 78.329
+  },
+  {
+   "sentence": 21,
+   "word": "Vallo",
+   "start": 78.357,
+   "end": 78.684
+  },
+  {
+   "sentence": 21,
+   "word": "speaks",
+   "start": 78.712,
+   "end": 79.104
+  },
+  {
+   "sentence": 21,
+   "word": "English,",
+   "start": 79.138,
+   "end": 79.595
+  },
+  {
+   "sentence": 21,
+   "word": "Hausa,",
+   "start": 79.634,
+   "end": 79.961
+  },
+  {
+   "sentence": 21,
+   "word": "Yorùbá",
+   "start": 79.989,
+   "end": 80.381
+  },
+  {
+   "sentence": 21,
+   "word": "and",
+   "start": 80.415,
+   "end": 80.611
+  },
+  {
+   "sentence": 21,
+   "word": "Igbo.",
+   "start": 80.628,
+   "end": 80.889
   },
   {
    "sentence": 22,
-   "word": "Live",
-   "start": 77.503,
-   "end": 77.843
+   "word": "This",
+   "start": 81.231,
+   "end": 81.578
   },
   {
    "sentence": 22,
-   "word": "now",
-   "start": 77.872,
-   "end": 78.128
+   "word": "is",
+   "start": 81.608,
+   "end": 81.781
   },
   {
    "sentence": 22,
-   "word": "on",
-   "start": 78.15,
-   "end": 78.32
+   "word": "only",
+   "start": 81.796,
+   "end": 82.143
   },
   {
    "sentence": 22,
    "word": "the",
-   "start": 78.335,
-   "end": 78.59
+   "start": 82.173,
+   "end": 82.433
   },
   {
    "sentence": 22,
-   "word": "App",
-   "start": 78.612,
-   "end": 78.867
+   "word": "start.",
+   "start": 82.455,
+   "end": 82.889
   },
   {
-   "sentence": 22,
-   "word": "Store",
-   "start": 78.889,
-   "end": 79.315
+   "sentence": 23,
+   "word": "We",
+   "start": 83.246,
+   "end": 83.371
   },
   {
-   "sentence": 22,
+   "sentence": 23,
+   "word": "are",
+   "start": 83.382,
+   "end": 83.569
+  },
+  {
+   "sentence": 23,
+   "word": "building",
+   "start": 83.585,
+   "end": 84.084
+  },
+  {
+   "sentence": 23,
+   "word": "how",
+   "start": 84.128,
+   "end": 84.315
+  },
+  {
+   "sentence": 23,
+   "word": "Nigeria",
+   "start": 84.331,
+   "end": 84.768
+  },
+  {
+   "sentence": 23,
+   "word": "finds,",
+   "start": 84.806,
+   "end": 85.117
+  },
+  {
+   "sentence": 23,
+   "word": "understands",
+   "start": 85.145,
+   "end": 85.831
+  },
+  {
+   "sentence": 23,
    "word": "and",
-   "start": 79.352,
-   "end": 79.607
+   "start": 85.89,
+   "end": 86.077
   },
   {
-   "sentence": 22,
+   "sentence": 23,
+   "word": "runs",
+   "start": 86.094,
+   "end": 86.343
+  },
+  {
+   "sentence": 23,
+   "word": "its",
+   "start": 86.365,
+   "end": 86.552
+  },
+  {
+   "sentence": 23,
+   "word": "spaces.",
+   "start": 86.568,
+   "end": 86.943
+  },
+  {
+   "sentence": 24,
+   "word": "Every",
+   "start": 87.295,
+   "end": 87.592
+  },
+  {
+   "sentence": 24,
+   "word": "home,",
+   "start": 87.618,
+   "end": 87.856
+  },
+  {
+   "sentence": 24,
+   "word": "every",
+   "start": 87.876,
+   "end": 88.173
+  },
+  {
+   "sentence": 24,
+   "word": "room,",
+   "start": 88.199,
+   "end": 88.437
+  },
+  {
+   "sentence": 24,
+   "word": "every",
+   "start": 88.457,
+   "end": 88.754
+  },
+  {
+   "sentence": 24,
+   "word": "table,",
+   "start": 88.78,
+   "end": 89.077
+  },
+  {
+   "sentence": 24,
+   "word": "every",
+   "start": 89.103,
+   "end": 89.4
+  },
+  {
+   "sentence": 24,
+   "word": "neighbour.",
+   "start": 89.426,
+   "end": 89.96
+  },
+  {
+   "sentence": 25,
+   "word": "Live",
+   "start": 90.327,
+   "end": 90.667
+  },
+  {
+   "sentence": 25,
+   "word": "now",
+   "start": 90.697,
+   "end": 90.952
+  },
+  {
+   "sentence": 25,
+   "word": "on",
+   "start": 90.974,
+   "end": 91.144
+  },
+  {
+   "sentence": 25,
+   "word": "the",
+   "start": 91.159,
+   "end": 91.414
+  },
+  {
+   "sentence": 25,
+   "word": "App",
+   "start": 91.436,
+   "end": 91.692
+  },
+  {
+   "sentence": 25,
+   "word": "Store",
+   "start": 91.714,
+   "end": 92.139
+  },
+  {
+   "sentence": 25,
+   "word": "and",
+   "start": 92.176,
+   "end": 92.431
+  },
+  {
+   "sentence": 25,
    "word": "Google",
-   "start": 79.629,
-   "end": 80.139
+   "start": 92.453,
+   "end": 92.964
   },
   {
-   "sentence": 22,
+   "sentence": 25,
    "word": "Play.",
-   "start": 80.184,
-   "end": 80.524
+   "start": 93.008,
+   "end": 93.348
   },
   {
-   "sentence": 23,
+   "sentence": 26,
    "word": "Download",
-   "start": 80.873,
-   "end": 81.289
+   "start": 93.698,
+   "end": 94.114
   },
   {
-   "sentence": 23,
+   "sentence": 26,
    "word": "Vallo",
-   "start": 81.325,
-   "end": 81.585
+   "start": 94.15,
+   "end": 94.41
   },
   {
-   "sentence": 23,
+   "sentence": 26,
    "word": "today.",
-   "start": 81.608,
-   "end": 81.868
+   "start": 94.432,
+   "end": 94.692
   },
   {
-   "sentence": 24,
+   "sentence": 27,
    "word": "Vallo.",
-   "start": 82.21,
-   "end": 82.535
+   "start": 95.035,
+   "end": 95.36
   },
   {
-   "sentence": 24,
+   "sentence": 27,
    "word": "Real",
-   "start": 82.563,
-   "end": 82.823
+   "start": 95.388,
+   "end": 95.648
   },
   {
-   "sentence": 24,
+   "sentence": 27,
    "word": "estate,",
-   "start": 82.846,
-   "end": 83.236
+   "start": 95.67,
+   "end": 96.06
   },
   {
-   "sentence": 24,
+   "sentence": 27,
    "word": "done",
-   "start": 83.27,
-   "end": 83.53
+   "start": 96.094,
+   "end": 96.354
   },
   {
-   "sentence": 24,
+   "sentence": 27,
    "word": "right.",
-   "start": 83.552,
-   "end": 83.877
+   "start": 96.377,
+   "end": 96.701
   }
  ]
 }
