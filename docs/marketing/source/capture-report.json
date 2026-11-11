@@ -2103,6 +2103,13 @@
     "theme": "light",
     "signedIn": true
   },
+  "v3-assistant": {
+    "url": "/assistant",
+    "at": "2026-11-11T04:31:07.080Z",
+    "kind": "mobile",
+    "theme": "dark",
+    "signedIn": true
+  },
   "v3-circle": {
     "url": "/circle",
     "at": "2026-11-10T21:29:03.677Z",
@@ -2251,8 +2258,15 @@
     "signedIn": false
   },
   "v3-split": {
-    "url": "/roommates/split",
-    "at": "2026-11-10T21:33:14.688Z",
+    "url": "/roommates/split?rent=1800000000&period=year&people=3",
+    "at": "2026-11-11T04:30:57.225Z",
+    "kind": "mobile",
+    "theme": "dark",
+    "signedIn": true
+  },
+  "v3-stay": {
+    "url": "/stay/ea000000-0000-4000-8000-000000000003",
+    "at": "2026-11-11T04:31:21.014Z",
     "kind": "mobile",
     "theme": "dark",
     "signedIn": true

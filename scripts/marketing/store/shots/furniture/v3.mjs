@@ -68,13 +68,14 @@ export const RECIPES = {
     props: [{ name: "coin", x: 0.05, y: 0.745, size: 200, rot: -8 }],
   },
 
-  /* 8: the roommate welcome's second slide: what a badge says. */
+  /* 8: the cost splitter. Its two result tiles lifted; the line the page ends on. */
   8: {
-    pops: [{ side: "right", y: 0.962, anchor: "bottom", kind: "line", tab: "Vallo Roommates", lucide: "badge-check", title: "A badge says what", line: "was confirmed, and no more", meta: null }],
-    props: [{ name: "id-check", x: 0.05, y: 0.775, size: 215, rot: -8 }],
+    mags: [{ box: [44, 1000, 1276, 1268], scale: 1.12, dy: 6 }],
+    pops: [{ side: "right", y: 0.962, anchor: "bottom", kind: "line", tab: "Estimates", lucide: "file-text", title: "Confirm in writing", line: "Before anyone pays", meta: null }],
+    props: [{ name: "coin", x: 0.05, y: 0.775, size: 215, rot: -8 }],
     badges: SIDE(
       { name: "users", kind: "glyph", x: 0.05, y: 0.215, size: 140, rot: -6 },
-      { name: "phone", kind: "glyph", rx: 0.055, y: 0.36, size: 146, rot: 7 },
+      { name: "banknote", kind: "glyph", rx: 0.055, y: 0.36, size: 146, rot: 7 },
       { kind: "mark", x: 0.058, y: 0.62, size: 126, rot: -8, tone: "paper" },
     ),
   },
@@ -94,7 +95,7 @@ export const RECIPES = {
 
   /* 10: the assistant. One of its own starter questions, lifted. */
   10: {
-    mags: [{ box: [51, 2424, 771, 2586], scale: 1.22, dx: -24, dy: 0 }],
+    mags: [{ box: [44, 2236, 780, 2400], scale: 1.2, dx: -24, dy: 0 }],
     pops: [{ side: "right", y: 0.962, anchor: "bottom", kind: "line", tab: "Costs", lucide: "receipt-text", title: "What moving in costs", line: "Ask the assistant first", meta: null }],
     props: [{ name: "assistant", x: 0.045, y: 0.80, size: 215, rot: -7 }],
     badges: SIDE(
@@ -173,13 +174,13 @@ export const RECIPES = {
     ),
   },
 
-  /* 17: notifications. */
+  /* 17: the roommate welcome's second slide: what a badge says. */
   17: {
-    mags: [{ box: [44, 1190, 1274, 1895], scale: 1.1, dy: 14 }],
-    props: [{ name: "bell", rx: 0.05, y: 0.78, size: 215, rot: 8 }],
+    pops: [{ side: "right", y: 0.962, anchor: "bottom", kind: "line", tab: "Vallo Roommates", lucide: "badge-check", title: "A badge says what", line: "was confirmed, and no more", meta: null }],
+    props: [{ name: "id-check", x: 0.05, y: 0.775, size: 215, rot: -8 }],
     badges: SIDE(
-      { name: "bell", kind: "glyph", x: 0.05, y: 0.215, size: 140, rot: -6 },
-      { name: "message-circle", kind: "glyph", rx: 0.055, y: 0.34, size: 146, rot: 7 },
+      { name: "users", kind: "glyph", x: 0.05, y: 0.215, size: 140, rot: -6 },
+      { name: "phone", kind: "glyph", rx: 0.055, y: 0.36, size: 146, rot: 7 },
       { kind: "mark", x: 0.058, y: 0.62, size: 126, rot: -8, tone: "paper" },
     ),
   },

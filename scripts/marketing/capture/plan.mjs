@@ -499,6 +499,7 @@ const V3 = [
   { id: "v3-search", steps: go("/search?market=rent") },
   { id: "v3-filters", steps: go("/search?filters=open") },
   { id: "v3-saved", steps: go("/saved") },
+  { id: "v3-assistant", steps: go("/assistant") },
   { id: "v3-stays", steps: go("/stays") },
   { id: "v3-stay", steps: [{ goto: STAY }, { reveal: "h1", offset: 900 }, { wait: 800 }] },
   { id: "v3-restaurant", steps: go(RESTAURANT) },
