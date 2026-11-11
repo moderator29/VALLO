@@ -34,7 +34,7 @@ import { moneyHoldRefusal } from "@/lib/money/hold";
 import { revalidatePath } from "next/cache";
 import { fail, formDataToObject, ok, validate, type ActionResult } from "../actions/envelope";
 import { NOT_CONFIGURED_MESSAGE, SIGNED_OUT_MESSAGE } from "../actions/session";
-import { PaystackError, isPaystackConfigured, resolveAccountNumber } from "../payments/paystack";
+import { PaystackError, isPaystackConfigured, listBanks, resolveAccountNumber } from "../payments/paystack";
 import { createAdminClient } from "../supabase/admin";
 import { getAgentContext } from "./listings-queries";
 import { moneyLockRefusalFor } from "../security/money-lock-guard";
@@ -145,11 +145,38 @@ export async function addPayoutAccount(
   } catch {
     return fail(SERVICE_DOWN_MESSAGE);
   }
+  /*
+   * AND THE BANK'S NAME IS THE BANK'S, FOR THE SAME REASON THE ACCOUNT NAME IS.
+   *
+   * The header above says a tampered form field must not put a friendly name
+   * on a stranger's NUBAN, and re-resolves `account_name` to make that true.
+   * `bank_name` was left as the browser sent it. It is a hidden input
+   * (`components/agent/PayoutAccounts.tsx`) derived from the code on the
+   * client, so an edited post can store "Zenith Bank" against a GTBank code.
+   * No money follows it: every Paystack call on this path takes `bank_code`
+   * (`createSubaccount` sends it as `settlement_bank`, `createTransferRecipient`
+   * as `bank_code`). What it does reach is the agent's own payout screen and
+   * the support desk's account lookup, where a name that is not the bank the
+   * money goes to is exactly the wrong thing to be reading during a payout
+   * dispute. So it is taken from the processor's own list by code.
+   *
+   * Best effort by design: a list that cannot be fetched falls back to the
+   * submitted value rather than refusing an agent their payout account. The
+   * code is what was verified a moment ago by `resolveAccountNumber`.
+   */
+  let bankName = parsed.data.bankName;
+  try {
+    const named = (await listBanks()).find((bank) => bank.code === parsed.data.bankCode)?.name;
+    if (named) bankName = named;
+  } catch {
+    /* The processor's list is a courtesy here, never a gate. */
+  }
+
   const { data: created, error: insertError } = await writer
     .from("payout_accounts")
     .insert({
       agent_id: context.agent.id,
-      bank_name: parsed.data.bankName,
+      bank_name: bankName,
       /* The code, not only the name. Paystack resolves an account by code, so
          an account stored without one can never climb the payout rung again
          after this insert: nothing would know which bank to ask. */
