@@ -35,9 +35,9 @@ describe("open.css", () => {
     /* Each piece is put at its finished value, so a sweep that never runs
        cannot leave the ring half drawn; the layer itself fades. */
     for (const block of [
-      /prefers-reduced-motion: reduce\)\s*\{\s*\.nf-open__launch\s*\{\s*animation: nf-open-still/,
+      /prefers-reduced-motion: reduce\)\s*\{\s*\.nf-open__launch\s*\{\s*--nf-reduced-duration: 300ms;\s*animation: nf-open-still/,
       /\.nf-open__launch :is\(\.sw, \.t, \.mv, \.l\)\s*\{\s*animation: none;\s*stroke-dashoffset: 0;\s*opacity: 1;\s*transform: none/,
-      /data-motion="calm"\], \[data-motion="off"\]\) \.nf-open__launch\s*\{\s*animation: nf-open-still/,
+      /data-motion="calm"\], \[data-motion="off"\]\) \.nf-open__launch\s*\{\s*--nf-reduced-duration: 300ms;\s*animation: nf-open-still/,
     ]) expect(css).toMatch(block);
   });
 
