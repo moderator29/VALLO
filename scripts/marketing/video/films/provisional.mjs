@@ -21,7 +21,9 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
-const [proj, scriptPath] = process.argv.slice(2);
+const argv = process.argv.slice(2);
+const opt = (name, fallback = null) => (argv.includes(`--${name}`) ? argv[argv.indexOf(`--${name}`) + 1] : fallback);
+const [proj, scriptPath] = argv.filter((a, i) => !a.startsWith("--") && !argv[i - 1]?.startsWith("--"));
 if (!proj || !scriptPath) {
   console.error("usage: node films/provisional.mjs <proj> <script.txt>");
   process.exit(1);
@@ -80,10 +82,13 @@ const bar = beat * 4;
 const barAt = (x) => Math.round(x / bar) * bar;
 const barUp = (x) => Math.ceil(x / bar - 1e-9) * bar;
 const last = sentences[sentences.length - 1];
-const logo = barAt(last.start);
+/* --logo-line N: the line the end card's mark lands on (default: the last one) */
+const logoLine = Number(opt("logo-line", sentences.length));
+const logo = barAt(sentences[logoLine - 1].start);
 const resolve = logo + bar;
 const badges = resolve + bar;
 const duration = +barUp(Math.max(last.end, badges) + bar).toFixed(3);
+void last;
 const body = sentences.slice(1, -1);
 const lifts = [0.3, 0.55, 0.78]
   .map((u) => barAt(body[0].start + (body[body.length - 1].end - body[0].start) * u))

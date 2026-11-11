@@ -22,7 +22,8 @@ import sys
 from collections import Counter
 from PIL import Image
 
-REPO = "/home/user/read-it-well"
+import os
+REPO = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", ".."))
 SCREENS = f"{REPO}/docs/marketing/screens"
 SOURCE = f"{REPO}/docs/marketing/source"
 

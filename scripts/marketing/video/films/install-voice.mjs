@@ -106,7 +106,7 @@ const sentences = lines.map((text, k) => {
 /* ---- 4. the music, on bar lines, because music.py refuses anything else ---- */
 
 const last = sentences[sentences.length - 1];
-const logo = bar(last.start);                        /* "Vallo." */
+const logo = bar(sentences[Number(opt("logo-line", sentences.length)) - 1].start);                        /* "Vallo." */
 const resolve = logo + BAR;                          /* "Real estate, done right." */
 const badges = resolve + BAR;
 /*
