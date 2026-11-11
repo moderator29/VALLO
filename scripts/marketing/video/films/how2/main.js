@@ -175,7 +175,7 @@ export async function build(ctx) {
   whipPan(ctx, w(3, "Search") - 0.1, { dir: "left", dur: 0.24, sound: "whoosh_short" });
   const find = layer("find", s(3) - 0.2, cut(4) + 0.1);
   lift(ctx, H, {
-    id: "v3-search", crop: { x: 80, y: 392, w: 1210, h: 164 },
+    id: "v3-search", crop: { x: 22, y: 201, w: 1298, h: 345 },
     t0: w(3, "Search") + 0.3, t1: w(3, "filter") - 0.35,
     to: { x: CX, y: 540, s: 0.76, r: -1.5 }, seed: 31, radius: 30,
   });
@@ -185,7 +185,7 @@ export async function build(ctx) {
     x: CX, y: 540, t0: w(3, "exactly") - 0.55, t1: w(3, "need") - 0.22, size: 32, from: "above", seed: 32, tab: "Filter by",
   });
   lift(ctx, H, {
-    id: "v3-filters", crop: { x: 30, y: 2659, w: 1260, h: 195 },
+    id: "v3-filters", crop: { x: 38, y: 2473, w: 1248, h: 195 },
     t0: w(3, "need") - 0.12, t1: cut(4) - 0.66,
     to: { x: CX, y: 555, s: 0.78, r: 1.5 }, seed: 33, radius: 40,
   });
@@ -242,7 +242,7 @@ export async function build(ctx) {
     x: 330, y: 560, t0: w(6, "rent") - 0.5, t1: w(6, "total") - 0.58, size: 30, from: "left", seed: 47, rot: -2,
   });
   lift(ctx, H, {
-    id: "v3-listing-total", crop: { x: 48, y: 1190, w: 1224, h: 180 },
+    id: "v3-listing-total", crop: { x: 0, y: 1044, w: 1296, h: 126 },
     t0: w(6, "total") - 0.05, t1: cut(7) - 0.66,
     to: { x: CX, y: 665, s: 0.8, r: -1.2 }, seed: 48, radius: 30, fly: 0.8,
   });
@@ -272,7 +272,7 @@ export async function build(ctx) {
     x: CX, y: 470, t0: s(7) - 0.4, t1: w(7, "compare") - 0.3, size: 30, from: "above", seed: 51,
   });
   lift(ctx, H, {
-    id: "v3-saved", crop: { x: 48, y: 1170, w: 1224, h: 130 },
+    id: "v3-saved", crop: { x: 0, y: 979, w: 1279, h: 135 },
     t0: w(7, "compare") - 0.2, t1: cut(8) - 0.62,
     to: { x: CX, y: 520, s: 0.8, r: -1.5 }, seed: 52, radius: 30,
   });
@@ -289,7 +289,7 @@ export async function build(ctx) {
     x: CX, y: 450, t0: s(8) - 0.4, t1: cut(9) - 0.4, size: 32, from: "above", accent: "electric", seed: 61,
   });
   lift(ctx, H, {
-    id: "assistant", crop: { x: 42, y: 2424, w: 730, h: 162 },
+    id: "assistant", crop: { x: 42, y: 2434, w: 1236, h: 206 },
     t0: w(8, "assistant") - 0.2, t1: cut(9) - 0.66,
     to: { x: CX, y: 652, s: 1.04, r: 1.2 }, seed: 62, radius: 40,
   });
@@ -301,7 +301,7 @@ export async function build(ctx) {
   ground(ctx, cut(9), cut(11), { tone: "dusk", y: 22, seed: 16 });
   const stay = layer("stay", cut(9), cut(11) + 0.1);
   lift(ctx, H, {
-    id: "v3-stays", crop: { x: 42, y: 1608, w: 1236, h: 420 },
+    id: "v3-stays", crop: { x: 0, y: 1411, w: 1320, h: 234 },
     t0: w(9, "hotel") - 0.25, t1: w(9, "few") - 0.7,
     to: { x: CX, y: 545, s: 0.6, r: -1.2 }, seed: 71, radius: 40,
   });
@@ -327,7 +327,7 @@ export async function build(ctx) {
     x: CX, y: 470, t0: s(11) + 0.1, t1: w(11, "ask") - 0.4, size: 31, from: "above", seed: 81, tab: "Vallo Circle",
   });
   lift(ctx, H, {
-    id: "v3-circle-explore", crop: { x: 30, y: 470, w: 1260, h: 780 },
+    id: "v3-circle-explore", crop: { x: 13, y: 392, w: 1258, h: 844 },
     t0: w(11, "ask") - 0.1, t1: cut(12) - 0.66,
     to: { x: CX, y: 580, s: 0.54, r: 1.2 }, seed: 82, radius: 40,
   });
@@ -343,7 +343,7 @@ export async function build(ctx) {
     x: CX, y: 470, t0: s(12) + 0.2, t1: w(12, "near") - 0.3, size: 30, from: "above", seed: 91, tab: "Say what you need",
   });
   lift(ctx, H, {
-    id: "v3-schools", crop: { x: 30, y: 640, w: 1260, h: 520 },
+    id: "v3-schools", crop: { x: 0, y: 622, w: 1320, h: 547 },
     t0: w(12, "near") - 0.15, t1: s(13) - 0.75,
     to: { x: CX, y: 560, s: 0.62, r: -1.5 }, seed: 92, radius: 40,
   });
@@ -363,7 +363,7 @@ export async function build(ctx) {
     x: CX, y: 150, size: 92, t0: w(14, "Vallo") - 0.1, t1: cut(15) - 0.3, align: "center", stagger: 0.04, keyStyle: "chip",
   });
   lift(ctx, H, {
-    id: "v3-payments", crop: { x: 30, y: 1060, w: 1260, h: 420 },
+    id: "v3-payments", crop: { x: 0, y: 894, w: 1189, h: 349 },
     t0: w(14, "holds") - 0.1, t1: cut(15) - 0.55,
     to: { x: CX, y: 640, s: 0.7, r: -1.2 }, seed: 101, radius: 30, label: "The Payments screen, word for word",
   });
