@@ -1,0 +1,10 @@
+{
+ "about": "Video One (Nov 2026): the payoffs lifted over the bed: the move-in total landing (the chime on the rolled figure) and the latch on 'never holds your money'. The end card rides the music back up from the logo hit. Cue windows come from sfx-how2-mobile.json; they move with the clock, so re-read them after the real voice is installed.",
+ "dip_db": -3,
+ "dip_s": 0.25,
+ "end_ride": { "from": 66.923, "ramp": 0.6, "db": 6.5 },
+ "cues": [
+  { "name": "success", "from": 28.7, "to": 29.0, "lift_db": 7 },
+  { "name": "lock_click", "from": 59.6, "to": 59.85, "lift_db": 6 }
+ ]
+}

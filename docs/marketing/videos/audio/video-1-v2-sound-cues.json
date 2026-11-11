@@ -1,0 +1,368 @@
+[
+ {
+  "name": "swipe",
+  "t": 7.305,
+  "offset_db": -4,
+  "pan": 0
+ },
+ {
+  "name": "swipe",
+  "t": 14.239,
+  "offset_db": -4,
+  "pan": 0
+ },
+ {
+  "name": "swipe",
+  "t": 25.981,
+  "offset_db": -4,
+  "pan": 0
+ },
+ {
+  "name": "swipe",
+  "t": 40.805,
+  "offset_db": -4,
+  "pan": 0
+ },
+ {
+  "name": "swipe",
+  "t": 41.987,
+  "offset_db": -4,
+  "pan": 0
+ },
+ {
+  "name": "swipe",
+  "t": 47.541,
+  "offset_db": -4,
+  "pan": 0
+ },
+ {
+  "name": "swipe",
+  "t": 54.649,
+  "offset_db": -4,
+  "pan": 0
+ },
+ {
+  "name": "swipe",
+  "t": 56.117,
+  "offset_db": -4,
+  "pan": 0
+ },
+ {
+  "name": "swipe",
+  "t": 64.924,
+  "offset_db": -4,
+  "pan": 0
+ },
+ {
+  "name": "whoosh_short",
+  "t": 5.999,
+  "offset_db": -3,
+  "pan": 0
+ },
+ {
+  "name": "whoosh_short",
+  "t": 7.111,
+  "offset_db": -6,
+  "pan": 0
+ },
+ {
+  "name": "pop",
+  "t": 7.705,
+  "offset_db": -2,
+  "pan": 0
+ },
+ {
+  "name": "tap",
+  "t": 9.824,
+  "offset_db": 0,
+  "pan": 0
+ },
+ {
+  "name": "card_slide",
+  "t": 10.459,
+  "offset_db": -5,
+  "pan": 0
+ },
+ {
+  "name": "pop",
+  "t": 12.052,
+  "offset_db": -2,
+  "pan": 0
+ },
+ {
+  "name": "stamp",
+  "t": 12.6,
+  "offset_db": -4,
+  "pan": 0
+ },
+ {
+  "name": "card_slide",
+  "t": 13.789,
+  "offset_db": -5,
+  "pan": 0
+ },
+ {
+  "name": "card_slide",
+  "t": 15.387,
+  "offset_db": -5,
+  "pan": 0
+ },
+ {
+  "name": "pop_low",
+  "t": 17.436,
+  "offset_db": -3,
+  "pan": 0
+ },
+ {
+  "name": "pop_low",
+  "t": 17.715,
+  "offset_db": -3,
+  "pan": 0
+ },
+ {
+  "name": "pop_low",
+  "t": 18.342,
+  "offset_db": -3,
+  "pan": 0
+ },
+ {
+  "name": "pop_low",
+  "t": 18.899,
+  "offset_db": -3,
+  "pan": 0
+ },
+ {
+  "name": "pop_low",
+  "t": 20.153,
+  "offset_db": -3,
+  "pan": 0
+ },
+ {
+  "name": "card_slide",
+  "t": 19.703,
+  "offset_db": -5,
+  "pan": 0
+ },
+ {
+  "name": "card_slide",
+  "t": 23.186,
+  "offset_db": -5,
+  "pan": 0
+ },
+ {
+  "name": "pop",
+  "t": 26.231,
+  "offset_db": -2,
+  "pan": 0
+ },
+ {
+  "name": "counter_tick",
+  "t": 27.423,
+  "offset_db": -4,
+  "pan": 0
+ },
+ {
+  "name": "counter_tick",
+  "t": 27.593,
+  "offset_db": -4.5,
+  "pan": 0
+ },
+ {
+  "name": "counter_tick",
+  "t": 27.763,
+  "offset_db": -5,
+  "pan": 0
+ },
+ {
+  "name": "counter_tick",
+  "t": 27.933,
+  "offset_db": -5.5,
+  "pan": 0
+ },
+ {
+  "name": "counter_tick",
+  "t": 28.103,
+  "offset_db": -6,
+  "pan": 0
+ },
+ {
+  "name": "counter_tick",
+  "t": 28.273,
+  "offset_db": -6.5,
+  "pan": 0
+ },
+ {
+  "name": "success",
+  "t": 28.837,
+  "offset_db": -1,
+  "pan": 0
+ },
+ {
+  "name": "whoosh_short",
+  "t": 29.294,
+  "offset_db": -3,
+  "pan": 0
+ },
+ {
+  "name": "card_slide",
+  "t": 29.252,
+  "offset_db": -5,
+  "pan": 0
+ },
+ {
+  "name": "pop",
+  "t": 31.412,
+  "offset_db": -2,
+  "pan": 0
+ },
+ {
+  "name": "tap",
+  "t": 32.371,
+  "offset_db": 0,
+  "pan": 0
+ },
+ {
+  "name": "impact_soft",
+  "t": 33.521,
+  "offset_db": -4,
+  "pan": 0
+ },
+ {
+  "name": "card_slide",
+  "t": 33.301,
+  "offset_db": -5,
+  "pan": 0
+ },
+ {
+  "name": "pop",
+  "t": 35.415,
+  "offset_db": -2,
+  "pan": 0
+ },
+ {
+  "name": "whoosh_short",
+  "t": 37.529,
+  "offset_db": -4,
+  "pan": 0
+ },
+ {
+  "name": "pop",
+  "t": 38.968,
+  "offset_db": -2,
+  "pan": 0
+ },
+ {
+  "name": "tap",
+  "t": 39.318,
+  "offset_db": 0,
+  "pan": 0
+ },
+ {
+  "name": "card_slide",
+  "t": 40.855,
+  "offset_db": -5,
+  "pan": 0
+ },
+ {
+  "name": "whoosh_short",
+  "t": 41.793,
+  "offset_db": -6,
+  "pan": 0
+ },
+ {
+  "name": "card_slide",
+  "t": 42.137,
+  "offset_db": -5,
+  "pan": 0
+ },
+ {
+  "name": "stamp",
+  "t": 45.348,
+  "offset_db": -4,
+  "pan": 0
+ },
+ {
+  "name": "card_slide",
+  "t": 45.608,
+  "offset_db": -5,
+  "pan": 0
+ },
+ {
+  "name": "pop",
+  "t": 47.841,
+  "offset_db": -2,
+  "pan": 0
+ },
+ {
+  "name": "whoosh_short",
+  "t": 50.555,
+  "offset_db": -3,
+  "pan": 0
+ },
+ {
+  "name": "card_slide",
+  "t": 51.113,
+  "offset_db": -5,
+  "pan": 0
+ },
+ {
+  "name": "pop",
+  "t": 54.749,
+  "offset_db": -2,
+  "pan": 0
+ },
+ {
+  "name": "card_slide",
+  "t": 56.117,
+  "offset_db": -5,
+  "pan": 0
+ },
+ {
+  "name": "impact_soft",
+  "t": 58.83,
+  "offset_db": -4,
+  "pan": 0
+ },
+ {
+  "name": "pop",
+  "t": 59.667,
+  "offset_db": -2,
+  "pan": 0
+ },
+ {
+  "name": "lock_click",
+  "t": 59.717,
+  "offset_db": -2,
+  "pan": 0
+ },
+ {
+  "name": "whoosh_short",
+  "t": 60.749,
+  "offset_db": -6,
+  "pan": 0
+ },
+ {
+  "name": "impact_soft",
+  "t": 67.003,
+  "offset_db": 0,
+  "pan": 0
+ },
+ {
+  "name": "pop",
+  "t": 67.673,
+  "offset_db": -6,
+  "pan": 0
+ },
+ {
+  "name": "pop",
+  "t": 67.973,
+  "offset_db": -3,
+  "pan": 0
+ },
+ {
+  "name": "pop",
+  "t": 68.093,
+  "offset_db": -3,
+  "pan": 0
+ }
+]
