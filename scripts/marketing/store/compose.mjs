@@ -560,9 +560,9 @@ if (WITH_FEATURE && FEATURE) {
 
 if (args.includes("--banners")) {
   /* The App Store product page's header (21:9) and search results (3:2) images; see shots/banners.mjs. */
-  const { HEADER, SEARCH } = await import("./shots/banners.mjs");
-  for (const [name, W, H, fn] of [["header-3840x1646", 3840, 1646, HEADER], ["search-results-3840x2560", 3840, 2560, SEARCH]]) {
-    const ctx = makeCtx({ n: 0 }, "app-store", 0);
+  const { HEADER, SEARCH, PLAY } = await import("./shots/banners.mjs");
+  for (const [name, W, H, fn, st] of [["header-3840x1646", 3840, 1646, HEADER], ["search-results-3840x2560", 3840, 2560, SEARCH], ["play-feature-graphic-1024x500", 1024, 500, PLAY, "google-play"]]) {
+    const ctx = makeCtx({ n: 0 }, st ?? "app-store", 0);
     ctx.W = W;
     ctx.H = H;
     ctx.u = W / 1320;

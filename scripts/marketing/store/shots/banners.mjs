@@ -57,3 +57,17 @@ export async function SEARCH(ctx) {
     lineCallout({ right: W * 0.05, y: H * 0.86, fit: true, scale: s, z: 50, lucide: "users", title: "Vallo Circle", line: "Ask, share and learn", meta: null }),
   ].join("\n");
 }
+
+/* Google Play's feature graphic, 1024 x 500: the same three-phone fan as the App Store header, smaller, with the idea on the left. */
+export async function PLAY(ctx) {
+  const { W, H } = ctx;
+  const mid = await ctx.phone({ id: "v3-home", cx: W * 0.64, cy: H * 0.54, h: H * 0.98, rotation: { x: 0, y: 0, z: 0 }, fov: 20, color: PHONE_COLOR, margin: 4, z: 22 });
+  const left = await ctx.phone({ id: "v3-circle", cx: W * 0.64 - 168, cy: H * 0.60, h: H * 0.74, rotation: { x: -4, y: 24, z: 5 }, fov: 22, color: PHONE_COLOR, margin: 4, z: 20 });
+  const right = await ctx.phone({ id: "v3-stays", cx: W * 0.64 + 168, cy: H * 0.60, h: H * 0.74, rotation: { x: -4, y: -24, z: -5 }, fov: 22, color: PHONE_COLOR, margin: 4, z: 21 });
+  return [
+    `<img class="abs" src="${brandUrl("vallo-wordmark.png")}" style="left:44px;top:132px;width:150px;z-index:40">`,
+    WORD(44, 196, 58, `Real estate,<br>${KEY("done right.")}`),
+    SUB(44, 340, 21, "Homes, stays, tables and people."),
+    left.html, right.html, mid.html,
+  ].join("\n");
+}
