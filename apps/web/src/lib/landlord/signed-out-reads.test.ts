@@ -19,7 +19,16 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const seam = vi.hoisted(() => ({
   claims: { state: "signed-out" } as { state: string; userId?: string; supabase?: unknown },
-  rpc: vi.fn(async () => ({ data: null, error: null })),
+  /* Typed at the seam rather than inferred: left to infer, this is a function
+     of no arguments returning exactly `{ data: null, error: null }`, so the
+     two-argument call below and every `mockResolvedValue` in this file are
+     rejected by the compiler. */
+  rpc: vi.fn(
+    async (
+      _fn: string,
+      _args: unknown,
+    ): Promise<{ data: unknown; error: { code?: string; message?: string } | null }> => ({ data: null, error: null }),
+  ),
   reported: [] as unknown[],
 }));
 

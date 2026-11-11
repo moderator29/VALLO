@@ -96,9 +96,20 @@ describe("the opening screen's decision", () => {
     expect(run().attrs["data-open"]).toBe("on");
     expect(run({ standalone: false, navStandalone: true }).attrs["data-open"]).toBe("on");
   });
-  it("stays off in a browser tab, on a warm open and where storage refuses", () => {
-    expect(run({ standalone: false }).attrs["data-open"]).toBe("off");
+  /*
+   * THE WEBSITE PLAYS IT TOO (the founder, 11 November 2026: "same as on
+   * website too"). This read `expect(run({ standalone: false })).toBe("off")`:
+   * a browser tab was refused the opening before it could draw a frame, which
+   * is why the site showed none. A cold tab lights like any other surface now.
+   */
+  it("turns on for a browser tab opened cold", () => {
+    expect(run({ standalone: false }).attrs["data-open"]).toBe("on");
+  });
+  it("stays off on a warm open and where storage refuses", () => {
+    /* Both of these would replay the opening on every page view, which is the
+       one thing it must never do. */
     expect(run({ warm: true }).attrs["data-open"]).toBe("off");
+    expect(run({ standalone: false, warm: true }).attrs["data-open"]).toBe("off");
     expect(run({ storageThrows: true }).attrs["data-open"]).toBe("off");
   });
   /*

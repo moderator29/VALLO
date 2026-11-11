@@ -5,12 +5,14 @@
  * (inline SVG in the first HTML) and `open.css` (first paint, no script).
  *
  * WHAT IT DECIDES. `data-open` on the root:
- *   on     an installed app (display-mode standalone, or iOS `navigator.standalone`)
- *          opened cold: the first load of this browser session (`nf_open` in
- *          sessionStorage; an installed app that was closed starts a new one).
- *   off    a browser tab, the native shell (its own launch plays there), a warm
- *          open in the same session, or storage that refuses (no flag could be
- *          kept, so it would replay on every load).
+ *   on     any surface opened cold: the first load of this browser session
+ *          (`nf_open` in sessionStorage; an installed app that was closed
+ *          starts a new one). The website, the installed app and the native
+ *          shell all play it (the founder, 11 November 2026: the opening was
+ *          refused to a browser tab outright, which is why the site showed
+ *          nothing at all).
+ *   off    a warm open in the same session, or storage that refuses (no flag
+ *          could be kept, so it would replay on every load).
  *   leave  the 320ms crossfade into the page.
  *
  * ON THE NATIVE SHELL (founder, 10 November 2026: the centred logo, slower).
@@ -66,9 +68,13 @@ export const OPEN_SESSION_KEY = "nf_open";
 
 export const OPEN_SCRIPT =
   "(function(){var W=window,D=document,r=D.documentElement;try{" +
-  "var sa=false;try{sa=!!(W.matchMedia&&W.matchMedia('(display-mode: standalone)').matches)||navigator.standalone===true}catch(e){}" +
   "var nat=false;try{nat=r.hasAttribute('data-native')||/VALLO-NATIVE/.test(navigator.userAgent)||!!(W.Capacitor&&W.Capacitor.isNativePlatform&&W.Capacitor.isNativePlatform())}catch(e){}" +
-  "if(!sa&&!nat){r.setAttribute('data-open','off');return}" +
+  /* A browser tab plays it too (the founder, 11 November 2026). This read
+     `if(!sa&&!nat){off;return}`, so the website turned the opening off before
+     it could draw a frame and only an installed app ever saw it. `sa` and `nat`
+     still decide how the layer is TIMED below (the shell waits for its splash),
+     but no surface is refused the opening now. A cold open in this browser
+     session is still the only one that plays: the warm check is next. */
   "var warm=true;try{warm=!!sessionStorage.getItem('" + OPEN_SESSION_KEY + "');if(!warm)sessionStorage.setItem('" + OPEN_SESSION_KEY + "','1')}catch(e){}" +
   "if(warm){r.setAttribute('data-open','off');return}" +
   "var lit=0;function light(){if(lit)return;lit=1;r.setAttribute('data-open','on')}" +

@@ -29,6 +29,9 @@
 @layer components {
   .nf-open {
     --nf-open-w: min(36vw, 11rem);
+    /* The lockup (mark and wordmark) is three and a quarter times as wide as it
+       is tall, so it takes its own width rather than the mark's. */
+    --nf-open-lw: min(72vw, 21rem);
     position: fixed;
     inset: 0;
     z-index: 2147483600;
@@ -41,7 +44,16 @@
     );
     animation: nf-open-cap 300ms var(--nf-ease-exit) 4200ms forwards;
   }
-  @media (display-mode: standalone) {
+  /*
+   * THE WEBSITE PLAYS IT TOO (the founder, 11 November 2026). This was
+   * `@media (display-mode: standalone)`, so the opening existed only in an
+   * installed app and a browser tab never drew it: "same as on website too".
+   * The layer is drawn by default now and `open-script.ts` is what decides,
+   * before the first frame, whether this load keeps it (a cold open) or turns
+   * it off at once (a warm open in the same session). With no script at all
+   * the sheet still lifts it by itself at OPEN_CSS_CAP_MS.
+   */
+  @media (display-mode: standalone), (display-mode: browser) {
     .nf-open {
       display: block;
     }
@@ -69,20 +81,110 @@
   /* The mark is 36 per cent of the width, its centre at 46 per cent of the
      height: the same as the launch images. 0.4278 is half of 1 / 1.1687, the
      mark's aspect. */
-  .nf-open__mark {
+  /*
+   * THE LOCKUP, DRAWN (the founder, 11 November 2026). The artwork is the mark
+   * and the wordmark side by side in one viewBox of 2177 by 664, so it is wider
+   * than the mark alone was and takes its own width; 0.1525 is half of
+   * 664 / 2177, which centres it on the same optical line as before.
+   *
+   * `nf-open-in` is kept and still carries the layer's own settle, because
+   * `open-script.ts` starts its clock on that animation's first frame
+   * (`animationstart`) and the picture and the timer must begin together.
+   * The drift is gone: the lockup is moving on its own now.
+   */
+  .nf-open__launch {
     position: absolute;
     inset-inline: 0;
-    inset-block-start: calc(46% - var(--nf-open-w) * 0.4278);
+    inset-block-start: calc(46% - var(--nf-open-lw) * 0.1525);
     margin-inline: auto;
-    inline-size: var(--nf-open-w);
-    animation:
-      nf-open-in 520ms var(--nf-ease-entrance) both,
-      nf-open-drift 3000ms var(--nf-ease-standard) 520ms forwards;
+    inline-size: var(--nf-open-lw);
+    animation: nf-open-in 520ms var(--nf-ease-entrance) both;
   }
-  .nf-open__mark svg {
+  .nf-open__launch svg {
     display: block;
     inline-size: 100%;
     block-size: auto;
+  }
+
+  /*
+   * THE SEQUENCE. These rules are `public/brand/launch/vallo-launch.svg`'s own,
+   * lifted out of the `<style>` element the policy forbids in the document and
+   * scoped to this layer (the file's class names are one and two letters long,
+   * so they are never loose in the page). The generator strips that element and
+   * asserts the class names survive, so the artwork and this sheet cannot drift
+   * apart silently. The keyframes are renamed with the layer's prefix.
+   *
+   * The ring sweeps round from 40ms, the four towers rise 100ms apart from
+   * 200ms, the mark travels to its place at 760ms, and V A L L O slide out from
+   * behind it 70ms apart from 980ms. The last letter lands at 1,780ms, inside
+   * OPEN_MIN_MS, so the whole sequence is seen before the layer is lifted.
+   */
+  .nf-open__launch .sw {
+    stroke-dashoffset: 100;
+    animation: nf-open-sweep 640ms cubic-bezier(0.16, 1, 0.3, 1) 40ms forwards;
+  }
+  .nf-open__launch .t {
+    transform-box: fill-box;
+    transform-origin: 50% 100%;
+    transform: translateY(40%) scaleY(0);
+    animation: nf-open-rise 520ms cubic-bezier(0.34, 1.3, 0.64, 1) forwards;
+  }
+  .nf-open__launch .t0 {
+    animation-delay: 200ms;
+  }
+  .nf-open__launch .t1 {
+    animation-delay: 300ms;
+  }
+  .nf-open__launch .t2 {
+    animation-delay: 400ms;
+  }
+  .nf-open__launch .t3 {
+    animation-delay: 500ms;
+  }
+  .nf-open__launch .mv {
+    transform: translateX(700.6px);
+    animation: nf-open-travel 540ms cubic-bezier(0.16, 1, 0.3, 1) 760ms forwards;
+  }
+  .nf-open__launch .l {
+    opacity: 0;
+    transform: translateX(-426px);
+    animation: nf-open-letter 520ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+  .nf-open__launch .l0 {
+    animation-delay: 980ms;
+  }
+  .nf-open__launch .l1 {
+    animation-delay: 1050ms;
+  }
+  .nf-open__launch .l2 {
+    animation-delay: 1120ms;
+  }
+  .nf-open__launch .l3 {
+    animation-delay: 1190ms;
+  }
+  .nf-open__launch .l4 {
+    animation-delay: 1260ms;
+  }
+  @keyframes nf-open-sweep {
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+  @keyframes nf-open-rise {
+    to {
+      transform: none;
+    }
+  }
+  @keyframes nf-open-travel {
+    to {
+      transform: none;
+    }
+  }
+  @keyframes nf-open-letter {
+    to {
+      opacity: 1;
+      transform: none;
+    }
   }
 
   /* Frame one is already the mark, a hair small and a touch soft, so it does
@@ -115,12 +217,40 @@
 
   /* Reduced motion and Calm and Off: the still mark, shown for the same time,
      then the fade (a fade is not movement). */
+  /*
+   * Reduced motion, and Calm and Off: the finished lockup fades in and nothing
+   * travels, which is the artwork's own answer and the phones' (`LaunchMark`
+   * does the same under Reduce Motion). Every piece is put at its final value
+   * first, so a sweep that never runs cannot leave the ring half drawn. The
+   * script shortens the hold to OPEN_MIN_STILL_MS to match, since there is no
+   * sequence left to wait for.
+   */
   @media (prefers-reduced-motion: reduce) {
-    .nf-open__mark {
+    .nf-open__launch {
+      animation: nf-open-still 300ms linear both;
+    }
+    .nf-open__launch :is(.sw, .t, .mv, .l) {
       animation: none;
+      stroke-dashoffset: 0;
+      opacity: 1;
+      transform: none;
     }
   }
-  :root:is([data-motion="calm"], [data-motion="off"]) .nf-open__mark {
+  :root:is([data-motion="calm"], [data-motion="off"]) .nf-open__launch {
+    animation: nf-open-still 300ms linear both;
+  }
+  :root:is([data-motion="calm"], [data-motion="off"]) .nf-open__launch :is(.sw, .t, .mv, .l) {
     animation: none;
+    stroke-dashoffset: 0;
+    opacity: 1;
+    transform: none;
+  }
+  @keyframes nf-open-still {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
   }
 }
