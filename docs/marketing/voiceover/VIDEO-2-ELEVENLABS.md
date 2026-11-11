@@ -1,7 +1,7 @@
 # Video Two, "Vision and what's coming": the ElevenLabs recording brief
 
 The new Video Two, rebuilt on the upgraded platform (11 November 2026). About
-**87 seconds** at the pace below, vertical, one cut. Its one job: make a
+**95 to 100 seconds** at the pace below, vertical, one cut. Its one job: make a
 listener feel that Vallo is where Nigerian real estate is going, and send
 them to download it.
 
@@ -11,7 +11,7 @@ Record it as written and every beat re-anchors to your voice. Do not re-cut
 or reorder a line after recording: a beat hangs on its words.
 
 Script file: `docs/marketing/voiceover/scripts/video-2-vision.txt`
-(24 lines, 219 words, one sentence or one breath per line).
+(27 lines, ~245 words, one sentence or one breath per line).
 
 ---
 
@@ -35,7 +35,7 @@ top and at the tail: the mixer needs it.
 
 Nigerian English, warm, certain, forward-looking. Not an advert voice: a
 person who has seen where this is going and is telling someone they like.
-Come **down** at the end of a sentence, never up (except the two real
+Come **down** at the end of a sentence, never up (except the real
 questions, which lift lightly and settle). The film opens on silence and a
 bar of music, so the first line is the first thing anyone hears: say it as
 if you are starting a conversation, not a speech.
@@ -45,13 +45,13 @@ Pacing by section:
 | Lines | Feel |
 |---|---|
 | 1 to 2 | Calm and big. A beat of air after "moving". |
-| 3 to 6 | Brisk and concrete. The cost lines are facts: let "full move-in cost" and "all added up" land. |
-| 7 to 8 | A turn. "But Vallo is more than listings." slows down; "This is Vallo Circle." is the reveal, a little brighter. |
-| 9 to 13 | Friendly, quicker. A neighbour explaining, not a presenter. |
-| 14 to 15 | Steady and plain. These two lines are about trust, so no sparkle. |
-| 16 to 18 | Matter of fact. Owners and hosts are listening: "no agency fee" gets a small pause before it. |
-| 19 to 21 | The lift. "This is only the start." is the film's turn upward. Then three clear verbs on line 20 (finds, understands, runs), each with its own weight. |
-| 22 to 24 | Warm and direct, a smile in it. "Download Vallo today." is an invitation. The last line is the brand: slow, down, final. |
+| 3 to 8 | Brisk and concrete. The cost lines are facts: let "full move-in cost" and "all added up" land. Line 6 ("Split the total") is practical and light. Lines 7 and 8 are a pair: questions first, then answers. |
+| 9 to 10 | A turn. "But Vallo is more than listings." slows down; "This is Vallo Circle." is the reveal, a little brighter. |
+| 11 to 15 | Friendly, quicker. A neighbour explaining, not a presenter. |
+| 16 to 17 | Steady and plain. These two lines are about trust, so no sparkle. |
+| 18 to 21 | Matter of fact. Owners and hosts are listening: "no agency fee" gets a small pause before it. Line 20 is new: "Track your bookings" is brisk and capable. Line 21 (the AI assistant) carries the four languages with equal weight. |
+| 22 to 24 | The lift. "This is only the start." is the film's turn upward. Then three clear verbs on line 23 (finds, understands, runs), each with its own weight. |
+| 25 to 27 | Warm and direct, a smile in it. "Download Vallo today." is an invitation. The last line is the brand: slow, down, final. |
 
 ## The exact lines to paste
 
@@ -62,7 +62,9 @@ And Vallo is where it is going.
 [brisk]  Open a home, and see the full move-in cost before you call anyone.
 Rent, fees and the refundable caution deposit, all added up.
 Save homes, and compare two side by side.
+Living with others? Split the total between you, line by line.
 Going away? Book a hotel or a shortlet. Going out? Reserve a table.
+See the room, read the menu, and check every detail before you book.
 
 [turn]  But Vallo is more than listings.
 [bright]  This is Vallo Circle.
@@ -78,6 +80,7 @@ Your Vallo passport shows every line, until you switch it off.
 
 [matter of fact]  If you own, host or manage property, your account becomes a workspace.
 List a place yourself... with no agency fee.
+Track your bookings, read reviews, and manage your listings from anywhere.
 Ask the AI assistant about prices, areas or how renting works. Vallo speaks English, Hausa, Yorùbá and Igbo.
 
 [lifting]  This is only the start.
@@ -99,21 +102,24 @@ long pauses (the same as in the three short films).
 | Line | Say it like this |
 |---|---|
 | 3, 4 | "move-in" is two words, "move in", with the stress on "move". "caution deposit": CAW-shun deh-POZ-it. |
-| 6 | Two questions in one line. "Going away?" and "Going out?" both lift lightly. "shortlet": SHORT-let. |
-| 8 | "Vallo": VAL-lo (as in "valley" + o), stress on the first syllable. "Circle": SUR-kul, a normal word. |
-| 9 | Read the four people as a list with a small lift on each comma. |
-| 12 | "Roommates": ROOM-mates, not "room-mates" with a gap. |
-| 13 | "corps members": **core** members. The "ps" is silent (NYSC "corps"). "checklist": CHECK-list. |
-| 14 | "confirmed": con-FIRMD, two syllables. |
-| 15 | "passport": PASS-port. |
-| 17 | "agency": AY-jen-see. |
-| 18 | "AI": A-I, two letters. "Hausa": HOW-sah. "Yorùbá": YO-roo-ba (YOH-roo-bah), three even syllables. "Igbo": IG-bo, hard g, two syllables (EEG-boh is also right if that is how you say it, be consistent with Video One). |
-| 20 | Stress the three verbs, one after another: FINDS, un-der-STANDS, RUNS. |
-| 22 | "App Store" two words, "Google Play" two words, even. |
-| 24 | "Vallo." then a full stop in the voice, then "Real estate, done right." The film's end card lands on the stop. |
+| 6 | "Living with others?" is a real, friendly question. "line by line" is even, each word its own beat. |
+| 7 | Two questions in one line. "Going away?" and "Going out?" both lift lightly. "shortlet": SHORT-let. |
+| 8 | Three actions: "See the room, read the menu, and check every detail". Even and steady, come down on "before you book". |
+| 10 | "Vallo": VAL-lo (as in "valley" + o), stress on the first syllable. "Circle": SUR-kul, a normal word. |
+| 11 | Read the four people as a list with a small lift on each comma. |
+| 14 | "Roommates": ROOM-mates, not "room-mates" with a gap. |
+| 15 | "corps members": **core** members. The "ps" is silent (NYSC "corps"). "checklist": CHECK-list. |
+| 16 | "confirmed": con-FIRMD, two syllables. |
+| 17 | "passport": PASS-port. |
+| 19 | "agency": AY-jen-see. |
+| 20 | "bookings": BOOK-ings. "listings": LIST-ings. Brisk and capable. |
+| 21 | "AI": A-I, two letters. "Hausa": HOW-sah. "Yoruba": YO-roo-ba (YOH-roo-bah), three even syllables. "Igbo": IG-bo, hard g, two syllables (EEG-boh is also right if that is how you say it, be consistent with Video One). |
+| 23 | Stress the three verbs, one after another: FINDS, un-der-STANDS, RUNS. |
+| 25 | "App Store" two words, "Google Play" two words, even. |
+| 27 | "Vallo." then a full stop in the voice, then "Real estate, done right." The film's end card lands on the stop. |
 
 Numbers: there are **no figures** in this film's script. The only number
-anyone sees is the example move-in total (₦26.1m, on screen, labelled
+anyone sees is the example move-in total (N26.1m, on screen, labelled
 Example), which the voice never says.
 
 ## Where every claim comes from (so nobody has to ask)
@@ -128,17 +134,20 @@ section 2. Facts: `scripts/marketing/video/FACTS.md` and `FACTS-OCT.md`.
 | 3 | The full move-in cost is shown before you call | FACTS.md claims; `v3-listing-cost` ("What you will actually pay") |
 | 4 | Rent, fees and the refundable caution deposit, added up | `v3-listing-cost`, `v3-listing-total` ("Total to move in") |
 | 5 | Save homes, compare two side by side | `v3-home` ("Compare two side by side"), `v3-saved` (Compare) |
-| 6 | Book a hotel or shortlet, reserve a table | FACTS.md claims; `v3-stays`, `v3-restaurant` |
-| 7 to 10 | Vallo Circle: renters, owners, agents and professionals share what they know about homes and areas; you can ask | `v3-circle` banner, word for word; `VALLO_CIRCLE.md`; `v3-circle-explore` (Ask a question, Areas) |
-| 11 to 13 | Roommates: find a roommate or a room to share; schools; corps members; a safety checklist | `v3-roommates`, `v3-schools` (Groups, Schools, Corps members), `v3-safety`; `ROOMMATES_STANDALONE.md` |
-| 14 | "A badge says exactly what was confirmed ... Nothing more is claimed" | `v3-roommates-2`, word for word. It describes Roommates badges; the film says it over that screen. |
-| 15 | The passport shows every line until the member switches it off | `v3-passport`, word for word |
-| 16 | Your account becomes a workspace | FACTS-OCT.md (the sign-up film's line); `host-start` ("Add a workspace") |
-| 17 | List yourself, no agency fee | `host-start` ("I own the property: List it yourself. No agency fee."); FACTS-OCT.md |
-| 18 | AI assistant (prices, areas, how renting works); four languages | FACTS.md (founder-approved lines 17 and 18 of Video One) |
-| 19 to 21 | "We are building how Nigeria finds, understands and runs its spaces" | FACTS-OCT.md "Direction" row; the founder's own line in the earlier Video Two. It is a direction, said as one ("we are building"), never as something shipped. |
-| 22 to 23 | Live on both stores | the founder, 17 October 2026 (FACTS-OCT.md, "Apps") |
-| 24 | The tagline | FACTS.md |
+| 6 | Split the total between you, line by line | `v3-split` screen: the split-the-cost view showing the total divided per person |
+| 7 | Book a hotel or shortlet, reserve a table | FACTS.md claims; `v3-stays`, `v3-restaurant` |
+| 8 | See the room, read the menu, check every detail before you book | `v3-stay` screen: the stay details with room info, menu and booking details |
+| 9 to 12 | Vallo Circle: renters, owners, agents and professionals share what they know about homes and areas; you can ask | `v3-circle` banner, word for word; `VALLO_CIRCLE.md`; `v3-circle-explore` (Ask a question, Areas) |
+| 13 to 15 | Roommates: find a roommate or a room to share; schools; corps members; a safety checklist | `v3-roommates`, `v3-schools` (Groups, Schools, Corps members), `v3-safety`; `ROOMMATES_STANDALONE.md` |
+| 16 | "A badge says exactly what was confirmed ... Nothing more is claimed" | `v3-roommates-2`, word for word. It describes Roommates badges; the film says it over that screen. |
+| 17 | The passport shows every line until the member switches it off | `v3-passport`, word for word |
+| 18 | Your account becomes a workspace | FACTS-OCT.md (the sign-up film's line); `host-start` ("Add a workspace") |
+| 19 | List yourself, no agency fee | `host-start` ("I own the property: List it yourself. No agency fee."); FACTS-OCT.md |
+| 20 | Track bookings, read reviews, manage listings from anywhere | the workspace dashboard; FACTS-OCT.md workspace features |
+| 21 | AI assistant (prices, areas, how renting works); four languages | FACTS.md (founder-approved lines 17 and 18 of Video One) |
+| 22 to 24 | "We are building how Nigeria finds, understands and runs its spaces" | FACTS-OCT.md "Direction" row; the founder's own line in the earlier Video Two. It is a direction, said as one ("we are building"), never as something shipped. |
+| 25 to 26 | Live on both stores | the founder, 17 October 2026 (FACTS-OCT.md, "Apps") |
+| 27 | The tagline | FACTS.md |
 
 ## What the film deliberately does NOT say
 
@@ -147,7 +156,7 @@ section 2. Facts: `scripts/marketing/video/FACTS.md` and `FACTS-OCT.md`.
   Guarantee is retired. The wallet is hidden, so it is not mentioned either.
 - No "verified" about a listing. No "safe", "secure", "protected". The word
   "safety" appears only as the product's own label for the Roommates
-  checklist (line 13).
+  checklist (line 15).
 - No user, listing or member counts, no ratings, no "first" or "biggest".
 - Nothing about Circle's content being full: the live Circle shows its empty
   states ("Nothing here yet. Start the first conversation."). The film sells
@@ -155,16 +164,16 @@ section 2. Facts: `scripts/marketing/video/FACTS.md` and `FACTS-OCT.md`.
 
 ## Needs the founder's eye before this is final
 
-1. **Line 14** says "a badge says exactly what was confirmed, and nothing
+1. **Line 16** says "a badge says exactly what was confirmed, and nothing
    more" over the Roommates screen. It is the product's own sentence. If the
    founder wants it to read as Roommates only, change it to "On Roommates, a
    badge says exactly what was confirmed, and nothing more." (re-recording one line only moves the beats that hang on it).
-2. **Line 16** ("your account becomes a workspace") is the sign-up film's
+2. **Line 18** ("your account becomes a workspace") is the sign-up film's
    line. Every workspace is an application that is checked first, which the
    film does not say. If that is a worry, use "your account can become a
    workspace."
-3. **Line 20** is a Direction claim (FACTS-OCT.md), not a shipped feature.
-4. **Line 17**: on the live app the host and agent screens are still the
+3. **Line 23** is a Direction claim (FACTS-OCT.md), not a shipped feature.
+4. **Line 19**: on the live app the host and agent screens are still the
    earlier captures (see the report), so they show the older bottom bar.
 
 ## After you record
@@ -173,7 +182,7 @@ section 2. Facts: `scripts/marketing/video/FACTS.md` and `FACTS-OCT.md`.
 python3 scripts/marketing/audio/timings.py --voice <take.mp3> \
     --script docs/marketing/voiceover/scripts/video-2-vision.txt --out <dir>
 node scripts/marketing/video/films/install-voice.mjs vision2 \
-    <dir>/timings.json docs/marketing/voiceover/scripts/video-2-vision.txt --logo-line 22
+    <dir>/timings.json docs/marketing/voiceover/scripts/video-2-vision.txt --logo-line 25
 python3 scripts/marketing/video/films/vision2/make-signature.py
 ```
 
