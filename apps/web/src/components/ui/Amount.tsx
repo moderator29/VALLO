@@ -184,6 +184,18 @@ function AmountStatic({
      section 5: nothing below 12 anywhere). On a 16px row figure 0.62em was
      9.9px kobo; on a hero figure the floor changes nothing. */
   const muted = secondaryClassName ?? "text-[length:max(0.75rem,0.62em)] font-semibold opacity-60";
+  /*
+   * THE WORD SUFFIX DOES NOT INHERIT THE FIGURE'S TRACKING.
+   *
+   * A hero figure is set tight: "in full" sat under `tracking-[-0.03em]` on
+   * the checkout total, which is a 40 to 60px number. The suffix renders at
+   * about a third of that size, where the same em value is a far harsher cut.
+   * Measured in WebKit at 390: a 3.4px space against 1.2px of negative
+   * tracking, so "N360,000.00 in full" read as one word, ".00in full". Kobo
+   * keeps the figure's tracking, because it is part of the number; the word
+   * does not, because it is a word.
+   */
+  const suffixClass = [muted, "tracking-normal"].join(" ");
 
   /*
    * B15: WHAT A SCREEN READER HEARS. A compact figure ("₦2.8m") is read
@@ -205,7 +217,7 @@ function AmountStatic({
               short form it keeps the figure's weight; only kobo is muted. */}
           {fraction ? short ? fraction : <span className={muted}>{fraction}</span> : null}
           {tail}
-          {suffix ? <span className={muted}> {suffix}</span> : null}
+          {suffix ? <span className={suffixClass}> {suffix}</span> : null}
         </span>
         <span className="sr-only">{spoken}</span>
       </span>
@@ -217,7 +229,7 @@ function AmountStatic({
       {head}
       {fraction ? <span className={muted}>{fraction}</span> : null}
       {tail}
-      {suffix ? <span className={muted}> {suffix}</span> : null}
+      {suffix ? <span className={suffixClass}> {suffix}</span> : null}
     </span>
   );
 }
@@ -249,10 +261,11 @@ export function Figure({
         : value.toLocaleString(intlTag[locale])
       : value;
   const muted = secondaryClassName ?? "text-[length:max(0.75rem,0.62em)] font-semibold opacity-60";
+  /* The word suffix keeps normal tracking, as on `Amount`: see the note there. */
   return (
     <span className={["nf-numeric", className ?? ""].filter(Boolean).join(" ")}>
       {shown}
-      {suffix ? <span className={muted}> {suffix}</span> : null}
+      {suffix ? <span className={[muted, "tracking-normal"].join(" ")}> {suffix}</span> : null}
     </span>
   );
 }
