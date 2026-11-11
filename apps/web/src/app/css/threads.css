@@ -66,10 +66,13 @@
    * below already hides its own (`.nf-photo-group__strip`). Scrolling,
    * wheel, trackpad and keyboard are untouched: only the indicator goes.
    */
-  .nf-thread__scroll {
+  /* The assistant's thread (`home.css`) and the support ticket's scroll on
+     the same rhythm and are named with this one below (the watermark rule),
+     so they lose the bar here too rather than in three files. */
+  :is(.nf-thread__scroll, .nf-support-thread, .nf-ai__thread) {
     scrollbar-width: none;
   }
-  .nf-thread__scroll::-webkit-scrollbar {
+  :is(.nf-thread__scroll, .nf-support-thread, .nf-ai__thread)::-webkit-scrollbar {
     display: none;
   }
 
