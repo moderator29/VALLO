@@ -94,7 +94,9 @@
     ".next-weight/types/**/*.ts",
     ".next-weight/dev/types/**/*.ts",
     ".next-ui/types/**/*.ts",
-    ".next-ui/dev/types/**/*.ts"
+    ".next-ui/dev/types/**/*.ts",
+    ".next-a11y/types/**/*.ts",
+    ".next-a11y/dev/types/**/*.ts"
   ],
   "exclude": [
     "node_modules",
