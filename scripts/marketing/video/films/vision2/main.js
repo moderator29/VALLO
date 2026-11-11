@@ -1,6 +1,6 @@
 /**
  * VIDEO TWO, "Vision and what's coming" (films/vision2, rebuilt 11 November
- * 2026 on the upgraded platform). One minute and a half, vertical, one cut.
+ * 2026 on the upgraded platform). About 99 seconds, vertical, one cut.
  *
  * One phone carries the film through what Vallo is now: the full cost of a
  * home, stays and tables, then the part that is more than listings (Vallo
@@ -59,6 +59,8 @@ export async function build(ctx) {
   const ROW_AGENT = { x: 42, y: 2105, w: 1236, h: 137 };        // host-start: "I am an agent"
   const ROW_OWN = { x: 42, y: 1791, w: 1236, h: 141 };          // host-start: "I own the property"
   const BUBBLE = { x: 514, y: 590, w: 630, h: 214 };            // assistant-caution-2: the member's question
+  const SPLIT_ROW = { x: 40, y: 1136, w: 1238, h: 134 };        // v3-split: a person's cost row
+  const STAY_INFO = { x: 26, y: 1751, w: 1276, h: 817 };         // v3-stay: the info section below the image
 
   /* ---------- the phone's path ---------- */
   H.path([
@@ -138,16 +140,29 @@ export async function build(ctx) {
   /* SAVE AND COMPARE. A light whip, then the home's own greeting card held up. */
   whipPan(ctx, s(5) - 0.04, { dir: "left", dur: 0.24, sound: null });
   ctx.sfx("swipe", s(5) - 0.1, { offset: -3 });
-  H.show("v3-home", s(5) - 0.12, s(7) - 0.2, { enter: "slide" });
+  H.show("v3-home", s(5) - 0.12, w(6, "Split") - 0.2, { enter: "slide" });
+  H.show("v3-split", w(6, "Split") - 0.2, s(7) - 0.2, { enter: "slide" });
   lift(ctx, H, {
-    id: "v3-home", crop: GREETING, t0: w(5, "save") + 0.05, t1: s(7) - 0.5,
+    id: "v3-home", crop: GREETING, t0: w(5, "save") + 0.05, t1: w(6, "Split") - 0.4,
     to: { x: CX, y: 900, s: 0.64, r: 1.2 }, exit: "fade", fly: 0.6, seed: 25, radius: 40,
   });
   popOut(ctx, cost, {
     kind: "line", lucide: "scale", tab: "Your shortlist", title: "Two homes, side by side", line: "Compare before you decide.",
-    x: CX, y: TOP, t0: w(5, "compare") - 0.1, t1: s(7) - 0.45, size: 31, from: "above", seed: 26,
+    x: CX, y: TOP, t0: w(5, "compare") - 0.1, t1: w(6, "Split") - 0.35, size: 31, from: "above", seed: 26,
   });
   H.tap(w(5, "side") + 0.1, 270, 1160);
+
+  /* SPLIT THE TOTAL, line by line. */
+  whipPan(ctx, w(6, "Split") - 0.15, { dir: "left", dur: 0.24, sound: "whoosh_short" });
+  lift(ctx, H, {
+    id: "v3-split", crop: SPLIT_ROW, t0: w(6, "Split") - 0.05, t1: w(6, "between") - 0.2,
+    to: { x: CX, y: 700, s: 0.78, r: 1.2 }, exit: "fade", fly: 0.55, seed: 60, radius: 30,
+  });
+  popOut(ctx, cost, {
+    kind: "counters", items: [["user", "Person 1"], ["user", "Person 2"], ["user", "Person 3"]],
+    x: CX, y: TOP, t0: w(6, "between") - 0.1, t1: s(7) - 0.4, size: 30, from: "above", seed: 61, tab: "Split the total",
+  });
+  object3d(ctx, cost, { name: "team", size: 200, x: 930, y: 1250, t0: w(6, "Split") + 0.1, t1: s(7) - 0.35, drift: 1, seed: 62 });
 
   /* ===================== 3. Stays and tables (s6) =====================
      CUT 2 -> 3. Four tick brackets close on the centre and bloom. */
@@ -159,18 +174,32 @@ export async function build(ctx) {
     id: "v3-stays", crop: STAYS_TOP, t0: w(7, "hotel") - 0.05, t1: w(7, "going", 2) - 0.25,
     to: { x: CX, y: 640, s: 0.66, r: -1.2 }, exit: "left", fly: 0.55, seed: 27, radius: 36,
   });
-  H.show("v3-restaurant", w(7, "table") - 0.2, s(9) - 0.2, { enter: "slide" });
+  H.show("v3-restaurant", w(7, "table") - 0.2, w(8, "See") - 0.2, { enter: "slide" });
+  H.show("v3-stay", w(8, "See") - 0.2, s(9) - 0.2, { enter: "slide" });
   lift(ctx, H, {
-    id: "v3-restaurant", crop: REST_ROW, t0: w(7, "table") - 0.05, t1: s(9) - 0.4,
+    id: "v3-restaurant", crop: REST_ROW, t0: w(7, "table") - 0.05, t1: w(8, "See") - 0.55,
     to: { x: CX, y: 640, s: 0.78, r: 1.1 }, exit: "fade", fly: 0.55, seed: 28, radius: 36,
   });
   chipRow(ctx, stays, {
     items: [["Hotels", "hotel"], ["Shortlets", "key-round"], ["Tables", "utensils"]],
     x: CX, y: BAND, t0: w(7, "hotel") + 0.05, gap: Math.max(0.35, (w(7, "table") - w(7, "hotel")) / 3.2),
-    t1: s(9) - 0.4, size: 32, wrapW: 1000, anchor: "center",
+    t1: w(8, "See") - 0.3, size: 32, wrapW: 1000, anchor: "center",
   });
   object3d(ctx, stays, { name: "hotel", size: 190, x: 130, y: 1170, t0: w(7, "hotel") + 0.1, t1: w(7, "going", 2) - 0.2, drift: 1, seed: 29 });
-  object3d(ctx, stays, { name: "restaurant", size: 190, x: 940, y: 1190, t0: w(7, "table") + 0.1, t1: s(9) - 0.4, drift: 1, seed: 30 });
+  object3d(ctx, stays, { name: "restaurant", size: 190, x: 940, y: 1190, t0: w(7, "table") + 0.1, t1: w(8, "See") - 0.3, drift: 1, seed: 30 });
+
+  /* SEE THE ROOM, READ THE MENU. Every detail before you book. */
+  whipPan(ctx, w(8, "See") - 0.15, { dir: "right", dur: 0.24, sound: "whoosh_short" });
+  popOut(ctx, stays, {
+    kind: "counters", items: [["eye", "See the room"], ["book-open", "Read the menu"], ["check-circle", "Check details"]],
+    x: CX, y: TOP, t0: w(8, "See") + 0.1, t1: w(8, "check") - 0.2, size: 30, from: "above", seed: 63, tab: "Before you book",
+  });
+  lift(ctx, H, {
+    id: "v3-stay", crop: STAY_INFO, t0: w(8, "check") - 0.1, t1: s(9) - 0.55,
+    to: { x: CX, y: 620, s: 0.54, r: -1.2 }, exit: "fade", fly: 0.55, seed: 64, radius: 40,
+  });
+  object3d(ctx, stays, { name: "hotel", size: 200, x: 935, y: 1300, t0: w(8, "See") + 0.2, t1: s(9) - 0.3, drift: 1, seed: 65 });
+  ctx.hidePill(w(8, "See") - 0.2, s(9));
 
   /* ===================== 4. More than listings (s7) =====================
      CUT 3 -> 4. The frame breaks into tiles and drops away. The phone is
@@ -299,14 +328,22 @@ export async function build(ctx) {
     x: CX, y: 1040, t0: w(18, "workspace") - 0.1, t1: s(19) + 0.3, size: 28, from: "below", seed: 50,
   });
   lift(ctx, H, {
-    id: "host-start", crop: ROW_OWN, t0: w(19, "place") - 0.1, t1: s(21) - 0.4,
+    id: "host-start", crop: ROW_OWN, t0: w(19, "place") - 0.1, t1: w(20, "Track") - 0.3,
     to: { x: CX, y: 640, s: 0.66, r: -1.2 }, exit: "fade", fly: 0.55, seed: 51, radius: 34,
   });
   popOut(ctx, work, {
     kind: "line", lucide: "badge-check", tab: "Owners", title: "No agency fee", line: "List it yourself.",
-    x: CX, y: 880, t0: w(19, "agency") - 0.1, t1: s(21) - 0.35, size: 34, from: "right", seed: 52,
+    x: CX, y: 880, t0: w(19, "agency") - 0.1, t1: w(20, "Track") - 0.25, size: 34, from: "right", seed: 52,
   });
-  object3d(ctx, work, { name: "keys", size: 190, x: 135, y: 1230, t0: w(19, "list") - 0.1, t1: s(21) - 0.4, drift: 1, seed: 53 });
+  object3d(ctx, work, { name: "keys", size: 190, x: 135, y: 1230, t0: w(19, "list") - 0.1, t1: w(20, "Track") - 0.3, drift: 1, seed: 53 });
+
+  /* TRACK YOUR BOOKINGS. Read reviews, manage listings from anywhere. */
+  whipPan(ctx, w(20, "Track") - 0.15, { dir: "left", dur: 0.24, sound: "whoosh_short" });
+  popOut(ctx, work, {
+    kind: "counters", items: [["calendar-days", "Bookings"], ["star", "Reviews"], ["list", "Listings"]],
+    x: CX, y: TOP, t0: w(20, "Track") + 0.1, t1: s(21) - 0.4, size: 30, from: "above", seed: 66, tab: "Manage from anywhere",
+  });
+  object3d(ctx, work, { name: "toolbox", size: 200, x: 130, y: 1250, t0: w(20, "bookings") + 0.1, t1: s(21) - 0.35, drift: 1, seed: 67 });
 
   /* ===================== 9. The assistant, in four languages (s18) =====================
      A light whip, no loud cut: this is still the same hand holding the phone. */
