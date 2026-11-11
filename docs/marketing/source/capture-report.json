@@ -2105,7 +2105,7 @@
   },
   "v3-assistant": {
     "url": "/assistant",
-    "at": "2026-11-11T04:31:07.080Z",
+    "at": "2026-11-11T20:16:00.498Z",
     "kind": "mobile",
     "theme": "dark",
     "signedIn": true
@@ -2133,7 +2133,7 @@
   },
   "v3-filters": {
     "url": "/search?filters=open",
-    "at": "2026-11-10T21:37:26.481Z",
+    "at": "2026-11-11T20:15:45.025Z",
     "kind": "mobile",
     "theme": "dark",
     "signedIn": true
@@ -2170,28 +2170,28 @@
   },
   "v3-notifications": {
     "url": "/notifications",
-    "at": "2026-11-10T21:44:01.594Z",
+    "at": "2026-11-11T20:17:01.162Z",
     "kind": "mobile",
     "theme": "dark",
     "signedIn": true
   },
   "v3-passport": {
     "url": "/settings/passport",
-    "at": "2026-11-10T21:43:14.252Z",
+    "at": "2026-11-11T20:16:50.878Z",
     "kind": "mobile",
     "theme": "dark",
     "signedIn": true
   },
   "v3-payments": {
     "url": "/payments",
-    "at": "2026-11-10T21:50:01.200Z",
+    "at": "2026-11-11T20:17:27.393Z",
     "kind": "mobile",
     "theme": "dark",
     "signedIn": true
   },
   "v3-restaurant": {
     "url": "/restaurant/eb000000-0000-4000-8000-000000000006",
-    "at": "2026-11-10T21:40:04.912Z",
+    "at": "2026-11-11T20:16:42.059Z",
     "kind": "mobile",
     "theme": "dark",
     "signedIn": true
@@ -2219,7 +2219,7 @@
   },
   "v3-saved": {
     "url": "/saved",
-    "at": "2026-11-10T21:38:26.437Z",
+    "at": "2026-11-11T20:15:53.111Z",
     "kind": "mobile",
     "theme": "dark",
     "signedIn": true
@@ -2233,7 +2233,7 @@
   },
   "v3-search": {
     "url": "/search?market=rent",
-    "at": "2026-11-10T21:37:04.807Z",
+    "at": "2026-11-11T20:15:32.830Z",
     "kind": "mobile",
     "theme": "dark",
     "signedIn": true
@@ -2254,14 +2254,14 @@
   },
   "v3-stay": {
     "url": "/stay/ea000000-0000-4000-8000-000000000003",
-    "at": "2026-11-11T04:31:21.014Z",
+    "at": "2026-11-11T20:16:31.346Z",
     "kind": "mobile",
     "theme": "dark",
     "signedIn": true
   },
   "v3-stays": {
     "url": "/stays",
-    "at": "2026-11-10T21:38:49.590Z",
+    "at": "2026-11-11T20:16:19.632Z",
     "kind": "mobile",
     "theme": "dark",
     "signedIn": true
