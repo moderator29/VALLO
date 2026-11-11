@@ -406,12 +406,21 @@
     padding: 0;
     overflow-x: auto;
     list-style: none;
+    /* Both halves of hiding a scrollbar, the way `roommates.css` already
+       hides the group rail's and the side nav's. `scrollbar-width` alone
+       left the bar drawn under the tabs in older WebKit. */
     scrollbar-width: none;
+  }
+  .nf-rmfd__tabs::-webkit-scrollbar {
+    display: none;
   }
   .nf-rmfd__tab {
     flex: none;
     white-space: nowrap;
-    min-block-size: 2.5rem;
+    /* 44, the touch floor the design system sets for every control
+       (docs/design/COMPONENTS.md). It drew 40 and these are the first thing
+       a thumb reaches for on the feed. */
+    min-block-size: 2.75rem;
     padding-inline: var(--nf-space-md);
     border: var(--nf-border-width) solid var(--nf-border-default);
     border-radius: var(--nf-radius-pill);

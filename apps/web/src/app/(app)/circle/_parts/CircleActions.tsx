@@ -26,6 +26,7 @@ import { tapFailedOffline } from "@/lib/offline/tap-failed";
 import { banner } from "@/lib/ui/toast";
 import { bannerWithUndo } from "@/lib/ui/undo-banner";
 import { useSafeTransition } from "@/lib/ui/use-safe-transition";
+import { Radio } from "@/components/ui/Check";
 
 /**
  * The Circle's small controls: join and leave, helpful, accept, follow, the
@@ -536,15 +537,17 @@ export function CommunitySettingsForm({
         <fieldset className="block">
           <legend className="nf-label">{words.visibilityLabel}</legend>
           <p className="nf-caption mt-2xs">{words.visibilityHelp}</p>
+          {/* The design system's radio row, not a hand-built one: `.nf-check`
+              makes the label the 44px target (docs/design/COMPONENTS.md). The
+              pair here drew a bare 20px input with no row around it, which is
+              a 20px target on a phone. */}
           <div className="mt-xs flex gap-row">
-            <label className="flex items-center gap-2xs">
-              <input type="radio" name="visibility" value="public" checked={v === "public"} onChange={() => setV("public")} />
-              <span>{words.publicWord}</span>
-            </label>
-            <label className="flex items-center gap-2xs">
-              <input type="radio" name="visibility" value="private" checked={v === "private"} onChange={() => setV("private")} />
-              <span>{words.privateWord}</span>
-            </label>
+            <Radio name="visibility" value="public" checked={v === "public"} onChange={() => setV("public")}>
+              {words.publicWord}
+            </Radio>
+            <Radio name="visibility" value="private" checked={v === "private"} onChange={() => setV("private")}>
+              {words.privateWord}
+            </Radio>
           </div>
         </fieldset>
       )}
