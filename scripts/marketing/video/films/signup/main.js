@@ -47,8 +47,8 @@ export async function build(ctx) {
      (the same bright blue top edge, so the bar is the screen's own colour).
      Their crops are therefore in the capture's own 1320-wide pixels. */
   const SU = (id) => ctx.src.capture(id);
-  const NAME_ROW = { x: 34, y: 596, w: 1272, h: 312 };   // "First name" + "Surname", labels and fields
-  const EMAIL_ROW = { x: 34, y: 888, w: 1272, h: 266 };  // "Email address" and its field
+  const NAME_ROW = { x: 34, y: 596, w: 1272, h: 296 };   // "First name" + "Surname", labels and fields
+  const EMAIL_ROW = { x: 34, y: 896, w: 1272, h: 250 };  // "Email address" and its field
   const PASS_ROW = { x: 34, y: 1182, w: 1272, h: 278 };  // "Password", its field and the strength bars
   /* su-sent, from above "Confirmation code" to under "Confirm and go in":
      the part of that screen with no address anywhere in it. */

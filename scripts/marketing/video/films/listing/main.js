@@ -213,7 +213,7 @@ export async function build(ctx) {
   /* the renter's side of the same place, and its own promise at the top of
      the cost sheet (blocks.py: the heading runs y 481..724) */
   lift(ctx, H, {
-    id: "sc-listing-cost", crop: { x: 30, y: 462, w: 1190, h: 282 },
+    id: "sc-listing-cost", crop: { x: 30, y: 476, w: 1190, h: 254 },
     /* it is gone before the push brings the same heading up on the glass */
     t0: w(4, "whole") - 0.12, t1: w(4, "so") - 0.30,
     to: { x: CX, y: 700, s: 0.64, r: -1.5 }, seed: 20, radius: 20,
@@ -232,7 +232,7 @@ export async function build(ctx) {
      figure a renter has already seen before anybody picks up a phone. The
      crop stops before the bar's buttons, so no control is cut in half. */
   lift(ctx, H, {
-    id: "sc-listing-cost", crop: { x: 26, y: 2676, w: 288, h: 140 },
+    id: "sc-listing-cost", crop: { x: 26, y: 2470, w: 288, h: 140 },
     t0: w(4, "already") + 0.32, t1: cut(5) - 0.42,
     to: { x: CX, y: 430, s: 1.55, r: -2 }, seed: 21, radius: 22, fly: 0.78,
   });
