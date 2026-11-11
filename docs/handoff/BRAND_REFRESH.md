@@ -14,14 +14,18 @@ WHAT CHANGED
 
 Logo and icons (same identity, bars-and-city mark, higher-luminance blues, stronger gloss, lighter shaded face):
 - scripts/brand/logo-art.mjs: palette lifted (low blue was #1238C8, now #2455F2; cyan #5BE7FF; orange #FFB25E to #F96B28; sheen 0.22 to 0.34).
-- scripts/build-brand-logo.mjs: icon ground is now bright. Run with BRAND_SKIP_NATIVE=1 to leave the store binaries' icons alone (that is how this was run; the Android notification vector ic_stat_vallo.xml was still rewritten, the app icons in android/ and ios/ and assets/ were not).
+- scripts/build-brand-logo.mjs: icon ground is the brand navy (this line said "bright" between 10 and 11 November; see the reversal below). Run with BRAND_SKIP_NATIVE=1 to leave the store binaries' icons alone (that is how this was run; the Android notification vector ic_stat_vallo.xml was still rewritten, the app icons in android/ and ios/ and assets/ were not).
 - Rewritten at the SAME paths: public/brand/vallo-mark(.svg/.png), vallo-wordmark, the -light copies, vallo-logo.png, vallo-icon.png (1024 master), vallo-email-lockup.png, startup/*.webp, session-b/signin/lockup.webp, welcome coin face, launch/*.svg (palette lifted), favicon.ico (16, 32, 48), pwa/icon-16/32/48/64/192/512, apple-touch-icon.png (180), icon-maskable-512.png, native-shell/vallo-mark.svg, src/lib/brand/logo-geometry.ts and og-logo.ts (generated).
 - src/app/offline/SystemFrame.tsx: SVG wordmark and the small plate (weight, see below).
 - Not rerun: scripts/build-og-image.mjs (needs the next package on its path); the share card og image still has the old palette.
 
-ICON CHOICE: the full-colour mark on a near-white tile (white to pale blue). A navy tile sinks into a dark home screen and reads dim next to WhatsApp, Gmail and Instagram; the white tile has the highest luminance on the screen and keeps the mark's cyan, blue and orange at full strength. The alternative, white mark on bright blue, loses the orange tower that carries the identity. The maskable icon uses the same tile with the mark inside the 80 per cent safe circle (tested by pixel).
+ICON CHOICE: REVERSED ON 11 NOVEMBER 2026 BY THE FOUNDER. See docs/handoff/NATIVE_ICONS.md.
 
-Cache busting: src/lib/theme/brand-assets.ts (ICON_VERSION 20261110) adds ?v= to the manifest icons, favicon and touch icon links and the launch images; public/sw.js CACHE_VERSION v8 to v9 (tests updated).
+The choice made here was the full-colour mark on a near-white tile (white to pale blue), reasoning that a navy tile sinks into a dark home screen and reads dim next to WhatsApp, Gmail and Instagram. That reasoning was not the founder's to assume: Vallo is dark first, the launch field, the splash and the app's own background are all #010118, and the white tile broke that line the moment it reached TestFlight (build 10002418). The icon is the full-colour mark on the brand navy, lifted by a soft radial toward #0B1C5C so the tile has depth rather than reading flat black. The maskable icon uses that same tile with the mark inside the 80 per cent safe circle (tested by pixel).
+
+The bright ground is GONE from scripts/build-brand-logo.mjs, not merely unused: the flag, both constants and the branch were deleted, so a future regeneration cannot bring it back by accident. The one surface still bright is the Open Graph share card, on purpose, because an unfurled link sits on a white chat or timeline rather than a home screen.
+
+Cache busting: src/lib/theme/brand-assets.ts (ICON_VERSION 20261111 after the 11 November reversal, 20261110 before it) adds ?v= to the manifest icons, favicon and touch icon links and the launch images; public/sw.js CACHE_VERSION v8 to v9, then v10 on 11 November so an installed PWA drops the cached white icon (tests updated).
 
 Opening screen (this REVERSES D68c, the rule that the logo never appears alone on open; the founder asked for it on 10 November):
 - src/components/startup/open.css (render-blocking stylesheet, tokens only), OpeningScreen.tsx (inline SVG mark in the first HTML, first in body), open-script.ts (controller, in the head), OpenReady.tsx (hydration flag), open-mark.generated.ts (generated mark), wired in app/layout.tsx.

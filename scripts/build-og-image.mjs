@@ -54,8 +54,10 @@ const BUDGET = 95 * 1024;
    brand ink, so the unfurled card and the home-screen icon are one identity. The old card
    was the villa photograph under a navy veil, which made the new mark's cyan and orange read
    dim. Hex is correct here for the same reason it is in an email: this is a bitmap, and there
-   is no stylesheet for a token to live in. Anchors: `--nf-ink-950` and the icon ground in
-   `scripts/build-brand-logo.mjs` (BRIGHT_TOP, BRIGHT_BOTTOM). */
+   is no stylesheet for a token to live in. Anchor: `--nf-ink-950`. NOTE (11 November 2026):
+   the app icon this card was matched to went back to the brand navy, so the two no longer
+   share a ground. The card is still bright on purpose, because an unfurled link sits on a
+   white chat or timeline, not on a home screen. Revisit if the card is ever to match again. */
 const INK_950 = "#010118";
 const BRIGHT_TOP = "#FFFFFF";
 const BRIGHT_BOTTOM = "#DCEBFF";

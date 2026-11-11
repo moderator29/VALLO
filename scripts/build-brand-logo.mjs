@@ -64,13 +64,14 @@ const IOS_ICON = path.join(WEB, "ios/App/App/Assets.xcassets/AppIcon.appiconset/
 
 const NAVY = "#010118";
 const NAVY_LIFT = "#0B1C5C";
-/* THE BRIGHT APP ICON (10 November 2026). A navy tile sinks into a dark iOS
-   home screen and reads dull beside WhatsApp, Gmail and Instagram. The web icon
-   set is now the full-colour mark on a near-white tile with a pale blue lift:
-   the highest luminance on the screen, the mark's own cyan, blue and orange
-   at full strength, and the brand navy reserved for the launch field. */
-const BRIGHT_TOP = "#FFFFFF";
-const BRIGHT_BOTTOM = "#DCEBFF";
+/* THE DARK APP ICON (11 November 2026). A near-white tile was tried on
+   10 November and reverted the next day: Vallo is a dark-first product, the
+   launch field, the splash and the app's own background are all `#010118`,
+   and a white icon broke that line the moment it sat on the home screen next
+   to the app it opens. The icon is the full-colour mark on the brand navy,
+   lifted by a soft radial toward `#0B1C5C` so the tile has depth rather than
+   reading flat black. One ground, used by every icon surface: store, home
+   screen, launcher, favicon and PWA. */
 const SKIP_NATIVE = process.env.BRAND_SKIP_NATIVE === "1";
 /* BRAND_ONLY_NATIVE=1 rewrites ONLY the native project files (apps/web/assets, android/, ios/) and
    leaves every web file alone, so the store icons can be regenerated without touching the web set. */
@@ -104,15 +105,11 @@ async function out(file, buffer) {
 const png = (b) => sharp(b).png({ compressionLevel: 9, adaptiveFiltering: true }).toBuffer();
 
 /** A navy square (or rounded square, or circle) with the mark centred at `scale` of its width. */
-async function iconOn(size, { scale = 0.7, shape = "square", lift = true, transparent = false, dy = 0.03, bright = false } = {}) {
+async function iconOn(size, { scale = 0.7, shape = "square", lift = true, transparent = false, dy = 0.03 } = {}) {
   const r = shape === "circle" ? size / 2 : shape === "rounded" ? Math.round(size * 0.225) : 0;
   const ground = transparent
     ? ""
-    : bright
-      ? `<defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${BRIGHT_TOP}"/><stop offset="1" stop-color="${BRIGHT_BOTTOM}"/></linearGradient></defs>` +
-        `<rect width="${size}" height="${size}" rx="${r}" ry="${r}" fill="url(#g)"/>` +
-        (shape === "square" ? "" : `<rect x="0.5" y="0.5" width="${size - 1}" height="${size - 1}" rx="${r}" ry="${r}" fill="none" stroke="#9CC4FF" stroke-opacity="0.8"/>`)
-      : `<defs><radialGradient id="g" cx="50%" cy="44%" r="62%"><stop offset="0" stop-color="${lift ? NAVY_LIFT : NAVY}"/><stop offset="1" stop-color="${NAVY}"/></radialGradient></defs>` +
+    : `<defs><radialGradient id="g" cx="50%" cy="44%" r="62%"><stop offset="0" stop-color="${lift ? NAVY_LIFT : NAVY}"/><stop offset="1" stop-color="${NAVY}"/></radialGradient></defs>` +
       `<rect width="${size}" height="${size}" rx="${r}" ry="${r}" fill="url(#g)"/>`;
   const base = Buffer.from(`<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}">${ground}</svg>`);
   /* A full square on navy carries no alpha channel at all: Apple rejects an
@@ -342,7 +339,7 @@ await out(path.join(WEB, "native-shell/vallo-mark.svg"), Buffer.from(svg.markNig
     ),
   );
 }
-await out(path.join(BRAND, "vallo-icon.png"), await iconOn(1024, { scale: 0.72, bright: true }));
+await out(path.join(BRAND, "vallo-icon.png"), await iconOn(1024, { scale: 0.72 }));
 
 /* ---------- the older cuts, redrawn under their names ---------- */
 await out(path.join(BRAND, "startup/vallo-mark.webp"), await sharp(await raster(svg.markNight, 280)).webp({ quality: 92, alphaQuality: 100 }).toBuffer());
@@ -376,7 +373,7 @@ await out(path.join(BRAND, "startup/vallo-wordmark.webp"), await sharp(await ras
 /* Tab-sized icons are a rounded tile, so a tab or a bookmark bar shows a
    shape rather than a hard navy square; the mark sits larger at the
    smallest sizes, where every pixel of it counts. */
-const tab = async (size) => iconOn(size, { scale: size <= 32 ? 0.86 : 0.8, shape: "rounded", dy: 0.02, bright: true });
+const tab = async (size) => iconOn(size, { scale: size <= 32 ? 0.86 : 0.8, shape: "rounded", dy: 0.02 });
 await out(
   path.join(WEB, "public/favicon.ico"),
   ico([
@@ -389,39 +386,39 @@ for (const size of [16, 32, 48, 64]) await out(path.join(PWA, `icon-${size}.png`
 /* Install icons stay full-bleed squares: the platform applies its own mask. */
 /* The 192 is the one a browser fetches for its tab and install prompt on every page
    load, so it is palette-coded (smaller on the wire, no visible banding at this size). */
-await out(path.join(PWA, "icon-192.png"), await sharp(await iconOn(192, { scale: 0.72, bright: true })).png({ palette: true, quality: 92, effort: 10, dither: 0.6 }).toBuffer());
-await out(path.join(PWA, "icon-512.png"), await iconOn(512, { scale: 0.72, bright: true }));
-await out(path.join(PWA, "apple-touch-icon.png"), await iconOn(180, { scale: 0.72, bright: true }));
+await out(path.join(PWA, "icon-192.png"), await sharp(await iconOn(192, { scale: 0.72 })).png({ palette: true, quality: 92, effort: 10, dither: 0.6 }).toBuffer());
+await out(path.join(PWA, "icon-512.png"), await iconOn(512, { scale: 0.72 }));
+await out(path.join(PWA, "apple-touch-icon.png"), await iconOn(180, { scale: 0.72 }));
 /* Maskable: everything meaningful inside the middle 80 per cent (the safe
    circle is 40 per cent of the width in radius). The mark's half-diagonal
    at 0.56 of the width is 0.37 of it, inside that circle. */
-await out(path.join(PWA, "icon-maskable-512.png"), await iconOn(512, { scale: 0.56, dy: 0.02, bright: true }));
+await out(path.join(PWA, "icon-maskable-512.png"), await iconOn(512, { scale: 0.56, dy: 0.02 }));
 
 /* ---------- native (BRAND_SKIP_NATIVE=1 leaves the store binaries' icons alone) ---------- */
-/* THE STORE ICONS ARE THE BRIGHT SET TOO (10 November 2026): the full-colour mark on the
-   near-white tile, the same as the web icons, so the home screen, the app switcher and the
+/* THE STORE ICONS ARE THE DARK SET TOO (11 November 2026): the full-colour mark on the
+   brand navy, the same as the web icons, so the home screen, the app switcher and the
    store listing all show one icon. The iOS marketing icon is a square with no alpha channel
    and no rounded corners (Apple rounds it); the Android adaptive foreground is the mark alone
-   on transparency inside the safe zone, over a full-bleed bright background layer. */
+   on transparency inside the safe zone, over a full-bleed navy background layer. */
 if (!SKIP_NATIVE) {
-await out(path.join(NATIVE, "icon-only.png"), await iconOn(1024, { scale: 0.7, bright: true }));
+await out(path.join(NATIVE, "icon-only.png"), await iconOn(1024, { scale: 0.7 }));
 /* The adaptive foreground: the mark alone, on transparency. Capacitor wraps
    it in a 16.7 per cent inset, so it is drawn in the inner 72 of 108 units
    and must fit the guaranteed 66-unit circle: 0.68 of the file's width keeps
    the mark's half-diagonal at about 30 of the 33 units of that circle's radius
    (`src/lib/brand/native-icons.test.ts` holds it by pixel). */
 await out(path.join(NATIVE, "icon-foreground.png"), await iconOn(1024, { scale: 0.68, transparent: true, dy: 0.02 }));
-await out(path.join(NATIVE, "icon-background.png"), await iconOn(1024, { scale: 0, bright: true }));
+await out(path.join(NATIVE, "icon-background.png"), await iconOn(1024, { scale: 0 }));
 for (const dir of await readdir(ANDROID_RES)) {
   if (!dir.startsWith("mipmap-") || dir.includes("anydpi")) continue;
   const base = path.join(ANDROID_RES, dir);
   const { width: size } = await sharp(path.join(base, "ic_launcher.png")).metadata();
-  await out(path.join(base, "ic_launcher.png"), await iconOn(size, { scale: 0.7, shape: "rounded", bright: true }));
-  await out(path.join(base, "ic_launcher_round.png"), await iconOn(size, { scale: 0.64, shape: "circle", dy: 0.02, bright: true }));
+  await out(path.join(base, "ic_launcher.png"), await iconOn(size, { scale: 0.7, shape: "rounded" }));
+  await out(path.join(base, "ic_launcher_round.png"), await iconOn(size, { scale: 0.64, shape: "circle", dy: 0.02 }));
   await out(path.join(base, "ic_launcher_foreground.png"), await iconOn(size, { scale: 0.68, transparent: true, dy: 0.02 }));
-  await out(path.join(base, "ic_launcher_background.png"), await iconOn(size, { scale: 0, bright: true }));
+  await out(path.join(base, "ic_launcher_background.png"), await iconOn(size, { scale: 0 }));
 }
-await out(IOS_ICON, await sharp(await iconOn(1024, { scale: 0.7, bright: true })).flatten({ background: BRIGHT_TOP }).removeAlpha().png().toBuffer());
+await out(IOS_ICON, await sharp(await iconOn(1024, { scale: 0.7 })).flatten({ background: NAVY }).removeAlpha().png().toBuffer());
 }
 
 console.log(written.join("\n"));
