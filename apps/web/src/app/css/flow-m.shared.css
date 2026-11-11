@@ -18,9 +18,10 @@
    * washing brand light over it. That wash is where the navy comes from.
    * `.nf-g1step` in grade1.css paints `--nf-surface-canvas` OPAQUELY, so the
    * wash never reaches it: measured in WebKit at 390 wide, /roommates reads
-   * rgb(0, 7, 36) at the same point a step frame reads rgb(0, 8, 20). The
-   * light theme has the same fault in the other direction: the app ground
-   * reads rgb(227, 230, 234) where the canvas token is #F5F6F8.
+   * rgb(0, 7, 36) at the same point a step frame reads rgb(0, 8, 20). By day
+   * the wash is faint enough that the ground stays at the canvas, so the
+   * fault is the night's alone; the frame is transparent in both themes all
+   * the same, because a page's ground is the page's to decide.
    *
    * The frame is a page, so it takes a page's ground: none of its own. That is
    * correct by construction in both themes and on every flow built on
