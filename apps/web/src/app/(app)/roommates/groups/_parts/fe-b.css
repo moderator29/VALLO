@@ -286,6 +286,22 @@
     min-block-size: 6rem;
     resize: vertical;
   }
+  /*
+   * The select draws this field's material, not the platform's. These are the
+   * only roommates selects that are not on `.nf-field` (the cost splitter's
+   * period and the two school pickers in `app/(app)/roommates/verify/VerifyFlows.tsx`), so they
+   * take the reset and the shared chevron on their own. See the long note in
+   * controls.css for why a native select needs this at all. The invalid rule
+   * above only moves `border-color`, so the mark survives it.
+   */
+  .nf-rmb-field select {
+    appearance: none;
+    -webkit-appearance: none;
+    padding-inline-end: var(--nf-pad-field-affordance);
+    background:
+      var(--nf-select-caret),
+      linear-gradient(var(--nf-surface-inset), var(--nf-surface-inset));
+  }
   .nf-rmb-field input[aria-invalid="true"],
   .nf-rmb-field select[aria-invalid="true"],
   .nf-rmb-field textarea[aria-invalid="true"] {
