@@ -88,7 +88,7 @@
    once with the script names it was kept with. Bumping the version makes the
    activate step delete every kept page and script, so the next open takes the
    deployed code. */
-const CACHE_VERSION = "v10";
+const CACHE_VERSION = "v11";
 const SHELL_CACHE = `vallo-shell-${CACHE_VERSION}`;
 const ASSET_CACHE = `vallo-assets-${CACHE_VERSION}`;
 const IMAGE_CACHE = `vallo-images-${CACHE_VERSION}`;
@@ -229,6 +229,28 @@ const KEPT_MARK_ATTRIBUTE = "data-vallo-kept";
 /* Whether every script and stylesheet a kept page draws with was on the phone
    when it was kept: only such a page may answer at once. */
 const WHOLE_HEADER = "x-vallo-whole";
+
+/*
+ * THE STYLESHEETS A KEPT PAGE CANNOT BE READ WITHOUT (the founder, 11 November
+ * 2026: documentation and legal pages drawn with sections on top of one
+ * another and paragraphs one word wide, on a phone, on pages that are correct
+ * in every browser here).
+ *
+ * `WHOLE_HEADER` above is stamped when the page is KEPT, and it was the only
+ * gate. A phone is not a vault: Safari drops Cache Storage entries one at a
+ * time under storage pressure, and a deploy retires the hashed chunks an older
+ * document names. Either way the kept document survives while some of the CSS
+ * it names does not, and a document whose stylesheets are half there does not
+ * degrade gracefully: the half that lost its rules collapses to its minimum
+ * width and paints over its neighbours, which is exactly what a broken page
+ * looks like.
+ *
+ * So the stylesheet addresses are stamped on the kept copy and checked AGAIN
+ * at the moment it would be shown. Scripts are deliberately not checked: a
+ * missing chunk costs interactivity, which the page can recover by fetching
+ * it, while a missing stylesheet costs legibility, which it cannot.
+ */
+const STYLES_HEADER = "x-vallo-css";
 
 /*
  * PAGES THE SERVER DRAWS TWO WAYS BY A COOKIE, and the cookie that decides.
@@ -510,6 +532,12 @@ function offlineAssetUrls(html) {
   return Array.from(found);
 }
 
+/* The stylesheets alone, out of the same markup: the ones whose absence makes
+   a kept page unreadable rather than merely slow (STYLES_HEADER). */
+function offlineStyleUrls(html) {
+  return offlineAssetUrls(html).filter((path) => /\.css(?:\?|$)/.test(path));
+}
+
 /* Keep the assets a document needs, so it can be drawn again offline. Under
    Save-Data only the ones already on the phone count (`frugal`), because a
    second download is the thing being saved. */
@@ -763,6 +791,11 @@ async function keepPage(url, response) {
     const whole = assetPaths.length > 0 && (await assetsAllKept(assetPaths));
     const headers = keptHeaders(response.headers, viewer);
     if (whole) headers.set(WHOLE_HEADER, "1");
+    /* The stylesheets this copy needs, re-checked every time it would be
+       shown (`keptPageIsReadable`), because the phone may have dropped one
+       since and a half-styled page is worse than a wait. */
+    const styles = offlineStyleUrls(body);
+    if (styles.length > 0) headers.set(STYLES_HEADER, styles.join(" "));
     /* Which way a two-way page was drawn; unknown leaves it unable to answer at once. */
     const variant = await pageVariant(url.pathname);
     if (variant) headers.set(VARIANT_HEADER, variant);
@@ -814,6 +847,7 @@ function markKept(response, timing) {
   headers.set("cache-control", "no-store");
   headers.delete(WHOLE_HEADER);
   headers.delete(VARIANT_HEADER);
+  headers.delete(STYLES_HEADER);
   return new Response(response.body, { status: 200, statusText: "OK", headers });
 }
 
@@ -958,6 +992,18 @@ let lastInstantAt = 0;
  * immediate refresh (`ConnectionLine`): one refresh, when the network's copy
  * has been kept, which is the same spending as the slow path, without the wait.
  */
+/*
+ * Whether a kept copy can still be READ: every stylesheet it names is on the
+ * phone right now, not merely when it was kept (STYLES_HEADER says why). A
+ * copy kept by an older worker carries no list and is trusted as before, and
+ * so is a document that names no stylesheet at all.
+ */
+async function keptPageIsReadable(kept) {
+  const named = (kept.headers.get(STYLES_HEADER) || "").trim();
+  if (!named) return true;
+  return assetsAllKept(named.split(" ").filter(Boolean));
+}
+
 async function mayAnswerInstantly(request, kept, now, pathname) {
   if (askedForNetwork(request)) return false;
   if (now - lastInstantAt < INSTANT_COOLDOWN_MS) return false;
@@ -1055,6 +1101,22 @@ function handleNavigation(event) {
     if (kept.key !== key && isStartPath(url.pathname)) {
       settled = "redirected";
       return Response.redirect(kept.key, 302);
+    }
+
+    /* A copy whose stylesheets the phone has since dropped is not shown at
+       all: the network gets as long as it needs, and the offline screen
+       answers only if it fails outright. A page drawn with half its rules
+       reads as broken, and broken is worse than late. */
+    const readable = await keptPageIsReadable(kept.response);
+    if (!readable) {
+      try {
+        const response = await network;
+        settled = "network";
+        return response;
+      } catch {
+        settled = "offline";
+        return offlineFallback();
+      }
     }
 
     const now = Date.now();
