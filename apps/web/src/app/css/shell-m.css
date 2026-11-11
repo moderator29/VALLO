@@ -168,7 +168,14 @@
   .nf-nav__docs a {
     display: inline-flex;
     align-items: center;
-    min-height: 44px;
+    justify-content: center;
+    /* 44 in BOTH axes, and on the scale rather than as a literal. The height
+       was already the floor; the width was the word, so Help was tapped at 31
+       by 44 and Docs at 34 by 44 in the drawer (measured in WebKit at 390).
+       The row wraps, so the wider short links take a second line rather than
+       pushing anything out of it. */
+    min-block-size: 2.75rem;
+    min-inline-size: 2.75rem;
     font-size: var(--nf-text-body-sm);
     color: var(--nf-brand-secondary);
     text-decoration: none;

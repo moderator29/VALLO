@@ -186,7 +186,7 @@ export function ReportSheetPanel({
                                 value={code}
                                 checked={active}
                                 onChange={() => setCategory(code)}
-                                className="mt-2xs h-4 w-4 shrink-0 accent-[var(--nf-brand-primary)]"
+                                className="mt-2xs shrink-0 accent-[var(--nf-brand-primary)]"
                               />
                               <span className="min-w-0">
                                 <span className="block text-[length:var(--nf-text-body-sm)] font-semibold text-[var(--nf-content-primary)]">
