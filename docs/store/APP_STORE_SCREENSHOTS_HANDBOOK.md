@@ -149,10 +149,11 @@ Checked against the stores' own pages on 29 September 2026.
 | Display | Accepted portrait sizes | Required? |
 |---|---|---|
 | 6.9" | 1260 x 2736, 1290 x 2796, **1320 x 2868** | The top of the scaling chain: supply it and every smaller iPhone uses it |
+| 6.3" (shown in App Store Connect as "iPhone with Dynamic Island (medium display)") | 1179 x 2556, **1206 x 2622** | Needed when that slot is filled by hand: it rejects 1320 x 2868 ("File dimensions are invalid"). `docs/store/screenshots/app-store-6.3-1206x2622/` is the 20 images resized to 1206 x 2622 |
 | 6.5" | 1284 x 2778, 1242 x 2688 | Only if 6.9" is not supplied |
 | iPad | various | Only if the app runs on iPad. Vallo is iPhone only |
 
-One to ten screenshots per display size and language, in .png, .jpg or .jpeg, with no alpha channel. Every image here is RGB with no alpha, which `compose.mjs` checks as it writes each file.
+**At most ten** screenshots per display size and language (upload 01 to 10 of the 20; Google Play takes at most eight, 01 to 08), one to ten per display size and language, in .png, .jpg or .jpeg, with no alpha channel. Every image here is RGB with no alpha, which `compose.mjs` checks as it writes each file.
 
 **Google Play** ([Add preview assets](https://support.google.com/googleplay/android-developer/answer/9866151)):
 
