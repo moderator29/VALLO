@@ -1187,6 +1187,23 @@ form.nf-composer .nf-composer__send {
     background-color var(--nf-duration-fast) var(--nf-ease-standard),
     scale var(--nf-duration-press) var(--nf-ease-press);
 }
+/*
+ * THE DISC IS DRAWN AT 40 AND HIT AT 44. The chat's own send carries the
+ * microphone's class and gets its hit area from messages-g1.css; the plain
+ * send on the first message to somebody (`u/[handle]/message`) carried
+ * neither, so it was a 40 by 40 target, under the floor
+ * docs/design/COMPONENTS.md sets. The target is grown around the disc
+ * rather than the disc made bigger, which is the idiom used throughout.
+ */
+form.nf-composer .nf-composer__send {
+  position: relative;
+}
+form.nf-composer .nf-composer__send::before {
+  content: "";
+  position: absolute;
+  inset: -0.125rem;
+  border-radius: var(--nf-radius-circle);
+}
 form.nf-composer .nf-composer__send[data-ready] {
   background: var(--nf-brand-primary);
   color: var(--nf-content-on-brand);
