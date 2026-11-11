@@ -238,3 +238,8 @@ node scripts/marketing/store/overview.mjs --grid
 ```
 
 **To change the words:** edit the headline in `store/shots/premium.mjs` and run `compose.mjs --only <n>`. Keep to DESIGN.md section 2 (no em dashes, "verified" only about people, no promise or valuation words, no invented numbers), to two lines, and within the measure (the phone's width plus 50 px).
+
+
+## Product page header and search results banners (App Store Connect, "Header and Search Results")
+
+Apple's creative assets specification: the **header** is 21:9, **3840 x 1646**, JPEG or PNG, no alpha; the **search results** image is 3:2, **1920 x 1280 to 3840 x 2560**, JPEG or PNG, no alpha. Apple's advice: one clear idea, key artwork in the centre (the edges are cropped on some devices), a short phrase, and no prices, web addresses, other platforms' logos or unearned claims. `store/shots/banners.mjs` draws both on the night ground with the new Home, Circle and Stays screens (none shows a price); `STORE_SET=v3 node scripts/marketing/store/compose.mjs --only 999 --banners --res 1` writes them to `docs/store/screenshots/app-store-banners/` (and `vallo-app-store-banners.zip` holds the two). Check them in App Store Connect's Preview before publishing.

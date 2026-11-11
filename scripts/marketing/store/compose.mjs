@@ -558,6 +558,24 @@ if (WITH_FEATURE && FEATURE) {
   made.push("google-play/feature-graphic");
 }
 
+if (args.includes("--banners")) {
+  /* The App Store product page's header (21:9) and search results (3:2) images; see shots/banners.mjs. */
+  const { HEADER, SEARCH } = await import("./shots/banners.mjs");
+  for (const [name, W, H, fn] of [["header-3840x1646", 3840, 1646, HEADER], ["search-results-3840x2560", 3840, 2560, SEARCH]]) {
+    const ctx = makeCtx({ n: 0 }, "app-store", 0);
+    ctx.W = W;
+    ctx.H = H;
+    ctx.u = W / 1320;
+    const body = await fn(ctx);
+    const shots = await renderHtml(page({ width: W, height: H, body }), W, H, ctx.flats.length > 0);
+    const raw = await finish(shots, W, H, ctx.flats);
+    const file = PROOF ? join(PROOF, `${name}.${PROOF_EXT}`) : join(OUT, "app-store-banners", `${name}.png`);
+    if (!PROOF) mkdirSync(join(OUT, "app-store-banners"), { recursive: true });
+    await write(raw, W, H, file, { width: W, height: H });
+    made.push(`app-store-banners/${name}`);
+  }
+}
+
 await browser.close();
 await phones.close();
 rmSync(TMP, { recursive: true, force: true });
