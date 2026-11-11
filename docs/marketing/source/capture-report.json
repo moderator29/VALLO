@@ -2150,18 +2150,12 @@
     "signedIn": true
   },
   "v3-listing": {
-    "url": "/listing/ed000000-0000-4000-8000-00000000003e",
-    "at": "2026-11-10T21:34:00.203Z",
-    "kind": "mobile",
-    "theme": "dark",
-    "signedIn": true
+    "failed": "page.goto: Timeout 480000ms exceeded.",
+    "at": "2026-11-11T20:13:59.793Z"
   },
   "v3-listing-cost": {
-    "url": "/listing/ed000000-0000-4000-8000-00000000003e",
-    "at": "2026-11-10T21:34:28.350Z",
-    "kind": "mobile",
-    "theme": "dark",
-    "signedIn": true
+    "failed": "locator.evaluate: Timeout 12000ms exceeded.",
+    "at": "2026-11-11T20:14:20.978Z"
   },
   "v3-listing-sale": {
     "url": "/listing/ed000000-0000-4000-8000-000000000040",
@@ -2171,11 +2165,8 @@
     "signedIn": true
   },
   "v3-listing-total": {
-    "url": "/listing/ed000000-0000-4000-8000-00000000003e",
-    "at": "2026-11-10T21:35:06.114Z",
-    "kind": "mobile",
-    "theme": "dark",
-    "signedIn": true
+    "failed": "locator.evaluate: Target page, context or browser has been closed",
+    "at": "2026-11-11T20:14:33.542Z"
   },
   "v3-notifications": {
     "url": "/notifications",
