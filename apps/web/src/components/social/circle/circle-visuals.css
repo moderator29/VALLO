@@ -511,11 +511,23 @@
   }
 
   /* ------------------------------------------------------------- cards */
+  /*
+   * THE CARD TIER'S CORNER IS 18, AND THESE WERE 22.
+   *
+   * `--nf-radius-xl` is the Card FIGURE rung (docs/design/COMPONENTS.md: "a
+   * Card whose subject is a figure"); the ordinary Card is
+   * `--nf-radius-card`. Every container below is an ordinary card, and four
+   * of them already draw `--nf-tier-card-edge`, the Card tier's own edge, so
+   * they were Cards wearing the Card hairline on the figure's corner.
+   * Measured in WebKit at 390 before this: twelve Circle containers at 22
+   * against the Roommates cards' 18, so crossing the dock between two
+   * features changed every corner on the screen by four pixels.
+   */
   .nf-ccard {
     display: grid;
     gap: var(--nf-space-xs);
     padding: var(--nf-space-md);
-    border-radius: var(--nf-radius-xl);
+    border-radius: var(--nf-radius-card);
     background: var(--nf-surface-primary);
     box-shadow: var(--nf-card-shadow);
     color: var(--nf-content-primary);
