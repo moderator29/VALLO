@@ -1,6 +1,8 @@
 NATIVE STORE ICONS AND THE SHARE CARD
 
-Date: 10 November 2026. Follows docs/handoff/BRAND_REFRESH.md, which refreshed the web icons and left the share card and the store icons in the old palette.
+Date: 10 November 2026, AMENDED 11 November 2026.
+
+AMENDMENT (11 November 2026, founder's ruling). The app icon is BACK ON THE BRAND NAVY. The bright near-white tile described below shipped to TestFlight as build 10002418 and was rejected on sight: Vallo is dark first, the launch field, the splash and the app's own background are all #010118, and a white icon broke that line next to the app it opens. scripts/build-brand-logo.mjs no longer has a bright ground at all (the flag, the two constants and the branch are gone, so it cannot come back by accident), ic_launcher_background.xml names #010118, and every icon was regenerated. The share card in item 1 is the ONE surface still bright, on purpose: an unfurled link sits on a white chat or timeline, not on a home screen. Read every "bright" below as applying to the share card only.
 
 WHAT CHANGED
 
@@ -9,13 +11,13 @@ WHAT CHANGED
 
 2. Native store icons, regenerated from the same vector art as the web set (scripts/build-brand-logo.mjs, new switch BRAND_ONLY_NATIVE=1, which writes only apps/web/assets, android/ and ios/ and leaves every web file alone):
    - iOS AppIcon.appiconset/AppIcon-512@2x.png: 1024x1024, plain RGB (no alpha channel), square corners (Apple rounds it). Contents.json untouched.
-   - Android mipmap-ldpi to xxxhdpi: ic_launcher.png (rounded), ic_launcher_round.png (circle), ic_launcher_foreground.png (the mark alone on transparency), ic_launcher_background.png (bright full-bleed). Sizes 36, 48, 72, 96, 144, 192. File names unchanged.
+   - Android mipmap-ldpi to xxxhdpi: ic_launcher.png (rounded), ic_launcher_round.png (circle), ic_launcher_foreground.png (the mark alone on transparency), ic_launcher_background.png (navy full-bleed). Sizes 36, 48, 72, 96, 144, 192. File names unchanged.
    - Adaptive icon safe zone: the foreground mark is now 68 per cent of its file (was 62), which after the launcher's 16.7 per cent inset keeps every visible pixel inside the guaranteed 66-unit circle (tested by pixel).
    - Notification icon ic_stat_vallo.xml: white on transparent vector of the new mark (already rewritten earlier; regenerated identically).
    - Capacitor sources apps/web/assets/icon-only.png, icon-foreground.png, icon-background.png.
    Run: BRAND_ONLY_NATIVE=1 node scripts/build-brand-logo.mjs
 
-3. Test: apps/web/src/lib/brand/native-icons.test.ts reads PNG headers and pixels (sizes, colour type, corners, safe zone, background brightness, adaptive XML targets, notification glyph).
+3. Test: apps/web/src/lib/brand/native-icons.test.ts reads PNG headers and pixels (sizes, colour type, corners, safe zone, the navy ground, adaptive XML targets, notification glyph). apps/web/src/lib/brand/icons.test.ts holds the web set's navy ground and the maskable safe zone; its safe-zone check compares against assets/icon-background.png rather than a row's edge, because a radial ground is lighter at the centre of a row than at its edge.
 
 DELIBERATELY NOT CHANGED
 

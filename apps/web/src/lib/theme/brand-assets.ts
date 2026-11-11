@@ -6,7 +6,7 @@
  * that names one carries this value as `?v=`, and the service worker's cache
  * version moved from v8 to v9 with it. Change it whenever an icon is redrawn.
  */
-export const ICON_VERSION = "20261110";
+export const ICON_VERSION = "20261111";
 
 /** An icon or launch image address with the cache-busting version added. */
 export function versioned(path: string): string {

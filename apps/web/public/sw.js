@@ -88,7 +88,7 @@
    once with the script names it was kept with. Bumping the version makes the
    activate step delete every kept page and script, so the next open takes the
    deployed code. */
-const CACHE_VERSION = "v9";
+const CACHE_VERSION = "v10";
 const SHELL_CACHE = `vallo-shell-${CACHE_VERSION}`;
 const ASSET_CACHE = `vallo-assets-${CACHE_VERSION}`;
 const IMAGE_CACHE = `vallo-images-${CACHE_VERSION}`;
@@ -104,7 +104,7 @@ const OFFLINE_URL = "/offline";
  * mark it draws, the app icon a notification uses, and the manifest so an
  * installed app still knows its own name and colours with no network.
  */
-const SHELL_ASSETS = [OFFLINE_URL, "/brand/vallo-mark.svg", "/pwa/icon-192.png?v=20261110", "/manifest.webmanifest"];
+const SHELL_ASSETS = [OFFLINE_URL, "/brand/vallo-mark.svg", "/pwa/icon-192.png?v=20261111", "/manifest.webmanifest"];
 
 /* First path segment is enough to name a surface whose ASSETS must never be
    cached (the asset allowlist below is the primary rule; this is the floor). */

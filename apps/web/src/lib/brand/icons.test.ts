@@ -12,7 +12,8 @@ import { LAUNCH_IMAGES } from "./launch-images";
  * November 2026, brand refresh). Read from the PNG header, not trusted from
  * the file name, and the maskable icon is checked for its safe zone.
  */
-const PUBLIC = join(__dirname, "..", "..", "..", "public");
+const WEB_ROOT = join(__dirname, "..", "..", "..");
+const PUBLIC = join(WEB_ROOT, "public");
 const onDisk = (url: string) => join(PUBLIC, url.split("?")[0]!);
 
 function pngSize(file: string): { w: number; h: number } {
@@ -90,19 +91,24 @@ describe("the iOS launch images", () => {
 
 describe("the maskable icon's safe zone", () => {
   it("keeps everything that is not the background inside the middle 80 per cent circle", async () => {
+    /* The ground is a RADIAL navy gradient, so it cannot be read from a row's
+       edge: at the same y it is lighter near the centre. Compare instead
+       against the ground layer the same generator emits with no mark on it
+       (`assets/icon-background.png`, the identical radial at 1024), scaled to
+       match. Whatever differs from that is the mark. */
+    const size = 512;
+    const ground = await sharp(join(WEB_ROOT, "assets", "icon-background.png")).resize(size, size).removeAlpha().raw().toBuffer();
     const { data, info } = await sharp(join(PUBLIC, "pwa", "icon-maskable-512.png")).removeAlpha().raw().toBuffer({ resolveWithObject: true });
-    const size = info.width;
-    const px = (x: number, y: number) => [data[(y * size + x) * 3]!, data[(y * size + x) * 3 + 1]!, data[(y * size + x) * 3 + 2]!];
+    expect(info.width).toBe(size);
     const centre = size / 2;
     const limit = size * 0.4;
     let outside = 0;
     let inside = 0;
     for (let y = 0; y < size; y += 2) {
       for (let x = 0; x < size; x += 2) {
-        // the ground is a near-white to pale blue vertical gradient: read it from the same row's edge
-        const ground = px(0, y);
-        const p = px(x, y);
-        const differs = Math.abs(p[0]! - ground[0]!) + Math.abs(p[1]! - ground[1]!) + Math.abs(p[2]! - ground[2]!) > 40;
+        const i = (y * size + x) * 3;
+        const differs =
+          Math.abs(data[i]! - ground[i]!) + Math.abs(data[i + 1]! - ground[i + 1]!) + Math.abs(data[i + 2]! - ground[i + 2]!) > 40;
         if (!differs) continue;
         const d = Math.hypot(x - centre, y - centre);
         if (d > limit) outside++;
@@ -112,9 +118,11 @@ describe("the maskable icon's safe zone", () => {
     expect(inside).toBeGreaterThan(1000);
     expect(outside).toBe(0);
   });
-  it("the home screen icon is bright: its ground is near white", async () => {
+  it("the home screen icon is dark: its ground is the brand navy", async () => {
     const { data } = await sharp(join(PUBLIC, "pwa", "icon-512.png")).removeAlpha().raw().toBuffer({ resolveWithObject: true });
     const corner = [data[0]!, data[1]!, data[2]!];
-    expect(Math.min(...corner)).toBeGreaterThan(235);
+    /* `#010118` at the corner, where the radial lift has fallen away. */
+    expect(Math.max(...corner)).toBeLessThan(40);
+    expect(corner[2]!).toBeGreaterThanOrEqual(corner[0]!);
   });
 });
