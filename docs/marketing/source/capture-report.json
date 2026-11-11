@@ -2150,23 +2150,32 @@
     "signedIn": true
   },
   "v3-listing": {
-    "failed": "page.goto: Timeout 480000ms exceeded.",
-    "at": "2026-11-11T20:13:59.793Z"
+    "url": "/listing/ed000000-0000-4000-8000-00000000003e",
+    "at": "2026-11-11T20:18:26.505Z",
+    "kind": "mobile",
+    "theme": "dark",
+    "signedIn": true
   },
   "v3-listing-cost": {
-    "failed": "locator.evaluate: Timeout 12000ms exceeded.",
-    "at": "2026-11-11T20:14:20.978Z"
+    "url": "/listing/ed000000-0000-4000-8000-00000000003e",
+    "at": "2026-11-11T20:18:39.665Z",
+    "kind": "mobile",
+    "theme": "dark",
+    "signedIn": true
   },
   "v3-listing-sale": {
     "url": "/listing/ed000000-0000-4000-8000-000000000040",
-    "at": "2026-11-10T21:36:39.309Z",
+    "at": "2026-11-11T20:18:58.767Z",
     "kind": "mobile",
     "theme": "dark",
     "signedIn": true
   },
   "v3-listing-total": {
-    "failed": "locator.evaluate: Target page, context or browser has been closed",
-    "at": "2026-11-11T20:14:33.542Z"
+    "url": "/listing/ed000000-0000-4000-8000-00000000003e",
+    "at": "2026-11-11T20:18:51.411Z",
+    "kind": "mobile",
+    "theme": "dark",
+    "signedIn": true
   },
   "v3-notifications": {
     "url": "/notifications",
@@ -2240,7 +2249,7 @@
   },
   "v3-sign-up": {
     "url": "/sign-up",
-    "at": "2026-11-10T21:50:29.207Z",
+    "at": "2026-11-11T20:17:52.302Z",
     "kind": "mobile",
     "theme": "dark",
     "signedIn": false
@@ -2268,7 +2277,7 @@
   },
   "v3-welcome": {
     "url": "/welcome",
-    "at": "2026-11-10T22:37:40.065Z",
+    "at": "2026-11-11T20:18:00.828Z",
     "kind": "mobile",
     "theme": "dark",
     "signedIn": false
