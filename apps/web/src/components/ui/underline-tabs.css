@@ -22,6 +22,13 @@
     position: relative;
     display: inline-flex;
     align-items: center;
+    /* The 44pt floor in BOTH axes (WCAG 2.5.8, and the floor buttons.css
+       guarantees on every control). The height was already 44; the width was
+       the word, so a short tab was tapped at 39 by 44 ("Plots" on /search,
+       measured in WebKit at 390). The row's gap is untouched, so widening the
+       short tabs cannot make one swallow a tap meant for its neighbour. */
+    justify-content: center;
+    min-inline-size: 2.75rem;
     gap: var(--nf-space-2xs);
     min-block-size: 2.75rem;
     padding: 0;

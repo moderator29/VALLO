@@ -327,7 +327,13 @@
     align-items: center;
     justify-content: center;
     gap: var(--nf-space-3xs);
-    min-block-size: 44px;
+    /* 44 in BOTH axes. The height was already there; the width was the
+       label, so the one-character chips (the 1 to 8 people chips and the
+       weight stepper's minus and plus on /roommates/split) were tapped at
+       32 by 44, measured in WebKit at 390. The people row wraps, so a wider
+       chip takes a second line rather than overflowing. */
+    min-block-size: 2.75rem;
+    min-inline-size: 2.75rem;
     padding: var(--nf-space-2xs) var(--nf-space-sm);
     border-radius: var(--nf-radius-control);
     border: var(--nf-border-width) solid var(--nf-brand-edge-soft);

@@ -476,6 +476,11 @@
     position: relative;
     display: inline-flex;
     align-items: center;
+    /* 44 in both axes, as on the underline tabs: the height was 44 and the
+       width was the word, so "Ask" was tapped at 26 by 44. The row's gap is
+       untouched, so no tab reaches into the one beside it. */
+    justify-content: center;
+    min-inline-size: 2.75rem;
     block-size: 2.75rem;
     color: var(--nf-content-muted);
     font-size: var(--nf-text-body-sm);

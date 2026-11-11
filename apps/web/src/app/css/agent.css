@@ -28,8 +28,16 @@
 
   /* ------------------------------------------------------- the console */
 
+  /*
+   * NO GROUND OF ITS OWN. This painted `--nf-surface-canvas` opaquely over
+   * `.nf-ambient` (ambient.css, fixed, z-index -1), the brand wash every
+   * other page in the product is lit by, so the agent console read near
+   * black beside a member app that reads navy: measured in WebKit at 390
+   * wide, rgb(0, 7, 19) against the app's rgb(0, 7, 36). The page ground is
+   * the html background and the wash above it, exactly as everywhere else.
+   */
   .nf-agent {
-    background: var(--nf-surface-canvas);
+    background: transparent;
   }
   /* The workspace's own header row: the display title, the standing line,
      and the primary action beside it. */
@@ -227,10 +235,12 @@
 
   /* ---------------------------------------------- the wizard and the flow */
 
+  /* The same ground as the console above, and for the same reason: the host
+     and owner wizard is a page, so it takes the page's ground. */
   .nf-host {
     display: flex;
     min-height: 100dvh;
-    background: var(--nf-surface-canvas);
+    background: transparent;
   }
   /* The column beside the workspace sidebar (plan item 20): the bar and the
      page. Below 1024px the sidebar is not drawn and this is the whole page. */
