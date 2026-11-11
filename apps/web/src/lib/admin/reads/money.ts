@@ -35,6 +35,17 @@ export const READ_CEILING = 50_000;
 /**
  * Every row a query returns, in chunks, up to the ceiling. Null on any error,
  * because half a ledger summed is a wrong number, not a smaller one.
+ *
+ * `complete` IS MEASURED AGAINST THE WINDOW ASKED FOR, NOT AGAINST `CHUNK`.
+ * The last window before a ceiling that is not a whole number of chunks is
+ * shorter than `CHUNK`: with `ceiling = 2500` the third window is rows 2000
+ * to 2499, five hundred of them. A full five hundred rows means the table had
+ * at least 2500 and the read stopped at the ceiling with more behind it;
+ * comparing that against `CHUNK` instead called it a short page and reported
+ * `complete: true`, which is a desk drawing a partial sum as a total. Every
+ * caller today passes the default ceiling, a whole number of chunks, so no
+ * figure on the money desk has ever been wrong this way. The next caller to
+ * pass a round number like 2500 would have been.
  */
 export async function readEvery<T>(
   page: (from: number, to: number) => PromiseLike<{ data: T[] | null; error: unknown }>,
@@ -42,11 +53,13 @@ export async function readEvery<T>(
 ): Promise<{ rows: T[]; complete: boolean } | null> {
   const rows: T[] = [];
   for (let from = 0; from < ceiling; from += CHUNK) {
-    const { data, error } = await page(from, Math.min(from + CHUNK, ceiling) - 1);
+    const to = Math.min(from + CHUNK, ceiling) - 1;
+    const asked = to - from + 1;
+    const { data, error } = await page(from, to);
     if (error) return null;
     const got = data ?? [];
     rows.push(...got);
-    if (got.length < CHUNK) return { rows, complete: true };
+    if (got.length < asked) return { rows, complete: true };
   }
   return { rows, complete: false };
 }

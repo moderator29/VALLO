@@ -253,13 +253,23 @@ export async function pushDrain(admin: PushClient): Promise<JobVerdict> {
 
     if (decision.action === "hold") {
       /* Back to the queue, unclaimed, with the instant the window opens.
-         `attempts` is deliberately NOT incremented: being asleep is not a
-         failed attempt and must not count towards giving up. */
+         Being asleep is not a failed attempt and must not count towards
+         giving up, so the attempt the claim spent is HANDED BACK here.
+         Saying "attempts is deliberately not incremented" and writing no
+         `attempts` at all was the bug: the increment does not happen in this
+         branch, it happens upstream in `claimDue`, which raises the count on
+         every row it takes before anything has looked at it. A row held by
+         quiet hours therefore kept the attempt, and a row held more than
+         three times reached MAX_QUEUE_ATTEMPTS and was given up on without a
+         single push ever having been sent for it. `row.attempts` is the
+         post-claim count, so one less is what the row carried before this
+         run touched it. */
       await admin
         .from("push_queue")
         .update({
           state: "held",
           not_before: decision.until.toISOString(),
+          attempts: Math.max(0, row.attempts - 1),
           claim_token: null,
           claimed_at: null,
         })
@@ -560,38 +570,66 @@ async function readDeliveries(
 /**
  * Claim what is due.
  *
- * One UPDATE, filtered on the claimable states, returning only the rows it
- * actually moved. See note 2 at the head for why this is safe against a
- * second drain without an explicit lock.
+ * ONE UPDATE PER DISTINCT ATTEMPT COUNT, AND THE BUMP RIDES ALONG WITH IT.
+ *
+ * The claim has to raise `attempts` as well as take the row, so the row this
+ * drain works on carries the count of the attempt ABOUT to happen rather
+ * than the one before it: `pushDrain` reads it to decide backoff and to
+ * decide when to give up. `attempts` is per row, and PostgREST writes one
+ * value per statement, so the rows are grouped by the count they carry and
+ * each group is claimed with its own `attempts: n + 1`. A claimable row has
+ * been attempted fewer than `MAX_QUEUE_ATTEMPTS` times, so there are at most
+ * four groups however many rows are due: a run of a hundred rows issues at
+ * most four UPDATEs where it used to issue a hundred and one.
+ *
+ * AND IT CLOSES A WINDOW, which is the better half of it. The bump used to
+ * be its own UPDATE per row after the claim. A drain that died between the
+ * claim and the bump left the row claimed with its old count; ten minutes
+ * later `private.push_reap_stale_claims` handed it back having burned an
+ * attempt that was never recorded, so a row that fails this way could be
+ * retried past `MAX_QUEUE_ATTEMPTS` instead of being given up on. Taking the
+ * row and spending the attempt in one statement means the two cannot
+ * disagree.
+ *
+ * Each group is still filtered on the claimable states, and still returns
+ * only the rows it actually moved, so note 2 at the head holds unchanged: a
+ * second drain's UPDATE re-reads a row that is already `sending` and matches
+ * nothing.
  */
-async function claimDue(admin: PushClient, claimToken: string): Promise<ClaimedRow[]> {
+export async function claimDue(admin: PushClient, claimToken: string): Promise<ClaimedRow[]> {
   const nowIso = new Date().toISOString();
 
   const { data: due } = await admin
     .from("push_queue")
-    .select("id")
+    .select("id, attempts")
     .in("state", ["pending", "held", "failed"])
     .lte("not_before", nowIso)
     .order("not_before", { ascending: true })
     .limit(CLAIM_LIMIT);
 
-  const ids = (due ?? []).map((row) => row.id);
-  if (ids.length === 0) return [];
+  const byAttempts = new Map<number, string[]>();
+  for (const row of due ?? []) {
+    const attempts = row.attempts ?? 0;
+    const group = byAttempts.get(attempts) ?? [];
+    group.push(row.id);
+    byAttempts.set(attempts, group);
+  }
+  if (byAttempts.size === 0) return [];
 
-  const { data } = await admin
-    .from("push_queue")
-    .update({ state: "sending", claim_token: claimToken, claimed_at: nowIso })
-    .in("id", ids)
-    .in("state", ["pending", "held", "failed"])
-    .select("id, notification_id, user_id, expires_at, attempts");
-
-  /* `attempts` is incremented separately so the returned row carries the
-     count of the attempt that is about to happen rather than the one
-     before it. */
-  const rows = (data ?? []) as ClaimedRow[];
-  for (const row of rows) {
-    row.attempts += 1;
-    await admin.from("push_queue").update({ attempts: row.attempts }).eq("id", row.id);
+  const rows: ClaimedRow[] = [];
+  for (const [attempts, ids] of byAttempts) {
+    /* `attempts` is matched as well as set, so the write is a compare and
+       set: a row the reaper or another drain moved on since the read above
+       is simply not claimed this run, rather than claimed with a count that
+       is already out of date. */
+    const { data } = await admin
+      .from("push_queue")
+      .update({ state: "sending", claim_token: claimToken, claimed_at: nowIso, attempts: attempts + 1 })
+      .in("id", ids)
+      .in("state", ["pending", "held", "failed"])
+      .eq("attempts", attempts)
+      .select("id, notification_id, user_id, expires_at, attempts");
+    rows.push(...((data ?? []) as ClaimedRow[]));
   }
   return rows;
 }

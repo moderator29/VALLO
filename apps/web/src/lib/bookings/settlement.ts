@@ -29,10 +29,26 @@ import type { AdminClient } from "@/lib/supabase/service";
  * THE SPLIT. The charge was opened with a Paystack split that the database
  * computed (`public.payment_split_for_booking`): the lister's share to their
  * subaccount, the Guarantee contribution to the reserve subaccount, and
- * Vallo's commission (zero today) to the main account. The ledger row records
- * exactly that: gross = platform fee + lister share + processor fee +
- * guarantee, in integer kobo, with the processor's fee borne by the lister's
- * subaccount as the split's bearer.
+ * Vallo's commission to the main account. The ledger row records exactly
+ * that: gross = platform fee + lister share + processor fee + guarantee, in
+ * integer kobo, with the processor's fee borne by the lister's subaccount as
+ * the split's bearer.
+ *
+ * THE RATE IS NOT ZERO, WHATEVER THIS COMMENT USED TO SAY. The only money
+ * policy version on the live database runs from 5 October 2026 and carries
+ * `commission_bps = 200`, two per cent, the founder's decision of 6 October
+ * 2026 for both rails. That version is also where the Guarantee was retired,
+ * at `guarantee_bps = 0`, so the reserve leg of the split computes to nothing
+ * unless an agreement carries a `guarantee_bps` of its own in its terms
+ * (`private.b3_guarantee_bps_for`), which none does today.
+ *
+ * NEITHER NUMBER IS READ FROM HERE, AND NEITHER IS A CONSTANT.
+ * `private.b3_commission_for_booking` picks the commission, and a listing's
+ * own accepted rate (`listing_rate_acceptances`, `listing_fee_acceptances`)
+ * wins over the policy when one exists, as does a hotel-room scope rate and
+ * an agreement's own terms. So the figure in a ledger row is per booking and
+ * the only honest place to read it is the row. Do not carry a rate in a
+ * comment again.
  */
 
 /** Every calendar date in [checkIn, checkOut), ISO strings. Half-open nights. */
@@ -108,12 +124,23 @@ export type ChargeDecomposition = {
 };
 
 /**
- * Split a settled charge for the ledger.
+ * Split a charge the way the ledger does, MINUS THE COMMISSION, which is why
+ * nothing calls this and nothing should start.
  *
- * The platform take is zero and stays zero. The processor charge is clamped
- * into [0, gross] so a nonsense figure from the processor can never drive the
- * agent's share negative and break the constraint; whatever is left after the
- * processor is the agent's, which is also what actually settles to them.
+ * It was written when the platform take really was zero, and it still returns
+ * `platformFeeMinor: 0` unconditionally. The live money policy has carried
+ * `commission_bps = 200` since 5 October 2026, so on a charge of a hundred
+ * thousand naira this hands back a platform fee two thousand naira short and
+ * an agent's share two thousand naira over. `public.settle_booking_charge`
+ * computes the real split (`private.b3_commission_for_booking`, which prefers
+ * the listing's own accepted rate over the policy) and `readSettlement` reads
+ * it out of the answer, so every ledger row on this platform comes from the
+ * database and not from here. This is kept for the clamp it documents and for
+ * the shape of `ChargeDecomposition`: a wrong figure for the processor can
+ * never drive the agent's share negative and break the constraint.
+ *
+ * If a caller ever needs this, it needs the commission passed in. Do not wire
+ * it up as it stands.
  */
 export function decomposeCharge(
   grossMinor: number,
