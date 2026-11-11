@@ -125,11 +125,11 @@ export async function build(ctx) {
   /* THE FILM'S WHOLE CLAIM, IN THE PRODUCT'S OWN TYPE. "I own the property /
      List it yourself. No agency fee." is a row of the live Add a workspace
      screen, cropped on the row card's own rounded edges (blocks.py: the card
-     runs y 1912..2173) and dropped back over the place it came from, a third
+     runs y 1977..2118) and dropped back over the place it came from, a third
      larger, the way the blueprint does it. Nothing is drawn and nothing is
      claimed: this is the screen saying it. */
   lift(ctx, H, {
-    id: "host-start", crop: { x: 44, y: 1904, w: 1232, h: 278 },
+    id: "host-start", crop: { x: 42, y: 1977, w: 1236, h: 141 },
     t0: w(2, "agency") - 0.12, t1: w(2, "did") - 0.15,
     /* it rests just under the screen's own sub-line: a few pixels higher and
        the card's rule ran through "Add a workspace" once the phone stepped
@@ -232,7 +232,7 @@ export async function build(ctx) {
      figure a renter has already seen before anybody picks up a phone. The
      crop stops before the bar's buttons, so no control is cut in half. */
   lift(ctx, H, {
-    id: "sc-listing-cost", crop: { x: 26, y: 2470, w: 288, h: 140 },
+    id: "sc-listing-cost", crop: { x: 26, y: 2634, w: 288, h: 140 },
     t0: w(4, "already") + 0.32, t1: cut(5) - 0.42,
     to: { x: CX, y: 430, s: 1.55, r: -2 }, seed: 21, radius: 22, fly: 0.78,
   });
