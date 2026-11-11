@@ -61,7 +61,7 @@ const kindOnly = args.includes("--kind") ? args[args.indexOf("--kind") + 1] : nu
 async function run(page, steps, signed) {
   for (const step of steps) {
     if (step.goto) {
-      await page.goto(`${BASE}${step.goto}`, { waitUntil: "load", timeout: 240_000 });
+      await page.goto(`${BASE}${step.goto}`, { waitUntil: "load", timeout: 480_000 });
       await settle(page, 1800);
       if (signed) await touchUnlock(page);
       /* One-time sheets the account meets on its way (the terms notice, the

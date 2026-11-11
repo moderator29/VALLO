@@ -852,7 +852,7 @@
   },
   "f-agreements": {
     "url": "/agreements",
-    "at": "2026-10-14T13:15:44.317Z",
+    "at": "2026-11-11T15:36:36.247Z",
     "kind": "mobile",
     "theme": "dark",
     "signedIn": true
@@ -992,7 +992,7 @@
   },
   "f-rewards-how": {
     "url": "/rewards",
-    "at": "2026-10-14T13:30:51.125Z",
+    "at": "2026-11-11T15:33:34.608Z",
     "kind": "mobile",
     "theme": "dark",
     "signedIn": true
@@ -1279,7 +1279,7 @@
   },
   "n-home2": {
     "url": "/home",
-    "at": "2026-10-14T14:19:09.896Z",
+    "at": "2026-11-11T15:57:25.548Z",
     "kind": "mobile",
     "theme": "dark",
     "signedIn": true
@@ -1300,7 +1300,7 @@
   },
   "n-restaurant": {
     "url": "/restaurant/eb000000-0000-4000-8000-000000000006",
-    "at": "2026-10-14T14:05:21.325Z",
+    "at": "2026-11-11T15:59:27.806Z",
     "kind": "mobile",
     "theme": "dark",
     "signedIn": true
@@ -1335,7 +1335,7 @@
   },
   "n-stays": {
     "url": "/stays",
-    "at": "2026-10-14T13:21:32.444Z",
+    "at": "2026-11-11T15:58:37.143Z",
     "kind": "mobile",
     "theme": "dark",
     "signedIn": true
@@ -1349,7 +1349,7 @@
   },
   "n-staysd": {
     "url": "/stays/search?in=2026-10-16&out=2026-10-19&guests=2",
-    "at": "2026-10-14T14:21:52.989Z",
+    "at": "2026-11-11T16:03:19.076Z",
     "kind": "mobile",
     "theme": "dark",
     "signedIn": true
@@ -2111,22 +2111,16 @@
     "signedIn": true
   },
   "v3-circle": {
-    "url": "/circle",
-    "at": "2026-11-10T21:29:03.677Z",
-    "kind": "mobile",
-    "theme": "dark",
-    "signedIn": true
+    "failed": "page.goto: Timeout 240000ms exceeded.",
+    "at": "2026-11-11T15:40:21.755Z"
   },
   "v3-circle-explore": {
-    "url": "/circle",
-    "at": "2026-11-10T21:29:30.209Z",
-    "kind": "mobile",
-    "theme": "dark",
-    "signedIn": true
+    "failed": "page.goto: Target page, context or browser has been closed",
+    "at": "2026-11-11T15:42:45.955Z"
   },
   "v3-drawer": {
     "url": "/home",
-    "at": "2026-11-10T21:26:58.522Z",
+    "at": "2026-11-11T15:36:21.645Z",
     "kind": "mobile",
     "theme": "dark",
     "signedIn": true
@@ -2139,15 +2133,12 @@
     "signedIn": true
   },
   "v3-home": {
-    "url": "/home",
-    "at": "2026-11-10T21:24:30.070Z",
-    "kind": "mobile",
-    "theme": "dark",
-    "signedIn": true
+    "failed": "page.goto: Target page, context or browser has been closed",
+    "at": "2026-11-11T15:49:45.044Z"
   },
   "v3-home-new": {
     "url": "/home",
-    "at": "2026-11-10T21:25:37.572Z",
+    "at": "2026-11-11T15:35:02.179Z",
     "kind": "mobile",
     "theme": "dark",
     "signedIn": true
