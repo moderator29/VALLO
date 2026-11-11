@@ -55,11 +55,22 @@
     max-width: none;
     margin-inline: 0;
   }
-  /* The scroller's own scrollbar sits at the pane's edge, thin and quiet,
-     not a bright bar in the middle of the screen. */
+  /*
+   * NO SCROLLBAR DOWN THE CONVERSATION (the founder, 11 November 2026: a pale
+   * line painted down the right edge of the thread every time he scrolls, on
+   * his phone). It was a thin quiet bar at the pane's edge, which is right for
+   * a document and wrong for a chat: iMessage, WhatsApp and Telegram draw
+   * none, and the thread is the one surface where the scroll position is
+   * already obvious from the bubbles. Hidden on the website as well as in the
+   * shell, because it is wrong in both, and the same way the photo strip
+   * below already hides its own (`.nf-photo-group__strip`). Scrolling,
+   * wheel, trackpad and keyboard are untouched: only the indicator goes.
+   */
   .nf-thread__scroll {
-    scrollbar-width: thin;
-    scrollbar-color: var(--nf-border-default) transparent;
+    scrollbar-width: none;
+  }
+  .nf-thread__scroll::-webkit-scrollbar {
+    display: none;
   }
 
   /* ------------------------------------------------------------- header */
