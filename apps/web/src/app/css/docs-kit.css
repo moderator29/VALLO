@@ -484,14 +484,24 @@
     font-weight: 700;
     letter-spacing: 0.03em;
   }
-  .nf-doc-table td {
+  /*
+   * THE ROW HEADER IS A CELL LIKE ANY OTHER (11 November 2026, the docs
+   * sweep). A `DocTable` row given a `head` draws `<th scope="row">` rather
+   * than a `<td>`, which is right for a table whose rows have subjects, and
+   * ninety rows across the offers and platform chapters use it. Only `td`
+   * was ever styled, so on every one of those tables the first column drew
+   * with no padding at all against a padded column beside it, and its text
+   * sat hard on the row's hairline. Both cells are named here.
+   */
+  .nf-doc-table :is(td, tbody th) {
     padding: var(--nf-space-sm) var(--nf-space-md);
     border-block-start: var(--nf-border-width) solid var(--nf-border-subtle);
     vertical-align: top;
     line-height: 1.5;
+    text-align: start;
     color: var(--nf-content-secondary);
   }
-  .nf-doc-table td[data-lead="true"] {
+  .nf-doc-table :is(td, tbody th)[data-lead="true"] {
     color: var(--nf-content-primary);
     font-weight: 600;
   }
@@ -583,10 +593,20 @@
       overflow: hidden;
       clip-path: inset(50%);
     }
+    /*
+     * `tbody th` STACKS WITH THE REST OF THE ROW, and leaving it out was the
+     * phone half of the same omission. A `display: table-cell` left inside a
+     * `display: block` row is wrapped in an anonymous table box and sized to
+     * fit its CONTENT, so a row's subject drew as a narrow shrink-to-fit
+     * column beside full-width cells, and a long one wrapped a word at a
+     * time while the cells under it read normally. Measured on
+     * `/docs/how-offers-work` at 390px: the row headers came out 62 to 196
+     * pixels wide inside a 358 pixel row.
+     */
     .nf-doc-table,
     .nf-doc-table tbody,
     .nf-doc-table tr,
-    .nf-doc-table td {
+    .nf-doc-table tbody :is(th, td) {
       display: block;
     }
     .nf-doc-table caption {
@@ -597,24 +617,24 @@
       padding: var(--nf-space-sm) var(--nf-space-md);
       border-block-start: var(--nf-border-width) solid var(--nf-border-subtle);
     }
-    .nf-doc-table td {
+    .nf-doc-table tbody :is(th, td) {
       display: grid;
       grid-template-columns: minmax(6rem, 38%) 1fr;
       gap: var(--nf-space-sm);
       padding: var(--nf-space-2xs) 0;
       border: 0;
     }
-    .nf-doc-table td::before {
+    .nf-doc-table tbody :is(th, td)::before {
       content: attr(data-label);
       color: var(--nf-content-muted);
       font-size: var(--nf-text-caption);
       font-weight: 600;
     }
-    .nf-doc-table td[data-lead="true"] {
+    .nf-doc-table tbody :is(th, td)[data-lead="true"] {
       grid-template-columns: 1fr;
       padding-block-end: var(--nf-space-xs);
     }
-    .nf-doc-table td[data-lead="true"]::before {
+    .nf-doc-table tbody :is(th, td)[data-lead="true"]::before {
       content: none;
     }
     .nf-doc-table [data-numeric="true"] {

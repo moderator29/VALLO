@@ -91,3 +91,95 @@ describe.skipIf(!hasBrowser && !process.env.CI)("the documentation kit", () => {
     }
   });
 });
+
+/*
+ * THE ROW HEADER, WHICH IS A CELL LIKE ANY OTHER (11 November 2026, the docs
+ * sweep). A row given a `head` draws `<th scope="row">` instead of a `<td>`,
+ * and ninety rows across the offers and platform chapters use it. Only `td`
+ * was ever styled, which cost the same thing twice:
+ *
+ *   on a phone  the stacking rules turned the row and its `td` cells into
+ *               blocks and left the `th` a `table-cell`. A table-cell inside
+ *               a block row is wrapped in an anonymous table box and sized to
+ *               its CONTENT, so the row's subject drew as a narrow
+ *               shrink-to-fit column beside full-width cells, and a long
+ *               subject wrapped a word at a time while the cells under it
+ *               read normally.
+ *   on a desk   the `th` had no padding at all beside a padded `td`, so its
+ *               text sat hard against the row's hairline.
+ */
+const headEntry = `
+  import { DocTable } from "@/components/docs/DocTable";
+  import { mount } from "@/lib/testing/browser-root";
+  mount(
+    <main style={{ width: 360, padding: 16 }}>
+      <DocTable caption="What the deal room does" headLabel="What" columns={[
+          { key: "what", label: "What" },
+          { key: "means", label: "What it means" },
+        ]}
+        rows={[
+          { head: "Inspection and due diligence before exchange", cells: { means: "The checks both sides agreed to, with every result on the record." } },
+          { head: "Messages", cells: { means: "Every word, kept with the offer." } },
+        ]} />
+    </main>
+  );
+`;
+
+describe.skipIf(!hasBrowser && !process.env.CI)("a documentation table whose rows have subjects", () => {
+  /** The row header and the cell beside it, measured. */
+  const measure = (page: import("playwright-core").Page) =>
+    page.evaluate(() => {
+      const th = document.querySelector('.nf-doc-table tbody th[scope="row"]');
+      const row = th?.closest("tr");
+      const td = row?.querySelector("td");
+      if (!th || !row || !td) return null;
+      return {
+        display: getComputedStyle(th).display,
+        thWidth: +th.getBoundingClientRect().width.toFixed(1),
+        tdWidth: +td.getBoundingClientRect().width.toFixed(1),
+        thPadding: getComputedStyle(th).paddingLeft,
+        tdPadding: getComputedStyle(td).paddingLeft,
+      };
+    });
+
+  it("stacks the row header with the rest of the row on a phone, at the row's full width", async () => {
+    const { page, close } = await mountInBrowser({ entry: headEntry, css: CSS });
+    try {
+      await page.setViewportSize({ width: 360, height: 800 });
+      const m = await measure(page);
+      expect(m).not.toBeNull();
+      /* Not `table-cell`: that is the anonymous table box that shrank it. */
+      expect(m!.display).toBe("grid");
+      /* And the same width as the cell under it, not its content's width. */
+      expect(m!.thWidth).toBe(m!.tdWidth);
+      expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
+    } finally {
+      await close();
+    }
+  });
+
+  it("pads the row header exactly as the cell beside it on a desk", async () => {
+    const { page, close } = await mountInBrowser({ entry: headEntry, css: CSS, viewport: { width: 1100, height: 800 } });
+    try {
+      const m = await measure(page);
+      expect(m).not.toBeNull();
+      expect(m!.display).toBe("table-cell");
+      expect(m!.thPadding).toBe(m!.tdPadding);
+      expect(Number.parseFloat(m!.thPadding)).toBeGreaterThan(0);
+    } finally {
+      await close();
+    }
+  });
+
+  it("still reads as a table with row headers for a screen reader", async () => {
+    const { page, close } = await mountInBrowser({ entry: headEntry, css: CSS });
+    try {
+      await page.setViewportSize({ width: 360, height: 800 });
+      expect(await page.getByRole("table", { name: "What the deal room does" }).count()).toBe(1);
+      expect(await page.getByRole("rowheader").count()).toBe(2);
+      expect(await axeViolations(page)).toEqual([]);
+    } finally {
+      await close();
+    }
+  });
+});
