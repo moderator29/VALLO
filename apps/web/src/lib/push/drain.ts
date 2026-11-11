@@ -59,6 +59,12 @@ import { isConfigurationFailure, isRetryable, type ProviderReply, type PushPaylo
  *    table, and specifically because a delivery still in `sending` is NEVER
  *    retried. A row we never read a reply for stays as it is, is counted by
  *    `push_queue_health`, and is a fact somebody reads rather than a retry.
+ *    THAT ROW IS WRITTEN BEFORE THE PUSH SERVICE IS CALLED, which is the
+ *    whole of it: it was written only afterwards, so a worker that died
+ *    inside the call left NO row, the reaper handed the queue row back ten
+ *    minutes later and the same device was sent the same notification twice.
+ *    `markDeliverySending` is that row (`push_deliveries_read_the_reply` is
+ *    written to allow exactly this one shape).
  *    The email outbox built alongside this reached the same conclusion from
  *    the other direction, by refusing to have a reaper at all.
  *
@@ -346,7 +352,7 @@ export async function pushDrain(admin: PushClient): Promise<JobVerdict> {
  * notified. `permanent` when every failure was one that will fail again
  * identically, so retrying is only a way of making the same mistake faster.
  */
-async function deliverOne(
+export async function deliverOne(
   admin: PushClient,
   queueId: string,
   targets: PushTarget[],
@@ -374,10 +380,25 @@ async function deliverOne(
     }
 
     attempted += 1;
+    const attempt = (previous?.attempts ?? 0) + 1;
+
+    /* THE ATTEMPT IS WRITTEN DOWN BEFORE THE PUSH SERVICE IS CALLED, which
+       is what makes rule 4 at the head true rather than merely intended.
+       `push_deliveries` carries a `sending` state and the table's own check
+       (`push_deliveries_read_the_reply`) exempts exactly that state from
+       having a provider status, because this row is the record that a send
+       was STARTED. Without it, a drain that died between the transport call
+       and the reply left no row at all: the reaper handed the queue row back
+       ten minutes later and the same device was sent the same notification a
+       second time, which is the one thing a person actually notices. A row
+       left in `sending` is never retried (the guard above), so the push is
+       one that a person reads about rather than one that is sent twice. */
+    await markDeliverySending(admin, queueId, target, attempt);
+
     const reply = await send(target, payload);
 
     /* THE REPLY IS WRITTEN DOWN BEFORE IT IS ACTED ON. */
-    await recordDelivery(admin, queueId, target, reply, (previous?.attempts ?? 0) + 1);
+    await recordDelivery(admin, queueId, target, reply, attempt);
 
     if (reply.outcome === "accepted") {
       accepted += 1;
@@ -458,11 +479,41 @@ async function bumpFailureStreak(admin: PushClient, target: PushTarget, counts: 
 }
 
 /**
+ * Claim one device for one queue row before the transport is called.
+ *
+ * `state: 'sending'` with no provider status, which is the one shape
+ * `push_deliveries_read_the_reply` allows, and it is the only row this file
+ * writes that does not carry a reply. `recordDelivery` overwrites it on the
+ * same unique key moments later. A row that stays in `sending` is a send
+ * whose reply nobody read, and nothing retries it.
+ */
+async function markDeliverySending(
+  admin: PushClient,
+  queueId: string,
+  target: PushTarget,
+  attempts: number,
+): Promise<void> {
+  await admin.from("push_deliveries").upsert(
+    {
+      queue_id: queueId,
+      token_id: target.id,
+      device_ref: target.deviceRef,
+      platform: target.platform,
+      state: "sending",
+      attempts,
+      attempted_at: new Date().toISOString(),
+    },
+    { onConflict: "queue_id,token_id" },
+  );
+}
+
+/**
  * Write what the provider said.
  *
  * `upsert` on the unique `(queue_id, token_id)` so a retry updates the same
- * row rather than being refused. The status is always present on a settled
- * state, which the database's own check constraint independently enforces.
+ * row rather than being refused, and so the `sending` row written moments
+ * earlier becomes this one. The status is always present on a settled state,
+ * which the database's own check constraint independently enforces.
  */
 async function recordDelivery(
   admin: PushClient,
