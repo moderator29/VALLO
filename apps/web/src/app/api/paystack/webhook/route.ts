@@ -145,12 +145,25 @@ function verdict(
 /**
  * File the card a charge was paid with, when the charge asked for it.
  *
- * Runs on every charge.success this platform owns, after the payer is known.
- * The rule is in lib/payments/methods.ts: metadata.save_card must be true
- * (the boolean, or the string the stringified-metadata quirk makes of it)
- * AND Paystack must say the authorization is reusable, and the row is
- * written by the service role from the processor's own payload. Nothing a
- * client sends can reach this insert.
+ * Runs after a charge has actually paid for a booking, never before. The rule
+ * is in lib/payments/methods.ts: metadata.save_card must be true (the
+ * boolean, or the string the stringified-metadata quirk makes of it) AND
+ * Paystack must say the authorization is reusable, and the row is written by
+ * the service role from the processor's own payload.
+ *
+ * WHOSE ACCOUNT THE CARD GOES ON, AND WHY THAT IS NOT A FREE CHOICE.
+ * `metadata.user_id` names the payer, and a payer is often not the guest (a
+ * sister in London pays for a cousin flying into Lagos), so the metadata is
+ * the only thing that knows whose card this is and it has to be read. What it
+ * is NOT is proof: metadata belongs to whoever opened the transaction at
+ * Paystack, not to Vallo. This file used to call this before settling, on any
+ * well-signed charge.success carrying an `rm-book-` reference, so a charge
+ * Vallo never minted could file a card against any account whose id the
+ * sender knew. The caller now waits for the settlement and files a card only
+ * for a reference that settled against a real booking, which is a reference
+ * Vallo minted and an amount that matched it. The card-setup path reached the
+ * same conclusion from the other side and checks its own audit intent
+ * (`confirmCardSetup`, lib/payments/methods-actions.ts).
  *
  * Best effort, and audited when it did anything. A card that could not be
  * filed is a missing convenience; the money has already been accounted for
@@ -209,19 +222,27 @@ async function handleBookingChargeSuccess(
   const metaBookingId = metadata["booking_id"];
   const fallbackBookingId = typeof metaBookingId === "string" ? metaBookingId : null;
 
-  // A booking checkout that asked to keep the card names its payer in
-  // metadata; without that there is nobody to file the card against.
-  const payerId = metadata["user_id"];
-  if (typeof payerId === "string" && payerId.length > 0) {
-    await fileCardIfAsked(admin, data, payerId, reference);
-  }
-
   const settlement = await settleBookingCharge(admin, {
     reference,
     amountMinor,
     processorFeeMinor: typeof data.fees === "number" ? data.fees : null,
     fallbackBookingId,
   });
+
+  /* A charge that paid for a booking: settled here, a flatmate's share, or
+     one the payer's return settled moments earlier. Anything else is a
+     reference this platform did not mint or did not apply (`unknown-reference`,
+     `refund-due`, and the REFUND_DUE replay of one), and no card is filed
+     from it. A booking checkout that asked to keep the card names its payer
+     in metadata; without that there is nobody to file the card against. */
+  const paidForTheBooking =
+    settlement.outcome === "settled" ||
+    settlement.outcome === "share-settled" ||
+    (settlement.outcome === "already-settled" && settlement.transactionStatus === "SUCCESSFUL");
+  const payerId = metadata["user_id"];
+  if (paidForTheBooking && typeof payerId === "string" && payerId.length > 0) {
+    await fileCardIfAsked(admin, data, payerId, reference);
+  }
 
   await recordMoneyAudit(admin, {
     actor: { kind: "webhook" },
