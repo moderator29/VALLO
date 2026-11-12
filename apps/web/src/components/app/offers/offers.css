@@ -660,9 +660,26 @@
 .nf-dt tbody tr[data-active] td:first-child {
   box-shadow: inset 3px 0 0 var(--nf-brand-primary);
 }
+/*
+ * A COLUMN SORT IS A CONTROL AND TAKES THE 44pt FLOOR (11 November 2026).
+ *
+ * `padding: 0` on an inline-flex button leaves it the height of its own text:
+ * measured in Chromium and WebKit at 1280, light and dark, 20.1px tall on
+ * `/preview/offers/list`, which is under the 24px WCAG minimum, never mind the
+ * platform's 44. The same button is the admin offers table's header.
+ *
+ * The header cell was already 45.1px tall, so the room was there and only the
+ * button was not taking it. Dropping the cell's own block padding where it
+ * holds a sort button hands that padding to the button instead of adding to
+ * it, so the header row measures the same before and after.
+ */
+.nf-dt thead th:has(.nf-dt__sort) {
+  padding-block: 0;
+}
 .nf-dt__sort {
   display: inline-flex;
   align-items: center;
+  min-block-size: 2.75rem;
   gap: var(--nf-space-2xs);
   padding: 0;
   border: 0;
