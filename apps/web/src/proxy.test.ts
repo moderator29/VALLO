@@ -405,6 +405,8 @@ const EXPECTED_PUBLIC = new Set([
   "/api/cron/offers-sweep",
   "/api/cron/rent-share-refunds",
   "/api/cron/reservation-deposit-refunds",
+  /* D51/D62: the Rewards Balance payout sweep, behind the cron bearer. */
+  "/api/cron/rewards-payouts",
   "/api/cron/inventory-drift",
   "/api/cron/landlord-line",
   "/api/cron/sanctions-lists",

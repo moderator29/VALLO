@@ -83,6 +83,10 @@ export const VERCEL_JOBS: readonly VercelJob[] = [
   /* C2: hosts' Airbnb and Booking.com calendars pulled in. A no-op while CALENDAR_SYNC_ENABLED is off. */
   { name: "calendar-sync", cron: "2,17,32,47 * * * *", schedule: "Every 15 minutes", maxGapHours: 2, audit: { entityType: "cron_job", term: "calendar-sync" } },
   { name: "reservation-deposit-refunds", cron: "40 * * * *", schedule: "Hourly at :40", maxGapHours: 2, audit: { entityType: "cron_job", term: "reservation-deposit-refunds" } },
+  /* D51/D62: sends Rewards Balance payouts opened or released from review but never
+     initiated, reads back the ones in flight, and names any in flight for over a day.
+     Unscheduled and unrouted until 12 November 2026 (lib/payouts/referral-payout.ts). */
+  { name: "rewards-payouts", cron: "22 * * * *", schedule: "Hourly at :22", maxGapHours: 3, audit: { entityType: "cron_job", term: "rewards-payouts" } },
   /* VC1: closes the provider rooms of finished calls. Skipped while `video_calls` is off. */
   { name: "calls-sweep", cron: "*/5 * * * *", schedule: "Every 5 minutes", maxGapHours: 1, audit: { entityType: "cron_job", term: "calls-sweep" } },
 ];

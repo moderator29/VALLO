@@ -90,6 +90,10 @@
       "schedule": "35 * * * *"
     },
     {
+      "path": "/api/cron/rewards-payouts",
+      "schedule": "22 * * * *"
+    },
+    {
       "path": "/api/cron/calendar-sync",
       "schedule": "2,17,32,47 * * * *"
     },

@@ -821,6 +821,7 @@ export const NON_NAVIGABLE: Readonly<Record<string, string>> = {
   "/api/cron/hold-sweep": "scheduled job, bearer token.",
   "/api/cron/rent-share-refunds": "scheduled job, bearer token.",
   "/api/cron/reservation-deposit-refunds": "scheduled job, bearer token (D75, table deposit refunds).",
+  "/api/cron/rewards-payouts": "scheduled job, bearer token (D51/D62, the Rewards Balance payout sweep).",
   "/api/cron/inventory-drift": "scheduled job, bearer token.",
   "/api/cron/landlord-line": "scheduled job, bearer token.",
   "/api/cron/sanctions-lists": "scheduled job, bearer token.",

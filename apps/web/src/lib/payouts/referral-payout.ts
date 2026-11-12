@@ -173,17 +173,50 @@ export async function settleRewardsTransferEvent(
 }
 
 /**
- * The cron sweep (wiring is the cron lane's): send payouts that were opened
- * or released from review but never initiated, ask Paystack about every
- * payout still in flight, and raise an alert for any older than a day so
- * none sits in processing forever unseen.
+ * THE CRON SWEEP: send payouts that were opened or released from review but
+ * never initiated, ask Paystack about every payout still in flight, and name
+ * every payout older than a day so none sits in processing forever unseen.
+ *
+ * WHO CALLS THIS, WHICH FOR THREE WEEKS WAS NOBODY. The header used to say
+ * "wiring is the cron lane's" and the wiring was never done: no route under
+ * `app/api/cron/`, no entry in `apps/web/vercel.json`, no `pg_cron` job, and
+ * `grep sweepRewardsPayouts` found this declaration and nothing else. Three
+ * things followed from that, each of them money standing still:
+ *
+ *   `admin_rewards_payout_decide('release')` moves a reviewed payout to
+ *   `processing` and leaves `transfer_initiated_at` null, and the ONLY reader
+ *   of `rewards_payouts_to_send` is this function, so a payout a human
+ *   released was never sent. The member's rewards stayed held in
+ *   `rewards_ledger` as `payout_hold`, their referrals stayed
+ *   `withdrawal_requested`, and nothing anywhere failed.
+ *
+ *   `sendOpenedPayout` records `unknown` when the transfer API did not
+ *   answer, and the only reader of `rewards_payouts_to_verify` is this
+ *   function, so a transfer that may have gone was never read back.
+ *
+ *   `rewards_payouts_stuck` is read here and nowhere else, so the "in flight
+ *   for more than a day" alarm could not sound.
+ *
+ * It is now `/api/cron/rewards-payouts`, hourly, through `lib/cron/run.ts`
+ * like every other job. The stuck references are RETURNED rather than
+ * printed, because a `console.error` in a serverless function is not an
+ * alert: the job turns them into one. Each reads `reference:status`.
  */
-export async function sweepRewardsPayouts(): Promise<{ sent: number; checked: number; stuck: number }> {
-  if (!hasServiceRole()) return { sent: 0, checked: 0, stuck: 0 };
+export async function sweepRewardsPayouts(): Promise<{ sent: number; checked: number; stuck: string[] }> {
+  if (!hasServiceRole()) return { sent: 0, checked: 0, stuck: [] };
   const admin = createAdminClient() as unknown as Rpc;
   const stuckRes = await admin.rpc("rewards_payouts_stuck", { p_older_than_hours: 24 });
-  const stuck = Array.isArray(stuckRes.data) ? stuckRes.data.length : 0;
-  if (stuck > 0) console.error(`rewards payouts: ${stuck} in flight for more than 24 hours; staff must look`);
+  /* `reference:status`, the shape `cron/jobs/rent-share-refunds.ts` uses, so
+     the desk reads what is stuck and how far it got without a second query. */
+  const stuck = Array.isArray(stuckRes.data)
+    ? (stuckRes.data as { reference?: unknown; status?: unknown }[])
+        .map((row) =>
+          typeof row?.reference === "string"
+            ? `${row.reference}:${typeof row.status === "string" ? row.status : "unreadable"}`
+            : null,
+        )
+        .filter((row): row is string => row !== null)
+    : [];
   const transfer = floatTransferDeps();
   if (!transfer) return { sent: 0, checked: 0, stuck };
   const deps = { db: adminDb(), transfer };

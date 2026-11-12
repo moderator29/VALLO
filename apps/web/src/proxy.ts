@@ -399,6 +399,8 @@ const PUBLIC_API_PATHS = new Set([
   "/api/cron/saved-search-alerts",
   "/api/cron/store-readiness",
   "/api/cron/new-match-alerts",
+  /* D51/D62: the Rewards Balance payout sweep, behind the cron bearer. */
+  "/api/cron/rewards-payouts",
   /* SCUML items 8 and 9, behind RECONCILE_CRON_SECRET like every job. */
   "/api/cron/sanctions-lists",
   "/api/cron/sanctions-screen",
