@@ -110,7 +110,20 @@ export function phone(ctx, { model = "island", color = "black-titanium", parent 
       self.mode = "3d";
       self.handle = handle;
       let drawn = null;
-      ctx.onFrame(() => {
+      let lastT = null;
+      ctx.onFrame((t) => {
+        /* A seek that is not the next frame (a worker starting its segment, a
+           check run) can leave Chromium holding an empty raster for the warped
+           display layer: the bezel draws and the screen is blank. Rebuilding
+           the layer on every jump makes the frame the same in any order. */
+        const jumped = lastT === null || Math.abs(t - lastT) > 0.2;
+        lastT = t;
+        if (jumped) {
+          const next = frame.nextSibling;
+          frame.remove();
+          root.insertBefore(frame, next);
+          drawn = null;
+        }
         const s = scene();
         const on = pose.opacity > 0.001 && (!s || s.style.visibility === "visible");
         canvas.style.visibility = on ? "visible" : "hidden";
