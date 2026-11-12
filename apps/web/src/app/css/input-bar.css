@@ -31,8 +31,23 @@
   backdrop-filter: blur(var(--nf-glass-blur)) saturate(var(--nf-glass-saturate));
   box-shadow: var(--nf-float-shadow);
 }
-:root form.nf-composer .nf-composer__box:focus-within {
-  border-color: var(--nf-brand-edge);
+/*
+ * NO LIT RECTANGLE ROUND THE BAR WHEN A THUMB TAPS IT (the founder, 11
+ * November 2026). Tapping the field used to run the brand edge round the
+ * whole composer, which is a desktop focus ring drawn on a phone: iMessage
+ * and WhatsApp light nothing, and the caret already says where the typing
+ * goes. So on a touch screen the bar keeps its resting edge.
+ *
+ * THE RING IS KEPT WHERE IT IS THE ONLY INDICATOR. On a pointer-and-keyboard
+ * machine a person tabbing through the page needs to see which control has
+ * focus, and a text caret alone is not enough at a glance, so the edge still
+ * lights there. `(hover: hover) and (pointer: fine)` is the test this
+ * repository already uses for that machine (buttons.css, brand-glass.css).
+ */
+@media (hover: hover) and (pointer: fine) {
+  :root form.nf-composer .nf-composer__box:focus-within {
+    border-color: var(--nf-brand-edge);
+  }
 }
 :root form.nf-composer .nf-composer__row {
   display: contents;
@@ -132,11 +147,28 @@
 :root form.nf-ai__composer .nf-ai__input {
   padding-block: var(--nf-space-xs);
 }
+/*
+ * THE SEND DISC KEEPS THE 44pt FLOOR (11 November 2026).
+ *
+ * This set the disc to 2.5rem and then explicitly zeroed `min-block-size` and
+ * `min-inline-size`, which are the two declarations the Button system uses to
+ * guarantee the floor. Measured on `/preview/f1/assistant` in Chromium at 360,
+ * 390, 440 and 1280, light and dark: 40 x 40 every time, on the one control
+ * that sends the message.
+ *
+ * The disc is deliberately smaller than the `size="lg"` button it is built
+ * from, because 3.5rem next to a 2.5rem field reads as a slab, not a send. It
+ * is the compact rung's number now, which is the smallest the platform draws
+ * anywhere and is exactly 44.
+ */
 :root form.nf-ai__composer .nf-ai__send.nf-ai__send {
-  inline-size: 2.5rem;
-  block-size: 2.5rem;
-  min-block-size: 0;
-  min-inline-size: 0;
+  /* The compact rung, which is the smallest height the Button system draws and
+     is exactly 44. Everything else reads it, so there is one number. */
+  --nf-btn-h: 2.75rem;
+  inline-size: var(--nf-btn-h);
+  block-size: var(--nf-btn-h);
+  min-block-size: var(--nf-btn-h);
+  min-inline-size: var(--nf-btn-h);
   padding: 0;
   border-radius: var(--nf-radius-circle);
 }

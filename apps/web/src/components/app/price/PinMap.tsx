@@ -206,7 +206,24 @@ export function PinMap({
           <p className="nf-body-sm text-[var(--nf-content-muted)]">{copy.unavailable}</p>
         ) : (
           <>
-            <div ref={frameRef} className="nf-pc-map__canvas" aria-hidden="true" />
+            {/* NAMED, NOT HIDDEN (11 November 2026). Leaflet puts `tabindex=0`
+                on its own container, so with `aria-hidden` on it the map was a
+                tab stop that announced nothing at all: a keyboard reader landed
+                on it, heard silence, and the arrow keys that move the pin were
+                behind an element assistive technology had been told to ignore.
+                Hiding it was never the choice: a named region says what the
+                stop is, the way the search map already does
+                (`components/app/search/MapCanvas.tsx`), and the status line
+                below still reads out where the pin has landed. `region` and
+                not `application`, to match that precedent and because
+                `application` would stop a screen reader reading anything
+                inside the map in its own voice. */}
+            <div
+              ref={frameRef}
+              className="nf-pc-map__canvas"
+              role="region"
+              aria-label={copy.help}
+            />
             {/* The pin is decorative to assistive technology: the coordinate it
                 stands for is announced by the status line below, which is text
                 a screen reader can actually read. */}

@@ -57,7 +57,20 @@
     overflow: hidden;
     background: color-mix(in oklab, var(--nf-content-primary) 8%, transparent);
   }
-  .nf-media-pill__media :global(img) {
+  /*
+   * `img`, NOT `:global(img)` (11 November 2026).
+   *
+   * `:global()` is CSS Modules syntax and this is a plain global stylesheet,
+   * so the parser does not recognise it and DROPS the whole rule. Five rules
+   * went that way, and the build has been saying so: "'global' is not
+   * recognized as a valid pseudo-class", once per rule. Each one was the
+   * `object-fit` on a `next/image` with `fill`, which is absolutely positioned
+   * at 100 percent of its box and stretches without it. Measured in Chromium
+   * and WebKit on `/preview/features/share`, every width, both themes:
+   * `object-fit: fill` on all four, with a 320 x 180 photo pulled into the
+   * 320 x 400 share card and a 51 x 29 swatch into a 48 x 48 square.
+   */
+  .nf-media-pill__media img {
     object-fit: cover;
   }
   .nf-media-pill__media--node {
@@ -137,7 +150,7 @@
     inset: 0;
     z-index: 0;
   }
-  .nf-share-card__bg :global(img) {
+  .nf-share-card__bg img {
     object-fit: cover;
   }
   /* A vignette so white text always holds, whatever the background is. */
@@ -168,7 +181,7 @@
     background: var(--nf-surface-inset);
     box-shadow: var(--nf-elevation-raised);
   }
-  .nf-share-card__avatar :global(img) {
+  .nf-share-card__avatar img {
     object-fit: cover;
   }
   .nf-share-card__initial {
@@ -278,7 +291,7 @@
     font-size: var(--nf-text-body-sm);
     font-weight: 700;
   }
-  .nf-share-card__brand :global(img) {
+  .nf-share-card__brand img {
     display: block;
   }
 
@@ -307,7 +320,7 @@
   .nf-swatch:active {
     transform: scale(0.94);
   }
-  .nf-swatch :global(img) {
+  .nf-swatch img {
     object-fit: cover;
   }
   .nf-swatch[aria-pressed="true"] {

@@ -189,7 +189,14 @@ export function RoommatesHomeView({ home, t: copy, now, feed }: { home: Roommate
         {feed ? (
           <>
             <RoommatesFeed initial={feed.initial} tab={feed.tab} filters={feed.filters} signedIn={home.signedIn} now={now} />
-            <ButtonLink href={postHref} variant="primary" size="lg" iconOnly round leadingIcon="plus" aria-label={copy.welcome.create} className="nf-rmfd__fab" data-testid="roommates-fab" />
+            {/* THE PLATFORM'S FLOATING ACTION BUTTON, not a round icon button that
+                had to be told where to float. `.nf-btn--fab` (buttons.css, the
+                recipe `components/ui/Fab.tsx` uses) is what gives it its width:
+                without it the control is fixed with only an inline-end inset,
+                so it shrank to the glyph and drew 24 by 50 instead of a 56px
+                circle, measured in WebKit at 390. `.nf-rmfd__fab` keeps its
+                placement and nothing else. */}
+            <ButtonLink href={postHref} variant="primary" size="lg" iconOnly round leadingIcon="plus" aria-label={copy.welcome.create} className="nf-btn--fab nf-rmfd__fab" data-testid="roommates-fab" />
             <div className="nf-rmfd__head">
               <h2 className="nf-rmfd__title">{copy.feed.toolsTitle}</h2>
               <ToolsSheet />

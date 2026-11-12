@@ -280,6 +280,139 @@
       linear-gradient(var(--nf-surface-inset), var(--nf-surface-inset)) padding-box,
       linear-gradient(var(--nf-state-error), var(--nf-state-error)) border-box;
   }
+
+  /*
+   * ------------------------------------------------------------------
+   * A SELECT ON `.nf-field` DREW THE PLATFORM'S CONTROL, NOT THE FIELD.
+   *
+   * A native `<select>` computes `appearance: menulist`, and WebKit then
+   * paints the operating system's own control and DISCARDS the background
+   * the stylesheet gave it. Measured on /roommates/split at 390: the select
+   * and the text field beside it resolve the same rule and the same
+   * `border-radius: 14px`, and the select paints a flat `rgb(54, 54, 54)`
+   * where the input paints the field's inset, `rgb(0, 0, 11)`. 81 selects
+   * in the tree carry `.nf-field` and every one of them was a grey platform
+   * box in a column of Vallo fields. `color-scheme` (base.css) follows the
+   * theme, so the control is at least the right SCHEME on a phone; it is
+   * still not this field's material.
+   *
+   * `components/ui/Field.tsx` has always known this. `SelectField` sets
+   * `appearance-none` and overlays its own chevron, and says why: "the
+   * native control paints its own arrow at its own size in its own colour,
+   * differently in every browser, and on the dark theme Safari's is nearly
+   * invisible against the inset fill". These rules give every other select
+   * the same answer without touching 81 call sites.
+   *
+   * THE CHEVRON IS A BACKGROUND MARK, as it already is on `.nf-stays-select`
+   * (stays.css): two gradient corners in `--nf-content-secondary`, so it
+   * takes the theme's ink rather than a baked colour, and the native picker
+   * is kept because it is the only control that gets a phone's own wheel.
+   *
+   * WHY EACH STATE IS RESTATED. `background` is a shorthand, so every rule
+   * that repaints the field (focus, the coarse-pointer focus, invalid, and
+   * the four daylight rules in light.css) replaces the whole layer list and
+   * would take the chevron with it. The mark is declared once in
+   * `--nf-select-caret`, position and box included, and each state drops it
+   * in front of its own two layers, which are copied from the rule it
+   * answers. Glass selects are excluded: `.nf-stays-select` already paints
+   * this mark over the glass well and must keep its own.
+   * ------------------------------------------------------------------ */
+  /*
+   * The mark itself, on the root so a select that is NOT on `.nf-field` can
+   * draw the same one (the roommates fields in `app/(app)/roommates/groups/_parts/fe-b.css`).
+   * The nested `var()` resolves where the property is USED, not here, so a
+   * select inside a `[data-theme="dark"]` island takes the island's ink.
+   */
+  :root {
+    --nf-select-caret:
+      linear-gradient(45deg, transparent 50%, var(--nf-content-secondary) 50%)
+        calc(100% - 1.125rem) calc(50% - 1px) / 0.375rem 0.375rem no-repeat padding-box,
+      linear-gradient(135deg, var(--nf-content-secondary) 50%, transparent 50%)
+        calc(100% - 0.75rem) calc(50% - 1px) / 0.375rem 0.375rem no-repeat padding-box;
+  }
+  select.nf-field:not(.nf-field--glass) {
+    appearance: none;
+    -webkit-appearance: none;
+    /* Room for the mark, on the token that is also the 44px floor. */
+    padding-inline-end: var(--nf-pad-field-affordance);
+    background:
+      var(--nf-select-caret),
+      linear-gradient(var(--nf-surface-inset), var(--nf-surface-inset)) padding-box,
+      linear-gradient(
+          var(--nf-light-angle),
+          color-mix(in oklab, var(--nf-brand-primary) 55%, white) 0%,
+          color-mix(in oklab, var(--nf-brand-accent) 32%, transparent) 40%,
+          var(--nf-wash-2) 74%
+        )
+        border-box;
+  }
+  select.nf-field:not(.nf-field--glass):focus {
+    background:
+      var(--nf-select-caret),
+      linear-gradient(var(--nf-surface-inset), var(--nf-surface-inset)) padding-box,
+      linear-gradient(var(--nf-light-angle), var(--nf-focus-ring), color-mix(in oklab, var(--nf-brand-accent) 70%, transparent))
+        border-box;
+  }
+  @media (pointer: coarse) {
+    select.nf-field:not(.nf-field--glass):focus {
+      background:
+        var(--nf-select-caret),
+        linear-gradient(var(--nf-surface-inset), var(--nf-surface-inset)) padding-box,
+        linear-gradient(var(--nf-brand-primary), var(--nf-brand-primary)) border-box;
+    }
+  }
+  select.nf-field:not(.nf-field--glass)[aria-invalid="true"] {
+    background:
+      var(--nf-select-caret),
+      linear-gradient(var(--nf-surface-inset), var(--nf-surface-inset)) padding-box,
+      linear-gradient(var(--nf-state-error), var(--nf-state-error)) border-box;
+  }
+  /*
+   * DAYLIGHT. light.css repaints the field four times over, each at a higher
+   * specificity than a bare class, so the mark is carried through each one
+   * here rather than there: these selectors are that file's own, with
+   * `select` added, so they outrank it wherever it lands in the cascade.
+   *
+   * THE TWO FOCUS RULES KEEP `:not([type="search"])` EVEN THOUGH A SELECT HAS
+   * NO TYPE. An element name is worth less than a class, so dropping it left
+   * these at one class below the rule they answer and daylight focus painted
+   * the field without the chevron: seen in WebKit at 390 before it was put
+   * back. It matches nothing extra and it is what keeps the pair level.
+   */
+  :root[data-theme="light"] select.nf-field:not(.nf-field--glass):not(:where([data-theme="dark"] *)) {
+    background:
+      var(--nf-select-caret),
+      linear-gradient(var(--nf-paper-field-fill), var(--nf-paper-field-fill)) padding-box,
+      linear-gradient(var(--nf-paper-field-edge), var(--nf-paper-field-edge)) border-box;
+  }
+  @media (hover: hover) {
+    :root[data-theme="light"] select.nf-field:not(.nf-field--glass):not(:focus):not(:disabled):hover:not(:where([data-theme="dark"] *)) {
+      background:
+        var(--nf-select-caret),
+        linear-gradient(var(--nf-paper-field-fill), var(--nf-paper-field-fill)) padding-box,
+        linear-gradient(var(--nf-paper-field-edge-hover), var(--nf-paper-field-edge-hover)) border-box;
+    }
+  }
+  :root[data-theme="light"] select.nf-field:not(.nf-field--glass):not([type="search"]):focus:not(:where([data-theme="dark"] *)) {
+    background:
+      var(--nf-select-caret),
+      linear-gradient(var(--nf-paper-field-fill), var(--nf-paper-field-fill)) padding-box,
+      linear-gradient(var(--nf-brand-primary), var(--nf-brand-primary)) border-box;
+  }
+  @media (pointer: coarse) {
+    :root[data-theme="light"] select.nf-field:not(.nf-field--glass):not([type="search"]):focus:not(:where([data-theme="dark"] *)) {
+      background:
+        var(--nf-select-caret),
+        linear-gradient(var(--nf-paper-field-fill), var(--nf-paper-field-fill)) padding-box,
+        linear-gradient(color-mix(in oklab, var(--nf-brand-primary) 55%, transparent), color-mix(in oklab, var(--nf-brand-primary) 55%, transparent)) border-box;
+    }
+  }
+  :root[data-theme="light"] select.nf-field:not(.nf-field--glass)[aria-invalid="true"]:not(:where([data-theme="dark"] *)) {
+    background:
+      var(--nf-select-caret),
+      linear-gradient(var(--nf-paper-field-fill), var(--nf-paper-field-fill)) padding-box,
+      linear-gradient(var(--nf-state-error), var(--nf-state-error)) border-box;
+  }
   /*
    * THE FORM ERROR, FOR EVERY FORM (MOTION_SYSTEM "Form error", north star
    * motion 24): the refused field shakes 4px once on `whip` 160ms, and its

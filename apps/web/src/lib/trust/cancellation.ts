@@ -442,3 +442,43 @@ export function freeCancellationOpen(
   const until = freeToCancelUntil(terms, checkInIso);
   return until !== null && until.getTime() > now.getTime();
 }
+
+/* ------------------------------------------------------------------------- */
+/*  What is still refundable, after refunds already made against the booking  */
+/* ------------------------------------------------------------------------- */
+
+/**
+ * A booking can be part-refunded without being cancelled: a goodwill gesture
+ * on a stay that goes ahead, a duplicate charge handed back
+ * (`refundBookingAsAdmin`). If that booking is later cancelled, the schedule
+ * is still applied to what the guest PAID, because that is the figure the
+ * published terms are written against, and the result is then bounded by what
+ * is actually still refundable.
+ *
+ * WITHOUT THIS BOUND THE CANCELLATION CANNOT HAPPEN AT ALL. The database
+ * refuses any refund above `paid - already refunded`
+ * (`private.refund_and_cancel_booking`, status `over_refund`), so an
+ * unbounded full refund on a booking that had any part refunded is rejected,
+ * the booking stays live, and the operator is told to call engineering. The
+ * bound is also the honest amount: a guest promised "everything back" who has
+ * already had a third of it back is owed the other two thirds, not the lot
+ * again.
+ *
+ * Integer kobo, never below zero, and never above the schedule's own figure.
+ *
+ * ONLY THE REFUND MOVES. `retainedMinor` stays `paid - refund`, which is what
+ * `private.refund_and_cancel_booking` writes onto `booking_refunds` and what
+ * the guest's email prints, so the figure previewed is the figure recorded. A
+ * refund made earlier is its own row on the booking, with its own line.
+ */
+export function boundedByRefundable(
+  outcome: RefundOutcome,
+  paidMinor: number,
+  alreadyRefundedMinor: number,
+): RefundOutcome {
+  const paid = Math.max(0, Math.trunc(paidMinor));
+  const already = Math.max(0, Math.trunc(alreadyRefundedMinor));
+  const refundable = Math.max(0, paid - already);
+  const refundMinor = Math.min(Math.max(0, Math.trunc(outcome.refundMinor)), refundable);
+  return { ...outcome, refundMinor, retainedMinor: paid - refundMinor };
+}

@@ -32,28 +32,6 @@
     }
   }
 
-  .nf-md-head {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: flex-end;
-    justify-content: space-between;
-    gap: var(--nf-space-sm);
-  }
-  /* Same head as every other desk (admin.css .nf-admin-page-head__title),
-     so moving between desks never changes the page's first line. */
-  .nf-md-head__title {
-    font-family: var(--nf-font-display);
-    font-size: clamp(1.375rem, 1.1rem + 0.7vw, 1.625rem);
-    font-weight: 700;
-    line-height: 1.15;
-    letter-spacing: var(--nf-tracking-tight);
-    color: var(--nf-content-primary);
-  }
-  .nf-md-head__lede {
-    margin-top: var(--nf-space-3xs);
-    font-size: var(--nf-text-body-sm);
-    color: var(--nf-brand-quiet);
-  }
   .nf-md-head__aside {
     display: flex;
     flex-wrap: wrap;
@@ -230,11 +208,7 @@
     .nf-md-grid {
       gap: var(--nf-space-lg);
     }
-    /* Money: reconciliation beside the summary, 54 to 46 as drawn. */
-    .nf-md-grid--split {
-      grid-template-columns: minmax(0, 1.17fr) minmax(0, 1fr);
-      align-items: stretch;
-    }
+
     /* Escrow and supply: the table beside its narrow column, 2 to 1. */
     .nf-md-grid--main {
       grid-template-columns: minmax(0, 2.05fr) minmax(0, 1fr);
@@ -242,17 +216,6 @@
     .nf-md-grid--halves {
       grid-template-columns: repeat(2, minmax(0, 1fr));
       align-items: stretch;
-    }
-  }
-  .nf-md-stack {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr);
-    gap: var(--nf-space-md);
-    align-content: start;
-  }
-  @media (min-width: 1024px) {
-    .nf-md-stack {
-      gap: var(--nf-space-lg);
     }
   }
 
@@ -353,13 +316,6 @@
     color: var(--nf-content-primary);
   }
 
-  .nf-md-empty {
-    padding: var(--nf-space-lg) var(--nf-space-md);
-    text-align: center;
-    font-size: var(--nf-text-body-sm);
-    color: var(--nf-content-muted);
-  }
-
   /* ----------------------------------------------------------- the tables */
 
   /* A desk table wider than its column scrolls inside its own box, never the
@@ -417,24 +373,6 @@
   .nf-md-table .nf-md-desc {
     color: var(--nf-brand-quiet);
   }
-  .nf-md-credit,
-  .nf-md-table .nf-md-credit {
-    color: var(--nf-state-success);
-    font-weight: 600;
-  }
-  .nf-md-debit,
-  .nf-md-table .nf-md-debit {
-    color: var(--nf-content-primary);
-    font-weight: 600;
-  }
-  .nf-md-countdown {
-    color: var(--nf-state-success);
-    font-weight: 600;
-    white-space: nowrap;
-  }
-  .nf-md-countdown--due {
-    color: var(--nf-state-warning);
-  }
   .nf-md-ref {
     display: block;
     font-family: ui-monospace, monospace;
@@ -442,23 +380,6 @@
     color: var(--nf-content-muted);
     overflow-wrap: anywhere;
     user-select: all;
-  }
-  .nf-md-thumb {
-    display: inline-grid;
-    place-items: center;
-    width: 2.75rem;
-    height: 2.75rem;
-    flex-shrink: 0;
-    border-radius: var(--nf-radius-sm);
-    border: var(--nf-border-width) solid var(--nf-brand-edge-soft);
-    background: var(--nf-well-fill);
-    overflow: hidden;
-  }
-  .nf-md-cell-row {
-    display: flex;
-    align-items: center;
-    gap: var(--nf-space-sm);
-    min-width: 0;
   }
 
   /*
@@ -763,29 +684,6 @@
     color: var(--nf-content-primary);
   }
 
-  /* Summary rows: label left, figure right, a rule above the total. */
-  .nf-md-sum {
-    display: grid;
-    gap: var(--nf-space-sm);
-  }
-  .nf-md-sum__row {
-    display: flex;
-    justify-content: space-between;
-    gap: var(--nf-space-md);
-    font-size: var(--nf-text-body-sm);
-    color: var(--nf-content-secondary);
-  }
-  .nf-md-sum__row--total {
-    padding-top: var(--nf-space-sm);
-    border-top: var(--nf-border-width) solid var(--nf-brand-edge-soft);
-    font-weight: 600;
-    color: var(--nf-content-primary);
-  }
-  .nf-md-sum__figure {
-    font-variant-numeric: tabular-nums;
-    color: var(--nf-content-primary);
-  }
-
   /* Ranked bars: 1. Lekki ███░░ 342 */
   .nf-md-bars {
     display: grid;
@@ -827,128 +725,6 @@
     font-variant-numeric: tabular-nums;
   }
 
-  /* ---------------------------------------------------------- the pipeline */
-
-  .nf-md-pipeline {
-    display: grid;
-    gap: var(--nf-space-xs);
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-  @media (min-width: 640px) {
-    .nf-md-pipeline {
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-    }
-  }
-  @media (min-width: 1024px) {
-    .nf-md-pipeline {
-      display: flex;
-      align-items: stretch;
-      gap: var(--nf-space-2xs);
-    }
-  }
-  .nf-md-stage {
-    display: flex;
-    flex: 1 1 0;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: var(--nf-space-2xs);
-    min-height: 6.5rem;
-    padding: var(--nf-space-sm);
-    text-align: center;
-    color: inherit;
-    text-decoration: none;
-  }
-  .nf-md-stage__label {
-    font-size: var(--nf-text-caption);
-    font-weight: 600;
-    color: var(--nf-content-secondary);
-  }
-  .nf-md-stage__count {
-    font-family: var(--nf-font-display);
-    font-size: var(--nf-text-h3);
-    font-weight: 600;
-    line-height: 1.1;
-    color: var(--nf-content-primary);
-    font-variant-numeric: tabular-nums;
-  }
-  .nf-md-stage--alarm .nf-md-stage__count {
-    color: var(--nf-state-error);
-  }
-  .nf-md-stage__arrow {
-    display: none;
-    align-self: center;
-    color: var(--nf-brand-quiet);
-  }
-  @media (min-width: 1024px) {
-    .nf-md-stage__arrow {
-      display: block;
-      flex-shrink: 0;
-    }
-  }
-
-  /* Recent activity: a timeline of dots on a thin rail. */
-  .nf-md-timeline {
-    display: grid;
-  }
-  .nf-md-event {
-    position: relative;
-    display: grid;
-    grid-template-columns: 1rem minmax(0, 1fr);
-    gap: var(--nf-space-sm);
-    padding-bottom: var(--nf-space-sm);
-  }
-  .nf-md-event + .nf-md-event {
-    padding-top: var(--nf-space-sm);
-    border-top: var(--nf-border-width) solid var(--nf-border-subtle);
-  }
-  .nf-md-event__dot {
-    width: 0.75rem;
-    height: 0.75rem;
-    margin-top: 0.3rem;
-    border-radius: var(--nf-radius-circle);
-    background: var(--nf-brand-primary);
-    box-shadow: 0 0 10px var(--nf-glow-2);
-  }
-  .nf-md-event__dot--good {
-    background: var(--nf-state-success);
-  }
-  .nf-md-event__dot--bad {
-    background: var(--nf-state-error);
-  }
-  .nf-md-event__dot--pending {
-    background: var(--nf-state-warning);
-  }
-  .nf-md-event__what {
-    font-size: var(--nf-text-body-sm);
-    color: var(--nf-content-primary);
-  }
-  .nf-md-event__when {
-    margin-top: var(--nf-space-3xs);
-    font-size: var(--nf-text-caption);
-    color: var(--nf-brand-quiet);
-  }
-
-  /* The float total's short accent rule under the figure. */
-  .nf-md-figure {
-    font-family: var(--nf-font-display);
-    font-size: var(--nf-text-h3);
-    font-weight: 600;
-    color: var(--nf-content-primary);
-    font-variant-numeric: tabular-nums;
-    overflow-wrap: anywhere;
-  }
-  .nf-md-figure::after {
-    content: "";
-    display: block;
-    width: 3rem;
-    height: 3px;
-    margin-top: var(--nf-space-xs);
-    border-radius: var(--nf-radius-xs);
-    background: var(--nf-state-warning);
-    box-shadow: 0 0 10px var(--nf-glow-2);
-  }
-
   /* The check plate on the reconciliation card. */
   .nf-md-check {
     display: grid;
@@ -983,9 +759,6 @@
   }
   .nf-md-mark--yes {
     color: var(--nf-state-success);
-  }
-  .nf-md-mark--no {
-    color: var(--nf-state-error);
   }
 
   /* A filter row for the desks with a toggle and chips of their own. */
@@ -1038,26 +811,7 @@
   their own. Cap heights in render px, converted, then font size = cap / 0.72.
 */
 @layer components {
-  /* Escrow, 8E9602E2 panel 1: title cap 14 (30px), stage label ascender 7
-     (15px), stage count cap 12 (26px), float figure cap 11 (24px). */
-  .nf-md--escrow .nf-md-head__title {
-    font-size: clamp(1.5rem, 1.1rem + 0.9vw, 1.875rem);
-  }
-  .nf-md--escrow .nf-md-stage__label {
-    font-size: 0.9375rem;
-  }
-  .nf-md--escrow .nf-md-stage__count {
-    font-size: clamp(1.375rem, 1rem + 0.6vw, 1.625rem);
-  }
-  .nf-md--escrow .nf-md-figure {
-    font-size: 1.5rem;
-  }
-  /* Supply, 8E9602E2 panel 3: title cap 14 (30px), KPI label ascender 8
-     (17px), figure cap 13 (28px), change cap 9 (20px), panel title cap 10
-     (22px). */
-  .nf-md--supply .nf-md-head__title {
-    font-size: clamp(1.5rem, 1.1rem + 0.9vw, 1.875rem);
-  }
+
   .nf-md--supply .nf-md-kpi__label {
     font-size: 1.0625rem;
   }
@@ -1074,83 +828,6 @@
 
 /* ------------------------------------------- evidence, float, firm rosters */
 @layer components {
-  /* The evidence on a dispute, drawn on the ruling card above the ruling. */
-  .nf-md-evidence {
-    margin-top: var(--nf-space-md);
-    padding-top: var(--nf-space-md);
-    border-top: var(--nf-border-width) solid var(--nf-border-subtle);
-  }
-  .nf-md-evidence__title {
-    margin: 0 0 var(--nf-space-sm);
-    font-size: var(--nf-text-body-sm);
-    font-weight: 600;
-    color: var(--nf-content-primary);
-  }
-  .nf-md-evidence__list {
-    display: grid;
-    gap: 0;
-    margin: 0;
-    padding: 0;
-    list-style: none;
-  }
-  .nf-md-evidence__item {
-    display: grid;
-    grid-template-columns: minmax(9rem, 14rem) minmax(0, 1fr) auto;
-    gap: var(--nf-space-xs) var(--nf-space-md);
-    padding: var(--nf-space-sm) 0 var(--nf-space-sm) var(--nf-space-sm);
-    border-left: 2px solid var(--nf-border-subtle);
-    font-size: var(--nf-text-body-sm);
-  }
-  .nf-md-evidence__item + .nf-md-evidence__item {
-    border-top: var(--nf-border-width) solid var(--nf-border-subtle);
-  }
-  /* Which side is said in words first; the stripe is the second signal. */
-  .nf-md-evidence__item[data-side="payer"] {
-    border-left-color: var(--nf-brand-primary);
-  }
-  .nf-md-evidence__item[data-side="payee"] {
-    border-left-color: var(--nf-state-info);
-  }
-  .nf-md-evidence__who {
-    color: var(--nf-brand-quiet);
-    font-weight: 600;
-  }
-  .nf-md-evidence__what {
-    min-width: 0;
-    color: var(--nf-content-primary);
-    overflow-wrap: anywhere;
-  }
-  .nf-md-evidence__meta {
-    display: block;
-    font-size: var(--nf-text-caption);
-    color: var(--nf-content-muted);
-  }
-  .nf-md-evidence__open {
-    color: var(--nf-brand-quiet);
-    text-decoration: underline;
-    text-underline-offset: 2px;
-  }
-  .nf-md-evidence__when {
-    font-size: var(--nf-text-caption);
-    color: var(--nf-content-muted);
-    white-space: nowrap;
-  }
-  @media (max-width: 767px) {
-    .nf-md-evidence__item {
-      grid-template-columns: minmax(0, 1fr);
-    }
-  }
-
-  /* The float's invariant, under its chart. */
-  .nf-md-invariant {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: var(--nf-space-xs) var(--nf-space-md);
-    margin-top: var(--nf-space-md);
-    font-size: var(--nf-text-body-sm);
-    color: var(--nf-content-secondary);
-  }
 
   /* One firm's roster under its name. */
   /* Every firm's table takes the same columns, so the rosters read as one list. */

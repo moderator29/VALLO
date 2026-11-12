@@ -4,7 +4,7 @@ import { KeptPriceNote, useKeptCopy } from "@/components/app/offline/KeptPriceNo
 import { PhoneGateLink } from "@/components/app/PhoneGateLink";
 import { PushPrompt } from "@/components/app/push/PushPrompt";
 import { isPhoneGate } from "@/lib/actions/envelope";
-import { useActionState, useEffect, useId, useMemo, useState } from "react";
+import { useActionState, useEffect, useId, useMemo, useState, type CSSProperties } from "react";
 import { banner } from "@/lib/ui/toast";
 import Link from "next/link";
 import { reserveTable } from "@/lib/reservations/actions";
@@ -63,6 +63,19 @@ function lagosClockNow(): string {
 }
 
 /** The words this form says (`t.memberFlows`): its own lines and the two day names. */
+
+/*
+ * THE TWO RAILS ARE THE PLATFORM'S RAIL, NOT A HAND-ROLLED ONE. They were a
+ * bare `overflow-x-auto`, which is the one shape `.nf-scroll-x` (utilities.css)
+ * exists to stop: a visible scrollbar where every other rail in the product
+ * hides it, a swipe that chains into the document at the end of the row so the
+ * whole page slides and springs back, and no snap. The rail bleeds to the
+ * phone edge and pads itself back by `2xs`, so it tells the snap line about
+ * that padding with the same token; without it the first day chip rests hard
+ * against the edge the moment the row settles.
+ */
+const RAIL_SNAP = { "--nf-rail-snap-pad": "var(--nf-space-2xs)" } as CSSProperties;
+
 export type ReserveTableCopy = Pick<Dictionary["memberFlows"], "table" | "days">;
 
 /** "Today", "Tomorrow", then a short weekday. Anchored at midday, see below. */
@@ -281,7 +294,8 @@ export function ReserveTable({
         <div
           role="group"
           aria-labelledby={dateId}
-          className="-mx-2xs mt-2xs flex gap-2xs overflow-x-auto px-2xs pb-2xs"
+          className="nf-scroll-x -mx-2xs mt-2xs flex gap-2xs px-2xs pb-2xs"
+          style={RAIL_SNAP}
         >
           {days.map((iso) => {
             const active = iso === date;
@@ -307,7 +321,8 @@ export function ReserveTable({
         <div
           role="group"
           aria-labelledby={timeId}
-          className="-mx-2xs mt-2xs flex gap-2xs overflow-x-auto px-2xs pb-2xs"
+          className="nf-scroll-x -mx-2xs mt-2xs flex gap-2xs px-2xs pb-2xs"
+          style={RAIL_SNAP}
         >
           {slots.map((slot) => {
             const active = slot === shownTime;

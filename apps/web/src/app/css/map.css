@@ -254,6 +254,19 @@
     background: var(--nf-btn-glass-fill) !important;
     color: var(--nf-content-primary) !important;
     border-color: var(--nf-btn-glass-edge) !important;
+    /*
+     * THE 44pt FLOOR ON A CONTROL A THUMB HAS TO HIT. Leaflet's own sheet
+     * draws these 30px square on a touch build, and measured in Chromium and
+     * WebKit on `/price` at 360, 390, 440 and 1280, light and dark, that is
+     * what they were: 30 x 30, the smallest targets on a map screen. The
+     * glyph is centred by the grid rather than by Leaflet's `line-height`,
+     * which is pinned to the old 30 and would leave the + sitting high.
+     */
+    inline-size: 2.75rem !important;
+    block-size: 2.75rem !important;
+    display: grid !important;
+    place-items: center !important;
+    line-height: 1 !important;
   }
   .leaflet-control-zoom {
     border-radius: var(--nf-radius-control) !important;

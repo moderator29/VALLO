@@ -313,7 +313,7 @@ export function ProfileEditor({
                   value={policy}
                   checked={active}
                   onChange={() => setContactPolicy(policy)}
-                  className="mt-2xs h-4 w-4 shrink-0 accent-[var(--nf-brand-primary)]"
+                  className="mt-2xs shrink-0 accent-[var(--nf-brand-primary)]"
                 />
                 <span className="min-w-0">
                   <span className="block text-[length:var(--nf-text-body-sm)] font-semibold">{copy.title}</span>
@@ -336,7 +336,7 @@ export function ProfileEditor({
             value="on"
             checked={pidginOk}
             onChange={(e) => setPidginOk(e.target.checked)}
-            className="mt-2xs h-4 w-4 shrink-0 accent-[var(--nf-brand-primary)]"
+            className="mt-2xs shrink-0 accent-[var(--nf-brand-primary)]"
           />
           <span className="min-w-0">
             <span className="block text-[length:var(--nf-text-body-sm)] font-semibold">{PIDGIN_COPY.title}</span>

@@ -14,6 +14,52 @@
  *   - nothing loops (except skeleton shimmer, which is a loading state)
  *
  * Imported by the member layouts (layout.tsx), after motion.css.
+ *
+ * ===========================================================================
+ * WHAT IS LIVE IN HERE AND WHAT NEVER WAS (audited 11 November 2026).
+ * ===========================================================================
+ *
+ * The question asked of this file was whether its unmatched selectors are the
+ * wreckage of a RENAME, in which case re-pointing them would switch on motion
+ * that is written and dead, or whether they were written against markup that
+ * never existed. The answer is the second one, and three pieces of evidence
+ * say so rather than one.
+ *
+ * 1. THE NAMES WERE NEVER IN THE MARKUP. `.nf-sheet__handle` is the first
+ *    object in the file and the clearest case: `git log -S` finds it in
+ *    exactly one commit, 565eb1a35, the commit that created this file, on
+ *    8 November 2026. The element Sheet.tsx actually renders, `.nf-sheet__grip`,
+ *    has been there since 66b9a02f8 on 7 October, a month earlier. A rename
+ *    leaves the old name in the history of the MARKUP. This one was never
+ *    there, so there is nothing to re-point from.
+ *
+ * 2. THE GATE WAS NEVER SET. `data-spring`, which three of the sheet rules
+ *    require, appears nowhere in any .ts or .tsx file in the repository. Even
+ *    the half of the sheet block that is spelled correctly could not run.
+ *
+ * 3. WHERE THE SAME CONCEPT DOES EXIST, THE RULE IS INCOMPATIBLE WITH IT, so
+ *    re-pointing would be a regression and not a fix. `.nf-toggle__thumb` has
+ *    a real counterpart: `.nf-switch__thumb`, inside `.nf-switch[aria-checked]`,
+ *    which is the same shape of selector. But the real thumb carries its
+ *    vertical centring IN its transform (`translate(x, -50%)`, Switch.tsx), and
+ *    `@keyframes nf-toggle-on` animates `translateX` alone. Pointing the
+ *    animation at the real thumb would drop the `-50%` for the length of the
+ *    animation and throw the knob out of the top of its track, which is a bug
+ *    this repository has already fixed once by hand.
+ *
+ * So nothing here is re-pointed. The file is NOT abandoned either, and that is
+ * the part worth knowing: 26 of its selectors are live, because somebody wired
+ * those by hand in `lib/ui/motion-hooks.ts` (`.nf-heart-pop`, `.nf-badge-bump`,
+ * `.nf-heart-unsave`) and in ListingCard and SaveControl. 81 are not, and a
+ * browser confirms it: across 70 routes at 390 and 1280, `getElementsByClassName`
+ * returned zero for every one of the 81.
+ *
+ * THE COST, MEASURED, SO THE NEXT PERSON DOES NOT HAVE TO: 1743 lines, loaded
+ * on every signed-in page by `(app)/layout.tsx`. It is left in place because
+ * the last commit on it (843b21fed) says the author was cut off mid-edit, and
+ * because deleting someone's unfinished work is not an audit's call. What an
+ * audit can do is say plainly that the unmatched four fifths of it is not one
+ * rename away from working.
  */
 @layer theme, base, components, utilities;
 

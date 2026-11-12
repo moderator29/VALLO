@@ -386,7 +386,10 @@
 }
 .nf-g1step__eyebrow {
   margin-block-end: var(--nf-space-xs);
-  color: var(--nf-brand-primary);
+  /* The quiet brand ink, not the primary one: `--nf-brand-primary` is the ink
+     for a brand-filled control, and as 12px text on the night surface behind
+     this step it measured 4.07 to 1, under the 4.5 small text needs. */
+  color: var(--nf-brand-quiet);
   font-size: var(--nf-text-overline);
   font-weight: 600;
   letter-spacing: 0.08em;
@@ -1133,8 +1136,12 @@ form.nf-composer {
   background: var(--nf-surface-secondary);
   transition: border-color var(--nf-duration-fast) var(--nf-ease-standard);
 }
-.nf-composer__box:focus-within {
-  border-color: var(--nf-brand-edge-soft);
+/* The lit edge is for a pointer-and-keyboard machine only; a thumb tapping
+   the bar lights nothing (input-bar.css says why). */
+@media (hover: hover) and (pointer: fine) {
+  .nf-composer__box:focus-within {
+    border-color: var(--nf-brand-edge-soft);
+  }
 }
 /* Beats brand-glass.css's night well (`:root:not([data-theme]) ... :not(:focus)`). */
 :root:root form.nf-composer .nf-composer__box .nf-composer__field {
@@ -1182,6 +1189,23 @@ form.nf-composer .nf-composer__send {
   transition:
     background-color var(--nf-duration-fast) var(--nf-ease-standard),
     scale var(--nf-duration-press) var(--nf-ease-press);
+}
+/*
+ * THE DISC IS DRAWN AT 40 AND HIT AT 44. The chat's own send carries the
+ * microphone's class and gets its hit area from messages-g1.css; the plain
+ * send on the first message to somebody (`u/[handle]/message`) carried
+ * neither, so it was a 40 by 40 target, under the floor
+ * docs/design/COMPONENTS.md sets. The target is grown around the disc
+ * rather than the disc made bigger, which is the idiom used throughout.
+ */
+form.nf-composer .nf-composer__send {
+  position: relative;
+}
+form.nf-composer .nf-composer__send::before {
+  content: "";
+  position: absolute;
+  inset: -0.125rem;
+  border-radius: var(--nf-radius-circle);
 }
 form.nf-composer .nf-composer__send[data-ready] {
   background: var(--nf-brand-primary);

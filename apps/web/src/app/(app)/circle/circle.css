@@ -386,11 +386,23 @@
   }
 
   /* ------------------------------------------------- community head card */
+  /*
+   * THE CARD TIER'S CORNER IS 18, AND THESE WERE 22.
+   *
+   * `--nf-radius-xl` is the Card FIGURE rung (docs/design/COMPONENTS.md: "a
+   * Card whose subject is a figure"); the ordinary Card is
+   * `--nf-radius-card`. Every container below is an ordinary card, and four
+   * of them already draw `--nf-tier-card-edge`, the Card tier's own edge, so
+   * they were Cards wearing the Card hairline on the figure's corner.
+   * Measured in WebKit at 390 before this: twelve Circle containers at 22
+   * against the Roommates cards' 18, so crossing the dock between two
+   * features changed every corner on the screen by four pixels.
+   */
   .nf-ccom {
     display: grid;
     gap: var(--nf-space-md);
     padding: var(--nf-space-md);
-    border-radius: var(--nf-radius-xl);
+    border-radius: var(--nf-radius-card);
     border: var(--nf-border-width) solid var(--nf-brand-edge-soft);
     background:
       radial-gradient(120% 90% at 0% 0%, var(--nf-brand-tint-1), transparent 60%),
@@ -505,7 +517,7 @@
     display: grid;
     gap: var(--nf-space-sm);
     padding: var(--nf-space-md);
-    border-radius: var(--nf-radius-xl);
+    border-radius: var(--nf-radius-card);
     border: var(--nf-border-width) solid var(--nf-tier-card-edge);
     background: var(--nf-surface-primary);
     box-shadow: var(--nf-card-shadow);
@@ -566,6 +578,18 @@
     font-size: var(--nf-text-caption);
     font-weight: 700;
     text-decoration: none;
+  }
+  /* The chip is drawn at 32, which is the size the header wants, and hit at
+     the 44 the design system asks for: the target is grown around it rather
+     than the chip being made taller (the `.nf-card-remove` idiom). */
+  .nf-cthread__community {
+    position: relative;
+  }
+  .nf-cthread__community::before {
+    content: "";
+    position: absolute;
+    inset-block: -0.375rem;
+    inset-inline: 0;
   }
   .nf-cthread__community:focus-visible,
   .nf-cthread__listing:focus-visible,
@@ -677,7 +701,7 @@
     display: grid;
     gap: var(--nf-space-sm);
     padding: var(--nf-space-md);
-    border-radius: var(--nf-radius-xl);
+    border-radius: var(--nf-radius-card);
     border: var(--nf-border-width) solid var(--nf-tier-card-edge);
     background: var(--nf-surface-primary);
     min-inline-size: 0;
@@ -735,7 +759,7 @@
     inset-block-end: calc(var(--nf-tabbar-clearance) + var(--nf-space-xs));
     z-index: var(--nf-z-sticky);
     padding: var(--nf-space-md);
-    border-radius: var(--nf-radius-xl);
+    border-radius: var(--nf-radius-card);
     border: var(--nf-border-width) solid var(--nf-brand-edge-soft);
     background: var(--nf-surface-primary);
     box-shadow: var(--nf-card-shadow);
@@ -753,7 +777,7 @@
     margin: 0;
     padding: 0;
     list-style: none;
-    border-radius: var(--nf-radius-xl);
+    border-radius: var(--nf-radius-card);
     border: var(--nf-border-width) solid var(--nf-tier-card-edge);
     background: var(--nf-surface-primary);
     box-shadow: var(--nf-card-shadow);

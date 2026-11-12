@@ -12,6 +12,7 @@ import { ThemeSync } from "@/components/site/ThemeControl";
 import { ServiceWorkerRegistrar } from "@/components/app/ServiceWorkerRegistrar";
 import { VIEWER_HEADER, viewerMeta } from "@/lib/offline/viewer-stamp";
 import { NativeRuntime } from "@/components/app/NativeRuntime";
+import { KeyboardInset } from "@/components/app/KeyboardInset";
 import { CrashListener } from "@/components/app/CrashListener";
 import { STARTUP_GATE_SCRIPT, STARTUP_NATIVE_SCRIPT } from "@/components/startup/startup-script";
 import { ThresholdStage } from "@/components/motion/ThresholdStage";
@@ -554,6 +555,7 @@ export default async function RootLayout({
           down was simply never in the page.
         */}
         <NativeRuntime />
+        <KeyboardInset />
         <CrashListener />
         <a href="#main" className="nf-skip-link">
           {t.common.skipToContent}

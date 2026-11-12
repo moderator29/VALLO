@@ -17,7 +17,10 @@
  * actually settled. An operator chooses WHY a stay is being cancelled and reads
  * back what that is worth; they never choose HOW MUCH. Three of the four
  * reasons override the schedule upward to a full refund, because the published
- * page says they do. Nothing here can go below the schedule.
+ * page says they do. Nothing here can go below the schedule, except by what
+ * has already gone back: a stay part refunded earlier without being cancelled
+ * is bounded by what is still refundable (`boundedByRefundable`), which is the
+ * only figure the database will accept and the only honest one to send.
  *
  * THE DECISION IS ONE TRANSACTION; THE MONEY GOES BACK THROUGH THE PROCESSOR.
  * The contra settlement row, the booking transition, the state event, the
@@ -52,6 +55,7 @@ import { submitBookingRefund } from "../payments/refund";
 import { createAdminClient } from "../supabase/admin";
 import {
   CANCELLATION_REASON_CODES,
+  boundedByRefundable,
   refundForReasonUnderTerms,
   type CancellationReason,
 } from "../trust/cancellation";
@@ -195,11 +199,27 @@ export async function cancelBookingAsAdmin(
   let paidMinor = 0;
   for (const payment of payments ?? []) paidMinor += payment.amount_minor;
 
+  // What has already gone back on this booking. A goodwill or duplicate-charge
+  // part refund (`refundBookingAsAdmin`) leaves the stay live, so the schedule
+  // can still work out more than is refundable; the database refuses that
+  // outright (`over_refund`) and the stay could then not be cancelled at all.
+  const { data: priorRefunds, error: refundsError } = await access.supabase
+    .from("booking_refunds")
+    .select("refund_minor")
+    .eq("booking_id", booking.id);
+  if (refundsError) return fail(SERVICE_DOWN);
+  let alreadyRefundedMinor = 0;
+  for (const row of priorRefunds ?? []) alreadyRefundedMinor += row.refund_minor;
+
   // V-20. A guest's own cancellation is priced by the terms frozen onto the
   // booking at payment; with none frozen (no payment, or paid before V-20),
   // the platform schedule, exactly as before.
   const frozen = await readFrozenTerms(access.supabase, booking.id);
-  const outcome = refundForReasonUnderTerms(reason, paidMinor, booking.check_in, frozen?.terms ?? null);
+  const outcome = boundedByRefundable(
+    refundForReasonUnderTerms(reason, paidMinor, booking.check_in, frozen?.terms ?? null),
+    paidMinor,
+    alreadyRefundedMinor,
+  );
   const reference = refundReference();
 
   let data: unknown = null;
@@ -457,12 +477,24 @@ export async function previewCancellation(input: {
   let paidMinor = 0;
   for (const payment of payments ?? []) paidMinor += payment.amount_minor;
 
+  const { data: priorRefunds, error: refundsError } = await access.supabase
+    .from("booking_refunds")
+    .select("refund_minor")
+    .eq("booking_id", booking.id);
+  if (refundsError) return fail(SERVICE_DOWN);
+  let alreadyRefundedMinor = 0;
+  for (const row of priorRefunds ?? []) alreadyRefundedMinor += row.refund_minor;
+
   const frozen = await readFrozenTerms(access.supabase, booking.id);
-  const outcome = refundForReasonUnderTerms(
-    parsed.data.reason,
+  const outcome = boundedByRefundable(
+    refundForReasonUnderTerms(
+      parsed.data.reason,
+      paidMinor,
+      booking.check_in,
+      frozen?.terms ?? null,
+    ),
     paidMinor,
-    booking.check_in,
-    frozen?.terms ?? null,
+    alreadyRefundedMinor,
   );
   return ok({
     paidMinor,

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { versioned } from "@/lib/theme/brand-assets";
 /*
  * The partial is imported here rather than from globals.css because the partial
  * is not in its ordered import list yet. When `css/system.css` is added to that
@@ -97,7 +98,14 @@ export function PlainSystemMoment({
         <>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src="/pwa/icon-192.png"
+            /* THE VERSION STAMP IS PART OF THE ADDRESS (`lib/theme/brand-assets.ts`,
+               the brand refresh of 10 November 2026): the icon was redrawn at the
+               same path, so the bare address serves whatever a phone already had,
+               which is the retired mark. It is also the address the service
+               worker does NOT keep: the shell precaches the stamped one, so with
+               no network the bare one was a hole where the lockup should be while
+               the bytes sat on the phone under the other name. */
+            src={versioned("/pwa/icon-192.png")}
             alt=""
             aria-hidden="true"
             width={192}

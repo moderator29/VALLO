@@ -55,11 +55,25 @@
     max-width: none;
     margin-inline: 0;
   }
-  /* The scroller's own scrollbar sits at the pane's edge, thin and quiet,
-     not a bright bar in the middle of the screen. */
-  .nf-thread__scroll {
-    scrollbar-width: thin;
-    scrollbar-color: var(--nf-border-default) transparent;
+  /*
+   * NO SCROLLBAR DOWN THE CONVERSATION (the founder, 11 November 2026: a pale
+   * line painted down the right edge of the thread every time he scrolls, on
+   * his phone). It was a thin quiet bar at the pane's edge, which is right for
+   * a document and wrong for a chat: iMessage, WhatsApp and Telegram draw
+   * none, and the thread is the one surface where the scroll position is
+   * already obvious from the bubbles. Hidden on the website as well as in the
+   * shell, because it is wrong in both, and the same way the photo strip
+   * below already hides its own (`.nf-photo-group__strip`). Scrolling,
+   * wheel, trackpad and keyboard are untouched: only the indicator goes.
+   */
+  /* The assistant's thread (`home.css`) and the support ticket's scroll on
+     the same rhythm and are named with this one below (the watermark rule),
+     so they lose the bar here too rather than in three files. */
+  :is(.nf-thread__scroll, .nf-support-thread, .nf-ai__thread) {
+    scrollbar-width: none;
+  }
+  :is(.nf-thread__scroll, .nf-support-thread, .nf-ai__thread)::-webkit-scrollbar {
+    display: none;
   }
 
   /* ------------------------------------------------------------- header */
@@ -1950,9 +1964,23 @@
   text-align: center;
   color: var(--nf-content-muted);
 }
+/*
+ * THE FIRST MESSAGE TO SOMEBODY (`u/[handle]/message`) KEEPS ITS ROW.
+ * `.nf-composer` above is a flex row whose field grows to fill it, and that
+ * is the layout this composer was written for: a field and a round send
+ * beside it. The input bar pass (7 November 2026) gave every
+ * `form.nf-composer` `display: block` for the chat's one-box bar, which this
+ * screen does not draw, and a block row leaves the field at the browser's
+ * default input width: measured in WebKit at 390, a 241px field with 104px
+ * of empty bar beside it. The row is restored here, where the exception
+ * belongs, rather than by weakening the chat's rule.
+ */
 .nf-direct__composer {
   position: sticky;
   bottom: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--nf-gap-inline-tight);
 }
 
 /*

@@ -7,6 +7,82 @@
  * would win where it used to lose, so it keeps its place.
  */
 @layer components {
+  /*
+   * THE STEP FRAME SAT ON THE BARE CANVAS WHILE EVERY OTHER SCREEN SAT ON THE
+   * APP'S GROUND (founder, November 2026: the roommates "new post" wizard
+   * renders on a near-black ground while the header and tabs above it are
+   * navy, "and it looks broken").
+   *
+   * Every page in the product is transparent down to the html background,
+   * `--nf-surface-canvas`, with `.nf-ambient` (ambient.css, fixed, z-index -1)
+   * washing brand light over it. That wash is where the navy comes from.
+   * `.nf-g1step` in grade1.css paints `--nf-surface-canvas` OPAQUELY, so the
+   * wash never reaches it: measured in WebKit at 390 wide, /roommates reads
+   * rgb(0, 7, 36) at the same point a step frame reads rgb(0, 8, 20). By day
+   * the wash is faint enough that the ground stays at the canvas, so the
+   * fault is the night's alone; the frame is transparent in both themes all
+   * the same, because a page's ground is the page's to decide.
+   *
+   * The frame is a page, so it takes a page's ground: none of its own. That is
+   * correct by construction in both themes and on every flow built on
+   * StepFrame, not only the roommates wizard: the circle post flow, the money
+   * screens, offers, support, the groups flow and the profile flow all drew
+   * the same wrong ground.
+   *
+   * The OVERLAY variant (verification, the listing wizard, the registrations)
+   * is fixed above the app and must hide what is behind it, so it cannot be
+   * transparent. It takes the ground the app reads as instead of the bare
+   * canvas, so an overlay flow and a routed flow are the same colour.
+   *
+   * The sticky top and foot bars take the house chrome material (the 88 per
+   * cent canvas tint over the strong blur that `.nf-glass--chrome` sets in
+   * glass.css) rather than an opaque slab, which is what every other sticky
+   * bar in the product wears and what stops them banding against a ground
+   * that is now lit.
+   *
+   * These live here, on `:root`, rather than in grade1.css where the rules
+   * they answer are written, only because that file is in another queue this
+   * week. Fold them into `.nf-g1step` there when it is free.
+   */
+  :root .nf-g1step {
+    background: transparent;
+  }
+  :root .nf-g1step--overlay {
+    background: var(--nf-surface-canvas);
+  }
+  /* Only at night. The brand wash darkens and blues the night ground, so an
+     opaque canvas reads near black beside it; by day the ambient leaves the
+     ground at the canvas (/search and a routed frame both measured
+     rgb(245, 246, 248) in WebKit at 390), and a tint here would make the
+     overlay the one plane in the product that is not the page's colour. */
+  :root:not([data-theme="light"]) .nf-g1step--overlay {
+    background: color-mix(in oklab, var(--nf-brand-primary) 8%, var(--nf-surface-canvas));
+  }
+  :root .nf-g1step__top,
+  :root .nf-g1step__foot {
+    background: color-mix(in oklab, var(--nf-surface-canvas) 88%, transparent);
+    -webkit-backdrop-filter: blur(var(--nf-glass-blur-strong)) saturate(var(--nf-glass-saturate));
+    backdrop-filter: blur(var(--nf-glass-blur-strong)) saturate(var(--nf-glass-saturate));
+  }
+  /* On the overlay the bars take the overlay's own ground rather than a tint
+     over it: a chrome tint over an already opaque plane is simply a darker
+     strip, which is the band at the top of the screen the glass is there to
+     avoid. `inherit` keeps the two in step whatever the ground becomes. */
+  :root .nf-g1step--overlay > .nf-g1step__top,
+  :root .nf-g1step--overlay > .nf-g1step__foot {
+    background: inherit;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+  /* No backdrop filter (an old web view, or the data saver turning it off):
+     the bars go solid rather than letting the page read through them. */
+  @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    :root .nf-g1step__top,
+    :root .nf-g1step__foot {
+      background: var(--nf-surface-canvas);
+    }
+  }
+
   @keyframes nf-flow-choose {
     0% {
       transform: scale(0.97);

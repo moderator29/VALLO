@@ -59,6 +59,12 @@ import { isConfigurationFailure, isRetryable, type ProviderReply, type PushPaylo
  *    table, and specifically because a delivery still in `sending` is NEVER
  *    retried. A row we never read a reply for stays as it is, is counted by
  *    `push_queue_health`, and is a fact somebody reads rather than a retry.
+ *    THAT ROW IS WRITTEN BEFORE THE PUSH SERVICE IS CALLED, which is the
+ *    whole of it: it was written only afterwards, so a worker that died
+ *    inside the call left NO row, the reaper handed the queue row back ten
+ *    minutes later and the same device was sent the same notification twice.
+ *    `markDeliverySending` is that row (`push_deliveries_read_the_reply` is
+ *    written to allow exactly this one shape).
  *    The email outbox built alongside this reached the same conclusion from
  *    the other direction, by refusing to have a reaper at all.
  *
@@ -247,13 +253,23 @@ export async function pushDrain(admin: PushClient): Promise<JobVerdict> {
 
     if (decision.action === "hold") {
       /* Back to the queue, unclaimed, with the instant the window opens.
-         `attempts` is deliberately NOT incremented: being asleep is not a
-         failed attempt and must not count towards giving up. */
+         Being asleep is not a failed attempt and must not count towards
+         giving up, so the attempt the claim spent is HANDED BACK here.
+         Saying "attempts is deliberately not incremented" and writing no
+         `attempts` at all was the bug: the increment does not happen in this
+         branch, it happens upstream in `claimDue`, which raises the count on
+         every row it takes before anything has looked at it. A row held by
+         quiet hours therefore kept the attempt, and a row held more than
+         three times reached MAX_QUEUE_ATTEMPTS and was given up on without a
+         single push ever having been sent for it. `row.attempts` is the
+         post-claim count, so one less is what the row carried before this
+         run touched it. */
       await admin
         .from("push_queue")
         .update({
           state: "held",
           not_before: decision.until.toISOString(),
+          attempts: Math.max(0, row.attempts - 1),
           claim_token: null,
           claimed_at: null,
         })
@@ -346,7 +362,7 @@ export async function pushDrain(admin: PushClient): Promise<JobVerdict> {
  * notified. `permanent` when every failure was one that will fail again
  * identically, so retrying is only a way of making the same mistake faster.
  */
-async function deliverOne(
+export async function deliverOne(
   admin: PushClient,
   queueId: string,
   targets: PushTarget[],
@@ -374,10 +390,25 @@ async function deliverOne(
     }
 
     attempted += 1;
+    const attempt = (previous?.attempts ?? 0) + 1;
+
+    /* THE ATTEMPT IS WRITTEN DOWN BEFORE THE PUSH SERVICE IS CALLED, which
+       is what makes rule 4 at the head true rather than merely intended.
+       `push_deliveries` carries a `sending` state and the table's own check
+       (`push_deliveries_read_the_reply`) exempts exactly that state from
+       having a provider status, because this row is the record that a send
+       was STARTED. Without it, a drain that died between the transport call
+       and the reply left no row at all: the reaper handed the queue row back
+       ten minutes later and the same device was sent the same notification a
+       second time, which is the one thing a person actually notices. A row
+       left in `sending` is never retried (the guard above), so the push is
+       one that a person reads about rather than one that is sent twice. */
+    await markDeliverySending(admin, queueId, target, attempt);
+
     const reply = await send(target, payload);
 
     /* THE REPLY IS WRITTEN DOWN BEFORE IT IS ACTED ON. */
-    await recordDelivery(admin, queueId, target, reply, (previous?.attempts ?? 0) + 1);
+    await recordDelivery(admin, queueId, target, reply, attempt);
 
     if (reply.outcome === "accepted") {
       accepted += 1;
@@ -458,11 +489,41 @@ async function bumpFailureStreak(admin: PushClient, target: PushTarget, counts: 
 }
 
 /**
+ * Claim one device for one queue row before the transport is called.
+ *
+ * `state: 'sending'` with no provider status, which is the one shape
+ * `push_deliveries_read_the_reply` allows, and it is the only row this file
+ * writes that does not carry a reply. `recordDelivery` overwrites it on the
+ * same unique key moments later. A row that stays in `sending` is a send
+ * whose reply nobody read, and nothing retries it.
+ */
+async function markDeliverySending(
+  admin: PushClient,
+  queueId: string,
+  target: PushTarget,
+  attempts: number,
+): Promise<void> {
+  await admin.from("push_deliveries").upsert(
+    {
+      queue_id: queueId,
+      token_id: target.id,
+      device_ref: target.deviceRef,
+      platform: target.platform,
+      state: "sending",
+      attempts,
+      attempted_at: new Date().toISOString(),
+    },
+    { onConflict: "queue_id,token_id" },
+  );
+}
+
+/**
  * Write what the provider said.
  *
  * `upsert` on the unique `(queue_id, token_id)` so a retry updates the same
- * row rather than being refused. The status is always present on a settled
- * state, which the database's own check constraint independently enforces.
+ * row rather than being refused, and so the `sending` row written moments
+ * earlier becomes this one. The status is always present on a settled state,
+ * which the database's own check constraint independently enforces.
  */
 async function recordDelivery(
   admin: PushClient,
@@ -509,38 +570,66 @@ async function readDeliveries(
 /**
  * Claim what is due.
  *
- * One UPDATE, filtered on the claimable states, returning only the rows it
- * actually moved. See note 2 at the head for why this is safe against a
- * second drain without an explicit lock.
+ * ONE UPDATE PER DISTINCT ATTEMPT COUNT, AND THE BUMP RIDES ALONG WITH IT.
+ *
+ * The claim has to raise `attempts` as well as take the row, so the row this
+ * drain works on carries the count of the attempt ABOUT to happen rather
+ * than the one before it: `pushDrain` reads it to decide backoff and to
+ * decide when to give up. `attempts` is per row, and PostgREST writes one
+ * value per statement, so the rows are grouped by the count they carry and
+ * each group is claimed with its own `attempts: n + 1`. A claimable row has
+ * been attempted fewer than `MAX_QUEUE_ATTEMPTS` times, so there are at most
+ * four groups however many rows are due: a run of a hundred rows issues at
+ * most four UPDATEs where it used to issue a hundred and one.
+ *
+ * AND IT CLOSES A WINDOW, which is the better half of it. The bump used to
+ * be its own UPDATE per row after the claim. A drain that died between the
+ * claim and the bump left the row claimed with its old count; ten minutes
+ * later `private.push_reap_stale_claims` handed it back having burned an
+ * attempt that was never recorded, so a row that fails this way could be
+ * retried past `MAX_QUEUE_ATTEMPTS` instead of being given up on. Taking the
+ * row and spending the attempt in one statement means the two cannot
+ * disagree.
+ *
+ * Each group is still filtered on the claimable states, and still returns
+ * only the rows it actually moved, so note 2 at the head holds unchanged: a
+ * second drain's UPDATE re-reads a row that is already `sending` and matches
+ * nothing.
  */
-async function claimDue(admin: PushClient, claimToken: string): Promise<ClaimedRow[]> {
+export async function claimDue(admin: PushClient, claimToken: string): Promise<ClaimedRow[]> {
   const nowIso = new Date().toISOString();
 
   const { data: due } = await admin
     .from("push_queue")
-    .select("id")
+    .select("id, attempts")
     .in("state", ["pending", "held", "failed"])
     .lte("not_before", nowIso)
     .order("not_before", { ascending: true })
     .limit(CLAIM_LIMIT);
 
-  const ids = (due ?? []).map((row) => row.id);
-  if (ids.length === 0) return [];
+  const byAttempts = new Map<number, string[]>();
+  for (const row of due ?? []) {
+    const attempts = row.attempts ?? 0;
+    const group = byAttempts.get(attempts) ?? [];
+    group.push(row.id);
+    byAttempts.set(attempts, group);
+  }
+  if (byAttempts.size === 0) return [];
 
-  const { data } = await admin
-    .from("push_queue")
-    .update({ state: "sending", claim_token: claimToken, claimed_at: nowIso })
-    .in("id", ids)
-    .in("state", ["pending", "held", "failed"])
-    .select("id, notification_id, user_id, expires_at, attempts");
-
-  /* `attempts` is incremented separately so the returned row carries the
-     count of the attempt that is about to happen rather than the one
-     before it. */
-  const rows = (data ?? []) as ClaimedRow[];
-  for (const row of rows) {
-    row.attempts += 1;
-    await admin.from("push_queue").update({ attempts: row.attempts }).eq("id", row.id);
+  const rows: ClaimedRow[] = [];
+  for (const [attempts, ids] of byAttempts) {
+    /* `attempts` is matched as well as set, so the write is a compare and
+       set: a row the reaper or another drain moved on since the read above
+       is simply not claimed this run, rather than claimed with a count that
+       is already out of date. */
+    const { data } = await admin
+      .from("push_queue")
+      .update({ state: "sending", claim_token: claimToken, claimed_at: nowIso, attempts: attempts + 1 })
+      .in("id", ids)
+      .in("state", ["pending", "held", "failed"])
+      .eq("attempts", attempts)
+      .select("id, notification_id, user_id, expires_at, attempts");
+    rows.push(...((data ?? []) as ClaimedRow[]));
   }
   return rows;
 }

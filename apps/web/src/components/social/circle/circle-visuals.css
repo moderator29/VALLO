@@ -428,8 +428,12 @@
     z-index: var(--nf-z-sticky);
     display: grid;
     place-items: center;
-    inline-size: 3.5rem;
-    block-size: 3.5rem;
+    /* The one number every floating action button on the platform is drawn
+       from. Roommates' FAB reads it through `.nf-btn--fab`; this one restated
+       it as a literal, so the two could drift apart without anything saying
+       so. Same 56px today, one source for it now. */
+    inline-size: var(--nf-act-fab-size);
+    block-size: var(--nf-act-fab-size);
     border-radius: var(--nf-radius-circle);
     background: var(--nf-brand-primary);
     color: var(--nf-content-on-brand);
@@ -476,6 +480,11 @@
     position: relative;
     display: inline-flex;
     align-items: center;
+    /* 44 in both axes, as on the underline tabs: the height was 44 and the
+       width was the word, so "Ask" was tapped at 26 by 44. The row's gap is
+       untouched, so no tab reaches into the one beside it. */
+    justify-content: center;
+    min-inline-size: 2.75rem;
     block-size: 2.75rem;
     color: var(--nf-content-muted);
     font-size: var(--nf-text-body-sm);
@@ -506,11 +515,23 @@
   }
 
   /* ------------------------------------------------------------- cards */
+  /*
+   * THE CARD TIER'S CORNER IS 18, AND THESE WERE 22.
+   *
+   * `--nf-radius-xl` is the Card FIGURE rung (docs/design/COMPONENTS.md: "a
+   * Card whose subject is a figure"); the ordinary Card is
+   * `--nf-radius-card`. Every container below is an ordinary card, and four
+   * of them already draw `--nf-tier-card-edge`, the Card tier's own edge, so
+   * they were Cards wearing the Card hairline on the figure's corner.
+   * Measured in WebKit at 390 before this: twelve Circle containers at 22
+   * against the Roommates cards' 18, so crossing the dock between two
+   * features changed every corner on the screen by four pixels.
+   */
   .nf-ccard {
     display: grid;
     gap: var(--nf-space-xs);
     padding: var(--nf-space-md);
-    border-radius: var(--nf-radius-xl);
+    border-radius: var(--nf-radius-card);
     background: var(--nf-surface-primary);
     box-shadow: var(--nf-card-shadow);
     color: var(--nf-content-primary);

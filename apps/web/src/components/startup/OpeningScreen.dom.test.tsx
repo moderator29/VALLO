@@ -20,7 +20,7 @@ describe("the opening screen's markup", () => {
     expect(html).toContain('id="nf-open"');
     expect(html).toContain('aria-hidden="true"');
     expect(html).toContain("<svg");
-    expect(html).toContain("nf-open__mark");
+    expect(html).toContain("nf-open__launch");
     expect(html).not.toContain("<img");
   });
 });
@@ -54,7 +54,7 @@ const state = (page: import("playwright-core").Page) =>
   page.evaluate(() => {
     const el = document.getElementById("nf-open")!;
     const cs = getComputedStyle(el);
-    const mark = el.querySelector(".nf-open__mark")!.getBoundingClientRect();
+    const mark = el.querySelector(".nf-open__launch")!.getBoundingClientRect();
     return { open: document.documentElement.dataset.open, display: cs.display, opacity: Number(cs.opacity), markWidth: Math.round(mark.width), markCentreY: Math.round(mark.top + mark.height / 2) };
   });
 
@@ -65,9 +65,12 @@ describe.skipIf(!hasBrowser && !process.env.CI)("the opening screen, in a browse
     const first = await state(page);
     expect(first.display).toBe("block");
     expect(first.opacity).toBe(1);
-    // 36 per cent of the width, give or take the entrance's small scale (0.96 to 1.04)
-    expect(first.markWidth).toBeGreaterThanOrEqual(Math.round(390 * 0.36 * 0.94));
-    expect(first.markWidth).toBeLessThanOrEqual(Math.round(390 * 0.36 * 1.06));
+    /* The lockup (mark AND wordmark) is 72 per cent of the width, give or take
+       the entrance's small scale (0.96 to 1). It was 36 per cent when only the
+       mark was drawn; the artwork is three and a quarter times as wide as it is
+       tall now, so it takes its own width. */
+    expect(first.markWidth).toBeGreaterThanOrEqual(Math.round(390 * 0.72 * 0.94));
+    expect(first.markWidth).toBeLessThanOrEqual(Math.round(390 * 0.72 * 1.06));
     expect(Math.abs(first.markCentreY - Math.round(844 * 0.46))).toBeLessThanOrEqual(8);
     await page.waitForTimeout(OPEN_MIN_MS - 250);
     expect((await state(page)).open).toBe("on");
@@ -95,11 +98,44 @@ describe.skipIf(!hasBrowser && !process.env.CI)("the opening screen, in a browse
     await page.waitForFunction(() => document.documentElement.dataset.open === "leave" || document.documentElement.dataset.open === "off", null, { timeout: 2000 });
     await close();
   });
-  it("shows the still mark under reduced motion (no animation), for the minimum", async () => {
+  it("shows the whole lockup under reduced motion with nothing travelling, for the minimum", async () => {
     const { page, close } = await installed({ reduced: true, hydrate: 50 });
     await page.waitForSelector("#nf-open svg", { state: "attached" });
-    expect(await page.evaluate(() => getComputedStyle(document.querySelector(".nf-open__mark")!).animationName)).toBe("none");
+    /* The layer fades; not one piece of the sequence moves, and every piece is
+       at its finished value, so the ring cannot be left half drawn. */
+    expect(await page.evaluate(() => getComputedStyle(document.querySelector(".nf-open__launch")!).animationName)).toBe("nf-open-still");
+    const pieces = await page.evaluate(() =>
+      [...document.querySelectorAll(".nf-open__launch .sw, .nf-open__launch .t, .nf-open__launch .mv, .nf-open__launch .l")].map((n) => {
+        const cs = getComputedStyle(n);
+        return { name: cs.animationName, opacity: Number(cs.opacity), transform: cs.transform };
+      }),
+    );
+    expect(pieces.length).toBeGreaterThan(0);
+    for (const piece of pieces) {
+      expect(piece.name).toBe("none");
+      expect(piece.opacity).toBe(1);
+      expect(["none", "matrix(1, 0, 0, 1, 0, 0)"]).toContain(piece.transform);
+    }
     expect((await state(page)).display).toBe("block");
+    await close();
+  });
+
+  it("draws the sequence: the ring sweeps, the towers rise and the five letters arrive", async () => {
+    const { page, close } = await installed({ hydrate: 50 });
+    await page.waitForSelector("#nf-open svg", { state: "attached" });
+    /* Frame one: the letters have not arrived yet. */
+    const early = await page.evaluate(() =>
+      [...document.querySelectorAll(".nf-open__launch .l")].map((n) => Number(getComputedStyle(n).opacity)),
+    );
+    expect(early).toHaveLength(5);
+    expect(Math.max(...early)).toBeLessThan(1);
+    /* Past the last letter's landing (1,260ms + 520ms), the whole lockup is up
+       and every piece has stopped where it belongs. */
+    await page.waitForTimeout(2000);
+    const landed = await page.evaluate(() =>
+      [...document.querySelectorAll(".nf-open__launch .l, .nf-open__launch .t, .nf-open__launch .mv")].map((n) => Number(getComputedStyle(n).opacity)),
+    );
+    expect(Math.min(...landed)).toBe(1);
     await close();
   });
 });

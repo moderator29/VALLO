@@ -10,22 +10,34 @@ import { LoadingShell } from "@/components/app/ScreenSkeleton";
  * with its count and Continue. Built from the frame's own classes
  * (`grade1.css`, `.nf-g1step*`), so the real frame lands on it with nothing
  * moving.
+ *
+ * `overlay` HAS TO MATCH THE FLOW IT WAITS FOR. The frame comes in two
+ * shapes: a full screen OVER the app (verification, the listing wizard, the
+ * registrations), and a routed page that keeps the app's header and dock
+ * around it (the money screens, support, the roommates and circle flows).
+ * The skeleton drew the overlay for both, so a routed flow waited behind a
+ * fixed plane that covered the chrome and then handed over to a page that
+ * does not, and the header and the dock popped back in on arrival. Each
+ * caller now says which shape its flow is.
  */
 export function StepFrameSkeleton({
   label,
   rows = 3,
   art = false,
   eyebrow = true,
+  overlay = true,
 }: {
   label: string;
   rows?: number;
   /** The step's object above the eyebrow (the chooser). */
   art?: boolean;
   eyebrow?: boolean;
+  /** True where the real flow draws `StepFrame overlay`, false where it is a routed page. */
+  overlay?: boolean;
 }) {
   return (
     <LoadingShell label={label}>
-      <div className="nf-g1step nf-g1step--overlay" aria-hidden="true" data-testid="step-frame-skeleton">
+      <div className={overlay ? "nf-g1step nf-g1step--overlay" : "nf-g1step"} aria-hidden="true" data-testid="step-frame-skeleton">
         <div className="nf-g1step__top">
           <div className="nf-g1step__bar">
             <Skeleton circle width="2.75rem" />
@@ -52,7 +64,12 @@ export function StepFrameSkeleton({
         <div className="nf-g1step__foot">
           <Skeleton width="5.5rem" height="0.875rem" radius="sm" />
           <div className="nf-g1step__actions">
-            <Skeleton width="7.5rem" height="2.75rem" radius="md" />
+            {/* The real Continue is a `md` button, 3rem tall, held to
+                9.5rem by `.nf-g1step__actions > :last-child` in grade1.css.
+                The placeholder was 7.5rem by 2.75rem, so the one control the
+                eye is on grew 32px wider and 4px taller the moment the flow
+                arrived. */}
+            <Skeleton width="9.5rem" height="3rem" radius="md" />
           </div>
         </div>
       </div>

@@ -1,13 +1,21 @@
 /**
- * THE APP OPENING: THE PRODUCT ARRIVING, NEVER A LOGO (D68c, 7 October 2026).
+ * THE PAGE'S OWN ARRIVAL. NOT THE OPENING: THAT IS THE LOGO, AND IT IS BACK.
  *
- * The founder's rule is absolute: the logo never appears by itself on app
- * open, not as an image, not as an animation, not for 200ms. The opening is
- * the app's own first screen arriving, the way a beautifully built website
- * arrives when you click its link: real structure in frame one, content
- * rising into it, usable almost at once. The logo lockup that used to play
- * here (a glass mark rising, a wordmark following, a door opening on the page
- * at 1350ms) is retired from the startup path entirely.
+ * READ THIS BEFORE QUOTING THE PARAGRAPH THAT USED TO BE HERE. It stated D68c
+ * (7 October 2026) as an absolute standing rule, that the logo never appears by
+ * itself on open. D68c WAS REVERSED, TWICE, AND THE NOTE WAS NEVER CORRECTED:
+ * on 10 November the founder brought the mark back for the opening screen
+ * (`open.css` says so at its head), and on 11 November he confirmed the drawn
+ * logo and wordmark were his own ask all along: "it was built and I was the one
+ * who said it should be built". The stale wording was read as his standing
+ * instruction and cost him a day. A retired rule is deleted from this file, not
+ * left here in the present tense.
+ *
+ * What this file still owns is only the PAGE's arrival behind the opening: real
+ * structure in frame one, content rising into it, usable almost at once. The
+ * logo lockup lives in `components/startup/OpeningScreen.tsx` with `open.css`
+ * and `open-script.ts`, and on the phones in `ValloShell.swift` and
+ * `LaunchMark.java`. Nothing here draws a logo.
  *
  * Three inline scripts, all nonce-carrying, none importing anything:
  *

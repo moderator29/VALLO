@@ -406,12 +406,21 @@
     padding: 0;
     overflow-x: auto;
     list-style: none;
+    /* Both halves of hiding a scrollbar, the way `roommates.css` already
+       hides the group rail's and the side nav's. `scrollbar-width` alone
+       left the bar drawn under the tabs in older WebKit. */
     scrollbar-width: none;
+  }
+  .nf-rmfd__tabs::-webkit-scrollbar {
+    display: none;
   }
   .nf-rmfd__tab {
     flex: none;
     white-space: nowrap;
-    min-block-size: 2.5rem;
+    /* 44, the touch floor the design system sets for every control
+       (docs/design/COMPONENTS.md). It drew 40 and these are the first thing
+       a thumb reaches for on the feed. */
+    min-block-size: 2.75rem;
     padding-inline: var(--nf-space-md);
     border: var(--nf-border-width) solid var(--nf-border-default);
     border-radius: var(--nf-radius-pill);
@@ -467,11 +476,20 @@
     justify-items: center;
     padding-block: var(--nf-space-sm);
   }
+  /*
+   * ABOVE THE DOCK, AS CIRCLE'S IS. This floated 24px off the bottom of the
+   * screen plus the home indicator, which describes the DEVICE and says
+   * nothing about the tab bar: measured in WebKit at 390 the dock spans
+   * 758 to 832 and this sat at 764 to 820, inside that band, while Circle's
+   * `.nf-cfab` rests on top of it at 709 to 759. The two features floated
+   * the same control in two places. `--nf-tabbar-clearance` is the token
+   * that clears the dock, and it already carries the safe area.
+   */
   .nf-rmfd__fab {
     position: fixed;
-    inset-block-end: calc(var(--nf-space-lg) + env(safe-area-inset-bottom));
-    inset-inline-end: var(--nf-pad-shell);
-    z-index: 20;
+    inset-block-end: var(--nf-tabbar-clearance);
+    inset-inline-end: max(var(--nf-space-md), env(safe-area-inset-right));
+    z-index: var(--nf-z-sticky);
   }
   @media (min-width: 48rem) {
     .nf-rmfd__grid {

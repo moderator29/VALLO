@@ -135,6 +135,13 @@ export async function mountInBrowser(opts: {
   init?: string;
   /** The window size; a phone (390 by 844) unless a test needs another. */
   viewport?: { width: number; height: number };
+  /**
+   * A touch screen rather than a mouse. Chromium then answers
+   * `(pointer: coarse)` and `(hover: none)`, which is the test the product
+   * CSS uses to tell a thumb from a pointer-and-keyboard machine, and the
+   * only way to measure a rule written inside that query.
+   */
+  touch?: boolean;
 }): Promise<Mounted> {
   if (!CHROMIUM) throw new Error("no Chromium binary for the browser mount");
   const dir = mkdtempSync(join(tmpdir(), "nf-mount-"));
@@ -165,6 +172,7 @@ export async function mountInBrowser(opts: {
   const context = await browser.newContext({
     viewport: opts.viewport ?? { width: 390, height: 844 },
     reducedMotion: opts.reducedMotion ? "reduce" : "no-preference",
+    ...(opts.touch ? { hasTouch: true, isMobile: true } : {}),
   });
   const page = await context.newPage();
   const actions = Object.entries(opts.actions ?? {})

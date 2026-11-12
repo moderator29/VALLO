@@ -38,6 +38,10 @@ const refund = vi.hoisted(() => ({
   refundChargeToCard: vi.fn(async () => ({ ok: true as const, refundId: "rf_1" })),
 }));
 
+const methods = vi.hoisted(() => ({
+  savePaymentMethodFromCharge: vi.fn(async () => "skipped" as const),
+}));
+
 vi.mock("@/lib/payments/paystack", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@/lib/payments/paystack")>();
   return { ...actual, ...paystack };
@@ -47,7 +51,7 @@ vi.mock("@/lib/money/audit", () => audit);
 vi.mock("@/lib/bookings/settlement", () => settlement);
 vi.mock("@/lib/payments/refund", () => refund);
 vi.mock("@/lib/bookings/arrival", () => ({ announceConfirmedStay: vi.fn(async () => {}) }));
-vi.mock("@/lib/payments/methods", () => ({ savePaymentMethodFromCharge: vi.fn(async () => "skipped") }));
+vi.mock("@/lib/payments/methods", () => methods);
 
 const { POST } = await import("./route");
 
@@ -84,6 +88,7 @@ beforeEach(() => {
   vi.spyOn(console, "info").mockImplementation(() => {});
   vi.spyOn(console, "warn").mockImplementation(() => {});
   vi.spyOn(console, "error").mockImplementation(() => {});
+  methods.savePaymentMethodFromCharge.mockClear();
   paystack.isPaystackConfigured.mockReturnValue(true);
   paystack.verifyWebhookSignature.mockReturnValue(true);
   service.getAdminClient.mockReturnValue(ADMIN);
@@ -249,5 +254,62 @@ describe("the delivery record", () => {
       ADMIN,
       expect.objectContaining({ outcome: "ignored", httpStatus: 200 }),
     );
+  });
+});
+
+/**
+ * A CARD IS FILED ONLY BY A CHARGE THAT PAID FOR A BOOKING.
+ *
+ * `metadata.user_id` says whose card it is, and it has to, because a payer is
+ * often not the guest. It is not proof of anything: metadata belongs to
+ * whoever opened the transaction at Paystack. This used to run before the
+ * settlement, on any well-signed charge.success carrying an `rm-book-`
+ * reference, so a charge this platform never minted could file a card against
+ * any account whose id the sender knew.
+ */
+describe("filing the card the charge was paid with", () => {
+  it("files it when the charge settled the booking", async () => {
+    const response = await POST(delivery(chargeSuccess()));
+    expect(response.status).toBe(200);
+    expect(methods.savePaymentMethodFromCharge).toHaveBeenCalledTimes(1);
+  });
+
+  it("files it when the payer's return settled it a moment earlier", async () => {
+    settlement.settleBookingCharge.mockResolvedValue({
+      outcome: "already-settled",
+      bookingId: "b1",
+      transactionStatus: "SUCCESSFUL",
+    });
+    await POST(delivery(chargeSuccess()));
+    expect(methods.savePaymentMethodFromCharge).toHaveBeenCalledTimes(1);
+  });
+
+  it("files nothing for a reference this platform never minted", async () => {
+    settlement.settleBookingCharge.mockResolvedValue({ outcome: "unknown-reference" });
+    const response = await POST(delivery(chargeSuccess()));
+    expect(response.status).toBe(200);
+    expect(methods.savePaymentMethodFromCharge).not.toHaveBeenCalled();
+  });
+
+  it("files nothing for a charge that could not be applied and goes back to the card", async () => {
+    settlement.settleBookingCharge.mockResolvedValue({
+      outcome: "refund-due",
+      bookingId: "b1",
+      reason: "no_split",
+      amountMinor: AMOUNT_MINOR,
+      reference: BOOK_REFERENCE,
+    });
+    await POST(delivery(chargeSuccess()));
+    expect(methods.savePaymentMethodFromCharge).not.toHaveBeenCalled();
+  });
+
+  it("files nothing on the replay of a charge that was found refund due", async () => {
+    settlement.settleBookingCharge.mockResolvedValue({
+      outcome: "already-settled",
+      bookingId: "b1",
+      transactionStatus: "REFUND_DUE",
+    });
+    await POST(delivery(chargeSuccess()));
+    expect(methods.savePaymentMethodFromCharge).not.toHaveBeenCalled();
   });
 });

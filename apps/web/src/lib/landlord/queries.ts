@@ -1,6 +1,7 @@
 import "server-only";
 import { reportReadError } from "@/lib/observability/read-error";
 
+import { resolveSessionClaims } from "../actions/session";
 import { isSupabaseConfigured } from "../supabase/env";
 import { createClient } from "../supabase/server";
 import { readListingFacts, readRentFact, type ListingFacts, type RentFact } from "./facts";
@@ -20,7 +21,52 @@ import { callLandlordRpc } from "./rpc";
  * The one exception is the reply page, whose whole content IS this read, and
  * which therefore distinguishes "failed" from "unknown" so a landlord is told
  * the truth about whose fault it was.
+ *
+ * ===========================================================================
+ * AND NONE OF THEM IS ASKED AT ALL FOR A SIGNED-OUT VISITOR.
+ *
+ * Every function here except `landlord_line_read` and `safety_share_read` is
+ * granted to `authenticated` and revoked from `anon` on purpose (migrations
+ * 20260924104312, 104806 and 105130): these are a landlord's facts, and a
+ * stranger may not have them. That grant is correct and is not the thing to
+ * change.
+ *
+ * What was wrong is that the app asked anyway. `readListingFactsFor` is on
+ * `/search` and on the listing page, both of which N-1 opened to signed-out
+ * visitors, so every signed-out browse called a function the visitor may not
+ * execute. Postgres answered 42501, this file swallowed it and returned the
+ * empty answer, and the page looked right: 1655 denials between 9 and 11
+ * November, in `crash_reports` under `read.landlord.readListingFactsFor`,
+ * with nobody any the wiser.
+ *
+ * IT WAS NOT FREE, AND THAT IS THE POINT. A denied statement ABORTS its
+ * transaction. PostgREST runs every request as `BEGIN ... COMMIT`, so each of
+ * those denials cost a round trip and left an aborted transaction behind on a
+ * pooled connection. (The cascade of 25P02 measured on 11 November was
+ * triggered by `stays_search` timing out rather than by this, but both end
+ * the same way, and this one is ours to stop making.)
+ *
+ * So a read whose function needs a session asks `resolveSessionClaims` first
+ * and answers its own empty value when there is nobody. That is not a guess
+ * about the grant: `resolveSessionClaims` resolves the caller the way
+ * PostgREST does, from the access token's verified claims, which is exactly
+ * what decides whether the statement runs as `authenticated` or as `anon`. It
+ * is memoised per request, so on a page that already knows who is asking it
+ * costs nothing.
  */
+
+/**
+ * Is there a signed-in viewer, as PostgREST will see one?
+ *
+ * The claims reader, not `resolveSession`: it verifies the access token
+ * locally rather than crossing to GoTrue, it is memoised per request, and it
+ * has no finish-setup hold, so an account that still owes setup reads as
+ * signed in here. That is right, because it IS `authenticated` at the
+ * database and these functions are granted to that role.
+ */
+async function hasSession(): Promise<boolean> {
+  return (await resolveSessionClaims()).state === "signed-in";
+}
 
 /** The reply page's question, by token. Works signed out: the landlord has no account. */
 export async function readReplyByToken(token: string): Promise<ReplyView> {
@@ -40,6 +86,9 @@ export async function readReplyByToken(token: string): Promise<ReplyView> {
 /** Landlord facts for a page of listings, keyed by id. Empty on any failure. */
 export async function readListingFactsFor(ids: readonly string[]): Promise<Map<string, ListingFacts>> {
   if (!isSupabaseConfigured() || ids.length === 0) return new Map();
+  /* `/search` and the listing page are open to signed-out visitors, and this
+     function is not. Nothing to show them, and nothing to ask the database. */
+  if (!(await hasSession())) return new Map();
   try {
     const db = await createClient();
     const { data, error } = await callLandlordRpc(db, "listing_landlord_facts", { p_listings: ids.slice(0, 200) });
@@ -69,6 +118,10 @@ export type PropertyOffer = {
  */
 export async function readPropertyOffers(listingId: string): Promise<PropertyOffer[] | null> {
   if (!isSupabaseConfigured()) return [];
+  /* The listing page is open signed out. The empty list, never null: there is
+     nothing to compare for a stranger, which is not the same as a comparison
+     that failed to load, and the view says those two things differently. */
+  if (!(await hasSession())) return [];
   try {
     const db = await createClient();
     const { data, error } = await callLandlordRpc(db, "property_offers", { p_listing: listingId });
@@ -101,6 +154,7 @@ export async function readPropertyOffers(listingId: string): Promise<PropertyOff
 /** The tenant's dated fact about the landlord's answer, or null for nothing to say. */
 export async function readRentFactFor(inspectionId: string): Promise<RentFact | null> {
   if (!isSupabaseConfigured()) return null;
+  if (!(await hasSession())) return null;
   try {
     const db = await createClient();
     const { data, error } = await callLandlordRpc(db, "rent_landlord_fact", { p_inspection: inspectionId });
@@ -144,6 +198,7 @@ export type MandateConsent = {
 export async function readMandateConsents(ids: readonly string[]): Promise<Map<string, MandateConsent> | null> {
   if (!isSupabaseConfigured()) return null;
   if (ids.length === 0) return new Map();
+  if (!(await hasSession())) return new Map();
   try {
     const db = await createClient();
     const { data, error } = await callLandlordRpc(db, "mandate_consents", { p_mandates: ids.slice(0, 200) });
@@ -186,6 +241,7 @@ export type PropertyCandidate = {
 /** Proposed matches for the reviewer. Null when the read failed. */
 export async function readPropertyCandidates(listingId: string): Promise<PropertyCandidate[] | null> {
   if (!isSupabaseConfigured()) return null;
+  if (!(await hasSession())) return [];
   try {
     const db = await createClient();
     const { data, error } = await callLandlordRpc(db, "property_candidates", { p_listing: listingId });
@@ -276,6 +332,7 @@ export async function readClosedReasons(ids: readonly string[]): Promise<Record<
 /** V-31 for owner listings: the caller's listings with an open "still available?" question. Empty on failure. */
 export async function readOpenOwnerHeartbeats(): Promise<string[]> {
   if (!isSupabaseConfigured()) return [];
+  if (!(await hasSession())) return [];
   try {
     const db = await createClient();
     const { data, error } = await callLandlordRpc(db, "owner_heartbeats_open", {});

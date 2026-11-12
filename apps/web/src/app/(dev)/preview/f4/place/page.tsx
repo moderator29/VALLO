@@ -34,7 +34,7 @@ const WITHIN = [
 export default function PlacePreview() {
   return (
     <div className="nf-shell mx-auto w-full max-w-3xl pb-4xl pt-md">
-      <Link href="/around/eti-osa" className="nf-enter__back mb-md">
+      <Link href="/around/eti-osa" className="nf-chip nf-enter__back mb-md">
         <UiIcon name="arrow-up" size={16} />
         Part of Eti-Osa
       </Link>
@@ -100,7 +100,7 @@ export default function PlacePreview() {
         <ul className="nf-enter__grid">
           {WITHIN.map((place) => (
             <li key={place.id}>
-              <Link href={`/around/${place.slug}`} className="nf-enter__chip">
+              <Link href={`/around/${place.slug}`} className="nf-chip nf-enter__chip">
                 <span className="nf-enter__chip-name">{place.name}</span>
                 <span className="nf-enter__chip-count nf-numeric">
                   {formatNumber(place.memberCount, "en")}

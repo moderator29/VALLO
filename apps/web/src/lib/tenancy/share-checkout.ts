@@ -36,7 +36,7 @@ import {
 import { currentPaystackMode, currentReserveSubaccount } from "../payments/paystack-mode";
 import { bookingReference, isBookingReference } from "../payments/references";
 import { markChargeFailed, settleBookingCharge } from "../bookings/settlement";
-import { refundChargeToCard } from "../payments/refund";
+import { REFUND_ALREADY_CLAIMED, refundChargeToCard } from "../payments/refund";
 import { guardMoney } from "../security/money-limits";
 import { IN_FLIGHT_MESSAGE, withIdempotency } from "../security/idempotency";
 import { recordCheckoutHandle, reuseLiveAttempt } from "../payments/attempts";
@@ -326,13 +326,30 @@ export async function settleShareReturn(input: { reference: string; tenancyId: s
     await announceConfirmedStay(admin, { bookingId: settlement.bookingId, totalMinor: settlement.totalMinor });
   }
   if (settlement.outcome === "refund-due") {
-    await refundChargeToCard(admin, {
+    const sent = await refundChargeToCard(admin, {
       reference: settlement.reference || parsed.data.reference,
       reason: settlement.reason,
       actor,
     });
+    /*
+     * WHAT WE MAY PROMISE IS WHAT THE PROCESSOR ACTUALLY TOOK.
+     *
+     * `settle_booking_charge` has marked the attempt FAILED and raised the
+     * desk's high alert ("must be refunded to the card"), and nothing
+     * automatic retries from here: the sweep reads PENDING attempts only, and
+     * a replay answers `already-settled` with transaction_status REFUND_DUE
+     * rather than refunding twice. So a refund the processor refused is one a
+     * person has to send, and telling the payer it is already on its way
+     * would be a sentence this platform cannot stand behind. The webhook has
+     * always read this answer (app/api/paystack/webhook/route.ts); this path
+     * threw it away. `REFUND_ALREADY_CLAIMED` is the one refusal that still
+     * means yes: the webhook or the sweep is sending the same refund.
+     */
+    const onItsWay = sent.ok || sent.reason === REFUND_ALREADY_CLAIMED;
     return fail(
-      "Your payment went through but could not be applied to this move-in, so the whole amount is being returned to the card or account you paid with. Vallo has kept nothing.",
+      onItsWay
+        ? "Your payment went through but could not be applied to this move-in, so the whole amount is being returned to the card or account you paid with. Vallo has kept nothing."
+        : "Your payment went through but could not be applied to this move-in, and returning it needs a person. Our team has been told and will return the whole amount to the card or account you paid with. Vallo has kept nothing. Do not pay again.",
     );
   }
   if (settlement.outcome === "unknown-reference") return fail("That payment could not be matched. Our team reconciles it for you.");
