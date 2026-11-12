@@ -428,8 +428,12 @@
     z-index: var(--nf-z-sticky);
     display: grid;
     place-items: center;
-    inline-size: 3.5rem;
-    block-size: 3.5rem;
+    /* The one number every floating action button on the platform is drawn
+       from. Roommates' FAB reads it through `.nf-btn--fab`; this one restated
+       it as a literal, so the two could drift apart without anything saying
+       so. Same 56px today, one source for it now. */
+    inline-size: var(--nf-act-fab-size);
+    block-size: var(--nf-act-fab-size);
     border-radius: var(--nf-radius-circle);
     background: var(--nf-brand-primary);
     color: var(--nf-content-on-brand);
