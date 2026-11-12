@@ -155,47 +155,6 @@
     }
   }
 
-  /* ------------------------------------------------------------ the head */
-  .nf-rv-head {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: var(--nf-space-sm);
-  }
-
-  .nf-rv-head__title {
-    margin: 0;
-    font-family: var(--nf-font-display);
-    font-size: 1.375rem; /* cap 10.5 image px / 0.72 = 14.6, x1.5 = 22 (R-A) */
-    font-weight: 600;
-    line-height: 1.2;
-    letter-spacing: -0.01em;
-    color: var(--nf-content-primary);
-  }
-
-  .nf-rv-head__sub {
-    margin: calc(var(--nf-space-sm) * -1 + var(--nf-space-3xs)) 0 0;
-    flex-basis: 100%;
-    font-size: var(--nf-text-caption);
-    color: var(--nf-brand-secondary);
-  }
-
-  .nf-rv-back {
-    display: inline-grid;
-    place-items: center;
-    width: 44px;
-    height: 44px; /* R-B */
-    border-radius: var(--nf-radius-control);
-    border: var(--nf-border-width) solid var(--nf-btn-glass-edge);
-    background: var(--nf-btn-glass-fill);
-    color: var(--nf-content-primary);
-    box-shadow: var(--nf-btn-glass-shadow);
-  }
-
-  .nf-rv-back:hover {
-    border-color: var(--nf-brand-edge-strong);
-  }
-
   .nf-rv-idline {
     margin: 0;
     font-family: var(--nf-font-display);
@@ -332,13 +291,6 @@
     padding: var(--nf-space-xl) var(--nf-space-md);
     color: var(--nf-content-secondary);
     font-size: var(--nf-text-body-sm);
-  }
-
-  .nf-rv-empty__title {
-    margin: 0 0 var(--nf-space-2xs);
-    font-size: var(--nf-text-body);
-    font-weight: 600;
-    color: var(--nf-content-primary);
   }
 
   /* ------------------------------------------------------------ the table */
@@ -503,16 +455,6 @@
     }
   }
 
-  /* The expandable row that carries a decision. */
-  .nf-rv-detail > summary {
-    list-style: none;
-    cursor: pointer;
-  }
-
-  .nf-rv-detail > summary::-webkit-details-marker {
-    display: none;
-  }
-
   .nf-rv-detail__body {
     padding: var(--nf-space-sm) var(--nf-space-md) var(--nf-space-md);
     border-top: 1px solid var(--nf-brand-edge-soft);
@@ -655,18 +597,6 @@
     width: 112px;
     height: 40px;
     overflow: visible;
-  }
-
-  .nf-rv-spark__line {
-    fill: none;
-    stroke: var(--nf-brand-primary);
-    stroke-width: 2;
-    vector-effect: non-scaling-stroke;
-    filter: drop-shadow(0 0 4px color-mix(in oklab, var(--nf-brand-primary) 70%, transparent));
-  }
-
-  .nf-rv-spark__area {
-    fill: color-mix(in oklab, var(--nf-brand-primary) 22%, transparent);
   }
 
   /* ------------------------------------------------------------ donut */
@@ -1255,27 +1185,10 @@
     outline-offset: 2px;
   }
 
-  .nf-rv-btn--approve { --rv-btn: var(--nf-state-success); }
-  .nf-rv-btn--reject { --rv-btn: var(--nf-state-error); }
-  .nf-rv-btn--ask { --rv-btn: var(--nf-brand-primary); }
-
-  .nf-rv-btn--quiet {
-    background: var(--nf-btn-glass-fill);
-    border-color: var(--nf-border-brand);
-    color: var(--nf-content-primary);
-    box-shadow: var(--nf-btn-glass-shadow);
-
-    border: var(--nf-border-width) solid var(--nf-btn-glass-edge);
-  }
-
   .nf-rv-msg {
     margin: 0;
     font-size: var(--nf-text-caption);
     color: var(--nf-content-secondary);
-  }
-
-  .nf-rv-msg--error {
-    color: var(--nf-state-error);
   }
 
   /* ------------------------------------------------------------ safety panel */
@@ -1340,10 +1253,6 @@
 
     .nf-rv-table td:first-child {
       grid-column: 1 / -1;
-    }
-
-    .nf-rv-head__title {
-      font-size: 1.375rem;
     }
 
     .nf-rv-tabs {

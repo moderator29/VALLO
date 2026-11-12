@@ -339,12 +339,7 @@
     top: var(--nf-space-2xs);
     left: var(--nf-space-2xs);
   }
-  /* The disclosure on an illustrative row. Cyan outline, never a fill, so it
-     cannot be mistaken for a promotion; it never appears with Verified. */
-  .nf-pcard__mark--example {
-    top: var(--nf-space-2xs);
-    left: var(--nf-space-2xs);
-  }
+
   .nf-pcard__controls {
     position: absolute;
     top: var(--nf-space-2xs);
@@ -427,29 +422,6 @@
     margin-inline: auto;
     translate: 0 -50%;
     text-align: center;
-  }
-  .nf-pcard__note {
-    position: absolute;
-    top: 3rem;
-    right: var(--nf-space-xs);
-    z-index: 3;
-    max-width: calc(100% - var(--nf-space-md));
-    padding: var(--nf-space-3xs) var(--nf-space-xs);
-        /*
-     * THE RATIO, NOT THE NAME, and `--nf-radius-sm` is 10px, which is small
-     * for a card and a capsule on a 20px note: ratio 0.51. It sits on a
-     * photograph, where a capsule reads even more strongly because there is no
-     * container edge beside it to compare with. 6px over 20px is 0.30.
-     */
-    border-radius: var(--nf-radius-xs);
-    font-size: var(--nf-text-overline);
-    font-weight: 600;
-    color: var(--nf-content-on-media);
-    border: var(--nf-border-width) solid var(--nf-btn-glass-edge);
-    background: var(--nf-btn-glass-fill);
-    -webkit-backdrop-filter: blur(var(--nf-btn-glass-blur));
-    backdrop-filter: blur(var(--nf-btn-glass-blur));
-    box-shadow: var(--nf-btn-glass-shadow);
   }
 
   /* ============================================================= the shelf
@@ -741,33 +713,7 @@
     font-weight: 700;
     color: var(--nf-content-primary);
   }
-  .nf-filters__clear {
-    min-height: 2.75rem;
-    padding: 0 var(--nf-space-2xs);
-    font-size: var(--nf-text-caption);
-    font-weight: 600;
-    color: var(--nf-brand-secondary);
-  }
-  .nf-filters__clear:focus-visible {
-    outline: var(--nf-focus-ring-width) solid var(--nf-focus-ring);
-    outline-offset: 2px;
-  }
-  /*
-   * THE GROUP'S CLEAR IS ALWAYS THERE, AND IT IS DISABLED WHEN THERE IS
-   * NOTHING TO CLEAR.
-   *
-   * It used to be rendered only when the group had a value, so the sheet's
-   * right-hand column filled and emptied as a person touched it and every
-   * heading moved. 3EB3E2A9 draws "Clear" beside every heading. Drawn at rest
-   * and genuinely disabled (the attribute, not a class) it also stops being a
-   * control that looks live and does nothing, and it keeps its accessible
-   * name, which names its group: "Clear" alone, repeated nine times down a
-   * sheet, tells a screen-reader user nothing about which nine things.
-   */
-  .nf-filters__clear:disabled {
-    color: var(--nf-content-muted);
-    cursor: default;
-  }
+
   .nf-filters__hint {
     margin-bottom: var(--nf-space-sm);
     font-size: var(--nf-text-caption);
@@ -1055,14 +1001,6 @@
       padding-inline: var(--nf-space-sm);
     }
   }
-  .nf-detail-price__suffix {
-    margin-left: var(--nf-space-xs);
-    font-family: var(--nf-font-sans);
-    font-size: var(--nf-text-body);
-    font-weight: 600;
-    letter-spacing: 0;
-    color: var(--nf-brand-secondary);
-  }
   /* The spec chips: bed, bath, size, parking, power, each a glass tile. */
   .nf-spec-row {
     display: flex;
@@ -1177,40 +1115,7 @@
       transition: none;
     }
   }
-  /* The move-in block: brand-tinted glass, the figure lit. */
-  .nf-detail-movein {
-    display: grid;
-    gap: var(--nf-space-sm);
-    padding: var(--nf-space-md);
-    border: var(--nf-border-width) solid var(--nf-panel-edge);
-    border-color: var(--nf-panel-edges);
-    border-radius: var(--nf-container-radius);
-    background: var(--nf-panel-fill-card);
-    box-shadow: var(--nf-panel-rim), var(--nf-panel-glow);
-  }
-  @media (min-width: 40rem) {
-    .nf-detail-movein {
-      grid-template-columns: minmax(0, 1fr) auto;
-      align-items: center;
-    }
-  }
-  .nf-detail-movein__label {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--nf-space-2xs);
-    font-size: var(--nf-text-body-sm);
-    font-weight: 600;
-    color: var(--nf-content-secondary);
-  }
-  .nf-detail-movein__figure {
-    font-family: var(--nf-font-display);
-    font-size: var(--nf-text-h1);
-    font-weight: 700;
-    letter-spacing: -0.02em;
-    line-height: 1.05;
-    color: var(--nf-content-primary);
-    text-shadow: 0 0 24px var(--nf-glow-2);
-  }
+
   .nf-detail-movein__suffix {
     margin-left: var(--nf-space-xs);
     font-family: var(--nf-font-sans);
@@ -1218,22 +1123,6 @@
     font-weight: 600;
     letter-spacing: 0;
     color: var(--nf-brand-secondary);
-  }
-  .nf-detail-movein__rooms {
-    display: flex;
-    align-items: center;
-    gap: var(--nf-space-sm);
-    padding: var(--nf-space-sm) var(--nf-space-md);
-    font-size: var(--nf-text-caption);
-    font-weight: 600;
-    color: var(--nf-content-primary);
-    border: var(--nf-border-width) solid var(--nf-btn-glass-edge);
-    background: var(--nf-btn-glass-fill);
-    box-shadow: var(--nf-btn-glass-shadow);
-    border-radius: var(--nf-radius-control);
-  }
-  .nf-detail-movein__rooms > .nf-plate {
-    flex-shrink: 0;
   }
   /* The section tabs. Anchors, so they are shareable and need no script. */
   /* On the page ground, as the render draws it: a row of words with a short
@@ -2096,26 +1985,6 @@
       transition: none;
     }
   }
-  /* What the database said about a call, under the card. */
-  .nf-lister-note {
-    position: absolute;
-    inset-inline: 0;
-    top: calc(100% + var(--nf-space-xs));
-    z-index: 5;
-    display: flex;
-    align-items: flex-start;
-    gap: var(--nf-space-sm);
-    padding: var(--nf-space-sm) var(--nf-space-md);
-    border: var(--nf-border-width) solid var(--nf-card-border);
-    border-radius: var(--nf-radius-md);
-    background: var(--nf-surface-elevated);
-    box-shadow: var(--nf-float-shadow);
-    font-size: var(--nf-text-caption);
-    color: var(--nf-content-secondary);
-  }
-  .nf-lister-note strong {
-    color: var(--nf-content-primary);
-  }
   /* Inside the summary card the row is the card's content, not a card. */
   .nf-lister--flat.nf-agent-card {
     padding: 0;
@@ -2304,15 +2173,6 @@
     background: var(--nf-panel-fill);
     box-shadow: var(--nf-panel-rim), var(--nf-panel-glow);
   }
-  .nf-ledger-row {
-    display: flex;
-    align-items: center;
-    gap: var(--nf-space-sm);
-    padding: var(--nf-space-sm) 0;
-  }
-  .nf-ledger-row + .nf-ledger-row {
-    border-top: var(--nf-border-width) solid var(--nf-panel-hair);
-  }
   .nf-ledger-row__glyph {
     display: grid;
     place-items: center;
@@ -2326,46 +2186,7 @@
     box-shadow: var(--nf-plate-shadow);
     border-radius: var(--nf-plate-radius-sm);
   }
-  .nf-ledger-row__label {
-    font-size: var(--nf-text-body);
-    font-weight: 600;
-    color: var(--nf-content-primary);
-  }
-  .nf-ledger-row__hint {
-    margin-top: var(--nf-space-3xs);
-    font-size: var(--nf-text-caption);
-    color: var(--nf-content-muted);
-  }
-  .nf-ledger-row__amount {
-    margin-left: auto;
-    flex-shrink: 0;
-    font-size: var(--nf-text-body-lg);
-    font-weight: 700;
-    color: var(--nf-content-primary);
-    white-space: nowrap;
-  }
-  .nf-ledger-total {
-    display: flex;
-    align-items: center;
-    gap: var(--nf-space-sm);
-    margin-top: var(--nf-space-sm);
-    padding-top: var(--nf-space-md);
-    border-top: var(--nf-border-width) solid var(--nf-panel-hair);
-  }
-  /* The total is the blue figure of the render, a rung above the rows it
-     sums. It was the same white as the lines above it, which made the one
-     number the page exists to print look like another row. */
-  .nf-ledger-total__figure {
-    margin-left: auto;
-    font-family: var(--nf-font-display);
-    font-size: var(--nf-text-h2);
-    font-weight: 700;
-    letter-spacing: -0.02em;
-    line-height: 1;
-    white-space: nowrap;
-    color: var(--nf-brand-secondary);
-    text-shadow: 0 0 22px var(--nf-glow-3);
-  }
+
   .nf-ledger-note {
     display: flex;
     flex-wrap: wrap;
@@ -2564,7 +2385,6 @@
     color: var(--nf-content-muted);
   }
 
-
   /* ============================================================== the tenancy
      The rent period on a tenancy card (/bookings, F3, 19 September 2026). It is
      the stay chip's geometry and it is NOT the stay chip: a tenancy card must
@@ -2606,56 +2426,6 @@
   }
   .nf-stay-type__object {
     flex-shrink: 0;
-  }
-  .nf-room-tiles {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: var(--nf-space-xs);
-  }
-  @media (min-width: 40rem) {
-    .nf-room-tiles {
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-    }
-  }
-  .nf-room-tile {
-    display: block;
-    overflow: hidden;
-    text-align: left;
-    color: var(--nf-content-primary);
-    border: var(--nf-border-width) solid var(--nf-panel-edge);
-    border-color: var(--nf-panel-edges);
-    border-radius: var(--nf-container-radius);
-    background: var(--nf-panel-fill-card);
-    box-shadow: var(--nf-panel-rim), var(--nf-panel-glow);
-  }
-  .nf-room-tile:focus-visible {
-    outline: var(--nf-focus-ring-width) solid var(--nf-focus-ring);
-    outline-offset: 2px;
-  }
-  .nf-room-tile__media {
-    position: relative;
-    aspect-ratio: 4 / 3;
-    background: var(--nf-media-ground-to);
-  }
-  .nf-room-tile__body {
-    display: flex;
-    align-items: center;
-    gap: var(--nf-space-xs);
-    padding: var(--nf-space-xs) var(--nf-space-sm);
-    font-size: var(--nf-text-overline);
-  }
-  .nf-room-tile__body > svg {
-    flex-shrink: 0;
-    color: var(--nf-brand-secondary);
-  }
-  .nf-room-tile__name {
-    display: block;
-    color: var(--nf-content-secondary);
-  }
-  .nf-room-tile__value {
-    display: block;
-    font-weight: 700;
-    color: var(--nf-content-primary);
   }
 
   /* ============================================================ the register
@@ -2896,14 +2666,6 @@
      drawn round, which here is the back chevron, the tick badge on a chosen
      card, the remove cross on a photograph and the add-photos plus. */
 
-  /* ------------------------------------------------------------- the rail
-     A back chevron, then the row of small filled rectangles. The render
-     draws the covered steps lit and the rest sunk into the ground. */
-  .nf-lw-rail {
-    display: flex;
-    align-items: center;
-    gap: var(--nf-space-md);
-  }
   .nf-lw-rail__track {
     display: flex;
     flex: 1;
@@ -2939,57 +2701,7 @@
   .nf-lw-rail__seg[data-at] {
     box-shadow: var(--nf-selected-shadow-inline), inset -0.5rem 0 0 var(--nf-spark);
   }
-  /* A bare icon-only control drawn round in a governing image stays round. */
-  .nf-lw-back {
-    display: grid;
-    place-items: center;
-    flex-shrink: 0;
-    width: 2.75rem;
-    height: 2.75rem;
-    color: var(--nf-content-secondary);
-    transition:
-      border-color var(--nf-duration-fast) var(--nf-ease-standard),
-      color var(--nf-duration-fast) var(--nf-ease-standard);
-    border: var(--nf-border-width) solid var(--nf-btn-glass-edge);
-    background: var(--nf-btn-glass-fill);
-    -webkit-backdrop-filter: blur(var(--nf-btn-glass-blur));
-    backdrop-filter: blur(var(--nf-btn-glass-blur));
-    box-shadow: var(--nf-btn-glass-shadow);
-    border-radius: var(--nf-radius-control);
-  }
-  .nf-lw-back:disabled {
-    opacity: 0.4;
-  }
-  @media (hover: hover) {
-    .nf-lw-back:not(:disabled):hover {
-      color: var(--nf-content-primary);
-    border-color: var(--nf-selected-edges);
-  }
-  }
 
-  /* ------------------------------------------------------------- the head
-     A display title, a muted sentence under it, and on the steps the renders
-     give one, a large glass object on the right with its own bloom. */
-  .nf-lw-head {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    align-items: start;
-    gap: var(--nf-space-md);
-  }
-  .nf-lw-head__title {
-    font-family: var(--nf-font-display);
-    font-size: var(--nf-text-h2);
-    font-weight: 700;
-    letter-spacing: -0.02em;
-    line-height: 1.1;
-    color: var(--nf-content-primary);
-  }
-  .nf-lw-head__sub {
-    margin-top: var(--nf-space-2xs);
-    font-size: var(--nf-text-body-sm);
-    line-height: 1.5;
-    color: var(--nf-content-secondary);
-  }
   .nf-lw-head__object {
     display: block;
     width: 3.75rem;
@@ -3260,54 +2972,6 @@
     box-shadow: var(--nf-btn-glass-shadow);
   }
 
-  /* ------------------------------------------------------------ the stepper
-     One rounded rectangle holding minus, the figure and plus, with the two
-     ends divided off. The ends are bare icon-only controls. */
-  .nf-lw-step {
-    display: grid;
-    grid-template-columns: auto minmax(0, 1fr) auto;
-    align-items: stretch;
-    overflow: hidden;
-    border: var(--nf-border-width) solid var(--nf-brand-edge-soft);
-    background: var(--nf-glass-well-fill);
-    border-radius: var(--nf-radius-control);
-  }
-  .nf-lw-step--inline {
-    width: 8.5rem;
-    justify-self: end;
-  }
-  .nf-lw-step__end {
-    display: grid;
-    place-items: center;
-    width: 2.75rem;
-    min-height: 2.75rem;
-    color: var(--nf-brand-secondary);
-    cursor: pointer;
-    transition: background-color var(--nf-duration-fast) var(--nf-ease-standard);
-  }
-  .nf-lw-step__end:disabled {
-    opacity: 0.35;
-    cursor: default;
-  }
-  @media (hover: hover) {
-    .nf-lw-step__end:not(:disabled):hover {
-    background: var(--nf-btn-glass-fill);
-  }
-  }
-  .nf-lw-step__value {
-    display: grid;
-    place-items: center;
-    border-inline: 1px solid var(--nf-border-subtle);
-    /* No numeric FAMILY. `--nf-font-numeric` was deleted from the token layer
-       on the argument that an amount in a different typeface from its label is
-       the defect, not the fix: the numeric job is tabular figures in the face
-       the text is already in, which is the line below. */
-    font-size: var(--nf-text-body);
-    font-weight: 700;
-    font-variant-numeric: tabular-nums;
-    color: var(--nf-content-primary);
-  }
-
   /* ------------------------------------------------------------ the photos
      07 screen four: three across, the cover marked, a round cross on each,
      and the add cell last with its round plus. */
@@ -3484,47 +3148,6 @@
   .nf-lw-add:disabled {
     opacity: 0.45;
     cursor: default;
-  }
-
-  /* ------------------------------------------------------- check it over
-     08 screen three's table: a glyph, the fact's name, its value, and the
-     control that jumps back to the step that owns it. */
-  .nf-lw-details {
-    overflow: hidden;
-    border: var(--nf-border-width) solid var(--nf-panel-edge);
-    border-color: var(--nf-panel-edges);
-    border-radius: var(--nf-container-radius);
-    background: var(--nf-panel-fill-card);
-    box-shadow: var(--nf-panel-rim), var(--nf-panel-glow);
-  }
-  .nf-lw-detail {
-    display: grid;
-    grid-template-columns: auto minmax(0, 1fr) minmax(0, 1.1fr) auto;
-    align-items: center;
-    gap: var(--nf-space-sm);
-    padding: var(--nf-space-sm) var(--nf-space-md);
-    min-height: 2.75rem;
-  }
-  .nf-lw-detail + .nf-lw-detail {
-    border-top: var(--nf-border-width) solid var(--nf-panel-hair);
-  }
-  .nf-lw-detail__glyph {
-    color: var(--nf-brand-secondary);
-  }
-  .nf-lw-detail__key {
-    font-size: var(--nf-text-body-sm);
-    color: var(--nf-content-muted);
-  }
-  .nf-lw-detail__value {
-    font-size: var(--nf-text-body-sm);
-    font-weight: 600;
-    color: var(--nf-content-primary);
-    overflow-wrap: anywhere;
-  }
-  .nf-lw-detail__edit {
-    font-size: var(--nf-text-body-sm);
-    font-weight: 600;
-    color: var(--nf-content-link);
   }
 
   /* The sent-for-review screen's rules (`.nf-lw-done`, `.nf-lw-id`,
