@@ -285,7 +285,7 @@ export async function build(ctx) {
 
   /* ===================== 7. Or list your own place (s7) =====================
      CUT 6 -> 7. The bars close once more, into the gold. */
-  shutter(ctx, s(7) - 0.05, { bars: 9, dur: 0.36 });
+  shutter(ctx, s(7) - 0.12, { bars: 7, dur: 0.28 });
   ground(ctx, s(7) - 0.05, s(9) - 0.45, { tone: "gold", y: 28, seed: 17 });
   const host = layer("host", s(7) - 0.1, s(8) + 0.4);
   H.show("f-host-start", s(7) - 0.1, w(7, "workspace") - 0.25, { enter: "slide" });
