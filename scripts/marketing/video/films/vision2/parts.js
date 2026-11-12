@@ -107,3 +107,32 @@ export function gatherDiscs(ctx, parent, { items, to, tFly, size = 210 }) {
 }
 
 export { badgeDisc };
+
+/**
+ * kit.js chipRow, drawn as a flat 2D matrix. The kit's own row animates
+ * `translateY() scale()` and settles at exactly scale(1), and Chromium then
+ * keeps whichever raster scale the chip was first painted at, so the same
+ * frame came out different depending on the frames rendered before it
+ * (render.mjs --check failed 3/6 over the Circle chapter). A matrix() that
+ * never quite reaches 1 paints the same in any order (BUILDING.md lessons).
+ */
+export function chipLine(ctx, parent, { items, x, y, t0, gap = 0.12, t1, size = 28, wrapW = null, anchor = "left" }) {
+  const row = ctx.el("div", { class: "abs", style: { left: `${x}px`, top: `${y}px`, display: "flex", flexWrap: "wrap", gap: `${size * 0.5}px`, width: wrapW ? `${wrapW}px` : "auto", justifyContent: anchor === "center" ? "center" : "flex-start", transform: anchor === "center" ? "translateX(-50%)" : "none" } }, parent);
+  items.forEach(([text, ic], i) => {
+    const el = ctx.el("div", { style: { display: "flex", alignItems: "center", gap: `${size * 0.35}px`, padding: `${size * 0.38}px ${size * 0.7}px`, borderRadius: "999px", background: "rgb(10 16 60 / 0.78)", border: "1.5px solid rgb(120 170 255 / 0.32)", color: "#fff", font: `600 ${size}px/1 Poppins, Inter, sans-serif`, letterSpacing: "-0.01em", whiteSpace: "nowrap", boxShadow: "0 16px 36px -18px rgb(0 0 20 / 0.8)", willChange: "transform" } }, row);
+    if (ic) { const n = ctx.icon(ic, { size: Math.round(size * 1.05), stroke: 2.2 }, el); n.style.color = "#8FD3FF"; }
+    ctx.el("span", { text }, el);
+    const ti = t0 + i * gap;
+    ctx.onFrame((t) => {
+      const a = ramp(ctx, t, ti, ti + 0.4, "back.out(1.8)");
+      const b = t1 == null ? 0 : ramp(ctx, t, t1 + i * 0.03, t1 + i * 0.03 + 0.3, "power2.in");
+      const o = Math.min(ramp(ctx, t, ti, ti + 0.15), 1 - b);
+      const k = Math.min(0.9999, 0.86 + 0.14 * a);
+      el.style.transform = `matrix(${k.toFixed(5)}, 0, 0, ${k.toFixed(5)}, 0, ${((1 - a) * 30 - b * 24).toFixed(2)})`;
+      el.style.opacity = opa(o);
+      el.style.visibility = o > 0.001 ? "inherit" : "hidden";
+    });
+    ctx.sfx("pop", ti, { offset: -8 });
+  });
+  return row;
+}

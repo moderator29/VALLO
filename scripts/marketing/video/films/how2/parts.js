@@ -97,6 +97,13 @@ export const PATCH = {
   "v3-stays": [{ x: 28, y: 462, w: 690, h: 176, bg: "rgb(0 9 42)", lines: ["Good evening."], size: 66, weight: 700, color: "#ffffff", lh: 1.1, pad: 88 }],
   "v3-stay": [{ x: 0, y: 266, w: 1320, h: 78, bg: "rgb(0 12 48)", lines: [], size: 10 }],
   "sc-stay": [{ x: 0, y: 266, w: 1320, h: 78, bg: "rgb(1 13 50)", lines: [], size: 10 }],
+  /* the passport prints the account's own name and passport number: shown
+     here as the placeholder member, with the number masked */
+  "v3-passport": [
+    { x: 508, y: 1498, w: 600, h: 84, bg: "rgb(10 20 51)", lines: ["Member"], size: 58, weight: 600, color: "#ffffff", lh: 1.25, pad: 2 },
+    { x: 508, y: 1980, w: 600, h: 70, bg: "rgb(8 17 46)", lines: ["•••••••••"], size: 50, weight: 600, color: "rgb(220 228 245)", lh: 1.2, pad: 4 },
+    { x: 90, y: 2826, w: 980, h: 42, bg: "rgb(6 22 58)", lines: [], size: 10 },
+  ],
 };
 /** H.show with the patches above applied to the screens that need them. */
 export const shower = (H) => (id, t0, t1, opts = {}) => H.show(id, t0, t1, { ...opts, patch: PATCH[id] ?? opts.patch });
