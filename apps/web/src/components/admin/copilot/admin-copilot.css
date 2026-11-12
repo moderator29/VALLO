@@ -129,6 +129,35 @@
     margin: 0 0 var(--nf-space-xs);
   }
 
+  /*
+   * THE HEADING IN A COPILOT ANSWER (the founder, 12 November 2026: "the ai
+   * copilot for the admin panel for each desk, the frontend is not okay, you
+   * see how gibberish it is").
+   *
+   * `markdown-lite.tsx` draws a heading as `<p class="nf-copilot-md__heading">`
+   * with a `<strong>` inside, and THIS CLASS WAS DEFINED IN NO STYLESHEET: not
+   * here, not anywhere in the tree. So it fell through to the paragraph rule
+   * above it and a heading was a bold line with exactly the body's spacing. In
+   * a long answer with three or four sections that is a wall of text with
+   * occasional bold in it, which is what an operator reads as gibberish: there
+   * is nothing to tell them where one answer ends and the next begins.
+   *
+   * It takes the space above that a heading needs and a step up in size. It
+   * stays a `<p>` in the markup on purpose, because the copilot's words are
+   * not a document outline and must not insert headings into the desk's own
+   * heading order for a screen reader.
+   */
+  .nf-copilot-md__heading {
+    margin: var(--nf-space-sm) 0 var(--nf-space-2xs);
+    color: var(--nf-content-primary);
+    font-size: var(--nf-text-body);
+    line-height: var(--nf-leading-snug);
+  }
+
+  .nf-copilot-md > .nf-copilot-md__heading:first-child {
+    margin-top: 0;
+  }
+
   .nf-copilot-md ul,
   .nf-copilot-md ol {
     padding-inline-start: var(--nf-space-lg);
