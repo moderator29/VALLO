@@ -148,13 +148,15 @@ export async function build(ctx) {
   /* ===================== 1. The hook (built, still on frame one) ============ */
   ground(ctx, 0, cut(2), { tone: "navy", y: 26, seed: 11 });
   const openRoot = layer("open", 0, cut(2));
-  /* frame one is never still: the whole opening pushes in slowly while the
+  /* frame one is never still: the whole opening drifts up slowly while the
      line is spoken (a pure function of t) */
   const open = ctx.el("div", { class: "fill", style: { transformOrigin: "50% 42%" } }, openRoot);
   ctx.onFrame((t) => {
     const u = Math.min(1, Math.max(0, t / cut(2)));
     const k = u * u * (3 - 2 * u);
-    open.style.transform = `translateY(${(-26 * k).toFixed(2)}px) scale(${(1 + 0.075 * k).toFixed(5)})`;
+    /* a drift in whole pixels, not a zoom or a transform: text on a moving
+       composited layer anti-aliases differently with the frames painted before */
+    open.style.top = `${Math.round(-44 * k)}px`;
   });
   placeBack(ctx, ctx.scene("open-place", 0, cut(2), { z: 3 }), { scene: "villa", t0: -1, t1: s(2) - 0.5, y: Dk(960, 560), opacity: 0.5 });
   standingHeadline(ctx, open, {
