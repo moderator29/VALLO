@@ -729,7 +729,10 @@ export function chipRow(ctx, parent, { items, x, y, t0, gap = 0.12, t1, size = 2
       const a = ramp(ctx, t, ti, ti + 0.4, "back.out(1.8)");
       const b = t1 == null ? 0 : ramp(ctx, t, t1 + i * 0.03, t1 + i * 0.03 + 0.3, "power2.in");
       const o = Math.min(ramp(ctx, t, ti, ti + 0.15), 1 - b);
-      el.style.transform = `translateY(${((1 - a) * 30 - b * 24).toFixed(1)}px) scale(${(0.86 + 0.14 * a).toFixed(4)})`;
+      /* a 2D matrix that never quite reaches 1: a layer scaled back to exactly
+         1 is painted by Chromium according to the frames drawn before it */
+      const k = Math.min(0.9999, 0.86 + 0.14 * a);
+      el.style.transform = `matrix(${k.toFixed(5)}, 0, 0, ${k.toFixed(5)}, 0, ${((1 - a) * 30 - b * 24).toFixed(2)})`;
       el.style.opacity = opa(o);
       el.style.visibility = o > 0.001 ? "inherit" : "hidden";
     });
