@@ -122,11 +122,13 @@ export async function build(ctx) {
      replaces the words and the phone rises. */
   ground(ctx, 0, s(3) - 0.05, { tone: "navy", y: 26, seed: 11 });
   const open = layer("open", 0, s(3) - 0.2);
-  openerWords(ctx, open, { x: Dk(70, 110), y: Dk(470, 300), size: Dk(114, 104), tKey: w(1, "moving") - 0.05, t1: s(2) - 0.3 });
-  ctx.hideCaptions(0, s(2) - 0.25);
+  /* the first line has fully lifted away before the second one types in */
+  const openOut = Math.min(s(2) - 0.3, e(1) - 0.25);
+  openerWords(ctx, open, { x: Dk(70, 110), y: Dk(470, 300), size: Dk(114, 104), tKey: w(1, "moving") - 0.05, t1: openOut });
+  ctx.hideCaptions(0, s(2) - 0.15);
   headline(ctx, open, {
     lines: [[["Vallo is where", false]], [["it is going.", true]]],
-    x: Dk(70, 90), y: Dk(280, 300), size: Dk(104, 80), t0: s(2) - 0.08, t1: s(3) - 0.45, stagger: 0.05,
+    x: Dk(70, 90), y: Dk(280, 300), size: Dk(104, 80), t0: Math.max(s(2) - 0.08, openOut + 0.62), t1: s(3) - 0.45, stagger: 0.05,
   });
   ctx.hideCaptions(s(2) - 0.15, s(3) - 0.5);
   show("v3-welcome", 0, s(3) + 0.2, { enter: "cut" });
@@ -152,17 +154,18 @@ export async function build(ctx) {
     id: "v3-listing-cost", crop: CELLS, t0: w(4, "rent") - 0.02, t1: w(4, "caution") - 0.1,
     to: Dk({ x: CX, y: 620, s: 0.72, r: -1.4 }, { x: RX, y: 420, s: 0.54, r: -1.4 }), exit: "up", fly: 0.55, seed: 22, radius: 34,
   });
-  show("v3-listing-total", w(4, "all") - 0.1, s(5) - 0.4, { enter: "slide" });
+  show("v3-listing-total", w(4, "all") - 0.1, s(5) - 0.22, { enter: "slide" });
   totalPlate(ctx, cost, {
-    x: Dk(CX, RX), y: Dk(640, 560), t0: w(4, "all") - 0.1, t1: s(5) - 0.28, tRoll0: w(4, "added") + 0.05, tRoll1: w(4, "added") + 1.0, size: Dk(40, 36),
+    x: Dk(CX, RX), y: Dk(640, 560), t0: w(4, "all") - 0.1, t1: s(5) - 0.32, tRoll0: w(4, "added") + 0.05, tRoll1: w(4, "added") + 0.72, size: Dk(40, 36),
   });
   badgeDisc(ctx, cost, { name: "receipt", kind: "object", x: Dk(150, 380), y: Dk(1450, 420), size: 130, t0: w(4, "refundable"), t1: s(5) - 0.3, seed: 23 });
   badgeDisc(ctx, cost, { name: "coin", kind: "object", x: Dk(940, 520), y: Dk(1380, 760), size: 120, t0: w(4, "caution"), t1: s(5) - 0.3, seed: 24, tone: "paper" });
 
   /* SAVE AND COMPARE. A light whip, then the home's own shortlist line held up. */
-  whipPan(ctx, s(5) - 0.4, { dir: "left", dur: 0.24, sound: null });
-  ctx.sfx("swipe", s(5) - 0.45, { offset: -3 });
-  show("v3-home", s(5) - 0.4, s(6) - 0.1, { enter: "cut" });
+  /* the cut waits for the total to fly off the glass */
+  whipPan(ctx, s(5) - 0.22, { dir: "left", dur: 0.24, sound: null });
+  ctx.sfx("swipe", s(5) - 0.27, { offset: -3 });
+  show("v3-home", s(5) - 0.22, s(6) - 0.1, { enter: "cut" });
   lift(ctx, H, {
     id: "v3-home", crop: SHORTLIST, t0: w(5, "homes") + 0.1, t1: s(6) - 0.6,
     to: Dk({ x: CX, y: 760, s: 0.9, r: 1.2 }, { x: LX, y: 420, s: 0.86, r: 1.2 }), exit: "fade", fly: 0.6, seed: 25, radius: 40,

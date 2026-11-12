@@ -71,8 +71,9 @@ export function totalPlate(ctx, parent, { x, y, t0, t1, tRoll0, tRoll1, value = 
   ctx.onFrame((t) => {
     if (t < t0 - 0.05 || t >= t1 + 0.6) { box.style.visibility = "hidden"; return; }
     const a = ramp(ctx, t, t0, t0 + 0.58, "land");
+    /* it leaves by flying up off the glass, so it never fades over the next screen */
     const b = ramp(ctx, t, t1, t1 + 0.42, "power2.in");
-    place(box, { x, y: y + mix(size * 2.4, 0, a) + Math.sin((t - t0) * 0.78 + ph) * 5 * a - b * size * 1.1, s: (0.93 + 0.07 * a) * (1 - 0.05 * b), r: rot + Math.sin((t - t0) * 0.46 + ph) * 0.5 * a, o: Math.min(ramp(ctx, t, t0, t0 + 0.2), 1 - b) });
+    place(box, { x, y: y + mix(size * 2.4, 0, a) + Math.sin((t - t0) * 0.78 + ph) * 5 * a - b * size * 16, s: (0.93 + 0.07 * a) * (1 - 0.05 * b), r: rot + Math.sin((t - t0) * 0.46 + ph) * 0.5 * a, o: Math.min(ramp(ctx, t, t0, t0 + 0.2), 1 - ramp(ctx, t, t1 + 0.1, t1 + 0.36)) });
   });
   /* the rolling digits tick, once for each place that lands */
   ctx.sfx("card_slide", t0, { offset: -5 });

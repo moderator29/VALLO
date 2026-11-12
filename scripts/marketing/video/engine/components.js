@@ -263,9 +263,21 @@ export function installCaptions(ctx) {
   const pill = ctx.el("div", { class: "pill", style: { fontSize: mobile ? "44px" : "30px", ...(mobile ? { maxWidth: "800px" } : {}) } }, box);
   let shown = -1;
   let nodes = [];
+  /* Each line's time on screen once the hidden windows are cut out of it. A
+     piece shorter than 0.35 s is dropped: between two hidden windows it would
+     only blink. Every piece fades in and out on its own edges. */
+  let pieces = null;
+  const cutPieces = () => spans.map((s) => {
+    let segs = [[s.from, s.to]];
+    for (const [a, b] of ctx.captionGaps) {
+      segs = segs.flatMap(([x, y]) => (b <= x || a >= y ? [[x, y]] : [[x, Math.min(y, a)], [Math.max(x, b), y]].filter(([p, q]) => q - p > 1e-6)));
+    }
+    return segs.filter(([x, y]) => y - x >= 0.35);
+  });
   ctx.onFrame((t) => {
-    const hidden = ctx.captionGaps.some(([a, b]) => t >= a && t < b);
-    const k = hidden ? -1 : spans.findIndex((s) => t >= s.from && t < s.to);
+    pieces ??= cutPieces();
+    let piece = null;
+    const k = spans.findIndex((s, i) => (piece = pieces[i].find(([x, y]) => t >= x && t < y)) != null);
     if (k !== shown) {
       shown = k;
       pill.innerHTML = "";
@@ -278,8 +290,8 @@ export function installCaptions(ctx) {
     box.style.visibility = k < 0 ? "hidden" : "visible";
     if (k < 0) return;
     const s = spans[k];
-    const a = ctx.progress(t, s.from, s.from + 0.14);
-    const b = 1 - ctx.progress(t, s.to - 0.12, s.to);
+    const a = ctx.progress(t, piece[0], piece[0] + 0.14);
+    const b = 1 - ctx.progress(t, piece[1] - 0.12, piece[1]);
     const o = Math.min(a, b);
     /* Never quite 1, and no scale: a layer that has been scaled or faded and
        comes back to exactly 1 is painted differently by Chromium depending
