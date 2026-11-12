@@ -84,3 +84,19 @@ export function examplePill(ctx, parent, { x, y, t0, t1, size = 30, label = "Exa
   });
   return el;
 }
+
+/*
+ * PATCHES ON THE FRESH CAPTURES (12 November). The test account's own name
+ * is printed in the greeting on the home and stays screens, and no real name
+ * goes on screen (DESIGN.md section 2), so the greeting is redrawn as the
+ * screen's own words without it. The stay page caught a sticky "Ask Vallo AI"
+ * chip half under its photo; that strip is returned to the page's ground.
+ */
+export const PATCH = {
+  "v3-home": [{ x: 60, y: 538, w: 670, h: 168, bg: "linear-gradient(90deg, rgb(7 37 91), rgb(8 26 66))", lines: ["Good afternoon."], size: 66, weight: 700, color: "#ffffff", lh: 1.1, pad: 66 }],
+  "v3-stays": [{ x: 28, y: 462, w: 690, h: 176, bg: "rgb(0 9 42)", lines: ["Good evening."], size: 66, weight: 700, color: "#ffffff", lh: 1.1, pad: 88 }],
+  "v3-stay": [{ x: 0, y: 266, w: 1320, h: 78, bg: "rgb(0 12 48)", lines: [], size: 10 }],
+  "sc-stay": [{ x: 0, y: 266, w: 1320, h: 78, bg: "rgb(1 13 50)", lines: [], size: 10 }],
+};
+/** H.show with the patches above applied to the screens that need them. */
+export const shower = (H) => (id, t0, t1, opts = {}) => H.show(id, t0, t1, { ...opts, patch: PATCH[id] ?? opts.patch });

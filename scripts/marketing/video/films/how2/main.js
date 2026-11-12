@@ -35,12 +35,13 @@ import {
   object3d, installFocus, slabWipe, shutter, irisTicks, tileFall, whipPan,
 } from "../kit.js";
 import { odometer } from "../../engine/components.js";
-import { placeBack, standingHeadline, examplePill } from "./parts.js";
+import { placeBack, standingHeadline, examplePill, shower } from "./parts.js";
 
 export async function build(ctx) {
   const M = ctx.isMobile;
   const { s, w } = anchors(ctx);
   const H = await hero(ctx, { model: "island", env: "dark", edge: "#040a2e" });
+  const show = shower(H);
 
   const cut = (i) => s(i) - 0.12;
   const layer = (id, t0, t1, z = 760) => ctx.scene(id, t0, t1, { z });
@@ -111,28 +112,28 @@ export async function build(ctx) {
   H.swing(cut(4), cut(8), cut(10), cut(11), cut(14), cut(15), cut(17));
 
   /* ---------- the screens (the upgraded platform's own captures) ---------- */
-  H.show("v3-home", cut(2) + 0.05, w(3, "Search") - 0.05, { enter: "cut" });
-  H.show("v3-search", w(3, "Search") - 0.05, w(3, "filter") - 0.05, { enter: "slide" });
-  H.show("v3-filters", w(3, "filter") - 0.05, cut(4) + 0.05, { enter: "rise" });
-  H.show("v3-listing", cut(4) + 0.05, w(4, "whole") - 0.1, { enter: "cut" });
-  H.show("v3-listing-cost", w(4, "whole") - 0.1, w(6, "total") - 0.25, { enter: "slide" });
-  H.show("v3-listing-total", w(6, "total") - 0.25, w(7, "buy") - 0.1, { enter: "slide" });
-  H.show("v3-listing-sale", w(7, "buy") - 0.1, cut(8) + 0.05, { enter: "slide" });
-  H.show("v3-saved", cut(8) + 0.05, cut(9) + 0.05, { enter: "cut" });
-  H.show("v3-split", cut(9) + 0.05, cut(10) + 0.05, { enter: "cut" });
-  H.show("assistant", cut(10) + 0.05, cut(11) + 0.05, { enter: "cut" });
-  H.show("v3-stays", cut(11) + 0.05, w(11, "few") - 0.35, { enter: "cut" });
-  H.show("sc-stay", w(11, "few") - 0.35, s(12) - 0.15, { enter: "slide" });
-  H.show("sc-restaurant", s(12) - 0.15, cut(13) + 0.05, { enter: "slide" });
-  H.show("v3-stay", cut(13) + 0.05, cut(14) + 0.05, { enter: "cut" });
-  H.show("v3-circle", cut(14) + 0.05, w(14, "ask") - 0.35, { enter: "cut" });
-  H.show("v3-circle-explore", w(14, "ask") - 0.35, cut(15) + 0.05, { enter: "slide" });
-  H.show("v3-roommates", cut(15) + 0.05, w(15, "near") - 0.2, { enter: "cut" });
-  H.show("v3-schools", w(15, "near") - 0.2, s(16) - 0.2, { enter: "slide" });
-  H.show("v3-roommates-2", s(16) - 0.2, cut(17) + 0.05, { enter: "slide" });
-  H.show("v3-payments", cut(17) + 0.05, cut(18) + 0.05, { enter: "cut" });
-  H.show("v3-home", cut(18) + 0.05, s(19) - 0.15, { enter: "cut" });
-  H.show("v3-welcome", s(19) - 0.15, ctx.duration, { enter: "slide" });
+  show("v3-home", cut(2) + 0.05, w(3, "Search") - 0.05, { enter: "cut" });
+  show("v3-search", w(3, "Search") - 0.05, w(3, "filter") - 0.05, { enter: "slide" });
+  show("v3-filters", w(3, "filter") - 0.05, cut(4) + 0.05, { enter: "rise" });
+  show("v3-listing", cut(4) + 0.05, w(4, "whole") - 0.1, { enter: "cut" });
+  show("v3-listing-cost", w(4, "whole") - 0.1, w(6, "total") - 0.25, { enter: "slide" });
+  show("v3-listing-total", w(6, "total") - 0.25, w(7, "buy") - 0.1, { enter: "slide" });
+  show("v3-listing-sale", w(7, "buy") - 0.1, cut(8) + 0.05, { enter: "slide" });
+  show("v3-saved", cut(8) + 0.05, cut(9) + 0.05, { enter: "cut" });
+  show("v3-split", cut(9) + 0.05, cut(10) + 0.05, { enter: "cut" });
+  show("assistant", cut(10) + 0.05, cut(11) + 0.05, { enter: "cut" });
+  show("v3-stays", cut(11) + 0.05, w(11, "few") - 0.35, { enter: "cut" });
+  show("sc-stay", w(11, "few") - 0.35, s(12) - 0.15, { enter: "slide" });
+  show("sc-restaurant", s(12) - 0.15, cut(13) + 0.05, { enter: "slide" });
+  show("v3-stay", cut(13) + 0.05, cut(14) + 0.05, { enter: "cut" });
+  show("v3-circle", cut(14) + 0.05, w(14, "ask") - 0.35, { enter: "cut" });
+  show("v3-circle-explore", w(14, "ask") - 0.35, cut(15) + 0.05, { enter: "slide" });
+  show("v3-roommates", cut(15) + 0.05, w(15, "near") - 0.2, { enter: "cut" });
+  show("v3-schools", w(15, "near") - 0.2, s(16) - 0.2, { enter: "slide" });
+  show("v3-roommates-2", s(16) - 0.2, cut(17) + 0.05, { enter: "slide" });
+  show("v3-payments", cut(17) + 0.05, cut(18) + 0.05, { enter: "cut" });
+  show("v3-home", cut(18) + 0.05, s(19) - 0.15, { enter: "cut" });
+  show("v3-welcome", s(19) - 0.15, ctx.duration, { enter: "slide" });
 
   /* ===================== 1. The hook (built, still on frame one) ============ */
   ground(ctx, 0, cut(2), { tone: "navy", y: 26, seed: 11 });
@@ -179,7 +180,7 @@ export async function build(ctx) {
   whipPan(ctx, w(3, "Search") - 0.1, { dir: "left", dur: 0.24, sound: "whoosh_short" });
   const find = layer("find", s(3) - 0.2, cut(4) + 0.1);
   lift(ctx, H, {
-    id: "v3-search", crop: { x: 22, y: 201, w: 1298, h: 345 },
+    id: "v3-search", crop: { x: 40, y: 387, w: 1240, h: 165 },
     t0: w(3, "Search") + 0.3, t1: w(3, "filter") - 0.35,
     to: { x: CX, y: 540, s: 0.76, r: -1.5 }, seed: 31, radius: 30,
   });
@@ -189,7 +190,7 @@ export async function build(ctx) {
     x: CX, y: 540, t0: w(3, "exactly") - 0.55, t1: w(3, "need") - 0.22, size: 32, from: "above", seed: 32, tab: "Filter by",
   });
   lift(ctx, H, {
-    id: "v3-filters", crop: { x: 38, y: 2473, w: 1248, h: 195 },
+    id: "v3-filters", crop: { x: 40, y: 2659, w: 1240, h: 190 },
     t0: w(3, "need") - 0.12, t1: cut(4) - 0.66,
     to: { x: CX, y: 555, s: 0.78, r: 1.5 }, seed: 33, radius: 40,
   });
@@ -246,7 +247,7 @@ export async function build(ctx) {
     x: 330, y: 560, t0: w(6, "rent") - 0.5, t1: w(6, "total") - 0.58, size: 30, from: "left", seed: 47, rot: -2,
   });
   lift(ctx, H, {
-    id: "v3-listing-total", crop: { x: 0, y: 1044, w: 1296, h: 126 },
+    id: "v3-listing-total", crop: { x: 38, y: 1200, w: 1240, h: 170 },
     t0: w(6, "total") - 0.05, t1: cut(8) - 0.66,
     to: { x: CX, y: 665, s: 0.8, r: -1.2 }, seed: 48, radius: 30, fly: 0.8,
   });
@@ -284,18 +285,18 @@ export async function build(ctx) {
     x: CX, y: 470, t0: s(8) - 0.4, t1: w(8, "compare") - 0.3, size: 30, from: "above", seed: 51,
   });
   lift(ctx, H, {
-    id: "v3-saved", crop: { x: 0, y: 979, w: 1279, h: 135 },
+    id: "v3-saved", crop: { x: 40, y: 1166, w: 884, h: 280 },
     t0: w(8, "compare") - 0.2, t1: cut(10) - 0.62,
     to: { x: CX, y: 520, s: 0.8, r: -1.5 }, seed: 52, radius: 30,
   });
-  H.tap(w(8, "side") - 0.1, 1110, 1235);
+  H.tap(w(8, "side") - 0.1, 210, 1376);
   object3d(ctx, keep, { name: "saved-heart", size: 230, x: 930, y: 1050, t0: s(8) + 0.1, t1: cut(10) - 0.55, drift: 1, seed: 53 });
   badgeDisc(ctx, keep, { name: "scale", kind: "glyph", x: 120, y: 1000, size: 132, t0: w(8, "compare") - 0.05, t1: cut(10) - 0.6, seed: 54 });
 
   /* 9. SPLIT THE COST. The move-in total, person by person. */
   whipPan(ctx, cut(9) - 0.05, { dir: "left", dur: 0.24, sound: "whoosh_short" });
   lift(ctx, H, {
-    id: "v3-split", crop: { x: 40, y: 1136, w: 1238, h: 134 },
+    id: "v3-split", crop: { x: 40, y: 978, w: 1240, h: 276 },
     t0: w(9, "Split") - 0.1, t1: w(9, "person") - 0.45,
     to: { x: CX, y: 700, s: 0.78, r: 1.2 }, seed: 57, radius: 30,
   });
@@ -315,7 +316,7 @@ export async function build(ctx) {
     x: CX, y: 450, t0: s(10) - 0.4, t1: cut(11) - 0.4, size: 32, from: "above", accent: "electric", seed: 61,
   });
   lift(ctx, H, {
-    id: "assistant", crop: { x: 42, y: 2434, w: 1236, h: 206 },
+    id: "assistant", crop: { x: 42, y: 2421, w: 732, h: 168 },
     t0: w(10, "assistant") - 0.2, t1: cut(11) - 0.66,
     to: { x: CX, y: 652, s: 1.04, r: 1.2 }, seed: 62, radius: 40,
   });
@@ -327,7 +328,7 @@ export async function build(ctx) {
   ground(ctx, cut(11), cut(14), { tone: "dusk", y: 22, seed: 16 });
   const stay = layer("stay", cut(11), cut(14) + 0.1);
   lift(ctx, H, {
-    id: "v3-stays", crop: { x: 0, y: 1411, w: 1320, h: 234 },
+    id: "v3-stays", crop: { x: 40, y: 1600, w: 1240, h: 424 },
     t0: w(11, "hotel") - 0.25, t1: w(11, "few") - 0.7,
     to: { x: CX, y: 545, s: 0.6, r: -1.2 }, seed: 71, radius: 40,
   });
@@ -351,7 +352,7 @@ export async function build(ctx) {
     x: CX, y: 470, t0: s(13) + 0.1, t1: w(13, "check") - 0.25, size: 30, from: "above", seed: 77, tab: "Before you go",
   });
   lift(ctx, H, {
-    id: "v3-stay", crop: { x: 26, y: 1751, w: 1276, h: 817 },
+    id: "v3-stay", crop: { x: 40, y: 1234, w: 1240, h: 730 },
     t0: w(13, "check") - 0.1, t1: cut(14) - 0.66,
     to: { x: CX, y: 580, s: 0.54, r: -1.2 }, seed: 76, radius: 40,
   });
@@ -367,7 +368,7 @@ export async function build(ctx) {
     x: CX, y: 470, t0: s(14) + 0.1, t1: w(14, "ask") - 0.4, size: 31, from: "above", seed: 81, tab: "Vallo Circle",
   });
   lift(ctx, H, {
-    id: "v3-circle-explore", crop: { x: 13, y: 392, w: 1258, h: 844 },
+    id: "v3-circle-explore", crop: { x: 40, y: 584, w: 1240, h: 650 },
     t0: w(14, "ask") - 0.1, t1: cut(15) - 0.66,
     to: { x: CX, y: 580, s: 0.54, r: 1.2 }, seed: 82, radius: 40,
   });
@@ -383,7 +384,7 @@ export async function build(ctx) {
     x: CX, y: 470, t0: s(15) + 0.2, t1: w(15, "near") - 0.3, size: 30, from: "above", seed: 91, tab: "Say what you need",
   });
   lift(ctx, H, {
-    id: "v3-schools", crop: { x: 0, y: 622, w: 1320, h: 547 },
+    id: "v3-schools", crop: { x: 40, y: 640, w: 1240, h: 440 },
     t0: w(15, "near") - 0.15, t1: s(16) - 0.75,
     to: { x: CX, y: 560, s: 0.62, r: -1.5 }, seed: 92, radius: 40,
   });
@@ -403,7 +404,7 @@ export async function build(ctx) {
     x: CX, y: 150, size: 92, t0: w(17, "Vallo") - 0.1, t1: cut(18) - 0.3, align: "center", stagger: 0.04, keyStyle: "chip",
   });
   lift(ctx, H, {
-    id: "v3-payments", crop: { x: 0, y: 894, w: 1189, h: 349 },
+    id: "v3-payments", crop: { x: 40, y: 970, w: 1240, h: 486 },
     t0: w(17, "holds") - 0.1, t1: cut(18) - 0.55,
     to: { x: CX, y: 640, s: 0.7, r: -1.2 }, seed: 101, radius: 30, label: "The Payments screen, word for word",
   });
