@@ -1,4 +1,4 @@
-import { countOf, intlTag, LAGOS_TIME_ZONE, DEFAULT_LOCALE, type Locale } from "@vallo/i18n/core";
+import { countOf, intlTag, LAGOS_TIME_ZONE, DEFAULT_LOCALE, threeLetterMonth, type Locale } from "@vallo/i18n/core";
 
 /**
  * WHEN, SAID ONE WAY (details pass, 30 September 2026).
@@ -66,14 +66,15 @@ export function dateLabel(value: When, options: { now?: Date; locale?: Locale } 
   const locale = options.locale ?? DEFAULT_LOCALE;
   const now = options.now ?? new Date();
   const sameYear = fmt(locale, { year: "numeric" }).format(date) === fmt(locale, { year: "numeric" }).format(now);
-  return (sameYear
+  const written = (sameYear
     ? fmt(locale, { weekday: "short", day: "numeric", month: "short" })
     : fmt(locale, { day: "numeric", month: "short", year: "numeric" })
   )
     .format(date)
-    .replace(/,/g, "")
-    /* en-NG writes September "Sept"; every other month is three letters. */
-    .replace(/\bSept\b/, "Sep");
+    .replace(/,/g, "");
+  /* en-NG writes September "Sept"; every other month is three letters. The
+     rule itself lives in `@vallo/i18n/core`, beside the tag that causes it. */
+  return threeLetterMonth(written);
 }
 
 /** "Today", "Tomorrow", "Yesterday", else `dateLabel`. */
@@ -140,9 +141,9 @@ export function agoShort(value: When, options: { now?: Date | number; locale?: L
   if (span < DAY) return `${Math.floor(span / HOUR)}h ago`;
   const days = Math.floor(span / DAY);
   if (days < 7) return `${days}d ago`;
-  return fmt(options.locale ?? DEFAULT_LOCALE, { day: "numeric", month: "short" })
-    .format(date)
-    .replace(/\bSept\b/, "Sep");
+  return threeLetterMonth(
+    fmt(options.locale ?? DEFAULT_LOCALE, { day: "numeric", month: "short" }).format(date),
+  );
 }
 
 /**

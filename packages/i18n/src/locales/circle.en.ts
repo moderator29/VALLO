@@ -69,7 +69,15 @@ export const circleEn = {
       view: "View post",
       back: "Back to Circle",
     },
-    compose: "Start a discussion",
+    /* THE COMPOSE BUTTON NAMES THE SCREEN IT OPENS. It said "Start a
+       discussion" and opened "What would you like to post?", four tiles of
+       which Discussion is one: a reader who wanted a discussion was asked a
+       question they had already answered, and a reader who wanted to ask one
+       never tapped it. A community page separately carries "Start a
+       discussion" on a control that really does open the discussion
+       composer, so the same words meant two different screens. This is the
+       flow's own eyebrow, which is what lands. */
+    compose: "New post",
     feed: "Feed",
     replies: { one: "{count} reply", other: "{count} replies" },
     helpful: { one: "{count} helpful", other: "{count} helpful" },

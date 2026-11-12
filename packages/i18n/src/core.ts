@@ -423,6 +423,29 @@ export function formatRating(
 }
 
 /**
+ * EVERY SHORT MONTH IS THREE LETTERS, SEPTEMBER INCLUDED.
+ *
+ * en-NG, the tag every locale here formats with, abbreviates September to
+ * "Sept" and every other month to three letters. Two helpers inside the web
+ * app already undid that by hand, each with its own copy of the rule
+ * (`lib/format/when.ts`, `lib/money/dates.ts`), and the dozens of surfaces
+ * that format a short month any other way kept "Sept". Measured in Chromium
+ * in November 2026: an offer's timeline read "14 Sept 2026", a host's
+ * earnings statement read "4 Sept" and "12 Sept", and the agent earnings
+ * chart ticked "Sept", while a booking row, a message day divider and a
+ * money history row on the same account read "Sep". One month, two
+ * spellings, decided by which screen you happened to be on.
+ *
+ * The rule lives here now, where the tag is chosen, so it reaches everything
+ * that formats through this module and the two hand copies have one
+ * authority to point at. "September" is untouched: the word boundary after
+ * "Sept" cannot match inside it.
+ */
+export function threeLetterMonth(text: string): string {
+  return text.replace(/\bSept\b/g, "Sep");
+}
+
+/**
  * A date in words, the same from the server and from every phone: asked of
  * `intlTag`, and on Lagos time unless the options name another zone.
  */
@@ -435,8 +458,10 @@ export function formatDate(
     year: "numeric",
   }
 ): string {
-  return new Intl.DateTimeFormat(intlTag[locale], {
-    timeZone: LAGOS_TIME_ZONE,
-    ...options,
-  }).format(date);
+  return threeLetterMonth(
+    new Intl.DateTimeFormat(intlTag[locale], {
+      timeZone: LAGOS_TIME_ZONE,
+      ...options,
+    }).format(date),
+  );
 }

@@ -5122,8 +5122,25 @@ export const en = {
     /* The place tabs and the anchored foot (7 October 2026). */
     tabTable: "The table",
     reserveFootCaption: "Pick a day, a time and your party",
-    reserveTitle: "Hold a table",
-    reserveBody: "Pick a time and the restaurant answers. Nothing is charged to hold a table.",
+    /*
+     * ONE VERB FOR ONE ACTION, AND IT IS NOT "HOLD".
+     *
+     * The reservation card headed itself "Hold a table", introduced itself
+     * with "Nothing is charged to hold a table", carried the button
+     * "Request a table", and closed with "The restaurant confirms it.
+     * Nothing is held until they do." So the card was titled with the one
+     * thing it then told the reader does not happen, on the exact question a
+     * guest has: is my table actually kept for me. It is not, until the
+     * venue answers.
+     *
+     * "Book a table" is the word the rest of the platform already uses for
+     * this: the restaurants shelf ("Book a table on Vallo. The restaurant
+     * confirms"), the card's own title in `member-flows.en.ts`, and the
+     * handbook chapter. The button stays "Request a table", because the tap
+     * really does send a request, and the promise under it stays as it is.
+     */
+    reserveTitle: "Book a table",
+    reserveBody: "Pick a day and a time, and the restaurant answers. It is free to ask.",
     hoursTitle: "Opening hours",
     /* The hours we do not have, said plainly. Never a guessed "open now": a
        badge this page cannot stand behind sends somebody across Lagos to a
@@ -5575,6 +5592,19 @@ export const en = {
     heroTitle: "Find your next home",
     heroLede: "Rent, buy or sell property across Nigeria.",
     heroSearch: "Search by location, property type",
+    /*
+     * THE FIELD'S NAME, WHICH WAS A SLOGAN FROM A SCREEN THAT IS GONE.
+     *
+     * The signed-in home's search box took its label from
+     * `landing.hero.searchLabel`, whose own comment says that block was
+     * superseded on 22 September: the word a screen reader read out on the
+     * property search field was "Start exploring". Every other search field
+     * on the platform is named for the thing it searches ("Search stays",
+     * "Search Roommates", "Search tables", "Search your receipts", and the
+     * 404's "Search property"), so this one is too, and it is the same
+     * wording as the 404 because both submit to `/search`.
+     */
+    heroSearchLabel: "Search property",
     filters: "Filters",
     featured: "Featured properties",
     parkingOne: "1 parking",

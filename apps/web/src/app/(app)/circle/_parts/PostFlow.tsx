@@ -94,7 +94,31 @@ export function PostFlow({
     writeDraft(key, next);
   };
 
-  const total = 4;
+  /*
+   * "STEP N OF M" COUNTS THE SCREENS THIS READER WILL ACTUALLY SEE.
+   *
+   * The five screens are numbered by `step` (0 the type picker, 1 where, 2
+   * the title, 3 the details, 4 the preview), and which of them a reader
+   * walks depends on where they came in: the compose button opens on the
+   * picker, "Ask the community" on a community page skips the picker AND the
+   * where, and the plain Ask link starts at the where.
+   *
+   * The counter used to be written from those raw numbers against a fixed
+   * total of four, with the picker alone claiming `total + 1`. Measured in
+   * the browser at 390px: screen one read "Step 1 of 5" with the bar at 20
+   * percent, and picking "Question" moved it to "Step 1 of 4" at 25 percent.
+   * The same step number twice, a denominator that shrank underneath it, and
+   * a reader who has just answered a question told they have not moved.
+   * Entering with a community preset was worse: the first screen a person
+   * ever saw said "Step 2 of 4" with the bar already half full.
+   *
+   * Both come from the same mistake, so both are fixed by the same line: the
+   * total is how many screens remain from the entry point, and a screen's
+   * number is its distance from it. Roommates' post flow (`roommates/new`)
+   * has always counted this way; this one now agrees with it.
+   */
+  const total = 5 - firstStep;
+  const at = (screen: number) => screen - firstStep + 1;
   const back = step > firstStep ? () => { setDir("back"); setStep(step - 1); } : undefined;
   const forward = () => { setDir("forward"); setStep(step + 1); };
   const community = communities.find((c) => c.id === draft.communityId);
@@ -156,7 +180,7 @@ export function PostFlow({
       { key: "property", icon: "apartment", title: P.property, sub: P.propertySub, go: () => { setKind("discussion"); forward(); } },
     ] as const;
     return (
-      <StepFrame step={1} total={total + 1} eyebrow={P.typeEyebrow} title={P.typeTitle} closeHref={closeHref} direction={dir}>
+      <StepFrame step={at(0)} total={total} eyebrow={P.typeEyebrow} title={P.typeTitle} closeHref={closeHref} direction={dir}>
         <ul className="nf-ctype" data-testid="circle-type-picker">
           {tiles.map((t) => (
             <li key={t.key}>
@@ -183,7 +207,7 @@ export function PostFlow({
   if (step === 1) {
     return (
       <StepFrame
-        step={1}
+        step={at(1)}
         total={total}
         eyebrow={question ? "Ask" : "Discuss"}
         title={question ? "Where should we ask?" : "Which community?"}
@@ -214,7 +238,7 @@ export function PostFlow({
   if (step === 2) {
     return (
       <StepFrame
-        step={2}
+        step={at(2)}
         total={total}
         eyebrow={question ? "Your question" : "Your topic"}
         title={question ? "What do you want to know?" : "What do you want to talk about?"}
@@ -243,17 +267,22 @@ export function PostFlow({
   if (step === 3) {
     return (
       <StepFrame
-        step={3}
+        step={at(3)}
         total={total}
         eyebrow="Details"
         title="Add the details"
-        subtitle="The area, the budget, what you have tried. Never a phone number or an address."
+        /* THE DETAILS ARE OPTIONAL, AND THE SUBTITLE IS WHERE THAT BELONGS.
+           The foot carried "Skip" quiet beside "Preview" lit, and both called
+           `forward`: two controls, one behaviour, a reader deciding between
+           them for nothing. The optionality was the only thing "Skip" ever
+           said, so it is said in the line that introduces the field and the
+           foot keeps one way on. */
+        subtitle="Optional. The area, the budget, what you have tried. Never a phone number or an address."
         onBack={back}
         closeHref={closeHref}
         direction={dir}
         save={draft.body ? "device" : "idle"}
         primary={{ label: "Preview", onClick: forward, testId: "circle-flow-next" }}
-        secondary={{ label: "Skip", onClick: forward }}
       >
         <div className="nf-circle-field">
           <label htmlFor="circle-body" className="sr-only">Details</label>
@@ -265,7 +294,7 @@ export function PostFlow({
 
   return (
     <StepFrame
-      step={4}
+      step={at(4)}
       total={total}
       eyebrow="Preview"
       title="This is what people will see"

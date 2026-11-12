@@ -6,6 +6,12 @@ import { getDictionary } from "@vallo/i18n";
 import { SystemMoment } from "./offline/SystemMoment";
 
 const LOST = getDictionary("en").trustVisible.state;
+/* The property search field says the same thing here as it does on the
+   results screen it submits to. This page had a third wording of its own
+   ("Search homes, shortlets, land") while `/search` said "Search or describe
+   your home" and the signed-in home said something else again, so one field,
+   one destination and three invitations. */
+const SEARCH = getDictionary("en").searchV2;
 
 /**
  * 404: the brand moment with a way to search.
@@ -76,7 +82,7 @@ export default async function NotFound() {
             inputMode="search"
             autoComplete="off"
             enterKeyHint="search"
-            placeholder="Search homes, shortlets, land"
+            placeholder={SEARCH.placeholder}
             className="nf-field"
           />
         </div>

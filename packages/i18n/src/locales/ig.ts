@@ -3048,7 +3048,7 @@ export const ig: Dictionary = withFallback({
     openNowTitle: "Emeghere ugbu a",
     perHead: "maka onye ọ bụla, na-emekarị",
     reserveTitle: "Debe tebụl",
-    reserveBody: "Pick a time and the restaurant answers. Nothing is charged to hold a table.",
+    reserveBody: "Pick a day and a time, and the restaurant answers. It is free to ask.",
     hoursTitle: "Oge mmeghe",
     hoursUnknown:
       "This restaurant has not published its hours on Vallo yet, so we do not show whether the kitchen is open right now rather than guess at it.",

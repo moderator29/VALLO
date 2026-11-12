@@ -1,5 +1,5 @@
 import { plural } from "@vallo/i18n/core";
-import { formatMoney } from "@vallo/i18n/core";
+import { formatMoney, threeLetterMonth } from "@vallo/i18n/core";
 
 /**
  * MONEY, PERCENTAGES AND TIMES FOR THE OFFER SCREENS. Pure functions, no
@@ -96,16 +96,21 @@ const DAY = new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short", y
 const DAY_SHORT = new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short", timeZone: ZONE });
 const CLOCK = new Intl.DateTimeFormat("en-GB", { hour: "2-digit", minute: "2-digit", hour12: false, timeZone: ZONE });
 
+/* Both of these said "12 Nov 2026" and "12 Nov, 14:05" in their own
+   docstrings and then printed "14 Sept 2026" for September, because en-GB
+   abbreviates that one month to four letters. `threeLetterMonth` is the
+   platform's rule for it (`@vallo/i18n/core`). */
+
 /** "12 Nov 2026". */
 export function formatDay(iso: string): string {
   const d = new Date(iso);
-  return Number.isNaN(d.getTime()) ? "" : DAY.format(d);
+  return Number.isNaN(d.getTime()) ? "" : threeLetterMonth(DAY.format(d));
 }
 
 /** "12 Nov, 14:05". */
 export function formatWhen(iso: string): string {
   const d = new Date(iso);
-  return Number.isNaN(d.getTime()) ? "" : `${DAY_SHORT.format(d)}, ${CLOCK.format(d)}`;
+  return Number.isNaN(d.getTime()) ? "" : `${threeLetterMonth(DAY_SHORT.format(d))}, ${CLOCK.format(d)}`;
 }
 
 /** How long something has been waiting, in plain words. */

@@ -3015,7 +3015,7 @@ export const ha: Dictionary = withFallback({
     openNowTitle: "A buɗe yanzu",
     perHead: "ga kowane mutum, galibi",
     reserveTitle: "Ajiye tebur",
-    reserveBody: "Pick a time and the restaurant answers. Nothing is charged to hold a table.",
+    reserveBody: "Pick a day and a time, and the restaurant answers. It is free to ask.",
     hoursTitle: "Lokutan buɗewa",
     hoursUnknown:
       "This restaurant has not published its hours on Vallo yet, so we do not show whether the kitchen is open right now rather than guess at it.",

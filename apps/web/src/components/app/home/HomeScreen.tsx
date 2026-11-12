@@ -297,7 +297,7 @@ export function HomeScreen({
           searchAction="/search"
           filtersHref="/search?filters=open"
           filtersLabel={copy.filters}
-          searchLabel={t.landing.hero.searchLabel}
+          searchLabel={copy.heroSearchLabel}
           kind="home"
           recent={t.catalogue.recent}
         />

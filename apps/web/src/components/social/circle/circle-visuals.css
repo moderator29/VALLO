@@ -438,7 +438,29 @@
     background: var(--nf-brand-primary);
     color: var(--nf-content-on-brand);
     box-shadow: var(--nf-elevation-floating);
-    transition: transform var(--nf-duration-press) var(--nf-ease-press);
+    /*
+     * ONE TRANSITION, BOTH JOBS (UX round 6).
+     *
+     * This button declared the press transition here and then a SECOND
+     * `.nf-cfab` block further down this file declared `transition` again for
+     * the step-aside, which replaced the property wholesale rather than
+     * adding to it. Measured in Chromium at 360, 390, 440 and 1280 in both
+     * themes: the computed transition was `transform, opacity / 0.24s /
+     * cubic-bezier(0.16, 1, 0.3, 1)`, so the `:active` squeeze below played
+     * over 240ms on the ENTRANCE curve. The platform's own floating action
+     * button, which Roommates draws through `.nf-btn--fab`, measures
+     * `transform / 0.12s / cubic-bezier(0.3, 0, 0.2, 1)` on the same screens:
+     * twice as fast, and on the press curve. Circle's felt soft under a
+     * thumb for no reason anybody chose.
+     *
+     * The two jobs are declared together now, and the later block is gone, so
+     * nothing can silently drop the press again. The step-aside slide takes
+     * the press duration with it, which suits a 16px move; the fade keeps the
+     * entrance curve, which is the part the eye actually reads.
+     */
+    transition:
+      transform var(--nf-duration-press) var(--nf-ease-press),
+      opacity var(--nf-duration-base) var(--nf-ease-entrance);
   }
   .nf-cfab:active {
     transform: scale(0.92);
@@ -752,16 +774,12 @@
     font-weight: 700;
   }
 
-  /* The FAB steps aside while the hero's own action is on screen. */
+  /* The FAB steps aside while the hero's own action is on screen. Its
+     transition is declared once, with the press, where `.nf-cfab` is built. */
   .nf-cfab[data-hidden] {
     opacity: 0;
     pointer-events: none;
     transform: translateY(1rem) scale(0.9);
-  }
-  .nf-cfab {
-    transition:
-      transform var(--nf-duration-base) var(--nf-ease-entrance),
-      opacity var(--nf-duration-base) var(--nf-ease-entrance);
   }
 
   /* ----------------------------------------------- a Roommates card in a post */

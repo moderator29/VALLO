@@ -189,8 +189,8 @@ describe("dated credentials (V-87)", () => {
       ],
     });
     expect(lines.map((l) => proofLineText(l, copy, "en"))).toEqual([
-      "Registered with LASRERA as Chidi Okeke, number LASRERA/AG/12345, checked on the LASRERA register 3 Sept 2026",
-      "A director of Acme Properties Ltd (RC 1234567), checked with the CAC 3 Sept 2026",
+      "Registered with LASRERA as Chidi Okeke, number LASRERA/AG/12345, checked on the LASRERA register 3 Sep 2026",
+      "A director of Acme Properties Ltd (RC 1234567), checked with the CAC 3 Sep 2026",
     ]);
     expect(proofExplainKey(lines[0]!)).toBe("credential");
   });

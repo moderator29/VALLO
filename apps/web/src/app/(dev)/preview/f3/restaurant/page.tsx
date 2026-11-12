@@ -115,7 +115,11 @@ export default async function RestaurantFacePreview() {
 
         <Stack className="mt-block">
           <Section title={copy.reserveTitle} description={copy.reserveBody}>
-            <ReserveTable listingId={id} messageHref={messageHref} copy={t.memberFlows} locale={locale} />
+            {/* `title={null}` as `RestaurantFace` passes it: the Section above
+                already heads this, and the card would otherwise carry a second
+                title under the first. The harness drew both, so an audit read
+                a surface the product does not have. */}
+            <ReserveTable listingId={id} messageHref={messageHref} title={null} copy={t.memberFlows} locale={locale} />
           </Section>
 
           <Section title={copy.hoursTitle}>

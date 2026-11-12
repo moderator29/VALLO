@@ -84,7 +84,7 @@ describe("SCUML item 6: reading the STR desk", () => {
   it("says every database answer in the desk's words", () => {
     expect(strResultText("same_person", copy)).toEqual({ ok: false, text: copy.results.same_person });
     expect(strResultText({ status: "decided" }, copy)).toEqual({ ok: true, text: copy.results.decided });
-    expect(strResultText({ status: "held", until: "2026-09-26T10:00:00Z" }, copy).text).toMatch(/Sat,? 26 Sept/);
+    expect(strResultText({ status: "held", until: "2026-09-26T10:00:00Z" }, copy).text).toMatch(/Sat,? 26 Sep/);
     expect(strResultText("something new", copy)).toEqual({ ok: false, text: copy.results.failed });
     expect(lagosTime("not a date")).toBe("");
     expect(strResultText("conflicted", copy)).toEqual({ ok: false, text: copy.results.conflicted });

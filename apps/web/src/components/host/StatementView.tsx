@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { countOf, formatMoney, getDictionary, type Locale } from "@vallo/i18n";
+import { countOf, formatMoney, getDictionary, threeLetterMonth, type Locale } from "@vallo/i18n";
 import { addMonths } from "@/lib/host/rate-calendar";
 import { statementCarriesGuarantee, statementTotals, type StatementLine } from "@/lib/host/statement";
 import { EARNINGS_SETTLEMENT, HISTORY_NOT_A_BALANCE, HOST_STATEMENT_EMPTY_BODY, HOST_STATEMENT_EMPTY_TITLE } from "@/lib/money/copy";
@@ -212,8 +212,13 @@ export function StatementView({
 }
 
 function day(iso: string, tag: string): string {
-  return new Intl.DateTimeFormat(tag, { weekday: "short", day: "numeric", month: "short", timeZone: "UTC" }).format(
-    new Date(`${iso}T12:00:00Z`),
+  /* Three letters for every short month, September included: a host's
+     September statement read "4 Sept" and "12 Sept" while their booking rows
+     and money history, formatted elsewhere, read "Sep". */
+  return threeLetterMonth(
+    new Intl.DateTimeFormat(tag, { weekday: "short", day: "numeric", month: "short", timeZone: "UTC" }).format(
+      new Date(`${iso}T12:00:00Z`),
+    ),
   );
 }
 

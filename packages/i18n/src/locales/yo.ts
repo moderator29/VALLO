@@ -3062,7 +3062,7 @@ export const yo: Dictionary = withFallback({
     openNowTitle: "Ó ṣí báyìí",
     perHead: "fún ẹnì kọ̀ọ̀kan, ní gbogbogbò",
     reserveTitle: "Fi tábìlì pamọ́",
-    reserveBody: "Pick a time and the restaurant answers. Nothing is charged to hold a table.",
+    reserveBody: "Pick a day and a time, and the restaurant answers. It is free to ask.",
     hoursTitle: "Àkókò ìṣiṣẹ́",
     hoursUnknown:
       "This restaurant has not published its hours on Vallo yet, so we do not show whether the kitchen is open right now rather than guess at it.",

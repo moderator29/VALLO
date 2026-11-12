@@ -17,7 +17,7 @@ describe("the person line (V-23)", () => {
       viewings_arranged: 4,
     });
     expect(personFacts(facts, copy, "en").map((f) => f.text)).toEqual([
-      "Identity matched with NIMC, 2 Sept 2026",
+      "Identity matched with NIMC, 2 Sep 2026",
       "On Vallo since 2 March 2026",
       "Phone confirmed",
       "4 viewings with you arranged on Vallo",
@@ -44,7 +44,7 @@ describe("the person line (V-23)", () => {
 
   it("dates the NIMC line with NIMC's own date, even with no badge date", () => {
     const facts = counterpartFactsFrom({ identity_seen_at: null, identity_nimc_at: "2026-09-02T10:00:00Z" });
-    expect(personFacts(facts, copy, "en")[0]!.text).toBe("Identity matched with NIMC, 2 Sept 2026");
+    expect(personFacts(facts, copy, "en")[0]!.text).toBe("Identity matched with NIMC, 2 Sep 2026");
   });
 
   it("is read from the RPC and drawn under the header", () => {
