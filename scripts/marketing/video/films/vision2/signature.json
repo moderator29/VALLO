@@ -3,33 +3,33 @@
  "dip_db": -3,
  "dip_s": 0.25,
  "end_ride": {
-  "from": 78.162,
+  "from": 101.238,
   "ramp": 0.6,
   "db": 6.5
  },
  "cues": [
   {
    "name": "ding_pay",
-   "from": 15.927,
-   "to": 16.327,
+   "from": 16.17,
+   "to": 16.57,
    "lift_db": 8
   },
   {
    "name": "success",
-   "from": 26.681,
-   "to": 27.081,
+   "from": 38.139,
+   "to": 38.539,
    "lift_db": 6
   },
   {
    "name": "stamp",
-   "from": 48.523,
-   "to": 48.823,
+   "from": 60.626,
+   "to": 60.926,
    "lift_db": 5
   },
   {
    "name": "chime_notify",
-   "from": 57.941,
-   "to": 58.341,
+   "from": 70.643,
+   "to": 71.043,
    "lift_db": 6
   }
  ]

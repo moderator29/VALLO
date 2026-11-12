@@ -2,6 +2,17 @@
  "about": "The referral film's payoffs lifted over the bed: the eighty naira landing, and the terms plate. The end card rides the music back up from the logo hit.",
  "dip_db": -3,
  "dip_s": 0.25,
- "end_ride": { "from": 34.615, "ramp": 0.6, "db": 6.5 },
- "cues": []
+ "end_ride": {
+  "from": 34.315,
+  "ramp": 0.6,
+  "db": 6.5
+ },
+ "cues": [
+  {
+   "name": "ding_pay",
+   "from": 10.246,
+   "to": 10.646,
+   "lift_db": 7
+  }
+ ]
 }

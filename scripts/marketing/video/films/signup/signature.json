@@ -3,28 +3,28 @@
  "dip_db": -3,
  "dip_s": 0.25,
  "end_ride": {
-  "from": 36.923,
+  "from": 36.623,
   "ramp": 0.6,
   "db": 6.5
  },
  "cues": [
   {
-   "name": "chime_notify",
-   "from": 13.971,
-   "to": 14.371,
-   "lift_db": 8
+   "name": "stamp",
+   "from": 8.274,
+   "to": 8.574,
+   "lift_db": 5
   },
   {
    "name": "stamp",
-   "from": 12.754,
-   "to": 13.054,
+   "from": 11.68,
+   "to": 11.98,
    "lift_db": 6
   },
   {
-   "name": "stamp",
-   "from": 9.341,
-   "to": 9.641,
-   "lift_db": 5
+   "name": "chime_notify",
+   "from": 13.189,
+   "to": 13.589,
+   "lift_db": 8
   }
  ]
 }

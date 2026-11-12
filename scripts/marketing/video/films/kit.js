@@ -206,9 +206,18 @@ export async function hero(ctx, { model = "island", env = "dark", edge = "#040a2
     }
     return q;
   };
+  /* the hand-held camera: a slow, seeded sway so a held shot is never dead still */
+  const drifted = (t, q) => {
+    const k = ctx.isMobile ? 1 : 0.8;
+    q.ry = (q.ry ?? 0) + k * (2.6 * Math.sin(t * 0.43 + 0.7) + 0.9 * Math.sin(t * 1.07 + 2.1));
+    q.rx = (q.rx ?? 0) + k * (1.4 * Math.sin(t * 0.37 + 1.9) + 0.5 * Math.sin(t * 0.91));
+    q.rz = (q.rz ?? 0) + k * 0.55 * Math.sin(t * 0.29 + 0.4);
+    q.cy = q.cy + k * 7 * Math.sin(t * 0.61 + 1.3);
+    return q;
+  };
   ctx.onFrame((t) => {
     if (!holder.p) return;
-    Object.assign(holder.p.pose, { fov: 24, rx: 0, ry: 0, rz: 0 }, swung(t, { ...poseAt(t) }));
+    Object.assign(holder.p.pose, { fov: 24, rx: 0, ry: 0, rz: 0 }, swung(t, drifted(t, { rx: 0, ry: 0, rz: 0, ...poseAt(t) })));
   });
   await Promise.all(ctx.pending ?? []);
   const p = phone(ctx, { model, parent: root, env, edge });
@@ -227,7 +236,7 @@ export async function hero(ctx, { model = "island", env = "dark", edge = "#040a2
       poseAt = keyed(ctx, keys);
       return H;
     },
-    at: (t) => swung(t, { rx: 0, ry: 0, rz: 0, opacity: 1, ...poseAt(t) }),
+    at: (t) => swung(t, drifted(t, { rx: 0, ry: 0, rz: 0, opacity: 1, ...poseAt(t) })),
     /** A 3D swing at each time (a chapter change): the phone turns away and back while its screen changes. */
     swing(...times) { swings.push(...times); times.forEach((ts, i) => leak(ctx, ts, { warm: i % 2 === 0 })); return H; },
     scaleAt: (t) => (fit.h * H.at(t).height) / DH,
@@ -473,6 +482,23 @@ export function lift(ctx, H, { id, crop, t0, t1, to, exit = "fade", fly = 0.7, z
   /* the cut edges breathe out rather than stopping dead */
   void fade;
   const sheen = ctx.el("div", { class: "abs", style: { left: "0px", top: "0px", width: `${w * 0.6}px`, height: `${h * 3}px`, transform: "rotate(20deg)", background: "linear-gradient(90deg, transparent, rgb(255 255 255 / 0.26) 50%, transparent)", pointerEvents: "none" } }, clip);
+  /* the spot it leaves from lights up on the glass first, then holds a dim
+     slot while the part is out, so the card reads as coming out of the screen */
+  const sy = crop.y - scrolled + (src ? BAR_PX : 0);
+  const slot = ctx.el("div", { class: "abs", style: { left: `${crop.x}px`, top: `${sy}px`, width: `${crop.w}px`, height: `${crop.h}px`, borderRadius: `${radius}px`, boxSizing: "border-box", border: "7px solid #8FD3FF", boxShadow: "0 0 54px 6px rgb(143 211 255 / 0.55), inset 0 0 40px rgb(143 211 255 / 0.25)", background: "rgb(0 3 16 / 0)", zIndex: 6000, visibility: "hidden", pointerEvents: "none" } }, H.p.screen);
+  ctx.onFrame((t) => {
+    const ringIn = ramp(ctx, t, t0 - 0.32, t0 - 0.04, "power2.out");
+    const ringOut = ramp(ctx, t, t0 + 0.05, t0 + 0.4, "power2.in");
+    const ring = ringIn * (1 - ringOut);
+    const dim = ramp(ctx, t, t0, t0 + 0.25) * (1 - ramp(ctx, t, Math.min(t1, t0 + fly + 0.9) - 0.1, Math.min(t1, t0 + fly + 0.9) + 0.3));
+    const on = ring > 0.002 || dim > 0.002;
+    slot.style.visibility = on ? "inherit" : "hidden";
+    if (!on) return;
+    slot.style.borderColor = `rgb(143 211 255 / ${(ring * 0.95).toFixed(3)})`;
+    slot.style.boxShadow = `0 0 ${(54 * ring).toFixed(0)}px ${(6 * ring).toFixed(0)}px rgb(143 211 255 / ${(0.55 * ring).toFixed(3)}), inset 0 0 40px rgb(0 0 10 / ${(0.5 * dim).toFixed(3)})`;
+    slot.style.background = `rgb(0 3 16 / ${(0.42 * dim).toFixed(3)})`;
+    slot.style.transform = `scale(${(1 + 0.025 * Math.sin(Math.PI * ringIn) * (1 - ringOut)).toFixed(4)})`;
+  });
   const from = H.toStage(t0, crop.x + crop.w / 2, crop.y + crop.h / 2 - scrolled + (src ? BAR_PX : 0));
   const phase = ctx.random(seed)() * Math.PI * 2;
   const back = exit === "back" ? H.toStage(t1, crop.x + crop.w / 2, crop.y + crop.h / 2 - scrolled + (src ? BAR_PX : 0)) : null;

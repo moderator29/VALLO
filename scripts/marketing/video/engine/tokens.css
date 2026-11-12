@@ -110,13 +110,13 @@ img { display: block; user-select: none; -webkit-user-drag: none; }
 .captions .pill {
   max-width: 88%; padding: 0.42em 0.8em 0.46em; border-radius: 0.75em; text-align: center;
   font-family: var(--text); font-weight: 600; letter-spacing: -0.01em; line-height: 1.28;
-  background: rgb(6 10 40 / 0.86); border: 1.5px solid rgb(120 170 255 / 0.22);
+  background: linear-gradient(180deg, rgb(10 16 58 / 0.95), rgb(4 8 34 / 0.95)); border: 1.5px solid rgb(143 211 255 / 0.30);
   backdrop-filter: blur(18px) saturate(1.2);
-  box-shadow: 0 12px 40px -12px rgb(0 0 20 / 0.6);
+  box-shadow: 0 16px 44px -14px rgb(0 0 20 / 0.75), inset 0 1px 0 rgb(255 255 255 / 0.08);
 }
-.captions .w { color: rgb(255 255 255 / 0.7); }
+.captions .w { color: rgb(255 255 255 / 0.5); }
 .captions .w.said { color: #fff; }
-.captions .w.now { color: var(--sky); }
+.captions .w.now { color: var(--sky); text-shadow: 0 0 18px rgb(143 211 255 / 0.55); }
 
 /* Stage grain: a still, seeded noise layer that keeps big gradients from banding. */
 .grain { position: absolute; inset: 0; pointer-events: none; z-index: 990; opacity: 0.05; mix-blend-mode: overlay; }

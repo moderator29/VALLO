@@ -5,7 +5,7 @@ Writes films/vision2/signature.json from films/vision2/timeline.json.
 The signature cues are the few payoff sounds the mixer lifts over the bed:
 the move-in total landing, Circle opening, a badge confirmed, the workspace.
 They hang on words, so run this again after the real recording replaces the
-provisional clock (films/install-voice.mjs vision2 ... --logo-line 22):
+provisional clock (films/install-voice.mjs vision2 ... --logo-line 25):
 
     python3 films/vision2/make-signature.py
 """
@@ -29,9 +29,9 @@ sig = {
     "end_ride": {"from": round(t["music"]["logo_hit"] - 0.3, 3), "ramp": 0.6, "db": 6.5},
     "cues": [
         {"name": "ding_pay", "from": round(roll_end - 0.05, 3), "to": round(roll_end + 0.35, 3), "lift_db": 8},
-        {"name": "success", "from": round(w(8, "circle") - 0.1, 3), "to": round(w(8, "circle") + 0.3, 3), "lift_db": 6},
-        {"name": "stamp", "from": round(w(14, "confirmed") - 0.05, 3), "to": round(w(14, "confirmed") + 0.25, 3), "lift_db": 5},
-        {"name": "chime_notify", "from": round(w(16, "workspace") - 0.05, 3), "to": round(w(16, "workspace") + 0.35, 3), "lift_db": 6},
+        {"name": "success", "from": round(w(10, "circle") - 0.1, 3), "to": round(w(10, "circle") + 0.3, 3), "lift_db": 6},
+        {"name": "stamp", "from": round(w(16, "confirmed") - 0.05, 3), "to": round(w(16, "confirmed") + 0.25, 3), "lift_db": 5},
+        {"name": "chime_notify", "from": round(w(18, "workspace") - 0.05, 3), "to": round(w(18, "workspace") + 0.35, 3), "lift_db": 6},
     ],
 }
 json.dump(sig, open(os.path.join(here, "signature.json"), "w"), indent=1)
