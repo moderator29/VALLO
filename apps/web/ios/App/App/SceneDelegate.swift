@@ -7,10 +7,26 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
         guard let windowScene = scene as? UIWindowScene else { return }
 
-        window = UIWindow(windowScene: windowScene)
-        // Build 1.0.2: Vallo's own bridge controller (ValloShell.swift): the
-        // edge swipe back and the shell plugin.
-        window?.rootViewController = ValloBridgeViewController()
+        // UIKIT MAY HAVE BUILT THE WINDOW ALREADY (12 November 2026).
+        //
+        // The scene configuration in Info.plist carries `UISceneStoryboardFile
+        // = Main`, and `UISceneConfiguration(name:sessionRole:)` in AppDelegate
+        // adopts the Info.plist entry of that name, so UIKit can hand this
+        // delegate a window holding `Main.storyboard`'s root controller before
+        // this method is called. Allocating a second window here left that
+        // first one, and its web view, alive: two bridge controllers and two
+        // loads of the live origin on one cold start, which on a metered data
+        // bundle is the first page paid for twice.
+        //
+        // So the window UIKit gave is the one that is used, and its root
+        // controller is replaced only when it is not already ours. The
+        // storyboard now names `ValloBridgeViewController` too, so in the
+        // ordinary case there is nothing to replace: one window, one web view,
+        // one load, with the edge swipe back and the shell plugin on it.
+        if window == nil { window = UIWindow(windowScene: windowScene) }
+        if !(window?.rootViewController is ValloBridgeViewController) {
+            window?.rootViewController = ValloBridgeViewController()
+        }
         window?.makeKeyAndVisible()
         // The exact mark and wordmark drawn in over the launch ground while
         // the first page loads; it hands over when the page has painted.

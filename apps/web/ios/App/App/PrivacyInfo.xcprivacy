@@ -211,6 +211,36 @@
 				<string>NSPrivacyCollectedDataTypePurposeAnalytics</string>
 			</array>
 		</dict>
+		<!--
+			CRASH DATA, AND 1.0.2 IS THE FIRST BUILD THAT COLLECTS IT
+			(12 November 2026). `ValloCrashLog` in ValloShell.swift catches an
+			uncaught NSException and the six fatal signals, writes the type,
+			the reason and the shell's own frames on the way down, and hands
+			them to the page on the next launch, which posts them to
+			/api/client-error. That is Apple's "Crash Data" under Diagnostics,
+			and it is its own data type: PerformanceData below is not it, and
+			declaring only PerformanceData while shipping a crash reporter is
+			an incomplete privacy manifest and a wrong answer on App Store
+			Connect's App Privacy form. Not linked to the person: the record
+			holds no identifier, and the page attaches none.
+
+			APP STORE CONNECT MUST BE CHANGED TOO. The manifest is read by
+			Xcode's privacy report; the answers a reviewer sees are the ones
+			typed in App Privacy. Tick Diagnostics, Crash Data, App
+			Functionality, not linked, not used for tracking.
+		-->
+		<dict>
+			<key>NSPrivacyCollectedDataType</key>
+			<string>NSPrivacyCollectedDataTypeCrashData</string>
+			<key>NSPrivacyCollectedDataTypeLinked</key>
+			<false/>
+			<key>NSPrivacyCollectedDataTypeTracking</key>
+			<false/>
+			<key>NSPrivacyCollectedDataTypePurposes</key>
+			<array>
+				<string>NSPrivacyCollectedDataTypePurposeAppFunctionality</string>
+			</array>
+		</dict>
 		<dict>
 			<key>NSPrivacyCollectedDataType</key>
 			<string>NSPrivacyCollectedDataTypePerformanceData</string>

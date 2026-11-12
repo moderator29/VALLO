@@ -29,6 +29,10 @@ private let valloGround = UIColor(red: 1.0 / 255.0, green: 1.0 / 255.0, blue: 24
 
 // MARK: - The web view
 
+/// `@objc` with its plain name, so `Main.storyboard` resolves it whatever the
+/// target's module is called: a storyboard that cannot find its class crashes
+/// the app at launch, and nothing in this repository can build a storyboard.
+@objc(ValloBridgeViewController)
 class ValloBridgeViewController: CAPBridgeViewController {
     override func capacitorDidLoad() {
         super.capacitorDidLoad()
@@ -322,6 +326,23 @@ enum ValloCrashLog {
     private static var signalPath: UnsafeMutablePointer<CChar>?
     private static var frames: UnsafeMutablePointer<UnsafeMutableRawPointer?>?
     private static var previousException: (@convention(c) (NSException) -> Void)?
+    /// The six signals handled, and the handler each of them had before Vallo.
+    ///
+    /// KEPT AS RAW BIT PATTERNS, NOT AS SWIFT FUNCTION VALUES, so the crashing
+    /// thread reads a plain word out of a buffer allocated at install time and
+    /// touches nothing that could allocate or take a lock. The C ABI's three
+    /// reserved values are 0 (`SIG_DFL`), 1 (`SIG_IGN`) and -1 (`SIG_ERR`);
+    /// anything else is a real handler to chain to.
+    private static let handled: [Int32] = [SIGABRT, SIGSEGV, SIGBUS, SIGILL, SIGFPE, SIGTRAP]
+    private static var previousSignal: UnsafeMutablePointer<Int>?
+    /// Written once, by the first fatal signal. A second one on the way down
+    /// (a SIGBUS raised inside the SIGSEGV handler, say) is NOT blocked by
+    /// `signal()`, which blocks only the signal being handled, and without
+    /// this it would re-enter `writeSignal`, re-open the file with `O_TRUNC`
+    /// and leave the record half written. Not an atomic: two threads crashing
+    /// in the same instant is a race this cannot win and the file is lost
+    /// either way, which is what happens today for every second signal.
+    private static var writing = false
 
     private static var folder: URL? {
         FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first?.appendingPathComponent("vallo", isDirectory: true)
@@ -338,9 +359,71 @@ enum ValloCrashLog {
             ValloCrashLog.writeException(exception)
             ValloCrashLog.previousException?(exception)
         }
-        for sig in [SIGABRT, SIGSEGV, SIGBUS, SIGILL, SIGFPE, SIGTRAP] {
-            signal(sig, valloSignalHandler)
+        // THE SIGNAL HANDLERS CHAIN, WHICH THEY DID NOT (12 November 2026).
+        // NATIVE_BUILD_QUEUE item 6 claims these are "chained to the previous
+        // handler and re-raised". Only the NSException half ever chained: this
+        // loop discarded `signal()`'s return value, so whatever was handling
+        // the signal before Vallo was dropped for good. Today that is the
+        // Swift runtime's own handler; tomorrow it is whatever an SDK the
+        // founder adds installs at launch, and it would be silently disabled
+        // by this app. The previous handler is kept now and run first.
+        // EVERY STATIC THE HANDLER READS IS WRITTEN HERE FIRST, AND THAT IS A
+        // CORRECTNESS REQUIREMENT, NOT TIDINESS. Swift initialises a static
+        // stored property lazily, through `swift_once`, which takes a lock.
+        // A lock is not async-signal-safe: the first read of an untouched
+        // static from inside a signal handler can deadlock a process that is
+        // already dying, and the crash would hang instead of crashing. So
+        // `signalPath`, `frames`, `previousSignal` and `writing` are all
+        // assigned on this line or above it, which consumes their tokens while
+        // the app is still healthy. ADD NOTHING TO THE HANDLER THAT IS NOT
+        // PRIMED HERE.
+        writing = false
+        previousSignal = UnsafeMutablePointer<Int>.allocate(capacity: handled.count)
+        previousSignal?.initialize(repeating: 0, count: handled.count)
+        for sig in handled {
+            let old = signal(sig, valloSignalHandler)
+            let i = slot(sig)
+            guard i >= 0 else { continue }
+            if let old = old {
+                previousSignal?[i] = unsafeBitCast(old, to: Int.self)
+            } else {
+                /* nil is the null pointer, which is SIG_DFL. */
+                previousSignal?[i] = 0
+            }
         }
+    }
+
+    /// Where this signal's previous handler is kept. A switch, so the crashing
+    /// thread does not search an array.
+    fileprivate static func slot(_ sig: Int32) -> Int {
+        switch sig {
+        case SIGABRT: return 0
+        case SIGSEGV: return 1
+        case SIGBUS: return 2
+        case SIGILL: return 3
+        case SIGFPE: return 4
+        case SIGTRAP: return 5
+        default: return -1
+        }
+    }
+
+    /// The whole of what runs on the crashing thread. Nothing here allocates,
+    /// takes a lock, or calls anything outside the async-signal-safe list.
+    fileprivate static func handle(_ sig: Int32) {
+        if !writing {
+            writing = true
+            writeSignal(sig)
+        }
+        let i = slot(sig)
+        let bits = i >= 0 ? (previousSignal?[i] ?? 0) : 0
+        if bits != 0, bits != 1, bits != -1 {
+            /* A real handler was there before this app: it still runs. */
+            let previous = unsafeBitCast(bits, to: (@convention(c) (Int32) -> Void).self)
+            previous(sig)
+        }
+        /* Then the system's own, so Apple's crash report is still made. */
+        signal(sig, SIG_DFL)
+        raise(sig)
     }
 
     fileprivate static func writeSignal(_ sig: Int32) {
@@ -430,10 +513,17 @@ enum ValloCrashLog {
 }
 
 /// Runs on the crashing thread with the process already broken: writes the
-/// record with plain system calls, then hands the signal back to the system,
-/// so the operating system's own crash report is still made.
+/// record with plain system calls, runs whatever handler was there before this
+/// app, then hands the signal back to the system, so the operating system's
+/// own crash report is still made. See `ValloCrashLog.handle`.
+///
+/// NOT ON AN ALTERNATE STACK, and that is a known limit rather than an
+/// oversight: `signal()` cannot ask for `SA_ONSTACK`, so a SIGSEGV raised by
+/// exhausting the thread's stack has no stack left to run this on and no
+/// record is written for it. Fixing that means `sigaction` with
+/// `sigaltstack`, which changes how every one of these six signals is
+/// delivered, and no build of this app has ever run on a phone. It is on the
+/// device list instead.
 private func valloSignalHandler(_ sig: Int32) {
-    ValloCrashLog.writeSignal(sig)
-    signal(sig, SIG_DFL)
-    raise(sig)
+    ValloCrashLog.handle(sig)
 }

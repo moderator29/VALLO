@@ -503,16 +503,41 @@
         from those devices. Such a device gets voice calls, or a clear
         "no camera found" on the call screen.
 
-        ValloCallKit (November 2026): FOREGROUND_SERVICE and
-        USE_FULL_SCREEN_INTENT are now declared for the incoming-call
-        notification that wakes the screen when the phone is locked.
+        ValloCallKit (November 2026): USE_FULL_SCREEN_INTENT is declared for
+        the incoming-call notification that wakes the screen when the phone is
+        locked, and it is used: `ValloCallKitPlugin.setFullScreenIntent`.
         MANAGE_OWN_CALLS is not needed: we use notifications, not
         ConnectionService. See native/README.md.
+
+        FOREGROUND_SERVICE WAS DECLARED AND NEVER USED, AND IS GONE
+        (12 November 2026). Nothing in this application starts a foreground
+        service: there is no `startForeground` anywhere in
+        `app/src/main/java`, no plugin dependency declares the permission in
+        its own manifest, and the line above says why there is no
+        ConnectionService. ValloCallKit rings with a notification and a full
+        screen intent, which needs neither. Three reasons to remove it rather
+        than leave it:
+
+          1. It is the plainest kind of store rejection there is, an app
+             asking for something it does not use, and this one is live on
+             both stores already.
+          2. Declaring it puts the app inside Play's Foreground Service
+             policy, which wants a declaration form and a video for every
+             type used. There is no type to declare.
+          3. From Android 14 the bare permission grants nothing anyway:
+             `startForeground` needs a typed permission
+             (FOREGROUND_SERVICE_PHONE_CALL and so on) and a matching
+             `android:foregroundServiceType`, and neither exists here.
+             targetSdk is 36.
+
+        If a real foreground service is ever added (a call that must survive
+        the app being backgrounded is the only likely one), it needs this line
+        back AND its typed permission AND the service's own
+        `android:foregroundServiceType` AND Play's declaration form.
     -->
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
     <uses-feature android:name="android.hardware.camera" android:required="false" />
     <uses-feature android:name="android.hardware.camera.autofocus" android:required="false" />

@@ -68,6 +68,40 @@
     }
   }
 
+  /*
+   * HAND THE LAUNCH MARK OVER TOO (12 November 2026).
+   *
+   * Build 1.0.2 draws the Vallo mark over the launch navy from the shell
+   * itself (`ios/App/App/ValloShell.swift`, `LaunchMark.java`), and it waits
+   * for the page to say it has painted before it leaves. Only the live app
+   * said so (`components/startup/startup-script.ts`); this packaged card never
+   * did, and this card is exactly the page that is shown when the live app
+   * cannot be reached, which is App Review's airplane mode cold start.
+   *
+   * What that cost, read from the two sources: the iPhone fell back to its
+   * 1.95 s ceiling and Android 12 and above to the same, so both showed the
+   * drawn logo and left, late but correct. ANDROID 11 AND BELOW SHOWED A BLANK
+   * NAVY RECTANGLE FOR SIX SECONDS. Below API 31 `LaunchMark.show` arms
+   * nothing: the only thing that starts the sequence is this hand-over, so
+   * every layer sat at its first value (the ring undrawn, the letters off the
+   * top, the version line transparent) and the overlay was removed only by
+   * `giveUp()` at `CEILING_MS`. `minSdkVersion` is 24, and the splash above it
+   * is already gone by then because `hideSplash` just took it down.
+   *
+   * The same bridge primitive, for the same reason, and an older binary with
+   * no such plugin simply refuses.
+   */
+  function handOffLaunchMark(win) {
+    try {
+      var cap = win && win.Capacitor;
+      if (!cap || typeof cap.nativePromise !== "function") return;
+      var pending = cap.nativePromise("ValloShell", "handoff", {});
+      if (pending && typeof pending.then === "function") pending.then(null, function () {});
+    } catch (e) {
+      /* A binary from before 1.0.2 draws no launch mark to hand over. */
+    }
+  }
+
   /* The waits between automatic retries, in milliseconds; the last repeats. */
   var BACKOFF_MS = [2000, 4000, 8000, 15000, 30000];
 
@@ -77,6 +111,7 @@
 
   function start(win, doc) {
     hideSplash(win);
+    handOffLaunchMark(win);
     var target = retryTarget(win);
     if (!target) {
       doc.body.setAttribute("data-state", "unconfigured");

@@ -8,10 +8,16 @@
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14088"/>
     </dependencies>
     <scenes>
-        <!--Bridge View Controller-->
+        <!--Vallo Bridge View Controller (build 1.0.2). This storyboard named
+            Capacitor's own CAPBridgeViewController, which has neither the
+            iPhone edge swipe back nor ValloShellPlugin on it, so any launch
+            that took the storyboard's controller lost the privacy cover, the
+            crash hand-over and the launch hand-over without a word. It is
+            Vallo's subclass now (ValloShell.swift), so the storyboard path and
+            SceneDelegate's path give the same controller.-->
         <scene sceneID="tne-QT-ifu">
             <objects>
-                <viewController id="BYZ-38-t0r" customClass="CAPBridgeViewController" customModule="Capacitor" sceneMemberID="viewController"/>
+                <viewController id="BYZ-38-t0r" customClass="ValloBridgeViewController" customModule="App" customModuleProvider="target" sceneMemberID="viewController"/>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
             </objects>
         </scene>

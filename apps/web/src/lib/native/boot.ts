@@ -210,6 +210,25 @@ export function startNativeRuntime(handlers: NativeRuntimeHandlers): () => void 
     try {
       const { startSplash } = await mods.splash;
       bootMark("runtime:splash-module-loaded");
+      /* THE FAILSAFE HAS DONE ITS JOB (12 November 2026). It exists for the
+         chunk that never arrives, and the comment on BRIDGE_FAILSAFE_MS says
+         so, but the timer was only cleared by the teardown: measured in a
+         WebKit drive of the live origin under the shell's user agent, it
+         fired on every single load, 2.5 s in, long after the splash was down
+         (`bridge-failsafe:fired@3682` against `hide:answered:parse@960`).
+         A second hide is a no-op, so this cost nothing but one more bridge
+         round trip on every cold start and a trace line that read like a
+         fault, which on a layer whose only instrument IS the trace is the
+         expensive part. The chunk is here, so the failsafe is not needed.
+
+         IT IS CLEARED HERE AND NOT EARLIER, DELIBERATELY. This line is
+         reached only once `./splash` has actually arrived and `startSplash`
+         is about to run, which is several chunk loads in, so a cold start
+         slow enough for the failsafe to be the thing that saves it still
+         gets it. No unit test pins this: any test would be racing the chunk
+         loads it is measuring, and a flaky test on this layer is worse than
+         the measurement above. */
+      window.clearTimeout(bridgeFailsafe);
       collect(startSplash());
     } catch {
       bootMark("runtime:splash-module-failed");

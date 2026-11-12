@@ -19,10 +19,28 @@ describe("the iOS privacy manifest (C15)", () => {
     expect(manifest).toMatch(/<key>NSPrivacyTrackingDomains<\/key>\s*<array\/>/);
   });
 
-  it("lists the collected types the store answers name, and not crash data while Sentry is off", () => {
+  it("lists the collected types the store answers name", () => {
     for (const type of ["EmailAddress", "PreciseLocation", "PhotosorVideos", "DeviceID", "ProductInteraction", "PerformanceData"]) {
       expect(manifest).toContain(`NSPrivacyCollectedDataType${type}<`);
     }
-    expect(manifest).not.toContain("NSPrivacyCollectedDataTypeCrashData");
+  });
+
+  /*
+   * THIS TEST SAID THE OPPOSITE UNTIL 12 NOVEMBER 2026, and it was right when
+   * it was written: "not crash data while Sentry is off". Build 1.0.2 then
+   * added the shell's own crash capture (`ValloCrashLog` in ValloShell.swift,
+   * `ValloCrashLog.java`), which records an uncaught exception and the fatal
+   * signals and posts them to /api/client-error on the next launch. That is
+   * Crash Data under Apple's Diagnostics heading whether or not Sentry is on,
+   * and the manifest had not moved with the code. So the rule is tied to the
+   * sources now rather than to a sentence about a third party: if the shell
+   * collects crashes, the manifest says so.
+   */
+  it("declares crash data exactly when the shell collects crashes", () => {
+    const collects =
+      readFileSync(`${root}ios/App/App/ValloShell.swift`, "utf8").includes("NSSetUncaughtExceptionHandler");
+    expect(manifest.includes("NSPrivacyCollectedDataTypeCrashData"), collects
+      ? "ValloCrashLog installs handlers, so the manifest must declare Crash Data"
+      : "nothing collects crashes any more, so the manifest must not declare Crash Data").toBe(collects);
   });
 });

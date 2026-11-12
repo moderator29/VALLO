@@ -123,7 +123,18 @@ final class LaunchMark {
     }
 
     static void show(final Activity activity) {
-        if (ground != null) return;
+        if (ground != null) {
+            /*
+             * THE ACTIVITY CAN BE REBUILT UNDER US (12 November 2026).
+             * `MainActivity.recoverRenderer` calls `recreate()` when the
+             * system stops the web view's renderer for memory, and onCreate
+             * calls this again. These fields are static, so an overlay from
+             * the activity that has gone kept that Activity alive here and
+             * this launch got no opening at all. Let the dead one go.
+             */
+            if (ground.getContext() == activity) return;
+            remove(ground);
+        }
         try {
             final FrameLayout g = new FrameLayout(activity);
             g.setBackgroundColor(GROUND);
@@ -190,6 +201,28 @@ final class LaunchMark {
                     }
                 });
             }
+            /*
+             * THE CEILING FOR THE PATHS THAT NEVER REACH start() (12 November
+             * 2026). It was scheduled only inside start(), so the two paths
+             * that do not call it had no ceiling at all and fell through to
+             * giveUp() at CEILING_MS, six seconds:
+             *
+             *   below Android 12 with no hand-over  the overlay is BLANK on
+             *     this path (nothing has been drawn: the ring undrawn, the
+             *     letters off the top, the version line transparent), and the
+             *     page that never hands over is the packaged offline card,
+             *     which is App Review's airplane mode cold start. That card
+             *     now hands over (native-shell/shell.js), and this is the
+             *     belt and braces for a page whose script never runs.
+             *   animations switched off  the finished logo, still, for six
+             *     seconds. The iPhone clears its own quiet path in 1.45 s.
+             *
+             * The iPhone schedules its ceiling in `show` on every path
+             * (ValloShell.swift), and this is the same thing. `leave` is
+             * idempotent, and start()'s own ceiling still governs a sequence
+             * that is actually running, so a slow first draw is not cut short.
+             */
+            MAIN.postDelayed(LaunchMark::ceilingForIdle, SEQUENCE_CEILING_MS);
             MAIN.postDelayed(LaunchMark::giveUp, CEILING_MS);
         } catch (Throwable ignored) {
             // No overlay: the page arrives as it did before.
@@ -266,6 +299,12 @@ final class LaunchMark {
     private static void leaveWhenLanded() {
         long elapsed = SystemClock.uptimeMillis() - startedAt;
         MAIN.postDelayed(LaunchMark::leave, Math.max(0, SEQUENCE_END_MS - elapsed));
+    }
+
+    /** Nothing is travelling and the ceiling has passed: the overlay goes. */
+    private static void ceilingForIdle() {
+        if (ground == null) return;
+        if (!started || !animatorsOn()) leave();
     }
 
     private static void giveUp() {

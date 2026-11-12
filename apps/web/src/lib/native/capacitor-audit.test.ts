@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { globSync, readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 
@@ -88,6 +88,32 @@ describe("Android", () => {
     for (const p of ["ACCESS_BACKGROUND_LOCATION", "READ_EXTERNAL_STORAGE", "WRITE_EXTERNAL_STORAGE", "READ_MEDIA_IMAGES", "READ_CONTACTS", "SYSTEM_ALERT_WINDOW"]) {
       expect(permissions, p).not.toContain(`android.permission.${p}`);
     }
+  });
+
+  /*
+   * FOREGROUND_SERVICE WAS DECLARED AND NEVER USED (12 November 2026). It was
+   * added for ValloCallKit, which rings with a notification and a full screen
+   * intent and starts no service at all. An app asking for something it does
+   * not use is the plainest store rejection there is, this one is live on both
+   * stores, and from Android 14 the bare permission grants nothing anyway
+   * without a typed permission and a matching `foregroundServiceType`. So the
+   * rule is tied to the code rather than to a list: the permission is declared
+   * only if some source actually calls `startForeground`.
+   */
+  it("declares FOREGROUND_SERVICE only if something starts a foreground service", () => {
+    const sources = globSync(`${root}android/app/src/main/java/**/*.java`)
+      .map((p) => read(p))
+      .join("\n");
+    const starts = sources.includes("startForeground");
+    expect(permissions.includes("android.permission.FOREGROUND_SERVICE"), starts
+      ? "something calls startForeground, so FOREGROUND_SERVICE must be declared, with its typed permission and foregroundServiceType"
+      : "nothing calls startForeground, so FOREGROUND_SERVICE must not be declared").toBe(starts);
+  });
+
+  it("declares USE_FULL_SCREEN_INTENT, and uses it: the call that wakes a locked screen", () => {
+    const callKit = read(`${root}android/app/src/main/java/com/vallospaces/app/plugins/callkit/ValloCallKitPlugin.java`);
+    expect(callKit).toContain("setFullScreenIntent");
+    expect(permissions).toContain("android.permission.USE_FULL_SCREEN_INTENT");
   });
 
   it("no cleartext, no backup of the session, predictive back on, camera and microphone optional", () => {

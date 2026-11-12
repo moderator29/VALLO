@@ -99,13 +99,19 @@ android {
              *
              * `shrinkResources` stays OFF and that is a deliberate exception
              * rather than an oversight. `capacitor.config.ts` sets
-             * `androidSplashResourceName: "splash"`, and the splash plugin
-             * turns that string into a drawable at runtime through
-             * `Resources.getIdentifier`. Resource shrinking works from static
-             * references, cannot see a lookup by name, and would strip the
-             * splash art as unused. The failure would be a black first frame on
-             * a release build only, which is precisely the kind of defect that
-             * survives every debug test and greets the first reviewer.
+             * `androidSplashResourceName: "splash_blank"` (it said "splash"
+             * when this note was written, before the founder's 7 November
+             * ruling that the shell draws the opening itself and the splash
+             * stays bare), and the splash plugin turns that string into a
+             * drawable at runtime through `Resources.getIdentifier`. Resource
+             * shrinking works from static references, cannot see a lookup by
+             * name, and would strip the drawable as unused. The same goes for
+             * every `launch_*` drawable `LaunchMark.java` decodes: those ARE
+             * referenced statically through R, so they would survive, but the
+             * splash lookup would not. The failure would be a black first
+             * frame on a release build only, which is precisely the kind of
+             * defect that survives every debug test and greets the first
+             * reviewer.
              */
             minifyEnabled true
             shrinkResources false
