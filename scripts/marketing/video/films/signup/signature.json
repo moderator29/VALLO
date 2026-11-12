@@ -10,20 +10,20 @@
  "cues": [
   {
    "name": "stamp",
-   "from": 8.274,
-   "to": 8.574,
+   "from": 8.374,
+   "to": 8.674,
    "lift_db": 5
   },
   {
    "name": "stamp",
-   "from": 11.68,
-   "to": 11.98,
+   "from": 11.78,
+   "to": 12.08,
    "lift_db": 6
   },
   {
    "name": "chime_notify",
-   "from": 13.189,
-   "to": 13.589,
+   "from": 13.269,
+   "to": 13.669,
    "lift_db": 8
   }
  ]

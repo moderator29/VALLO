@@ -10,14 +10,14 @@
  "cues": [
   {
    "name": "success",
-   "from": 30.337,
-   "to": 30.637,
+   "from": 30.347,
+   "to": 30.647,
    "lift_db": 7
   },
   {
    "name": "lock_click",
-   "from": 73.649,
-   "to": 73.899,
+   "from": 74.189,
+   "to": 74.439,
    "lift_db": 6
   }
  ]
