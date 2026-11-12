@@ -92,7 +92,16 @@ export function DocTable({
 }) {
   return (
     <div className="nf-doc-table-wrap">
-      <table className="nf-doc-table" role="table">
+      {/*
+        A DENSE TABLE STACKS ON ITS OWN WIDTH, NOT ONLY THE WINDOW'S. The
+        stacking rule was a viewport media query at 34rem, which answers the
+        phone and nothing else. A four column table inside the 48rem document
+        sheet is 704px wide on a 1280px window, and measured on `/cookies` that
+        put a column of prose at 78px. `data-dense` is the hook the container
+        query in docs-kit.css reads; the count is on the wrap for anyone
+        reading the DOM.
+      */}
+      <table className="nf-doc-table" role="table" data-cols={columns.length} data-dense={columns.length >= 4 ? "true" : undefined}>
         <caption className={captionHidden ? "sr-only" : "nf-doc-table__caption"}>{caption}</caption>
         <thead role="rowgroup">
           <tr role="row">

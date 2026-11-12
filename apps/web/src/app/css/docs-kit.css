@@ -51,6 +51,15 @@
     align-items: center;
     gap: var(--nf-space-xs);
     flex: 1;
+    /*
+     * THE 44pt FLOOR, WHICH ITS TWO NEIGHBOURS ALREADY HAD. Back and Search
+     * above are both 2.75rem square; this one took only the height of its own
+     * line, and it is the link that leads to the section index on every docs,
+     * help, guides and legal page. Measured in Chromium and WebKit at 360,
+     * 390, 440 and 1280, light and dark: 24.8px tall inside a 56px bar, so the
+     * room was already there. The bar does not move.
+     */
+    min-block-size: 2.75rem;
     min-inline-size: 0;
     font-weight: 600;
     font-size: var(--nf-text-body);
@@ -461,6 +470,9 @@
     border-radius: var(--nf-radius-xl);
     background: var(--nf-surface-secondary);
     overflow: clip;
+    /* So a table can answer its own width rather than the window's. See the
+       dense-table container query below the phone block. */
+    container-type: inline-size;
   }
   .nf-doc-table {
     inline-size: 100%;
@@ -638,6 +650,84 @@
       content: none;
     }
     .nf-doc-table [data-numeric="true"] {
+      text-align: start;
+    }
+  }
+
+  /*
+   * A DENSE TABLE STACKS ON ITS OWN WIDTH (11 November 2026).
+   *
+   * The block above is a viewport query, so it answers the phone and nothing
+   * else. The window is not what a table is laid out in: a document sheet caps
+   * at 48rem, so on a 1280px window the wrap measures 704px whatever the window
+   * does, and four columns of prose have to share it. Measured in Chromium at
+   * 1280, light and dark:
+   *
+   *   /cookies                      78.3px  / 99.2px / 107.0px columns
+   *   /cancellations               126.6px, six lines deep
+   *   /privacy                     135.0px, nine lines deep
+   *   /terms                       150.7px, seven lines deep
+   *
+   * Nothing overflowed; it was simply unreadable, eighteen characters to the
+   * line. Four columns or more now stack into the same cards the phone gets as
+   * soon as the wrap is 48rem or narrower, which is every window up to the
+   * point where a sheet that wide could give each column eleven rems.
+   *
+   * Two and three column tables are left alone, and the three column case is a
+   * judgement rather than a clean pass: at 1280 their narrowest column came out
+   * 160 to 176px in Chromium, which reads across, but WebKit's table algorithm
+   * distributes differently and gave `/privacy` a 116px column over seven
+   * lines. That is the next thing to look at here, measured, and it is written
+   * down rather than quietly included.
+   *
+   * The declarations repeat the phone block deliberately rather than being
+   * folded into it. The two have different conditions, one on the window and
+   * one on the container, and a single rule cannot carry two thresholds. The
+   * phone block is untouched so no phone layout can move.
+   */
+  @container (max-width: 48rem) {
+    .nf-doc-table[data-dense="true"] thead {
+      position: absolute;
+      inline-size: 1px;
+      block-size: 1px;
+      overflow: hidden;
+      clip-path: inset(50%);
+    }
+    .nf-doc-table[data-dense="true"],
+    .nf-doc-table[data-dense="true"] tbody,
+    .nf-doc-table[data-dense="true"] tr,
+    .nf-doc-table[data-dense="true"] tbody :is(th, td) {
+      display: block;
+    }
+    .nf-doc-table[data-dense="true"] caption {
+      display: block;
+      inline-size: 100%;
+    }
+    .nf-doc-table[data-dense="true"] tr {
+      padding: var(--nf-space-sm) var(--nf-space-md);
+      border-block-start: var(--nf-border-width) solid var(--nf-border-subtle);
+    }
+    .nf-doc-table[data-dense="true"] tbody :is(th, td) {
+      display: grid;
+      grid-template-columns: minmax(6rem, 38%) 1fr;
+      gap: var(--nf-space-sm);
+      padding: var(--nf-space-2xs) 0;
+      border: 0;
+    }
+    .nf-doc-table[data-dense="true"] tbody :is(th, td)::before {
+      content: attr(data-label);
+      color: var(--nf-content-muted);
+      font-size: var(--nf-text-caption);
+      font-weight: 600;
+    }
+    .nf-doc-table[data-dense="true"] tbody :is(th, td)[data-lead="true"] {
+      grid-template-columns: 1fr;
+      padding-block-end: var(--nf-space-xs);
+    }
+    .nf-doc-table[data-dense="true"] tbody :is(th, td)[data-lead="true"]::before {
+      content: none;
+    }
+    .nf-doc-table[data-dense="true"] [data-numeric="true"] {
       text-align: start;
     }
   }
