@@ -250,7 +250,9 @@ export async function build(ctx) {
   const keep = layer("keep", s(6) - 0.2, s(7) - 0.1);
   H.show("saved", s(6) - 0.25, w(6, "conversations") - 0.1, { enter: "slide" });
   H.show("messages", w(6, "conversations") - 0.1, w(6, "agreements") - 0.1, { enter: "slide" });
-  H.show("f-agreements", w(6, "agreements") - 0.1, s(7) - 0.1, { enter: "slide" });
+  /* the agreements screen as it reads with nothing yet signed (the fresh
+     capture caught a connection error, which no film should show) */
+  H.show("agreements", w(6, "agreements") - 0.1, s(7) - 0.1, { enter: "slide" });
   /* the shortlist's own count, then the inbox's one conversation */
   lift(ctx, H, {
     id: "saved", crop: SAVED_BAR, t0: w(6, "shortlist") - 0.05, t1: w(6, "conversations") + 0.1,

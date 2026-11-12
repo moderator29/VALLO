@@ -17,8 +17,12 @@
  * (the Agreements screen's own paragraph says "our payment processor", and
  * that paragraph is lifted whole rather than paraphrased).
  *
- * Nothing here refers to a number of seconds: the clock is provisional and
- * every beat re-anchors itself on s(i), e(i) and w(i, "word").
+ * Nothing here refers to a number of seconds: every beat hangs on s(i),
+ * e(i) and w(i, "word") of the recorded clock.
+ *
+ * Two formats. Mobile: the phone ends its glass above the caption pill and a
+ * container only comes up while it has stepped down. Desktop (1920x1080):
+ * the phone in the middle, what comes off it alternating left and right.
  */
 import {
   anchors, ground, hero, lift, headline, ending, openerOwner, popOut, badgeDisc,
@@ -28,6 +32,7 @@ import { placeBack, strikeThrough } from "./parts.js";
 
 export async function build(ctx) {
   const M = ctx.isMobile;
+  const P = (m, d) => (M ? m : d);
   const { s, w, wq } = anchors(ctx);
   const H = await hero(ctx, { model: "island", env: "dark", edge: "#040a2e" });
 
@@ -40,29 +45,44 @@ export async function build(ctx) {
   const layer = (id, t0, t1, z = 760) => ctx.scene(id, t0, t1, { z });
 
   /* ---------- the stage ---------- */
-  const CX = 540;
-  /* HOME: the phone at reading size, its glass from y 398 to 1752.
-     LOW: stepped back, so the band from the pill down to y 700 is free for a
-     container. The chapter pill sits at y 290..360 and the captions at 1580,
-     so nothing of ours lands in either without ctx.hidePill / hideCaptions. */
-  const HOME = { cx: CX, cy: 1075, height: 1380 };
-  const LOW = { cx: CX, cy: 1265, height: 1150 };
-  const off = (p) => ({ ...p, cy: p.cy + 1750 });
+  const CX = ctx.W / 2;
+  const LX = 410;    // desktop: the left column's centre
+  const RX = 1510;   // desktop: the right column's centre
+  const TOP = 480;   // mobile: the band a container takes while the phone is LOW
+  /* HOME: the phone at reading size, its glass from y ~370 to ~1650, so the
+     caption pill (centred 1580) only sits on the screen's bottom bar.
+     LOW: stepped down, so the band from the pill to y ~630 is free for a
+     container. Desktop: the phone stands in the middle of the frame. */
+  const HOME = P({ cx: CX, cy: 1010, height: 1280 }, { cx: CX, cy: 535, height: 800 });
+  const LOW = P({ cx: CX, cy: 1130, height: 1000 }, { cx: CX, cy: 535, height: 800 });
+  const OPEN = P(LOW, { cx: 1420, cy: 560, height: 780 });   // desktop: beside the opening line, not behind it
+  const off = (p) => ({ ...p, cy: p.cy + (M ? 1750 : 1150) });
   /* the push onto the cost breakdown: the rows of the listing's own price
-     sheet aimed at the middle of the frame, with 100px of air each side */
-  const COST = H.aim(660, 1700, 1950, CX, 1000);
+     sheet held in the middle of the frame, clear of the caption */
+  const COST = M ? H.aim(660, 1700, 1950, CX, 930) : H.aim(660, 1700, 1150, CX, 540);
+  /* the crops, measured on the fresh captures (films/blocks.py) */
+  const OWN_ROW = { x: 42, y: 2280, w: 1236, h: 315 };        // host-start: "I own the property / List it yourself. No agency fee."
+  const WS_HEAD = { x: 30, y: 694, w: 1256, h: 300 };         // f-host-start: "Add a workspace" and its own sub-line
+  const ASK_HEAD = { x: 30, y: 462, w: 1260, h: 340 };        // f-agent-listing-edit: "What are you listing today?"
+  const COST_HEAD = { x: 30, y: 476, w: 1190, h: 254 };       // sc-listing-cost: "What you will actually pay"
+  const TOTAL = { x: 26, y: 2634, w: 288, h: 140 };           // sc-listing-cost: the move-in total, before the buttons
+  const INSPECT = { x: 30, y: 590, w: 1240, h: 240 };         // f-agent-inspections: "Property inspection", its line and its house
+  const DRAWN = { x: 110, y: 1962, w: 1100, h: 246 };         // agreements: "An agreement is drawn up after an inspection report ..."
+  const NEVER = { x: 30, y: 916, w: 1270, h: 216 };           // agreements: "Vallo never holds your money. When you pay ..."
+  const TAP_OWN = [660, 2437];                                // the "I own the property" card
+  const TAP_LET = [660, 1440];                                // "A property to let"
 
   H.path([
-    [0, { ...off(LOW), opacity: 0 }],
+    [0, { ...off(OPEN), opacity: 0 }],
     /* THE PHONE'S FIRST RISE, on "list it yourself". It comes up to the low
        pose, under the opening line and clear of it, so the last beat of
        sentence one is the owner's own screen arriving rather than three
        seconds of a title card sitting still. It takes the reading pose behind
        the opening cut's slab. */
-    [s(1) + 0.45, { ...off(LOW), opacity: 1 }, "none"],
-    [w(1, "list") - 0.15, { ...off(LOW) }, "none"],
-    [w(1, "list") + 0.75, { ...LOW }, "power3.out"],
-    [cut(2) - 0.05, { ...LOW }],
+    [s(1) + 0.45, { ...off(OPEN), opacity: 1 }, "none"],
+    [w(1, "list") - 0.15, { ...off(OPEN) }, "none"],
+    [w(1, "list") + 0.75, { ...OPEN }, "power3.out"],
+    [cut(2) - 0.05, { ...OPEN }],
     [cut(2) + 0.30, { ...HOME }, "power3.out"],
     /* the phone steps back for the struck fee, so the container stands in a
        clear band rather than across the screen's own heading */
@@ -99,7 +119,9 @@ export async function build(ctx) {
   H.show("f-agent-listing-edit", w(3, "tell") + 0.30, cut(4) + 0.08, { enter: "slide" });
   H.show("sc-listing-cost", cut(4) + 0.08, cut(5) + 0.08, { enter: "rise" });
   H.show("f-agent-inspections", cut(5) + 0.08, w(5, "report") - 0.10, { enter: "slide" });
-  H.show("f-agreements", w(5, "report") - 0.10, cut(7) - 0.05, { enter: "slide" });
+  /* the agreements screen as it reads with nothing yet signed: the live one
+     was caught on a connection error, which no film should show */
+  H.show("agreements", w(5, "report") - 0.10, cut(7) - 0.05, { enter: "slide" });
 
   /* ===================== 1. The opening frame (built, approved) ============ */
   ground(ctx, 0, cut(2), { tone: "navy", y: 26, seed: 11 });
@@ -108,7 +130,7 @@ export async function build(ctx) {
   /* the opener's composed still clears on the first word, and a photographed
      place takes the field under the line, BEHIND the phone (z 3), so the
      frame is never empty and the handset rises out of the building */
-  placeBack(ctx, ctx.scene("open-place", s(1), cut(2), { z: 3 }), { scene: "house", t0: s(1) + 0.15, t1: s(2) - 0.45, y: 880, opacity: 0.44 });
+  placeBack(ctx, ctx.scene("open-place", s(1), cut(2), { z: 3 }), { scene: "house", t0: s(1) + 0.15, t1: s(2) - 0.45, y: P(880, 330), opacity: 0.44, width: P(null, 1500) });
   headline(ctx, open, {
     lines: [[["If you own a place,", false]], [["list it ", false], ["yourself.", true]]],
     x: M ? 60 : 160, y: M ? 430 : 230, size: M ? 100 : 104, t0: s(1) - 0.05, t1: s(2) - 0.5, stagger: 0, keyStyle: "chip",
@@ -129,12 +151,10 @@ export async function build(ctx) {
      larger, the way the blueprint does it. Nothing is drawn and nothing is
      claimed: this is the screen saying it. */
   lift(ctx, H, {
-    id: "host-start", crop: { x: 42, y: 1977, w: 1236, h: 141 },
+    id: "host-start", crop: OWN_ROW,
     t0: w(2, "agency") - 0.12, t1: w(2, "did") - 0.15,
-    /* it rests just under the screen's own sub-line: a few pixels higher and
-       the card's rule ran through "Add a workspace" once the phone stepped
-       back, which is the founder's standing complaint */
-    to: { x: CX, y: 1075, s: 0.72, r: -2 }, seed: 1, radius: 44,
+    /* on mobile it rests over the stepped-down phone, under the container */
+    to: P({ x: CX, y: 1010, s: 0.66, r: -2 }, { x: LX, y: 400, s: 0.52, r: -2 }), seed: 1, radius: 44,
   });
   /* the caption would print "No agency fee." under a part that already says
      it in the product's own words, so it waits for the second clause */
@@ -147,13 +167,14 @@ export async function build(ctx) {
   const feeOut = popOut(ctx, fee, {
     kind: "stat", lucide: "percent", tab: "Agency fee", figure: "10.0%", unit: "of a year's rent",
     note: "Not when you list it yourself.",
-    x: CX, y: 555, t0: w(2, "middle") + 0.05, t1: cut(3) - 0.42, size: 32, from: "above", seed: 2,
+    x: P(CX, RX), y: P(TOP + 10, 470), t0: w(2, "middle") + 0.05, t1: cut(3) - 0.42, size: P(32, 30), from: P("above", "right"), seed: 2,
   });
+  ctx.hidePill(w(2, "middle") - 0.2, cut(3));
   strikeThrough(ctx, feeOut.rows[1], { t0: w(2, "cut"), dur: 0.44 });
 
   /* two of the brand's discs ride the margins beside the handset */
-  badgeDisc(ctx, fee, { name: "price-tag", x: 112, y: 1310, size: 128, t0: w(2, "fee") + 0.15, t1: cut(3) - 0.5, seed: 3 });
-  badgeDisc(ctx, fee, { name: "contract", x: 972, y: 770, size: 126, t0: w(2, "man") + 0.15, t1: cut(3) - 0.45, seed: 4 });
+  badgeDisc(ctx, fee, { name: "price-tag", x: P(112, LX), y: P(1330, 800), size: P(128, 140), t0: w(2, "fee") + 0.15, t1: cut(3) - 0.5, seed: 3 });
+  badgeDisc(ctx, fee, { name: "contract", x: P(972, 1640), y: P(780, 800), size: P(126, 140), t0: w(2, "man") + 0.15, t1: cut(3) - 0.45, seed: 4 });
 
   /* ===================== 3. Add a workspace, and send it =================== */
   /* CUT 2 -> 3. The frame breaks into tiles and drops away. */
@@ -165,20 +186,22 @@ export async function build(ctx) {
      workspace gets its own tools and its own checks." That line is why this
      film never shows a place going live on being described. */
   lift(ctx, H, {
-    id: "f-host-start", crop: { x: 30, y: 694, w: 1256, h: 300 },
+    id: "f-host-start", crop: WS_HEAD,
     /* it leaves while the wizard is still sliding in under it: held any
        longer it hung half faded over the new screen's own heading */
     t0: w(3, "workspace") - 0.12, t1: w(3, "Vallo") + 0.05,
-    to: { x: CX, y: 790, s: 0.60, r: -1.5 }, seed: 5, radius: 20,
+    to: P({ x: CX, y: 640, s: 0.62, r: -1.5 }, { x: LX, y: 330, s: 0.5, r: -1.5 }), seed: 5, radius: 20,
   });
-  H.tap(w(3, "tell") - 0.15, 660, 2355);
+  H.tap(w(3, "tell") - 0.15, ...TAP_OWN);
+  /* what the place is: the wizard's own answer, pressed */
+  H.tap(w(3, "is") + 0.02, ...TAP_LET);
 
   /* the step the pointer opened: the wizard's first question, whole, over the
      place it came from (its own block runs y 1758..1980 on the screen) */
   lift(ctx, H, {
-    id: "f-agent-listing-edit", crop: { x: 36, y: 1756, w: 1252, h: 228 },
+    id: "f-agent-listing-edit", crop: ASK_HEAD,
     t0: w(3, "place") - 0.12, t1: w(3, "and", 2) - 0.45,
-    to: { x: CX, y: 1180, s: 0.62, r: 1.5 }, seed: 6, radius: 20,
+    to: P({ x: CX, y: 790, s: 0.6, r: 1.5 }, { x: RX, y: 340, s: 0.5, r: 1.5 }), seed: 6, radius: 20,
   });
   /* a light whip carries the move from the list to the wizard: a quick move
      inside a chapter, never a chapter change */
@@ -192,7 +215,7 @@ export async function build(ctx) {
   popOut(ctx, flow, {
     kind: "line", lucide: "tag", tab: "Step six of eight", title: "The price",
     line: "And what it includes.",
-    x: CX, y: 480, t0: w(3, "price") - 0.50, t1: w(3, "and", 2) - 0.79, size: 30, from: "above", seed: 7,
+    x: P(CX, LX), y: P(TOP, 720), t0: w(3, "price") - 0.50, t1: w(3, "and", 2) - 0.79, size: 30, from: P("above", "left"), seed: 7,
   });
   /* THE LAST STEP, AND THE ONE LOUD CONTAINER IN THE FILM. "Check and send"
      and "Nothing is submitted until you press the button on this screen" are
@@ -200,10 +223,11 @@ export async function build(ctx) {
   popOut(ctx, flow, {
     kind: "line", lucide: "send-horizontal", tab: "The last step", title: "Check and send",
     line: "Nothing is sent until you press it.",
-    x: CX, y: 430, t0: wq(3, "send", ["it", 2]) - 0.50, t1: cut(4) - 0.40, size: 30, from: "below", accent: "electric", seed: 8,
+    x: P(CX, RX), y: P(TOP, 720), t0: wq(3, "send", ["it", 2]) - 0.50, t1: cut(4) - 0.40, size: 30, from: P("below", "right"), accent: "electric", seed: 8,
   });
   ctx.hidePill(wq(3, "send", ["it", 2]) - 0.5, cut(4) - 0.05);
-  object3d(ctx, flow, { name: "checklist", size: 210, x: 905, y: 980, t0: wq(3, "checks", "live") - 0.25, t1: cut(4) - 0.35, drift: 1, seed: 14 });
+  ctx.hidePill(w(3, "price") - 0.5, w(3, "and", 2) - 0.6);
+  object3d(ctx, flow, { name: "checklist", size: 210, x: P(905, 1660), y: P(1000, 320), t0: wq(3, "checks", "live") - 0.25, t1: cut(4) - 0.35, drift: 1, seed: 14 });
 
   /* ===================== 4. The whole cost, on the listing ================= */
   /* CUT 3 -> 4. Four tick brackets close on the centre and bloom. */
@@ -213,10 +237,10 @@ export async function build(ctx) {
   /* the renter's side of the same place, and its own promise at the top of
      the cost sheet (blocks.py: the heading runs y 481..724) */
   lift(ctx, H, {
-    id: "sc-listing-cost", crop: { x: 30, y: 476, w: 1190, h: 254 },
+    id: "sc-listing-cost", crop: COST_HEAD,
     /* it is gone before the push brings the same heading up on the glass */
     t0: w(4, "whole") - 0.12, t1: w(4, "so") - 0.30,
-    to: { x: CX, y: 700, s: 0.64, r: -1.5 }, seed: 20, radius: 20,
+    to: P({ x: CX, y: 640, s: 0.64, r: -1.5 }, { x: LX, y: 330, s: 0.5, r: -1.5 }), seed: 20, radius: 20,
   });
   /* VIDEO ONE HELD THE FOUR COST ROWS UP ONE BY ONE. This film has two thirds
      of the time for the same beat, so it does the opposite: the camera pushes
@@ -232,9 +256,9 @@ export async function build(ctx) {
      figure a renter has already seen before anybody picks up a phone. The
      crop stops before the bar's buttons, so no control is cut in half. */
   lift(ctx, H, {
-    id: "sc-listing-cost", crop: { x: 26, y: 2634, w: 288, h: 140 },
+    id: "sc-listing-cost", crop: TOTAL,
     t0: w(4, "already") + 0.32, t1: cut(5) - 0.42,
-    to: { x: CX, y: 430, s: 1.55, r: -2 }, seed: 21, radius: 22, fly: 0.78,
+    to: P({ x: CX, y: 470, s: 1.55, r: -2 }, { x: RX, y: 470, s: 1.25, r: -2 }), seed: 21, radius: 22, fly: 0.78,
   });
   /* the push brings the cost sheet's own heading up under the pill, and the
      pill sat squarely across "Every cost this lister has declared": it steps
@@ -251,18 +275,18 @@ export async function build(ctx) {
      report." One crop carries the ask and the report both, and it is taken
      low enough to keep the whole of the screen's own house object. */
   lift(ctx, H, {
-    id: "f-agent-inspections", crop: { x: 30, y: 1164, w: 1240, h: 262 },
+    id: "f-agent-inspections", crop: INSPECT,
     t0: w(5, "inspection") - 0.12, t1: w(5, "Then") - 0.45,
-    to: { x: CX, y: 900, s: 0.64, r: -2 }, seed: 22, radius: 20,
+    to: P({ x: CX, y: 660, s: 0.66, r: -2 }, { x: RX, y: 360, s: 0.52, r: -2 }), seed: 22, radius: 20,
   });
   whipPan(ctx, w(5, "report") - 0.10, { dir: "left", dur: 0.22, sound: null });
   /* and the Agreements screen answering the last clause in its own words */
   lift(ctx, H, {
-    id: "f-agreements", crop: { x: 120, y: 2120, w: 1082, h: 238 },
+    id: "agreements", crop: DRAWN,
     t0: w(5, "agreement") - 0.50, t1: cut(6) - 0.32,
-    to: { x: CX, y: 1120, s: 0.72, r: 1.5 }, seed: 23, radius: 20,
+    to: P({ x: CX, y: 660, s: 0.74, r: 1.5 }, { x: LX, y: 560, s: 0.56, r: 1.5 }), seed: 23, radius: 20,
   });
-  object3d(ctx, deal, { name: "contract", size: 220, x: 905, y: 600, t0: w(5, "agreement") - 0.15, t1: cut(6) - 0.38, drift: 1, seed: 18 });
+  object3d(ctx, deal, { name: "contract", size: 220, x: P(905, 1640), y: P(1080, 800), t0: w(5, "agreement") - 0.15, t1: cut(6) - 0.38, drift: 1, seed: 18 });
 
   /* ===================== 6. Straight to your own bank account ============= */
   /* CUT 5 -> 6. The slab sweeps left into the emerald. */
@@ -277,15 +301,15 @@ export async function build(ctx) {
      place it sits, so the film quotes the product rather than the other way
      round. The paragraph names no provider, which is the rule. */
   lift(ctx, H, {
-    id: "f-agreements", crop: { x: 30, y: 1068, w: 1256, h: 210 },
+    id: "agreements", crop: NEVER,
     t0: w(6, "share") - 0.12, t1: w(6, "through") - 0.05,
-    to: { x: CX, y: 980, s: 0.68, r: -1.5 }, seed: 24, radius: 16,
+    to: P({ x: CX, y: 760, s: 0.7, r: -1.5 }, { x: RX, y: 420, s: 0.5, r: -1.5 }), seed: 24, radius: 16,
     label: "The Agreements screen, word for word",
   });
-  object3d(ctx, paid, { name: "bank", size: 230, x: 125, y: 690, t0: w(6, "bank") - 0.2, t1: cut(7) - 0.45, drift: 1, seed: 25 });
+  object3d(ctx, paid, { name: "bank", size: P(200, 230), x: P(130, LX), y: P(1300, 760), t0: w(6, "bank") - 0.2, t1: cut(7) - 0.45, drift: 1, seed: 25 });
   popOut(ctx, paid, {
     kind: "line", lucide: "shield-check", tab: "In the same transaction", title: "Our licensed payments provider",
-    x: CX, y: 420, t0: w(6, "licensed") - 0.50, t1: cut(7) - 0.40, size: 32, from: "above", seed: 26,
+    x: P(CX, LX), y: P(TOP, 400), t0: w(6, "licensed") - 0.50, t1: cut(7) - 0.40, size: P(32, 28), from: P("above", "left"), seed: 26,
   });
   ctx.hidePill(w(6, "licensed") - 0.5, cut(7));
 
@@ -299,12 +323,12 @@ export async function build(ctx) {
   const vow = layer("vow", cut(7), s(9) - 0.1, 800);
   headline(ctx, vow, {
     lines: [[["Vallo ", false], ["never", true]], [["holds your money.", false]]],
-    x: CX, y: 720, size: 96, t0: w(7, "Vallo") - 0.1, t1: s(8) - 0.42, align: "center", stagger: 0, keyStyle: "chip",
+    x: CX, y: P(720, 360), size: P(96, 132), t0: w(7, "Vallo") - 0.1, t1: s(8) - 0.42, align: "center", stagger: 0, keyStyle: "chip",
   });
   ctx.hideCaptions(s(7) - 0.2, s(8) - 0.25);
-  badgeDisc(ctx, vow, { name: "bank", x: 130, y: 460, size: 138, t0: w(7, "never") - 0.1, t1: s(8) - 0.5, seed: 28 });
-  badgeDisc(ctx, vow, { name: "vallo", kind: "mark", x: 950, y: 560, size: 130, t0: w(7, "holds") - 0.05, t1: s(8) - 0.5, tone: "paper", seed: 29 });
-  badgeDisc(ctx, vow, { name: "lock", kind: "glyph", x: 160, y: 1270, size: 126, t0: w(7, "money") - 0.05, t1: s(8) - 0.5, seed: 30 });
+  badgeDisc(ctx, vow, { name: "bank", x: P(130, 330), y: P(460, 300), size: 138, t0: w(7, "never") - 0.1, t1: s(8) - 0.5, seed: 28 });
+  badgeDisc(ctx, vow, { name: "vallo", kind: "mark", x: P(950, 1600), y: P(560, 320), size: 130, t0: w(7, "holds") - 0.05, t1: s(8) - 0.5, tone: "paper", seed: 29 });
+  badgeDisc(ctx, vow, { name: "lock", kind: "glyph", x: P(160, 960), y: P(1270, 760), size: 126, t0: w(7, "money") - 0.05, t1: s(8) - 0.5, seed: 30 });
   ctx.sfx("lock_click", w(7, "holds"), { offset: -2 });
 
   /* ---- Your place. Your price. Your account.: three phrases, three containers ---- */
@@ -315,13 +339,13 @@ export async function build(ctx) {
      starts half a second early, so the slab is the anticipation and the words
      inside it land exactly on the phrase that names them. */
   [
-    ["house", "Your place", "You put it up yourself", "place", 600, "left", 31, 0.00],
-    ["tag", "Your price", "You set it, and what it includes", "price", 950, "right", 32, 0.04],
-    ["landmark", "Your account", "Your share lands in it", "account", 1300, "left", 33, 0.08],
-  ].forEach(([lucide, tab, title, word, y, from, seed, late]) => {
+    ["house", "Your place", "You put it up yourself", "place", P(CX, 960), P(600, 250), "left", 31, 0.00],
+    ["tag", "Your price", "You set it, and what it includes", "price", P(CX, 960), P(950, 520), "right", 32, 0.04],
+    ["landmark", "Your account", "Your share lands in it", "account", P(CX, 960), P(1300, 830), "left", 33, 0.08],
+  ].forEach(([lucide, tab, title, word, x, y, from, seed, late]) => {
     popOut(ctx, mine, {
       kind: "line", lucide, tab, title,
-      x: CX, y, t0: w(8, word) - 0.50, t1: s(9) - 0.30 + late, size: 32, from, seed,
+      x, y, t0: w(8, word) - 0.50, t1: s(9) - 0.30 + late, size: P(32, 40), from, seed,
     });
   });
   /* the three tabs print the three phrases, so the caption stays down until
