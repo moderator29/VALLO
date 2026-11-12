@@ -283,8 +283,37 @@ export function useMoneyStepUp(
     release(done.data.stepUp);
   };
 
+  /*
+      A DISMISSAL ALWAYS SETTLES THE PROMISE (the founder, 12 November 2026: "if
+      I click anything there my app won't function again until I close the app
+      and open it again").
+  *
+      This read `!busy && (next ? setOpen(true) : close())`. The intent was
+      right, that a sensor check in flight should not be interrupted, but it
+      made the one escape conditional on the very thing that can get stuck.
+      `prove()` hands out `new Promise((resolve) => { settle.current = resolve })`
+      and `close()` is the only path that calls it on a dismissal. Its callers
+      await that promise inside `useSafeTransition`, whose `pending` drives
+      `disabled={pending}` on their controls. So while `busy` was true the
+      sheet could not be dismissed, the promise could never settle, the
+      transition never ended, and every control on the screen stayed disabled
+      until the app was restarted. No error, no log, nothing in the banner:
+      just a dead screen.
+  *
+      It is reachable the moment the sensor does not answer, which is the
+      ordinary state of a phone that has no key registered yet, since that is
+      exactly the phone a person brings to this screen to register one.
+  *
+      So a dismissal is always honoured and always settles. `close()` resolves
+      `null`, which every caller already handles as "the person backed out"
+      (`if (stepUp === null) return;`), so nothing is confirmed by accident.
+      A check still in flight is abandoned rather than awaited: its own
+      `finally` puts `busy` back, and a late answer finds `settle.current`
+      already null and releases nothing.
+  *
+  */
   const sheet = (
-    <Sheet open={open} onOpenChange={(next) => !busy && (next ? setOpen(true) : close())} title={copy.confirmTitle} detents={[0.6]}>
+    <Sheet open={open} onOpenChange={(next) => (next ? setOpen(true) : close())} title={copy.confirmTitle} detents={[0.6]}>
       <div className="space-y-row" data-testid="money-step-up">
         <p className="nf-body text-[var(--nf-content-secondary)]">{copy.confirmBody}</p>
         {mode === "sensor" ? (

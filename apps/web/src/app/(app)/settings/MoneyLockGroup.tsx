@@ -181,14 +181,19 @@ export function MoneyLockGroup({ list, locale }: { list: MoneyCredentialList; lo
   return (
     <SettingsGroup label={copy.settingsTitle} note={<span>{groupNote}</span>}>
       {rows.length > 0 && (
-        <RowValue icon="key" label={copy.settingsTitle} value={copy.settingsEnrolled.replace("{count}", plural(rows.length, copy.phones, locale))} testId="money-lock-count" />
+        /* Its own label, not the group's. The heading above already says
+           "Lock money with this phone"; repeating it here said nothing. */
+        <RowValue icon="key" label={copy.settingsCountLabel} value={copy.settingsEnrolled.replace("{count}", plural(rows.length, copy.phones, locale))} testId="money-lock-count" />
       )}
       {rows.map((row) => (
         <form key={row.id} onSubmit={remove} data-testid="money-lock-phone">
           <input type="hidden" name="id" value={row.id} />
           <RowSubmit
             label={row.label ?? copy.thisPhone}
-            sub={`${copy.added.replace("{when}", formatDate(new Date(row.createdAt), locale, { day: "numeric", month: "short", year: "numeric", timeZone: "Africa/Lagos" }))} ${copy.settingsRemoveNeedsProof}`}
+            /* Two sentences, joined as two. A bare space ran them together as
+               "Added 1 Oct 2026 Removing a phone asks for the same proof as
+               sending money." */
+            sub={`${copy.added.replace("{when}", formatDate(new Date(row.createdAt), locale, { day: "numeric", month: "short", year: "numeric", timeZone: "Africa/Lagos" }))}. ${copy.settingsRemoveNeedsProof}`}
             action={copy.settingsRemove}
             disabled={pending}
           />

@@ -441,8 +441,16 @@ export const platformEn = {
     settingsTitle: "Lock money with this phone",
     settingsBody:
       "Sending and withdrawing will ask for this phone's face or fingerprint lock. If the lock will not answer, your password still works.",
-    settingsEnrol: "Lock money with this phone",
+    /* NOT `settingsTitle` AGAIN (the founder, 12 November 2026: "that page is
+       scattered rubbish and I can't see any meaning of that page"). This row
+       sat under a heading and a status row that both already read "Lock money
+       with this phone", so the same seven words appeared four times on one
+       screen, counting the page title, and none of them said what the row
+       does. A row label is a verb: it says what happens when it is tapped. */
+    settingsEnrol: "Add this phone",
     settingsEnrolled: "Money is locked with {count}",
+    /* The status row's own label, for the same reason. */
+    settingsCountLabel: "Phones that lock money",
     phones: { one: "{count} phone", other: "{count} phones" } as PluralForms,
     settingsRemove: "Remove this phone",
     settingsPasswordFirst: "Enter your password first, or a code we email you if your account has no password.",

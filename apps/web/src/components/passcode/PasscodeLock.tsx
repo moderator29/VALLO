@@ -21,7 +21,20 @@ import { banner } from "@/lib/ui/toast";
 import { deviceKeyState, type DeviceKeyState } from "@/lib/platform/device-keys";
 
 /** English, like the other words added before a native speaker has read them. */
-const NO_KEY_HERE = "Face ID is not set up on this phone yet. Use your passcode, then turn it on in Settings, Passcode.";
+/*
+ * IT SAID FACE ID WAS NOT SET UP, WHICH WAS NOT TRUE AND NOT THE POINT (the
+ * founder, 12 November 2026: "Face ID it's not working ... it was actually
+ * done"). His Face ID is set up; iOS is fine. This line is shown when
+ * `deviceKeyState()` reads "none", which means THIS PHONE HOLDS NO VALLO KEY
+ * YET, a different thing entirely, and the old wording sent him to iOS
+ * Settings to fix something that was not broken there.
+ *
+ * It also named the wrong screen: Settings, Passcode does not add a key. The
+ * screen that does is Settings, Privacy, Lock money with this phone, which is
+ * where `MoneyLockGroup` enrols the phone's lock.
+ */
+const NO_KEY_HERE =
+  "This phone is not set up to unlock Vallo yet. Use your passcode, then add it under Settings, Privacy, Lock money with this phone.";
 import { readDeviceLock, type DeviceLock } from "@/lib/security/device-lock";
 import { platformLockAvailable } from "@/lib/security/webauthn-client";
 import { PasscodeFrame } from "./PasscodeFrame";
