@@ -293,7 +293,7 @@ export async function build(ctx) {
   /* the row the founder wants lifted, on its card's own edges */
   lift(ctx, H, {
     id: "f-host-start", crop: OWN_ROW, t0: w(7, "own") - 0.05, t1: w(7, "same") - 0.5,
-    to: P({ x: CX, y: 620, s: 0.62, r: -2 }, { x: LX, y: 420, s: 0.5, r: -2 }), exit: "fade", fly: 0.5, seed: 8,
+    to: P({ x: CX, y: 620, s: 0.62, r: -2 }, { x: LX, y: 420, s: 0.5, r: -2 }), exit: M ? "up" : "fade", fly: 0.5, seed: 8,
   });
   /* the workspace itself: its overview, scrolled down to the day's counters */
   H.show("f-host-home", w(7, "workspace") - 0.25, s(8) + 0.3, {
