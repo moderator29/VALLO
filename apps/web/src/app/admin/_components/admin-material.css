@@ -446,6 +446,25 @@
     color: var(--nf-content-secondary);
     font-size: var(--nf-text-caption);
   }
+
+  /*
+   * THE STAFF DOOR (the founder, 12 November 2026). It wears the figure's own
+   * card so it belongs to the grid above it, but it carries words where a
+   * figure carries a number: staff access has no queue to count, and a zero
+   * there would read as "nothing waiting" about somebody's access.
+   */
+  .nf-admin-door {
+    gap: var(--nf-space-2xs);
+  }
+  .nf-admin-door__lede {
+    color: var(--nf-content-secondary);
+    font-size: var(--nf-text-body-sm);
+  }
+  .nf-admin-door__go {
+    color: var(--nf-brand-quiet);
+    font-size: var(--nf-text-caption);
+    font-weight: 600;
+  }
   .nf-admin-figure__foot {
     display: flex;
     align-items: center;

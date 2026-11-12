@@ -31,6 +31,7 @@ import { currentDestination, labelFor, type ShellCopy } from "./nav";
 import { UiIcon } from "@/design-system/icons/UiIcon";
 import { QueueByDesk } from "./QueueByDesk";
 import { QueueFigures } from "./QueueFigures";
+import { StaffDoor } from "./StaffDoor";
 import type { OverviewCounts } from "./ConsoleOverview";
 
 /** "You were heading to Money": the desk the address asked for, one tap away. */
@@ -237,6 +238,9 @@ export function OverviewView(props: OverviewProps) {
       {props.headingTo && <HeadingTo href={props.headingTo} copy={shell.entry} shell={shell} />}
       {/* The overview's first answer: what is waiting on a person, as figures. */}
       <QueueFigures t={getDictionary(locale)} locale={locale} counts={props.queue ?? null} />
+      {/* The way into the staff desk, beside the figures rather than among
+          them: it has no queue and no count (see StaffDoor). */}
+      <StaffDoor />
       <KpiStrip items={strip} label={c.pulse} />
       <KpiGrid items={cards} label={c.week} />
 
