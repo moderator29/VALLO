@@ -102,16 +102,16 @@ export async function build(ctx) {
     /* it settles back only once the explore page has slid fully in: a slide
        under a 3D re-mapping paints differently depending on the frames before */
     [s(11) + 0.45, { ...PUSH }],
-    [s(11) + 1.1, { ...HOME }, "glide"],
-    [s(14) - 0.1, { ...HOME }],
+    [s(11) + 1.1, { ...LOW }, "glide"],
+    [s(14) - 0.1, { ...LOW }],
     [s(14) + 0.5, { ...LOW }, "glide"],
     [s(16) - 0.2, { ...LOW }],
     [s(16) + 0.4, { ...HOME }, "glide"],
     [s(18) - 0.2, { ...HOME }],
     [s(18) + 0.45, { ...BACK }, "glide"],
     [s(21) - 0.2, { ...BACK }],
-    [s(21) + 0.4, { ...HOME }, "glide"],
-    [s(22) - 0.35, { ...HOME }],
+    [s(21) + 0.4, { ...LOW }, "glide"],
+    [s(22) - 0.35, { ...LOW }],
     [s(22) + 0.1, { ...off(HOME), rz: -8, ry: 20 }, "power3.in"],
     [ctx.duration, { ...off(HOME), opacity: 0 }, "none"],
   ]);
@@ -412,7 +412,7 @@ export async function build(ctx) {
     x: Dk(CX, RX), y: Dk(425, 480), t0: w(21, "english") - 0.05, gap: Math.max(0.28, (w(21, "igbo") - w(21, "english")) / 3.1),
     t1: s(22) - 0.35, size: 32, wrapW: Dk(1000, 560), anchor: "center",
   });
-  badgeDisc(ctx, ask, { name: "assistant", kind: "object", x: Dk(150, 1640), y: Dk(360, 800), size: 140, t0: w(21, "ask"), t1: s(22) - 0.4, seed: 55 });
+  badgeDisc(ctx, ask, { name: "assistant", kind: "object", x: Dk(965, 1640), y: Dk(1250, 800), size: 140, t0: w(21, "ask"), t1: s(22) - 0.4, seed: 55 });
 
   /* ===================== 10. The start (s22 - s24) =====================
      CUT 7 -> 8. The bars close, the phone leaves, and the words stand alone. */
