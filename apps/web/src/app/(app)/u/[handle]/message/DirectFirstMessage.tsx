@@ -78,32 +78,51 @@ export function DirectFirstMessage({
         <PhoneGateLink show={phoneGate} full />
       </div>
 
-      <form onSubmit={send} className="nf-composer nf-direct__composer">
-        <label htmlFor="direct-body" className="sr-only">
-          {copy.placeholder}
-        </label>
-        <input
-          id="direct-body"
-          name="body"
-          type="text"
-          required
-          maxLength={2000}
-          value={body}
-          onChange={(event) => setBody(event.target.value)}
-          placeholder={copy.placeholder}
-          autoComplete="off"
-          enterKeyHint="send"
-          autoFocus
-          className="nf-composer__field"
-        />
-        <button
-          type="submit"
-          aria-label={pending ? copy.sending : copy.send}
-          disabled={pending || body.trim().length === 0}
-          className="nf-composer__send"
-        >
-          <UiIcon name="arrow-right" size={20} className="-rotate-45" />
-        </button>
+      {/*
+        THE PLATFORM'S INPUT BAR, NOT THE ONE THIS SCREEN WAS BORN WITH (the
+        founder, 12 November 2026: "it's like the old one ... even for new
+        conversations with agent"). The input bar pass of 7 November 2026 gave
+        the chat one floating rounded bar and left this screen on the shape it
+        replaced: measured in WebKit at 390, a 314 by 44 field with a 14px
+        corner, no glass, no shadow, beside the thread's 358 by 50 island with
+        blur(26px) saturate(1.65) and the floating shadow. Same product, two
+        composers, and this is the one a person meets FIRST.
+
+        The `__box` wrapper is the whole fix: `input-bar.css` draws the bar off
+        that one element, so this composer now takes the island, its blue send
+        disc and its 16px field with no new rule of its own. It still sends
+        one message with one control, because that is all this screen does.
+      */}
+      <form onSubmit={send} className="nf-composer nf-direct__composer" data-composer="">
+        <div className="nf-composer__box">
+          <label htmlFor="direct-body" className="sr-only">
+            {copy.placeholder}
+          </label>
+          <input
+            id="direct-body"
+            name="body"
+            type="text"
+            required
+            maxLength={2000}
+            value={body}
+            onChange={(event) => setBody(event.target.value)}
+            placeholder={copy.placeholder}
+            autoComplete="off"
+            enterKeyHint="send"
+            autoFocus
+            className="nf-composer__field"
+          />
+          <div className="nf-composer__row">
+            <button
+              type="submit"
+              aria-label={pending ? copy.sending : copy.send}
+              disabled={pending || body.trim().length === 0}
+              className="nf-composer__send"
+            >
+              <UiIcon name="arrow-right" size={20} className="-rotate-45" />
+            </button>
+          </div>
+        </div>
       </form>
     </section>
   );

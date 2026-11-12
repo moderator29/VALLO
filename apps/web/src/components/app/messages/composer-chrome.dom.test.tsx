@@ -180,3 +180,109 @@ describe.skipIf(!hasBrowser && !process.env.CI)("tapping the chat bar", () => {
     }
   });
 });
+
+/*
+ * EVERY COMPOSER, NOT WHICHEVER ONE IS A FORM (the founder, 12 November 2026:
+ * "you only fixed it for me and that users chat, it supposed to be fixed for
+ * all messages, any message at all ... even for new conversations with
+ * agent").
+ *
+ * The first message to somebody is the composer a person meets FIRST, and the
+ * input bar pass of 7 November 2026 left it on the shape it replaced:
+ * measured in WebKit at 390, a 314 by 44 field with a 14px corner, no glass
+ * and no shadow, beside the thread's 358 by 50 island. This mounts the real
+ * component and holds it to the platform's bar: one box, the island's corner,
+ * the glass, a 16px field that iOS will not zoom, a send disc hit at the 44pt
+ * floor, and the keyboard foot.
+ *
+ * `app/css/composer-contract.test.ts` is the other half: it fails if a
+ * composer is added anywhere without the contract.
+ */
+const directEntry = `
+  import { mount } from "@/lib/testing/browser-root";
+  import { DirectFirstMessage } from "@/app/(app)/u/[handle]/message/DirectFirstMessage";
+  mount(
+    <div style={{ height: 700, display: "flex", flexDirection: "column" }}>
+      <DirectFirstMessage
+        handle="ada"
+        name="Ada Eze"
+        avatarUrl=""
+        copy={{ placeholder: "Say hello", hint: "Say why you are writing.", send: "Send", sending: "Sending" }}
+      />
+    </div>,
+  );
+`;
+
+describe.skipIf(!hasBrowser && !process.env.CI)("a new conversation's composer", () => {
+  /** The bar, the field and the send, as the browser draws them. */
+  const measure = (page: Page) =>
+    page.evaluate(() => {
+      const form = document.querySelector("form.nf-composer");
+      const box = document.querySelector(".nf-composer__box");
+      const field = document.querySelector(".nf-composer__field");
+      const send = document.querySelector(".nf-composer__send");
+      if (!form || !box || !field || !send) return null;
+      const rect = (el: Element) => {
+        const r = el.getBoundingClientRect();
+        return { w: Math.round(r.width), h: Math.round(r.height) };
+      };
+      const grown = (el: Element) => {
+        const before = getComputedStyle(el, "::before");
+        const inset = Number.parseFloat(before.insetBlockStart || "0");
+        const r = el.getBoundingClientRect();
+        return before.content === "none" ? rect(el) : { w: Math.round(r.width - 2 * inset), h: Math.round(r.height - 2 * inset) };
+      };
+      const boxStyle = getComputedStyle(box);
+      return {
+        bar: rect(box),
+        barRadius: boxStyle.borderTopLeftRadius,
+        barGlass: boxStyle.backdropFilter || boxStyle.getPropertyValue("-webkit-backdrop-filter"),
+        fieldFont: getComputedStyle(field).fontSize,
+        sendHit: grown(send),
+        footDown: getComputedStyle(form).paddingBottom,
+      };
+    });
+
+  it("is the platform's input bar and not the shape it replaced", async () => {
+    const { page, close } = await mountInBrowser({ entry: directEntry, css: CSS, touch: true });
+    try {
+      const m = await measure(page);
+      expect(m).not.toBeNull();
+      /* One box, the island's corner, the chat bar's glass. The old shape had
+         no box at all, a 14px corner and no backdrop. */
+      expect(m!.barRadius).toBe("28px");
+      expect(m!.barGlass).not.toBe("none");
+      /* 16px, or iOS zooms the page when the field takes focus. */
+      expect(m!.fieldFont).toBe("16px");
+      /* The send is drawn smaller and hit at the floor. */
+      expect(m!.sendHit.h).toBeGreaterThanOrEqual(44);
+      expect(m!.sendHit.w).toBeGreaterThanOrEqual(44);
+    } finally {
+      await close();
+    }
+  });
+
+  it("takes its keyboard foot back, though nothing here is a form by accident", async () => {
+    const { page, close } = await mountInBrowser({ entry: directEntry, css: CSS, touch: true });
+    try {
+      /* The home indicator's reservation, keys down. */
+      expect(await composerFoot(page)).toBe(HOME_INDICATOR);
+      await openKeyboard(page, 336);
+      const foot = await composerFoot(page);
+      expect(Number.parseFloat(foot)).toBeLessThan(Number.parseFloat(HOME_INDICATOR));
+      /* And the contract reaches it through the class, so a composer written
+         as a div or a section would be collapsed too. */
+      const byClass = await page.evaluate(() => {
+        const probe = document.createElement("div");
+        probe.className = "nf-composer";
+        document.body.append(probe);
+        const value = getComputedStyle(probe).paddingBottom;
+        probe.remove();
+        return value;
+      });
+      expect(Number.parseFloat(byClass)).toBeLessThan(Number.parseFloat(HOME_INDICATOR));
+    } finally {
+      await close();
+    }
+  });
+});

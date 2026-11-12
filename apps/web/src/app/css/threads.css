@@ -1965,22 +1965,15 @@
   color: var(--nf-content-muted);
 }
 /*
- * THE FIRST MESSAGE TO SOMEBODY (`u/[handle]/message`) KEEPS ITS ROW.
- * `.nf-composer` above is a flex row whose field grows to fill it, and that
- * is the layout this composer was written for: a field and a round send
- * beside it. The input bar pass (7 November 2026) gave every
- * `form.nf-composer` `display: block` for the chat's one-box bar, which this
- * screen does not draw, and a block row leaves the field at the browser's
- * default input width: measured in WebKit at 390, a 241px field with 104px
- * of empty bar beside it. The row is restored here, where the exception
- * belongs, rather than by weakening the chat's rule.
+ * THE FIRST MESSAGE TO SOMEBODY (`u/[handle]/message`) is the platform's
+ * input bar and nothing of its own: it draws `.nf-composer__box` now, so
+ * `input-bar.css` gives it the island, the blue send disc and the 16px
+ * field. The flex row this rule used to restore went with it, because the
+ * box is the grid and there is no second child to lay out.
  */
 .nf-direct__composer {
   position: sticky;
   bottom: 0;
-  display: flex;
-  align-items: center;
-  gap: var(--nf-gap-inline-tight);
 }
 
 /*

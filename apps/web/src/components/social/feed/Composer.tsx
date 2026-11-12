@@ -705,7 +705,14 @@ export function Composer({
          * so they are not drawn. The ring fills as the limit approaches and
          * turns red past it; the number appears only in the last 40.
          */
-        <div className="nf-compose-page__tools" data-compose-part="">
+        /* `data-composer` puts this bar under the keyboard contract
+           (messages-g1.css). It is `position: sticky; inset-block-end: 0`
+           with `env(safe-area-inset-bottom)` in its padding, so with the keys
+           up it reserved a home indicator the keyboard was already covering:
+           measured in WebKit at 390, 42px of bottom padding where 8 was
+           wanted. The attribute is on THIS bar and not on the page root
+           because this bar is the element carrying that padding. */
+        <div className="nf-compose-page__tools" data-compose-part="" data-composer="">
           <button
             type="button"
             className="nf-compose-page__tool"

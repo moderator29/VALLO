@@ -83,6 +83,20 @@
 :root form.nf-composer .nf-composer__box .nf-composer__send:disabled {
   opacity: 0.55;
 }
+/*
+ * A SEND THAT CARRIES A WORD KEEPS ITS WIDTH IN THE BAR.
+ * `.nf-composer__send--label` (threads.css) is the send that says "Send"
+ * rather than drawing an arrow, which is what the deal room uses: that room
+ * names its actions. The disc rule above sets `inline-size: 2.5rem` and
+ * outranks it inside the box, so the word was squashed into a 40px circle.
+ * The word's own width wins back here, and the disc's fill and ink stay.
+ */
+:root form.nf-composer .nf-composer__box .nf-composer__send.nf-composer__send--label {
+  inline-size: auto;
+  min-inline-size: 6.5rem;
+  padding-inline: var(--nf-space-md);
+  border-radius: var(--nf-radius-control);
+}
 
 /* ---------------------------------------------------- the search shelf */
 

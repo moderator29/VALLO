@@ -432,9 +432,34 @@
 
   /* ------------------------------------------------- on the keyboard */
 
-  /* With the keyboard up the bottom of the view is the top of the keys, where
-     no home indicator is: the safe-area padding would be dead air. */
-  :root[data-keyboard="open"] form.nf-composer {
+  /*
+   * THE KEYBOARD FOOT, FOR EVERY COMPOSER, WHATEVER ELEMENT IT IS (the
+   * founder, 12 November 2026: "you only fixed it for me and that users
+   * chat, it supposed to be fixed for all messages, any message at all").
+   *
+   * With the keyboard up the bottom of the view is the top of the keys, where
+   * no home indicator is, so the safe-area padding every composer reserves
+   * (threads.css `.nf-composer`, and the chat bar's own in grade1.css) is
+   * dead air wedged between the bar and the keys. This rule takes it back.
+   *
+   * IT USED TO SAY `form.nf-composer`, AND THAT WAS THE WHOLE BUG. An
+   * element name in a shared contract means the contract is kept by whichever
+   * composer happens to be written as a <form> and silently skipped by one
+   * written as a <div>, a <section> or a sheet's footer. Nothing about a
+   * keyboard cares what element it is. So the selector is the CLASS, plus
+   * `data-composer` for a composer that is not `.nf-composer` at all (the
+   * comments sheet, the post composer, a ticket reply): a surface declares
+   * that it is a composer and the contract follows, rather than qualifying
+   * for it by accident of markup.
+   *
+   * `composer-contract.test.ts` fails if a composer is added without it.
+   *
+   * SPECIFICITY, DELIBERATELY. (0,3,0) here beats grade1.css's
+   * `form.nf-composer` (0,1,1) and threads.css's `.nf-composer` (0,1,0),
+   * which are the two rules that set the padding being taken back, and it
+   * does so without naming an element.
+   */
+  :root[data-keyboard="open"] :is(.nf-composer, [data-composer]) {
     padding-block-end: var(--nf-space-xs);
   }
 

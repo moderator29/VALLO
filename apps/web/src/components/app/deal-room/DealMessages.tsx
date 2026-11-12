@@ -75,6 +75,19 @@ export function DealMessages({ conversationId, messages, counterpartyName, live 
         </Panel>
       )}
       {live ? (
+        /*
+         * THE PLATFORM'S INPUT BAR (the founder, 12 November 2026: "it
+         * supposed to be fixed for all messages, any message at all").
+         *
+         * This textarea carried NO class, so it drew the browser's own
+         * control: measured in WebKit at 390, a white 206 by 26 box with a
+         * black 1px hairline and a 5px corner, on the night app, indented 35
+         * pixels with 117 of empty bar beside it, and 26 tall against a 44
+         * floor. In the room where an offer is negotiated. It is the chat's
+         * bar now, drawn off `.nf-composer__box` by `input-bar.css`, and the
+         * Send keeps its word (`--label`) because this room names its
+         * actions rather than drawing a bare arrow.
+         */
         <form
           className="nf-composer"
           onSubmit={(e) => {
@@ -82,24 +95,29 @@ export function DealMessages({ conversationId, messages, counterpartyName, live 
             void send();
           }}
         >
-          <label className="sr-only" htmlFor="deal-message">
-            Message
-          </label>
-          <textarea
-            id="deal-message"
-            rows={1}
-            value={text}
-            maxLength={4000}
-            placeholder={`Message ${counterpartyName}`}
-            enterKeyHint="send"
-            onChange={(e) => {
-              setText(e.target.value);
-              grow(e.target);
-            }}
-          />
-          <Button type="submit" variant="primary" leadingIcon="send" loading={busy} disabled={text.trim().length === 0} data-testid="deal-message-send">
-            Send
-          </Button>
+          <div className="nf-composer__box">
+            <label className="sr-only" htmlFor="deal-message">
+              Message
+            </label>
+            <textarea
+              id="deal-message"
+              className="nf-composer__field"
+              rows={1}
+              value={text}
+              maxLength={4000}
+              placeholder={`Message ${counterpartyName}`}
+              enterKeyHint="send"
+              onChange={(e) => {
+                setText(e.target.value);
+                grow(e.target);
+              }}
+            />
+            <div className="nf-composer__row">
+              <Button type="submit" variant="primary" leadingIcon="send" loading={busy} disabled={text.trim().length === 0} className="nf-composer__send nf-composer__send--label" data-testid="deal-message-send">
+                Send
+              </Button>
+            </div>
+          </div>
         </form>
       ) : null}
       <p className="nf-body-sm text-[var(--nf-content-muted)]">Keep the talk and the money on Vallo. Be careful if anyone asks you to pay outside the platform. Vallo never asks for a deposit to secure a property.</p>
