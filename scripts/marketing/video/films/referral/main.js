@@ -11,8 +11,12 @@
  * as a wallet and no balance is ever invented: the only money on the stage
  * is ₦80, ₦1,000 and the screens' own ₦0.
  *
- * The clock is provisional and will be replaced by the aligner, so nothing
- * here refers to a number of seconds: every beat hangs on s(i), e(i) and
+ * Two formats. Mobile: the phone ends its glass above the caption pill. Desktop
+ * (1920x1080): the phone in the middle, what comes off it to the left and
+ * right columns. The invite card's own link and code belong to one account,
+ * so they are never held up big: the lift is its Copy link and Share row.
+ *
+ * Nothing here refers to a number of seconds: every beat hangs on s(i), e(i) and
  * w(i, "word"). The voice leaves about a third of a second between lines, so
  * each chapter is cut on that breath (`cut(i)`) with a short transition.
  */
@@ -25,43 +29,48 @@ import { strikeOut, bigRoll } from "./parts.js";
 
 export async function build(ctx) {
   const M = ctx.isMobile;
+  const P = (m, d) => (M ? m : d);
   const { s, e, w, wq } = anchors(ctx);
+  const CX = ctx.W / 2;
+  const LX = 410;    // desktop: the left column's centre
+  const RX = 1510;   // desktop: the right column's centre
   const H = await hero(ctx, { model: "island", env: "dark", edge: "#040a2e" });
 
   /* ---------- poses ---------- */
-  const HOME = { cx: 540, cy: 1075, height: 1380 };
-  const LOW = { cx: 540, cy: 1255, height: 1180 };
-  const MID = { cx: 540, cy: 1180, height: 1300 };
-  const off = (p, dy = 1760) => ({ ...p, cy: p.cy + dy });
+  const HOME = P({ cx: CX, cy: 1010, height: 1280 }, { cx: CX, cy: 535, height: 800 });
+  const LOW = P({ cx: CX, cy: 1130, height: 1000 }, { cx: CX, cy: 545, height: 780 });
+  const MID = P({ cx: CX, cy: 1070, height: 1160 }, { cx: CX, cy: 520, height: 840 });
+  const off = (p, dy = M ? 1760 : 1150) => ({ ...p, cy: p.cy + dy });
   /* THE ONE PUSH. It is aimed at a point of the DISPLAY, and it stops where
      the whole handset still clears every edge of the frame by 50px: the
      "How it is counted" plate lands in the middle of the stage at a size
      that can be read, which is the whole of sentence seven. */
-  const TERMS = H.aim(660, 1855, 1600, 540, 1080);
+  const TERMS = M ? H.aim(660, 1490, 1600, CX, 920) : H.aim(660, 1490, 1300, CX, 500);
 
   /* ---------- the Rewards screens, measured ----------
      f-rewards-full is 880px wide and the display renders it at 1320, so the
      crops taken off it are in that 1320-wide space. Every box below was
      measured (films/blocks.py) and then checked by eye on its own component's
      edges, so no rule ever cuts a heading. */
-  const LINK = 2576;        /* scrolled so the invite link card is centred */
-  const COUNTED = 3660;     /* scrolled to the foot: "How it is counted" */
+  const LINK = 2811;        /* scrolled so the invite card sits in the middle of the glass */
+  const COUNTED = 4017;     /* scrolled to the foot: "How it is counted" and its plate */
   const FULL = ctx.src.capture("f-rewards-full");
   const CROP = {
-    /* the invite card's own first rows: the label, the link, the code */
-    link: { x: 27, y: 3669, w: 1266, h: 400 },
+    /* the invite card's Copy link and Share buttons (the link and code above
+       them are one account's own, so they stay small, on the glass) */
+    link: { x: 114, y: 4078, w: 1092, h: 170 },
     /* "Qualified referrals counted a month      1,500", one row of the plate */
-    row1500: { x: 27, y: 5262, w: 1266, h: 186 },
+    row1500: { x: 46, y: 5250, w: 1230, h: 154 },
     /* the balance card's own rule, in its own rounded box */
-    pill1000: { x: 110, y: 1426, w: 1104, h: 200 },
+    pill1000: { x: 116, y: 1448, w: 1092, h: 190 },
     /* "Your Rewards Balance is what Vallo owes you for referrals that
        qualified. It is not money held for you, and it does not expire." */
-    owes: { x: 104, y: 2444, w: 1126, h: 210 },
+    owes: { x: 104, y: 2444, w: 1126, h: 222 },
     /* "Earn ₦80 for each friend who signs up fully" */
     earn80: { x: 100, y: 1570, w: 1130, h: 230 },
   };
-  const SHARE = [908, 1770];     /* the Share button, at scroll = LINK */
-  const WITHDRAW = [660, 1320];  /* the Withdraw button of the balance card */
+  const SHARE = [935, 1538];     /* the Share button, at scroll = LINK */
+  const WITHDRAW = [660, 1354];  /* the Withdraw button of the balance card */
 
   const layer = (id, t0, t1, z = 760) => ctx.scene(id, t0, t1, { z });
   const cut = (i) => s(i) - 0.2;
@@ -112,6 +121,11 @@ export async function build(ctx) {
     x: M ? 60 : 160, y: M ? 430 : 230, size: M ? 100 : 104, t0: s(1) - 0.05, t1: s(2) - 0.5, stagger: 0, keyStyle: "chip",
   });
   ctx.hideCaptions(s(1) - 0.2, s(2) - 0.3);
+  /* the line names who gets paid and for what: a gift, the people it is for,
+     and the money, standing under the words while they are said */
+  object3d(ctx, open, { name: "gift", size: P(320, 300), x: P(700, 1360), y: P(1020, 380), t0: s(1) + 0.75, t1: s(2) - 0.55, drift: 1, seed: 41 });
+  object3d(ctx, open, { name: "celebrate", size: P(220, 200), x: P(180, 1080), y: P(1330, 690), t0: s(1) + 0.95, t1: s(2) - 0.55, drift: 1, seed: 42 });
+  object3d(ctx, open, { name: "earnings", size: P(200, 210), x: P(820, 1640), y: P(1420, 720), t0: w(1, "serious") - 0.3, t1: s(2) - 0.55, drift: 1, seed: 43 });
 
   /* ===================== 1. Share your invite link (s2) =====================
      The shortest chapter in the film: a second and a third of voice. One
@@ -128,8 +142,8 @@ export async function build(ctx) {
   const share = layer("share", s(2) - 0.1, cut(3) + 0.1);
   /* two of the blueprint's discs ride the margins beside the handset, clear
      of the pill and the captions, and they leave with the chapter */
-  badgeDisc(ctx, share, { name: "link-2", kind: "glyph", x: 118, y: 900, size: 128, t0: s(2) + 0.2, t1: cut(3) - 0.25, seed: 1 });
-  badgeDisc(ctx, share, { name: "megaphone", kind: "object", x: 962, y: 1230, size: 136, t0: s(2) + 0.5, t1: cut(3) - 0.2, seed: 2 });
+  badgeDisc(ctx, share, { name: "link-2", kind: "glyph", x: P(118, LX), y: P(900, 420), size: P(128, 150), t0: s(2) + 0.2, t1: cut(3) - 0.25, seed: 1 });
+  badgeDisc(ctx, share, { name: "megaphone", kind: "object", x: P(962, RX), y: P(1230, 660), size: P(136, 160), t0: s(2) + 0.5, t1: cut(3) - 0.2, seed: 2 });
 
   /* ===================== 2. Eighty naira a friend (s3) =====================
      The film's signature. The how-you-earn sheet rises on the phone and its
@@ -145,7 +159,7 @@ export async function build(ctx) {
   lift(ctx, H, {
     id: "f-rewards-how", crop: CROP.earn80,
     t0: w(3, "friend") - 0.15, t1: wq(3, "link", "it") - 0.15,
-    to: { x: 540, y: 1356, s: 0.72, r: -2 }, exit: "up", fly: 0.5, seed: 3,
+    to: P({ x: CX, y: 560, s: 0.72, r: -2 }, { x: RX, y: 420, s: 0.52, r: -2 }), exit: "up", fly: 0.5, seed: 3,
   });
   /* the figure stands BEHIND the phone (z 300), so the handset leaving is
      what reveals it. It locks on "eighty" rather than "naira" because the
@@ -153,14 +167,14 @@ export async function build(ctx) {
      on the last word would leave it nothing to stand in. */
   const money = layer("money", w(3, "you") - 0.6, cut(4) + 0.15, 300);
   bigRoll(ctx, money, {
-    value: 80, prefix: "₦", x: 540, y: 1000, size: M ? 430 : 300, rot: -3,
+    value: 80, prefix: "₦", x: CX, y: P(1000, 470), size: M ? 430 : 360, rot: -3,
     t0: w(3, "earn"), t1: w(3, "eighty") + 0.35, tOut: s(4) - 0.5, seed: 7,
   });
   /* the condition, in the product's own words, under the figure: ₦80 is
      never shown on this stage without what it is paid for */
   kicker(ctx, money, {
     text: "for each friend who signs up fully", icon: "user-round-check",
-    x: 540, y: 1300, t0: w(3, "eighty") - 0.1, t1: s(4) - 0.45, size: 32, anchor: "center",
+    x: CX, y: P(1300, 790), t0: w(3, "eighty") - 0.1, t1: s(4) - 0.45, size: P(32, 34), anchor: "center",
   });
   ctx.sfx("success", w(3, "eighty") + 0.4, { offset: -2 });
 
@@ -175,12 +189,12 @@ export async function build(ctx) {
   const OUT2 = w(4, "signed") - 0.1;
   const c1 = popOut(ctx, who, {
     kind: "line", lucide: "mouse-pointer-click", tab: "Not paid for", title: "A click",
-    x: 540, y: 520, size: 38, rot: -2, from: "left", t0: w(4, "for", 1) - 0.1, t1: OUT2, seed: 11,
+    x: P(CX, LX + 40), y: P(520, 330), size: 38, rot: -2, from: "left", t0: w(4, "for", 1) - 0.1, t1: OUT2, seed: 11,
   });
   strikeOut(ctx, { slab: c1.slab, row: c1.rows[0], t0: w(4, "click") + 0.12, t1: OUT2 });
   const c2 = popOut(ctx, who, {
     kind: "line", lucide: "download", tab: "Not paid for", title: "A download",
-    x: 540, y: 800, size: 38, rot: 2, from: "right", t0: w(4, "for", 2) - 0.1, t1: OUT2 + 0.07, seed: 12,
+    x: P(CX, RX - 40), y: P(800, 330), size: 38, rot: 2, from: "right", t0: w(4, "for", 2) - 0.1, t1: OUT2 + 0.07, seed: 12,
   });
   strikeOut(ctx, { slab: c2.slab, row: c2.rows[0], t0: w(4, "download") + 0.25, t1: OUT2 + 0.07 });
   /* the turn in the sentence takes a light whip: a quick move inside a
@@ -202,7 +216,7 @@ export async function build(ctx) {
        the detail, and keeps carrying it after the terms move. */
     title: "A real person", line: "Signs up fully, with your link",
     amount: "₦80",
-    x: 540, y: 1150, size: 40, rot: -1, from: "below", t0: w(4, "real") - 0.3, t1: s(5) - 0.45, seed: 13,
+    x: CX, y: P(1150, 680), size: P(40, 44), rot: -1, from: "below", t0: w(4, "real") - 0.3, t1: s(5) - 0.45, seed: 13,
   });
 
   /* ===================== 4. Watch it climb (s5) =====================
@@ -217,20 +231,20 @@ export async function build(ctx) {
   lift(ctx, H, {
     id: "f-rewards", crop: CROP.owes,
     t0: w(5, "Balance") + 0.1, t1: w(5, "watch") - 0.15,
-    to: { x: 540, y: 1370, s: 0.7, r: -2 }, exit: "fade", fly: 0.5, seed: 4,
+    to: P({ x: CX, y: 1340, s: 0.7, r: -2 }, { x: LX, y: 420, s: 0.5, r: -2 }), exit: "fade", fly: 0.5, seed: 4,
   });
   /* the climb: one friend, then another, then another, each adding the same
      ₦80 the product prints. They stack up the left margin, clear of the
      handset, one arriving every quarter second. */
-  for (const [y, d] of [[1210, 0], [1010, 0.25], [810, 0.5]]) {
+  for (const [y, d] of (M ? [[1100, 0], [900, 0.25], [700, 0.5]] : [[760, 0], [600, 0.25], [440, 0.5]])) {
     kicker(ctx, climb, {
       text: "+ ₦80", icon: "user-round-check",
-      x: 148, y, t0: w(5, "and") + 0.05 + d, t1: s(6) - 0.3, size: 30, anchor: "center",
+      x: P(148, RX), y, t0: w(5, "and") + 0.05 + d, t1: s(6) - 0.3, size: P(30, 40), anchor: "center",
     });
   }
   /* the brand's coin object is a plain disc at this size and reads as a dot,
      so the small discs carry line glyphs instead */
-  badgeDisc(ctx, climb, { name: "coins", kind: "glyph", x: 960, y: 1150, size: 134, t0: wq(5, ["you", 2], "you") + 0.1, t1: s(6) - 0.3, seed: 5 });
+  badgeDisc(ctx, climb, { name: "coins", kind: "glyph", x: P(960, LX), y: P(1150, 760), size: 134, t0: wq(5, ["you", 2], "you") + 0.1, t1: s(6) - 0.3, seed: 5 });
 
   /* ===================== 5. Withdraw at ₦1,000 (s6) =====================
      The rule is printed on the balance card itself, so it is lifted off it
@@ -250,14 +264,14 @@ export async function build(ctx) {
     /* ABOVE the Withdraw button, not over it: held level with the button the
        pointer glides to, the orb came to rest in the middle of the lifted
        sentence and sat on the word "your". */
-    to: { x: 540, y: 900, s: 0.72, r: -2 }, exit: "up", fly: 0.55, seed: 8,
+    to: P({ x: CX, y: 640, s: 0.72, r: -2 }, { x: RX, y: 420, s: 0.52, r: -2 }), exit: "up", fly: 0.55, seed: 8,
   });
   H.tap(w(6, "withdraw") + 0.05, WITHDRAW[0], WITHDRAW[1]);
   /* the ring is drawn inside the display, and a screen shown later in the
      film sits above its own z, so it is lifted over the screen it outlines */
-  H.ring(w(6, "withdraw") + 0.02, s(7) - 0.4, { x: 118, y: 1229, w: 1086, h: 185, r: 48 }).style.zIndex = "900";
+  H.ring(w(6, "withdraw") + 0.02, s(7) - 0.4, { x: 112, y: 1268, w: 1096, h: 172, r: 48 }).style.zIndex = "900";
   const bank = layer("bank", w(6, "it") - 0.6, cut(7) + 0.1);
-  object3d(ctx, bank, { name: "bank", size: 190, x: 118, y: 770, t0: w(6, "it") - 0.2, t1: s(7) - 0.45, drift: 1, seed: 9 });
+  object3d(ctx, bank, { name: "bank", size: P(190, 220), x: P(118, LX), y: P(770, 560), t0: w(6, "it") - 0.2, t1: s(7) - 0.45, drift: 1, seed: 9 });
 
   /* ===================== 6. Up to 1,500 a month (s7) =====================
      The longest line in the film, and the one that must not drift: an early
@@ -275,11 +289,11 @@ export async function build(ctx) {
   lift(ctx, H, {
     id: "f-rewards", src: FULL, scrolled: COUNTED, crop: CROP.row1500,
     t0: w(7, "friends") - 0.15, t1: wq(7, "terms", "catch") - 0.25,
-    to: { x: 540, y: 1180, s: 0.64, r: -2 }, exit: "up", fly: 0.55, seed: 10, radius: 30,
+    to: P({ x: CX, y: 580, s: 0.66, r: -2 }, { x: LX, y: 420, s: 0.5, r: -2 }), exit: "up", fly: 0.55, seed: 10, radius: 30,
   });
   const terms = layer("terms", wq(7, "terms", "catch") - 0.5, cut(8) + 0.1);
-  badgeDisc(ctx, terms, { name: "file-text", kind: "glyph", x: 96, y: 620, size: 134, t0: wq(7, "terms", "catch") + 0.15, t1: s(8) - 0.5, seed: 14 });
-  badgeDisc(ctx, terms, { name: "contract", kind: "object", x: 984, y: 1368, size: 140, t0: wq(7, "terms", "catch") + 0.5, t1: s(8) - 0.46, seed: 15 });
+  badgeDisc(ctx, terms, { name: "file-text", kind: "glyph", x: P(96, 1660), y: P(620, 300), size: 134, t0: wq(7, "terms", "catch") + 0.15, t1: s(8) - 0.5, seed: 14 });
+  badgeDisc(ctx, terms, { name: "contract", kind: "object", x: P(984, 1660), y: P(1400, 760), size: 140, t0: wq(7, "terms", "catch") + 0.5, t1: s(8) - 0.46, seed: 15 });
   /* pushed this far in, the screen's own rows run up under the pill */
   ctx.hidePill(wq(7, "screen", "small") - 0.4, s(8) - 0.4);
 
@@ -295,14 +309,14 @@ export async function build(ctx) {
   lift(ctx, H, {
     id: "f-rewards", src: FULL, scrolled: LINK, crop: CROP.link,
     t0: w(8, "link") - 0.15, t1: w(8, "join") - 0.05,
-    to: { x: 540, y: 614, s: 0.62, r: 2 }, exit: "up", fly: 0.45, seed: 16, radius: 44,
+    to: P({ x: CX, y: 600, s: 0.66, r: 2 }, { x: RX, y: 420, s: 0.5, r: 2 }), exit: "up", fly: 0.45, seed: 16, radius: 44,
   });
   H.tap(w(8, "link") + 0.25, SHARE[0], SHARE[1]);
   const join = layer("join", s(8) - 0.1, s(9) - 0.5);
-  [["coins", "glyph", 118, 806, 0, "navy", 17],
-    ["gift", "object", 958, 892, 0.14, "navy", 18],
-    ["user-round-plus", "glyph", 142, 1330, 0.28, "paper", 19],
-    ["celebrate", "object", 946, 1342, 0.42, "navy", 20]]
+  [["coins", "glyph", P(118, 330), P(806, 300), 0, "navy", 17],
+    ["gift", "object", P(958, 1640), P(892, 760), 0.14, "navy", 18],
+    ["user-round-plus", "glyph", P(142, 520), P(1330, 760), 0.28, "paper", 19],
+    ["celebrate", "object", P(946, 1460), P(1342, 760), 0.42, "navy", 20]]
     .forEach(([name, kind, bx, by, delay, tone, seed]) => badgeDisc(ctx, join, {
       name, kind, x: bx, y: by, size: 128, t0: w(8, "Earn") + 0.05, t1: s(9) - 0.72, tone, seed, delay, drift: 1,
     }));
