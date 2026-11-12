@@ -427,6 +427,35 @@
   /* ============================================================= the shelf
      The search screen: the glass field row, the capsule chip row, the count
      line with its sort control. */
+  /*
+   * THE BAR LIFTS WHILE ITS SORT MENU IS OPEN (the founder, 12 November 2026:
+   * "it supposed to be on the front not on the back of those button").
+   *
+   * This bar is `position: sticky` with a `z-index`, which makes it a STACKING
+   * CONTEXT. Everything inside it is sealed in: the sort menu's own
+   * `z-index: 40` (catalogue.css, raised to 40 in search-v2.css) is not a page
+   * number, it only orders the menu against its siblings INSIDE this bar. Out
+   * on the page the whole bar is a single layer at 30, and anything later in
+   * the document at 30 or above paints straight over the open menu however
+   * high its own number goes.
+   *
+   * There are several such things on this very screen: `.nf-maplist-pill` is
+   * `position: fixed; z-index: 30` (list-views.css), the compare tray is 30
+   * (compare-tray.css), and the list views layer is 30. Measured in Chromium
+   * at 390 with the menu open and a later sibling at 30: the sibling is what
+   * `elementFromPoint` returns at the centre of the menu. The menu is behind
+   * a control it belongs to.
+   *
+   * So the bar takes a higher layer for exactly as long as the menu is open,
+   * and drops back the moment it closes. 50 clears the 30s without reaching
+   * the surfaces that must stay over everything: the cookie bar is 60, the
+   * side flip 70 and the photo viewer 90, and a dropdown must never cover
+   * those. `:has()` keeps it in CSS with no script, which is the whole reason
+   * the control is a native `<details>` in the first place.
+   */
+  .nf-shelf-bar:has(.nf-shelf-sort[open]) {
+    z-index: 50;
+  }
   .nf-shelf-bar {
     position: sticky;
     top: 0;
