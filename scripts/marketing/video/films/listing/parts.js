@@ -68,7 +68,7 @@ export function strikeThrough(ctx, node, { t0, dur = 0.42, color = "#FF6B1A", th
     /* anticipation: the rule pulls back a hair before it runs */
     const back = ramp(ctx, t, t0 - 0.16, t0, "power2.out") * 0.06;
     const u = ramp(ctx, t, t0, t0 + dur, "power3.out");
-    bar.style.transform = `translateY(-50%) scaleX(${Math.max(0, u - back * (1 - u)).toFixed(4)})`;
+    bar.style.transform = `translateY(-50%) scaleX(${Math.min(0.9999, Math.max(0, u - back * (1 - u))).toFixed(4)})`;
     bar.style.opacity = opa(u > 0.001 ? 1 : 0);
     bar.style.visibility = u > 0.001 ? "inherit" : "hidden";
   });

@@ -37,7 +37,7 @@ export function strikeOut(ctx, { slab, row, t0, dur = 0.3, t1 = null, dim = 0.36
   ctx.onFrame((t) => {
     const u = ramp(ctx, t, t0, t0 + dur, "power3.out");
     const b = t1 == null ? 0 : ramp(ctx, t, t1, t1 + 0.28, "power2.in");
-    bar.style.transform = `scaleX(${u.toFixed(4)})`;
+    bar.style.transform = `scaleX(${Math.min(u, 0.9999).toFixed(4)})`;
     bar.style.opacity = opa(Math.min(u * 3, 1 - b));
     if (slab) slab.style.opacity = opa(1 - dim * u);
   });

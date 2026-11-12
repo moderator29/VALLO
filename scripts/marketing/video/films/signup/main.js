@@ -21,11 +21,11 @@
  * Copy rules: marketing/DESIGN.md section 2.
  */
 import {
-  anchors, ground, hero, lift, headline, chipRow, ending, openerClock,
+  anchors, ground, hero, lift, headline, ending, openerClock,
   listingWall, STAY_CARDS, windowRig, object3d, badgeDisc, popOut, figureOut,
   installFocus, leak, flash, slabWipe, shutter, irisTicks, tileFall, whipPan,
 } from "../kit.js";
-import { strikeList } from "./parts.js";
+import { strikeList, chips } from "./parts.js";
 
 export async function build(ctx) {
   const M = ctx.isMobile;
@@ -224,10 +224,10 @@ export async function build(ctx) {
   whipPan(ctx, w(5, "restaurants") - 0.08, { dir: "right", dur: 0.22, sound: null });
   H.show("n-home2", w(5, "all") - 0.1, s(6) - 0.25, { enter: "slide", full: "n-home2-full", scroll: [[w(5, "all") - 0.1, LIST_SCROLL]] });
   /* the three kinds of booking, named above the phone (the chapter pill steps aside) */
-  chipRow(ctx, plat, {
+  chips(ctx, plat, {
     items: [["Hotels", "bed"], ["Shortlets", "key-round"], ["Restaurants", "utensils-crossed"]],
     x: P(CX, RX), y: P(318, 260), t0: w(5, "hotels") - 0.08, gap: Math.max(0.3, (w(5, "restaurants") - w(5, "hotels")) / 2),
-    t1: w(5, "all") - 0.35, size: P(32, 30), wrapW: P(1000, 600), anchor: "center",
+    t1: w(5, "all") - 0.35, size: P(32, 30), wrapW: P(1000, 600),
   });
   ctx.hidePill(w(5, "hotels") - 0.3, s(6) - 0.2);
   [["hotel", P(130, 300), P(700, 640), w(5, "hotels") + 0.1, 22],

@@ -100,10 +100,38 @@ export function strikeList(ctx, parent, { x, y, w, t0, t1, size = 36, tab, items
       r.row.style.opacity = opa(Math.min(Math.max(u, 0.17 * a), 1 - b));
       r.label.style.color = k > 0 ? `rgb(214 228 255 / ${(0.95 - 0.45 * k).toFixed(3)})` : "#ffffff";
       r.plate.style.opacity = opa(1 - 0.42 * k);
-      r.rule.style.transform = `scaleX(${k.toFixed(4)})`;
+      r.rule.style.transform = `scaleX(${Math.min(k, 0.9999).toFixed(4)})`;
     }
     box.style.visibility = o > 0.001 ? "inherit" : "hidden";
   });
   ctx.sfx("card_slide", t0, { offset: -5 });
   return box;
+}
+
+/**
+ * A row of glass chips that pop in one by one: kit's chipRow, with one
+ * change. Its scale settles a hair under 1, never on 1 exactly: a layer that
+ * has been scaled and comes back to exactly 1 is rastered according to the
+ * frames drawn before it, so the same frame came out differently when the
+ * film was rendered backwards (BUILDING.md, "Lessons").
+ */
+export function chips(ctx, parent, { items, x, y, t0, gap = 0.12, t1, size = 28, wrapW = null }) {
+  const row = ctx.el("div", { class: "abs", style: { left: `${x}px`, top: `${y}px`, display: "flex", flexWrap: "wrap", gap: `${size * 0.5}px`, width: wrapW ? `${wrapW}px` : "auto", justifyContent: "center", transform: "translateX(-50%)" } }, parent);
+  items.forEach(([text, ic], i) => {
+    const el = ctx.el("div", { style: { display: "flex", alignItems: "center", gap: `${size * 0.35}px`, padding: `${size * 0.38}px ${size * 0.7}px`, borderRadius: "999px", background: "rgb(10 16 60 / 0.78)", border: "1.5px solid rgb(120 170 255 / 0.32)", color: "#fff", font: `600 ${size}px/1 Poppins, Inter, sans-serif`, letterSpacing: "-0.01em", whiteSpace: "nowrap", boxShadow: "0 16px 36px -18px rgb(0 0 20 / 0.8)" } }, row);
+    if (ic) { const n = ctx.icon(ic, { size: Math.round(size * 1.05), stroke: 2.2 }, el); n.style.color = "#8FD3FF"; }
+    ctx.el("span", { text }, el);
+    const ti = t0 + i * gap;
+    ctx.onFrame((t) => {
+      const a = ramp(ctx, t, ti, ti + 0.4, "back.out(1.8)");
+      const b = t1 == null ? 0 : ramp(ctx, t, t1 + i * 0.03, t1 + i * 0.03 + 0.3, "power2.in");
+      const o = Math.min(ramp(ctx, t, ti, ti + 0.15), 1 - b);
+      const sc = Math.min(0.86 + 0.14 * a, 0.9999);
+      el.style.transform = `translateY(${((1 - a) * 30 - b * 24).toFixed(1)}px) scale(${sc.toFixed(4)})`;
+      el.style.opacity = opa(o);
+      el.style.visibility = o > 0.001 ? "inherit" : "hidden";
+    });
+    ctx.sfx("pop", ti, { offset: -8 });
+  });
+  return row;
 }
