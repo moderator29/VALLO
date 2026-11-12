@@ -45,7 +45,7 @@ export async function build(ctx) {
      the whole handset still clears every edge of the frame by 50px: the
      "How it is counted" plate lands in the middle of the stage at a size
      that can be read, which is the whole of sentence seven. */
-  const TERMS = M ? H.aim(660, 1490, 1600, CX, 920) : H.aim(660, 1490, 1300, CX, 500);
+  const TERMS = M ? H.aim(660, 1490, 1600, CX, 920) : H.aim(660, 1490, 1120, CX, 470);
 
   /* ---------- the Rewards screens, measured ----------
      f-rewards-full is 880px wide and the display renders it at 1320, so the
