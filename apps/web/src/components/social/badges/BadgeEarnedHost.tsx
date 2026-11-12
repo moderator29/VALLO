@@ -31,7 +31,10 @@ function readSeen(viewerId: string): string[] {
 
 function writeSeen(viewerId: string, codes: string[]): void {
   try {
-    window.localStorage.setItem(keyFor(viewerId), JSON.stringify(codes.slice(-64)));
+    /* Deduped: a badge is now written when it is shown AND again when it is
+       closed, so the same code arrives twice for one celebration. Without this
+       the repeats would eat the 64 slots that exist to remember older badges. */
+    window.localStorage.setItem(keyFor(viewerId), JSON.stringify([...new Set(codes)].slice(-64)));
   } catch {
     /* Storage can be blocked. The worst case is the moment shows again. */
   }
@@ -76,7 +79,30 @@ export function BadgeEarnedHost({
     if (old.length > 0) writeSeen(viewerId, [...seen, ...old]);
     const next = badgeToCelebrate(badges, seen, now);
     if (!next) return;
-    const timer = window.setTimeout(() => setCurrent(next), 600);
+    const timer = window.setTimeout(() => {
+      /*
+       * WRITTEN DOWN WHEN IT IS SHOWN, NOT WHEN IT IS DISMISSED (the founder,
+       * 12 November 2026: "anytime I click my profile icon it always pops up").
+       *
+       * This used to be recorded in `onClose` alone. Every DISMISSAL does call
+       * it (Back, Escape, the X, a swipe past the detent: Sheet.tsx answers all
+       * four through `onOpenChange`), which is why the replay was never
+       * reproducible by closing the sheet. It came from the ways of LEAVING
+       * that are not dismissals, and the native shell adds the one a person
+       * uses without thinking: `ValloShell.swift` sets
+       * `allowsBackForwardNavigationGestures`, so an edge swipe takes the web
+       * view back and this host unmounts with no close ever called. Force
+       * quitting the app with the moment open does the same, and so does a
+       * crash or a reload. Nothing was written, so the next visit celebrated
+       * again, and the next, which is exactly what he saw.
+       *
+       * A celebration that has been put on the screen has been seen. The write
+       * belongs at that moment. `onClose` still writes, which is now only a
+       * harmless repeat (the list is a set of codes, capped at 64).
+       */
+      writeSeen(viewerId, [...readSeen(viewerId), next.code]);
+      setCurrent(next);
+    }, 600);
     return () => window.clearTimeout(timer);
   }, [badges, viewerId]);
 
