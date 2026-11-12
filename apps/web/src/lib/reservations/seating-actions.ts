@@ -40,8 +40,11 @@ import { assertProviderEnabled, openCheckout, paystackSeam } from "../payments/p
 import { isBillReference } from "../payments/references";
 import { getAdminClient } from "@/lib/supabase/service";
 import {
+  PAY_BILL_ALREADY_PAID,
+  PAY_BILL_CHECK_AGAIN,
   PAY_BILL_NOT_AVAILABLE,
   PAY_BILL_PAYEE_NOT_SET_UP,
+  PAY_BILL_UNAVAILABLE,
   SEATING_NOT_READY,
   cleanCode,
   nairaToMinor,
@@ -49,6 +52,7 @@ import {
 } from "./seating";
 import { seatingMissing } from "./seating-missing";
 import { billPayOn } from "./bill-pay";
+import { recoverStrandedBill, type StrandedBillDeps } from "./bill-stranded";
 
 type Rpc = {
   rpc: (fn: string, args: Record<string, unknown>) => PromiseLike<{ data: unknown; error: { code?: string; message?: string } | null }>;
@@ -216,6 +220,34 @@ async function siteOrigin(): Promise<string> {
 export type BillCheckout = { reference: string; amountMinor: number; authorizationUrl: string };
 
 /**
+ * The three things `recoverStrandedBill` needs, bound to the real provider and
+ * the service client. The settle is the SAME function the webhook and the
+ * diner's return call, so a stranded checkout that turns out to have been paid
+ * is recorded once however it is found.
+ */
+function strandedBillDeps(db: Rpc): StrandedBillDeps {
+  return {
+    verify: async (reference) => {
+      const tx = await verifyTransaction(reference);
+      return { status: tx.status, amountMinor: tx.amountMinor, currency: tx.currency };
+    },
+    settle: async (reference, amountMinor, currency) => {
+      const { data, error } = await db.rpc("restaurant_bill_settle", {
+        p_reference: reference,
+        p_amount_minor: amountMinor,
+        p_currency: currency,
+      });
+      if (error) return null;
+      const outcome = (data as { outcome?: unknown } | null)?.outcome;
+      return typeof outcome === "string" ? outcome : null;
+    },
+    reopen: async (reference) => {
+      await db.rpc("restaurant_bill_reopen", { p_reference: reference });
+    },
+  };
+}
+
+/**
  * The diner pays a confirmed bill. Refused in words, before anything is
  * written, when payment through Vallo is not available yet.
  */
@@ -239,15 +271,37 @@ export async function payTableBill(billId: string): Promise<ActionResult<BillChe
   if (!admin) return fail(PAY_BILL_NOT_AVAILABLE);
   const db = admin as unknown as Rpc;
 
-  const { data, error } = await db.rpc("restaurant_bill_open", {
-    p_bill: billId,
-    p_guest: session.user.id,
-    p_mode: currentPaystackMode(),
-  });
-  if (error) return fail(seatingMissing(error) ? PAY_BILL_NOT_AVAILABLE : "Payment is temporarily unavailable. Nothing has been charged.");
-  const opened = (data ?? {}) as Answer;
-  if (opened.status === "pending" && typeof opened.authorization_url === "string" && typeof opened.reference === "string") {
-    return ok({ reference: opened.reference, amountMinor: Number(opened.amount_minor), authorizationUrl: opened.authorization_url });
+  const open = async (): Promise<{ answer: Answer } | { refusal: string }> => {
+    const { data, error } = await db.rpc("restaurant_bill_open", {
+      p_bill: billId,
+      p_guest: session.user.id,
+      p_mode: currentPaystackMode(),
+    });
+    if (error) return { refusal: seatingMissing(error) ? PAY_BILL_NOT_AVAILABLE : PAY_BILL_UNAVAILABLE };
+    return { answer: (data ?? {}) as Answer };
+  };
+
+  let first = await open();
+  if ("refusal" in first) return fail(first.refusal);
+  let opened = first.answer;
+  if (opened.status === "pending" && typeof opened.reference === "string") {
+    if (typeof opened.authorization_url === "string" && opened.authorization_url.length > 0) {
+      return ok({ reference: opened.reference, amountMinor: Number(opened.amount_minor), authorizationUrl: opened.authorization_url });
+    }
+    /* `pending` with no page to send them to: the checkout never finished
+       being recorded. Before `bill-stranded.ts` this fell through to a flat
+       refusal and the bill could never be paid or amended by anybody again.
+       Paystack decides what happens to the reference; a reopen leaves a fresh
+       one to mint below. */
+    const verdict = await recoverStrandedBill(strandedBillDeps(db), opened.reference);
+    if (verdict === "settled") return fail(PAY_BILL_ALREADY_PAID);
+    if (verdict === "unknown") return fail(PAY_BILL_CHECK_AGAIN);
+    first = await open();
+    if ("refusal" in first) return fail(first.refusal);
+    opened = first.answer;
+    /* Reopened and immediately pending again would mean another writer is
+       opening the same bill; the second press is not the one to race it. */
+    if (opened.status === "pending") return fail(PAY_BILL_CHECK_AGAIN);
   }
   if (opened.status === "not_priced" || opened.status === "switched_off") return fail(PAY_BILL_NOT_AVAILABLE);
   if (opened.status === "payee_not_set_up") return fail(PAY_BILL_PAYEE_NOT_SET_UP);
@@ -289,7 +343,11 @@ export async function payTableBill(billId: string): Promise<ActionResult<BillChe
     return ok({ reference, amountMinor, authorizationUrl: tx.authorizationUrl });
   } catch (e) {
     if (e instanceof PaystackUnknownOutcome) {
-      /* The checkout may exist: the bill stays pending and the return settles it. */
+      /* The checkout may exist, so the reference stays on the bill for the
+         webhook. The bill is left `pending` with no page, which used to be a
+         state nothing could leave; the next press now asks Paystack what
+         became of the reference and either settles it or mints a fresh one
+         (`bill-stranded.ts`). */
       return fail("We could not tell whether the payment page opened. Check your bill again in a minute. Nothing has been charged twice.");
     }
     if (e instanceof PaystackError) {

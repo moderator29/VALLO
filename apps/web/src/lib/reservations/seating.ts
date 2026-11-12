@@ -224,6 +224,21 @@ export const PAY_BILL_PAYEE_NOT_SET_UP =
 export const SEATING_NOT_READY =
   "Seating and bills are not switched on yet. Nothing has changed.";
 
+/** The one sentence for "our side is broken", so every branch says it the same way. */
+export const PAY_BILL_UNAVAILABLE =
+  "Payment is temporarily unavailable. Nothing has been charged.";
+
+/**
+ * A bill whose last checkout cannot be accounted for yet (`bill-stranded.ts`):
+ * the charge may exist, so nothing is reopened and nothing is charged twice.
+ */
+export const PAY_BILL_CHECK_AGAIN =
+  "We could not tell whether your last payment went through. Check your bill again in a minute. Nothing has been charged twice.";
+
+/** The stranded checkout turned out to be paid after all. */
+export const PAY_BILL_ALREADY_PAID =
+  "This bill is already paid. Open it again to see the receipt.";
+
 export function seatingRefusal(status: string | undefined): string {
   return (status && SEATING_REFUSALS[status]) || "That did not go through. Please try again.";
 }

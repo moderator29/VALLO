@@ -21,6 +21,9 @@ const state = vi.hoisted(() => ({
   meRpcs: [] as string[],
   opened: [] as Record<string, unknown>[],
   answer: {} as Record<string, unknown>,
+  /* Successive `restaurant_bill_open` answers, when one run opens twice. */
+  answers: [] as Record<string, unknown>[],
+  verifyThrows: null as Error | null,
   ownRow: null as Record<string, unknown> | null,
   ownFilters: [] as [string, unknown][],
   verified: { status: "success", amountMinor: 1_250_000, currency: "NGN" } as Record<string, unknown>,
@@ -55,12 +58,18 @@ vi.mock("../actions/session", () => ({
     },
   }),
 }));
+class FakePaystackError extends Error {}
+class FakePaystackUnknownOutcome extends FakePaystackError {}
+
 vi.mock("../payments/paystack", () => ({
-  PaystackError: class extends Error {},
-  PaystackUnknownOutcome: class extends Error {},
+  PaystackError: FakePaystackError,
+  PaystackUnknownOutcome: FakePaystackUnknownOutcome,
   currentPaystackMode: () => "test",
   isPaystackConfigured: () => state.paystack,
-  verifyTransaction: async () => state.verified,
+  verifyTransaction: async () => {
+    if (state.verifyThrows) throw state.verifyThrows;
+    return state.verified;
+  },
 }));
 vi.mock("../payments/providers", () => ({
   assertProviderEnabled: async () => undefined,
@@ -75,6 +84,9 @@ vi.mock("@/lib/supabase/service", () => ({
     rpc: async (fn: string, args: Record<string, unknown>) => {
       state.rpcs.push({ fn, args });
       if (fn === "restaurant_bill_settle") return { data: { outcome: "settled" }, error: null };
+      if (fn === "restaurant_bill_open" && state.answers.length > 0) {
+        return { data: state.answers.shift(), error: null };
+      }
       return { data: state.answer, error: null };
     },
   }),
@@ -88,8 +100,10 @@ beforeEach(() => {
     meRpcs: [],
     opened: [],
     answer: {},
+    answers: [],
     ownRow: null,
     ownFilters: [],
+    verifyThrows: null,
     verified: { status: "success", amountMinor: 1_250_000, currency: "NGN" },
   });
 });
@@ -139,6 +153,80 @@ describe("restaurant_bill_pay on", () => {
       amountMinor: 1_250_000,
       split: { listerSubaccount: "ACCT_venue", listerShareMinor: 1_225_000, reserveSubaccount: null, guaranteeMinor: 0 },
     });
+  });
+
+  /**
+   * A BILL LEFT `pending` WITH NO CHECKOUT PAGE WAS A STATE NOTHING COULD
+   * LEAVE (12 November 2026). `restaurant_bill_open` mints the reference and
+   * moves the bill to `pending` before Paystack is called, and
+   * `restaurant_bill_checkout_saved` writes the page afterwards. If the
+   * checkout call does not answer, or the process stops between the two, the
+   * bill sits `pending` with `authorization_url` null: this action used to
+   * answer the stored page, find none, fall through to a flat refusal and do
+   * nothing, `restaurant_bill_enter` answers `locked` so the restaurant could
+   * not amend it either, and no sweep looks at bills. Paystack now decides
+   * (`bill-stranded.ts`).
+   */
+  it("recovers a pending bill with no checkout page: Paystack never saw it", async () => {
+    state.flag = true;
+    state.verifyThrows = new FakePaystackError("Transaction reference not found");
+    state.answers = [
+      { status: "pending", reference: REF, amount_minor: 1_250_000, authorization_url: null },
+      {
+        status: "ok",
+        reference: REF,
+        amount_minor: 1_250_000,
+        payee_subaccount_code: "ACCT_venue",
+        restaurant_share_minor: 1_225_000,
+      },
+    ];
+    const { payTableBill } = await import("./seating-actions");
+    const r = await payTableBill(BILL);
+    expect(r.ok, "the diner can pay the bill again").toBe(true);
+    expect(state.rpcs.map((c) => c.fn)).toEqual([
+      "restaurant_bill_open",
+      "restaurant_bill_reopen",
+      "restaurant_bill_open",
+      "restaurant_bill_checkout_saved",
+    ]);
+    expect(state.opened).toHaveLength(1);
+  });
+
+  it("settles a pending bill with no page that Paystack says was paid, and charges nothing again", async () => {
+    state.flag = true;
+    state.verified = { status: "success", amountMinor: 1_250_000, currency: "NGN" };
+    state.answers = [{ status: "pending", reference: REF, amount_minor: 1_250_000, authorization_url: null }];
+    const { payTableBill } = await import("./seating-actions");
+    const r = await payTableBill(BILL);
+    expect(r.ok).toBe(false);
+    expect(state.rpcs.map((c) => c.fn)).toEqual(["restaurant_bill_open", "restaurant_bill_settle"]);
+    expect(state.opened, "nothing is charged a second time").toHaveLength(0);
+  });
+
+  it("leaves a pending bill alone when Paystack does not answer, so the reference survives for the webhook", async () => {
+    state.flag = true;
+    state.verifyThrows = new FakePaystackUnknownOutcome("no answer");
+    state.answers = [{ status: "pending", reference: REF, amount_minor: 1_250_000, authorization_url: null }];
+    const { payTableBill } = await import("./seating-actions");
+    const r = await payTableBill(BILL);
+    expect(r.ok).toBe(false);
+    expect(state.rpcs.map((c) => c.fn)).toEqual(["restaurant_bill_open"]);
+    expect(state.opened).toHaveLength(0);
+  });
+
+  it("still answers the stored page when there is one, asking Paystack nothing", async () => {
+    state.flag = true;
+    state.answer = {
+      status: "pending",
+      reference: REF,
+      amount_minor: 1_250_000,
+      authorization_url: "https://checkout.paystack.com/kept",
+    };
+    const { payTableBill } = await import("./seating-actions");
+    const r = await payTableBill(BILL);
+    expect(r.ok).toBe(true);
+    expect(r.ok && r.data.authorizationUrl).toBe("https://checkout.paystack.com/kept");
+    expect(state.rpcs.map((c) => c.fn)).toEqual(["restaurant_bill_open"]);
   });
 
   it("refuses a share larger than the bill and reopens it, opening nothing", async () => {
