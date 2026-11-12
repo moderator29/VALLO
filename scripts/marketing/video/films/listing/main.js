@@ -239,7 +239,7 @@ export async function build(ctx) {
   lift(ctx, H, {
     id: "sc-listing-cost", crop: COST_HEAD,
     /* it is gone before the push brings the same heading up on the glass */
-    t0: w(4, "whole") - 0.12, t1: w(4, "so") - 0.30,
+    t0: w(4, "whole") - 0.12, t1: w(4, "so") - 0.8,
     to: P({ x: CX, y: 640, s: 0.64, r: -1.5 }, { x: LX, y: 330, s: 0.5, r: -1.5 }), seed: 20, radius: 20,
   });
   /* VIDEO ONE HELD THE FOUR COST ROWS UP ONE BY ONE. This film has two thirds
@@ -276,7 +276,7 @@ export async function build(ctx) {
      low enough to keep the whole of the screen's own house object. */
   lift(ctx, H, {
     id: "f-agent-inspections", crop: INSPECT,
-    t0: w(5, "inspection") - 0.12, t1: w(5, "Then") - 0.45,
+    t0: w(5, "inspection") - 0.12, t1: w(5, "Then") - 0.85,
     to: P({ x: CX, y: 660, s: 0.66, r: -2 }, { x: RX, y: 360, s: 0.52, r: -2 }), seed: 22, radius: 20,
   });
   whipPan(ctx, w(5, "report") - 0.10, { dir: "left", dur: 0.22, sound: null });
@@ -348,6 +348,10 @@ export async function build(ctx) {
       x, y, t0: w(8, word) - 0.50, t1: s(9) - 0.30 + late, size: P(32, 40), from, seed,
     });
   });
+  if (!M) {
+    object3d(ctx, mine, { name: "keys", size: 260, x: 330, y: 470, t0: w(8, "place") - 0.2, t1: s(9) - 0.3, drift: 1, seed: 34 });
+    object3d(ctx, mine, { name: "earnings", size: 240, x: 1590, y: 620, t0: w(8, "account") - 0.2, t1: s(9) - 0.3, drift: 1, seed: 35 });
+  }
   /* the three tabs print the three phrases, so the caption stays down until
      the end card takes over the words itself */
   ctx.hideCaptions(s(8) - 0.2, s(9) - 0.05);
