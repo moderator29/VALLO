@@ -39,7 +39,7 @@ import { placeBack, standingHeadline, examplePill, shower } from "./parts.js";
 
 export async function build(ctx) {
   const M = ctx.isMobile;
-  const { s, w } = anchors(ctx);
+  const { s, e, w } = anchors(ctx);
   const H = await hero(ctx, { model: "island", env: "dark", edge: "#040a2e" });
   const show = shower(H);
 
@@ -116,8 +116,8 @@ export async function build(ctx) {
   show("v3-search", w(3, "Search") - 0.05, w(3, "filter") - 0.05, { enter: "slide" });
   show("v3-filters", w(3, "filter") - 0.05, cut(4) + 0.05, { enter: "rise" });
   show("v3-listing", cut(4) + 0.05, w(4, "whole") - 0.1, { enter: "cut" });
-  show("v3-listing-cost", w(4, "whole") - 0.1, w(6, "total") - 0.25, { enter: "slide" });
-  show("v3-listing-total", w(6, "total") - 0.25, w(7, "buy") - 0.1, { enter: "slide" });
+  show("v3-listing-cost", w(4, "whole") - 0.1, w(6, "and") - 0.2, { enter: "slide" });
+  show("v3-listing-total", w(6, "and") - 0.2, w(7, "buy") - 0.1, { enter: "slide" });
   show("v3-listing-sale", w(7, "buy") - 0.1, cut(8) + 0.05, { enter: "slide" });
   show("v3-saved", cut(8) + 0.05, cut(9) + 0.05, { enter: "cut" });
   show("v3-split", cut(9) + 0.05, cut(10) + 0.05, { enter: "cut" });
@@ -126,18 +126,26 @@ export async function build(ctx) {
   show("sc-stay", w(11, "few") - 0.35, s(12) - 0.15, { enter: "slide" });
   show("sc-restaurant", s(12) - 0.15, cut(13) + 0.05, { enter: "slide" });
   show("v3-stay", cut(13) + 0.05, cut(14) + 0.05, { enter: "cut" });
-  show("v3-circle", cut(14) + 0.05, w(14, "ask") - 0.35, { enter: "cut" });
-  show("v3-circle-explore", w(14, "ask") - 0.35, cut(15) + 0.05, { enter: "slide" });
-  show("v3-roommates", cut(15) + 0.05, w(15, "near") - 0.2, { enter: "cut" });
-  show("v3-schools", w(15, "near") - 0.2, s(16) - 0.2, { enter: "slide" });
-  show("v3-roommates-2", s(16) - 0.2, cut(17) + 0.05, { enter: "slide" });
+  show("v3-circle", cut(14) + 0.05, w(14, "where") - 0.3, { enter: "cut" });
+  show("v3-circle-explore", w(14, "where") - 0.3, cut(15) + 0.05, { enter: "slide" });
+  show("v3-roommates", cut(15) + 0.05, w(15, "share") - 0.05, { enter: "cut" });
+  show("v3-schools", w(15, "share") - 0.05, e(15) - 0.25, { enter: "slide" });
+  show("v3-roommates-2", e(15) - 0.25, cut(17) + 0.05, { enter: "slide" });
   show("v3-payments", cut(17) + 0.05, cut(18) + 0.05, { enter: "cut" });
   show("v3-home", cut(18) + 0.05, s(19) - 0.15, { enter: "cut" });
   show("v3-welcome", s(19) - 0.15, ctx.duration, { enter: "slide" });
 
   /* ===================== 1. The hook (built, still on frame one) ============ */
   ground(ctx, 0, cut(2), { tone: "navy", y: 26, seed: 11 });
-  const open = layer("open", 0, cut(2));
+  const openRoot = layer("open", 0, cut(2));
+  /* frame one is never still: the whole opening pushes in slowly while the
+     line is spoken (a pure function of t) */
+  const open = ctx.el("div", { class: "fill", style: { transformOrigin: "50% 42%" } }, openRoot);
+  ctx.onFrame((t) => {
+    const u = Math.min(1, Math.max(0, t / cut(2)));
+    const k = u * u * (3 - 2 * u);
+    open.style.transform = `translateY(${(-26 * k).toFixed(2)}px) scale(${(1 + 0.075 * k).toFixed(5)})`;
+  });
   placeBack(ctx, ctx.scene("open-place", 0, cut(2), { z: 3 }), { scene: "villa", t0: -1, t1: s(2) - 0.5, y: 960, opacity: 0.5 });
   standingHeadline(ctx, open, {
     lines: [[["Finding a home", false]], [["in Nigeria should", false]], [["not feel like", false]], [["a ", false], ["gamble.", true]]],
@@ -149,15 +157,15 @@ export async function build(ctx) {
      N26,100,000). The viewer sees the gap before the first word. */
   popOut(ctx, open, {
     kind: "stat", lucide: "key-round", tab: "Asking", figure: "₦18m", unit: "a year",
-    x: 372, y: 1010, t0: -1.4, t1: s(2) - 0.35, size: 34, from: "left", rot: -3, seed: 2, sound: null,
+    x: 372, y: 1010, t0: w(1, "home") - 0.1, t1: s(2) - 0.35, size: 34, from: "left", rot: -3, seed: 2,
   });
   popOut(ctx, open, {
     kind: "stat", lucide: "receipt-text", tab: "Move-in total", figure: "₦26.1m",
-    x: 640, y: 1330, t0: -1.2, t1: s(2) - 0.3, size: 40, from: "right", rot: 2.6, accent: "electric", seed: 3, sound: null,
+    x: 640, y: 1330, t0: w(1, "feel") - 0.15, t1: s(2) - 0.3, size: 40, from: "right", rot: 2.6, accent: "electric", seed: 3,
   });
-  examplePill(ctx, open, { x: 540, y: 1560, t0: -1, t1: s(2) - 0.4, size: 28, label: "Example home in Maitama" });
-  object3d(ctx, open, { name: "keys", size: 250, x: 140, y: 1650, t0: -1, t1: s(2) - 0.35, drift: 1, seed: 14 });
-  object3d(ctx, open, { name: "villa", size: 240, x: 935, y: 700, t0: -1, t1: s(2) - 0.35, drift: 1, seed: 15 });
+  examplePill(ctx, open, { x: 540, y: 1560, t0: w(1, "gamble") - 0.2, t1: s(2) - 0.4, size: 28, label: "Example home in Maitama" });
+  object3d(ctx, open, { name: "keys", size: 250, x: 140, y: 1650, t0: 0.35, t1: s(2) - 0.35, drift: 1, seed: 14 });
+  object3d(ctx, open, { name: "villa", size: 240, x: 935, y: 700, t0: 0.7, t1: s(2) - 0.35, drift: 1, seed: 15 });
   ctx.hideCaptions(0, s(2) - 0.1);
 
   /* ===================== 2. Meet Vallo ==================================== */
@@ -179,9 +187,10 @@ export async function build(ctx) {
      inside a chapter, never a chapter change */
   whipPan(ctx, w(3, "Search") - 0.1, { dir: "left", dur: 0.24, sound: "whoosh_short" });
   const find = layer("find", s(3) - 0.2, cut(4) + 0.1);
+  H.tap(w(3, "Search") - 0.3, 600, 1865);
   lift(ctx, H, {
     id: "v3-search", crop: { x: 40, y: 387, w: 1240, h: 165 },
-    t0: w(3, "Search") + 0.3, t1: w(3, "filter") - 0.35,
+    t0: w(3, "Search") + 0.6, t1: w(3, "filter") - 0.35,
     to: { x: CX, y: 540, s: 0.76, r: -1.5 }, seed: 31, radius: 30,
   });
   H.tap(w(3, "filter") - 0.55, 1065, 474);
@@ -205,15 +214,15 @@ export async function build(ctx) {
   object3d(ctx, cost, { name: "villa", size: 230, x: 930, y: 520, t0: cut(4) + 0.35, t1: w(4, "whole") + 0.3, drift: 1, seed: 41 });
   popOut(ctx, cost, {
     kind: "line", lucide: "receipt-text", tab: "Move-in cost", title: "Every fee, added up", line: "Every cost the lister declared.",
-    x: CX, y: 470, t0: w(4, "whole") - 0.55, t1: w(4, "before") - 0.62, size: 31, from: "above", seed: 42,
+    x: CX, y: 440, t0: w(4, "whole") - 0.55, t1: w(4, "before") - 0.62, size: 31, from: "above", seed: 42,
   });
   /* the figure a renter has already seen before anybody picks up a phone: the
      listing's own sticky bar */
   popOut(ctx, cost, {
     kind: "stat", lucide: "receipt-text", tab: "Move-in total", figure: "₦26.1m", unit: "before the call",
-    x: 400, y: 600, t0: w(4, "before") - 0.2, t1: w(5, "Rent") - 0.2, size: 32, from: "left", rot: -2, accent: "electric", seed: 43,
+    x: 400, y: 545, t0: w(4, "before") - 0.2, t1: w(5, "Rent") - 0.7, size: 32, from: "left", rot: -2, accent: "electric", seed: 43,
   });
-  badgeDisc(ctx, cost, { name: "phone", kind: "glyph", x: 900, y: 600, size: 128, t0: w(4, "call") - 0.1, t1: w(5, "Rent") - 0.25, seed: 44 });
+  badgeDisc(ctx, cost, { name: "phone", kind: "glyph", x: 900, y: 560, size: 128, t0: w(4, "call") - 0.1, t1: w(5, "Rent") - 0.7, seed: 44 });
   ctx.hidePill(cut(4), cut(4) + 0.3);
 
   /* 5. THE ROWS, one by one on the word that names each. The camera is
@@ -248,30 +257,35 @@ export async function build(ctx) {
   });
   lift(ctx, H, {
     id: "v3-listing-total", crop: { x: 38, y: 1200, w: 1240, h: 170 },
-    t0: w(6, "total") - 0.05, t1: cut(8) - 0.66,
+    t0: w(6, "total") + 0.15, t1: w(7, "buy") - 0.45,
     to: { x: CX, y: 665, s: 0.8, r: -1.2 }, seed: 48, radius: 30, fly: 0.8,
   });
   const roll = ctx.el("div", { class: "abs", style: { left: "0px", top: "0px", width: `${ctx.W}px`, visibility: "hidden" } }, cost);
   const fig = odometer(ctx, roll, { value: 26100000, t0: w(6, "twenty-six") - 0.05, t1: w(6, "one") + 0.35, fontSize: 124 });
   Object.assign(fig.style, { left: "50%", top: "372px", transform: "translateX(-50%)" });
   ctx.onFrame((t) => {
-    const on = t >= w(6, "twenty-six") - 0.3 && t < cut(8) - 0.35;
+    const on = t >= w(6, "twenty-six") - 0.3 && t < w(7, "buy") - 0.1;
     roll.style.visibility = on ? "inherit" : "hidden";
     const a = Math.min(1, Math.max(0, (t - (w(6, "twenty-six") - 0.3)) / 0.3));
-    const b = Math.min(1, Math.max(0, (t - (cut(8) - 0.7)) / 0.35));
+    const b = Math.min(1, Math.max(0, (t - (w(7, "buy") - 0.45)) / 0.35));
     roll.style.opacity = String(Math.min(a, 1 - b).toFixed(3));
   });
   for (let k = 0; k < 6; k += 1) ctx.sfx("counter_tick", w(6, "twenty-six") + k * 0.17, { offset: -4 - k * 0.5 });
   ctx.sfx("success", w(6, "one") + 0.3, { offset: -1 });
-  object3d(ctx, cost, { name: "receipt", size: 220, x: 925, y: 1090, t0: w(6, "total") + 0.1, t1: cut(8) - 0.4, drift: 1, seed: 49 });
-  badgeDisc(ctx, cost, { name: "price-tag", x: 125, y: 1240, size: 134, t0: w(6, "rent") + 0.1, t1: cut(8) - 0.4, seed: 50 });
+  object3d(ctx, cost, { name: "receipt", size: 220, x: 925, y: 1090, t0: w(6, "total") + 0.1, t1: w(7, "buy") - 0.3, drift: 1, seed: 49 });
+  badgeDisc(ctx, cost, { name: "price-tag", x: 125, y: 1240, size: 134, t0: w(6, "rent") + 0.1, t1: w(7, "buy") - 0.3, seed: 50 });
   ctx.hidePill(w(6, "On") - 0.1, cut(8));
 
   /* 7. WANT TO BUY? A for-sale listing shows the same full cost. */
   whipPan(ctx, w(7, "buy") - 0.15, { dir: "right", dur: 0.24, sound: "whoosh_short" });
   popOut(ctx, cost, {
     kind: "line", lucide: "home", tab: "For Sale", title: "Same full cost", line: "Every home for sale, the same breakdown.",
-    x: CX, y: 470, t0: w(7, "Every") - 0.4, t1: cut(8) - 0.4, size: 31, from: "above", seed: 55,
+    x: CX, y: 430, t0: w(7, "buy") + 0.2, t1: w(7, "sale") - 0.15, size: 31, from: "above", seed: 55,
+  });
+  lift(ctx, H, {
+    id: "v3-listing-sale", crop: { x: 40, y: 1104, w: 1240, h: 1026 },
+    t0: w(7, "sale") - 0.05, t1: cut(8) - 0.45,
+    to: { x: CX, y: 690, s: 0.56, r: -1.4 }, seed: 53, radius: 40,
   });
   object3d(ctx, cost, { name: "villa", size: 220, x: 135, y: 1100, t0: w(7, "buy") + 0.1, t1: cut(8) - 0.35, drift: 1, seed: 56 });
 
@@ -286,23 +300,25 @@ export async function build(ctx) {
   });
   lift(ctx, H, {
     id: "v3-saved", crop: { x: 40, y: 1166, w: 884, h: 280 },
-    t0: w(8, "compare") - 0.2, t1: cut(10) - 0.62,
+    t0: w(8, "compare") - 0.2, t1: cut(9) - 0.3,
     to: { x: CX, y: 520, s: 0.8, r: -1.5 }, seed: 52, radius: 30,
   });
   H.tap(w(8, "side") - 0.1, 210, 1376);
-  object3d(ctx, keep, { name: "saved-heart", size: 230, x: 930, y: 1050, t0: s(8) + 0.1, t1: cut(10) - 0.55, drift: 1, seed: 53 });
-  badgeDisc(ctx, keep, { name: "scale", kind: "glyph", x: 120, y: 1000, size: 132, t0: w(8, "compare") - 0.05, t1: cut(10) - 0.6, seed: 54 });
+  object3d(ctx, keep, { name: "saved-heart", size: 230, x: 930, y: 1050, t0: s(8) + 0.1, t1: cut(9) - 0.2, drift: 1, seed: 53 });
+  badgeDisc(ctx, keep, { name: "scale", kind: "glyph", x: 120, y: 1000, size: 132, t0: w(8, "compare") - 0.05, t1: cut(9) - 0.2, seed: 54 });
 
   /* 9. SPLIT THE COST. The move-in total, person by person. */
   whipPan(ctx, cut(9) - 0.05, { dir: "left", dur: 0.24, sound: "whoosh_short" });
+  H.tap(s(9) + 0.35, 358, 532);
   lift(ctx, H, {
     id: "v3-split", crop: { x: 40, y: 978, w: 1240, h: 276 },
     t0: w(9, "Split") - 0.1, t1: w(9, "person") - 0.45,
     to: { x: CX, y: 700, s: 0.78, r: 1.2 }, seed: 57, radius: 30,
   });
-  popOut(ctx, keep, {
-    kind: "counters", items: [["user", "Person 1"], ["user", "Person 2"], ["user", "Person 3"]],
-    x: CX, y: 370, t0: w(9, "person") - 0.3, t1: cut(10) - 0.4, size: 30, from: "above", seed: 58, tab: "Split the total",
+  lift(ctx, H, {
+    id: "v3-split", crop: { x: 40, y: 1278, w: 1240, h: 640 },
+    t0: w(9, "person") - 0.25, t1: cut(10) - 0.45,
+    to: { x: CX, y: 650, s: 0.6, r: -1.2 }, seed: 58, radius: 40,
   });
   object3d(ctx, keep, { name: "team", size: 220, x: 930, y: 1050, t0: w(9, "Split") + 0.1, t1: cut(10) - 0.35, drift: 1, seed: 59 });
   ctx.hidePill(cut(9) - 0.1, cut(10));
@@ -320,6 +336,7 @@ export async function build(ctx) {
     t0: w(10, "assistant") - 0.2, t1: cut(11) - 0.66,
     to: { x: CX, y: 652, s: 1.04, r: 1.2 }, seed: 62, radius: 40,
   });
+  H.tap(w(10, "Ask") + 0.05, 400, 2505);
   object3d(ctx, ask, { name: "assistant", size: 240, x: 120, y: 1520, t0: s(10) + 0.2, t1: cut(11) - 0.35, drift: 1, seed: 63 });
   badgeDisc(ctx, ask, { name: "clock", x: 960, y: 1010, size: 134, t0: w(10, "any") - 0.1, t1: cut(11) - 0.4, seed: 64 });
 
@@ -344,6 +361,7 @@ export async function build(ctx) {
     x: CX, y: 480, t0: s(12) + 0.0, t1: cut(13) - 0.4, size: 31, from: "right", seed: 74, accent: "electric",
   });
   object3d(ctx, stay, { name: "restaurant", size: 230, x: 135, y: 1040, t0: s(12) + 0.3, t1: cut(13) - 0.35, drift: 1, seed: 75 });
+  H.tap(w(12, "table") + 0.1, 385, 2752);
 
   /* 13. THE DETAIL. See the room, read the menu, check every detail. */
   whipPan(ctx, cut(13) - 0.05, { dir: "right", dur: 0.24, sound: "whoosh_short" });
@@ -363,13 +381,14 @@ export async function build(ctx) {
   irisTicks(ctx, cut(14), { dur: 0.34 });
   ground(ctx, cut(14), cut(15), { tone: "navy", y: 20, seed: 17 });
   const circle = layer("circle", cut(14), cut(15) + 0.1);
+  H.tap(w(14, "Circle") + 0.25, 625, 1720);
   popOut(ctx, circle, {
     kind: "counters", items: [["users", "Renters"], ["key-round", "Owners"], ["briefcase", "Agents"]],
     x: CX, y: 470, t0: s(14) + 0.1, t1: w(14, "ask") - 0.4, size: 31, from: "above", seed: 81, tab: "Vallo Circle",
   });
   lift(ctx, H, {
     id: "v3-circle-explore", crop: { x: 40, y: 584, w: 1240, h: 650 },
-    t0: w(14, "ask") - 0.1, t1: cut(15) - 0.66,
+    t0: w(14, "ask") + 0.1, t1: cut(15) - 0.66,
     to: { x: CX, y: 580, s: 0.54, r: 1.2 }, seed: 82, radius: 40,
   });
   object3d(ctx, circle, { name: "local-talks", size: 230, x: 930, y: 1100, t0: s(14) + 0.2, t1: cut(15) - 0.3, drift: 1, seed: 83 });
@@ -385,12 +404,13 @@ export async function build(ctx) {
   });
   lift(ctx, H, {
     id: "v3-schools", crop: { x: 40, y: 640, w: 1240, h: 440 },
-    t0: w(15, "near") - 0.15, t1: s(16) - 0.75,
+    t0: w(15, "near") + 0.05, t1: e(15) + 0.1,
     to: { x: CX, y: 560, s: 0.62, r: -1.5 }, seed: 92, radius: 40,
   });
-  popOut(ctx, mates, {
-    kind: "counters", items: [["graduation-cap", "A school email"], ["id-card", "An ID"], ["phone", "A phone number"]],
-    x: CX, y: 470, t0: s(16) - 0.2, t1: cut(17) - 0.35, size: 30, from: "above", accent: "electric", seed: 93, tab: "Badges say what was confirmed",
+  lift(ctx, H, {
+    id: "v3-roommates-2", crop: { x: 40, y: 1188, w: 1240, h: 580 },
+    t0: w(16, "says") - 0.05, t1: cut(17) - 0.45,
+    to: { x: CX, y: 640, s: 0.66, r: -1.2 }, seed: 93, radius: 40,
   });
   object3d(ctx, mates, { name: "team", size: 230, x: 930, y: 1070, t0: s(15) + 0.3, t1: cut(17) - 0.3, drift: 1, seed: 94 });
   ctx.hidePill(s(16) - 0.35, cut(17));
