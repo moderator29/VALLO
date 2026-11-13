@@ -383,6 +383,42 @@
     gap: var(--nf-space-xs);
     margin-top: var(--nf-space-sm);
   }
+  /*
+   * A GRID WHOSE LABELS ARE PHRASES, NOT WORDS: two to a row on a phone.
+   * Three columns leave each tile 93px, and 57px of that for the words once
+   * the padding is off. Measured in Chromium on `/preview/c2/
+   * facilities-and-photos` and `/preview/imgc/facilities`, light and dark, at
+   * 320 and 360: "Air conditioning" came out over FIVE lines, 65px wide,
+   * hyphenated into "con-", "di-", "tion-", "ing", because `hyphens: auto`
+   * on the tile gives the browser a break point inside the word and a
+   * min-content width of one syllable. Two columns give the words 104px at
+   * 320, which holds "conditioning" whole. Three columns come back at 480,
+   * where a tile is 150px.
+   *
+   * Both classes are named in the selector deliberately: the one-class
+   * `.nf-stays-tiles` rule exists in two stylesheets, so a single-class
+   * modifier would win or lose on import order.
+   */
+  .nf-stays-tiles.nf-stays-tiles--phrases {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  /*
+   * AND NO HYPHENATION ON A PHRASE. With two columns the words have 121px
+   * and "conditioning" needs 96, so it fits whole; Chromium still broke it
+   * as "Air" / "condition-" / "ing" over three lines, because `hyphens:
+   * auto` on the tile gives it a break point inside the word and the whole
+   * phrase is one pixel wider than the line. Hyphenated product words are
+   * not Vallo's look in any case. `break-word` stays as the backstop for a
+   * single word longer than the tile.
+   */
+  .nf-stays-tiles.nf-stays-tiles--phrases .nf-stays-tile {
+    hyphens: manual;
+  }
+  @media (min-width: 30rem) {
+    .nf-stays-tiles.nf-stays-tiles--phrases {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
   .nf-stays-tile {
     position: relative;
     display: flex;

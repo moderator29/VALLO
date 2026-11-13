@@ -118,7 +118,10 @@ export function FacilitiesPicker({
         shown the places that claim them, so a claim that is not true is a bad review waiting.
       </p>
 
-      <div className="nf-stays-tiles" role="group" aria-label={hw.facilitiesLabel}>
+      {/* `--phrases`: these labels are phrases ("Air conditioning", "Backup
+          power"), so the grid is two to a row on a phone. Three columns drew
+          "Air conditioning" over five hyphenated lines at 320 and 360. */}
+      <div className="nf-stays-tiles nf-stays-tiles--phrases" role="group" aria-label={hw.facilitiesLabel}>
         {STAY_FACILITIES.map((facility) => {
           const on = picked.has(facility.code);
           return (

@@ -320,11 +320,20 @@
   border-left: 1px solid var(--nf-card-border, var(--nf-border-default));
 }
 
+/*
+ * `break-word`, NOT `anywhere`, IN A THREE-UP STRIP. The two break text in
+ * the same places; only `anywhere` is counted when the browser works out an
+ * element's min-content width, so under `anywhere` each of these three
+ * shrinkable cells can collapse to one character. Measured on
+ * `/preview/cards` at 320 wide: "2 months" drew over three lines in a 36px
+ * cell, 2.7 characters to a line. The long-value protection these were added
+ * for is kept; the collapse is not.
+ */
 .nf-share-card__stat dt {
   font-size: var(--nf-text-overline);
   line-height: 1.35;
   color: var(--nf-content-muted);
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
 }
 
 .nf-share-card__stat dd {
@@ -334,7 +343,7 @@
   font-weight: 600;
   font-variant-numeric: tabular-nums;
   color: var(--nf-content-primary);
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
 }
 
 /* ------------------------------------------------------------- the foot */

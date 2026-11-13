@@ -461,11 +461,31 @@
       grid-template-columns: repeat(4, minmax(0, 1fr));
     }
   }
-  /* Two tiles to a row on a phone leave a label about 90px: it wraps to a
-     second line rather than being cut to "ARRIVI...". */
+  /*
+   * THE LABEL DID NOT HAVE 90 PIXELS, AND THE CLAMP ABOVE IT WAS OFF.
+   * Measured in Chromium on `/preview/f5/host-landing`, dark, two tiles to a
+   * row, before this change:
+   *
+   *   320px viewport: tile 117px, head 83px, LABEL 47px. "Staying tonight",
+   *                   "Requests waiting" and "Unread messages" each drew FOUR
+   *                   lines, broken mid-word, about three characters to a
+   *                   line, and "Arriving today" drew three.
+   *   360px viewport: tile 137px, LABEL 67px. "Unread messages" drew three.
+   *
+   * Two things were wrong. The label was given 47 to 67 pixels, not 90: the
+   * tile's 16px padding either side and the chevron's 32px box with its 8px
+   * gap take 68 of the tile's 117. And `overflow: visible` here cancels the
+   * `-webkit-line-clamp: 2` set in `controls.css`, whose comment promises
+   * "up to two lines, then clipped", so nothing stopped the fourth line.
+   *
+   * The room comes from the chrome rather than from the words: tighter tile
+   * padding, a tighter head gap, and the chevron's box sized to the 16px
+   * glyph it holds instead of 32px of mostly air (the glyph itself is
+   * unchanged, and icon weights are not touched). The clamp goes back to
+   * doing its job as the backstop a translation needs.
+   */
   .nf-desk-kpis .nf-kpi__label {
     white-space: normal;
-    overflow: visible;
     text-overflow: clip;
     /* Last resort for a word longer than the tile (a translation): break it
        rather than run it under the chevron. */
@@ -478,6 +498,25 @@
     .nf-desk-kpis .nf-kpi__glyph {
       display: none;
     }
+    .nf-desk-kpis .nf-kpi.nf-kpi {
+      padding: var(--nf-space-sm);
+    }
+    .nf-desk-kpis .nf-kpi__head {
+      gap: var(--nf-space-2xs);
+    }
+  }
+  /* Below 360 the 15px label still has only 71px, and "Unread messages" laid
+     out a third line that the clamp then hid as "Unread mes...". One step
+     down in type gives the longest of the four labels both of its words. */
+  @media (max-width: 22rem) {
+    .nf-desk-kpis .nf-kpi .nf-kpi__label.nf-kpi__label {
+      font-size: var(--nf-text-body-sm);
+    }
+  }
+  .nf-desk-kpis .nf-kpi .nf-kpi__door {
+    width: 1.25rem;
+    height: 1.25rem;
+    margin-block: 0;
   }
   .nf-desk-grid {
     display: grid;
