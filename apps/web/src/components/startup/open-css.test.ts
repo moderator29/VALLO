@@ -116,7 +116,8 @@ describe("the first HTML", () => {
   });
   /*
    * ONE WEBSITE OPENING (13 November 2026). The older launch layer
-   * (components/motion/launch-script.ts, `.nf-launch`) played a second opening
+   * (the launch-script module in components/motion, now deleted, `.nf-launch`)
+   * played a second opening
    * on the next whole-page load of a front door; it was deleted with its
    * stylesheet rules and its <script> in the root layout. Nothing may bring it
    * back.

@@ -2,7 +2,8 @@
  * THE ANIMATED MARK INSIDE THE APP (MarkDraw: sign-in, the empty home).
  *
  * This sheet also held the older website launch layer (the nf-launch rules, from
- * components/motion/launch-script.ts), which played a SECOND opening on the
+ * the launch-script module in components/motion, now deleted), which played a
+ * SECOND opening on the
  * next whole-page load of a front door after the real one
  * (components/startup). It was deleted on 13 November 2026 with its script;
  * only the mark's rules are left.
