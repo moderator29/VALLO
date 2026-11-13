@@ -1,75 +1,13 @@
 /*
- * THE APP OPEN LOGO (founder ruling (a); the controller is
- * components/motion/launch-script.ts). A dark ground in both themes, the
- * animated lockup centred, the version line at the foot, and the hand into
- * the page: the layer fades while the lockup grows a touch, on the
- * compositor only. It never takes a pointer event. Plays on both the
- * website and the native shell.
+ * THE ANIMATED MARK INSIDE THE APP (MarkDraw: sign-in, the empty home).
+ *
+ * This sheet also held the older website launch layer (the nf-launch rules, from
+ * components/motion/launch-script.ts), which played a SECOND opening on the
+ * next whole-page load of a front door after the real one
+ * (components/startup). It was deleted on 13 November 2026 with its script;
+ * only the mark's rules are left.
  */
 @layer components {
-  .nf-launch {
-    position: fixed;
-    inset: 0;
-    z-index: 2147483000;
-    display: grid;
-    place-items: center;
-    background: var(--nf-surface-artwork);
-    pointer-events: none;
-    transition: opacity var(--nf-duration-slow) var(--nf-ease-exit);
-  }
-  .nf-launch__art {
-    inline-size: min(64vw, 17.5rem);
-    block-size: auto;
-    opacity: 0;
-    transition:
-      opacity var(--nf-duration-fast) var(--nf-ease-standard),
-      transform var(--nf-duration-slow) var(--nf-ease-exit);
-  }
-  .nf-launch[data-ready] .nf-launch__art {
-    opacity: 1;
-  }
-  .nf-launch__version {
-    position: absolute;
-    inset-block-end: calc(env(safe-area-inset-bottom, 0px) + var(--nf-space-xl));
-    inset-inline: 0;
-    margin: 0;
-    color: var(--nf-content-on-media-muted);
-    font-family: var(--nf-font-sans);
-    font-size: var(--nf-text-caption);
-    font-weight: 600;
-    letter-spacing: 0.04em;
-    text-align: center;
-    opacity: 0;
-    transition: opacity var(--nf-duration-slow) var(--nf-ease-standard);
-  }
-  .nf-launch[data-ready] .nf-launch__version {
-    opacity: 1;
-    transition-delay: 1100ms;
-  }
-  .nf-launch[data-launch="still"][data-ready] .nf-launch__version {
-    transition-delay: 0ms;
-  }
-  .nf-launch[data-launch="leave"] {
-    opacity: 0;
-  }
-  .nf-launch[data-launch="leave"] .nf-launch__art {
-    transform: scale(1.06);
-  }
-  .nf-launch[data-launch="leave"] .nf-launch__version {
-    opacity: 0;
-    transition-delay: 0ms;
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .nf-launch[data-launch="leave"] .nf-launch__art {
-      transform: none;
-    }
-  }
-  :root:is([data-motion="calm"], [data-motion="off"]) .nf-launch[data-launch="leave"] .nf-launch__art {
-    transform: none;
-  }
-  /* The overlay now plays on the native shell too (the web artwork is the
-     single source for both surfaces), so no native bail-out here. */
-
   /* THE ANIMATED MARK INSIDE THE APP (sign-in, the empty home): the ring
      draws and the towers rise once, from `vallo-mark-draw.svg`; Calm and Off
      show the still mark instead (the file answers the system setting itself). */

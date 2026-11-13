@@ -20,8 +20,6 @@ import { MOTION_COOKIE, motionAttributes, parseMotion } from "@/lib/motion/motio
 import "./globals.css";
 import "./css/launch.css";
 import "./css/input-bar.css";
-import { launchScript } from "@/components/motion/launch-script";
-import packageJson from "../../package.json";
 import "@/components/startup/startup.css";
 import "@/components/startup/open.css";
 import { OpenReady } from "@/components/startup/OpenReady";
@@ -509,10 +507,6 @@ export default async function RootLayout({
             __html: STARTUP_GATE_SCRIPT,
           }}
         />
-        {/* The app open logo on the website (founder ruling (a)): decided before
-            the first frame, never on the native shell, once per session on the
-            front doors; components/motion/launch-script.ts. */}
-        <script nonce={nonce} suppressHydrationWarning dangerouslySetInnerHTML={{ __html: launchScript(packageJson.version) }} />
         {/*
           WITHOUT JAVASCRIPT, EVERYTHING BELOW THE FOLD WAS INVISIBLE.
 

@@ -82,24 +82,11 @@ export const OPEN_NATIVE_WAIT_MS = 6000;
 export const OPEN_NATIVE_PLUGIN = "ValloShell";
 export const OPEN_NATIVE_METHOD = "handoff";
 
-/** The older website launch layer's session mark (`components/motion/launch-script.ts`), spent here so it never plays as a second opening. */
-export const OPEN_LAUNCH_SESSION_KEY = "nf_launch";
-
 /** sessionStorage key marking this session's opening as shown. */
 export const OPEN_SESSION_KEY = "nf_open";
 
 export const OPEN_SCRIPT =
   "(function(){var W=window,D=document,r=D.documentElement;try{" +
-  /* THE OLDER WEBSITE OPENING NEVER PLAYS AFTER THIS ONE (13 November 2026,
-     found on a filmstrip). `components/motion/launch-script.ts` (7 November)
-     draws its own lockup with a version line on the front doors, once per
-     session by `nf_launch`. It stood aside only on the SAME load as this
-     layer (`data-open` "on") and spent its mark only when it played, so the
-     next whole-page load of a front door in the session (a reload, a sign-in
-     landing on /home, /welcome after /) played it: a second opening. This
-     script decides the session's opening, so it spends that mark too, before
-     anything else, on every path. */
-  "try{sessionStorage.setItem('" + OPEN_LAUNCH_SESSION_KEY + "','1')}catch(e){}" +
   "var nat=false;try{nat=r.hasAttribute('data-native')||/VALLO-NATIVE/.test(navigator.userAgent)||!!(W.Capacitor&&W.Capacitor.isNativePlatform&&W.Capacitor.isNativePlatform())}catch(e){}" +
   /* A browser tab plays it too (the founder, 11 November 2026). This read
      `if(!sa&&!nat){off;return}`, so the website turned the opening off before

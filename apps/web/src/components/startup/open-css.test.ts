@@ -1,8 +1,8 @@
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { OPEN_LAUNCH_SVG } from "./open-launch.generated";
-import { OPEN_LAUNCH_SESSION_KEY, OPEN_MIN_MS, OPEN_SCRIPT } from "./open-script";
+import { OPEN_MIN_MS, OPEN_SCRIPT } from "./open-script";
 
 /**
  * THE OPENING SCREEN, FIRST PAINT (10 November 2026). What must be true of the
@@ -114,21 +114,17 @@ describe("the first HTML", () => {
     expect(ready).toContain('"use client"');
     expect(ready).toContain("__nfOpenReady");
   });
-  it("does not play the older website launch layer under it", () => {
-    const launch = readFileSync(join(WEB, "src", "components", "motion", "launch-script.ts"), "utf8");
-    expect(launch).toContain("data-open')==='on'");
-  });
   /*
-   * NOR ON THE NEXT LOAD (13 November 2026, found on a filmstrip of the
-   * website: the drawn opening on the first load, then on the next whole-page
-   * load of /welcome a second lockup with "Version 1.0.2" under it). The older
-   * layer only checked this one's attribute on the same load and spent its own
-   * session mark only when it played. The opening's script now spends that
-   * mark on every path, and the older layer returns when it finds it.
+   * ONE WEBSITE OPENING (13 November 2026). The older launch layer
+   * (components/motion/launch-script.ts, `.nf-launch`) played a second opening
+   * on the next whole-page load of a front door; it was deleted with its
+   * stylesheet rules and its <script> in the root layout. Nothing may bring it
+   * back.
    */
-  it("spends the older launch layer's session mark, which that layer reads before it plays", () => {
-    expect(OPEN_SCRIPT).toContain(`sessionStorage.setItem('${OPEN_LAUNCH_SESSION_KEY}','1')`);
-    const launch = readFileSync(join(WEB, "src", "components", "motion", "launch-script.ts"), "utf8");
-    expect(launch).toContain(`sessionStorage.getItem('${OPEN_LAUNCH_SESSION_KEY}'))return`);
+  it("the older website launch layer is gone, script, rules and all", () => {
+    expect(existsSync(join(WEB, "src", "components", "motion", "launch-script.ts"))).toBe(false);
+    const layout = readFileSync(join(WEB, "src", "app", "layout.tsx"), "utf8");
+    expect(layout).not.toMatch(/launchScript|launch-script/);
+    expect(readFileSync(join(WEB, "src", "app", "css", "launch.css"), "utf8")).not.toMatch(/\.nf-launch\b/);
   });
 });
