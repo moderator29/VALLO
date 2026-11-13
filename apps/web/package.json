@@ -6,7 +6,7 @@
     "dev": "next dev -p 3000",
     "build": "next build",
     "start": "next start -p 3000",
-    "lint": "eslint . --max-warnings=333 && node scripts/check-css-tokens.mjs && node scripts/check-valuation-words.mjs && node scripts/check-no-em-dash.mjs && node ../../scripts/check-migrations.mjs && npm run check:claims",
+    "lint": "eslint . --max-warnings=333 && node scripts/check-css-tokens.mjs && node scripts/check-valuation-words.mjs && node scripts/check-no-em-dash.mjs && node scripts/check-notify-reachability.mjs && node ../../scripts/check-migrations.mjs && npm run check:claims",
     "check:claims": "vitest run src/lib/trust/claims.test.ts",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
