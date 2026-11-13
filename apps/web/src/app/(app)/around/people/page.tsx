@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { getDictionary } from "@vallo/i18n";
 import { PageHeader } from "@/components/app/PageHeader";
-import { PeopleFinder, typedOf } from "@/components/social/find/PeopleFinder";
+import { PeopleFinder } from "@/components/social/find/PeopleFinder";
+import { typedOf } from "@/components/social/find/typed";
 import { PeopleSections } from "@/components/social/find/PeopleSections";
 import { EmptyPanel } from "@/components/social/profile/EmptyPanel";
 import { SocialPaused } from "@/components/social/SocialPaused";

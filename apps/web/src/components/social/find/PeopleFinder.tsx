@@ -1,5 +1,6 @@
 "use client";
 
+import { typedOf } from "./typed";
 import { useEffect, useRef, useState } from "react";
 import { UiIcon } from "@/design-system/icons/UiIcon";
 import { Skeleton } from "@/components/ui/Skeleton";
@@ -23,10 +24,6 @@ export type FinderWords = {
   you: string;
 };
 
-/** What the search has typed, as the action reads it: no leading @, at most 40. */
-export function typedOf(value: string): string {
-  return value.trim().replace(/^@+/, "").slice(0, 40);
-}
 
 /** A search result as a row of the vertical list. */
 export function cardOfHit(hit: PersonHit, words: Pick<FinderWords, "roleLandlord" | "roleAgent" | "you">): PersonCardData {

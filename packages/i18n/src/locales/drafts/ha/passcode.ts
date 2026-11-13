@@ -81,4 +81,23 @@ export const passcodeHa = {
   deleteKey: "Goge",
   digitsEntered: "An shigar da lambobi {count} cikin {total}",
   moneyLocked: "Da farko ka buɗe Vallo da lambar sirrinka. Ba a caji ko canza komai ba.",
+  /* Machine drafts added 13 November 2026 for keys English gained; awaiting native review like the rest of this file. */
+  bioRowUnsupportedApp: "Ba za a iya amfani da Face ID ko zanen yatsa a wannan sigar manhajar ba. Lambar sirrinka tana kiyaye Vallo a kulle.",
+  slow: "Haɗi ba shi da ƙarfi. Har yanzu ana duba lambar sirrinka.",
+  unreachable: "Ba mu iya isa ga Vallo ba. Lambar sirrinka tana nan: duba siginarka sannan ka taɓa Sake gwadawa.",
+  tryAgain: "Sake gwadawa",
+  wrongOffline: "Wannan ba lambar sirrinka ba ce.",
+  passkeyUnlockBy: {
+    "face-id": "Buɗe da Face ID",
+    "touch-id": "Buɗe da Touch ID",
+    fingerprint: "Buɗe da zanen yatsa",
+    "windows-hello": "Buɗe da Windows Hello",
+    "this-device": "Buɗe da wannan na'urar",
+  },
+  turnOff: "Kashe lambar sirri",
+  turnOffTitle: "Kashe lambar sirrinka",
+  turnOffBody: "Shigar da lambar sirrinka ta yanzu. Daga nan Vallo zai buɗe ba tare da ita ba a wannan asusun.",
+  turnOffWithKey: "Yi amfani da Face ID ko zanen yatsa",
+  turnOffCancel: "Ci gaba da lambar sirrina",
+  turnedOff: "An kashe lambar sirri. Vallo yana buɗewa ba tare da ita ba yanzu, kuma za ka iya sake kunna ta a nan a kowane lokaci.",
 } satisfies NonNullable<Translation["passcode"]>;

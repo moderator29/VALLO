@@ -79,4 +79,23 @@ export const passcodeIg = {
   deleteKey: "Hichapụ",
   digitsEntered: "Etinyela ọnụọgụ {count} n'ime {total}",
   moneyLocked: "Buru ụzọ meghee Vallo site na nọmba nzuzo gị. Ọ dịghị ihe a kwụrụ ụgwọ ma ọ bụ gbanwee.",
+  /* Machine drafts added 13 November 2026 for keys English gained; awaiting native review like the rest of this file. */
+  bioRowUnsupportedApp: "Enweghị ike iji Face ID ma ọ bụ mbọ aka na ụdị ngwa a. Nọmba nzuzo gị na-eme ka Vallo nọrọ na mkpọchi.",
+  slow: "Njikọ adịghị ike. A ka na-elele nọmba nzuzo gị.",
+  unreachable: "Anyị enweghị ike iru Vallo. Nọmba nzuzo gị ka dị ebe ahụ: lelee akara njikọ gị wee pịa Nwaa ọzọ.",
+  tryAgain: "Nwaa ọzọ",
+  wrongOffline: "Nke ahụ abụghị nọmba nzuzo gị.",
+  passkeyUnlockBy: {
+    "face-id": "Meghee na Face ID",
+    "touch-id": "Meghee na Touch ID",
+    fingerprint: "Meghee na mbọ aka",
+    "windows-hello": "Meghee na Windows Hello",
+    "this-device": "Meghee na ngwaọrụ a",
+  },
+  turnOff: "Gbanyụọ nọmba nzuzo",
+  turnOffTitle: "Gbanyụọ nọmba nzuzo gị",
+  turnOffBody: "Tinye nọmba nzuzo gị ugbu a. Vallo ga-emeghe na-enweghị ya na akaụntụ a mgbe ahụ.",
+  turnOffWithKey: "Jiri Face ID ma ọ bụ mbọ aka",
+  turnOffCancel: "Debe nọmba nzuzo m",
+  turnedOff: "Agbanyụọla nọmba nzuzo. Vallo na-emeghe na-enweghị ya ugbu a, ị nwekwara ike ịgbanye ya ọzọ ebe a oge ọ bụla.",
 } satisfies NonNullable<Translation["passcode"]>;

@@ -113,7 +113,7 @@ export function TurnOffPasscode({
 
   if (!open) {
     return (
-      <button type="button" className="nf-btn nf-btn--secondary w-full" onClick={() => setOpen(true)} data-testid="passcode-turn-off">
+      <button type="button" className="nf-btn nf-btn--glass w-full" onClick={() => setOpen(true)} data-testid="passcode-turn-off">
         {copy.turnOff}
       </button>
     );

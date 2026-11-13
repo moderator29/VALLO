@@ -79,4 +79,23 @@ export const passcodeYo = {
   deleteKey: "Pa rẹ́",
   digitsEntered: "A ti tẹ nọ́mbà {count} nínú {total}",
   moneyLocked: "Kọ́kọ́ ṣí Vallo pẹ̀lú nọ́mbà àṣírí rẹ. A kò gba owó kankan, a kò sì yí nǹkan kan padà.",
+  /* Machine drafts added 13 November 2026 for keys English gained; awaiting native review like the rest of this file. */
+  bioRowUnsupportedApp: "Face ID àti ìka ọwọ́ kò ṣeé lò láti inú ẹ̀dà áàpù yìí. Nọ́mbà àṣírí rẹ ń jẹ́ kí Vallo wà ní títì.",
+  slow: "Ìsopọ̀ kò lágbára. A ṣì ń ṣàyẹ̀wò nọ́mbà àṣírí rẹ.",
+  unreachable: "A kò lè dé Vallo. Nọ́mbà àṣírí rẹ ṣì wà níbẹ̀: ṣàyẹ̀wò àmì ìsopọ̀ rẹ kí o sì tẹ Tún gbìyànjú.",
+  tryAgain: "Tún gbìyànjú",
+  wrongOffline: "Ìyẹn kì í ṣe nọ́mbà àṣírí rẹ.",
+  passkeyUnlockBy: {
+    "face-id": "Ṣí i pẹ̀lú Face ID",
+    "touch-id": "Ṣí i pẹ̀lú Touch ID",
+    fingerprint: "Ṣí i pẹ̀lú ìka ọwọ́",
+    "windows-hello": "Ṣí i pẹ̀lú Windows Hello",
+    "this-device": "Ṣí i pẹ̀lú ẹ̀rọ yìí",
+  },
+  turnOff: "Pa nọ́mbà àṣírí",
+  turnOffTitle: "Pa nọ́mbà àṣírí rẹ",
+  turnOffBody: "Tẹ nọ́mbà àṣírí rẹ lọ́wọ́lọ́wọ́. Vallo yóò ṣí láìsí rẹ̀ lórí àkáǹtì yìí lẹ́yìn náà.",
+  turnOffWithKey: "Lo Face ID tàbí ìka ọwọ́",
+  turnOffCancel: "Fi nọ́mbà àṣírí mi sílẹ̀",
+  turnedOff: "A ti pa nọ́mbà àṣírí. Vallo ń ṣí láìsí rẹ̀ báyìí, o sì lè tún tàn án níbí nígbàkígbà.",
 } satisfies NonNullable<Translation["passcode"]>;
