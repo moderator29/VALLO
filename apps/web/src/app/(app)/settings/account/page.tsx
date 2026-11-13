@@ -4,6 +4,7 @@ import { getDictionary } from "@vallo/i18n";
 import { getLocale } from "@/lib/locale";
 import { PageFrame } from "@/components/app/PageFrame";
 import { SearchCard } from "@/components/app/account/SettingsGroups";
+import { getDisplayPreferences } from "@/lib/currency/server";
 import { SettingsLede } from "@/components/app/account/SettingsLede";
 import { SettingsInnerNav } from "@/components/app/account/SettingsInnerNav";
 import { loadSettingsState } from "@/lib/profile/queries";
@@ -26,6 +27,9 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function AccountSettingsPage() {
   const locale = await getLocale();
   const t = getDictionary(locale);
+  /* The display currency the Search card's Currency row names. */
+  const display = await getDisplayPreferences();
+  const currencyValue = display.currency === "NGN" ? "₦" : display.currency;
   const [account, intent, deletion] = await Promise.all([
     loadSettingsState(),
     loadInterestsState(),
@@ -92,7 +96,7 @@ export default async function AccountSettingsPage() {
           </PlaceCard>
         </section>
         <section id="settings-search" className="scroll-mt-28">
-          <SearchCard t={forSearchCard(t)} />
+          <SearchCard t={forSearchCard(t)} currencyValue={currencyValue} distanceUnit={display.distanceUnit} />
         </section>
       </div>
       </div>

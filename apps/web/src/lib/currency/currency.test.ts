@@ -13,6 +13,7 @@ import { approxFigure, wholeUnits } from "./format";
 import { automaticCurrency, languageTags } from "./auto";
 import { SQFT_PER_SQM, areaIn, formatArea, isAreaUnit } from "./area";
 import { displayFromSettings, resolveDisplay, withDisplay } from "./preference";
+import { KM_PER_MILE, distanceFigure, formatDistance, isDistanceUnit } from "./distance";
 import { NAIRA_ONLY, currencyLabel, guideFor, showsGuide, withFreshRate, type DisplayMoney } from "./display";
 
 const NOW = Date.parse("2026-11-13T14:00:00Z");
@@ -229,12 +230,32 @@ describe("floor area", () => {
   });
 });
 
+describe("distance", () => {
+  it("converts kilometres to miles exactly by definition, one decimal under ten", () => {
+    expect(KM_PER_MILE).toBe(1.609344);
+    expect(formatDistance(27, "km", { km: "km", mi: "mi" })).toBe("27 km");
+    expect(formatDistance(27, "mi", { km: "km", mi: "mi" })).toBe("17 mi");
+    expect(formatDistance(7, "mi", { km: "km", mi: "mi" })).toBe("4.3 mi");
+    expect(distanceFigure(Number.NaN, "km")).toBe("");
+    expect(isDistanceUnit("mi")).toBe(true);
+    expect(isDistanceUnit("miles")).toBe(false);
+  });
+
+  it("is read from the account, then the cookie, then kilometres", () => {
+    const auto = { currency: "NGN" as const, from: "unsure" as const };
+    expect(resolveDisplay({ account: { distanceUnit: "mi" }, cookies: { distance: "km" }, auto }).distanceUnit).toBe("mi");
+    expect(resolveDisplay({ account: null, cookies: { distance: "mi" }, auto }).distanceUnit).toBe("mi");
+    expect(resolveDisplay({ account: null, cookies: { distance: "leagues" }, auto }).distanceUnit).toBe("km");
+    expect(displayFromSettings({ display: { distanceUnit: "mi" } })).toEqual({ distanceUnit: "mi" });
+  });
+});
+
 describe("the preference, in order: account, then cookie, then automatic", () => {
   const auto = { currency: "GBP" as const, from: "country" as const };
 
   it("the account wins, so every device gives the same answer", () => {
     const resolved = resolveDisplay({ account: { currency: "USD", areaUnit: "sqft" }, cookies: { currency: "EUR", area: "sqm" }, auto });
-    expect(resolved).toEqual({ choice: "USD", currency: "USD", automatic: "GBP", areaUnit: "sqft", from: "account" });
+    expect(resolved).toEqual({ choice: "USD", currency: "USD", automatic: "GBP", areaUnit: "sqft", distanceUnit: "km", from: "account" });
   });
 
   it("the cookie holds for anybody signed out", () => {
@@ -265,17 +286,19 @@ describe("the preference, in order: account, then cookie, then automatic", () =>
 
   it("writes display and keeps every other key in the settings document", () => {
     const doc = { whatsappDoorbell: true, notifications: { bookings: false }, display: { currency: "EUR", areaUnit: "sqm" } };
-    expect(withDisplay(doc, { currency: "GBP", areaUnit: "sqft" })).toEqual({
+    expect(withDisplay(doc, { currency: "GBP", areaUnit: "sqft", distanceUnit: "mi" })).toEqual({
       whatsappDoorbell: true,
       notifications: { bookings: false },
-      display: { currency: "GBP", areaUnit: "sqft" },
+      display: { currency: "GBP", areaUnit: "sqft", distanceUnit: "mi" },
     });
-    expect(withDisplay(null, { currency: "auto", areaUnit: "sqm" })).toEqual({ display: { currency: "auto", areaUnit: "sqm" } });
+    expect(withDisplay(null, { currency: "auto", areaUnit: "sqm", distanceUnit: "km" })).toEqual({
+      display: { currency: "auto", areaUnit: "sqm", distanceUnit: "km" },
+    });
   });
 });
 
 describe("what a page hands its prices", () => {
-  const base = { choice: "GBP" as const, currency: "GBP" as const, automatic: "NGN" as const, areaUnit: "sqm" as const };
+  const base = { choice: "GBP" as const, currency: "GBP" as const, automatic: "NGN" as const, areaUnit: "sqm" as const, distanceUnit: "km" as const };
 
   it("keeps a fresh rate for the chosen currency", () => {
     const display = withFreshRate(base, new Map([["GBP", gbp()]]), NOW);

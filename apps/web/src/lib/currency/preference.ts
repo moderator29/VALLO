@@ -1,6 +1,7 @@
 import { AUTO_CURRENCY, isCurrencyChoice, type CurrencyChoice, type DisplayCurrency } from "./currencies";
 import { DEFAULT_AREA_UNIT, isAreaUnit, type AreaUnit } from "./area";
 import type { AutoVerdict } from "./auto";
+import { DEFAULT_DISTANCE_UNIT, isDistanceUnit, type DistanceUnit } from "./distance";
 
 /**
  * THE READER'S DISPLAY PREFERENCES: currency and floor-area unit. Pure.
@@ -8,10 +9,10 @@ import type { AutoVerdict } from "./auto";
  * WHERE THE CHOICE LIVES, and the order it is read in:
  *
  *   1. Signed in: the account, `profiles.settings.display`
- *      (`{ currency: "GBP" | "auto" | ..., areaUnit: "sqm" | "sqft" }`). The
+ *      (`{ currency: "GBP" | "auto" | ..., areaUnit: "sqm" | "sqft", distanceUnit: "km" | "mi" }`). The
  *      same answer on the web and in the app, on every device, because both
  *      shells load the same site and sign in to the same account.
- *   2. The cookies `vallo_currency` and `vallo_area` on this device. Anybody
+ *   2. The cookies `vallo_currency`, `vallo_area` and `vallo_distance` on this device. Anybody
  *      signed out keeps their choice here, and a member's device keeps it
  *      too, so a failed account write still holds on the device that made it.
  *   3. Automatic (`auto.ts`).
@@ -27,30 +28,35 @@ import type { AutoVerdict } from "./auto";
 
 export const CURRENCY_COOKIE = "vallo_currency";
 export const AREA_COOKIE = "vallo_area";
+export const DISTANCE_COOKIE = "vallo_distance";
 /** 400 days, the ceiling browsers enforce. A preference, not a credential. */
 export const PREFERENCE_COOKIE_MAX_AGE = 60 * 60 * 24 * 400;
 
 /** The key inside `profiles.settings`. */
 export const SETTINGS_DISPLAY_KEY = "display";
 
-export type StoredDisplay = { currency?: CurrencyChoice; areaUnit?: AreaUnit };
+export type StoredDisplay = { currency?: CurrencyChoice; areaUnit?: AreaUnit; distanceUnit?: DistanceUnit };
 
 /** The display preference out of a raw `profiles.settings` document, tolerant of anything. */
 export function displayFromSettings(settings: unknown): StoredDisplay {
   if (!settings || typeof settings !== "object" || Array.isArray(settings)) return {};
   const display = (settings as Record<string, unknown>)[SETTINGS_DISPLAY_KEY];
   if (!display || typeof display !== "object" || Array.isArray(display)) return {};
-  const { currency, areaUnit } = display as Record<string, unknown>;
+  const { currency, areaUnit, distanceUnit } = display as Record<string, unknown>;
   return {
     ...(isCurrencyChoice(currency) ? { currency } : {}),
     ...(isAreaUnit(areaUnit) ? { areaUnit } : {}),
+    ...(isDistanceUnit(distanceUnit) ? { distanceUnit } : {}),
   };
 }
 
 /** A settings document with `display` replaced and every other key kept exactly. */
 export function withDisplay(settings: unknown, display: Required<StoredDisplay>): Record<string, unknown> {
   const base = settings && typeof settings === "object" && !Array.isArray(settings) ? (settings as Record<string, unknown>) : {};
-  return { ...base, [SETTINGS_DISPLAY_KEY]: { currency: display.currency, areaUnit: display.areaUnit } };
+  return {
+    ...base,
+    [SETTINGS_DISPLAY_KEY]: { currency: display.currency, areaUnit: display.areaUnit, distanceUnit: display.distanceUnit },
+  };
 }
 
 export type ResolvedDisplay = {
@@ -61,13 +67,14 @@ export type ResolvedDisplay = {
   /** What "Automatic" would show this reader now, for the sheet's label. */
   automatic: DisplayCurrency;
   areaUnit: AreaUnit;
+  distanceUnit: DistanceUnit;
   /** Where the currency answer came from, for tests and the sheet. */
   from: "account" | "cookie" | "auto";
 };
 
 export function resolveDisplay(input: {
   account: StoredDisplay | null;
-  cookies: { currency?: string | null; area?: string | null };
+  cookies: { currency?: string | null; area?: string | null; distance?: string | null };
   auto: AutoVerdict;
 }): ResolvedDisplay {
   const cookieCurrency = isCurrencyChoice(input.cookies.currency) ? input.cookies.currency : undefined;
@@ -78,5 +85,7 @@ export function resolveDisplay(input: {
   const from: ResolvedDisplay["from"] = fromAccount ? "account" : cookieCurrency ? "cookie" : "auto";
   const currency = choice === AUTO_CURRENCY ? input.auto.currency : choice;
   const areaUnit = input.account?.areaUnit ?? cookieArea ?? DEFAULT_AREA_UNIT;
-  return { choice, currency, automatic: input.auto.currency, areaUnit, from };
+  const cookieDistance = isDistanceUnit(input.cookies.distance) ? input.cookies.distance : undefined;
+  const distanceUnit = input.account?.distanceUnit ?? cookieDistance ?? DEFAULT_DISTANCE_UNIT;
+  return { choice, currency, automatic: input.auto.currency, areaUnit, distanceUnit, from };
 }

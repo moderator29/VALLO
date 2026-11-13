@@ -8,6 +8,8 @@ import { LOCALES, localeMeta, type Locale } from "@vallo/i18n/core";
 import { LOCALE_COOKIE } from "@/lib/locale.constants";
 import { updateSettings } from "@/lib/profile/actions";
 import { NIGERIAN_STATES } from "@/lib/data/nigeria";
+import { saveDisplayPreferences } from "@/lib/currency/actions";
+import type { DistanceUnit } from "@/lib/currency/distance";
 import { RowButton, RowLink, RowSelect, RowSwitch, RowValue, SettingsGroup } from "./rows";
 import { useClientMount } from "@/lib/ui/client-mount";
 import {
@@ -271,8 +273,38 @@ export function PrivacyCard({ t }: { t: PrivacyCardCopy }) {
 
 /* ----------------------------------------------------------------- search */
 
-export function SearchCard({ t }: { t: SearchCardCopy }) {
+export function SearchCard({
+  t,
+  currencyValue = "₦",
+  distanceUnit,
+}: {
+  t: SearchCardCopy;
+  /** The reader's display currency, read on the server ("₦", or "GBP" when a guide is chosen). */
+  currencyValue?: string;
+  /**
+   * The distance unit kept on the account and in a cookie
+   * (`lib/currency/preference.ts`), read on the server. Absent, the row falls
+   * back to this device's old setting, which nothing else ever read.
+   */
+  distanceUnit?: DistanceUnit;
+}) {
   const { settings, set } = useNfSettings();
+  const router = useRouter();
+  const [distance, setDistance] = useState<DistanceUnit>(distanceUnit ?? settings.distanceUnit);
+  const [servedDistance, setServedDistance] = useState<DistanceUnit | undefined>(distanceUnit);
+  if (servedDistance !== distanceUnit) {
+    setServedDistance(distanceUnit);
+    if (distanceUnit) setDistance(distanceUnit);
+  }
+  const chooseDistance = (next: DistanceUnit) => {
+    if (next === distance) return;
+    setDistance(next);
+    set("distanceUnit", next);
+    /* On the account and in a cookie, so every device and the server agree. */
+    void saveDisplayPreferences({ distanceUnit: next })
+      .then(() => router.refresh())
+      .catch(() => undefined);
+  };
   const copy = t.settings.search;
 
   return (
@@ -289,18 +321,18 @@ export function SearchCard({ t }: { t: SearchCardCopy }) {
         ]}
         onChange={(next) => set("defaultCity", next)}
       />
-      {/* R3-16: the currency is explained on its own screen rather than
-          stated here as a read-only code. */}
-      <RowLink href="/settings/region" icon="banknote" label={copy.currency} value="₦" />
+      {/* R3-16: the currency is chosen on its own screen, where the sheet
+          says plainly that payment is always in naira. */}
+      <RowLink href="/settings/region#settings-money-display" icon="banknote" label={copy.currency} value={currencyValue} />
       <RowSelect
         icon="map"
         label={copy.mapDistances}
-        value={settings.distanceUnit}
+        value={distance}
         options={[
           { value: "km", label: copy.kilometres },
           { value: "mi", label: copy.miles },
         ]}
-        onChange={(next) => set("distanceUnit", next)}
+        onChange={chooseDistance}
       />
     </SettingsGroup>
   );

@@ -7,12 +7,14 @@ import { Amount } from "@/components/ui/Amount";
 import { MediaFrame } from "@/components/app/MediaFrame";
 import { SpaceCard } from "@/components/ui/space-card/SpaceCard";
 import { SaveButton, useSaveControl } from "@/components/app/SaveControl";
+import { AuthGate } from "@/components/auth/AuthGate";
 import { useScrollEntry } from "@/lib/motion/scroll-entry";
 import { amenityLabel } from "@/components/app/filters/amenities";
 import type { StayCardData } from "./stay-card-model";
 import "@/app/css/catalogue.css";
 import "@/app/css/list-views.css";
 import "./stay-card.css";
+import { PriceGuide } from "@/components/currency/Price";
 
 /**
  * The stay card of FD3DFE84, in the space card's container (the founder, 13
@@ -54,9 +56,8 @@ export function StayCard({
    * Whether the reader can actually write to `saved_places`, which means
    * whether they are signed in. A stay or a restaurant has no device half:
    * `saved_items` takes listing ids only, so there is nowhere for a
-   * signed-out tap on a hotel to go. A control that cannot act is never
-   * drawn, so the heart is simply absent for that reader rather than present
-   * and refusing.
+   * signed-out tap on a hotel to go. Such a heart is still drawn, behind the
+   * sign-up gate, so every card on a page carries the same control.
    */
   canSavePlaces?: boolean;
   /** The first card above the fold: its photograph loads at once and high
@@ -66,7 +67,11 @@ export function StayCard({
   const copy = t.catalogue.stays;
   const isTable = stay.kind === "restaurant";
   const save = useSaveControl(stay.id, saved, stay.place);
-  const showSave = stay.place ? canSavePlaces : true;
+  /* Every card carries its heart (Agent FEEL, 13 November 2026). A guest saw
+     hearts on the catalogue cards and none on the platform ones beside them,
+     which read as broken. A place heart a guest cannot write goes through the
+     sign-up gate instead (`AuthGate`), which brings them back here to save. */
+  const gateSave = Boolean(stay.place) && !canSavePlaces;
   const chips = stay.amenities.slice(0, 4);
   const style = index !== undefined ? ({ "--card-i": Math.min(index, 5) } as React.CSSProperties) : undefined;
   const cardRef = useRef<HTMLElement | null>(null);
@@ -97,19 +102,30 @@ export function StayCard({
         ) : null
       }
       heart={
-        showSave ? <SaveButton saved={save.saved} pending={save.pending} onToggle={save.toggle} title={stay.title} /> : null
+        gateSave ? (
+          <AuthGate action="save">
+            <SaveButton saved={save.saved} pending={save.pending} onToggle={save.toggle} title={stay.title} />
+          </AuthGate>
+        ) : (
+          <SaveButton saved={save.saved} pending={save.pending} onToggle={save.toggle} title={stay.title} />
+        )
       }
       price={
         stay.nightlyMinor !== null
           ? {
               amount: (
-                <Amount
-                  minorUnits={stay.nightlyMinor}
-                  locale={locale}
-                  currency={stay.currency}
-                  glance
-                  secondaryClassName="text-[length:max(0.6em,0.75rem)] font-semibold opacity-70"
-                />
+                <>
+                  <Amount
+                    minorUnits={stay.nightlyMinor}
+                    locale={locale}
+                    currency={stay.currency}
+                    glance
+                    secondaryClassName="text-[length:max(0.6em,0.75rem)] font-semibold opacity-70"
+                  />
+                  {/* The reader's currency guide beside the nightly rate. The
+                      dated total below stays naira only: it is a quote. */}
+                  <PriceGuide minor={stay.nightlyMinor} currency={stay.currency} compact />
+                </>
               ),
               /* A table is priced by the head, a room by the night: the
                  unit is the market's own (the restaurant page says the same). */

@@ -14,6 +14,8 @@ import { SpaceCard } from "@/components/ui/space-card/SpaceCard";
 import type { UiIconName } from "@/design-system/icons/UiIcon";
 import { SaveButton, useSaveControl } from "@/components/app/SaveControl";
 import { chipOf, factsOf, priceOf, type HomeCardCopy } from "@/components/app/home/home-card-copy";
+import { PriceGuide } from "@/components/currency/Price";
+import { useAreaText } from "@/components/currency/DisplayMoneyProvider";
 import "@/app/css/home.css";
 
 /**
@@ -56,6 +58,7 @@ export function HomeListingCard({
   eager?: boolean;
 }) {
   const save = useSaveControl(listing.id);
+  const areaText = useAreaText();
   const price = priceOf(listing, copy);
 
   const onOpen = (event: MouseEvent<HTMLAnchorElement>, media: HTMLElement | null) => {
@@ -84,13 +87,19 @@ export function HomeListingCard({
       price={
         price
           ? {
-              amount: <Money minor={price.minor} locale={locale} currency={listing.currency} mode="glance" />,
+              amount: (
+                  <>
+                    <Money minor={price.minor} locale={locale} currency={listing.currency} mode="glance" />
+                    {/* The guide beside the asking price; never beside a move-in total. */}
+                    {price.moveIn ? null : <PriceGuide minor={price.minor} currency={listing.currency} compact />}
+                  </>
+                ),
               unit: price.unit,
               from: price.from ? copy.from : null,
             }
           : null
       }
-      facts={factsOf(listing, copy, locale)}
+      facts={factsOf(listing, copy, locale, areaText)}
       reason={reason}
       reasonIcon={reasonIcon}
       photoLabel={copy.photoLabel}

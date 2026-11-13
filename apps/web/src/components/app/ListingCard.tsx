@@ -5,7 +5,6 @@ import { useEffect, useRef, useState } from "react";
 import {
   formatDate,
   formatMoney,
-  formatNumber,
   isGlanceCompact,
   type Dictionary,
   type Locale,
@@ -27,6 +26,8 @@ import { startPhotoMorph } from "@/lib/motion/photo-morph";
 import { pressFrom } from "@/lib/motion/press-start";
 import { drawnSrcIn, handOff } from "@/lib/listings/handoff";
 import { cardGlance } from "@/lib/listings/card-glance";
+import { PriceGuide } from "@/components/currency/Price";
+import { useAreaText } from "@/components/currency/DisplayMoneyProvider";
 import { SaveButton, useSaveControl } from "@/components/app/SaveControl";
 import { useScrollEntry } from "@/lib/motion/scroll-entry";
 import {
@@ -438,6 +439,8 @@ export function ListingCard({
     ? listing.kind
     : null;
   const save = useSaveControl(listing.id, saved);
+  /* The floor area in the reader's unit (Settings, Language and currency). */
+  const areaText = useAreaText();
   /* Details pass: hold the card for Save, Share and Hide (CardMenu.tsx). */
   const shareable = !listing.isDemo;
   const menu = useCardMenu(listing.id, { shareable });
@@ -458,7 +461,7 @@ export function ListingCard({
   if (listing.sizeSqm !== undefined && listing.sizeSqm > 0) {
     row.splice(Math.min(2, row.length), 0, {
       key: "size",
-      label: `${formatNumber(listing.sizeSqm, locale)} ${copy.sqm}`,
+      label: areaText(listing.sizeSqm, copy.sqm),
       icon: "grid",
       numeric: true,
     });
@@ -544,13 +547,18 @@ export function ListingCard({
           />
         </CountUpMoney>
       ) : price.lead === "headline" ? (
-        <Amount
-          minorUnits={price.minor}
-          locale={locale}
-          currency={listing.currency}
-          glance
-          secondaryClassName={fractionClass(price.minor, "text-[length:max(0.6em,0.75rem)] font-semibold opacity-70")}
-        />
+        <>
+          <Amount
+            minorUnits={price.minor}
+            locale={locale}
+            currency={listing.currency}
+            glance
+            secondaryClassName={fractionClass(price.minor, "text-[length:max(0.6em,0.75rem)] font-semibold opacity-70")}
+          />
+          {/* The reader's currency guide, beside the asking price only. The
+              move-in lead above is an obligation and stays naira only. */}
+          <PriceGuide minor={price.minor} currency={listing.currency} compact />
+        </>
       ) : (
         <span className="nf-sc__ask">{t.common.priceOnRequest}</span>
       );
@@ -888,6 +896,7 @@ export function ListingCard({
                   "text-[length:max(0.6em,0.75rem)] font-semibold opacity-70"
                 )}
               />
+              <PriceGuide minor={price.minor} currency={listing.currency} compact />
               {suffix && (
                 <span className="nf-pcard__price-suffix">{suffix}</span>
               )}

@@ -3,9 +3,11 @@
 import { formatNumber, formatRating, type Dictionary, type Locale } from "@vallo/i18n/core";
 import { Amount } from "@/components/ui/Amount";
 import { SaveButton, useSaveControl } from "@/components/app/SaveControl";
+import { AuthGate } from "@/components/auth/AuthGate";
 import { StackCardFace } from "@/components/app/listing/StackCardFace";
 import type { StayCardData } from "./stay-card-model";
 import "@/app/css/catalogue.css";
+import { PriceGuide } from "@/components/currency/Price";
 
 /**
  * A stay, hotel or restaurant as a card in the featured stack (the travel-app
@@ -32,7 +34,11 @@ export function StayStackCard({
   eager?: boolean;
 }) {
   const save = useSaveControl(stay.id, saved, stay.place);
-  const showSave = stay.place ? canSavePlaces : true;
+  /* Every card carries its heart (Agent FEEL, 13 November 2026). A guest saw
+     hearts on the catalogue cards and none on the platform ones beside them,
+     which read as broken. A place heart a guest cannot write goes through the
+     sign-up gate instead (`AuthGate`), which brings them back here to save. */
+  const gateSave = Boolean(stay.place) && !canSavePlaces;
   const isTable = stay.kind === "restaurant";
   const rating =
     stay.rating && stay.rating.count > 0 && !stay.isDemo
@@ -43,6 +49,7 @@ export function StayStackCard({
       <>
         <Amount minorUnits={stay.nightlyMinor} locale={locale} currency={stay.currency} glance />
         <span className="font-normal opacity-75"> {isTable ? t.restaurantPage.perHead : t.catalogue.stays.perNight}</span>
+        <PriceGuide minor={stay.nightlyMinor} currency={stay.currency} compact />
       </>
     ) : null;
 
@@ -61,9 +68,13 @@ export function StayStackCard({
       photoNote={stay.photo ? undefined : t.catalogue.card.noPhotos}
       eager={eager}
       heart={
-        showSave ? (
+        gateSave ? (
+          <AuthGate action="save">
+            <SaveButton saved={save.saved} pending={save.pending} onToggle={save.toggle} title={stay.title} surface="media" />
+          </AuthGate>
+        ) : (
           <SaveButton saved={save.saved} pending={save.pending} onToggle={save.toggle} title={stay.title} surface="media" />
-        ) : undefined
+        )
       }
     />
   );

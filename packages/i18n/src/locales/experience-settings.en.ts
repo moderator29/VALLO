@@ -92,10 +92,9 @@ export const experienceSettingsEn = {
     sub: "How Vallo writes words, money and dates for you",
     language: "Language",
     money: "Money",
-    currency: "Currency",
-    currencyValue: "Naira (₦, NGN)",
-    currencySub:
-      "Every price on Vallo is set and paid in naira. A converted view would need a dated exchange rate, which Vallo does not show, so no other currency is offered here.",
+    /* `currency`, `currencyValue` and `currencySub` stood here and said no
+       other currency was offered. The Currency row now lives in
+       `preferences` below (13 November 2026). */
     dates: "Dates and times",
     /** `{date}` is today, in the reader's language and Lagos time. */
     datesSub: "Shown in Lagos time, wherever you are. Today reads: {date}.",
@@ -149,7 +148,22 @@ export const experienceSettingsEn = {
     sqftShort: "sq ft",
     /** The example floor area line. `{area}` is "120 m²" or "1,292 sq ft". */
     areaExample: "A 120 m² flat reads: {area}",
+    /** A distance in miles, after the figure ("17 mi"). */
+    miShort: "mi",
     saveFailed: "That did not save. Check your connection and try again.",
     choose: "Choose",
+  },
+
+  /* -------------------------------------------------------------- your time */
+  /**
+   * The reader's own clock beside a Lagos time on the viewing screens
+   * (`components/your-time/YourTime.tsx`), shown only when the two differ.
+   * Lagos time stays the time of record.
+   */
+  yourTime: {
+    /** `{time}` is "09:00" on the reader's clock. */
+    yourTime: "{time} your time",
+    /** `{day}` is "Fri", when the reader's day differs from Lagos's. */
+    yourTimeDay: "{day} {time} your time",
   },
 };

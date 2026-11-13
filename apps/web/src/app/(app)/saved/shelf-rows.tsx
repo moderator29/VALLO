@@ -5,6 +5,7 @@ import { cardPrice } from "@/components/app/listing-card-model";
 import type { StayCardData } from "@/components/app/stays/stay-card-model";
 import { Money } from "@/components/ui/Money";
 import { SavedShelf } from "./SavedShelf";
+import { PriceGuide } from "@/components/currency/Price";
 
 /**
  * The two kinds of saved thing, said as one shelf (SavedShelf.tsx). The
@@ -12,11 +13,25 @@ import { SavedShelf } from "./SavedShelf";
  * the amount in full ink, the unit grey beside it. A tenancy shows what it
  * costs to move in, as its card did; a place with no price says so in words.
  */
-function Figure({ minor, currency, locale, unit }: { minor: number; currency: string; locale: Locale; unit?: string }) {
+function Figure({
+  minor,
+  currency,
+  locale,
+  unit,
+  guide = false,
+}: {
+  minor: number;
+  currency: string;
+  locale: Locale;
+  unit?: string;
+  /** The reader's currency guide beside an asking price; never beside a move-in total. */
+  guide?: boolean;
+}) {
   return (
     <>
       <Money minor={minor} locale={locale} currency={currency} mode="glance" />
       {unit ? <span className="nf-shelf__unit"> {unit}</span> : null}
+      {guide ? <PriceGuide minor={minor} currency={currency} compact /> : null}
     </>
   );
 }
@@ -37,6 +52,7 @@ export function listingShelf(listing: Listing, locale: Locale, t: Dictionary, ea
         currency={listing.currency}
         locale={locale}
         unit={price.period === "sale" ? undefined : t.experienceLabels.periodShort[price.period]}
+        guide
       />
     ) : (
       <span className="nf-shelf__unit">{t.common.priceOnRequest}</span>
@@ -62,7 +78,7 @@ export function placeShelf(stay: StayCardData, locale: Locale, t: Dictionary, ea
   const verified = stay.verified && !stay.isDemo;
   const figure =
     stay.nightlyMinor !== null ? (
-      <Figure minor={stay.nightlyMinor} currency={stay.currency} locale={locale} unit={t.experienceLabels.periodShort.night} />
+      <Figure minor={stay.nightlyMinor} currency={stay.currency} locale={locale} unit={t.experienceLabels.periodShort.night} guide />
     ) : (
       <span className="nf-shelf__unit">{t.common.priceOnRequest}</span>
     );

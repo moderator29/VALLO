@@ -23,6 +23,7 @@ const TABLE_FORM_ID = "reserve-table";
 import { panelClass } from "@/components/ui/Panel";
 import { ReportSheet } from "@/components/app/ReportSheet";
 import "@/app/css/catalogue.css";
+import { PriceGuide } from "@/components/currency/Price";
 
 const WEEKDAY: Record<number, string> = {
   0: "Sunday",
@@ -139,7 +140,14 @@ export function RestaurantFace({
 
           {price && price.minor > 0 && (
             <DetailPriceRow
-              figure={<Amount minorUnits={price.minor} locale={locale} currency={price.currency} />}
+              figure={
+                <>
+                  <Amount minorUnits={price.minor} locale={locale} currency={price.currency} />
+                  {/* The guide beside the menu price. The reserve foot below, which
+                      leads to the table deposit, stays naira only. */}
+                  <PriceGuide minor={price.minor} currency={price.currency} compact />
+                </>
+              }
               unit={copy.perHead}
               /* Real rows only: the rating is averaged from `reviews`, so this
                  is absent until somebody has actually reviewed the venue. */

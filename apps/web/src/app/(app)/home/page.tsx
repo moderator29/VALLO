@@ -23,6 +23,7 @@ import type { HomeLeadFigure } from "@/components/app/home/HomeFigure";
 import { PROPERTY_SPACE_TYPES, type SpaceTypeKey } from "@/components/app/home/space-types";
 import { BestMatchesStream, NewListingsStream } from "@/components/app/home/HomeStreams";
 import { HomeListSkeleton } from "@/components/app/home/HomeLists";
+import { GuideScope } from "@/components/currency/GuideScope";
 
 /** How many places Premium draws, and how many more Featured listings adds under it. */
 const PREMIUM_SHOWN = 6;
@@ -211,7 +212,7 @@ export default async function HomePage() {
   return (
     /* Pull down to refresh, as on every app home (2 November 2026). */
     <PullToRefresh>
-    <>
+    <GuideScope copy={t.experienceSettings.preferences}>
       {overview.signedIn ? (
         <>
           {/* No passcode nudge here (the founder, 13 November 2026): the passcode is
@@ -277,7 +278,7 @@ export default async function HomePage() {
         ) : null
       }
     />
-    </>
+    </GuideScope>
     </PullToRefresh>
   );
 }

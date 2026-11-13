@@ -1,4 +1,5 @@
 import { LOCALES, getDictionary, type Dictionary } from "@vallo/i18n";
+import { CURRENCY_META, DISPLAY_CURRENCIES } from "@/lib/currency/currencies";
 
 /**
  * A WAY TO FIND, ON A SETTINGS HOME THAT IS NOW A HUB.
@@ -83,6 +84,17 @@ export function settingsSections(t: Dictionary): SettingsSection[] {
     ),
     section("settings-privacy", "/settings/privacy#settings-privacy", t.settings.privacy.label, t.settings.privacy),
     section("settings-search", "/settings/account#settings-search", t.settings.search.label, t.settings.search),
+    /* Currency and floor area (13 November 2026): the guide currency beside
+       naira prices, and square metres or square feet. The currency names are
+       indexed so "pounds" or "cedi" finds the control. */
+    section(
+      "settings-currency",
+      "/settings/region#settings-money-display",
+      t.experienceSettings.preferences.currency,
+      t.experienceSettings.preferences,
+      DISPLAY_CURRENCIES.map((code) => `${code} ${CURRENCY_META[code].name} ${CURRENCY_META[code].spoken}`).join(" "),
+      "exchange rate dollars pounds square feet metres floor area",
+    ),
     section(
       "settings-security",
       "/settings/privacy#settings-security",

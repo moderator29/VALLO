@@ -1,7 +1,7 @@
 "use client";
 
 import { useId, useRef, useState } from "react";
-import { type Locale, countOf, formatNumber, formatRating } from "@vallo/i18n/core";
+import { type Locale, countOf, formatRating } from "@vallo/i18n/core";
 import { UiIcon } from "@/design-system/icons/UiIcon";
 import type { MapCopy, MapListing } from "./mapTypes";
 import { Amount } from "@/components/ui/Amount";
@@ -9,6 +9,8 @@ import { MediaFrame } from "@/components/app/MediaFrame";
 import { SpaceCard } from "@/components/ui/space-card/SpaceCard";
 import { useClientCopy } from "@/lib/i18n/client-copy";
 import "./search-v2.css";
+import { PriceGuide } from "@/components/currency/Price";
+import { useAreaText } from "@/components/currency/DisplayMoneyProvider";
 
 /**
  * The card that docks at the foot of the map when a pin is chosen.
@@ -85,6 +87,8 @@ export function MapDock({
      reader's language, the state in `aria-pressed`, the title described. */
   const saveName = useClientCopy().a11y.favourite;
   const saveTitleId = useId();
+  /* The floor area in the reader's unit (Settings, Language and currency). */
+  const areaText = useAreaText();
 
   const where =
     listing.area && listing.area !== listing.city
@@ -95,7 +99,7 @@ export function MapDock({
   const facts: string[] = [];
   if (listing.bedrooms !== undefined && listing.bedrooms > 0) facts.push(countOf(listing.bedrooms, "beds", locale));
   if (listing.bathrooms !== undefined && listing.bathrooms > 0) facts.push(countOf(listing.bathrooms, "baths", locale));
-  if (listing.sizeSqm !== undefined && listing.sizeSqm > 0) facts.push(`${formatNumber(listing.sizeSqm, locale)} ${copy.sqm ?? "m²"}`);
+  if (listing.sizeSqm !== undefined && listing.sizeSqm > 0) facts.push(areaText(listing.sizeSqm, copy.sqm ?? "m²"));
   /* A rating only with the reviews behind it, and never on an example. */
   const rating =
     !listing.isDemo && listing.rating > 0 && listing.reviewCount > 0
@@ -167,13 +171,16 @@ export function MapDock({
           fallback={<MediaFrame hue={listing.hue} kind={listing.kind} drawn={listing.drawn} sizes="(max-width: 640px) 100vw, 24rem" />}
           price={{
             amount: hasPrice ? (
-              <Amount
-                minorUnits={listing.priceMinor}
-                locale={locale}
-                currency={listing.currency}
-                glance
-                secondaryClassName="text-[length:max(0.65em,0.75rem)] font-semibold opacity-60"
-              />
+              <>
+                <Amount
+                  minorUnits={listing.priceMinor}
+                  locale={locale}
+                  currency={listing.currency}
+                  glance
+                  secondaryClassName="text-[length:max(0.65em,0.75rem)] font-semibold opacity-60"
+                />
+                <PriceGuide minor={listing.priceMinor} currency={listing.currency} compact />
+              </>
             ) : (
               <span className="nf-sc__ask">{listing.kindLabel}</span>
             ),

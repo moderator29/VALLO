@@ -21,6 +21,13 @@ describe("settings search on the hub", () => {
     expect(hits.some((entry) => entry.href.startsWith("/settings/notifications"))).toBe(true);
   });
 
+  it("finds the currency control by a currency's name or code", () => {
+    for (const query of ["currency", "pounds", "cedi", "GBP", "square feet"]) {
+      const hits = matchSettings(settingsSections(t), query);
+      expect(hits.map((entry) => entry.href), query).toContain("/settings/region#settings-money-display");
+    }
+  });
+
   it("returns everything for an empty query and nothing for nonsense", () => {
     const all = settingsSections(t);
     expect(matchSettings(all, "   ")).toHaveLength(all.length);

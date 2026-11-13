@@ -2,6 +2,7 @@ import { CURRENCY_META, type CurrencyChoice, type DisplayCurrency } from "./curr
 import { convertNgnMinor, rateVerdict, type DisplayRate } from "./convert";
 import { approxFigure, type ApproxFigure } from "./format";
 import { DEFAULT_AREA_UNIT, type AreaUnit } from "./area";
+import { DEFAULT_DISTANCE_UNIT, type DistanceUnit } from "./distance";
 
 /**
  * WHAT A PAGE HANDS ITS PRICES: one small, serialisable object. Client-safe.
@@ -22,6 +23,7 @@ export type DisplayMoney = {
   automatic: DisplayCurrency;
   rate: DisplayRate | null;
   areaUnit: AreaUnit;
+  distanceUnit: DistanceUnit;
 };
 
 /** Naira only: the safe answer when nothing could be read. */
@@ -31,6 +33,7 @@ export const NAIRA_ONLY: DisplayMoney = {
   automatic: "NGN",
   rate: null,
   areaUnit: DEFAULT_AREA_UNIT,
+  distanceUnit: DEFAULT_DISTANCE_UNIT,
 };
 
 /** Keep the rate only when it is for this currency and fresh at `now`. */

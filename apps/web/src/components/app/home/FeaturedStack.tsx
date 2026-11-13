@@ -17,6 +17,8 @@ import { AreaMapTile } from "@/components/app/maps/AreaMapTile";
 import { MapCreditsInfo } from "@/components/app/maps/MapCreditsInfo";
 import { areaPoint } from "@/components/app/search/mapGeo";
 import { chipOf, factsOf, priceOf, type HomeCardCopy } from "@/components/app/home/home-card-copy";
+import { PriceGuide } from "@/components/currency/Price";
+import { useAreaText } from "@/components/currency/DisplayMoneyProvider";
 import "@/app/css/home.css";
 
 /**
@@ -83,6 +85,7 @@ function StackCard({
   onOpen: (event: React.MouseEvent<HTMLAnchorElement>, media: HTMLElement | null) => void;
 }) {
   const save = useSaveControl(listing.id);
+  const areaText = useAreaText();
   const href = hrefForListing(listing.kind, listing.id, marketFactsOf(listing));
   const photo = listing.photos[0];
   const point = areaPoint(listing.city, listing.area);
@@ -117,13 +120,19 @@ function StackCard({
         price={
           price
             ? {
-                amount: <Money minor={price.minor} locale={locale} currency={listing.currency} mode="glance" />,
+                amount: (
+                  <>
+                    <Money minor={price.minor} locale={locale} currency={listing.currency} mode="glance" />
+                    {/* The guide beside the asking price; never beside a move-in total. */}
+                    {price.moveIn ? null : <PriceGuide minor={price.minor} currency={listing.currency} compact />}
+                  </>
+                ),
                 unit: price.unit,
                 from: price.from ? copy.card.from : null,
               }
             : null
         }
-        facts={factsOf(listing, copy.card, locale)}
+        facts={factsOf(listing, copy.card, locale, areaText)}
         rating={rated ? `${formatRating(listing.rating, locale)} (${listing.reviewCount} ${copy.reviews})` : null}
         overlay={
           point ? (

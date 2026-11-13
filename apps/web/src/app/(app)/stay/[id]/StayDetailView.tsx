@@ -35,6 +35,7 @@ import { PlaceTabs } from "@/components/app/listing/PlaceTabs";
 import { PlaceMapPanel } from "@/components/app/listing/PlaceMapPanel";
 import { PhotoViewerProvider } from "@/components/app/listing/PhotoViewer";
 import "@/app/css/catalogue.css";
+import { PriceGuide } from "@/components/currency/Price";
 
 type StaysCopy = Dictionary["stayDetail"];
 
@@ -309,13 +310,18 @@ export function StayDetailView({
           {from !== null ? (
             <DetailPriceRow
               figure={
-                <span data-testid="stay-from">
-                  <Amount
-                    minorUnits={from}
-                    locale={locale}
-                    secondaryClassName="text-[length:max(0.6em,0.75rem)] font-semibold opacity-70"
-                  />
-                </span>
+                <>
+                  <span data-testid="stay-from">
+                    <Amount
+                      minorUnits={from}
+                      locale={locale}
+                      secondaryClassName="text-[length:max(0.6em,0.75rem)] font-semibold opacity-70"
+                    />
+                  </span>
+                  {/* The guide beside the nightly rate only. The total for the
+                      dates and the booking choices below stay naira only. */}
+                  <PriceGuide minor={from} compact />
+                </>
               }
               unit={catalogue.perNight}
               /* THE NIGHTLY RATE LEADS AND THE TOTAL FOR THE DATES SITS

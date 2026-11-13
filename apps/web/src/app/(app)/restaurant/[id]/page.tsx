@@ -19,6 +19,7 @@ import { resolveSession } from "@/lib/actions/session";
 import { readVenueDeposit } from "@/lib/reservations/deposit-settings";
 import { RestaurantFace } from "./RestaurantFace";
 import { RecordPlaceVisit } from "@/components/app/listing/RecordPlaceVisit";
+import { GuideScope } from "@/components/currency/GuideScope";
 
 /**
  * A restaurant, on its own surface.
@@ -302,7 +303,7 @@ export default async function RestaurantPage({ params }: { params: Promise<{ id:
   /* The face itself is `RestaurantFace`, so the sweep's fixture harness draws
      exactly what this route draws (the second audit's S-B). */
   return (
-    <>
+    <GuideScope copy={t.experienceSettings.preferences}>
     <RecordPlaceVisit
       id={venue.id}
       title={venue.title}
@@ -405,7 +406,7 @@ export default async function RestaurantPage({ params }: { params: Promise<{ id:
         signedIn,
       }}
     />
-    </>
+    </GuideScope>
   );
 }
 

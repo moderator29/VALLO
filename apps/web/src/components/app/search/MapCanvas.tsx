@@ -35,6 +35,7 @@ import { countOf, formatNumber } from "@vallo/i18n/core";
 import { BrandIcon } from "@/design-system/icons/BrandIcon";
 import "./discovery.css";
 import "./search-v2.css";
+import { PriceGuide } from "@/components/currency/Price";
 
 /**
  * The discovery map.
@@ -1008,7 +1009,11 @@ export function MapCanvas({
                     </span>
                     <span className="nf-numeric shrink-0 text-[length:var(--nf-text-caption)] font-bold text-[var(--nf-content-primary)]">
                       {listing.priceMinor > 0 ? (
-                        <Money minor={listing.priceMinor} locale={locale} currency={listing.currency} />
+                        <>
+                          <Money minor={listing.priceMinor} locale={locale} currency={listing.currency} />
+                          {/* The guide on the list beside the map, never on a pin: a pin has no room for it. */}
+                          <PriceGuide minor={listing.priceMinor} currency={listing.currency} compact below />
+                        </>
                       ) : (
                         listing.kindLabel
                       )}

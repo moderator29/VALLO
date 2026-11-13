@@ -21,7 +21,13 @@ export type SpecChip = { key: string; icon: UiIconName; label: string };
 /** How many chips show before the "+N" chip, as the reference draws them. */
 export const SPEC_CHIPS_VISIBLE = 5;
 
-export function specChips(listing: Listing, t: Dictionary, locale: Locale): SpecChip[] {
+export function specChips(
+  listing: Listing,
+  t: Dictionary,
+  locale: Locale,
+  /** The reader's floor-area unit (`formatArea` bound to it); square metres when absent. */
+  areaText?: (sqm: number, sqmLabel: string) => string,
+): SpecChip[] {
   const chips: SpecChip[] = [];
   const copy = t.catalogue.detail;
   const facts = t.experienceDetail.listing.facts;
@@ -35,7 +41,9 @@ export function specChips(listing: Listing, t: Dictionary, locale: Locale): Spec
     chips.push({
       key: "size",
       icon: "grid",
-      label: `${formatNumber(listing.sizeSqm, locale)} ${t.catalogue.card.sqm}`,
+      label: areaText
+        ? areaText(listing.sizeSqm, t.catalogue.card.sqm)
+        : `${formatNumber(listing.sizeSqm, locale)} ${t.catalogue.card.sqm}`,
     });
   }
   /* Said once: when the amenity row under the chips already carries parking

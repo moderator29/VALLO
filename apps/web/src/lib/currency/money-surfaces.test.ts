@@ -25,6 +25,31 @@ const ADOPTERS: ReadonlySet<string> = new Set([
   "app/api/cron/display-rates/route.ts",
   /* Settings, Language and currency: the chooser and its worked example. */
   "app/(app)/settings/region/page.tsx",
+  /* Settings: the Search card names the chosen currency; the search index finds it. */
+  "app/(app)/settings/account/page.tsx",
+  "components/app/account/settings-search.ts",
+  /* The Search card's distance row saves through the display preferences. */
+  "components/app/account/SettingsGroups.tsx",
+  /* PHASE 2 (13 November 2026): the browsing pages that resolve the guide
+     once (GuideScope), and the browsing surfaces that draw it beside an
+     ASKING price. Move-in totals, dated stay totals, booking choices and the
+     table deposit foot on these same files stay naira only. */
+  "app/(app)/search/page.tsx",
+  "app/(app)/home/page.tsx",
+  "app/(app)/stays/page.tsx",
+  "app/(app)/stay/[id]/page.tsx",
+  "app/(app)/stay/[id]/StayDetailView.tsx",
+  "app/(app)/restaurant/[id]/page.tsx",
+  "app/(app)/restaurant/[id]/RestaurantFace.tsx",
+  "app/(app)/saved/page.tsx",
+  "app/(app)/saved/shelf-rows.tsx",
+  "components/app/ListingCard.tsx",
+  "components/app/home/HomeListingCard.tsx",
+  "components/app/home/FeaturedStack.tsx",
+  "components/app/stays/StayCard.tsx",
+  "components/app/stays/StayStackCard.tsx",
+  "components/app/search/MapCanvas.tsx",
+  "components/app/search/MapDock.tsx",
 ]);
 
 /** Paths that are money surfaces. A match here can never import the guide. */

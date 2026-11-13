@@ -4,7 +4,7 @@ import { cache } from "react";
 import { cookies, headers } from "next/headers";
 import { resolveSessionClaims } from "../actions/session";
 import { automaticCurrency, COUNTRY_HEADER } from "./auto";
-import { AREA_COOKIE, CURRENCY_COOKIE, displayFromSettings, resolveDisplay, type ResolvedDisplay, type StoredDisplay } from "./preference";
+import { AREA_COOKIE, CURRENCY_COOKIE, DISTANCE_COOKIE, displayFromSettings, resolveDisplay, type ResolvedDisplay, type StoredDisplay } from "./preference";
 import { NAIRA_ONLY, withFreshRate, type DisplayMoney } from "./display";
 import { readDisplayRates } from "./rates-store";
 
@@ -45,21 +45,38 @@ export const getDisplayPreferences = cache(async function getDisplayPreferences(
     const [requestHeaders, jar, account] = await Promise.all([headers(), cookies(), accountDisplay()]);
     return resolveDisplay({
       account,
-      cookies: { currency: jar.get(CURRENCY_COOKIE)?.value, area: jar.get(AREA_COOKIE)?.value },
+      cookies: {
+        currency: jar.get(CURRENCY_COOKIE)?.value,
+        area: jar.get(AREA_COOKIE)?.value,
+        distance: jar.get(DISTANCE_COOKIE)?.value,
+      },
       auto: automaticCurrency({
         country: requestHeaders.get(COUNTRY_HEADER),
         acceptLanguage: requestHeaders.get("accept-language"),
       }),
     });
   } catch {
-    return { choice: "auto", currency: "NGN", automatic: "NGN", areaUnit: NAIRA_ONLY.areaUnit, from: "auto" };
+    return {
+      choice: "auto",
+      currency: "NGN",
+      automatic: "NGN",
+      areaUnit: NAIRA_ONLY.areaUnit,
+      distanceUnit: NAIRA_ONLY.distanceUnit,
+      from: "auto",
+    };
   }
 });
 
 export const getDisplayMoney = cache(async function getDisplayMoney(): Promise<DisplayMoney> {
   try {
     const prefs = await getDisplayPreferences();
-    const base = { choice: prefs.choice, currency: prefs.currency, automatic: prefs.automatic, areaUnit: prefs.areaUnit };
+    const base = {
+      choice: prefs.choice,
+      currency: prefs.currency,
+      automatic: prefs.automatic,
+      areaUnit: prefs.areaUnit,
+      distanceUnit: prefs.distanceUnit,
+    };
     if (prefs.currency === "NGN") return { ...base, rate: null };
     return withFreshRate(base, await readDisplayRates(), Date.now());
   } catch {

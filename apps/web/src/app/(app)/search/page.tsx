@@ -76,6 +76,7 @@ import { parseWords } from "@/lib/listings/query-parse";
 import { looksCheckable } from "@/lib/doors/agent-check";
 import "@/app/css/catalogue.css";
 import "@/app/css/list-views.css";
+import { GuideScope } from "@/components/currency/GuideScope";
 
 export const metadata: Metadata = {
   title: "Search",
@@ -541,7 +542,7 @@ export default async function SearchPage({
   });
 
   return (
-    <>
+    <GuideScope copy={t.experienceSettings.preferences}>
       {/* A6: the funnel's "first search", once a search has something in it. */}
       {Object.keys(raw).length > 0 && <FunnelBeacon step="first_search" />}
       {/*
@@ -903,6 +904,6 @@ export default async function SearchPage({
           to={query.view === "map" ? "list" : "map"}
         />
       )}
-    </>
+    </GuideScope>
   );
 }

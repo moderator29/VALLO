@@ -25,6 +25,7 @@ import { ShareCollection } from "./ShareCollection";
 import { readSavedChanges } from "@/lib/saved/changes";
 import { SavedRoommates } from "@/components/roommates/SavedRoommates";
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { GuideScope } from "@/components/currency/GuideScope";
 
 export async function generateMetadata(): Promise<Metadata> {
   return { title: getDictionary(await getLocale()).nav.saved };
@@ -157,6 +158,7 @@ export default async function SavedPage({ searchParams }: { searchParams: Promis
   const items = inCollection(sorted, activeList);
 
   return (
+    <GuideScope copy={t.experienceSettings.preferences}>
     <PullToRefresh className="nf-cat-surface mx-auto max-w-3xl">
       <div className="relative">
         <PageScene art="globe-pin" />
@@ -240,6 +242,7 @@ export default async function SavedPage({ searchParams }: { searchParams: Promis
         listFor={(kind, id) => (session.state === "signed-in" ? <AddToList collections={collections} itemKey={collectionKey(kind, id)} kind={kind} id={id} /> : undefined)}
       />
     </PullToRefresh>
+    </GuideScope>
   );
 }
 

@@ -27,6 +27,7 @@ import { accommodationPhotoUrl } from "@/lib/stays/photos";
 import { siteUrl } from "@/lib/site";
 import { resolveSession } from "@/lib/actions/session";
 import ListingPage, { generateMetadata as listingMetadata } from "../../listing/[id]/page";
+import { GuideScope } from "@/components/currency/GuideScope";
 
 type Params = Promise<{ id: string }>;
 type Search = Promise<Record<string, string | string[] | undefined>>;
@@ -232,7 +233,7 @@ export default async function StayDetailPage({
   );
 
   return (
-    <>
+    <GuideScope copy={t.experienceSettings.preferences}>
     <RecordPlaceVisit
       id={detail.id}
       title={detail.name}
@@ -264,6 +265,6 @@ export default async function StayDetailPage({
       arrival={<ArrivalChargesLine listingId={null} accommodationId={detail.id} locale={locale} />}
       door={doorCharges}
     />
-    </>
+    </GuideScope>
   );
 }

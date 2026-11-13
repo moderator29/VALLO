@@ -59,7 +59,7 @@ export const SLICES = {
      false readings took the settings screen's slice from 137 KB to 47 KB and
      the listing card's from 104 KB to 55 KB. */
   listingCard: ["catalogue", "common", "directHome", "experienceLabels", "homeV2", "interests", "moveIn", "shape", "signUp", "success", "trustVisible", "units"],
-  stayCard: ["catalogue", "common", "stays", "restaurantPage", "success"],
+  stayCard: ["catalogue", "common", "stays", "restaurantPage", "signUp", "success"],
   stayFilterSheet: ["catalogue", "shape", "stayDetail", "stays"],
   priceCheck: ["home", "priceCheck"],
   proofStrip: ["trustVisible"],
@@ -74,7 +74,7 @@ export const SLICES = {
   signUpOptions: ["auth", "common", "landing", "publicDoors", "side", "stays"],
   welcomeFlow: ["auth", "common", "interests", "landing", "moveIn", "onboardingMotion", "pickers", "platform", "shape", "side", "signUp", "stays", "success", "welcomeCards"],
   interestChoices: ["common", "interests", "platform"],
-  stayStackCard: ["catalogue", "restaurantPage", "stays", "success"],
+  stayStackCard: ["catalogue", "common", "restaurantPage", "signUp", "stays", "success"],
   accountToggles: ["settings", "shape"],
   agentNav: ["a11y", "agent", "agentListings", "experienceFeatures", "experienceInbox", "experienceRewards", "experienceShell", "feedV2", "frontDoor", "home", "landlord", "nav", "passportV2", "priceCheck", "settings", "shape", "stays", "supply", "verification"],
 } as const satisfies Record<string, readonly (keyof Dictionary)[]>;

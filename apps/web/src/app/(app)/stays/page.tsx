@@ -21,6 +21,7 @@ import { resolveSession } from "@/lib/actions/session";
 import { listSavedPlaces } from "@/lib/saved/places-actions";
 import { isSaved, savedKeySet } from "@/lib/saved/places";
 import "@/app/css/home.css";
+import { GuideScope } from "@/components/currency/GuideScope";
 
 export const metadata: Metadata = {
   title: "Stays",
@@ -174,6 +175,7 @@ export default async function StaysHomePage() {
   ];
 
   return (
+    <GuideScope copy={t.experienceSettings.preferences}>
     <div className="nf-home">
       {/* ------------------------------------------- the greeting, as kept */}
       <section className="nf-rise">
@@ -259,5 +261,6 @@ export default async function StaysHomePage() {
         }
       />
     </div>
+    </GuideScope>
   );
 }

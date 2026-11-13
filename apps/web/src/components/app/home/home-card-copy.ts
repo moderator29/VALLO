@@ -57,26 +57,43 @@ export function chipOf(listing: Listing, copy: HomeCardCopy): string {
  * a floor built from the parts the lister named, "from" before it. A rent says
  * its period, a sale says nothing. No figure on the row, no price line.
  */
-export type HomeCardPrice = { minor: number; from: boolean; unit: string | null };
+export type HomeCardPrice = {
+  minor: number;
+  from: boolean;
+  unit: string | null;
+  /** The figure is the move-in total, an obligation: no currency guide beside it. */
+  moveIn: boolean;
+};
 
 export function priceOf(listing: Listing, copy: HomeCardCopy): HomeCardPrice | null {
   const price = cardPrice(listing);
   if (price.lead === "none") return null;
-  if (price.lead === "moveIn") return { minor: price.minor, from: price.approximate, unit: copy.moveIn };
+  if (price.lead === "moveIn") return { minor: price.minor, from: price.approximate, unit: copy.moveIn, moveIn: true };
   return {
     minor: price.minor,
     from: false,
+    moveIn: false,
     unit: price.period === "sale" ? null : copy.periodShort[price.period as keyof HomeCardCopy["periodShort"]],
   };
 }
 
 /** ["2 beds", "2 baths", "120 m²"], only the facts the lister stated. */
-export function factsOf(listing: Listing, copy: HomeCardCopy, locale: Locale): string[] {
+export function factsOf(
+  listing: Listing,
+  copy: HomeCardCopy,
+  locale: Locale,
+  /** The reader's floor-area unit (`useAreaText`); square metres when absent. */
+  areaText?: (sqm: number, sqmLabel: string) => string,
+): string[] {
   const parts: string[] = [];
   if (listing.bedrooms > 0) parts.push(countOf(listing.bedrooms, "beds", locale));
   if (listing.bathrooms > 0) parts.push(countOf(listing.bathrooms, "baths", locale));
   if (listing.sizeSqm !== undefined && listing.sizeSqm > 0) {
-    parts.push(`${formatNumber(Math.round(listing.sizeSqm), locale)} ${copy.sqm}`);
+    parts.push(
+      areaText
+        ? areaText(Math.round(listing.sizeSqm), copy.sqm)
+        : `${formatNumber(Math.round(listing.sizeSqm), locale)} ${copy.sqm}`,
+    );
   }
   return parts;
 }

@@ -5,7 +5,8 @@ import { axe, closeAxe, hasBrowser } from "@/lib/a11y/axe";
 import type { DisplayMoney } from "@/lib/currency/display";
 import type { DisplayRate } from "@/lib/currency/convert";
 import { Price, PriceGuide } from "./Price";
-import { DisplayMoneyProvider, guideCopyOf } from "./DisplayMoneyProvider";
+import { DisplayMoneyProvider } from "./DisplayMoneyProvider";
+import { guideCopyOf } from "./guide-copy";
 import { RatesAttribution, ATTRIBUTION_URL } from "./RatesAttribution";
 import { AreaRow, CurrencyChoices, CurrencyRows, currencyOptions } from "./DisplayPreferences";
 
@@ -30,8 +31,8 @@ const RATE: DisplayRate = {
   sourceUpdatedAt: "2026-11-13T00:02:31.000Z",
   fetchedAt: "2026-11-13T00:50:04.000Z",
 };
-const POUNDS: DisplayMoney = { choice: "GBP", currency: "GBP", automatic: "NGN", rate: RATE, areaUnit: "sqm" };
-const NAIRA: DisplayMoney = { choice: "auto", currency: "NGN", automatic: "NGN", rate: null, areaUnit: "sqm" };
+const POUNDS: DisplayMoney = { choice: "GBP", currency: "GBP", automatic: "NGN", rate: RATE, areaUnit: "sqm", distanceUnit: "km" };
+const NAIRA: DisplayMoney = { choice: "auto", currency: "NGN", automatic: "NGN", rate: null, areaUnit: "sqm", distanceUnit: "km" };
 const NO_RATE: DisplayMoney = { ...POUNDS, rate: null };
 
 const text = (html: string) => html.replace(/<[^>]+>/g, "").replace(/&#x27;/g, "'");
