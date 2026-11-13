@@ -52,3 +52,15 @@ export function activeRoommatesTab(pathname: string): RoommatesTabId {
   }
   return "home";
 }
+
+/**
+ * True on a tab's own root page (`/roommates`, `/roommates/discover`, and so
+ * on), with or without a trailing slash. Those pages draw the area's tabs
+ * under their own title, so the layout's copy of the row stands down on
+ * exactly these paths and nowhere else: an inner page (a room, a person, a
+ * form) is not a root and keeps the bar above it.
+ */
+export function isRoommatesTabRoot(pathname: string): boolean {
+  const path = pathname.replace(/\/+$/, "") || "/";
+  return ROOMMATES_TABS.some((tab) => tab.href === path);
+}

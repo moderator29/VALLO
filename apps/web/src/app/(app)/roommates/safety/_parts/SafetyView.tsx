@@ -5,6 +5,7 @@ import { BADGE_ICON, type RoommatesCopy } from "@/components/roommates";
 import { ButtonLink } from "@/components/ui/Button";
 import { UiIcon, type UiIconName } from "@/design-system/icons/UiIcon";
 import { ROOMMATES_ROUTES, type BadgeKind } from "@/lib/features/roommates/model";
+import { RoommatesSubNav } from "../../_parts/SubNav";
 
 const TIP_ICON: UiIconName[] = ["eye", "user-check", "file-text", "banknote", "location", "chat-bubble"];
 const BADGES: BadgeKind[] = ["identity", "phone", "student_email", "student_id", "nysc", "workplace"];
@@ -16,7 +17,7 @@ const CIRCLES = [
 
 export function SafetyView({ t: copy }: { t: RoommatesCopy }) {
   return (
-    <PageFrame title={copy.safety.title} subtitle={copy.ui.safety.subtitle} fallback={ROOMMATES_ROUTES.home} width="default">
+    <PageFrame title={copy.safety.title} subtitle={copy.ui.safety.subtitle} fallback={ROOMMATES_ROUTES.home} width="default" tabs={<RoommatesSubNav slot="page" />}>
       <div className="nf-rmp" data-testid="roommates-safety">
         <ol className="nf-rms-list">
           {copy.safety.tips.map((tip, i) => (

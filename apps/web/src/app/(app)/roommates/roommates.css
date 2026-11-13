@@ -1688,6 +1688,29 @@
     background: var(--nf-surface-primary);
     border-block-end: var(--nf-border-width) solid var(--nf-tier-card-edge);
   }
+  /* UNDER THE PAGE'S TITLE (13 November 2026): on a tab's own root the row is
+     part of the page, not a bar over it. It scrolls with the title, carries
+     no fill and no rule of its own, and bleeds to the screen's edge so a cut
+     tab shows there is more to the side. */
+  .nf-rmnav--page {
+    position: static;
+    background: none;
+    border-block-end: 0;
+    margin-inline: calc(var(--nf-space-md) * -1);
+  }
+  .nf-rmnav--page .nf-rmnav__list {
+    padding-block: 0;
+  }
+  /* The area's tabs, then a page's own switch or tabs under them. */
+  .nf-rmnav-stack {
+    display: grid;
+    /* One column that is the page's width, never its widest child's: an
+       `auto` track let the page's own switch widen the column past the
+       screen. */
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--nf-space-sm);
+    min-inline-size: 0;
+  }
   .nf-rmnav__list {
     display: flex;
     gap: var(--nf-space-xs);

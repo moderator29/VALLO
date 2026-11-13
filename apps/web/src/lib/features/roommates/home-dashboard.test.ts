@@ -46,3 +46,16 @@ describe("the sub-navigation's active tab", () => {
     expect(ROOMMATES_TABS.map((x) => x.id)).toEqual(["home", "discover", "groups", "schools", "nysc", "mine", "safety"]);
   });
 });
+
+describe("the tab roots, where the page draws the area's tabs under its own title", () => {
+  it("is true on each tab's own page and false on every inner page", async () => {
+    const { isRoommatesTabRoot, ROOMMATES_TABS } = await import("./home-dashboard");
+    for (const tab of ROOMMATES_TABS) {
+      expect(isRoommatesTabRoot(tab.href), tab.href).toBe(true);
+      expect(isRoommatesTabRoot(`${tab.href}/`), `${tab.href}/`).toBe(true);
+    }
+    for (const inner of ["/roommates/r/abc", "/roommates/p/abc", "/roommates/groups/new", "/roommates/campus/unilag", "/roommates/profile", "/roommates/new", "/roommates/verify", "/roommates/split", "/roommates/tools/checklist", "/home"]) {
+      expect(isRoommatesTabRoot(inner), inner).toBe(false);
+    }
+  });
+});

@@ -11,6 +11,7 @@ import { agoShort, dateTimeLabel } from "@/lib/format/when";
 
 import { Empty, Face, Plate, Section, Tag, fill } from "../../groups/_parts/kit";
 import "../../groups/_parts/fe-b.css";
+import { RoommatesSubNav } from "../../_parts/SubNav";
 import {
   ConnectionActions,
   GroupInviteActions,
@@ -44,7 +45,7 @@ export function RoommatesHubView({ hub, tab, now, locale = "en" }: { hub: Roomma
 
   if (!hub.live) {
     return (
-      <PageFrame title={R.hub.title} subtitle={X.subtitle} fallback={ROOMMATES_ROUTES.home}>
+      <PageFrame title={R.hub.title} subtitle={X.subtitle} fallback={ROOMMATES_ROUTES.home} tabs={<RoommatesSubNav slot="page" />}>
         <State kind="empty" title={R.hub.title} body={R.notOpen} primary={{ href: ROOMMATES_ROUTES.home, label: R.title }} />
       </PageFrame>
     );
@@ -76,7 +77,13 @@ export function RoommatesHubView({ hub, tab, now, locale = "en" }: { hub: Roomma
       subtitle={X.subtitle}
       fallback={ROOMMATES_ROUTES.home}
       width="wide"
-      tabs={<UnderlineTabs items={tabs} active={tab} label={X.tabsLabel} itemTestIdPrefix="rm-hub-tab-" />}
+      tabs={
+        /* The area's tabs under the title, then this page's own tabs. */
+        <div className="nf-rmnav-stack">
+          <RoommatesSubNav slot="page" />
+          <UnderlineTabs items={tabs} active={tab} label={X.tabsLabel} itemTestIdPrefix="rm-hub-tab-" />
+        </div>
+      }
     >
       <div className="nf-rmb" data-testid="roommates-hub">
         <ProfileCard hub={hub} t={X} />

@@ -91,14 +91,16 @@ export function CurrencyRows({
     setChoice(next);
     setError(null);
     startTransition(async () => {
-      const result = await saveDisplayPreferences({ currency: next }).catch(() => null);
-      if (!result) {
+      /* One try block, so a lost signal is caught like any other failure
+         (tap-failed.dom.test.tsx): the choice goes back and says so. */
+      try {
+        const result = await saveDisplayPreferences({ currency: next });
+        if (!result.ok) setError(result.error);
+        router.refresh();
+      } catch {
         setChoice(previous);
         setError(copy.saveFailed);
-        return;
       }
-      if (!result.ok) setError(result.error);
-      router.refresh();
     });
   };
 
@@ -213,14 +215,16 @@ export function AreaRow({
     setUnit(next);
     setError(null);
     startTransition(async () => {
-      const result = await saveDisplayPreferences({ areaUnit: next }).catch(() => null);
-      if (!result) {
+      /* One try block, so a lost signal is caught like any other failure
+         (tap-failed.dom.test.tsx): the choice goes back and says so. */
+      try {
+        const result = await saveDisplayPreferences({ areaUnit: next });
+        if (!result.ok) setError(result.error);
+        router.refresh();
+      } catch {
         setUnit(previous);
         setError(copy.saveFailed);
-        return;
       }
-      if (!result.ok) setError(result.error);
-      router.refresh();
     });
   };
 

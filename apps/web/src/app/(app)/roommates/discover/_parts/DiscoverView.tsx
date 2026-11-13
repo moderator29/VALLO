@@ -8,6 +8,7 @@ import { ROOMMATES_ROUTES, type InstitutionRef, type PeopleFilters, type RoomCar
 
 import { DiscoverControls, ModeSwitch, SaveSearchButton } from "./DiscoverControls";
 import { discoverHref } from "./href";
+import { RoommatesSubNav } from "../../_parts/SubNav";
 
 /** At most this many pages are read for one address (`?more=`). */
 export const MAX_PAGES = 10;
@@ -117,7 +118,14 @@ export function DiscoverView({
   }
 
   return (
-    <PageFrame title={copy.ui.discover.title} subtitle={copy.ui.discover.subtitle} fallback={ROOMMATES_ROUTES.home} width="wide" tabs={<ModeSwitch mode={mode} />}>
+    <PageFrame title={copy.ui.discover.title} subtitle={copy.ui.discover.subtitle} fallback={ROOMMATES_ROUTES.home} width="wide" tabs={
+        /* The area's tabs under the title, then this page's own switch. */
+        <div className="nf-rmnav-stack">
+          <RoommatesSubNav slot="page" />
+          <ModeSwitch mode={mode} />
+        </div>
+      }
+    >
       <PullToRefresh>
         <div className="nf-rmp" data-testid="roommates-discover">
           <DiscoverControls mode={mode} people={people} rooms={rooms} schools={schools} canSave={result.state === "ok"} />

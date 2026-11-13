@@ -14,6 +14,7 @@ import { getLocale } from "@/lib/locale";
 import { Empty, FaceStack, Plate, Section, Tag, fill } from "./_parts/kit";
 import { JoinGroupButton } from "./_parts/GroupActions";
 import "./_parts/fe-b.css";
+import { RoommatesSubNav } from "../_parts/SubNav";
 
 export const metadata: Metadata = { title: "Find together" };
 export const dynamic = "force-dynamic";
@@ -32,7 +33,7 @@ export default async function RoommateGroupsPage() {
   if (hub.live && !hub.signedIn) redirect(withNext("/sign-in", ROOMMATES_ROUTES.groups));
   if (!hub.live) {
     return (
-      <PageFrame title={R.groups.title} subtitle={G.subtitle} fallback={ROOMMATES_ROUTES.home}>
+      <PageFrame title={R.groups.title} subtitle={G.subtitle} fallback={ROOMMATES_ROUTES.home} tabs={<RoommatesSubNav slot="page" />}>
         <State kind="empty" title={R.groups.title} body={R.notOpen} primary={{ href: ROOMMATES_ROUTES.home, label: R.title }} />
       </PageFrame>
     );
@@ -54,6 +55,7 @@ export default async function RoommateGroupsPage() {
           {G.start}
         </ButtonLink>
       }
+      tabs={<RoommatesSubNav slot="page" />}
     >
       <div className="nf-rmb nf-rmg-split" data-testid="roommates-groups">
         <Section title={G.mine} id="rm-groups-mine">

@@ -1022,7 +1022,27 @@
   .nf-pcf__top-actions {
     display: flex;
     align-items: center;
-    gap: var(--nf-space-2xs);
+    gap: var(--nf-space-xs);
+  }
+  /* THE THREE DOTS KEEP THEIR OWN SPACE ON THIS CARD (13 November 2026). On
+     an ordinary post the kebab is pulled to the card's edge with negative
+     margins (`.nf-pc .nf-pc__kebab`: 8px to the start, 12px to the end). On
+     the editorial card it is a glass disc beside the bookmark's disc, and
+     the same 8px pulled it over the bookmark by about 3px. Here it has no
+     margin and sits level with its neighbour. */
+  .nf-pc .nf-pcf__top-actions .nf-pc__kebab {
+    align-self: center;
+    margin: 0;
+  }
+  /* The discs draw 40 and are tapped at 44: an invisible square 2px out on
+     each side, which the 8px gap keeps clear of the neighbour's. */
+  .nf-pc .nf-pcf__top-actions .nf-pcf__glass {
+    position: relative;
+  }
+  .nf-pc .nf-pcf__top-actions .nf-pcf__glass::after {
+    content: "";
+    position: absolute;
+    inset: -0.125rem;
   }
   /* The controls on the photograph: glass, with the solid fallback. */
   .nf-pc .nf-pcf__glass,

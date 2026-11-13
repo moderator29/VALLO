@@ -6,6 +6,8 @@ import { PageFrame } from "@/components/app/PageFrame";
 import { CircleBanner, CircleComposeFab, CircleDestinations, CircleFeaturedCard, CirclePostCard, CircleSortRow, CircleTabs, type CircleFace } from "@/components/social/circle/CircleVisuals";
 import { PullToRefresh } from "@/components/ui/PullToRefresh";
 import { ButtonLink } from "@/components/ui/Button";
+import { ListGroup, ListRow } from "@/components/ui/ListGroup";
+import { PromoBanner } from "@/components/app/PromoBanner";
 import { UiIcon } from "@/design-system/icons/UiIcon";
 import { CIRCLE_COPY } from "@/lib/features/circle/copy";
 import { CATEGORY_LABEL, CIRCLE_TABS, PROFESSIONAL_LABEL, TAB_TYPE, countWords, readSort, readTab, type CircleCategory, type CircleTab, type ProfessionalKind } from "@/lib/features/circle/model";
@@ -248,25 +250,27 @@ async function RoommatesDoor() {
     { slug: "nysc-accommodation", label: E.circleNysc },
     { slug: "finding-roommates", label: E.circleFinding },
   ];
+  /* ONE DOOR TO ROOMMATES, DRAWN ONE WAY (13 November 2026). The feed's door
+     is the platform's promo banner; this one was a plain card with a button
+     and three bare links, so the same door looked like two products. It is
+     the same banner now, and the three roommate communities under it are the
+     platform's grouped list. Every link it had is still here. */
   return (
-    <section className="nf-circle-card" data-testid="circle-roommates-door" aria-labelledby="circle-roommates-title">
-      <h2 id="circle-roommates-title" className="nf-circle-card__title">
-        {E.circleTitle}
-      </h2>
-      <p className="nf-circle-card__body">{E.circleLine}</p>
-      <ButtonLink href={ROOMMATES_ROUTES.home} variant="primary" size="sm" arrow>
-        {E.circleOpen}
-      </ButtonLink>
-      <span className="nf-circle-card__eyebrow">{E.circleCommunities}</span>
-      <ul className="nf-circle-list">
+    <section className="nf-circle-door" data-testid="circle-roommates-door" aria-label={E.circleTitle}>
+      <PromoBanner
+        eyebrow={E.feedPromoEyebrow}
+        title={E.circleTitle}
+        body={E.circleLine}
+        cta={E.circleOpen}
+        href={ROOMMATES_ROUTES.home}
+        art="home-small"
+        testId="circle-roommates-promo"
+      />
+      <ListGroup label={E.circleCommunities} labelAs="h3">
         {rooms.map((r) => (
-          <li key={r.slug}>
-            <Link href={`/circle/c/${r.slug}`} className="nf-link">
-              {r.label}
-            </Link>
-          </li>
+          <ListRow key={r.slug} href={`/circle/c/${r.slug}`} title={r.label} chevron />
         ))}
-      </ul>
+      </ListGroup>
     </section>
   );
 }

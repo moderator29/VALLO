@@ -5,12 +5,13 @@ import { SectionHead, STATE_OPTIONS, fill, type RoommatesCopy } from "@/componen
 import { ButtonLink } from "@/components/ui/Button";
 import { UiIcon } from "@/design-system/icons/UiIcon";
 import { ROOMMATES_ROUTES } from "@/lib/features/roommates/model";
+import { RoommatesSubNav } from "../../_parts/SubNav";
 
 const CIRCLE_NYSC = "/circle/c/nysc-accommodation";
 
 export function NyscView({ t: copy }: { t: RoommatesCopy }) {
   return (
-    <PageFrame title={copy.nysc.title} subtitle={copy.nysc.intro} fallback={ROOMMATES_ROUTES.home} width="wide">
+    <PageFrame title={copy.nysc.title} subtitle={copy.nysc.intro} fallback={ROOMMATES_ROUTES.home} width="wide" tabs={<RoommatesSubNav slot="page" />}>
       <div className="nf-rmp" data-testid="roommates-nysc-page">
         <section className="nf-rm-section" aria-labelledby="rmn-state">
           <SectionHead id="rmn-state" title={copy.nysc.state} />

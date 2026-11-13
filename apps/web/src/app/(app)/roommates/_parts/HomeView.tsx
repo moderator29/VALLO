@@ -33,6 +33,7 @@ import { ButtonLink } from "@/components/ui/Button";
 import { UiIcon } from "@/design-system/icons/UiIcon";
 import { ROOMMATES_ROUTES } from "@/lib/features/roommates/model";
 import type { RoommatesHome } from "@/lib/features/roommates/queries";
+import { RoommatesSubNav } from "./SubNav";
 
 const signInTo = (next: string) => `/sign-in?next=${encodeURIComponent(next)}`;
 
@@ -52,7 +53,7 @@ export function RoommatesHomeView({ home, t: copy, now, feed }: { home: Roommate
 
   if (!home.live) {
     return (
-      <PageFrame title={copy.title} fallback="/home" width="wide">
+      <PageFrame title={copy.title} fallback="/home" width="wide" tabs={<RoommatesSubNav slot="page" />}>
         <PullToRefresh>
         <div className="nf-rmp" data-testid="roommates-home">
           {hero}
@@ -211,7 +212,7 @@ export function RoommatesHomeView({ home, t: copy, now, feed }: { home: Roommate
     : [how, ...shelves, promo, schools, nysc, figures >= 2 ? stats : null];
 
   return (
-    <PageFrame title={copy.title} fallback="/home" width="wide">
+    <PageFrame title={copy.title} fallback="/home" width="wide" tabs={<RoommatesSubNav slot="page" />}>
       <PullToRefresh>
         <div className="nf-rmp" data-testid="roommates-home">
         {hero}

@@ -19,6 +19,7 @@ import { ButtonLink } from "@/components/ui/Button";
 import { UiIcon } from "@/design-system/icons/UiIcon";
 import { ROOMMATES_ROUTES, type InstitutionRef } from "@/lib/features/roommates/model";
 import type { InstitutionPage } from "@/lib/features/roommates/queries";
+import { RoommatesSubNav } from "../../_parts/SubNav";
 
 /**
  * THE SCHOOLS (server safe). The directory: a search that works without a
@@ -34,7 +35,7 @@ export function CampusDirectoryView({ live, items, q, t: copy }: { live: boolean
   }
   const ordered = [...groups.entries()].sort(([a], [b]) => (a === "" ? 1 : b === "" ? -1 : a.localeCompare(b)));
   return (
-    <PageFrame title={copy.campus.title} subtitle={copy.ui.campus.subtitle} fallback={ROOMMATES_ROUTES.home} width="wide">
+    <PageFrame title={copy.campus.title} subtitle={copy.ui.campus.subtitle} fallback={ROOMMATES_ROUTES.home} width="wide" tabs={<RoommatesSubNav slot="page" />}>
       <div className="nf-rmp" data-testid="roommates-campuses">
         <form role="search" method="get" action={ROOMMATES_ROUTES.campuses} className="nf-rmd-search">
           <span className="nf-rmd-search__glyph" aria-hidden="true">
