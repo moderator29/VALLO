@@ -69,7 +69,30 @@ function inline(text: string, onNavigate: (() => void) | undefined, keyBase: str
   return out;
 }
 
-type Block = { kind: "p"; text: string } | { kind: "h"; text: string } | { kind: "ul"; items: string[] } | { kind: "ol"; items: string[] };
+type Block =
+  | { kind: "p"; text: string }
+  | { kind: "h"; text: string }
+  | { kind: "ul"; items: string[] }
+  | { kind: "ol"; items: string[] }
+  /* A fenced block, kept exactly as written: the copilot answers operators
+     with SQL often enough that flattening it was the worst of the three. */
+  | { kind: "code"; text: string }
+  | { kind: "quote"; text: string }
+  | { kind: "table"; head: string[]; rows: string[][] };
+
+/** `| a | b |` split into cells, with the outer pipes dropped. */
+function cells(line: string): string[] {
+  return line.replace(/^\s*\|/, "").replace(/\|\s*$/, "").split("|").map((c) => c.trim());
+}
+
+/** The `| --- | :--: |` line directly under a table's head, and nothing else. */
+function isTableRule(line: string): boolean {
+  return /^\s*\|?[\s:|-]+\|[\s:|-]*$/.test(line) && line.includes("-") && line.includes("|");
+}
+
+function isTableRow(line: string): boolean {
+  return /^\s*\|.*\|\s*$/.test(line.trimEnd());
+}
 
 export function parseBlocks(source: string): Block[] {
   const blocks: Block[] = [];
@@ -84,8 +107,56 @@ export function parseBlocks(source: string): Block[] {
     if (list) blocks.push(list.kind === "ul" ? { kind: "ul", items: list.items } : { kind: "ol", items: list.items });
     list = null;
   };
-  for (const raw of lines) {
+  /* A fence swallows every line until it closes, so nothing inside is read
+     as a heading, a bullet or a table. An unclosed fence still flushes at the
+     end rather than eating the rest of the answer in silence. */
+  let fence: { lang: string; lines: string[] } | null = null;
+
+  for (let i = 0; i < lines.length; i += 1) {
+    const raw = lines[i] ?? "";
     const line = raw.trimEnd();
+
+    const fenceMark = /^\s*```+\s*([A-Za-z0-9_+-]*)\s*$/.exec(line);
+    if (fence) {
+      if (fenceMark) {
+        blocks.push({ kind: "code", text: fence.lines.join("\n") });
+        fence = null;
+      } else {
+        fence.lines.push(raw);
+      }
+      continue;
+    }
+    if (fenceMark) {
+      flushParagraph();
+      flushList();
+      fence = { lang: fenceMark[1] ?? "", lines: [] };
+      continue;
+    }
+
+    /* A table is a head row, the rule under it, then rows until they stop. */
+    if (isTableRow(line) && isTableRule(lines[i + 1] ?? "")) {
+      flushParagraph();
+      flushList();
+      const head = cells(line);
+      const rows: string[][] = [];
+      let j = i + 2;
+      while (j < lines.length && isTableRow(lines[j] ?? "")) {
+        rows.push(cells(lines[j] ?? ""));
+        j += 1;
+      }
+      blocks.push({ kind: "table", head, rows });
+      i = j - 1;
+      continue;
+    }
+
+    const quote = /^\s*>\s?(.*)$/.exec(line);
+    if (quote) {
+      flushParagraph();
+      flushList();
+      blocks.push({ kind: "quote", text: quote[1] ?? "" });
+      continue;
+    }
+
     const bullet = /^\s*(?:[-*•])\s+(.*)$/.exec(line);
     const numbered = /^\s*\d+[.)]\s+(.*)$/.exec(line);
     const heading = /^\s*#{1,4}\s+(.*)$/.exec(line);
@@ -107,6 +178,7 @@ export function parseBlocks(source: string): Block[] {
       paragraph.push(line.trim());
     }
   }
+  if (fence) blocks.push({ kind: "code", text: fence.lines.join("\n") });
   flushParagraph();
   flushList();
   return blocks;
@@ -134,6 +206,48 @@ export function CopilotMarkdown({ text, onNavigate }: { text: string; onNavigate
                 <li key={`${key}-${j}`}>{inline(item, onNavigate, `${key}-${j}`)}</li>
               ))}
             </ol>
+          );
+        }
+        if (block.kind === "code") {
+          /* Exactly as written, never run through `inline`: a line in a code
+             block is code, not prose, and must not grow links or bold. */
+          return (
+            <pre key={key} className="nf-copilot-md__code">
+              <code>{block.text}</code>
+            </pre>
+          );
+        }
+        if (block.kind === "quote") {
+          return (
+            <p key={key} className="nf-copilot-md__quote">
+              {inline(block.text, onNavigate, key)}
+            </p>
+          );
+        }
+        if (block.kind === "table") {
+          return (
+            <div key={key} className="nf-copilot-md__tablewrap">
+              <table className="nf-copilot-md__table">
+                <thead>
+                  <tr>
+                    {block.head.map((cell, j) => (
+                      <th key={`${key}-h${j}`} scope="col">
+                        {inline(cell, onNavigate, `${key}-h${j}`)}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {block.rows.map((row, j) => (
+                    <tr key={`${key}-r${j}`}>
+                      {row.map((cell, k) => (
+                        <td key={`${key}-r${j}c${k}`}>{inline(cell, onNavigate, `${key}-r${j}c${k}`)}</td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           );
         }
         if (block.kind === "h") {

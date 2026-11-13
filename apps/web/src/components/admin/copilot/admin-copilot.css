@@ -158,6 +158,66 @@
     margin-top: 0;
   }
 
+  /*
+   * CODE, A TABLE AND A QUOTE IN AN ANSWER (the founder, 12 November 2026).
+   * The renderer could not read any of the three: a table arrived as one
+   * run-on line of pipes, a SQL block as its lines joined by spaces with the
+   * backticks still showing, and a quote with a bare ">" in front of it.
+   * `markdown-lite.tsx` reads them now; these are what they wear.
+   */
+  .nf-copilot-md__code {
+    margin: 0 0 var(--nf-space-xs);
+    padding: var(--nf-space-xs);
+    overflow-x: auto;
+    border: var(--nf-border-width) solid var(--nf-panel-hair);
+    border-radius: var(--nf-radius-sm);
+    background: var(--nf-surface-canvas);
+    /* Code keeps its own line breaks and its own spacing: wrapping it would
+       change what a statement says. The block scrolls instead. */
+    white-space: pre;
+    font-family: var(--nf-font-mono);
+    font-size: var(--nf-text-caption);
+    line-height: var(--nf-leading-snug);
+    color: var(--nf-content-primary);
+  }
+
+  .nf-copilot-md__quote {
+    margin: 0 0 var(--nf-space-xs);
+    padding-inline-start: var(--nf-space-xs);
+    border-inline-start: 2px solid var(--nf-panel-edge);
+    color: var(--nf-content-secondary);
+  }
+
+  /* A desk count table is wider than a chat column on a phone, so the table
+     scrolls inside its own wrapper rather than stretching the answer. */
+  .nf-copilot-md__tablewrap {
+    margin: 0 0 var(--nf-space-xs);
+    overflow-x: auto;
+  }
+
+  .nf-copilot-md__table {
+    border-collapse: collapse;
+    inline-size: 100%;
+    font-size: var(--nf-text-caption);
+  }
+
+  .nf-copilot-md__table th,
+  .nf-copilot-md__table td {
+    padding: var(--nf-space-3xs) var(--nf-space-2xs);
+    border-block-end: var(--nf-border-width) solid var(--nf-panel-hair);
+    text-align: start;
+    vertical-align: top;
+  }
+
+  .nf-copilot-md__table th {
+    color: var(--nf-content-primary);
+    font-weight: 600;
+  }
+
+  .nf-copilot-md__table td {
+    color: var(--nf-content-secondary);
+  }
+
   .nf-copilot-md ul,
   .nf-copilot-md ol {
     padding-inline-start: var(--nf-space-lg);
