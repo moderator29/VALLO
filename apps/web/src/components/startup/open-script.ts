@@ -11,9 +11,17 @@
  *          shell all play it (the founder, 11 November 2026: the opening was
  *          refused to a browser tab outright, which is why the site showed
  *          nothing at all).
- *   off    a warm open in the same session, or storage that refuses (no flag
+ *   off    inside an app binary that draws its own opening (below), a warm
+ *          open in the same session, or storage that refuses (no flag
  *          could be kept, so it would replay on every load).
  *   leave  the 320ms crossfade into the page.
+ *
+ * NOT IN AN APP THAT DRAWS ITS OWN (13 November 2026). A 1.0.2 or later
+ * binary plays the drawn opening natively (`LaunchMark`), so this layer is
+ * turned off there before the first frame: one opening, never two. It is
+ * known by `ValloShell.handoff` in `Capacitor.PluginHeaders`, which the
+ * bridge injects at document start. What follows applies only to an older
+ * binary, which has no opening of its own.
  *
  * ON THE NATIVE SHELL (founder, 10 November 2026: the centred logo, slower).
  * The opening plays there too, but it must NOT begin while the Capacitor
@@ -63,6 +71,15 @@ export const OPEN_CSS_CAP_MS = 4200;
 /** Longest the shell waits for the splash to come down before playing anyway. */
 export const OPEN_NATIVE_WAIT_MS = 6000;
 
+/**
+ * The shell plugin, and its method, that only a binary drawing its own opening
+ * registers (build 1.0.2 and later: `ValloShell.handoff`, ValloShell.swift and
+ * ValloShellPlugin.java). Their presence in `Capacitor.PluginHeaders` is what
+ * turns this layer off inside the app.
+ */
+export const OPEN_NATIVE_PLUGIN = "ValloShell";
+export const OPEN_NATIVE_METHOD = "handoff";
+
 /** sessionStorage key marking this session's opening as shown. */
 export const OPEN_SESSION_KEY = "nf_open";
 
@@ -75,6 +92,24 @@ export const OPEN_SCRIPT =
      still decide how the layer is TIMED below (the shell waits for its splash),
      but no surface is refused the opening now. A cold open in this browser
      session is still the only one that plays: the warm check is next. */
+  /* ONE OPENING IN THE APP (13 November 2026, the founder: "two openings, and
+     not even consistently"). A 1.0.2 or later binary draws its own opening
+     over the launch ground (`LaunchMark` in ValloShell.swift and
+     LaunchMark.java: the ring, the towers, the letters, the version line)
+     and hands over to the page. This layer then played AGAIN on top of the
+     page once the splash plugin said it was down, so a cold start showed
+     two. Whether it read as two depended on a race nobody chose: on a slow
+     first launch the native mark left at its 1.95s ceiling, the page showed,
+     and this one arrived over it seconds later; on a fast, cached launch this
+     one began beneath the native mark and the two blurred into one. So where
+     the binary carries that opening, this one stays off. The binary says so
+     itself, at document start, before this script runs: Capacitor injects
+     every registered plugin's header (`window.Capacitor.PluginHeaders`), and
+     only a binary with the drawn opening registers `ValloShell` with a
+     `handoff` method. An older binary has none, and there this layer is
+     still the one opening, timed after the splash as below. */
+  "if(nat){var own=false;try{var H=W.Capacitor&&W.Capacitor.PluginHeaders;if(H&&H.length)for(var i=0;i<H.length;i++){var h=H[i];if(h&&h.name==='" + OPEN_NATIVE_PLUGIN + "'&&h.methods)for(var j=0;j<h.methods.length;j++)if(h.methods[j]&&h.methods[j].name==='" + OPEN_NATIVE_METHOD + "')own=true}}catch(e){}" +
+  "if(own){r.setAttribute('data-open','off');return}}" +
   "var warm=true;try{warm=!!sessionStorage.getItem('" + OPEN_SESSION_KEY + "');if(!warm)sessionStorage.setItem('" + OPEN_SESSION_KEY + "','1')}catch(e){}" +
   "if(warm){r.setAttribute('data-open','off');return}" +
   "var lit=0;function light(){if(lit)return;lit=1;r.setAttribute('data-open','on')}" +

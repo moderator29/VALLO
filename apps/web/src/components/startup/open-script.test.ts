@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { OPEN_CAP_MS, OPEN_CSS_CAP_MS, OPEN_FADE_MS, OPEN_MIN_MS, OPEN_MIN_STILL_MS, OPEN_NATIVE_WAIT_MS, OPEN_SCRIPT, OPEN_SESSION_KEY } from "./open-script";
+import { OPEN_NATIVE_METHOD, OPEN_NATIVE_PLUGIN, OPEN_CAP_MS, OPEN_CSS_CAP_MS, OPEN_FADE_MS, OPEN_MIN_MS, OPEN_MIN_STILL_MS, OPEN_NATIVE_WAIT_MS, OPEN_SCRIPT, OPEN_SESSION_KEY } from "./open-script";
 
 /**
  * THE OPENING SCREEN'S CONTROLLER (10 November 2026). The script is run here
@@ -22,6 +22,8 @@ type Env = {
   guarded?: boolean;
   guardReady?: boolean;
   lockDrawn?: boolean;
+  /** `window.Capacitor.PluginHeaders`, as the native bridge injects it at document start. */
+  pluginHeaders?: { name: string; methods: { name: string }[] }[];
 };
 
 function run(env: Env = {}) {
@@ -44,7 +46,7 @@ function run(env: Env = {}) {
   const W = {
     matchMedia: (q: string) => ({ matches: q.includes("display-mode") ? env.standalone !== false : q.includes("reduced-motion") ? !!env.reduced : false }),
     __nfOpenReady: env.ready ?? false,
-    Capacitor: undefined,
+    Capacitor: env.pluginHeaders ? { PluginHeaders: env.pluginHeaders } : undefined,
   } as Record<string, unknown>;
   const D = {
     documentElement: root,
@@ -128,6 +130,42 @@ describe("the opening screen's decision", () => {
       r.advance(OPEN_NATIVE_WAIT_MS + 100);
       expect(r.attrs["data-open"]).toBe("on");
     }
+  });
+});
+
+/*
+ * ONE OPENING IN THE APP (13 November 2026). A 1.0.2 or later binary draws its
+ * own opening (`LaunchMark`) and registers `ValloShell.handoff`; this layer then
+ * played a second time over the page once the splash was down. Where the
+ * binary carries its own, this one is off before the first frame, on a cold
+ * open as on a warm one, and never lights later from the splash signal or the
+ * native wait.
+ */
+describe("one opening inside the app", () => {
+  const SPLASH = { name: "SplashScreen", methods: [{ name: "hide" }, { name: "show" }] };
+  const SHELL_102 = { name: OPEN_NATIVE_PLUGIN, methods: [{ name: "setPrivacyCover" }, { name: OPEN_NATIVE_METHOD }, { name: "takeCrashReport" }] };
+
+  it("is off at once, cold, in a binary that draws its own opening, and never lights afterwards", () => {
+    for (const env of [{ native: true }, { ua: "Mozilla/5.0 VALLO-NATIVE" }]) {
+      const r = run({ ...env, pluginHeaders: [SPLASH, SHELL_102] });
+      expect(r.attrs["data-open"]).toBe("off");
+      r.advance(OPEN_NATIVE_WAIT_MS + OPEN_CAP_MS + 1000);
+      expect(r.attrs["data-open"]).toBe("off");
+    }
+  });
+
+  it("still plays, after the splash, in an older binary with no opening of its own", () => {
+    for (const headers of [[SPLASH], [SPLASH, { name: OPEN_NATIVE_PLUGIN, methods: [{ name: "setPrivacyCover" }] }], []]) {
+      const r = run({ native: true, pluginHeaders: headers });
+      expect(r.attrs["data-open"]).toBeUndefined();
+      r.advance(OPEN_NATIVE_WAIT_MS + 100);
+      expect(r.attrs["data-open"]).toBe("on");
+    }
+  });
+
+  it("ignores the headers on the website: a browser tab is not the shell, whatever a page script defines", () => {
+    const r = run({ standalone: false, pluginHeaders: [SHELL_102] });
+    expect(r.attrs["data-open"]).toBe("on");
   });
 });
 
