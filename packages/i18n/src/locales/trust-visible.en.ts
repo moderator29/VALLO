@@ -492,14 +492,20 @@ export const trustVisibleEn = {
     lostTitle: "We could not find that page",
     lostBody: "The link may be old, or the page may have moved. Search for what you came for, or go back home.",
     /** A screen inside the app that failed to load. No promise that nothing was lost: no code checks it. */
-    screenErrorOverline: "Not loaded",
-    screenErrorTitle: "That screen did not load",
+    screenErrorOverline: "Still loading",
+    screenErrorTitle: "Taking longer than usual",
     /* The audit's claims sweep reworded this: nothing promises the reader lost nothing. W2 (round 5)
        says what is safe in the same spirit: a failed load cannot undo what was already sent or saved,
        and it can lose what was being typed. What happened, what is safe, what to do. */
-    screenErrorBody: "A screen that fails to load undoes nothing you had already sent or saved. What you typed here may need typing again, and trying again usually settles it.",
+    screenErrorBody: "Vallo tried a few times and this page has not answered yet. Nothing you sent or saved was undone. Tap Try again in a moment.",
     /** `{digest}` is the server's id for the failure, for support to find it. */
     screenErrorRef: "Reference {digest}. If this keeps happening, quote it to support.",
+    /* What a screen says while it is tried again by itself (`SignalHold`, 13 November 2026). It
+       was "Loading on a weak connection", which was false when the server, not the signal, was
+       slow, so it now says only what is true for both: the page is loading and Vallo is retrying.
+       The hold's spoken label is `screenErrorOverline` ("Still loading"): one key fewer in the words
+       every page carries (core-entry.test.ts holds them under 13 KB). */
+    holdNote: "Still loading. Trying again.",
     offlineOverline: "Connection",
     offlineTitle: "You are offline",
     offlineBody: "The connection dropped before this page could load. Pages you have opened before still open, and your balance is never shown from an old copy.",

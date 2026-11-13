@@ -389,9 +389,10 @@ export const en = {
     takenOr: ", or",
     resetPassword: "reset the password",
     takenTail: "if you cannot remember it.",
-    errorTitle: "This screen did not load",
+    /* The calm words (13 November 2026): shown only after the quiet tries ran out (`useSignalHold`). */
+    errorTitle: "Taking longer than usual",
     errorBody:
-      "Something on our side stopped part way through. Nothing was submitted and no account was created or changed. Trying again usually settles it.",
+      "Vallo tried a few times and this page has not answered yet. Nothing was submitted and no account was created or changed. Tap Try again in a moment.",
     tryAgain: "Try again",
     /* A weak signal on a sign-in screen is not a fault (13 November 2026). */
     offlineTitle: "You are offline",

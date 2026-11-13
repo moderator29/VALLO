@@ -68,12 +68,16 @@ describe("the failure screens' words", () => {
   const copy = getDictionary("en").trustVisible.state;
   it("say what happened, what is safe and what to do, in the voice, with no banned phrase", () => {
     expect(stateCopyProblems({ kind: "error", title: copy.screenErrorTitle, body: copy.screenErrorBody, actions: ["Try again", "Back to home"] })).toEqual([]);
-    expect(copy.screenErrorBody).toMatch(/undoes nothing you had already sent or saved/);
+    /* 13 November 2026: the calm words. "undoes nothing you had already sent or
+       saved" became "Nothing you sent or saved was undone", the same safe claim;
+       what to do is still said ("Tap Try again in a moment"). */
+    expect(copy.screenErrorBody).toMatch(/Nothing you sent or saved was undone\./);
+    expect(copy.screenErrorBody).toMatch(/Tap Try again in a moment\./);
     expect(copy.screenErrorRef).toContain("{digest}");
     for (const file of ["app/error.tsx", "app/global-error.tsx", "app/(app)/error.tsx"]) {
       expect(bannedPhrasesIn(src(file).replace(/\/\*[\s\S]*?\*\/|\{\/\*[\s\S]*?\*\/\}/g, "")), file).toEqual([]);
     }
-    expect(src("app/error.tsx")).toMatch(/undoes nothing you had already sent or\s+saved/);
-    expect(src("app/global-error.tsx")).toMatch(/undoes nothing you had\s+already sent or saved/);
+    expect(src("app/error.tsx")).toMatch(/Nothing\s+you sent or saved was undone\./);
+    expect(src("app/global-error.tsx")).toMatch(/Nothing you sent or saved was undone\./);
   });
 });

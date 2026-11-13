@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import type { MouseEventHandler, ReactNode } from "react";
 import { SystemMoment } from "@/app/offline/SystemMoment";
 import { STATE_TONE, stateRole, type StateKind } from "@/lib/design/voice";
 import { ICON_PLATE_GLYPH, IconPlate } from "@/components/ui/IconPlate";
@@ -29,6 +29,8 @@ export function StateMoment({
   children,
   home,
   homeLabel,
+  onHome,
+  calm = false,
   inset = false,
   offline = false,
   aside,
@@ -50,13 +52,24 @@ export function StateMoment({
   home?: string;
   /** Passed to `SystemMoment`; see there. */
   homeLabel?: string;
+  /**
+   * A failure screen's handling of the lockup's click (`lib/offline/escape.ts`,
+   * 13 November 2026): the same page tries again, another page is a full load.
+   */
+  onHome?: MouseEventHandler<HTMLAnchorElement>;
+  /**
+   * A failure that is only slow (13 November 2026): a screen reached after
+   * the quiet tries ran out says "Taking longer than usual", so it carries a
+   * clock on the brand plate rather than the fault's mark. The role stays.
+   */
+  calm?: boolean;
   inset?: boolean;
   offline?: boolean;
   aside?: ReactNode;
 }) {
   const role = stateRole(kind);
   return (
-    <SystemMoment {...(home ? { home } : {})} {...(homeLabel ? { homeLabel } : {})} inset={inset} offline={offline} {...(aside ? { aside } : {})}>
+    <SystemMoment {...(home ? { home } : {})} {...(homeLabel ? { homeLabel } : {})} {...(onHome ? { onHome } : {})} inset={inset} offline={offline} {...(aside ? { aside } : {})}>
       {/* The role sits on a real box: `display: contents` drops an element
           from the accessibility tree in some browsers, and the role with it.
           A block wrapper changes nothing in the card's layout (the card is
@@ -67,8 +80,8 @@ export function StateMoment({
             a failure: the kind's own glyph on its flat plate, the state's
             colour with the title's words beside it, so colour is never the
             only signal. The card still leads with the brand above it. */}
-        <IconPlate size="md" tone={STATE_TONE[kind]} className="nf-system__mark">
-          <UiIcon name={KIND_GLYPH[kind]} size={ICON_PLATE_GLYPH.md} />
+        <IconPlate size="md" tone={calm ? "brand" : STATE_TONE[kind]} className="nf-system__mark">
+          <UiIcon name={calm ? "clock" : KIND_GLYPH[kind]} size={ICON_PLATE_GLYPH.md} />
         </IconPlate>
         {overline && <p className="nf-system__overline">{overline}</p>}
         <h1 className="nf-system__title">{title}</h1>

@@ -2,10 +2,10 @@
 
 import { Button, ButtonLink } from "@/components/ui/Button";
 import { ICON_PLATE_GLYPH, IconPlate } from "@/components/ui/IconPlate";
-import { KIND_GLYPH } from "@/components/ui/State";
 import { UiIcon } from "@/design-system/icons/UiIcon";
 import { useErrorReport } from "@/lib/observability/use-error-report";
 import { useSignalHold } from "@/lib/offline/use-offline";
+import { escapeTo } from "@/lib/offline/escape";
 import { SignalHold } from "@/components/app/SignalHold";
 import { PlainSystemMoment } from "./offline/SystemFrame";
 
@@ -27,10 +27,14 @@ import { PlainSystemMoment } from "./offline/SystemFrame";
 export default function Error({
   error,
   reset,
+  retry,
 }: {
   error: Error & { digest?: string };
   reset: () => void;
+  /** Next 16.3+: re-fetches the failed segment and re-renders it. `reset()` only redraws from what the client already holds, so a server failure stayed failed and Try again did nothing. */
+  retry?: () => void;
 }) {
+  const again = retry ?? reset;
   /* Logs to the console (the only record when `SENTRY_DSN` is unset), sends
      the scrubbed report, and returns the short reference (C13). */
   const reference = useErrorReport(error, "client.route_boundary", "[vallo] route error");
@@ -43,17 +47,17 @@ export default function Error({
    * a request that died on a weak signal there drew the fault screen. Now it
    * holds the page's shape and tries again by itself, like the app's boundary.
    */
-  const hold = useSignalHold(error, reset);
+  const hold = useSignalHold(error, again);
   if (hold.view === "retrying") {
     return (
       <main id="main" className="px-gutter py-section">
-        <SignalHold tries={hold.tries} onRetry={reset} />
+        <SignalHold tries={hold.tries} onRetry={again} />
       </main>
     );
   }
   if (hold.view === "offline" || hold.view === "weak") {
     return (
-      <PlainSystemMoment home="/home-or-landing">
+      <PlainSystemMoment home="/home-or-landing" onHome={escapeTo("/home-or-landing", again)}>
         <div data-state-kind="offline" role="status">
           <p className="nf-system__overline">Connection</p>
           <h1 className="nf-system__title">{hold.view === "offline" ? "You are offline" : "Weak connection"}</h1>
@@ -64,7 +68,7 @@ export default function Error({
           </p>
         </div>
         <div className="nf-system__actions">
-          <Button variant="primary" size="lg" full onClick={reset}>
+          <Button variant="primary" size="lg" full onClick={again}>
             Try again
           </Button>
         </div>
@@ -77,7 +81,7 @@ export default function Error({
        a client component by requirement, so it cannot read a session and the
        auth cookies are httpOnly by design. That route answers the question
        on the server and sends the reader to whichever home is theirs. */
-    <PlainSystemMoment home="/home-or-landing">
+    <PlainSystemMoment home="/home-or-landing" onHome={escapeTo("/home-or-landing", again)}>
       {/* WHAT HAPPENED, WHAT IS SAFE, WHAT TO DO (W2, round 5). The overline
           said "Something went wrong", the one phrase the voice bans because
           it says nothing. The card now leads with the failure's small mark,
@@ -86,28 +90,26 @@ export default function Error({
           was typed here), and gives the next step. The cut is immediate
           (system.css: an error fades in on the fast rung, nothing rises). */}
       <div data-state-kind="error" role="alert">
-        <IconPlate size="md" tone="error" className="nf-system__mark">
-          <UiIcon name={KIND_GLYPH.error} size={ICON_PLATE_GLYPH.md} />
+        <IconPlate size="md" tone="brand" className="nf-system__mark">
+          <UiIcon name="clock" size={ICON_PLATE_GLYPH.md} />
         </IconPlate>
-        <p className="nf-system__overline">Not loaded</p>
-        <h1 className="nf-system__title">This screen did not load</h1>
+        <p className="nf-system__overline">Still loading</p>
+        <h1 className="nf-system__title">Taking longer than usual</h1>
         <p className="nf-system__body">
-          A screen that fails to load undoes nothing you had already sent or
-          saved. What you typed here may need typing again, and trying again
-          usually settles it. If it keeps happening, tell support and quote
-          the reference below.
+          Vallo tried a few times and this page has not answered yet. Nothing
+          you sent or saved was undone. Tap Try again in a moment.
         </p>
       </div>
 
       <p className="nf-system__ref">
-        Reference <span className="nf-numeric select-all">{reference}</span>. Quote this to support.
+        Reference <span className="nf-numeric select-all">{reference}</span>. If this keeps happening, quote it to support.
       </p>
 
       <div className="nf-system__actions">
-        <Button variant="primary" size="lg" full onClick={reset}>
+        <Button variant="primary" size="lg" full onClick={again}>
           Try again
         </Button>
-        <ButtonLink href="/home-or-landing" variant="secondary" size="lg" full>
+        <ButtonLink href="/home-or-landing" onClick={escapeTo("/home-or-landing", again)} variant="secondary" size="lg" full>
           Back to home
         </ButtonLink>
       </div>

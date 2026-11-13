@@ -1,6 +1,7 @@
 "use client";
 
 import { useErrorReport } from "@/lib/observability/use-error-report";
+import { escapeTo } from "@/lib/offline/escape";
 import { ResultScreen } from "@/components/app/ResultSheet";
 
 /**
@@ -23,10 +24,14 @@ import { ResultScreen } from "@/components/app/ResultSheet";
 export default function AdminError({
   error,
   reset,
+  retry,
 }: {
   error: Error & { digest?: string };
   reset: () => void;
+  /** Next 16.3+: re-fetches the failed segment and re-renders it. `reset()` only redraws from what the client already holds, so a server failure stayed failed and Try again did nothing. */
+  retry?: () => void;
 }) {
+  const again = retry ?? reset;
   const reference = useErrorReport(error, "client.admin_boundary", "[vallo] admin route error");
 
   return (
@@ -39,8 +44,8 @@ export default function AdminError({
       verdict="This queue did not load"
       consequence="The console could not finish reading it. Nothing has been decided or changed by this failure: the queue is intact and will come back as it was."
       actions={[
-        { label: "Retry this queue", onClick: reset, tone: "primary" },
-        { label: "Back to the console", href: "/admin", tone: "quiet" },
+        { label: "Retry this queue", onClick: again, tone: "primary" },
+        { label: "Back to the console", href: "/admin", onClick: escapeTo("/admin", again), tone: "quiet" },
       ]}
       footnote={
         <span>

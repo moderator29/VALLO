@@ -91,7 +91,8 @@ export type ResultScreenState = ResultState | "missing" | "sign-in";
 export type ResultAction = {
   label: string;
   href?: string;
-  onClick?: () => void;
+  /** With `href`, the click event comes too, so a failure screen can take the click over (`lib/offline/escape.ts`). */
+  onClick?: (event: React.MouseEvent<HTMLElement>) => void;
   tone: "primary" | "quiet";
 };
 
@@ -546,6 +547,7 @@ export function ResultScreen({
                 href={action.href}
                 variant={action.tone === "primary" ? "primary" : "ghost"}
                 full
+                onClick={action.onClick}
               >
                 {action.label}
               </ButtonLink>

@@ -4,6 +4,7 @@ import { useEffect } from "react";
 
 import { reportClientError } from "@/lib/observability/client";
 import { digestFor, shortReference } from "@/lib/observability/reference";
+import { useSignalHold } from "@/lib/offline/use-offline";
 import "./globals.css";
 
 /**
@@ -40,16 +41,30 @@ import "./globals.css";
 export default function GlobalError({
   error,
   reset,
+  retry,
 }: {
   error: Error & { digest?: string };
   reset: () => void;
+  /** Next 16.3+: re-fetches the failed segment and re-renders it. `reset()` only redraws from what the client already holds, so a server failure stayed failed and Try again did nothing. */
+  retry?: () => void;
 }) {
+  const again = retry ?? reset;
   const digest = digestFor(error);
   const reference = shortReference(digest);
   useEffect(() => {
     console.error("[vallo] global error", error);
     reportClientError(error, { kind: "client.global_boundary", digest });
   }, [error, digest]);
+  /* TRIED AGAIN QUIETLY FIRST (13 November 2026, the founder: "This screen did
+     not load" must be gone from the normal experience, and Try again was a
+     dead button). A server failure or a weak signal is retried by itself with
+     the same gaps as every other boundary (lib/offline/use-offline.ts), and
+     the card says only that Vallo is still loading. The words below promise
+     "Vallo tried a few times" only once those tries have run. Only the hook is
+     imported, not the app's skeleton: this boundary keeps its own imports to
+     the minimum, for the reason given above. */
+  const hold = useSignalHold(error, again);
+  const holding = hold.view === "retrying";
 
   return (
     <html lang="en" data-theme="dark">
@@ -75,21 +90,22 @@ export default function GlobalError({
                 margin: 0,
               }}
             >
-              Not loaded
+              Still loading
             </p>
             <h1 style={{ fontSize: "1.75rem", lineHeight: 1.2, margin: "0.75rem 0 0" }}>
-              Vallo did not load
+              {holding ? "Opening Vallo" : "Taking longer than usual"}
             </h1>
-            <p style={{ margin: "1rem 0 0", opacity: 0.8, lineHeight: 1.6 }}>
-              Vallo stopped before it could start. That undoes nothing you had
-              already sent or saved; what you typed may need typing again,
-              and trying again usually settles it.{" "}
-              If it keeps happening, tell support and quote the reference below.
+            <p style={{ margin: "1rem 0 0", opacity: 0.8, lineHeight: 1.6 }} role="status">
+              {holding
+                ? "Vallo is trying again by itself."
+                : "Vallo tried a few times and has not answered yet. Nothing you sent or saved was undone. Tap Try again in a moment."}
             </p>
 
-            <p style={{ margin: "1rem 0 0", fontSize: "0.8125rem", opacity: 0.6, userSelect: "all" }}>
-              Reference {reference}. Quote this to support.
-            </p>
+            {holding ? null : (
+              <p style={{ margin: "1rem 0 0", fontSize: "0.8125rem", opacity: 0.6 }}>
+                Reference <span style={{ userSelect: "all" }}>{reference}</span>. If this keeps happening, quote it to support.
+              </p>
+            )}
 
             {/* Both of these were `borderRadius: "999px"`, then the control
                 radius; section 17 makes every button a pill, so they read the
@@ -101,7 +117,7 @@ export default function GlobalError({
             <div style={{ marginTop: "1.5rem", display: "grid", gap: "0.75rem" }}>
               <button
                 type="button"
-                onClick={reset}
+                onClick={again}
                 style={{
                   minHeight: "3rem",
                   borderRadius: "var(--nf-radius-button)",

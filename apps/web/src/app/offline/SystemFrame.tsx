@@ -1,5 +1,5 @@
 import Link from "next/link";
-import type { ReactNode } from "react";
+import type { MouseEventHandler, ReactNode } from "react";
 import { versioned } from "@/lib/theme/brand-assets";
 /*
  * The partial is imported here rather than from globals.css because the partial
@@ -24,6 +24,7 @@ import "@/app/css/system.css";
 export function SystemFrame({
   home,
   homeLabel,
+  onHome,
   inset,
   plate,
   brand,
@@ -32,6 +33,8 @@ export function SystemFrame({
 }: {
   home: string;
   homeLabel: string;
+  /** A failure screen's own handling of the lockup's click (`lib/offline/escape.ts`): a client caller only. */
+  onHome?: MouseEventHandler<HTMLAnchorElement>;
   inset: boolean;
   plate: ReactNode;
   brand: ReactNode;
@@ -50,7 +53,7 @@ export function SystemFrame({
       <div className="nf-aurora" aria-hidden="true" />
 
       <div className="nf-system__stage">
-        <Link href={home} aria-label={homeLabel} className="nf-system__brand nf-tap">
+        <Link href={home} aria-label={homeLabel} className="nf-system__brand nf-tap" onClick={onHome}>
           {brand}
         </Link>
 
@@ -74,12 +77,14 @@ export function SystemFrame({
 export function PlainSystemMoment({
   home = "/",
   homeLabel = "Vallo home",
+  onHome,
   inset = false,
   children,
   aside,
 }: {
   home?: string;
   homeLabel?: string;
+  onHome?: MouseEventHandler<HTMLAnchorElement>;
   inset?: boolean;
   children: ReactNode;
   aside?: ReactNode;
@@ -88,6 +93,7 @@ export function PlainSystemMoment({
     <SystemFrame
       home={home}
       homeLabel={homeLabel}
+      {...(onHome ? { onHome } : {})}
       inset={inset}
       aside={aside}
       plate={

@@ -15,10 +15,19 @@ vi.setConfig({ testTimeout: BROWSER_TEST_TIMEOUT });
 beforeAll(warmBrowser);
 afterAll(closeBrowser);
 
+/* 13 November 2026: the failure here is a CLIENT error (no digest). A server
+   failure (with a digest) is now held and tried again by itself before any
+   screen with a reference appears (useSignalHold; proven in
+   src/app/retry-boundaries.dom.test.tsx), so it no longer shows "the ordinary
+   failure, with its reference" at once, and its timed tries would count as
+   resets before the signal drops. What this test is about is unchanged: an
+   ordinary fault shows its reference online, the same boundary speaks of the
+   connection when offline, and it tries again once when the signal returns.
+   A client error is the fault that still reaches that screen at once. */
 const entry = (module: string) => `
   import { mount } from "@/lib/testing/browser-root";
   import Boundary from "${module}";
-  mount(<Boundary error={Object.assign(new Error("boom"), { digest: "d1" })} reset={() => { window.__resets = (window.__resets || 0) + 1; }} />);
+  mount(<Boundary error={new Error("boom")} reset={() => { window.__resets = (window.__resets || 0) + 1; }} />);
 `;
 
 const BOUNDARIES = [

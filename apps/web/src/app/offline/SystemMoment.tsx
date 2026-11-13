@@ -1,5 +1,5 @@
 import Image from "next/image";
-import type { ReactNode } from "react";
+import type { MouseEventHandler, ReactNode } from "react";
 import { PlainSystemMoment, SystemFrame } from "./SystemFrame";
 
 /**
@@ -44,6 +44,7 @@ import { PlainSystemMoment, SystemFrame } from "./SystemFrame";
 export function SystemMoment({
   home = "/",
   homeLabel = "Vallo home",
+  onHome,
   inset = false,
   offline = false,
   children,
@@ -55,6 +56,8 @@ export function SystemMoment({
       error screens are written in English and keep the English name; the
       in-app error screen speaks the reader's language and passes theirs. */
   homeLabel?: string;
+  /** A failure screen's handling of the lockup's click (`lib/offline/escape.ts`). */
+  onHome?: MouseEventHandler<HTMLAnchorElement>;
   inset?: boolean;
   offline?: boolean;
   children: ReactNode;
@@ -63,7 +66,7 @@ export function SystemMoment({
 }) {
   if (offline) {
     return (
-      <PlainSystemMoment home={home} homeLabel={homeLabel} inset={inset} aside={aside}>
+      <PlainSystemMoment home={home} homeLabel={homeLabel} {...(onHome ? { onHome } : {})} inset={inset} aside={aside}>
         {children}
       </PlainSystemMoment>
     );
@@ -72,6 +75,7 @@ export function SystemMoment({
     <SystemFrame
       home={home}
       homeLabel={homeLabel}
+      {...(onHome ? { onHome } : {})}
       inset={inset}
       aside={aside}
       plate={<Image src="/brand/photos/bg-blue-wave.jpg" alt="" fill sizes="100vw" priority />}

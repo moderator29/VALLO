@@ -42,7 +42,7 @@ const STUBS: Record<string, string> = {
     const record = (name) => (...args) => { calls.calls.push([name, ...args]); };
     const router = { push: record("push"), replace: record("replace"), refresh: record("refresh"), back: record("back"), prefetch() {} };
     export const useRouter = () => router;
-    export const usePathname = () => window.location.pathname;
+    export const usePathname = () => window.__pathname ?? window.location.pathname;
     export const useSearchParams = () => new URLSearchParams(window.location.search);
     export const useParams = () => ({});
     export const redirect = () => { throw new Error("redirect"); };

@@ -8,7 +8,8 @@ import { useErrorReport } from "@/lib/observability/use-error-report";
  * A lane that threw. Never "no hits": the check could not run, and the desk
  * says so, so a failure can never read as a clean screening.
  */
-export default function ComplianceError({ error, reset }: { error: Error & { digest?: string }; reset: () => void }) {
+export default function ComplianceError({ error, reset, retry }: { error: Error & { digest?: string }; reset: () => void; retry?: () => void }) {
+  const again = retry ?? reset;
   const c = COMPLIANCE_ERROR;
   const reference = useErrorReport(error, "client.compliance_boundary", "[vallo] compliance lane error");
   return (
@@ -17,7 +18,7 @@ export default function ComplianceError({ error, reset }: { error: Error & { dig
         <p className="nf-h4">{c.unavailableTitle}</p>
         <p className="nf-body mx-auto mt-row max-w-[48ch] text-content-2">{c.unavailableBody}</p>
         <div className="mt-group">
-          <Button variant="secondary" onClick={reset}>
+          <Button variant="secondary" onClick={again}>
             {c.tryAgain}
           </Button>
         </div>

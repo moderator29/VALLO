@@ -3,6 +3,7 @@
 import { useErrorReport } from "@/lib/observability/use-error-report";
 import { useClientCopy } from "@/lib/i18n/client-copy";
 import { useSignalHold } from "@/lib/offline/use-offline";
+import { escapeTo } from "@/lib/offline/escape";
 import { SignalHold } from "@/components/app/SignalHold";
 import { ResultScreen } from "@/components/app/ResultSheet";
 
@@ -26,20 +27,24 @@ import { ResultScreen } from "@/components/app/ResultSheet";
 export default function AgentError({
   error,
   reset,
+  retry,
 }: {
   error: Error & { digest?: string };
   reset: () => void;
+  /** Next 16.3+: re-fetches the failed segment and re-renders it. `reset()` only redraws from what the client already holds, so a server failure stayed failed and Try again did nothing. */
+  retry?: () => void;
 }) {
+  const again = retry ?? reset;
   const reference = useErrorReport(error, "client.agent_boundary", "[vallo] agent route error");
 
   const copy = useClientCopy();
   /* No signal is not a fault: the same calm words as the app's boundary, and
      the segment loads itself again when the signal returns. */
-  const hold = useSignalHold(error, reset);
+  const hold = useSignalHold(error, again);
   const offline = hold.view;
   /* A weak signal: the page's shape stays, and the screen is tried again by
      itself with growing gaps (lib/offline/use-offline.ts, 13 November 2026). */
-  if (offline === "retrying") return <SignalHold tries={hold.tries} onRetry={reset} />;
+  if (offline === "retrying") return <SignalHold tries={hold.tries} onRetry={again} />;
   if (offline) {
     return (
       <main id="main" className="flex min-h-dvh flex-col items-center justify-center px-gutter py-section">
@@ -48,8 +53,8 @@ export default function AgentError({
           verdict={copy.fixesV2[offline === "weak" ? "weakSignal" : "offline"].title}
           consequence={copy.fixesV2[offline === "weak" ? "weakSignal" : "offline"].body}
           actions={[
-            { label: copy.authFlow.tryAgain, onClick: reset, tone: "primary" },
-            { label: "Back to dashboard", href: "/agent/dashboard", tone: "quiet" },
+            { label: copy.authFlow.tryAgain, onClick: again, tone: "primary" },
+            { label: "Back to dashboard", href: "/agent/dashboard", onClick: escapeTo("/agent/dashboard", again), tone: "quiet" },
           ]}
         />
       </main>
@@ -73,8 +78,8 @@ export default function AgentError({
         verdict="We could not open that workspace"
         consequence="A read on our side did not complete. Your listings, bookings and earnings are untouched: this is the page failing to load them, not the records themselves."
         actions={[
-          { label: "Try again", onClick: reset, tone: "primary" },
-          { label: "Back to dashboard", href: "/agent/dashboard", tone: "quiet" },
+          { label: "Try again", onClick: again, tone: "primary" },
+          { label: "Back to dashboard", href: "/agent/dashboard", onClick: escapeTo("/agent/dashboard", again), tone: "quiet" },
         ]}
         footnote={
           <span>

@@ -3,6 +3,7 @@ import "@/app/css/auth.css";
 
 import { useErrorReport } from "@/lib/observability/use-error-report";
 import { useSignalHold } from "@/lib/offline/use-offline";
+import { escapeTo } from "@/lib/offline/escape";
 import { SignalHold } from "@/components/app/SignalHold";
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
@@ -34,16 +35,20 @@ import { useClientCopy } from "@/lib/i18n/client-copy";
 export default function AuthError({
   error,
   reset,
+  retry,
 }: {
   error: Error & { digest?: string };
   reset: () => void;
+  /** Next 16.3+: re-fetches the failed segment and re-renders it. `reset()` only redraws from what the client already holds, so a server failure stayed failed and Try again did nothing. */
+  retry?: () => void;
 }) {
+  const again = retry ?? reset;
   const a = useClientCopy().authFlow;
   const reference = useErrorReport(error, "client.auth_boundary", "[vallo] auth route error");
   /* A weak signal is not a fault (13 November 2026): the page's shape stays
      and the screen is tried again by itself (lib/offline/use-offline.ts). */
-  const hold = useSignalHold(error, reset);
-  if (hold.view === "retrying") return <SignalHold tries={hold.tries} onRetry={reset} />;
+  const hold = useSignalHold(error, again);
+  if (hold.view === "retrying") return <SignalHold tries={hold.tries} onRetry={again} />;
   if (hold.view) {
     return (
       <div className="text-center" role="status">
@@ -52,7 +57,7 @@ export default function AuthError({
           {hold.view === "offline" ? a.offlineBody : a.weakBody}
         </p>
         <div className="mt-md flex flex-col">
-          <Button variant="primary" size="lg" full onClick={reset}>
+          <Button variant="primary" size="lg" full onClick={again}>
             {a.tryAgain}
           </Button>
         </div>
@@ -68,11 +73,12 @@ export default function AuthError({
       </p>
 
       <div className="mt-6 flex flex-col gap-2">
-        <Button variant="primary" size="lg" full onClick={reset}>
+        <Button variant="primary" size="lg" full onClick={again}>
           {a.tryAgain}
         </Button>
         <Link
           href="/"
+          onClick={escapeTo("/", again)}
           className="nf-tap py-2 text-[length:var(--nf-text-body-sm)] font-semibold text-[var(--nf-content-muted)] transition-colors hover:text-[var(--nf-content-primary)]"
         >
           {a.backHome}

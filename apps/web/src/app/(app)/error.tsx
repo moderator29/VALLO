@@ -5,6 +5,7 @@ import { useErrorReport } from "@/lib/observability/use-error-report";
 import { useClientCopy } from "@/lib/i18n/client-copy";
 import { StateMoment } from "@/components/ui/StateMoment";
 import { useSignalHold } from "@/lib/offline/use-offline";
+import { escapeTo } from "@/lib/offline/escape";
 import { SignalHold } from "@/components/app/SignalHold";
 
 /**
@@ -31,10 +32,14 @@ import { SignalHold } from "@/components/app/SignalHold";
 export default function AppError({
   error,
   reset,
+  retry,
 }: {
   error: Error & { digest?: string };
   reset: () => void;
+  /** Next 16.3+: re-fetches the failed segment and re-renders it. `reset()` only redraws from what the client already holds, so a server failure stayed failed and Try again did nothing. */
+  retry?: () => void;
 }) {
+  const again = retry ?? reset;
   /* The full error object goes to the console and nowhere near the rendered
      output; the scrubbed report carries the same short reference the screen
      shows (C13). */
@@ -51,16 +56,17 @@ export default function AppError({
      because the phone is offline says so in one calm line, with no reference
      to quote and no "tell support", and loads itself again when the signal
      returns. The same words in the agent and host boundaries. */
-  const hold = useSignalHold(error, reset);
+  const hold = useSignalHold(error, again);
   const offline = hold.view;
   /* A weak signal: the page's shape stays, and the screen is tried again by
      itself with growing gaps (lib/offline/use-offline.ts, 13 November 2026). */
-  if (offline === "retrying") return <SignalHold tries={hold.tries} onRetry={reset} />;
+  if (offline === "retrying") return <SignalHold tries={hold.tries} onRetry={again} />;
   if (offline) {
     return (
       <StateMoment
         kind="offline"
         home="/home"
+        onHome={escapeTo("/home", again)}
         homeLabel={clientCopy.a11y.logoHome}
         inset
         overline={COPY.offlineOverline}
@@ -68,10 +74,10 @@ export default function AppError({
         body={clientCopy.fixesV2[offline === "weak" ? "weakSignal" : "offline"].body}
         actions={
           <div className="nf-system__actions">
-            <Button variant="primary" size="lg" full onClick={reset}>
+            <Button variant="primary" size="lg" full onClick={again}>
               {clientCopy.authFlow.tryAgain}
             </Button>
-            <ButtonLink href="/home" variant="secondary" size="lg" full>
+            <ButtonLink href="/home" onClick={escapeTo("/home", again)} variant="secondary" size="lg" full>
               {clientCopy.a11y.logoHome}
             </ButtonLink>
           </div>
@@ -84,7 +90,9 @@ export default function AppError({
   return (
     <StateMoment
       kind="error"
+      calm
       home="/home"
+      onHome={escapeTo("/home", again)}
       homeLabel={clientCopy.a11y.logoHome}
       inset
       overline={COPY.screenErrorOverline}
@@ -100,10 +108,10 @@ export default function AppError({
       }
       actions={
         <div className="nf-system__actions">
-          <Button variant="primary" size="lg" full onClick={reset}>
+          <Button variant="primary" size="lg" full onClick={again}>
             Try again
           </Button>
-          <ButtonLink href="/home" variant="secondary" size="lg" full>
+          <ButtonLink href="/home" onClick={escapeTo("/home", again)} variant="secondary" size="lg" full>
             Back to home
           </ButtonLink>
         </div>

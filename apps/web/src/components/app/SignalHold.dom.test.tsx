@@ -72,7 +72,12 @@ describe.skipIf(!hasBrowser && !process.env.CI)("a screen on a weak signal", () 
       const { page, close } = await mountInBrowser({ entry: entry(4000, "Load failed"), reducedMotion: true, init: "sessionStorage.clear();" });
       try {
         await page.getByTestId("signal-hold-note").waitFor({ timeout: 4000 });
-        expect(await page.getByTestId("signal-hold-note").textContent()).toContain("Still loading on a weak connection");
+        /* 13 November 2026: the hold also covers a slow SERVER now, so its line
+           no longer blames the connection: "Still loading. Trying again." is
+           true for both causes. The intent is unchanged: one calm line from
+           the second try, no reference, no fault. */
+        expect(await page.getByTestId("signal-hold-note").textContent()).toContain("Still loading. Trying again.");
+        expect(await page.getByTestId("signal-hold-note").textContent()).not.toMatch(/weak connection/i);
         await page.getByRole("button", { name: "Try again" }).click();
         await page.getByTestId("screen").waitFor({ timeout: 15000 });
         expect(await page.getByTestId("fault").count()).toBe(0);

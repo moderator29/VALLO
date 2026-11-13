@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useSyncExternalStore } from "react";
+import { usePathname } from "next/navigation";
 import { tapFailedOffline } from "./tap-failed";
 
 /**
@@ -173,7 +174,21 @@ function reloadOnceForChunk(): boolean {
 
 export function useSignalHold(error: unknown, reset: () => void): SignalHoldState {
   const offline = useOfflineBoundary(reset);
-  const network = !offline && isNetworkError(error);
+  /* THE ADDRESS THAT FAILED, NOT THE ONE IN THE BAR (13 November 2026, found on
+     the local production proof). When a tap's soft navigation fails, the
+     boundary mounts before the browser's address changes, so
+     `location.pathname` is still the page the person came FROM. The first try
+     was counted against that page and the failing one started again from
+     zero: one try too many, and a stale count left on the previous page. The
+     router's own pathname is the page being drawn. */
+  const routePath = usePathname();
+  /* A failure on the SERVER is retried too (13 November 2026): it carries a
+     digest, and in practice it is a database read that timed out, which the
+     next try usually answers. The founder saw "This screen did not load" for
+     exactly that, so it is now held and tried again quietly first, the same
+     way as a weak signal. A failure in the browser itself (no digest) is a
+     bug a retry cannot fix, so it is not retried. */
+  const network = !offline && (isNetworkError(error) || isServerFailure(error));
   /* Decided once per failure: which try this is, and whether any are left.
      Remembered against the error object, because React may run a state
      initializer twice for one mount (a render it threw away), and a try must
@@ -182,7 +197,7 @@ export function useSignalHold(error: unknown, reset: () => void): SignalHoldStat
     if (!network || typeof window === "undefined") return { tries: 0, gap: null, reload: false };
     const known = error && typeof error === "object" ? planned.get(error) : undefined;
     if (known) return known;
-    const made = planFor(error);
+    const made = planFor(error, routePath || location.pathname);
     if (error && typeof error === "object") planned.set(error, made);
     return made;
   });
@@ -194,10 +209,15 @@ export function useSignalHold(error: unknown, reset: () => void): SignalHoldStat
   }, [plan, error, reset]);
   if (offline) return { view: "offline", tries: 0 };
   if (plan.reload || plan.gap !== null) return { view: "retrying", tries: plan.tries };
-  return { view: network ? "weak" : null, tries: plan.tries };
+  return { view: network && isNetworkError(error) ? "weak" : null, tries: plan.tries };
 }
 
 type Plan = { tries: number; gap: number | null; reload: boolean };
+
+/** A Server Component or server action that failed: Next sends a digest and hides the message. */
+export function isServerFailure(error: unknown): boolean {
+  return Boolean(error && typeof error === "object" && typeof (error as { digest?: unknown }).digest === "string" && (error as { digest: string }).digest.length > 0);
+}
 const planned = new WeakMap<object, Plan>();
 
 /* React draws a failing screen a second time before it hands the error to the
@@ -206,10 +226,10 @@ const planned = new WeakMap<object, Plan>();
    together are the same try. */
 const SAME_TRY_MS = 400;
 
-function planFor(error: unknown): Plan {
+function planFor(error: unknown, path: string): Plan {
   if (isChunkLoadError(error) && reloadOnceForChunk()) return { tries: 0, gap: null, reload: true };
   const now = Date.now();
-  const tries = readTries(location.pathname, now);
+  const tries = readTries(path, now);
   if (tries.count > 0 && tries.last !== undefined && now - tries.last < SAME_TRY_MS) {
     const count = tries.count - 1;
     return { tries: count, gap: count < SIGNAL_RETRY_GAPS_MS.length ? SIGNAL_RETRY_GAPS_MS[count]! : null, reload: false };
