@@ -23,7 +23,7 @@ import {
  */
 export default function LoadingPayouts() {
   return (
-    <MoneyWait label="Loading your payouts" className="nf-page nf-md nf-history">
+    <MoneyWait label="Loading your payouts" className="nf-page grid grid-cols-1 gap-md nf-history">
       <PageFrame title={PAYOUTS_TITLE} fallback="/home">
       <div>
       <div className="mt-inline space-y-block">

@@ -316,6 +316,22 @@
   padding: var(--nf-space-xs) var(--nf-space-sm);
 }
 
+/*
+ * THREE STATS IN A NARROW CARD GET THEIR PADDING BACK. Measured on
+ * `/preview/cards` at 320 wide, dark and light: the card is 288px, the strip
+ * 238px, and three equal cells are 68px each. The 12px of padding on each
+ * side leaves 44px for the words, and "2 months" came out over THREE lines,
+ * 2.7 characters to a line, because "months" alone needs about 48px. The
+ * card is its own container (`container-type: inline-size` above), so the
+ * threshold is the card's width and not the window's: a wide card in a
+ * desktop column keeps the roomier padding.
+ */
+@container (max-width: 20rem) {
+  .nf-share-card__stat {
+    padding-inline: var(--nf-space-2xs);
+  }
+}
+
 .nf-share-card__stat + .nf-share-card__stat {
   border-left: 1px solid var(--nf-card-border, var(--nf-border-default));
 }

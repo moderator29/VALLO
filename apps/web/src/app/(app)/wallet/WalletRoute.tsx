@@ -22,7 +22,7 @@ export async function WalletRoute({ screen, path, title, filter }: { screen: Wal
   const read = await readMyBalance({ limit: screen === "transactions" ? TRANSACTIONS_LIMIT : 20 });
 
   return (
-    <main className="nf-page">
+    <div className="nf-page">
       {read.state === "signed-out" ? (
         <div className="nf-mw">
           <WalletHeader title={title} back="/home" />
@@ -36,6 +36,6 @@ export async function WalletRoute({ screen, path, title, filter }: { screen: Wal
       ) : (
         <BalanceView read={read} locale={locale} screen={screen} filter={isWalletFilter(filter) ? filter : undefined} />
       )}
-    </main>
+    </div>
   );
 }

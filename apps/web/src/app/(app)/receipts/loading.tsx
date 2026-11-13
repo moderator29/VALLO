@@ -30,7 +30,7 @@ import {
  */
 export default function LoadingReceipts() {
   return (
-    <MoneyWait label="Loading your receipts" className="nf-page nf-md">
+    <MoneyWait label="Loading your receipts" className="nf-page grid grid-cols-1 gap-md">
       <PageFrame title={RECEIPTS_TITLE} fallback="/payments">
       <div>
       <div className="mt-inline space-y-block">

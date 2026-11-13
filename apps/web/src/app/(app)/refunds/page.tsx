@@ -34,7 +34,7 @@ export default async function RefundsPage({
   const [read, protectedRailOpen] = await Promise.all([readMyPayments(before), protectedRailLive()]);
 
   return (
-    <main className="nf-page nf-md nf-history">
+    <div className="nf-page grid grid-cols-1 gap-md nf-history">
       <PageFrame title={REFUNDS_TITLE} fallback="/payments">
       <div>
       {read.state === "signed-out" ? (
@@ -59,6 +59,6 @@ export default async function RefundsPage({
       )}
       </div>
     </PageFrame>
-    </main>
+    </div>
   );
 }

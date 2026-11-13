@@ -50,6 +50,7 @@ export default async function HostCalendarPage({
     return (
       <HostShell fallback="/host">
         <EmptyState
+          heading="h1"
           icon="calendar-grid"
           title={words.signedOutTitle}
           body={words.signedOutBody}
@@ -78,6 +79,7 @@ export default async function HostCalendarPage({
     return (
       <HostShell fallback="/host">
         <EmptyState
+          heading="h1"
           icon="calendar-grid"
           title={chosen ? hw.calendar.saveFirstTitle : hw.calendar.noPropertyTitle}
           body={hw.calendar.emptyBody}
@@ -128,6 +130,7 @@ export default async function HostCalendarPage({
         </p>
       ) : read.rooms.length === 0 ? (
         <EmptyState
+          heading="h1"
           icon="hotel-bed"
           title={words.noRoomTypesTitle}
           body={words.noRoomTypesBody}

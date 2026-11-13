@@ -61,6 +61,7 @@ export default async function HostPhotosPage({
     return (
       <HostShell logoLabel={t.a11y.logoHome} fallback="/host">
         <EmptyState
+          heading="h1"
           icon="camera"
           title={t.hostWorkspace.photos.signedOutTitle}
           body={t.hostWorkspace.photos.signedOutBody}

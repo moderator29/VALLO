@@ -53,7 +53,9 @@ const padsForHomeIndicator = (decl: Declaration) =>
   /^padding(-block-end|-bottom|-block|)$/.test(decl.prop) && /safe-area-inset-bottom/.test(decl.value);
 
 /** A selector that is about a composer, by its own name. */
-const namesAComposer = (selector: string) => /\bnf-[a-z0-9-]*compos/i.test(selector);
+/* The underscore matters: `nf-ai__composer` is the assistant's bar, and a
+   character class without `_` in it read that name as not a composer at all. */
+const namesAComposer = (selector: string) => /\bnf-[a-z0-9_-]*compos/i.test(selector);
 
 /**
  * Composer feet that are under the contract, and how each one qualifies.
@@ -63,7 +65,7 @@ const namesAComposer = (selector: string) => /\bnf-[a-z0-9-]*compos/i.test(selec
  */
 const UNDER_CONTRACT: Record<string, string> = {
   ".nf-composer": "the class the contract rule matches",
-  "form.nf-composer": "the same class, qualified in grade1.css",
+  ".nf-composer.nf-composer": "the same class, doubled in grade1.css for weight",
   ".nf-compose-page__tools": "components/social/feed/Composer.tsx carries data-composer",
 };
 
@@ -140,6 +142,43 @@ describe("every composer that reserves the home indicator", () => {
   it("lists nothing in the contract that no longer exists", () => {
     const gone = Object.keys(UNDER_CONTRACT).filter((selector) => !feet.some((f) => f.selector === selector));
     expect(gone).toEqual([]);
+  });
+});
+
+/* ----------------------- no composer rule anywhere is qualified by an element */
+
+/*
+ * THE CONTRACT RULE WAS NOT THE ONLY SELECTOR WITH AN ELEMENT IN IT.
+ * `grade1.css` dressed the chat box and `input-bar.css` the box, the field
+ * and the send disc under `form.nf-composer`, and `input-bar.css` dressed the
+ * assistant's whole bar and its 44px disc under `form.nf-ai__composer`. The
+ * keyboard foot was moved onto a class in November 2026 and these were left
+ * behind, so a composer written as a div would have kept the keyboard
+ * behaviour and lost the box and the disc: broken in a different way rather
+ * than broken in the same way. Both now double the class instead, which is
+ * the same weight with no element in it.
+ *
+ * This test is about the SHAPE of the selector, not about any one file, so a
+ * new composer rule written as `form.nf-whatever-composer` fails here on the
+ * day it is written.
+ */
+describe("every rule that styles a composer", () => {
+  it("reaches it by class, never by element name", () => {
+    const qualified: string[] = [];
+    for (const file of filesUnder(SRC, ".css")) {
+      postcss.parse(readFileSync(file, "utf8")).walkRules((rule) => {
+        for (const selector of rule.selectors) {
+          if (!namesAComposer(selector)) continue;
+          /* An element name immediately before a composer class, such as
+             `form.nf-composer`. A descendant element is a different thing and
+             is not what this is about. */
+          if (/(^|[\s,>+~])[a-z][a-z0-9]*\.nf-[a-z0-9_-]*compos/i.test(selector)) {
+            qualified.push(`${rel(file)}: ${selector}`);
+          }
+        }
+      });
+    }
+    expect(qualified).toEqual([]);
   });
 });
 

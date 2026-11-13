@@ -9,7 +9,7 @@ import { LoadingShell, PageHeaderSkeleton } from "@/components/app/ScreenSkeleto
  */
 export default function LoadingAgreement() {
   return (
-    <LoadingShell label="Loading the agreement" className="nf-page nf-md">
+    <LoadingShell label="Loading the agreement" className="nf-page grid grid-cols-1 gap-md">
       <PageHeaderSkeleton layout="large" />
       <div className="nf-card mt-inline block space-y-xs p-card">
         <Skeleton width="30%" height="0.75rem" radius="xs" />

@@ -13,7 +13,7 @@ import { REFUNDS_HOW_BODY, REFUNDS_HOW_TITLE, REFUNDS_LEDE, REFUNDS_SCOPE, REFUN
  */
 export default function LoadingRefunds() {
   return (
-    <MoneyWait label="Loading your refunds" className="nf-page nf-md nf-history">
+    <MoneyWait label="Loading your refunds" className="nf-page grid grid-cols-1 gap-md nf-history">
       <PageFrame title={REFUNDS_TITLE} fallback="/payments">
       <div>
       <div className="mt-inline space-y-block">

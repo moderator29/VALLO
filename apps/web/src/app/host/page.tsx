@@ -45,6 +45,7 @@ export default async function HostPage({
     return (
       <HostShell logoLabel={t.a11y.logoHome}>
         <EmptyState
+          heading="h1"
           icon="hotel"
           title={t.hostWorkspace.home.signedOutTitle}
           body={t.hostWorkspace.home.signedOutBody}

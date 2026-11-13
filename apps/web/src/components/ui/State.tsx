@@ -93,6 +93,25 @@ export type StateProps = {
    * leave it off and the full kit draws. One way, two sizes.
    */
   compact?: boolean;
+  /**
+   * THE STATE IS THE WHOLE PAGE, SO ITS TITLE IS THE PAGE'S HEADING.
+   *
+   * Measured in Chromium on 13 November 2026, signed out, over 249 member and
+   * workspace routes: 37 of them had NO `<h1>` anywhere in the document. On
+   * most of those the page is a gate, and the gate is this component: `/host`
+   * drew "Host on Vallo" as a `<p class="nf-h3">`, and so did every other
+   * `/host/*` page, `/wallet` and its four inner pages, both sign-in screens,
+   * `/checkout`, `/pro` and the rest. A screen reader landing there is told
+   * the page has no heading at all, and the skip link in `app/layout.tsx`
+   * lands the reader in a region with nothing to announce.
+   *
+   * The default stays a `<p>`, because a state inside a section must not
+   * invent a heading level. A page whose whole content is one state passes
+   * `heading="h1"`; a state that is a section's whole content passes `"h2"`.
+   * The words, the size and the balance are identical either way: this
+   * changes the element, never the drawing.
+   */
+  heading?: "h1" | "h2";
   className?: string;
   "data-testid"?: string;
 };
@@ -108,11 +127,15 @@ export function State({
   action,
   footnote,
   compact,
+  heading,
   className,
   children,
   "data-testid": testId,
 }: StateProps) {
   const role = stateRole(kind);
+  /* The element the title is drawn as. A page-level state says which heading
+     it is; everything else keeps the paragraph it has always been. */
+  const Title = heading ?? "p";
   /* GRADE 1 (SW7, UX_SYSTEM section 11): ONE THIN GLYPH. By default every
      state draws the lean line glyph on the kind's plate: the object a call
      site names (`icon`) draws its line twin, and nothing is derived from it
@@ -162,9 +185,9 @@ export function State({
         )}
         <div className="min-w-0 flex-1 self-center">
           {/* Words only (no `body`): the one sentence is the state, quiet. */}
-          <p className={body ? "nf-body font-semibold text-[var(--nf-content-primary)]" : "nf-body-sm text-[var(--nf-content-secondary)]"}>
+          <Title className={body ? "nf-body font-semibold text-[var(--nf-content-primary)]" : "nf-body-sm text-[var(--nf-content-secondary)]"}>
             {title}
-          </p>
+          </Title>
           {body && <p className="nf-body-sm text-[var(--nf-content-muted)]">{body}</p>}
           {primary ? (
             <div className="mt-sm">
@@ -206,7 +229,7 @@ export function State({
         )}
       </span>
       {/* `balance` stops a centred two-line title leaving a one-word orphan. */}
-      <p className={`mt-block ${STATE_TITLE_CLASS} [text-wrap:balance]`}>{title}</p>
+      <Title className={`mt-block ${STATE_TITLE_CLASS} [text-wrap:balance]`}>{title}</Title>
       {body && <p className={`mt-inline max-w-[42ch] ${STATE_BODY_CLASS}`}>{body}</p>}
       {primary ? (
         <div className="mt-block flex w-full justify-center">

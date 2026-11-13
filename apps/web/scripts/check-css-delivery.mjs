@@ -117,6 +117,21 @@ const MARKER_CLASSES = new Map([
       "nf-site-newsletter-field; the form itself needs nothing.",
   ],
   [
+    "nf-depth",
+    "The landing hero's title, as the namespace for nf-depth-word and " +
+      "nf-depth-line, which carry the motion. The block itself draws nothing.",
+  ],
+  [
+    "nf-m-count",
+    "The span CountUp animates. It is the handle the motion code holds, not a " +
+      "style.",
+  ],
+  [
+    "nf-page",
+    "The page namespace beside nf-page-stage and nf-page-title, which are " +
+      "styled. The block is a name, not a rule.",
+  ],
+  [
     "nf-tab--circle",
     "The Circle slot on the bottom bar, named so the tab can be found and so " +
       "a later rule has somewhere to land. The slot draws as nf-tab today.",

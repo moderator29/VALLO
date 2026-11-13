@@ -42,6 +42,7 @@ export default async function HostReservationsPage() {
     return (
       <HostShell logoLabel={t.a11y.logoHome} fallback="/host">
         <EmptyState
+          heading="h1"
           icon="concierge-bell"
           title={t.hostWorkspace.reservations.signedOutTitle}
           body={t.hostWorkspace.reservations.signedOutBody}

@@ -27,7 +27,7 @@
      top padding rather than making the box taller, so a one-line message
      sits exactly where it did. Beats grade1.css's `:root:root` rule by
      coming later at the same weight. */
-  :root:root form.nf-composer .nf-composer__box .nf-composer__field {
+  :root:root .nf-composer.nf-composer .nf-composer__box .nf-composer__field {
     min-block-size: 2.75rem;
     margin-block-start: calc(var(--nf-space-xs) * -1);
     padding-block: calc(var(--nf-space-xs) + var(--nf-space-2xs)) var(--nf-space-2xs);
@@ -47,7 +47,7 @@
    * it is the solid brand. The glyphs cross over in place, so the bar never
    * moves. 40px painted, 44px to the thumb (the ::before).
    */
-  form.nf-composer .nf-composer__send.nf-composer__action {
+  .nf-composer.nf-composer .nf-composer__send.nf-composer__action {
     position: relative;
     z-index: 2;
     inline-size: 2.5rem;
@@ -66,25 +66,25 @@
       box-shadow var(--nf-duration-fast) var(--nf-ease-standard),
       scale var(--nf-duration-press) var(--nf-ease-press);
   }
-  form.nf-composer .nf-composer__send.nf-composer__action::before {
+  .nf-composer.nf-composer .nf-composer__send.nf-composer__action::before {
     content: "";
     position: absolute;
     inset: -0.125rem;
     border-radius: var(--nf-radius-circle);
   }
-  form.nf-composer .nf-composer__send.nf-composer__action[data-ready] {
+  .nf-composer.nf-composer .nf-composer__send.nf-composer__action[data-ready] {
     background: var(--nf-brand-primary);
     color: var(--nf-content-on-brand);
     box-shadow: none;
   }
-  form.nf-composer .nf-composer__send.nf-composer__action[data-recording] {
+  .nf-composer.nf-composer .nf-composer__send.nf-composer__action[data-recording] {
     background: var(--nf-brand-primary);
     color: var(--nf-content-on-brand);
     box-shadow: none;
     scale: 1.14;
   }
   /* The held microphone breathes a ring outward while it records. */
-  form.nf-composer .nf-composer__send.nf-composer__action[data-recording]::after {
+  .nf-composer.nf-composer .nf-composer__send.nf-composer__action[data-recording]::after {
     content: "";
     position: absolute;
     inset: 0;
@@ -455,9 +455,11 @@
    * `composer-contract.test.ts` fails if a composer is added without it.
    *
    * SPECIFICITY, DELIBERATELY. (0,3,0) here beats grade1.css's
-   * `form.nf-composer` (0,1,1) and threads.css's `.nf-composer` (0,1,0),
-   * which are the two rules that set the padding being taken back, and it
-   * does so without naming an element.
+   * `.nf-composer.nf-composer` (0,2,0) and threads.css's `.nf-composer`
+   * (0,1,0), which are the two rules that set the padding being taken back,
+   * and it does so without naming an element. grade1.css doubles the class
+   * for the same reason: it used to reach the same weight by writing
+   * `form.nf-composer`, which is the defect this whole comment is about.
    */
   :root[data-keyboard="open"] :is(.nf-composer, [data-composer]) {
     padding-block-end: var(--nf-space-xs);
@@ -635,10 +637,10 @@
       animation: none;
       transition: none;
     }
-    form.nf-composer .nf-composer__send.nf-composer__action[data-recording] {
+    .nf-composer.nf-composer .nf-composer__send.nf-composer__action[data-recording] {
       scale: 1;
     }
-    form.nf-composer .nf-composer__send.nf-composer__action[data-recording]::after {
+    .nf-composer.nf-composer .nf-composer__send.nf-composer__action[data-recording]::after {
       animation: none;
       opacity: 0.6;
     }

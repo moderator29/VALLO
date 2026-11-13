@@ -52,7 +52,7 @@ const IMPORTS = `
 const SCREENS = {
   payouts: {
     wait: `<PayoutsWait />`,
-    page: `<main className="nf-page nf-md nf-history">
+    page: `<main className="nf-page grid grid-cols-1 gap-md nf-history">
       <PageFrame title={M.PAYOUTS_TITLE} fallback="/home"><div>
       <div className="mt-inline space-y-block">
         <HistoryHero id="t" label={M.EARNINGS_TOTAL_LABEL} totalMinor={345600000} locale="en" note={M.EARNINGS_SETTLEMENT + " " + M.HISTORY_NOT_A_BALANCE} facts={[]} />
@@ -64,7 +64,7 @@ const SCREENS = {
   },
   receipts: {
     wait: `<ReceiptsWait />`,
-    page: `<main className="nf-page nf-md">
+    page: `<main className="nf-page grid grid-cols-1 gap-md">
       <PageFrame title={M.RECEIPTS_TITLE} fallback="/payments"><div>
       <div className="mt-inline space-y-block">
         <p className={TYPE.body}>{M.RECEIPTS_LEDE}</p>
@@ -76,7 +76,7 @@ const SCREENS = {
   },
   refunds: {
     wait: `<RefundsWait />`,
-    page: `<main className="nf-page nf-md nf-history">
+    page: `<main className="nf-page grid grid-cols-1 gap-md nf-history">
       <PageFrame title={M.REFUNDS_TITLE} fallback="/payments"><div>
       <div className="mt-inline space-y-block">
         <p className={TYPE.body}>{M.REFUNDS_LEDE}</p>

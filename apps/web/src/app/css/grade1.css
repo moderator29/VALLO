@@ -1119,9 +1119,12 @@
  * THE CHAT BOX (reference R58). One rounded box: the words on top, the photo
  * button bottom left, a round send bottom right. No hairline above it and
  * none under the thread header: the founder asked for fewer lines. Written
- * under `form.nf-composer` so it wins over threads.css by specificity.
+ * Written under `.nf-composer.nf-composer`, the class doubled, so it wins
+ * over threads.css by specificity WITHOUT naming an element: a composer that
+ * is written as a div or a section gets the same box as one written as a
+ * form. It said `form.nf-composer` until 13 November 2026.
  */
-form.nf-composer {
+.nf-composer.nf-composer {
   display: block;
   padding: var(--nf-space-xs) 0 max(var(--nf-space-xs), env(safe-area-inset-bottom));
   border-block-start: 0;
@@ -1144,7 +1147,7 @@ form.nf-composer {
   }
 }
 /* Beats brand-glass.css's night well (`:root:not([data-theme]) ... :not(:focus)`). */
-:root:root form.nf-composer .nf-composer__box .nf-composer__field {
+:root:root .nf-composer.nf-composer .nf-composer__box .nf-composer__field {
   min-height: 1.5rem;
   max-height: 8.25rem;
   padding: var(--nf-space-2xs) 0 0;
@@ -1176,7 +1179,7 @@ form.nf-composer {
 .nf-composer__tool:active {
   background: var(--nf-border-subtle);
 }
-form.nf-composer .nf-composer__send {
+.nf-composer.nf-composer .nf-composer__send {
   display: inline-grid;
   place-items: center;
   inline-size: 2.5rem;
@@ -1198,20 +1201,20 @@ form.nf-composer .nf-composer__send {
  * docs/design/COMPONENTS.md sets. The target is grown around the disc
  * rather than the disc made bigger, which is the idiom used throughout.
  */
-form.nf-composer .nf-composer__send {
+.nf-composer.nf-composer .nf-composer__send {
   position: relative;
 }
-form.nf-composer .nf-composer__send::before {
+.nf-composer.nf-composer .nf-composer__send::before {
   content: "";
   position: absolute;
   inset: -0.125rem;
   border-radius: var(--nf-radius-circle);
 }
-form.nf-composer .nf-composer__send[data-ready] {
+.nf-composer.nf-composer .nf-composer__send[data-ready] {
   background: var(--nf-brand-primary);
   color: var(--nf-content-on-brand);
 }
-form.nf-composer .nf-composer__send:active {
+.nf-composer.nf-composer .nf-composer__send:active {
   scale: var(--nf-press-scale-sm);
 }
 /* Beats brand-glass.css's luminous hairline under the thread header. */

@@ -52,6 +52,7 @@ export default async function HostStatementPage({
     return (
       <HostShell fallback="/host/earnings">
         <EmptyState
+          heading="h1"
           icon="ledger-book"
           title={t.experienceHost.statement.signedOutTitle}
           body={HOST_STATEMENT_SIGNED_OUT_BODY}

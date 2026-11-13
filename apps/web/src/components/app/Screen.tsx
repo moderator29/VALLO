@@ -262,6 +262,7 @@ export function EmptyState({
   body,
   action,
   secondary,
+  heading,
   className,
   "data-testid": testId,
 }: {
@@ -275,6 +276,12 @@ export function EmptyState({
   action?: ReactNode;
   /** A quiet text link. Never a second button competing with the first. */
   secondary?: ReactNode;
+  /**
+   * `"h1"` where this empty IS the page (a signed-out gate, an empty route),
+   * so the document has a heading. See `State`'s `heading` for the 37 routes
+   * that had none. Left off inside a section, where a paragraph is right.
+   */
+  heading?: "h1" | "h2";
   className?: string;
   "data-testid"?: string;
 }) {
@@ -291,6 +298,7 @@ export function EmptyState({
       body={body}
       action={action}
       footnote={secondary}
+      {...(heading ? { heading } : {})}
       {...(className ? { className } : {})}
       {...(testId ? { "data-testid": testId } : {})}
     />

@@ -42,6 +42,7 @@ export default async function HostDecidePage() {
     return (
       <HostShell fallback="/host">
         <EmptyState
+          heading="h1"
           icon="hourglass"
           title={t.experienceHost.decide.signedOutTitle}
           body={t.experienceHost.decide.signedOutBody}

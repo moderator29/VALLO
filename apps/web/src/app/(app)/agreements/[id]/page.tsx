@@ -152,7 +152,7 @@ export default async function AgreementPage({
   const approvedMoment: SuccessMomentId | null = arrival?.seenOnce ? arrival.moment : null;
 
   return (
-    <main className="nf-page nf-md" data-testid="agreement-page" data-status={a.status}>
+    <div className="nf-page grid grid-cols-1 gap-md" data-testid="agreement-page" data-status={a.status}>
       <SuccessFromFlag
         copy={getDictionary(locale).success}
         show={(moment ?? approvedMoment) !== null}
@@ -199,7 +199,7 @@ export default async function AgreementPage({
           }}
         />
       </PageFrame>
-    </main>
+    </div>
   );
 }
 

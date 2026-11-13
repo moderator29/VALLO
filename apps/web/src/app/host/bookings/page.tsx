@@ -48,6 +48,7 @@ export default async function HostRoomBookingsPage() {
     return (
       <HostShell logoLabel={t.a11y.logoHome} fallback="/host">
         <EmptyState
+          heading="h1"
           icon="hotel-bed"
           title={words.signedOutTitle}
           body={words.signedOutBody}

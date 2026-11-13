@@ -41,7 +41,7 @@ export default async function ReceiptsPage({
   const [read, protectedRows] = await Promise.all([readMyPayments(before), readMyProtectedPayments()]);
 
   return (
-    <main className="nf-page nf-md">
+    <div className="nf-page grid grid-cols-1 gap-md">
       <PageFrame title={RECEIPTS_TITLE} fallback="/payments">
       <div>
       {read.state === "signed-out" ? (
@@ -86,6 +86,6 @@ export default async function ReceiptsPage({
       )}
       </div>
     </PageFrame>
-    </main>
+    </div>
   );
 }

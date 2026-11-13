@@ -38,7 +38,7 @@ export default async function PayoutsPage({
   const [read, hold] = await Promise.all([readMyEarnings(before), readMyChargebackHold()]);
 
   return (
-    <main className="nf-page nf-md nf-history">
+    <div className="nf-page grid grid-cols-1 gap-md nf-history">
       <PageFrame title={PAYOUTS_TITLE} fallback="/home">
       <div>
       {/* Chargebacks: the payout rule, said calmly, only when it applies. */}
@@ -60,6 +60,6 @@ export default async function PayoutsPage({
       <HelpLink to="payouts" className="mt-block" />
       </div>
     </PageFrame>
-    </main>
+    </div>
   );
 }

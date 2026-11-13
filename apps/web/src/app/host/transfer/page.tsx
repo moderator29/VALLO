@@ -49,6 +49,7 @@ export default async function TransferBusinessPage() {
     return (
       <HostShell logoLabel={t.a11y.logoHome}>
         <EmptyState
+          heading="h1"
           icon="hotel"
           title={t.hostWorkspace.transfer.signedOutTitle}
           body={t.hostWorkspace.transfer.signedOutBody}

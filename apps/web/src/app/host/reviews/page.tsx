@@ -35,6 +35,7 @@ export default async function HostReviewsPage() {
     return (
       <HostShell fallback="/host">
         <EmptyState
+          heading="h1"
           icon="reviews"
           title={t.experienceHost.reviews.signedOutTitle}
           body={t.experienceHost.reviews.signedOutBody}

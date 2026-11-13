@@ -47,7 +47,7 @@ export default async function AgreementsPage({
      side navigation and keeps its way up to Home. */
   const dockRoot = !(await isSocialEnabled());
   return (
-    <main className="nf-page nf-md">
+    <div className="nf-page grid grid-cols-1 gap-md">
       <PageFrame title={t.nav.agreements} back={!dockRoot} fallback="/home">
       <div>
       <p className={`${TYPE.body} mt-inline`}>{PAYMENT_GATE_SENTENCE}</p>
@@ -73,6 +73,6 @@ export default async function AgreementsPage({
       </Section>
       </div>
     </PageFrame>
-    </main>
+    </div>
   );
 }

@@ -9,7 +9,7 @@ import { NairaFacePreload } from "@/components/app/NairaFacePreload";
  */
 export default function LoadingPayments() {
   return (
-    <LoadingShell label="Loading your payments" className="nf-page nf-md nf-history">
+    <LoadingShell label="Loading your payments" className="nf-page grid grid-cols-1 gap-md nf-history">
       {/* A money screen: the naira sign's face arrives with the shell. */}
       <NairaFacePreload />
       <PageHeaderSkeleton layout="large" />

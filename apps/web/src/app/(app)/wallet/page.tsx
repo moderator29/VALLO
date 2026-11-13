@@ -29,7 +29,7 @@ export default async function WalletPage() {
   const read = await readMyBalance();
 
   return (
-    <main className="nf-page">
+    <div className="nf-page">
       {read.state === "signed-out" ? (
         <div className="nf-mw">
           <WalletHeader title={BALANCE_TITLE} back="/home" />
@@ -43,6 +43,6 @@ export default async function WalletPage() {
       ) : (
         <BalanceView read={read} locale={locale} />
       )}
-    </main>
+    </div>
   );
 }

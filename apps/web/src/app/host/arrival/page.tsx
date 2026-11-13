@@ -38,6 +38,7 @@ export default async function HostArrivalPage({
     return (
       <HostShell logoLabel={t.a11y.logoHome} fallback="/host">
         <EmptyState
+          heading="h1"
           icon="hotel"
           title={copy.title}
           body={copy.lede}

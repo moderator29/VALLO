@@ -51,7 +51,7 @@ export default async function PaymentsPage({
   const [read, balances, protectedRows] = await Promise.all([readMyPayments(before), readMyBalances(), readMyProtectedPayments()]);
 
   return (
-    <main className="nf-page nf-md nf-history">
+    <div className="nf-page grid grid-cols-1 gap-md nf-history">
       <PageFrame title={words.title} fallback="/home">
       <div>
 
@@ -92,6 +92,6 @@ export default async function PaymentsPage({
       )}
       </div>
     </PageFrame>
-    </main>
+    </div>
   );
 }

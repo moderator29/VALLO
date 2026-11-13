@@ -38,6 +38,7 @@ export default async function HostSettingsPage() {
     return (
       <HostShell fallback="/host">
         <EmptyState
+          heading="h1"
           icon="hotel"
           title={t.hostWorkspace.settings.signedOutTitle}
           body={t.hostWorkspace.settings.signedOutBody}

@@ -57,6 +57,7 @@ export default async function HostApplyPage({
     return (
       <HostShell logoLabel={t.a11y.logoHome}>
         <EmptyState
+          heading="h1"
           icon="hotel"
           title={t.hostWorkspace.apply.signedOutTitle}
           body={t.hostWorkspace.apply.signedOutBody}
@@ -97,6 +98,7 @@ export default async function HostApplyPage({
     return (
       <HostShell logoLabel={t.a11y.logoHome} fallback="/host">
         <EmptyState
+          heading="h1"
           icon="hotel"
           title={t.hostWorkspace.apply.failedTitle}
           body={t.hostWorkspace.apply.failedBody}

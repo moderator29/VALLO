@@ -9,7 +9,7 @@
  * themes. It grows with a long message and keeps its tools on the last line.
  *
  * Applied over the existing markup, so every behaviour and test id stays:
- * the chat box (`form.nf-composer`, messages and the assistant) and the
+ * the chat box (`.nf-composer`, messages and the assistant) and the
  * search shelf (`.nf-shelf-box`). Unlayered and specific on purpose: it is
  * the last word over grade1.css, messages-g1.css, catalogue.css and
  * search-v2.css, which drew the older two-row box and the square well.
@@ -17,7 +17,7 @@
 
 /* --------------------------------------------------------- the chat box */
 
-:root form.nf-composer .nf-composer__box {
+:root .nf-composer.nf-composer .nf-composer__box {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: end;
@@ -45,21 +45,21 @@
  * repository already uses for that machine (buttons.css, brand-glass.css).
  */
 @media (hover: hover) and (pointer: fine) {
-  :root form.nf-composer .nf-composer__box:focus-within {
+  :root .nf-composer.nf-composer .nf-composer__box:focus-within {
     border-color: var(--nf-brand-edge);
   }
 }
-:root form.nf-composer .nf-composer__row {
+:root .nf-composer.nf-composer .nf-composer__row {
   display: contents;
 }
-:root form.nf-composer .nf-composer__box .nf-composer__tool {
+:root .nf-composer.nf-composer .nf-composer__box .nf-composer__tool {
   grid-column: 1;
   grid-row: 1;
   inline-size: 2.75rem;
   block-size: 2.75rem;
   color: var(--nf-content-primary);
 }
-:root:root form.nf-composer .nf-composer__box .nf-composer__field {
+:root:root .nf-composer.nf-composer .nf-composer__box .nf-composer__field {
   grid-column: 2;
   grid-row: 1;
   align-self: center;
@@ -70,8 +70,8 @@
 }
 /* The disc: Vallo blue at rest and ready alike, the glyph in the on-brand
    ink; the microphone and Send still cross over inside it. */
-:root form.nf-composer .nf-composer__box .nf-composer__send.nf-composer__action,
-:root form.nf-composer .nf-composer__box .nf-composer__send {
+:root .nf-composer.nf-composer .nf-composer__box .nf-composer__send.nf-composer__action,
+:root .nf-composer.nf-composer .nf-composer__box .nf-composer__send {
   grid-column: 3;
   grid-row: 1;
   inline-size: 2.5rem;
@@ -80,7 +80,7 @@
   color: var(--nf-content-on-brand);
   box-shadow: inset 0 1px 0 color-mix(in oklab, var(--nf-content-on-brand) 24%, transparent);
 }
-:root form.nf-composer .nf-composer__box .nf-composer__send:disabled {
+:root .nf-composer.nf-composer .nf-composer__box .nf-composer__send:disabled {
   opacity: 0.55;
 }
 /*
@@ -91,7 +91,7 @@
  * outranks it inside the box, so the word was squashed into a 40px circle.
  * The word's own width wins back here, and the disc's fill and ink stay.
  */
-:root form.nf-composer .nf-composer__box .nf-composer__send.nf-composer__send--label {
+:root .nf-composer.nf-composer .nf-composer__box .nf-composer__send.nf-composer__send--label {
   inline-size: auto;
   min-inline-size: 6.5rem;
   padding-inline: var(--nf-space-md);
@@ -130,7 +130,7 @@
 
 /* ------------------------------------------------ the assistant's bar */
 
-:root form.nf-ai__composer {
+:root .nf-ai__composer.nf-ai__composer {
   gap: var(--nf-space-3xs);
   min-block-size: 3rem;
   margin-block-start: var(--nf-space-xs);
@@ -142,23 +142,23 @@
   backdrop-filter: blur(var(--nf-glass-blur)) saturate(var(--nf-glass-saturate));
   box-shadow: var(--nf-float-shadow);
 }
-:root form.nf-ai__composer:focus-within {
+:root .nf-ai__composer.nf-ai__composer:focus-within {
   border-color: var(--nf-brand-edge);
   outline: var(--nf-focus-ring-width) solid var(--nf-focus-ring);
   outline-offset: var(--nf-focus-ring-offset);
 }
 /* The ring belongs to the whole bar, so the send disc reads as inside it. The
    inner field no longer draws its own ring around the text area alone. */
-:root form.nf-ai__composer .nf-ai__well:focus-within {
+:root .nf-ai__composer.nf-ai__composer .nf-ai__well:focus-within {
   outline: 0;
 }
-:root form.nf-ai__composer .nf-ai__well {
+:root .nf-ai__composer.nf-ai__composer .nf-ai__well {
   min-block-size: 2.5rem;
   padding: 0 var(--nf-space-3xs) 0 var(--nf-space-xs);
   border: 0;
   background: transparent;
 }
-:root form.nf-ai__composer .nf-ai__input {
+:root .nf-ai__composer.nf-ai__composer .nf-ai__input {
   padding-block: var(--nf-space-xs);
 }
 /*
@@ -175,7 +175,7 @@
  * is the compact rung's number now, which is the smallest the platform draws
  * anywhere and is exactly 44.
  */
-:root form.nf-ai__composer .nf-ai__send.nf-ai__send {
+:root .nf-ai__composer.nf-ai__composer .nf-ai__send.nf-ai__send {
   /* The compact rung, which is the smallest height the Button system draws and
      is exactly 44. Everything else reads it, so there is one number. */
   --nf-btn-h: 2.75rem;
@@ -187,7 +187,7 @@
   border-radius: var(--nf-radius-circle);
 }
 /* At rest (nothing typed) the disc stays Vallo blue, quieter, never grey. */
-:root form.nf-ai__composer .nf-ai__send.nf-ai__send:disabled {
+:root .nf-ai__composer.nf-ai__composer .nf-ai__send.nf-ai__send:disabled {
   border-color: transparent;
   background: var(--nf-brand-primary);
   color: var(--nf-content-on-brand);

@@ -37,18 +37,18 @@ export default async function DealRoomPage({
   const sent = (Array.isArray(query.sent) ? query.sent[0] : query.sent) === "1" && room.viewerSide === "buyer";
   if (sent) {
     return (
-      <main className="nf-page nf-md">
+      <div className="nf-page grid grid-cols-1 gap-md">
         <PageFrame title="Offer sent" back={false} width="narrow">
           <OfferConfirmation room={room} />
         </PageFrame>
-      </main>
+      </div>
     );
   }
   return (
-    <main className="nf-page nf-md">
+    <div className="nf-page grid grid-cols-1 gap-md">
       <PageFrame title="Deal Room" fallback="/offers" width="wide">
         <DealRoomView room={room} nowMs={requestNow()} initialTab={parseTab(query.tab)} thread={thread} />
       </PageFrame>
-    </main>
+    </div>
   );
 }

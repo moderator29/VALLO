@@ -63,6 +63,7 @@ export default async function HostEarningsPage({
         <ChargebackHoldNotice hold={hold} copy={t.chargebacks.hold} locale={locale} />
         {read.state === "signed-out" ? (
           <EmptyState
+          heading="h1"
             icon="bank-column"
             title={t.experienceHost.earnings.signedOutTitle}
             body={HOST_EARNINGS_EMPTY_BODY}

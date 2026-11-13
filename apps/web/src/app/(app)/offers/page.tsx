@@ -29,7 +29,7 @@ export default async function OffersPage({ searchParams }: { searchParams: Promi
     received = null;
   }
   return (
-    <main className="nf-page nf-md">
+    <div className="nf-page grid grid-cols-1 gap-md">
       <PageFrame title="Offers" subtitle="Offers you made and offers you received" fallback="/home" width="wide">
         {made && received ? (
           <OffersWorkspace made={made} received={received} initialTab={initialTab} nowMs={requestNow()} />
@@ -37,6 +37,6 @@ export default async function OffersPage({ searchParams }: { searchParams: Promi
           <Unreachable noun="offers" icon="contract-sign" />
         )}
       </PageFrame>
-    </main>
+    </div>
   );
 }

@@ -107,23 +107,23 @@ Columns: Frame (on PageFrame or StepFrame), Light, Dark, 360, Notes.
 
 | Page | Owner | Frame | Light | Dark | 360 | Notes |
 |---|---|---|---|---|---|---|
-| `/host` | FE | PageFrame |  |  |  | PageFrame, workspace root: no Back; the Today band sits under it as h2. Not seen: needs a host session |
-| `/host/apply` | FE |  |  |  |  |  |
-| `/host/arrival` | FE | PageFrame |  |  |  | PageFrame; business chips in the tab row. Not seen: needs a host session |
+| `/host` | FE | PageFrame |  |  |  | PageFrame, workspace root: no Back; the Today band sits under it as h2. Not seen: needs a host session; FE-BUGS 13 Nov: the signed-out gate had no h1 (measured in Chromium, 0 h1 on the document); its EmptyState now draws the title as the page's h1. Desk KPI labels at 320 and 360: 3 to 4 broken lines before, 2 after |
+| `/host/apply` | FE |  |  |  |  | FE-BUGS 13 Nov: the signed-out gate had no h1 (measured in Chromium, 0 h1 on the document); its EmptyState now draws the title as the page's h1. Desk KPI labels at 320 and 360: 3 to 4 broken lines before, 2 after |
+| `/host/arrival` | FE | PageFrame |  |  |  | PageFrame; business chips in the tab row. Not seen: needs a host session; FE-BUGS 13 Nov: the signed-out gate had no h1 (measured in Chromium, 0 h1 on the document); its EmptyState now draws the title as the page's h1. Desk KPI labels at 320 and 360: 3 to 4 broken lines before, 2 after |
 | `/host/assistant` | FE |  |  |  |  |  |
-| `/host/bookings` | FE | PageFrame |  |  |  | PageFrame wide, Back in the header, bar keeps the host's destinations, 10 Nov. Not seen: needs a host session |
-| `/host/calendar` | FE | PageFrame |  |  |  | PageFrame; property chips in the tab row; Back now in the header. Not seen: needs a host session |
-| `/host/decide` | FE | PageFrame |  |  |  | DecideView on PageFrame wide, Back in the header, bar keeps the host's destinations, 10 Nov. Not seen: needs a host session |
-| `/host/earnings` | FE | PageFrame |  |  |  | PageFrame under the host inner nav, as rooms; 10 Nov. Not seen: needs a host session |
-| `/host/earnings/statement` | FE |  |  |  |  |  |
+| `/host/bookings` | FE | PageFrame |  |  |  | PageFrame wide, Back in the header, bar keeps the host's destinations, 10 Nov. Not seen: needs a host session; FE-BUGS 13 Nov: the signed-out gate had no h1 (measured in Chromium, 0 h1 on the document); its EmptyState now draws the title as the page's h1. Desk KPI labels at 320 and 360: 3 to 4 broken lines before, 2 after |
+| `/host/calendar` | FE | PageFrame |  |  |  | PageFrame; property chips in the tab row; Back now in the header. Not seen: needs a host session; FE-BUGS 13 Nov: the signed-out gate had no h1 (measured in Chromium, 0 h1 on the document); its EmptyState now draws the title as the page's h1. Desk KPI labels at 320 and 360: 3 to 4 broken lines before, 2 after |
+| `/host/decide` | FE | PageFrame |  |  |  | DecideView on PageFrame wide, Back in the header, bar keeps the host's destinations, 10 Nov. Not seen: needs a host session; FE-BUGS 13 Nov: the signed-out gate had no h1 (measured in Chromium, 0 h1 on the document); its EmptyState now draws the title as the page's h1. Desk KPI labels at 320 and 360: 3 to 4 broken lines before, 2 after |
+| `/host/earnings` | FE | PageFrame |  |  |  | PageFrame under the host inner nav, as rooms; 10 Nov. Not seen: needs a host session; FE-BUGS 13 Nov: the signed-out gate had no h1 (measured in Chromium, 0 h1 on the document); its EmptyState now draws the title as the page's h1. Desk KPI labels at 320 and 360: 3 to 4 broken lines before, 2 after |
+| `/host/earnings/statement` | FE |  |  |  |  | FE-BUGS 13 Nov: the signed-out gate had no h1 (measured in Chromium, 0 h1 on the document); its EmptyState now draws the title as the page's h1. Desk KPI labels at 320 and 360: 3 to 4 broken lines before, 2 after |
 | `/host/notifications` | FE |  |  |  |  |  |
-| `/host/photos` | FE | PageFrame |  |  |  | PageFrame; venue chips in the tab row. Not seen: needs a host session |
-| `/host/reservations` | FE | PageFrame |  |  |  | PageFrame; the desk keeps its search. Not seen: needs a host session |
-| `/host/reviews` | FE | PageFrame |  |  |  | HostReviewsView on PageFrame wide, Back in the header, 10 Nov. Not seen: needs a host session |
-| `/host/rooms` | FE | PageFrame |  |  |  | PageFrame; property chips in the tab row. Not seen: needs a host session |
-| `/host/settings` | FE | PageFrame |  |  |  | PageFrame, Back in the header, bar Back off; shaped loading.tsx. Not seen: needs a host session |
+| `/host/photos` | FE | PageFrame |  |  |  | PageFrame; venue chips in the tab row. Not seen: needs a host session; FE-BUGS 13 Nov: the signed-out gate had no h1 (measured in Chromium, 0 h1 on the document); its EmptyState now draws the title as the page's h1. Desk KPI labels at 320 and 360: 3 to 4 broken lines before, 2 after |
+| `/host/reservations` | FE | PageFrame |  |  |  | PageFrame; the desk keeps its search. Not seen: needs a host session; FE-BUGS 13 Nov: the signed-out gate had no h1 (measured in Chromium, 0 h1 on the document); its EmptyState now draws the title as the page's h1. Desk KPI labels at 320 and 360: 3 to 4 broken lines before, 2 after |
+| `/host/reviews` | FE | PageFrame |  |  |  | HostReviewsView on PageFrame wide, Back in the header, 10 Nov. Not seen: needs a host session; FE-BUGS 13 Nov: the signed-out gate had no h1 (measured in Chromium, 0 h1 on the document); its EmptyState now draws the title as the page's h1. Desk KPI labels at 320 and 360: 3 to 4 broken lines before, 2 after |
+| `/host/rooms` | FE | PageFrame |  |  |  | PageFrame; property chips in the tab row. Not seen: needs a host session; FE-BUGS 13 Nov: the signed-out gate had no h1 (measured in Chromium, 0 h1 on the document); its EmptyState now draws the title as the page's h1. Desk KPI labels at 320 and 360: 3 to 4 broken lines before, 2 after |
+| `/host/settings` | FE | PageFrame |  |  |  | PageFrame, Back in the header, bar Back off; shaped loading.tsx. Not seen: needs a host session; FE-BUGS 13 Nov: the signed-out gate had no h1 (measured in Chromium, 0 h1 on the document); its EmptyState now draws the title as the page's h1. Desk KPI labels at 320 and 360: 3 to 4 broken lines before, 2 after |
 | `/host/start` | FE |  |  |  |  |  |
-| `/host/transfer` | FE | PageFrame |  |  |  | PageFrame, Back in the header, bar Back off; shaped loading.tsx. Not seen: needs a host session |
+| `/host/transfer` | FE | PageFrame |  |  |  | PageFrame, Back in the header, bar Back off; shaped loading.tsx. Not seen: needs a host session; FE-BUGS 13 Nov: the signed-out gate had no h1 (measured in Chromium, 0 h1 on the document); its EmptyState now draws the title as the page's h1. Desk KPI labels at 320 and 360: 3 to 4 broken lines before, 2 after |
 
 ## Member: about
 
@@ -135,8 +135,8 @@ Columns: Frame (on PageFrame or StepFrame), Light, Dark, 360, Notes.
 
 | Page | Owner | Frame | Light | Dark | 360 | Notes |
 |---|---|---|---|---|---|---|
-| `/agreements` | PAGES | PageFrame | yes | yes | yes | R3 job 1; seen through /preview/pages-frame (real page, signed-out or not-found state; no session here); no Back while it holds the dock slot (social off) |
-| `/agreements/[id]` | PAGES | PageFrame |  |  |  | R3 job 1: on PageFrame in code; signed-in only (redirect or not-found without a session), needs a fixture harness to see |
+| `/agreements` | PAGES | PageFrame | yes | yes | yes | R3 job 1; seen through /preview/pages-frame (real page, signed-out or not-found state; no session here); no Back while it holds the dock slot (social off); FE-BUGS 13 Nov: the page's own <main> was nested inside AppShell's, so two main landmarks (measured); it is a div now. nf-md did nothing here (declared only in the admin money desk sheet): the one-column grid and gap it claimed are real utilities now |
+| `/agreements/[id]` | PAGES | PageFrame |  |  |  | R3 job 1: on PageFrame in code; signed-in only (redirect or not-found without a session), needs a fixture harness to see; FE-BUGS 13 Nov: the page's own <main> was nested inside AppShell's, so two main landmarks (measured); it is a div now. nf-md did nothing here (declared only in the admin money desk sheet): the one-column grid and gap it claimed are real utilities now |
 | `/agreements/[id]/fund` | PAGES | PageFrame |  |  |  | R3 job 1: on PageFrame in code; signed-in only (redirect or not-found without a session), needs a fixture harness to see; loading.tsx in its own shape (SW12) |
 | `/agreements/[id]/held` | PAGES | PageFrame |  |  |  | R3 job 1: on PageFrame in code; signed-in only (redirect or not-found without a session), needs a fixture harness to see; loading.tsx in its own shape (SW12) |
 
@@ -398,8 +398,8 @@ Columns: Frame (on PageFrame or StepFrame), Light, Dark, 360, Notes.
 
 | Page | Owner | Frame | Light | Dark | 360 | Notes |
 |---|---|---|---|---|---|---|
-| `/offers` | UI | PageFrame | fixture | fixture | fixture | My offers: Made and Received with true counts. Fixture preview only |
-| `/offers/[id]` | UI | PageFrame | fixture | fixture | fixture | The Deal Room, both sides. Fixture preview only |
+| `/offers` | UI | PageFrame | fixture | fixture | fixture | My offers: Made and Received with true counts. Fixture preview only; FE-BUGS 13 Nov: the page's own <main> was nested inside AppShell's, so two main landmarks (measured); it is a div now. nf-md did nothing here (declared only in the admin money desk sheet): the one-column grid and gap it claimed are real utilities now |
+| `/offers/[id]` | UI | PageFrame | fixture | fixture | fixture | The Deal Room, both sides. Fixture preview only; FE-BUGS 13 Nov: the page's own <main> was nested inside AppShell's, so two main landmarks (measured); it is a div now. nf-md did nothing here (declared only in the admin money desk sheet): the one-column grid and gap it claimed are real utilities now |
 | `/offline` | FE |  |  |  |  |  |
 
 ## Member: passport
@@ -419,13 +419,13 @@ Columns: Frame (on PageFrame or StepFrame), Light, Dark, 360, Notes.
 
 | Page | Owner | Frame | Light | Dark | 360 | Notes |
 |---|---|---|---|---|---|---|
-| `/payments` | PAGES | PageFrame | yes | yes | yes | R3 job 1; seen through /preview/pages-frame (real page, signed-out or not-found state; no session here) |
+| `/payments` | PAGES | PageFrame | yes | yes | yes | R3 job 1; seen through /preview/pages-frame (real page, signed-out or not-found state; no session here); FE-BUGS 13 Nov: the page's own <main> was nested inside AppShell's, so two main landmarks (measured); it is a div now. nf-md did nothing here (declared only in the admin money desk sheet): the one-column grid and gap it claimed are real utilities now |
 
 ## Member: payouts
 
 | Page | Owner | Frame | Light | Dark | 360 | Notes |
 |---|---|---|---|---|---|---|
-| `/payouts` | PAGES | PageFrame | yes | yes | yes | R3 job 1; seen through /preview/pages-frame (real page, signed-out or not-found state; no session here) |
+| `/payouts` | PAGES | PageFrame | yes | yes | yes | R3 job 1; seen through /preview/pages-frame (real page, signed-out or not-found state; no session here); FE-BUGS 13 Nov: the page's own <main> was nested inside AppShell's, so two main landmarks (measured); it is a div now. nf-md did nothing here (declared only in the admin money desk sheet): the one-column grid and gap it claimed are real utilities now |
 
 ## Member: post
 
@@ -476,7 +476,7 @@ Columns: Frame (on PageFrame or StepFrame), Light, Dark, 360, Notes.
 
 | Page | Owner | Frame | Light | Dark | 360 | Notes |
 |---|---|---|---|---|---|---|
-| `/receipts` | PAGES | PageFrame | yes | yes | yes | R3 job 1; seen through /preview/pages-frame (real page, signed-out or not-found state; no session here) |
+| `/receipts` | PAGES | PageFrame | yes | yes | yes | R3 job 1; seen through /preview/pages-frame (real page, signed-out or not-found state; no session here); FE-BUGS 13 Nov: the page's own <main> was nested inside AppShell's, so two main landmarks (measured); it is a div now. nf-md did nothing here (declared only in the admin money desk sheet): the one-column grid and gap it claimed are real utilities now |
 
 ## Member: record
 
@@ -488,7 +488,7 @@ Columns: Frame (on PageFrame or StepFrame), Light, Dark, 360, Notes.
 
 | Page | Owner | Frame | Light | Dark | 360 | Notes |
 |---|---|---|---|---|---|---|
-| `/refunds` | PAGES | PageFrame | yes | yes | yes | R3 job 1; seen through /preview/pages-frame (real page, signed-out or not-found state; no session here) |
+| `/refunds` | PAGES | PageFrame | yes | yes | yes | R3 job 1; seen through /preview/pages-frame (real page, signed-out or not-found state; no session here); FE-BUGS 13 Nov: the page's own <main> was nested inside AppShell's, so two main landmarks (measured); it is a div now. nf-md did nothing here (declared only in the admin money desk sheet): the one-column grid and gap it claimed are real utilities now |
 
 ## Member: rent
 
@@ -683,11 +683,11 @@ Columns: Frame (on PageFrame or StepFrame), Light, Dark, 360, Notes.
 
 | Page | Owner | Frame | Light | Dark | 360 | Notes |
 |---|---|---|---|---|---|---|
-| `/wallet` | PAGES | PageFrame top | yes | yes | yes | WalletHeader is now PageHeader large (round back, large title, gear action). Seen via /preview/money/wallet |
+| `/wallet` | PAGES | PageFrame top | yes | yes | yes | WalletHeader is now PageHeader large (round back, large title, gear action). Seen via /preview/money/wallet; FE-BUGS 13 Nov: the page's own <main> was nested inside AppShell's, so two main landmarks (measured); it is a div now. nf-md did nothing here (declared only in the admin money desk sheet): the one-column grid and gap it claimed are real utilities now |
 | `/wallet/add` | PAGES | StepFrame | yes | yes | yes | R3 job 3: amount, check, pay on StepFrame. Seen via /preview/money/wallet?state=add* |
 | `/wallet/send` | PAGES | StepFrame | yes | yes | yes | R3 job 3: amount, review (slide stays the only confirm), code on StepFrame; outcomes keep the wallet top. Seen via /preview/money/wallet?state=send* |
-| `/wallet/settings` | PAGES | PageFrame top | yes | yes | yes | WalletHeader large; loading in its own shape (was the overview card) |
-| `/wallet/transactions` | PAGES | PageFrame top | yes | yes | yes | WalletHeader large; loading in its own shape (was the overview card) |
+| `/wallet/settings` | PAGES | PageFrame top | yes | yes | yes | WalletHeader large; loading in its own shape (was the overview card); FE-BUGS 13 Nov: the page's own <main> was nested inside AppShell's, so two main landmarks (measured); it is a div now. nf-md did nothing here (declared only in the admin money desk sheet): the one-column grid and gap it claimed are real utilities now |
+| `/wallet/transactions` | PAGES | PageFrame top | yes | yes | yes | WalletHeader large; loading in its own shape (was the overview card); FE-BUGS 13 Nov: the page's own <main> was nested inside AppShell's, so two main landmarks (measured); it is a div now. nf-md did nothing here (declared only in the admin money desk sheet): the one-column grid and gap it claimed are real utilities now |
 | `/wallet/withdraw` | PAGES | StepFrame | yes | yes | yes | R3 job 3: amount, review (slide), code on StepFrame. Seen via /preview/money/wallet?state=withdraw* |
 
 ## Member: welcome
