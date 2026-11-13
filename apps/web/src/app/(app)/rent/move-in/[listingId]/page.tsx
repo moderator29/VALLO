@@ -98,7 +98,10 @@ export default async function MoveInPage({ params }: { params: Promise<{ listing
       subtitle={copy.lede}
       fallback={`/listing/${listing.id}`}
       width="narrow"
-      actions={listing.verified ? <span className="nf-detail-verified">{copy.verified}</span> : undefined}
+      /* The claim only where it is true (lib/trust/claims.ts: a listing is
+         verified only when it is not an example row and its agent holds the
+         badge); never on an example. */
+      actions={listing.verified && !listing.isDemo ? <span className="nf-detail-verified">{copy.verified}</span> : undefined}
     >
       <div>
       <MoveInLedger

@@ -1087,6 +1087,95 @@
     transition: none;
   }
 
+  /*
+   * ONE BAR ON A PHONE (founder, 13 November 2026: "like X, Instagram and
+   * Facebook"). Below 64rem a page with a large header hands its back
+   * control to the app bar (LargeTitleFold): the bar reads back, title, then
+   * the bell and the menu at its end. The back is a bare glyph, no plate, its
+   * 44pt target flush with the screen's edge so the glyph sits 12px in, as a
+   * navigation bar draws it. The page's own back and large title step aside
+   * (the title stays the page's h1 for a screen reader).
+   */
+  .nf-app-header__lead {
+    display: contents;
+  }
+  /* The in-page back (BackControl `round`): no plate, the primary ink, a
+     quiet tint under the finger, and the 44pt target pulled out by half its
+     slack so the 20px glyph starts on the content edge. */
+  .nf-back-plain {
+    margin-inline-start: -0.75rem;
+    border-radius: var(--nf-radius-control);
+    color: var(--nf-content-primary);
+    transition: background-color var(--nf-duration-fast) var(--nf-ease-standard);
+  }
+  @media (hover: hover) {
+    .nf-back-plain:hover {
+      background: var(--nf-interactive-hover);
+    }
+  }
+  .nf-back-plain:active {
+    background: var(--nf-interactive-hover);
+  }
+  .nf-back-plain:focus-visible {
+    outline: var(--nf-focus-ring-width) solid var(--nf-focus-ring);
+    outline-offset: -2px;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .nf-back-plain {
+      transition: none;
+    }
+  }
+  .nf-bar-back {
+    margin-inline-start: calc(var(--nf-space-md) * -1);
+    border-radius: var(--nf-radius-control);
+    color: var(--nf-content-primary);
+  }
+  .nf-bar-back:focus-visible {
+    outline: var(--nf-focus-ring-width) solid var(--nf-focus-ring);
+    outline-offset: -2px;
+  }
+  .nf-app-header__title {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-family: var(--nf-font-display);
+    font-size: var(--nf-text-body-lg);
+    font-weight: 600;
+    color: var(--nf-content-primary);
+  }
+  @media (max-width: 63.999rem) {
+    .nf-app-header[data-page-back] .nf-app-header__fold {
+      display: none;
+    }
+    .nf-app-header[data-page-back] .nf-app-header__btn[aria-expanded] {
+      order: 99;
+      margin-inline: 0 calc(var(--nf-space-2xs) * -1);
+    }
+    /* !important because the control carries Tailwind's inline-grid, and the
+       utilities layer outranks this one for a normal declaration. */
+    :root[data-page-back] :is(.nf-ph-large__row, .nf-ph-row) > [data-nav-back] {
+      display: none !important;
+    }
+    :root[data-page-back] :is(.nf-ph-large__title, .nf-ph-row__title) {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip-path: inset(50%);
+      white-space: nowrap;
+    }
+    :root[data-page-back] .nf-ph-large {
+      margin-block-start: 0;
+    }
+  }
+  @media (min-width: 64rem) {
+    .nf-app-header__lead {
+      display: none;
+    }
+  }
+
   /* The desk strip (spec 8.2). */
   .nf-ph-desk {
     display: flex;

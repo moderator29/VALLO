@@ -88,19 +88,27 @@ export function ListingAmenityTiles({
           aria-label={`+${count} ${more}`}
           data-testid="amenity-plates-more"
         >
-          <IconPlate size="md" shape="round" tone="solid">
+          {/* The neutral plate, like every plate beside it: the white solid
+              disc read as a different control (founder, 13 November 2026). */}
+          <IconPlate size="md" shape="round">
             <span className="nf-numeric">+{count}</span>
           </IconPlate>
           <span>{more}</span>
         </a>
       </li>
     );
+    /* Without a limit it is the Amenities section's full list: the same
+       plates, wrapping, so the page draws amenities one way only. */
+    const capped = limit !== undefined;
     return (
-      <ul className="nf-amenity-plates" data-testid="amenity-plates">
+      <ul
+        className={capped ? "nf-amenity-plates" : "nf-amenity-plates nf-amenity-plates--all"}
+        data-testid={capped ? "amenity-plates" : "amenity-plates-all"}
+      >
         {shown.map((code, i) => (
           <li
             key={code}
-            className={i === 4 ? "nf-amenity-plate nf-amenity-plate--wide" : "nf-amenity-plate"}
+            className={capped && i === 4 ? "nf-amenity-plate nf-amenity-plate--wide" : "nf-amenity-plate"}
             data-amenity={code}
           >
             <IconPlate size="md" shape="round">

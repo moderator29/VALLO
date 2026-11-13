@@ -215,7 +215,7 @@ export function MoveInLedger({
             </span>
             {copy.payAfter}
           </span>
-          {listing.verified && (
+          {listing.verified && !listing.isDemo && (
             <span className="inline-flex items-center gap-2xs">
               <UiIcon name="verified" size={12} />
               {copy.verified}

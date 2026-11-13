@@ -1,6 +1,4 @@
 import { UiIcon, type UiIconName } from "@/design-system/icons/UiIcon";
-import { BrandIcon } from "@/design-system/icons/BrandIcon";
-import type { TieredObjectName } from "@/design-system/icons/object-assets";
 import { DetailGlyph } from "./DetailGlyph";
 import type { Listing } from "@/lib/listings/types";
 import type { ListingAccessView } from "@/lib/listings/access-queries";
@@ -39,35 +37,14 @@ import { getDictionary } from "@vallo/i18n";
  * shared scale in `Screen.tsx`. No object here sits on a tile, a chip or a
  * ring: the mark sits on the surface with its label beside it.
  * ---------------------------------------------------------------------------
- * THE ROWS ARE MARKED WITH THE REAL THING (Session 3, Stage 5; D29 Tier A).
- *
- * A generator, an inverter and its battery, a prepaid meter, a water tank and
- * a borehole pump are things a Nigerian renter has stood beside, so the row
- * that states one is marked with that object, realistic, at 40px, rather than
- * with a line glyph standing in for it. An object is drawn only for what the
- * agent STATED: a row nobody answered keeps the quiet line glyph, because an
- * object beside "not answered" would picture a thing nobody claimed. The
- * prepaid meter, which used to hang under the light as a sentence led by a
- * tick, is its own row with its own object: a tick is a promise, and this is
- * a fact about how the light is paid for.
+ * ONE ICON FAMILY (13 November 2026). The rows used to carry realistic 3D
+ * objects (a generator, a meter, a borehole pump) for a stated answer. The
+ * founder asked for the listing page to use one icon family, and these were
+ * the only illustrations among line glyphs, so every row now wears its line
+ * glyph on the page's one plate, answered or not. The prepaid meter keeps its
+ * own row: a fact about how the light is paid for, not a promise.
  * ---------------------------------------------------------------------------
  */
-
-/** The object a stated backup is, when it is a thing with a picture. */
-const BACKUP_OBJECT: Record<string, TieredObjectName> = {
-  GENERATOR: "generator",
-  INVERTER: "inverter-battery",
-  SOLAR: "inverter-battery",
-  GENERATOR_INVERTER: "generator",
-};
-
-/** The object a stated water supply is. Mains and tanker water is stored. */
-const WATER_OBJECT: Record<string, TieredObjectName> = {
-  TREATED_MAINS: "water-tank",
-  BOREHOLE: "borehole-pump",
-  PUMPED_STORAGE: "water-tank",
-  TANKER: "water-tank",
-};
 
 /* The grid, backup and water words live in the dictionary
    (`experienceDetail.utilities`), with the article reasoning below kept
@@ -128,7 +105,6 @@ export function ListingUtilities({
       <Row
         notAnswered={copy.notAnswered}
         icon="bolt"
-        object={utilities.powerBackup ? BACKUP_OBJECT[utilities.powerBackup] : undefined}
         term={copy.light}
         answered={powerAnswered}
         value={
@@ -147,7 +123,6 @@ export function ListingUtilities({
         <Row
           notAnswered={copy.notAnswered}
           icon="bolt"
-          object="prepaid-meter"
           term={copy.prepaidMeter}
           answered
           value={<span className={`block ${TYPE.body}`}>{copy.prepaidMeterBody}</span>}
@@ -157,7 +132,6 @@ export function ListingUtilities({
       <Row
         notAnswered={copy.notAnswered}
         icon="droplet"
-        object={utilities.waterSupply ? WATER_OBJECT[utilities.waterSupply] : undefined}
         term={copy.water}
         answered={Boolean(water)}
         value={
@@ -175,11 +149,11 @@ export function ListingUtilities({
       {utilities.hasEstateAccess && (
         /* The same row anatomy as `Row` below: a <dl>'s <div> may hold only
            <dt> and <dd>, and the object and an inner wrapper sat between them
-           here (axe `definition-list` and `dlitem`, Round 3 sweep). The object
+           here (axe `definition-list` and `dlitem`, Round 3 sweep). The glyph
            floats inside the term, as in every other row. */
         <div className="flow-root py-md">
           <dt className={TYPE.label}>
-            <BrandIcon name="estate-gate" size={40} className="nf-utility-object float-left mr-sm" />
+            <DetailGlyph name="gate" className="float-left mr-sm" />
             {copy.gate}
           </dt>
           <dd className="mt-2xs min-w-0 overflow-hidden">
@@ -232,7 +206,6 @@ export function ListingUtilities({
 
 function Row({
   icon,
-  object,
   term,
   answered,
   value,
@@ -240,8 +213,6 @@ function Row({
 }: {
   notAnswered: string;
   icon: UiIconName;
-  /** The real object this row states, drawn only when it was stated. */
-  object?: TieredObjectName;
   term: string;
   answered: boolean;
   value: React.ReactNode;
@@ -258,13 +229,11 @@ function Row({
   return (
     <div className="flow-root py-md first:pt-0">
       <dt className={TYPE.label}>
-        {/* The plate's own box, floated, so the term and the answer run
-            beside it as they did beside the glass object it replaced. */}
-        {object && answered ? (
-          <BrandIcon name={object} size={40} className="nf-utility-object float-left mr-sm" />
-        ) : (
-          <DetailGlyph name={icon} className="float-left mr-sm" />
-        )}
+        {/* The line glyph on the page's one plate, floated so the term and
+            the answer run beside it. The 3D objects (a generator, a meter, a
+            borehole) went on 13 November 2026: the founder asked for one icon
+            family, and they were the only illustrations among line glyphs. */}
+        <DetailGlyph name={icon} className="float-left mr-sm" />
         {term}
       </dt>
       <dd className="mt-2xs min-w-0 overflow-hidden">

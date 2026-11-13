@@ -382,6 +382,12 @@ export function AppShell({
                of them, and that row does not fit a full lockup on a phone. */
             data-tail={signedIn ? "account" : "signed-out"}
           >
+            {/* THE PAGE'S WAY BACK, IN THIS BAR (founder, 13 November 2026:
+                "like X and Instagram", one bar). A large page header portals
+                its back control here on a phone (`LargeTitleFold`), its title
+                shows beside it, and the menu moves to the row's end. Empty on
+                every screen without one. */}
+            <span className="nf-app-header__lead" />
             <button
               type="button"
               aria-label={t.a11y.openMenu}

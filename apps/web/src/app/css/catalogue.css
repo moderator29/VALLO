@@ -1893,6 +1893,14 @@
   .nf-detail-head__title {
     min-width: 0;
   }
+  /* The price's column: the figure, and under it whatever explains the
+     figure (the currency guide), right-aligned with it. */
+  .nf-detail-head__pricebox {
+    display: grid;
+    justify-items: end;
+    gap: var(--nf-space-3xs);
+    min-width: 0;
+  }
   .nf-detail-head__price {
     display: flex;
     align-items: baseline;
@@ -2189,12 +2197,6 @@
     .nf-detail-grid .nf-detail-tabs {
       margin-inline: 0;
       padding-inline: 0;
-    }
-    /* The move-in figure steps with the viewport (detail-m.css), and in the
-       two-column page its column is about half the viewport, so at 1280 the
-       full figure ran to the card's edge. It steps with the column instead. */
-    .nf-detail-grid .nf-movein-hero .nf-summary__figure {
-      font-size: min(var(--nf-text-figure-xl), 4.5vw);
     }
   }
 

@@ -742,7 +742,11 @@ export default async function ListingDetailPage({
       <p className={TYPE.rowMeta} data-testid="space-closed">
         {sx.closed.body.replace("{area}", areaName)}
       </p>
-      <ButtonLink href={realSoonHref} variant="primary" className="mt-block w-full">
+      {/* Below lg the sticky bar carries this same button, so the panel
+          says the consequence and stops there (founder, 13 November 2026:
+          two "More spaces in" buttons on one screen). From lg the panel is
+          the side rail and the sticky bar is gone, so the button is here. */}
+      <ButtonLink href={realSoonHref} variant="primary" className="mt-block w-full max-lg:hidden">
         {sx.closed.action.replace("{area}", areaName)}
       </ButtonLink>
     </div>
@@ -901,8 +905,8 @@ export default async function ListingDetailPage({
     { id: "overview", label: sx.sections.overview },
     ...(hasCost ? [{ id: "cost", label: sx.sections.costs }] : []),
     { id: "amenities", label: sx.sections.amenities },
-    { id: "trust", label: sx.sections.trust },
     { id: "location", label: sx.map.tab },
+    { id: "trust", label: sx.sections.trust },
     { id: "reviews", label: sx.sections.reviews },
   ];
   /* The gallery, the viewer and the grid share one row: photos and videos in
@@ -912,10 +916,10 @@ export default async function ListingDetailPage({
     { id: "overview", label: sx.sections.overview, icon: "home" },
     ...(hasCost ? [{ id: "cost", label: sx.sections.costs, icon: "receipt" as UiIconName }] : []),
     { id: "amenities", label: sx.sections.amenities, icon: "circle-check" },
-    { id: "trust", label: sx.sections.trust, icon: "shield-check" },
     ...(facts.length > 0 ? [{ id: "details", label: sx.sections.details, icon: "clipboard-list" as UiIconName }] : []),
-    ...(media.length > 1 ? [{ id: "photos", label: sx.sections.photos, icon: "picture" as UiIconName }] : []),
     { id: "location", label: sx.map.tab, icon: "location" },
+    ...(media.length > 1 ? [{ id: "photos", label: sx.sections.photos, icon: "picture" as UiIconName }] : []),
+    { id: "trust", label: sx.sections.trust, icon: "shield-check" },
     { id: "agent", label: sx.sections.agent, icon: "user" },
     { id: "reviews", label: sx.sections.reviews, icon: "star" },
   ];
@@ -1121,9 +1125,23 @@ export default async function ListingDetailPage({
                   </div>
 
                   <div className="nf-detail-head mt-sm">
-                    <h1 className="nf-detail-head__title nf-h2 [overflow-wrap:anywhere]">{listing.title}</h1>
-                    {headline}
+                    <h1 className="nf-detail-head__title nf-h2 break-words">{listing.title}</h1>
+                    <div className="nf-detail-head__pricebox">
+                      {headline}
+                      {/* CURRENCY SLOT: the currency guide line goes here,
+                          directly under the rent figure, e.g.
+                          <PriceGuide minor={listing.priceMinor} currency={listing.currency} compact below />.
+                          The move-in line follows below the head. */}
+                    </div>
                   </div>
+
+                  {/* The move-in total, once, as a line under the price; the
+                      parts are the Costs section's (founder, 13 November 2026). */}
+                  {isRental && !isSale && (
+                    <div className="mt-sm" data-testid="detail-lead-move-in">
+                      <ListingMoveInBlock listing={listing} locale={locale} t={t} />
+                    </div>
+                  )}
 
                   <p className="nf-detail-meta mt-xs">
                     {/* A rating only with the reviews behind it; a count only
@@ -1242,9 +1260,6 @@ export default async function ListingDetailPage({
                 */}
                 {isRental && !isSale && (
                   <div className="flex flex-col gap-sm">
-                    <div data-testid="detail-lead-move-in">
-                      <ListingMoveInBlock listing={listing} locale={locale} t={t} />
-                    </div>
                     {/* Backlog row 26: rent and move-in total against the
                         reader's own income, on their device, never an example. */}
                     {!listing.isDemo && (
@@ -1289,67 +1304,13 @@ export default async function ListingDetailPage({
                   index={{ label: sx.sections.navLabel, toggle: sx.sections.toggle, items: sectionIndex }}
                 />
 
-                {/* ---------------------------------------- the description */}
-                <Section id="about" title={t.catalogue.detail.description} divided className="scroll-mt-16">
-                  <ListingAbout
-                    paragraphs={aboutParagraphs}
-                    labels={{ readMore: t.catalogue.detail.readMore, showLess: t.catalogue.detail.showLess }}
-                  />
-                </Section>
-
-                {/* ------------------------------------------- listed by */}
-                <Section id="agent" title={t.catalogue.detail.agent} divided className="scroll-mt-16">
-                    {/*
-                      THE LAST MILE OF TRACK G, AND IT IS ONE PROP.
-                      `listings.listing_role` has been live and not null on
-                      every row since Track G migration 3, and this card has
-                      mounted `ListerRoleLine` for it since the same week. The
-                      value simply never travelled: the read did not select the
-                      column. It does now, so "Listed by the owner" is on a
-                      screen rather than in a constant with a passing test.
-                      Absent draws no line, which is what this card drew before.
-
-                      AND THE NAME, WHICH IS THE OTHER HALF. Two of the three
-                      sentences carry `{name}` and the public read could not
-                      fill either one, so on all 64 live listings, every one of
-                      them `listing_role = 'agent'`, the line appeared on zero
-                      screens. `listing.listerName` comes from
-                      `public.listing_lister`, a published view of exactly two
-                      columns added by migration `20260923103838`. It carries a
-                      name and nothing else about the person.
-                    */}
-                  {listerCardNode}
-                  <OwnershipSeenMark
-                    seenAt={ownershipSeen}
-                    label={t.supply.register.owner.proof.seenMark}
-                    className="mt-2xs"
-                  />
-                  {/* B7: the reply-time line, only when the record supports one. */}
-                  <ReplyTimeLine listingId={listing.id} locale={locale} className="mt-2xs" />
-                  <ValloRecord record={record} t={t} locale={locale} className="mt-row" />
-                </Section>
-
-                {/* ------------------------------------------- the gallery */}
-                {/* A single photograph is already the hero; a strip of one
-                    states nothing, so it is not rendered below two. Videos
-                    are frames of it too, in the lister's order. */}
-                {media.length > 1 && (
-                  <Section id="photos" divided className="scroll-mt-16">
-                    <ListingPhotoGrid
-                      photos={listing.photos}
-                      media={media}
-                      hue={listing.hue}
-                      kind={listing.kind}
-                      title={listing.title}
-                      copy={{
-                        title: t.catalogue.detail.gallery,
-                        viewAll: t.catalogue.detail.viewAll,
-                        viewAllMedia: t.catalogue.detail.viewAllMedia,
-                      }}
-                    />
-                  </Section>
-                )}
-
+                {/*
+                  THE ORDER (founder, 13 November 2026: "more uniformed
+                  arrangements"): what it costs, what it is, what it carries,
+                  how it runs, the facts, where it is, the pictures, why to
+                  trust it, who lists it, then what others said. Each section
+                  says one thing once, on the one Section frame.
+                */}
                 {/* --------------------- 6. THE NIGERIAN NUMBER, ITEMISED */}
                 {/*
                   WHAT A TENANT WILL ACTUALLY PAY. The page used to show ONE
@@ -1428,6 +1389,14 @@ export default async function ListingDetailPage({
                     <ListingTenure listing={listing} />
                   </Section>
                 )}
+
+                {/* ---------------------------------------- the description */}
+                <Section id="about" title={t.catalogue.detail.description} divided className="scroll-mt-16">
+                  <ListingAbout
+                    paragraphs={aboutParagraphs}
+                    labels={{ readMore: t.catalogue.detail.readMore, showLess: t.catalogue.detail.showLess }}
+                  />
+                </Section>
 
                 {/* ------------------------------------------- amenities */}
                 <Section id="amenities" title={t.catalogue.detail.amenities} divided className="scroll-mt-16">
@@ -1517,30 +1486,18 @@ export default async function ListingDetailPage({
                   </Reveal>
                 )}
 
-                {/* ------------------------- WHY TRUST THIS SPACE? (D25) */}
-                {/*
-                  The dated facts, here in summary, with the door to the inner
-                  page that answers the question completely. Every fact is a
-                  date; a check that has not happened is not drawn, so a null
-                  never reads as a negative.
-                */}
-                <Reveal>
-                  <Section id="trust" title={sx.trust.title} divided className="scroll-mt-16">
-                    <TrustFacts
-                      listingId={listing.id}
-                      trust={trust}
-                      strip={
-                        /* V-03, THE PROOF STRIP: each line opens what the
-                           check is and is not. Nothing at all when nothing is
-                           dated, which today is every example listing. */
-                        <ProofStrip lines={proof} variant="full" t={forProofStrip(t)} locale={locale} />
-                      }
-                      proofCount={proof.length}
-                      locale={locale}
-                      t={t}
-                    />
-                  </Section>
-                </Reveal>
+                {/* -------------------------------------- 8. THE DETAILS */}
+                {facts.length > 0 && (
+                  <Reveal>
+                    <Section id="details" title={L.detailsTitle} divided className="scroll-mt-16">
+                      <FactGrid facts={facts} />
+                    </Section>
+                  </Reveal>
+                )}
+
+                {/* "About this place" stood here and printed the same
+                    paragraphs as the description above, word for word. One
+                    statement of a thing is enough. */}
 
                 {/* ------------------------- V-43. GETTING TO WORK FROM HERE */}
                 {commute.anchors > 0 && (
@@ -1563,49 +1520,6 @@ export default async function ListingDetailPage({
                           {t.shape.commute.locationNone.replace("{area}", listing.area || listing.city)}
                         </p>
                       )}
-                    </Section>
-                  </Reveal>
-                )}
-
-                {/* -------------------------------------- 8. THE DETAILS */}
-                {facts.length > 0 && (
-                  <Reveal>
-                    <Section id="details" title={L.detailsTitle} divided className="scroll-mt-16">
-                      <FactGrid facts={facts} />
-                    </Section>
-                  </Reveal>
-                )}
-
-                {/* "About this place" stood here and printed the same
-                    paragraphs as the description above, word for word. One
-                    statement of a thing is enough. */}
-
-                {/* ------------------------------------------ listing code */}
-                {/*
-                  THE CODE, WHERE SOMEBODY WOULD BE STANDING WHEN THEY READ IT
-                  OUT. A person on the phone to a friend about this exact flat
-                  needs nine characters, not a URL with a uuid in it. Every
-                  listing on this page is PUBLISHED, so the code always exists;
-                  it is still guarded, because the model carries it as optional
-                  and a guard is cheaper than a promise.
-                */}
-                {/* SHARE TO FEED (founder, 10 November 2026): anyone signed in may put a
-                    live listing in the feed; a guest is sent through sign-up and back. */}
-                {!isExample && (
-                  <Reveal>
-                    <Section divided>
-                      <div className="flex flex-wrap items-center gap-xs">
-                        <ShareToFeedButton listingId={listing.id} />
-                        <CopyLink path={`/listing/${listing.id}`} label={t.offPlatform.copy} />
-                      </div>
-                    </Section>
-                  </Reveal>
-                )}
-
-                {listing.reference && (
-                  <Reveal>
-                    <Section divided>
-                      <ListingCodeRow code={listing.reference} copy={t.listingReference} />
                     </Section>
                   </Reveal>
                 )}
@@ -1653,6 +1567,117 @@ export default async function ListingDetailPage({
                       file, A.3 fix 1.
                     */}
                 </Section>
+
+                {/* ------------------------------------------- the gallery */}
+                {/* A single photograph is already the hero; a strip of one
+                    states nothing, so it is not rendered below two. Videos
+                    are frames of it too, in the lister's order. */}
+                {media.length > 1 && (
+                  <Section id="photos" divided className="scroll-mt-16">
+                    <ListingPhotoGrid
+                      photos={listing.photos}
+                      media={media}
+                      hue={listing.hue}
+                      kind={listing.kind}
+                      title={listing.title}
+                      copy={{
+                        title: t.catalogue.detail.gallery,
+                        viewAll: t.catalogue.detail.viewAll,
+                        viewAllMedia: t.catalogue.detail.viewAllMedia,
+                      }}
+                    />
+                  </Section>
+                )}
+
+                {/* ------------------------- WHY TRUST THIS SPACE? (D25) */}
+                {/*
+                  The dated facts, here in summary, with the door to the inner
+                  page that answers the question completely. Every fact is a
+                  date; a check that has not happened is not drawn, so a null
+                  never reads as a negative.
+                */}
+                <Reveal>
+                  <Section id="trust" title={sx.trust.title} divided className="scroll-mt-16">
+                    <TrustFacts
+                      listingId={listing.id}
+                      trust={trust}
+                      strip={
+                        /* V-03, THE PROOF STRIP: each line opens what the
+                           check is and is not. Nothing at all when nothing is
+                           dated, which today is every example listing. */
+                        <ProofStrip lines={proof} variant="full" t={forProofStrip(t)} locale={locale} />
+                      }
+                      proofCount={proof.length}
+                      locale={locale}
+                      t={t}
+                    />
+                  </Section>
+                </Reveal>
+
+                {/* ------------------------------------------- listed by */}
+                <Section id="agent" title={t.catalogue.detail.agent} divided className="scroll-mt-16">
+                    {/*
+                      THE LAST MILE OF TRACK G, AND IT IS ONE PROP.
+                      `listings.listing_role` has been live and not null on
+                      every row since Track G migration 3, and this card has
+                      mounted `ListerRoleLine` for it since the same week. The
+                      value simply never travelled: the read did not select the
+                      column. It does now, so "Listed by the owner" is on a
+                      screen rather than in a constant with a passing test.
+                      Absent draws no line, which is what this card drew before.
+
+                      AND THE NAME, WHICH IS THE OTHER HALF. Two of the three
+                      sentences carry `{name}` and the public read could not
+                      fill either one, so on all 64 live listings, every one of
+                      them `listing_role = 'agent'`, the line appeared on zero
+                      screens. `listing.listerName` comes from
+                      `public.listing_lister`, a published view of exactly two
+                      columns added by migration `20260923103838`. It carries a
+                      name and nothing else about the person.
+                    */}
+                  {listerCardNode}
+                  <OwnershipSeenMark
+                    seenAt={ownershipSeen}
+                    label={t.supply.register.owner.proof.seenMark}
+                    className="mt-2xs"
+                  />
+                  {/* B7: the reply-time line, only when the record supports one. */}
+                  <ReplyTimeLine listingId={listing.id} locale={locale} className="mt-2xs" />
+                  <ValloRecord record={record} t={t} locale={locale} className="mt-row" />
+                </Section>
+
+                {/* ------------------------------------------ listing code */}
+                {/*
+                  THE CODE, WHERE SOMEBODY WOULD BE STANDING WHEN THEY READ IT
+                  OUT. A person on the phone to a friend about this exact flat
+                  needs nine characters, not a URL with a uuid in it. Every
+                  listing on this page is PUBLISHED, so the code always exists;
+                  it is still guarded, because the model carries it as optional
+                  and a guard is cheaper than a promise.
+                */}
+                {/* SHARE TO FEED (founder, 10 November 2026): anyone signed in may put a
+                    live listing in the feed; a guest is sent through sign-up and back. */}
+                {!isExample && (
+                  <Reveal>
+                    <Section divided>
+                      {/* One row to post it to the feed (HUNTER owns what the
+                          post does), then the plain link, stacked: a row and a
+                          button side by side read as two families. */}
+                      <div className="grid justify-items-start gap-xs">
+                        <ShareToFeedButton listingId={listing.id} />
+                        <CopyLink path={`/listing/${listing.id}`} label={t.offPlatform.copy} />
+                      </div>
+                    </Section>
+                  </Reveal>
+                )}
+
+                {listing.reference && (
+                  <Reveal>
+                    <Section divided>
+                      <ListingCodeRow code={listing.reference} copy={t.listingReference} />
+                    </Section>
+                  </Reveal>
+                )}
 
                 {/* --------------------------------------------- reviews */}
                 {/* The band renders nothing rather than inventing

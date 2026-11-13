@@ -37,10 +37,13 @@ export type TrueCostActionsCopy = {
 };
 
 function Tile({ icon, word }: { icon: UiIconName; word: string }) {
+  /* The page's one button family (founder, 13 November 2026): the glass
+     secondary button Copy address and Open in Maps already wear, icon then
+     word, not a square tile of its own. */
   return (
     <>
-      <UiIcon name={icon} size={20} className="nf-bill-tile__glyph" />
-      <span className="nf-bill-tile__word">{word}</span>
+      <UiIcon name={icon} size={16} />
+      <span className="nf-btn__label">{word}</span>
     </>
   );
 }
@@ -81,14 +84,14 @@ export function TrueCostActions({
   return (
     <ul className="nf-bill-tiles" aria-label={copy.label} data-testid="true-cost-actions">
       <li>
-        <Link href={ledgerHref} className="nf-bill-tile nf-tap" aria-label={copy.ledgerLabel} prefetch={false}>
+        <Link href={ledgerHref} className="nf-btn nf-btn--glass nf-btn--sm nf-tap" aria-label={copy.ledgerLabel} prefetch={false}>
           <Tile icon="document" word={copy.ledger} />
         </Link>
       </li>
       <li>
         <button
           type="button"
-          className="nf-bill-tile nf-tap"
+          className="nf-btn nf-btn--glass nf-btn--sm nf-tap"
           aria-label={copy.shareLabel}
           onPointerEnter={() => void mint()}
           onPointerDown={() => void mint()}
@@ -100,7 +103,7 @@ export function TrueCostActions({
       </li>
       <li>
         <AuthGate action="message">
-          <Link href={messageHref} className="nf-bill-tile nf-tap" aria-label={copy.askLabel} prefetch={false}>
+          <Link href={messageHref} className="nf-btn nf-btn--glass nf-btn--sm nf-tap" aria-label={copy.askLabel} prefetch={false}>
             <Tile icon="chat-bubble" word={copy.ask} />
           </Link>
         </AuthGate>

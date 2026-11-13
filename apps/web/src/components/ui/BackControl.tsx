@@ -31,9 +31,9 @@ import { useClientCopy } from "@/lib/i18n/client-copy";
  * `surface` picks the material for where it sits, never the size or the glyph:
  *
  *   bare    no plate: bars that paint their own control (auth, the slate).
- *   round   the 44px white circle on a soft shadow (a raised night surface
- *           in dark): founder references 44 and 45, CLEAN_UNIFIED_DIRECTION
- *           section 17. `PageHeader`, the workspace and console bars,
+ *   round   the bare glyph with a 44px target pulled to the content edge
+ *           (13 November 2026; it was the 44px white circle of references
+ *           44 and 45). `PageHeader`, the workspace and console bars,
  *           settings, support, the thread and the assistant.
  *   plate   the old base square; renders `round` now.
  *   glass   the old glass square; renders `round` now.
@@ -42,7 +42,13 @@ import { useClientCopy } from "@/lib/i18n/client-copy";
  */
 export type BackSurface = "bare" | "round" | "plate" | "glass" | "media" | "pill";
 
-const ROUND = "nf-icon-btn nf-icon-btn--round";
+/* THE BACK IS A BARE GLYPH NOW (founder, 13 November 2026: "too big and too
+   far from the edge, like X, Instagram and Facebook"). The 38pt bordered disc
+   went; the 44pt target stays, and `.nf-back-plain` (chrome.css) pulls it
+   outward so the glyph lines up with the content edge, as a navigation bar's
+   chevron does. Over a photograph (`media`, `pill`) it keeps its plate,
+   which is what keeps it legible on a bright picture. */
+const ROUND = "nf-back-plain";
 
 const SURFACE: Record<BackSurface, string> = {
   bare: "rounded-control text-[var(--nf-content-primary)] transition-colors hover:text-[var(--nf-brand-secondary)]",

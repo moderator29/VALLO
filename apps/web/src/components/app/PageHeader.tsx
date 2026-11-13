@@ -5,6 +5,7 @@ import { UiIcon } from "@/design-system/icons/UiIcon";
 import { ICON } from "@/components/app/Screen";
 import { BackControl } from "@/components/ui/BackControl";
 import { LargeTitleFold } from "./LargeTitleFold";
+import { BarBack } from "./BarBack";
 
 /**
  * Page header with the platform back flow.
@@ -95,9 +96,18 @@ export function PageHeader({
     <BackControl fallback={fallback} surface="round" {...(backLabel ? { label: backLabel } : {})} />
   ) : null;
 
+  /* The same back, handed to the app bar on a phone (BarBack, chrome.css). */
+  const barBack = back ? (
+    <BarBack
+      title={title}
+      back={<BackControl fallback={fallback} className="nf-bar-back" {...(backLabel ? { label: backLabel } : {})} />}
+    />
+  ) : null;
+
   if (variant === "large") {
     return (
       <LargeTitleFold title={title}>
+        {barBack}
         <div className="nf-ph-large__row">
           {backButton}
           {leading}
@@ -187,7 +197,7 @@ export function PageHeader({
          block dropped it below a one-line title whenever the subtitle ran to
          two or three lines (Restaurants, Price Check; integration QA,
          30 September). Without one, centring is the same thing. */
-      className={`mb-heading flex flex-wrap ${subtitle ? "items-start" : "items-center"} gap-x-md gap-y-inline rounded-lg ${
+      className={`nf-ph-row mb-heading flex flex-wrap ${subtitle ? "items-start" : "items-center"} gap-x-md gap-y-inline rounded-lg ${
         tone === "verified" ? "nf-page-header--verified" : ""
       }`}
     >
@@ -204,6 +214,7 @@ export function PageHeader({
         pseudo-element that was standing in for it.
       */}
       {backButton}
+      {barBack}
       {leading}
       <div className="min-w-0 flex-1 basis-[11rem]">
         {/*
@@ -222,7 +233,7 @@ export function PageHeader({
           hid it. A title long enough to wrap three times is a copy problem, and
           a copy problem you can read is better than one you cannot.
         */}
-        <h1 className={`nf-h2 [overflow-wrap:anywhere] ${subtitle ? "pt-[max(0px,calc((2.75rem-1lh)/2))]" : ""}`}>{title}</h1>
+        <h1 className={`nf-ph-row__title nf-h2 break-words ${subtitle ? "pt-[max(0px,calc((2.75rem-1lh)/2))]" : ""}`}>{title}</h1>
         {subtitle &&
           (subtitleHref ? (
             <Link

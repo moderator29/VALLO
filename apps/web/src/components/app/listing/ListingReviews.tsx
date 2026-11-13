@@ -1,7 +1,8 @@
 import { formatNumber, type Dictionary, type Locale, formatRating } from "@vallo/i18n/core";
 import type { ListingReview } from "@/lib/reviews/queries";
 import { UiIcon } from "@/design-system/icons/UiIcon";
-import { EmptyState, ICON, TYPE } from "@/components/app/Screen";
+import { ICON, TYPE } from "@/components/app/Screen";
+import { DetailGlyph } from "./DetailGlyph";
 import { ReportSheet } from "@/components/app/ReportSheet";
 import { RatingStars } from "@/components/ui/RatingStars";
 import { RatingSummary, type RatingBreakdown } from "@/components/ui/RatingSummary";
@@ -57,16 +58,20 @@ export function ListingReviews({
 }) {
   if (reviewCount === 0 && reviews.length === 0) {
     return (
-      <EmptyState
-        icon="reviews"
-        title="No reviews yet"
-        body={
-          tenancy
-            ? "Tenants can review a place after they move in, and a review appears only once one has."
-            : "Nobody has stayed here through Vallo yet. A review appears once a guest actually has, and never before."
-        }
-        data-testid="reviews-empty"
-      />
+      /* One quiet row, the glyph on the page's plate beside two lines, not
+         a large centred tile over blank space (founder, 13 November 2026:
+         the empty section was mostly empty). The words are unchanged. */
+      <div className="flex items-start gap-sm" data-testid="reviews-empty">
+        <DetailGlyph name="star" className="shrink-0" />
+        <div className="min-w-0">
+          <p className="nf-body font-semibold text-[var(--nf-content-primary)]">No reviews yet</p>
+          <p className="nf-caption mt-2xs text-[var(--nf-content-muted)]">
+            {tenancy
+              ? "Tenants can review a place after they move in, and a review appears only once one has."
+              : "Nobody has stayed here through Vallo yet. A review appears once a guest actually has, and never before."}
+          </p>
+        </div>
+      </div>
     );
   }
 

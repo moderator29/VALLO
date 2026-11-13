@@ -171,32 +171,34 @@
      facts, the infrastructure objects and the section index. Tokens only;
      transform and opacity only where anything moves. */
 
-  /* THE MOVE-IN TOTAL IS THE HERO FIGURE, THE RENT ITS SECOND LINE. The
-     figure takes the figure-xl step (the one figure on the screen); the rent
-     reads at body size directly beneath it, in the secondary ink, tabular. */
-  .nf-movein-hero .nf-summary__figure {
-    /* THE FIGURE FITS ITS CARD ON ONE LINE (W12): the extra-large rung is wider
-       than a phone's card, and `₦14,700,000` broke as `₦14,7` over `00,000`,
-       which reads as two numbers. It steps down with the viewport instead
-       (10.5vw is 41px at 390), never past the rung, and never wraps. */
-    font-size: min(var(--nf-text-figure-xl), 10.5vw);
-    white-space: nowrap;
-    letter-spacing: var(--nf-tracking-figure-xl);
-    line-height: 1.05;
+  /* THE MOVE-IN TOTAL, ONE LINE UNDER THE PRICE (ListingMoveInBlock): the
+     label and the figure on one baseline, the rent beneath in the secondary
+     ink, then the way into the breakdown. The parts are the Costs section's. */
+  .nf-movein-line {
+    display: grid;
+    gap: var(--nf-space-2xs);
+    justify-items: start;
   }
-  .nf-movein-hero__rent {
-    display: block;
-    margin-block-start: var(--nf-space-2xs);
-    font-family: var(--nf-font-sans);
+  .nf-movein-line__main {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: var(--nf-space-2xs) var(--nf-space-xs);
+  }
+  .nf-movein-line__label {
     font-size: var(--nf-text-body-sm);
-    font-weight: 400;
-    letter-spacing: normal;
-    line-height: 1.4;
     color: var(--nf-content-secondary);
   }
-  .nf-movein-hero__rent-figure {
+  .nf-movein-line__figure {
+    font-family: var(--nf-font-display);
+    font-size: var(--nf-text-h4);
     font-weight: 600;
+    white-space: nowrap;
     color: var(--nf-content-primary);
+  }
+  .nf-movein-line__rent {
+    font-size: var(--nf-text-body-sm);
+    color: var(--nf-content-secondary);
     font-variant-numeric: tabular-nums;
   }
 
@@ -363,49 +365,13 @@
     color: var(--nf-content-secondary);
   }
 
+  /* Ledger, Share and Ask: a row of the page's glass buttons
+     (TrueCostActions), wrapping like the map's place actions. */
   .nf-bill-tiles {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: var(--nf-space-sm);
-    margin-top: var(--nf-space-sm);
-  }
-  .nf-bill-tile {
     display: flex;
-    width: 100%;
-    min-height: 4.5rem;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: var(--nf-space-2xs);
-    border: var(--nf-border-width) solid var(--nf-tier-card-edge);
-    border-radius: var(--nf-radius-card);
-    background: var(--nf-surface-primary);
-    box-shadow: var(--nf-card-shadow);
-    color: var(--nf-content-primary);
-    transition: scale var(--nf-duration-fast) var(--nf-ease-press);
-  }
-  .nf-bill-tile:active {
-    scale: var(--nf-press-scale);
-  }
-  .nf-bill-tile:focus-visible {
-    outline: 2px solid var(--nf-brand-secondary);
-    outline-offset: 2px;
-  }
-  .nf-bill-tile__glyph {
-    color: var(--nf-content-secondary);
-  }
-  .nf-bill-tile__word {
-    font-size: var(--nf-text-overline);
-    font-weight: 600;
-    color: var(--nf-content-secondary);
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .nf-bill-tile {
-      transition: none;
-    }
-    .nf-bill-tile:active {
-      scale: none;
-    }
+    flex-wrap: wrap;
+    gap: var(--nf-space-xs);
+    margin-top: var(--nf-space-sm);
   }
 
   /* WHY TRUST THIS SPACE: dated rows on the Plate rhythm, the date on the
@@ -484,11 +450,6 @@
     font-size: var(--nf-text-body-sm);
     font-weight: 600;
     color: var(--nf-content-secondary);
-  }
-
-  /* The real objects on the light, water, meter and gate rows. */
-  .nf-utility-object {
-    flex-shrink: 0;
   }
 
   /* THE SECTION INDEX at the anchor row's trailing end. Its panel opens from
