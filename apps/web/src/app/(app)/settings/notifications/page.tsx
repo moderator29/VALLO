@@ -9,6 +9,7 @@ import { PushDevices, type PushDeviceView } from "@/components/app/push/PushDevi
 import { PushSetting } from "@/components/app/push/PushSetting";
 import { deviceName, loadPushDevices, whenPhrase } from "@/lib/push/devices";
 import { NotificationMatrix } from "./NotificationMatrix";
+import "./notification-settings.css";
 import { SettingsLede } from "@/components/app/account/SettingsLede";
 import { SettingsInnerNav } from "@/components/app/account/SettingsInnerNav";
 import { RowLink, SettingsGroup } from "@/components/app/account/rows";
@@ -38,19 +39,16 @@ export const dynamic = "force-dynamic";
  * Notifications, channel by channel, and the phones they reach.
  *
  * ===========================================================================
- * TWO THINGS ARE MOUNTED HERE THAT WERE NOT BEFORE, AND THE SECOND IS THE ONE
- * THAT MATTERS.
+ * ONE SWITCH AT THE TOP (the founder, 13 November 2026: "Unified once allowed
+ * ... no other buttons everywhere"). `PushSetting` is "Notifications": on asks
+ * the system if needed, registers this device and turns every kind on in one
+ * write; off retires this device. The matrix below it is only a way to turn a
+ * kind OFF later: every Push cell is on unless somebody turned it off.
  *
- * `PushSetting` is the one place asking about notifications is not an
- * interruption, because the person came here to ask us.
- *
- * `PushDevices` is what makes the permission reversible. WITHOUT A DEVICE
- * LIST, PUSH IS SOMETHING A PERSON CAN GRANT AND CANNOT TAKE BACK except by
- * uninstalling Vallo, which is not a setting, it is an ultimatum.
- *
- * Both are below the existing channel toggles rather than above them. The
- * toggles are what a person came for; the devices are the fine print of a
- * decision they have already made.
+ * `PushDevices`, at the foot, is what makes the permission reversible for the
+ * OTHER devices on the account. WITHOUT A DEVICE LIST, PUSH IS SOMETHING A
+ * PERSON CAN GRANT AND CANNOT TAKE BACK except by uninstalling Vallo, which is
+ * not a setting, it is an ultimatum.
  *
  * ===========================================================================
  * THE ROWS ARE FORMATTED HERE, IN THE SERVER COMPONENT.
@@ -106,11 +104,30 @@ export default async function NotificationsSettingsPage() {
           ]}
         />
       )}
+      {push.state === "signed-in" && (
+        <section id="settings-push-master" className="mb-block">
+          {/* The same live rows the list at the foot draws, by `device_ref`.
+              The switch reads on only when THIS device's ref is among them:
+              see `components/app/push/device-state.ts`. */}
+          <div className="nf-nset__card">
+            <PushSetting
+              copy={t.experienceSettings.notifications.push}
+              devices={rows.map((row) => ({ id: row.id, ref: row.ref }))}
+            />
+          </div>
+        </section>
+      )}
       <section id="settings-notifications" className="scroll-mt-28">
         {account.state === "signed-in" ? (
           /* R3-14: event by channel, and quiet hours, each cell a preference
-             delivery reads (NotificationMatrix's header says which). */
-          <NotificationMatrix initial={account.settings.notifications} copy={t.experienceSettings.notifications} />
+             delivery reads (NotificationMatrix's header says which). Keyed by
+             the stored answers, so the master switch's one write (every kind
+             on) redraws the cells when the page refreshes. */
+          <NotificationMatrix
+            key={JSON.stringify(account.settings.notifications)}
+            initial={account.settings.notifications}
+            copy={t.experienceSettings.notifications}
+          />
         ) : (
           <NotificationsCard t={forNotificationsCard(t)} />
         )}
@@ -138,10 +155,6 @@ export default async function NotificationsSettingsPage() {
       {push.state === "signed-in" && (
         <section id="settings-push" className="mt-block scroll-mt-28 space-y-block">
           <h2 className="nf-title-sm text-content">{copy.notificationsNav.navPhone}</h2>
-          {/* The same live rows the list below draws, by `device_ref`. The
-              control reads on only when THIS device's ref is among them: see
-              `components/app/push/device-state.ts`. */}
-          <PushSetting registeredRefs={rows.map((row) => row.ref)} />
           <PushDevices rows={rows} readable={push.readable} />
         </section>
       )}

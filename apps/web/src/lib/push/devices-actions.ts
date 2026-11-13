@@ -28,7 +28,7 @@ import {
   SIGNED_OUT_MESSAGE,
   resolveSession,
 } from "@/lib/actions/session";
-import { revokeTokens } from "./revoke";
+import { isDeviceRef, revokeTokens } from "./revoke";
 
 const FAILED_MESSAGE =
   "We could not turn that device off just now. Nothing has changed, and the list below is still correct. Try again in a moment.";
@@ -37,6 +37,10 @@ const SETTINGS_PATH = "/settings/notifications";
 
 const oneDevice = z.object({
   deviceId: z.string().uuid("That is not a device on this account."),
+});
+
+const thisDevice = z.object({
+  deviceRef: z.string().refine(isDeviceRef, "That is not a device on this account."),
 });
 
 /**
@@ -70,6 +74,27 @@ export async function revokeAllPushDevices(): Promise<ActionResult<{ revoked: nu
   if (session.state === "signed-out") return fail(SIGNED_OUT_MESSAGE);
 
   const outcome = await revokeTokens(session.user.id, { all: true });
+  if (!outcome.ok) return fail(FAILED_MESSAGE);
+
+  revalidatePath(SETTINGS_PATH);
+  return ok({ revoked: outcome.revoked });
+}
+
+/**
+ * The master switch on Settings turned OFF: retire the device in the member's
+ * hand, named by the `device_ref` `/api/push/register` gave it
+ * (`components/app/push/device-state.ts`). The same ownership filter as
+ * above, so a ref that is not this member's retires nothing.
+ */
+export async function revokeThisPushDevice(input: unknown): Promise<ActionResult<{ revoked: number }>> {
+  const parsed = validate(thisDevice, input);
+  if (!parsed.ok) return fail(parsed.error, parsed.fieldErrors);
+
+  const session = await resolveSession();
+  if (session.state === "unconfigured") return fail(NOT_CONFIGURED_MESSAGE);
+  if (session.state === "signed-out") return fail(SIGNED_OUT_MESSAGE);
+
+  const outcome = await revokeTokens(session.user.id, { deviceRef: parsed.data.deviceRef });
   if (!outcome.ok) return fail(FAILED_MESSAGE);
 
   revalidatePath(SETTINGS_PATH);

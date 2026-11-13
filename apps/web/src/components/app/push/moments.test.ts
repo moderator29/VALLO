@@ -1,142 +1,70 @@
 import { describe, expect, it } from "vitest";
 
-import {
-  androidNeedsPrompt,
-  MAX_DECLINES,
-  NO_MEMORY,
-  offerVerdict,
-  RE_ASK_AFTER_DAYS,
-  rememberDecline,
-  type PromptMemory,
-} from "./moments";
+import { NO_MEMORY, offerVerdict, rememberDecline, rememberSystemAsked, type PromptMemory } from "./moments";
 
 /**
- * The rules that decide whether this product ever gets to notify anybody.
- *
- * The expensive mistakes are all in one direction: asking when the answer can
- * only be no, and asking again after somebody has already said no twice. Both
- * spend something that cannot be got back.
+ * The rules for the one notifications screen (the founder, 13 November 2026):
+ * shown once, at the end of first run, and a No is final on this device.
  */
 
-const DAY = 24 * 60 * 60 * 1000;
 const NOW = 1_800_000_000_000;
+const YEAR = 365 * 24 * 60 * 60 * 1000;
 
-describe("never spend the system prompt", () => {
-  it("does not offer when the permission is already granted", () => {
-    const verdict = offerVerdict({
-      moment: "listing_published",
-      permission: "granted",
-      memory: NO_MEMORY,
-      now: NOW,
-    });
-    expect(verdict).toEqual({ show: false, because: "granted" });
+describe("the one ask", () => {
+  it("is shown on a device that has never been asked and is not registered", () => {
+    expect(offerVerdict({ permission: "default", registered: false, memory: NO_MEMORY })).toEqual({ show: true });
   });
 
-  it("does not offer once the system prompt has been spent on a no", () => {
-    /* THE IMPORTANT ONE. After `denied` there is nowhere for a Yes to go:
-       the system will not ask again and the page cannot make it. Offering
-       here produces a person who agreed and got nothing. */
-    const verdict = offerVerdict({
-      moment: "conversation_active",
-      permission: "denied",
-      memory: NO_MEMORY,
-      now: NOW,
-    });
-    expect(verdict).toEqual({ show: false, because: "denied" });
+  it("is shown where the permission is already granted but this device is not registered, so a tap registers it and turns everything on", () => {
+    /* Android 12 and below grant the permission at install; a browser may
+       have allowed Vallo before. Skipping them left the device silent. */
+    expect(offerVerdict({ permission: "granted", registered: false, memory: NO_MEMORY })).toEqual({ show: true });
   });
 
-  it("does not offer where push does not exist", () => {
-    const verdict = offerVerdict({
-      moment: "booking_requested",
-      permission: "unsupported",
-      memory: NO_MEMORY,
-      now: NOW,
+  it("is not shown where this device is granted and registered: there is nothing to turn on", () => {
+    expect(offerVerdict({ permission: "granted", registered: true, memory: NO_MEMORY })).toEqual({
+      show: false,
+      because: "registered",
     });
-    expect(verdict).toEqual({ show: false, because: "unsupported" });
+  });
+
+  it("is never shown over a refused permission or where push does not exist", () => {
+    expect(offerVerdict({ permission: "denied", registered: false, memory: NO_MEMORY })).toEqual({
+      show: false,
+      because: "denied",
+    });
+    expect(offerVerdict({ permission: "unsupported", registered: false, memory: NO_MEMORY })).toEqual({
+      show: false,
+      because: "unsupported",
+    });
   });
 });
 
-describe("asking at a moment of success", () => {
-  it("offers at each of the four moments, in the words for that moment", () => {
-    const moments = ["listing_published", "booking_requested", "conversation_active", "settings_opened", "joined"] as const;
-    const offers = moments.map((moment) => {
-      const verdict = offerVerdict({ moment, permission: "default", memory: NO_MEMORY, now: NOW });
-      expect(verdict.show).toBe(true);
-      return verdict.show ? verdict.offer : "";
+describe("a No is final (never asked again from inside the product)", () => {
+  it("Not now once means never again on this device, however long after", () => {
+    const memory = rememberDecline(NO_MEMORY, NOW);
+    for (const permission of ["default", "granted"] as const) {
+      expect(offerVerdict({ permission, registered: false, memory })).toEqual({ show: false, because: "answered" });
+    }
+    /* No clock in the rule: a decline from years ago is still a No. */
+    const longAgo = rememberDecline(NO_MEMORY, NOW - 3 * YEAR);
+    expect(offerVerdict({ permission: "default", registered: false, memory: longAgo }).show).toBe(false);
+  });
+
+  it("a device that reached the system prompt is never shown the screen again, whatever it answered", () => {
+    const memory = rememberSystemAsked(NO_MEMORY);
+    expect(offerVerdict({ permission: "default", registered: false, memory })).toEqual({
+      show: false,
+      because: "answered",
     });
-    /* Each moment names the specific thing that will not be missed, so no
-       two are the same sentence. */
-    expect(new Set(offers).size).toBe(moments.length);
-    expect(offers[0]).toContain("asks about it");
-    expect(offers[1]).toContain("host answers");
-  });
-});
-
-describe("re-asking, which is where pestering starts", () => {
-  it("says nothing for thirty days after a no", () => {
-    const declined = rememberDecline(NO_MEMORY, NOW);
-    const nextDay = offerVerdict({
-      moment: "conversation_active",
-      permission: "default",
-      memory: declined,
-      now: NOW + DAY,
+    expect(offerVerdict({ permission: "granted", registered: false, memory })).toEqual({
+      show: false,
+      because: "answered",
     });
-    expect(nextDay).toEqual({ show: false, because: "too_soon" });
-
-    const almost = offerVerdict({
-      moment: "conversation_active",
-      permission: "default",
-      memory: declined,
-      now: NOW + (RE_ASK_AFTER_DAYS * DAY - 1),
-    });
-    expect(almost).toEqual({ show: false, because: "too_soon" });
   });
 
-  it("may offer once more after thirty days and a fresh moment", () => {
-    const declined = rememberDecline(NO_MEMORY, NOW);
-    const later = offerVerdict({
-      moment: "listing_published",
-      permission: "default",
-      memory: declined,
-      now: NOW + RE_ASK_AFTER_DAYS * DAY,
-    });
-    expect(later.show).toBe(true);
-  });
-
-  it("never offers a third time, however long it has been", () => {
-    let memory: PromptMemory = NO_MEMORY;
-    memory = rememberDecline(memory, NOW);
-    memory = rememberDecline(memory, NOW + RE_ASK_AFTER_DAYS * DAY);
-    expect(memory.declines).toBe(MAX_DECLINES);
-
-    const muchLater = offerVerdict({
-      moment: "listing_published",
-      permission: "default",
-      memory,
-      now: NOW + 365 * DAY,
-    });
-    expect(muchLater).toEqual({ show: false, because: "asked_enough" });
-  });
-
-  it("a no on our own screen is not a no to the system, and is counted separately", () => {
-    const declined = rememberDecline(NO_MEMORY, NOW);
-    expect(declined.systemAsked).toBe(false);
-    expect(declined.declines).toBe(1);
-  });
-});
-
-describe("Android below 13 has no prompt to explain", () => {
-  it("skips the explanation where the permission is granted at install", () => {
-    expect(androidNeedsPrompt(32)).toBe(false);
-    expect(androidNeedsPrompt(30)).toBe(false);
-  });
-
-  it("shows it on Android 13 and above, where it is a runtime request", () => {
-    expect(androidNeedsPrompt(33)).toBe(true);
-    expect(androidNeedsPrompt(34)).toBe(true);
-  });
-
-  it("errs towards showing it when the version cannot be read", () => {
-    expect(androidNeedsPrompt(null)).toBe(true);
+  it("reads a decline stored by the old rules as a decline", () => {
+    const old: PromptMemory = { declinedAt: NOW - 40 * 24 * 60 * 60 * 1000, declines: 1, systemAsked: false };
+    expect(offerVerdict({ permission: "default", registered: false, memory: old }).show).toBe(false);
   });
 });

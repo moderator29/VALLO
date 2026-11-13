@@ -3,8 +3,8 @@
   reference 1, notification-stack-onboarding.jpg): a near-black card, the
   notifications stacked in depth (front one frosted glass with a hairline
   light edge and one warm glow behind the mark; each behind narrower, dimmer,
-  lower), a confident title, the promises as rows with soft plates, and one
-  wide capsule.
+  lower), a confident title, one sentence, one wide capsule and a quiet Not
+  now.
 */
 @layer components {
   .nf-push-ask {
@@ -98,27 +98,10 @@
     letter-spacing: var(--nf-tracking-tight);
     color: var(--nf-content-primary);
   }
-  .nf-push-ask__rows {
-    display: flex;
-    flex-direction: column;
-    gap: var(--nf-space-sm);
-  }
-  .nf-push-ask__row {
-    display: flex;
-    align-items: center;
-    gap: var(--nf-space-sm);
+  .nf-push-ask__body {
+    text-align: center;
     font-size: var(--nf-text-body-sm);
     color: var(--nf-content-secondary);
-  }
-  .nf-push-ask__plate {
-    flex: none;
-    display: grid;
-    place-items: center;
-    width: 2.5rem;
-    height: 2.5rem;
-    border-radius: var(--nf-radius-plate);
-    background: var(--nf-glass-fill);
-    color: var(--nf-content-primary);
   }
   .nf-push-ask__actions {
     display: flex;

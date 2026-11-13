@@ -1,138 +1,120 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import type { Dictionary } from "@vallo/i18n/core";
 
 import { Button } from "@/components/ui/Button";
 import { LogoMark } from "@/design-system/brand/Logo";
-import { UiIcon, type UiIconName } from "@/design-system/icons/UiIcon";
+import { looksNative } from "@/lib/native/platform";
+import { banner } from "@/lib/ui/toast";
 import "./push-prompt.css";
 
-import { failureMessage } from "./device-state";
-import { currentPermission, enrol, failureReference, onIosHomeScreenApp } from "./enrol";
-import {
-  offerVerdict,
-  readMemory,
-  rememberDecline,
-  rememberSystemAsked,
-  writeMemory,
-  type PushMoment,
-} from "./moments";
-import { banner } from "@/lib/ui/toast";
+import { failureMessage, readLocalDevice } from "./device-state";
+import { currentPermission, failureReference, onIosHomeScreenApp, readNativePermission } from "./enrol";
+import { offerVerdict, readMemory, rememberDecline, writeMemory } from "./moments";
+import { turnOnNotifications } from "./turn-on";
 
-/* What the prompt did, said by the one banner (founder, 7 November 2026). */
-const WORDS = { on: "Notifications are on", signIn: "Open sign in", retry: "Try again" };
+export type PushCopy = Dictionary["experienceSettings"]["notifications"]["push"];
 
 /**
- * THE SCREEN THAT COMES BEFORE THE SYSTEM PROMPT.
+ * THE ONE NOTIFICATIONS SCREEN, AT THE END OF FIRST RUN.
  *
  * ===========================================================================
- * WHY THERE IS A SCREEN AT ALL, WHEN THE SYSTEM ALREADY HAS ONE.
+ * ONE SCREEN, ONE BUTTON, ONE QUIET NOT NOW (the founder, 13 November 2026).
  *
- * Because the system's can only be shown once. On iOS a refusal is effectively
- * permanent; on the web a denied permission cannot be re-prompted from the
- * page. So the expensive question is asked only after a cheap one has already
- * been answered yes. A No here costs nothing and can be asked again in a
- * month. A No there costs the channel for the life of the install.
+ * Turn on notifications asks the system (the native prompt in the shell, the
+ * browser's on the web) and, when it is granted, registers this device and
+ * switches push on for every kind in the member's settings in one write
+ * (`turn-on.ts`). Nothing else anywhere has to be turned on.
+ *
+ * Not now, or a refusal of the system prompt, goes on into the app, and this
+ * screen never comes back on this device (`moments.ts`). The way back is the
+ * Notifications switch on Settings.
+ *
+ * MOUNTED IN FIRST RUN ONLY. A gate test (`push-mounts.test.ts`) fails the
+ * suite if it is mounted anywhere else; the in-flow asks it used to power are
+ * gone.
  *
  * ===========================================================================
- * THREE THINGS THIS COMPONENT WILL NOT DO.
- *
- * IT WILL NOT APPEAR ON A COLD START. It takes a `moment`, and the four
- * moments in `moments.ts` are all immediately after something has gone right
- * for the person. A caller that mounts this on a home screen has misused it,
- * and the moments are a closed union so that misuse has to be deliberate.
- *
- * IT WILL NOT ASK TWICE IN A MONTH, OR THREE TIMES EVER. `offerVerdict`
- * decides, this only renders.
- *
- * IT WILL NOT TOUCH THE SYSTEM PROMPT EXCEPT FROM THE YES HANDLER, in the
- * same tick as the click. `Notification.requestPermission()` is gated on user
- * activation and an await before it can lose the gesture, so `enrol` is
- * called directly from `onClick` with nothing awaited first.
+ * THE SYSTEM PROMPT IS TOUCHED ONLY FROM THE TURN ON HANDLER, in the same
+ * tick as the click: `turnOnNotifications` calls `enrol` on its first line.
  */
 
 export type PushPromptProps = {
-  /** Why now. See `moments.ts`; there are exactly four legitimate answers. */
-  moment: PushMoment;
+  copy: PushCopy;
   /**
-   * Told what happened, so a caller can say thank you in its own words.
+   * Told what happened, so first run can move on.
    *
    * "enrolled" means ONLY that `/api/push/register` answered ok for this
-   * device, and it always carries the `device_ref` the server named. A
-   * permission the browser already holds is "allowed", never "enrolled": that
-   * confusion is how a control came to read on over zero rows (see
-   * `device-state.ts`).
+   * device. "declined" is Not now or a refusal of the system prompt.
+   * "unavailable" is a device where the screen was not shown at all: no push
+   * here, already refused, already answered, or already registered.
    */
-  onSettled?: (
-    outcome: "enrolled" | "allowed" | "declined" | "unavailable",
-    deviceRef?: string,
-  ) => void;
+  onSettled?: (outcome: "enrolled" | "declined" | "unavailable", deviceRef?: string) => void;
 };
 
-export function PushPrompt({ moment, onSettled }: PushPromptProps) {
-  /* One piece of state rather than three, so deciding to show the prompt is
-     a single transition and cannot half apply. `null` means "not decided
-     yet", which is distinct from "decided not to show". */
-  const [shown, setShown] = useState<{ offer: string } | null>(null);
+export function PushPrompt({ copy, onSettled }: PushPromptProps) {
+  const router = useRouter();
+  /* `null` is "not decided yet", which is distinct from "decided not to
+     show". */
+  const [shown, setShown] = useState<boolean | null>(null);
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
-    /* DECIDED AFTER MOUNT, ON THE CLIENT, AND THERE IS NO OTHER OPTION.
-       Both inputs are per device and neither exists on the server: the
-       permission state is a browser or operating system fact, and the memory
-       is in `localStorage`. Computing this during render would make the
-       server produce "unsupported" and the client produce something else,
-       which is a hydration mismatch. The lint rule's suggested alternatives
-       are for state that could be derived during render; this cannot be. */
-    const verdict = offerVerdict({
-      moment,
-      permission: currentPermission(),
-      memory: readMemory(),
-      now: Date.now(),
-    });
-    if (verdict.show) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- see above
-      setShown({ offer: verdict.offer });
-    } else {
-      onSettled?.(verdict.because === "granted" ? "allowed" : "unavailable");
-    }
+    /* DECIDED AFTER MOUNT, ON THE CLIENT. The permission and the memory are
+       per device and neither exists on the server. In the shell the real
+       permission is read first (`checkPermissions` never prompts), so a
+       phone that already refused Vallo is not shown a button that cannot
+       work. */
+    let cancelled = false;
+    const decide = async () => {
+      if (looksNative()) await readNativePermission();
+      if (cancelled) return;
+      const verdict = offerVerdict({
+        permission: currentPermission(),
+        registered: readLocalDevice() !== null,
+        memory: readMemory(),
+      });
+      if (verdict.show) setShown(true);
+      else {
+        setShown(false);
+        onSettled?.("unavailable");
+      }
+    };
+    void decide();
+    return () => {
+      cancelled = true;
+    };
     /* `onSettled` is deliberately not a dependency: a caller passing an
-       inline function would otherwise re-run this on every render and could
-       re-show a prompt that was just dismissed. */
+       inline function would otherwise re-run this on every render. */
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [moment]);
+  }, []);
 
-  const accept = useCallback(() => {
+  function accept(): void {
     setBusy(true);
-    /* NOT AWAITED BEFORE THE CALL. `enrol` requests the permission on its
-       first line precisely so the user activation from this click is still
-       live when it does. */
-    void enrol().then((outcome) => {
-      writeMemory(rememberSystemAsked(readMemory()));
+    /* NOT AWAITED BEFORE THE CALL: `enrol` asks for the permission first. */
+    void turnOnNotifications().then((result) => {
       setBusy(false);
-      if (outcome.ok) {
-        setShown(null);
-        banner.success(WORDS.on, { "data-testid": "banner-push-on" });
-        onSettled?.("enrolled", outcome.deviceRef);
+      if (result.kind === "on") {
+        setShown(false);
+        if (result.topicsSaved) banner.success(copy.done.on, { "data-testid": "banner-push-on" });
+        else banner.error(copy.done.topicsNotSaved, { "data-testid": "push-problem" });
+        onSettled?.("enrolled", result.deviceRef);
         return;
       }
-      if (outcome.reason === "permission_denied") {
-        /* The system prompt is now spent. Saying so plainly is better than
-           a cheerful dismissal, because the only way back is their own
-           settings and they should know that now rather than wonder later
-           why nothing arrives. */
-        setShown(null);
+      if (result.kind === "denied" || result.kind === "unsupported") {
+        /* The system said no. On into the app; Settings says how to undo it. */
+        setShown(false);
         onSettled?.("declined");
         return;
       }
-      /* Every failure says one plain sentence and the prompt stays, so the
-         person is never left with a closed prompt and a silent screen. */
-      const reference = failureReference(outcome);
-      /* Said by the one banner at the top of the screen (founder, 7 November
-         2026), with Open sign in when that is the way on, or Try again (a
-         tap on the banner is a fresh user activation for the permission). */
+      /* The system said yes and the registration failed. One plain sentence,
+         and the screen stays with Try again (a tap on the banner is a fresh
+         user activation) and Not now still beside it. */
+      const reference = failureReference(result.outcome);
       const text =
-        failureMessage(outcome.reason, {
+        failureMessage(result.outcome.reason, {
           iosHomeScreenApp: onIosHomeScreenApp(),
           where: "prompt",
           reference,
@@ -140,31 +122,28 @@ export function PushPrompt({ moment, onSettled }: PushPromptProps) {
       banner.error(text, {
         "data-testid": "push-problem",
         action:
-          outcome.reason === "signed_out"
-            ? { label: WORDS.signIn, run: () => window.location.assign("/sign-in?next=%2Fsettings%2Fnotifications") }
-            : { label: WORDS.retry, run: () => accept() },
+          result.outcome.reason === "signed_out"
+            ? { label: "Open sign in", run: () => router.push("/sign-in?next=%2Fsettings%2Fnotifications") }
+            : { label: "Try again", run: accept },
       });
     });
-  // `accept` names itself for Try again; it is stable with `onSettled`.
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [onSettled]);
+  }
 
-  const decline = useCallback(() => {
+  function decline(): void {
     writeMemory(rememberDecline(readMemory(), Date.now()));
-    setShown(null);
+    setShown(false);
     onSettled?.("declined");
-  }, [onSettled]);
+  }
 
   if (!shown) return null;
 
   return (
     /* THE FOUNDER'S REFERENCE 1 ("Never miss a moment",
        notification-stack-onboarding.jpg, 7 October): notifications stacked
-       in depth, the front one in our mark carrying the very line this moment
-       offers, then the title, one muted line, the promises as plated rows,
-       and one wide capsule. The stack is a picture of what will arrive, so it
-       is hidden from a screen reader; the words under it say it all. */
-    <section className="nf-push-ask" aria-live="polite" data-push-prompt={moment}>
+       in depth, the front one in our mark, then the title, one sentence, and
+       one wide capsule with a quiet Not now under it. The stack is a picture
+       of what will arrive, so it is hidden from a screen reader. */
+    <section className="nf-push-ask" aria-live="polite" data-push-prompt="joined">
       <div className="nf-push-ask__stack" aria-hidden="true">
         <span className="nf-push-ask__card nf-push-ask__card--3" />
         <span className="nf-push-ask__card nf-push-ask__card--2" />
@@ -174,43 +153,24 @@ export function PushPrompt({ moment, onSettled }: PushPromptProps) {
           </span>
           <span className="nf-push-ask__text">
             <span className="nf-push-ask__app">Vallo</span>
-            <span className="nf-push-ask__line">{shown.offer}</span>
+            <span className="nf-push-ask__line">{copy.ask.offer}</span>
           </span>
         </span>
       </div>
-      <h2 className="nf-push-ask__title">Get told, not left guessing</h2>
-      {/* EXACTLY WHAT WILL BE SENT, BEFORE THE PROMPT AND NOT AFTER.
-          A person who knows what they are agreeing to says yes more often
-          and regrets it less. */}
-      <ul className="nf-push-ask__rows">
-        {PROMISES.map((row) => (
-          <li key={row.text} className="nf-push-ask__row">
-            <span className="nf-push-ask__plate" aria-hidden="true">
-              <UiIcon name={row.icon} size={20} />
-            </span>
-            {row.text}
-          </li>
-        ))}
-      </ul>
+      <h2 className="nf-push-ask__title">{copy.ask.title}</h2>
+      <p className="nf-push-ask__body">
+        {copy.ask.body} {copy.ask.later}
+      </p>
       <div className="nf-push-ask__actions">
-        <Button variant="primary" full onClick={accept} disabled={busy}>
-          {busy ? "Just a moment" : "Yes, tell me"}
+        <Button variant="primary" full onClick={accept} disabled={busy} data-testid="push-ask-turn-on">
+          {busy ? copy.ask.busy : copy.ask.turnOn}
         </Button>
-        {/* Not now, never Cancel. It is a real answer and it is honoured for
-            thirty days. */}
-        <Button variant="quiet" onClick={decline} disabled={busy}>
-          Not now
+        <Button variant="quiet" onClick={decline} disabled={busy} data-testid="push-ask-not-now">
+          {copy.ask.notNow}
         </Button>
       </div>
     </section>
   );
 }
-
-/** What will be sent, as the reference's plated rows. Unchanged words. */
-const PROMISES: { icon: UiIconName; text: string }[] = [
-  { icon: "bell", text: "Bookings, messages and money." },
-  { icon: "moon", text: "Nothing at night unless it is about your money." },
-  { icon: "settings-gear", text: "Off again whenever you like, in Settings." },
-];
 
 export default PushPrompt;

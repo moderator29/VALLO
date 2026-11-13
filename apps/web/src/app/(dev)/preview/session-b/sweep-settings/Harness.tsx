@@ -314,7 +314,7 @@ export function SweepSettingsHarness({ v }: { v: string }) {
         />
         <section className="mt-block space-y-block">
           <h2 className="nf-title-sm text-content">On your phone</h2>
-          <PushSetting />
+          <PushSetting copy={t.experienceSettings.notifications.push} />
           <PushDevices
             readable
             rows={[

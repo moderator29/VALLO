@@ -576,12 +576,14 @@ export function FirstRun({
   const signInFirst = wall ? wall.primary === "sign-in" : Boolean(next && /^\/sign-in(?:[/?#]|$)/.test(next));
 
   /*
-   * THE NOTIFICATIONS STEP (the founder, 7 November 2026): a default part of
-   * joining, the way Hauslet asks right after sign-in. `PushPrompt` is the
-   * whole offer: Vallo's own screen first, the one system prompt only after a
-   * Yes, a No remembered for thirty days, and it settles itself immediately
-   * (so this beat never traps anyone) when the permission is already granted,
-   * already denied, declined recently, or push is unsupported here.
+   * THE NOTIFICATIONS STEP, THE ONLY ASK THERE IS (the founder, 7 and 13
+   * November 2026). One screen: Turn on notifications asks the system and,
+   * on a yes, registers this device and switches every kind on in one write;
+   * Not now, or a refusal, goes on into the app and is never asked again
+   * from inside the product. `PushPrompt` settles itself at once (so this
+   * beat never traps anyone) where push is unsupported, already refused,
+   * already answered on this device, or this device is already registered.
+   * After this, Settings > Notifications is the one switch.
    */
   if (beat === "notify") {
     return (
@@ -593,7 +595,7 @@ export function FirstRun({
         <Lockup onCanvas />
         <div className="nf-gs-question">
           <div className="nf-gs-notify nf-gs-rise">
-            <PushPrompt moment="joined" onSettled={() => leave(next ?? "/home")} />
+            <PushPrompt copy={t.experienceSettings.notifications.push} onSettled={() => leave(next ?? "/home")} />
           </div>
         </div>
       </div>

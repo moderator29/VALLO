@@ -53,6 +53,33 @@ export type NotificationSettings = {
 export const NOTIFICATION_TOPICS = ["bookings", "messages", "wallet", "listings", "social", "marketing"] as const;
 export type NotificationTopic = (typeof NOTIFICATION_TOPICS)[number];
 
+/**
+ * THE ONE YES (the founder, 13 November 2026: "once allowed from iPhone then
+ * it should turn notis for all"). The settings patch a granted notification
+ * permission writes, in ONE `updateSettings` call: an explicit push answer of
+ * yes for every topic (`wantsPush` rule 1, so it outranks an old per-topic
+ * boolean that was about email) and the price-drop push. Nothing else is
+ * touched: the email booleans and quiet hours stay as the member left them.
+ *
+ * Marketing is in it on purpose. The screen that asks says offers are
+ * included, so the tap is the explicit consent `wantsPush` waits for, and the
+ * Push cell on Settings turns it off again.
+ */
+export function everyPushOn(): {
+  notifications: {
+    savedPriceDrops: true;
+    channels: Record<NotificationTopic, { push: true }>;
+  };
+} {
+  const channels = Object.fromEntries(NOTIFICATION_TOPICS.map((topic) => [topic, { push: true as const }]));
+  return {
+    notifications: {
+      savedPriceDrops: true,
+      channels: channels as Record<NotificationTopic, { push: true }>,
+    },
+  };
+}
+
 export const VISIBILITY_LEVELS = ["everyone", "verified", "connections"] as const;
 export type VisibilityLevel = (typeof VISIBILITY_LEVELS)[number];
 

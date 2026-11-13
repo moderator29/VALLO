@@ -1,87 +1,39 @@
 /**
- * WHEN TO ASK FOR THE NOTIFICATION PERMISSION, AND WHEN NEVER TO.
+ * WHETHER THE ONE NOTIFICATIONS SCREEN IS SHOWN ON THIS DEVICE.
  *
  * ===========================================================================
- * THE ONE FACT THAT MAKES THIS FILE NECESSARY.
+ * THERE IS ONE ASK, AND IT IS AT THE END OF JOINING (the founder, 13 November
+ * 2026: "Unified once allowed from iPhone then it should turn notis for all
+ * that one no other buttons everywhere ... we need organized").
  *
- * ASKING ON FIRST LAUNCH IS HOW AN APPLICATION GETS REFUSED PERMANENTLY. On
- * iOS a declined system prompt cannot be shown again, ever: the only way back
- * is the Settings app, and almost nobody goes. On the web a denied permission
- * cannot be re-prompted from the page at all. There is exactly one system
- * prompt per install and it is spent the first time it is shown.
+ * The asks that used to appear inside the product (after a listing was
+ * published, after a booking request, in a conversation that had become one)
+ * are gone. The screen is shown once, as the last beat of first run
+ * (`FirstRun.tsx`), and after that the only place notifications are switched
+ * on or off is the master switch on Settings > Notifications (`PushSetting`).
  *
- * So the system prompt is never the first thing a person sees. A Vallo screen
- * comes first, in our own words, saying precisely what will be sent and
- * offering Not now. Only a Yes on that screen may call the system API. A No
- * on our screen costs nothing, because our screen can be shown again and the
- * system's cannot.
- *
- * This is also what the Android manifest has said all along in its own words:
- * do not spend the one prompt a person reliably grants on a channel that
- * cannot deliver anything. That comment was right, and it stays right; what
- * changes is that the channel can now deliver.
+ * The discipline that made this file stays: Vallo's own screen comes first,
+ * and the operating system's prompt is reached only from its Turn on button,
+ * because there is one system prompt per install and on iOS a refusal to it
+ * is permanent.
  *
  * ===========================================================================
- * ASK AT THE MOMENT THE VALUE IS OBVIOUS, WHICH IS ALWAYS A MOMENT OF
- * SUCCESS, NEVER A MOMENT OF FRICTION.
+ * A NO IS FINAL. Not now on our screen, or a refusal of the system prompt,
+ * and the screen is never shown again on this device. There is no thirty day
+ * re-ask any more: a member who wants notifications later has the switch on
+ * Settings, which is always there and never asks unbidden.
  *
- * Every moment below is immediately after a person has just done something
- * that worked, and every offer names the specific thing they will now not
- * miss. A person who has just published a listing wants to know when somebody
- * asks about it; a person who has just sent a booking request wants to know
- * when the host answers. That is a very different question from one asked on
- * a home screen, and it converts differently by a large multiple.
- *
- * NEVER on the home screen. NEVER on a payment screen: a permission dialogue
- * over a payment reads as a trick and costs the payment as well as the
- * permission. NEVER inside the sign-up FORM either; but the founder ruled on
- * 7 November 2026 that offering notifications is a DEFAULT STEP of joining,
- * the way Hauslet asks right after sign-in. So `joined` exists: the last beat
- * of first run (`FirstRun.tsx`), after the account exists and the interests
- * question is answered, with the person already inside Vallo's own screens.
- * The discipline stands unchanged: Vallo's screen first, the one system
- * prompt only after a Yes, and a No honoured for thirty days.
- *
- * ===========================================================================
- * EVERYTHING HERE IS PURE. It takes a moment and a small record of what has
- * been asked before and returns a verdict. No browser API is touched, so
- * every rule below is testable, which matters because the cost of getting the
- * re-ask rule wrong is not a bug report, it is a person who has silently
- * turned the application off.
+ * EVERYTHING HERE IS PURE apart from the two storage helpers at the foot, so
+ * every rule is tested in the node suite.
  */
-
-/** The moments at which asking is allowed at all. */
-export type PushMoment =
-  /** A lister has just published their first listing. */
-  | "listing_published"
-  /** A guest has just sent their first booking request. */
-  | "booking_requested"
-  /** A second reply in one conversation: this is now a conversation. */
-  | "conversation_active"
-  /** A person has opened the notification settings themselves, which is the
-      one place asking is not an interruption, because they came to ask us. */
-  | "settings_opened"
-  /** The last step of first run: the account exists, the interests question
-      is behind them, and joining is the moment (the founder, 7 Nov 2026). */
-  | "joined";
-
-/** What the person will actually get, in the words they are shown. */
-export const MOMENT_OFFER: Readonly<Record<PushMoment, string>> = {
-  listing_published: "Know the moment somebody asks about it.",
-  booking_requested: "Know the moment the host answers.",
-  conversation_active: "Know when they write back.",
-  settings_opened: "Choose what reaches your phone.",
-  joined: "Booking answers, messages and your money, as they happen.",
-};
 
 /**
  * What this device remembers about being asked.
  *
  * Per device, deliberately, and kept in `localStorage` rather than on the
- * profile. The permission itself is per device: a person who granted it on
- * their phone has not granted it on the tablet they just picked up, and
- * asking them on the tablet is correct. A server-side record would suppress
- * that second, legitimate ask.
+ * profile: the permission itself is per device. The stored shape is the one
+ * earlier builds wrote, so a device that declined under the old rules is read
+ * as having declined.
  */
 export type PromptMemory = {
   /** When our own screen was last declined, as epoch milliseconds. */
@@ -94,86 +46,55 @@ export type PromptMemory = {
 
 export const NO_MEMORY: PromptMemory = { declinedAt: null, declines: 0, systemAsked: false };
 
-/** How long to wait after a No before the subject may be raised again. */
-export const RE_ASK_AFTER_DAYS = 30;
-
-/** Two declines is an answer. A third offer is pestering. */
-export const MAX_DECLINES = 2;
-
 /** What the browser or the operating system currently says. */
 export type PermissionState = "granted" | "denied" | "default" | "unsupported";
 
 export type OfferVerdict =
-  | { show: false; because: "granted" | "denied" | "unsupported" | "too_soon" | "asked_enough" }
-  | { show: true; offer: string };
+  | { show: false; because: "registered" | "denied" | "unsupported" | "answered" }
+  | { show: true };
 
 /**
- * Should the Vallo screen be shown at this moment?
+ * Should the one screen be shown on this device?
  *
- * The order matters and each refusal is a different fact:
+ *  - `denied`: the system prompt is spent; only the phone's own Settings can
+ *    undo it, and the Settings screen says so.
+ *  - `unsupported`: no push here at all (iOS Safari outside the home screen
+ *    app, an old browser).
+ *  - `answered`: this device has already said Not now, or already reached the
+ *    system prompt. A No is final; the Settings switch is the way back.
+ *  - `registered`: the permission is granted AND this device is registered,
+ *    so there is nothing to turn on.
  *
- *  - `granted`: there is nothing to ask for.
- *  - `denied`: THE SYSTEM PROMPT IS SPENT. Showing our screen now would lead
- *    somewhere that cannot work, and a Yes that produces nothing is worse
- *    than never having offered. What belongs here instead is a line on the
- *    settings screen telling the person where in their own settings to turn
- *    it back on, which is the only route left.
- *  - `unsupported`: an older Android browser, or iOS Safari on a site that
- *    has not been installed to the home screen, where web push does not
- *    exist at all.
- *  - `too_soon` and `asked_enough`: the re-ask rules below.
+ * A permission that is granted on a device that is NOT registered (Android
+ * 12 and below grant it at install; a browser that allowed Vallo before) is
+ * shown the screen: its Turn on registers the device and switches every kind
+ * on, which an already granted permission would otherwise never do.
  */
 export function offerVerdict(input: {
-  moment: PushMoment;
   permission: PermissionState;
+  /** Whether this device holds a registration (`readLocalDevice`). */
+  registered: boolean;
   memory: PromptMemory;
-  now: number;
 }): OfferVerdict {
-  const { moment, permission, memory, now } = input;
+  const { permission, registered, memory } = input;
 
-  if (permission === "granted") return { show: false, because: "granted" };
   if (permission === "denied") return { show: false, because: "denied" };
   if (permission === "unsupported") return { show: false, because: "unsupported" };
-
-  if (memory.declines >= MAX_DECLINES) return { show: false, because: "asked_enough" };
-
-  if (memory.declinedAt !== null) {
-    const elapsed = now - memory.declinedAt;
-    if (elapsed < RE_ASK_AFTER_DAYS * 24 * 60 * 60 * 1000) {
-      return { show: false, because: "too_soon" };
-    }
+  if (memory.declines > 0 || memory.declinedAt !== null || memory.systemAsked) {
+    return { show: false, because: "answered" };
   }
-
-  return { show: true, offer: MOMENT_OFFER[moment] };
+  if (permission === "granted" && registered) return { show: false, because: "registered" };
+  return { show: true };
 }
 
-/**
- * Record a No on our own screen.
- *
- * Note what this does NOT do: it does not record a No to the SYSTEM prompt.
- * That one is held by the browser or the operating system, is readable as
- * `denied`, and is not ours to remember or to second-guess.
- */
+/** Record a Not now on our own screen. */
 export function rememberDecline(memory: PromptMemory, now: number): PromptMemory {
   return { ...memory, declinedAt: now, declines: memory.declines + 1 };
 }
 
+/** Record that the system prompt was reached, whatever it answered. */
 export function rememberSystemAsked(memory: PromptMemory): PromptMemory {
   return { ...memory, systemAsked: true };
-}
-
-/**
- * Is the Android explanation screen worth showing on this handset at all?
- *
- * `POST_NOTIFICATIONS` is a runtime permission only on Android 13, API 33,
- * and above. Below that the permission is granted at install and NO PROMPT
- * EXISTS, so showing an explanation screen there asks somebody to agree to
- * something that already happened. The screen is skipped and registration
- * proceeds directly.
- */
-export function androidNeedsPrompt(apiLevel: number | null): boolean {
-  if (apiLevel === null) return true;
-  return apiLevel >= 33;
 }
 
 const MEMORY_KEY = "vallo.push.prompt";
@@ -182,10 +103,9 @@ const MEMORY_KEY = "vallo.push.prompt";
  * Read the memory, never throwing.
  *
  * `localStorage` throws outright in a private window on some browsers and in
- * a web view with site data blocked, and this runs on a path where a throw
- * would take a page down. A device that cannot remember is treated as a
- * device that has never been asked, which errs towards offering once too
- * often rather than towards never offering at all.
+ * a web view with site data blocked. A device that cannot remember is treated
+ * as one that has never been asked; the screen is only ever reached from
+ * first run, so that costs at most one more offer.
  */
 export function readMemory(): PromptMemory {
   try {

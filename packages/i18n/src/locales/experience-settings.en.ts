@@ -84,6 +84,40 @@ export const experienceSettingsEn = {
       save: "Save quiet hours",
     },
     saved: "Saved",
+    /*
+     * THE ONE NOTIFICATIONS CONTROL (the founder, 13 November 2026: "once
+     * allowed ... it should turn notis for all ... no other buttons
+     * everywhere"). `ask` is the single screen at the end of first run;
+     * `master` is the same control as a switch at the top of Settings. A yes
+     * to either turns push on for every kind at once.
+     */
+    push: {
+      ask: {
+        title: "Turn on notifications",
+        body: "One tap and you hear about everything: bookings, messages, payments, price drops and offers. Email and the inbox in the app carry on as they are.",
+        offer: "Booking answers, messages and your money, as they happen.",
+        later: "You can turn any kind off later in Settings.",
+        turnOn: "Turn on notifications",
+        notNow: "Not now",
+        busy: "Just a moment",
+      },
+      master: {
+        label: "Notifications",
+        on: "On for this device. Everything below reaches you; switch off any kind you do not want.",
+        off: "Off for this device. Turn on to hear about bookings, messages, payments and the rest.",
+        checking: "Checking this device.",
+        blockedPhone: "Notifications are blocked for Vallo. Allow Vallo in your phone's Settings, then come back.",
+        blockedBrowser: "Notifications are blocked for Vallo in this browser. Allow them in the site settings beside the address, then come back.",
+        openSettings: "Open Settings",
+        unsupported: "This browser cannot show notifications. On an iPhone, add Vallo to your home screen and open it from there.",
+      },
+      done: {
+        on: "Notifications are on",
+        off: "Notifications are off for this device",
+        topicsNotSaved: "This device is on, but we could not switch every kind on. Turn the switch off and on again in Settings.",
+        offFailed: "We could not turn this device off just now. Try again in a moment.",
+      },
+    },
   },
 
   /* --------------------------------------------------- language and currency */

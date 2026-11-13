@@ -84,7 +84,6 @@ import { addQuestion } from "@/lib/enquiry/renter-questions";
 import { feedback } from "@/lib/ui/feedback";
 import type { AccountCheckView } from "@/lib/messages/account-check";
 import type { ChargeOffer } from "@/lib/messages/charge-offer";
-import { PushPrompt } from "@/components/app/push/PushPrompt";
 import { DayDivider, UNREAD_DIVIDER_ID, UnreadDivider } from "@/components/app/messages/ThreadDividers";
 import { QuotedReply, type QuotedMessage } from "@/components/app/messages/QuotedReply";
 import { AttachmentRow } from "@/components/app/messages/AttachmentRow";
@@ -735,12 +734,6 @@ export function ThreadView({
   const [inspected, setInspected] = useState(inspectedInitial);
   const [confirmBusy, setConfirmBusy] = useState(false);
   const [confirmNote, setConfirmNote] = useState<string | null>(null);
-  /* STORE-04: the push question at a real moment. Once this person has sent
-     a message into a thread the other side has already written in, it is a
-     conversation, and "know the moment they reply" is worth asking.
-     `PushPrompt` itself decides whether to show (never twice in thirty days,
-     never after two refusals, never when already granted). */
-  const [conversationActive, setConversationActive] = useState(false);
   const itemsRef = useRef(items);
   useEffect(() => {
     itemsRef.current = items;
@@ -1063,7 +1056,6 @@ export function ThreadView({
       }
       if (done.state === "sent" && done.result.ok) {
         adoptResult(tempId, done.result.data.id, lagosTimeLabel(done.result.data.createdAt));
-        if (itemsRef.current.some((m) => !m.mine)) setConversationActive(true);
       } else markFailed(tempId);
     },
     [conversationId, adoptResult, markFailed],
@@ -1201,7 +1193,6 @@ export function ThreadView({
         if (result.ok) {
           void forgetVoice(tempId);
           adoptResult(tempId, result.data.messageId, lagosTimeLabel(result.data.createdAt));
-          if (itemsRef.current.some((m) => !m.mine)) setConversationActive(true);
         } else markFailed(tempId, result.error || VOICE_WORDS.failed, passive);
       } catch {
         const landed = retryPayloads.current.get(tempId);
@@ -2245,9 +2236,6 @@ export function ThreadView({
           />
         </div>
       )}
-
-
-      {conversationActive ? <PushPrompt moment="conversation_active" /> : null}
 
       {/* --------------------------------------------------------- composer */}
       {pendingFile && (

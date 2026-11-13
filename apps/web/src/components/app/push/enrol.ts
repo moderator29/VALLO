@@ -17,9 +17,10 @@ import {
  * ===========================================================================
  * THE ORDER IS THE WHOLE THING, AND IT IS THE OPPOSITE OF THE OBVIOUS ONE.
  *
- * Nothing in this file may run before a person has said Yes on the Vallo
- * screen. `components/app/push/moments.ts` decides whether that screen is
- * shown; `PushPrompt` shows it; only its Yes handler calls `enrol`. The
+ * Nothing in this file may run before a person has tapped Turn on: the one
+ * screen at the end of first run (`PushPrompt`, shown when `moments.ts` says)
+ * or the Notifications switch on Settings (`PushSetting`). Both reach `enrol`
+ * only through `turn-on.ts`, from the tap itself. The
  * system prompt is reached on the LAST line of a deliberate sequence, never
  * on a page load, because there is one system prompt per install and a
  * refusal to it is, on iOS, permanent.

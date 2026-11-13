@@ -2,7 +2,6 @@
 
 import { KeptPriceNote, useKeptCopy } from "@/components/app/offline/KeptPriceNote";
 import { PhoneGateLink } from "@/components/app/PhoneGateLink";
-import { PushPrompt } from "@/components/app/push/PushPrompt";
 import { isPhoneGate } from "@/lib/actions/envelope";
 import { useActionState, useEffect, useId, useMemo, useState, type CSSProperties } from "react";
 import { banner } from "@/lib/ui/toast";
@@ -266,10 +265,6 @@ export function ReserveTable({
         >
           {w.seeBookings}
         </Link>
-        {/* The moment the value of a notification is plain: the restaurant's
-            answer is coming. After the success sheet, never over it;
-            PushPrompt decides whether to ask at all (moments.ts). */}
-        {successClosed || !success ? <PushPrompt moment="booking_requested" /> : null}
       </div>
     );
   }

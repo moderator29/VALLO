@@ -72,7 +72,7 @@ export const SLICES = {
   resetCodeForm: ["auth", "authFlow", "signUp"],
   resetPasswordForm: ["auth", "authFlow", "signUp"],
   signUpOptions: ["auth", "common", "landing", "publicDoors", "side", "stays"],
-  welcomeFlow: ["auth", "common", "interests", "landing", "moveIn", "onboardingMotion", "pickers", "platform", "shape", "side", "signUp", "stays", "success", "welcomeCards"],
+  welcomeFlow: ["auth", "common", "experienceSettings", "interests", "landing", "moveIn", "onboardingMotion", "pickers", "platform", "shape", "side", "signUp", "stays", "success", "welcomeCards"],
   interestChoices: ["common", "interests", "platform"],
   stayStackCard: ["catalogue", "common", "restaurantPage", "signUp", "stays", "success"],
   accountToggles: ["settings", "shape"],
@@ -98,6 +98,8 @@ export const NARROW = {
   },
   proofStrip: { trustVisible: ["proof"] },
   welcomeFlow: {
+    /* The one notifications screen at the end of first run (`PushPrompt`). */
+    experienceSettings: ["notifications"],
     shape: ["wall"],
     signUp: ["hearAbout"],
   },

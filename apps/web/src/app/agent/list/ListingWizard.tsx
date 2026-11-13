@@ -77,7 +77,6 @@ import { forgetUploadPath, resumableUpload, stableUploadPath } from "@/lib/agent
 import { SUPABASE_URL } from "@/lib/supabase/env";
 import { StepFrame, type StepAction, type StepSaveState } from "@/components/ui/StepFrame";
 import { ListingSentForReview } from "./ListingSentForReview";
-import { PushPrompt } from "@/components/app/push/PushPrompt";
 import { StatusPill, toneForStatus } from "@/components/ui/StatusPill";
 import { successCopy, type SuccessWords } from "@/lib/ui/success-moments";
 import { EMPTY_COMPOUND_FORM, compoundPayload } from "@/lib/listings/compound";
@@ -1837,8 +1836,6 @@ export function ListingWizard({
                     </ButtonLink>
                   </p>
                 ) : null}
-                {/* Sent: the lister now wants to know when somebody asks. */}
-                <PushPrompt moment="listing_published" />
               </>
             ) : (
               <div className="nf-lw-publish__send mt-heading grid grid-cols-1 gap-md">
