@@ -331,6 +331,7 @@ function ListingRow({
   selection,
   payoff,
   identityPending,
+  stats,
 }: {
   t: WorkspaceCopy;
   /** The lister's identity is not approved yet: a listing in review reads "Waiting on identity". */
@@ -520,6 +521,17 @@ function ListingRow({
               </span>
             </p>
           )}
+
+          {/* Listing stats: only this lister's own figures (my_listing_stats),
+              on a listing that has been live. Nothing when they could not be read. */}
+          {stats && listing.publishedAt ? (
+            <ListingStatsRow
+              compact
+              className="mt-2xs text-[length:var(--nf-text-overline)]"
+              label={listingStatsEn.agentLabel}
+              items={agentStatItems({ publishedAt: listing.publishedAt, figures: stats.figures, now: new Date(stats.at), locale })}
+            />
+          ) : null}
         </div>
       </div>
 
@@ -699,6 +711,8 @@ export function ListingsWorkspace({
   ownerCopy,
   liveCopy,
   liveArrivalId,
+  stats,
+  statsAt = 0,
 }: {
   identityPending?: boolean | undefined;
   t: WorkspaceCopy;
@@ -734,6 +748,10 @@ export function ListingsWorkspace({
   /** V-31: listings whose owner has an open "still available?" question. */
   ownerAsks?: string[];
   ownerCopy?: Dictionary["landlord"]["owner"];
+  /** Listing stats: the lister's own views and saves by listing id; null or absent draws none. */
+  stats?: Record<string, StatsFigures> | null;
+  /** When the page read them, so the days live match between server and browser. */
+  statsAt?: number;
 }) {
   /* The bar's search lands here with `?q=`, so it is a real narrowing and
      not a field that does nothing. */
@@ -940,6 +958,7 @@ export function ListingsWorkspace({
                     ownerAsk={ownerAsks.includes(listing.id)}
                     ownerCopy={ownerCopy}
                     payoff={payoffId === listing.id ? liveCopy : null}
+                    stats={stats?.[listing.id] ? { figures: stats[listing.id]!, at: statsAt } : null}
                     selection={
                       selecting
                         ? { selected: selected.includes(listing.id), onToggle: (on, shift) => toggle(listing.id, on, shift) }
@@ -978,6 +997,7 @@ export function ListingsWorkspace({
                   onDelete={scheduleDelete}
                   closedReason={closed[listing.id]}
                   closeCopy={closeCopy}
+                  stats={stats?.[listing.id] ? { figures: stats[listing.id]!, at: statsAt } : null}
                 />
               ))}
           </ul>

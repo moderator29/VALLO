@@ -130,7 +130,7 @@ export const COVERAGE: readonly CoverageGroup[] = [
   { doc: M("cases-and-safety"), routes: ["/admin/trust", "/admin/cases", "/admin/cases/[id]", "/admin/alerts", "/admin/appeals", "/admin/standing", "/admin/weight-withheld", "/admin/blocked-terms", "/admin/circle", "/admin/social", "/admin/roommates", "/admin/account-deletions"] },
   { doc: M("support-desk"), routes: ["/admin/support", "/admin/support-lead", "/admin/doc-feedback"] },
   { doc: M("offers-and-deals-desk"), routes: ["/admin/offers", "/admin/offers/[id]"] },
-  { doc: M("operations-and-tools"), routes: ["/admin/operations", "/admin/operations/providers", "/admin/crashes", "/admin/field-speed", "/admin/call-usage", "/admin/analytics", "/admin/front-door", "/admin/retention", "/admin/compliance", "/admin/switches", "/admin/settings", "/admin/copilot"] },
+  { doc: M("operations-and-tools"), routes: ["/admin/operations", "/admin/operations/providers", "/admin/crashes", "/admin/field-speed", "/admin/call-usage", "/admin/analytics", "/admin/analytics/listings", "/admin/analytics/listings/[listingId]", "/admin/front-door", "/admin/retention", "/admin/compliance", "/admin/switches", "/admin/settings", "/admin/copilot"] },
 ];
 
 /**

@@ -3,6 +3,7 @@ import { countOf } from "@vallo/i18n/core";
 import { readInternalIds } from "@/lib/admin/internal-accounts";
 import { getSendBackReasons } from "@/lib/admin/reads/review-reasons";
 import { getBookingOutcomes, getPriceCheckDemand, getSupplySeries, getThinAreas } from "@/lib/admin/reads/analytics";
+import { getListingViewTotals } from "@/lib/admin/reads/listing-stats";
 import type { CollectedRange } from "@/lib/admin/reads/shapes";
 import { LiveRefresh } from "../_components/LiveRefresh";
 import { AnalyticsView } from "./AnalyticsView";
@@ -12,6 +13,7 @@ import { analyticsContext } from "@/lib/admin/copilot/contexts/analytics";
 export const dynamic = "force-dynamic";
 
 const RANGES: readonly CollectedRange[] = ["30d", "90d", "12m"];
+const RANGE_DAYS: Record<CollectedRange, number> = { "30d": 30, "90d": 91, "12m": 365 };
 
 function requestTime(): number {
   return Date.now();
@@ -32,13 +34,15 @@ export default async function AdminAnalyticsPage({
   const params = await searchParams;
   const range = RANGES.find((r) => r === params.range) ?? "30d";
   const now = requestTime();
-  const [bookings, supply, thin, demand, internal, reasons] = await Promise.all([
+  const [bookings, supply, thin, demand, internal, reasons, views] = await Promise.all([
     getBookingOutcomes(range, now),
     getSupplySeries(range, now),
     getThinAreas(5),
     getPriceCheckDemand(range, now),
     readInternalIds(),
     getSendBackReasons(now),
+    /* Listing stats: views in the range, from the daily rollup. */
+    getListingViewTotals(RANGE_DAYS[range]),
   ]);
   return (
     <>
@@ -51,6 +55,7 @@ export default async function AdminAnalyticsPage({
         thin={thin.state === "ok" ? thin.data : null}
         demand={demand.state === "ok" ? demand.data : null}
         sentBack={reasons.state === "ok" ? reasons.data.filter((r) => r.count > 0) : null}
+        views={views.state === "missing" ? "missing" : views.state === "ok" ? views.data : null}
       />
       {/* C10: the figures above leave these accounts out; the count is read, not assumed. */}
       <p className="nf-caption mt-block">

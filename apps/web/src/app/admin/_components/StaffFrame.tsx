@@ -66,6 +66,8 @@ export const STAFF_EXTRA_DESKS: Partial<Record<StaffScope, { href: string; label
   ],
   support_lead: [{ href: "/admin/account-deletions", label: "Account deletions" }],
   marketing: [{ href: "/admin/account-deletions", label: "Account deletions" }],
+  /* Listing stats: the read-only analyst reads the Listings desk too. */
+  analyst: [{ href: "/admin/analytics/listings", label: "Listing analytics" }],
 };
 
 export function StaffFrame({ staff, name, children }: { staff: StaffAccess; name: string; children: ReactNode }) {

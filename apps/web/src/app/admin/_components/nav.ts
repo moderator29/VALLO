@@ -260,6 +260,8 @@ export const ADMIN_PRIMARY: AdminDestination[] = [
     /* A6: the first-party front door funnel and the invite codes (A5). */
     children: [
       { key: "front-door", href: "/admin/front-door", icon: ui("trending-up"), label: "Front door" },
+      /* Listing stats: views, saves, enquiries and viewing requests by listing, area and lister. */
+      { key: "listing-analytics", href: "/admin/analytics/listings", icon: ui("eye"), label: "Listings" },
       /* V-80: how fast the app is on the phones people use. */
       { key: "field-speed", href: "/admin/field-speed", icon: ui("bolt"), label: "Field speed" },
     ],
@@ -361,7 +363,7 @@ export const ADMIN_GROUPS: AdminGroup[] = [
       { key: "compliance", label: "Compliance", items: pick("compliance") },
     ],
   },
-  { key: "g-intelligence", label: "Intelligence", icon: glyph("bars"), sections: [{ key: "intelligence", label: null, items: pick("analytics", "front-door", "field-speed", "trust", "account-deletions", "audit") }] },
+  { key: "g-intelligence", label: "Intelligence", icon: glyph("bars"), sections: [{ key: "intelligence", label: null, items: pick("analytics", "listing-analytics", "front-door", "field-speed", "trust", "account-deletions", "audit") }] },
   { key: "g-knowledge", label: "Knowledge Centre", icon: ui("document"), sections: [{ key: "knowledge", label: null, items: pick("handbook", "manual", "doc-feedback") }] },
   { key: "g-settings", label: "Settings", icon: ui("settings-gear"), sections: [{ key: "settings", label: null, items: pick("settings", "switches", "reference", "examples", "help") }] },
 ];

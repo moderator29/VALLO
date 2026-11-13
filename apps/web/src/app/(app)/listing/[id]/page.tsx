@@ -39,7 +39,8 @@ import {
 import { isModestExample } from "@/lib/listings/example-imagery";
 import { ListingCompound } from "@/components/app/listing/ListingCompound";
 import { ListingService } from "@/components/app/listing/ListingService";
-import { RecordViews } from "@/components/app/search/RecordViews";
+import { ListingViewBeacon } from "@/components/app/listing/ListingViewBeacon";
+import { ListingStats } from "@/components/app/listing/ListingStats";
 import { ListingNeighbours } from "@/components/app/listing/ListingNeighbours";
 import { readFlooding, readNeighbours } from "@/lib/around/pulse-queries";
 import { flagIsOn, NEIGHBOURS_FLAG, SHOW_ME_FLAG } from "@/lib/flags/read";
@@ -1051,8 +1052,10 @@ export default async function ListingDetailPage({
 
         {/* Nothing rendered. Puts this place in the recently-viewed memory the
             search page offers back, whichever way it was reached. */}
-        {/* V-73: this listing was opened (counted once per person per day). */}
-        <RecordViews opened={listing.id} />
+        {/* Listing stats: this listing was opened, counted from the browser once
+            the page has been on screen for a second, once per person per day
+            (lib/listings/stats). Never for an example. */}
+        {!listing.isDemo && <ListingViewBeacon listingId={listing.id} />}
         {/* B2: with the card's own glance (photo, price line, mark), so
             Home's "Looked at recently" draws a real small card. */}
         <RecordVisit glance={cardGlance(listing, locale, t.catalogue.card)} />
@@ -1396,6 +1399,10 @@ export default async function ListingDetailPage({
                     paragraphs={aboutParagraphs}
                     labels={{ readMore: t.catalogue.detail.readMore, showLess: t.catalogue.detail.showLess }}
                   />
+                  {/* Days on Vallo, views and saves: its own cached read, streamed. */}
+                  <Suspense fallback={null}>
+                    <ListingStats listingId={listing.id} isDemo={listing.isDemo} publishedAt={listing.publishedAt} locale={locale} className="mt-sm" />
+                  </Suspense>
                 </Section>
 
                 {/* ------------------------------------------- amenities */}

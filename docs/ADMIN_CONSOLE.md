@@ -1237,7 +1237,7 @@ names its figures as price checks and does not call them searches.
 | Panel | Source | State today |
 |---|---|---|
 | Price checks | `price_check_events` rows at stage `submit` in the range, against the same length of time before it (exact count), with a spark per bucket | real |
-| Listing views | nothing records a listing view | Not recorded, Request A8 |
+| Listing views | sum of `opens` in `listing_daily_stats` for real listings in the range, against the same length of time before it (`getListingViewTotals`, `lib/admin/reads/listing-stats.ts`); opens the Listings desk below | real once `listing_stats_2026-11-13.sql` is applied; Not recorded until then |
 | Successful bookings | exact count of `bookings` confirmed or completed, created in the range, against the same length of time before it | real; zero on 22 September |
 | Checks answered | outcomes `answered` over checks submitted in the range | real; a dash while nothing was checked |
 | Demand vs supply | price checks submitted per bucket beside listings created per bucket (examples excluded) | real, both series |
@@ -1256,6 +1256,43 @@ prefix past 50,000 rows), so no total is capped.
 
 The render also draws an "All areas" filter; it is not built, because the
 figures that vary by area already list their areas.
+
+### 14.1 Listings (Analytics > Listings, `/admin/analytics/listings`)
+
+Added 13 November 2026 with the stats row on every listing page ("12 days on
+Vallo | 340 views | 18 saves"). `?range=7d`, `30d` (default) or `90d`. Admins
+and super admins, and staff holding the read-only `analyst` scope (it is on
+their staff frame beside the Trust overview). Reads:
+`lib/admin/reads/listing-stats.ts`, each one SQL function over the daily
+rollup, all in parallel; nothing scans saved items, conversations or viewing
+requests per request.
+
+| Panel | Source |
+|---|---|
+| Views, Saves, Enquiries, Viewing requests | `admin_listing_stats_daily` over twice the range, split into the range and the one before it, with a spark per day (per week on 90 days) |
+| From a view to the next step | saves, enquiries and viewing requests as a share of views in the range; a dash when there were no views |
+| Views per day | the same days, as the area chart |
+| Saves, enquiries and viewing requests per day | the same days, grouped bars |
+| Top listings by views, by saves | `admin_listing_stats_ranked` grouped by listing; each opens the listing's own page |
+| By area, By lister | the same function grouped by area and city, and by lister |
+
+`/admin/analytics/listings/[listingId]` shows one listing: views since counting
+began and saves now (`admin_listing_stats_lifetime`), its time on Vallo, and the
+same day panels for it alone.
+
+**What a view is.** One person opening one published, real listing on one
+Lagos day, reported by the page after it has been on screen for a second
+(`/api/listing-view`). Not counted: examples, the lister, staff and internal
+accounts (C10), crawlers and link previews, a browser that declined usage counts
+or sends Global Privacy Control, another website's pages. A guest is a salted
+hash that is deleted when the day ends; no cookie is used. Members have been
+counted since 28 September 2026 (V-73), everyone since the migration. The day
+columns leave out saves, enquiries and viewing requests by staff and internal
+accounts; the public save count on a listing is every save it holds.
+
+**Before the SQL.** Until `supabase/migrations/pending/listing_stats_2026-11-13.sql`
+is applied the desk shows "Listing stats are not switched on yet", the
+Analytics figure reads Not recorded, and no listing draws a stats row.
 
 ## 15. The other desks
 

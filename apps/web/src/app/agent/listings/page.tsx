@@ -20,6 +20,7 @@ import { SuccessFromFlag } from "@/components/ui/SuccessFromFlag";
 import { readDone } from "@/lib/ui/success-moments";
 import { listingArrival } from "@/lib/ui/arrival-moments";
 import { readClosedReasons, readOpenOwnerHeartbeats } from "@/lib/landlord/queries";
+import { readMyListingStats } from "@/lib/listings/stats/read";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = getDictionary(await getLocale());
@@ -80,12 +81,14 @@ export default async function Page({
   /* V-48: which of these were closed with a reason, read beside the list and
      failing soft into "none", which draws the workspace as it was. V-08: and
      whether the board flag is on. */
-  const [closed, ownerAsks, boardOn, routingFirms] = await Promise.all([
+  const [closed, ownerAsks, boardOn, routingFirms, myStats] = await Promise.all([
     readClosedReasons(listings.map((listing) => listing.id)),
     readOpenOwnerHeartbeats(),
     listingBoardIsOn(),
     /* V-99: the way to the firm desk, for a principal or coordinator. */
     readMyRoutingFirms(),
+    /* Listing stats: views and saves on this lister's own listings only. */
+    readMyListingStats(context.supabase),
   ]);
 
   /*
@@ -176,11 +179,18 @@ export default async function Page({
           open: t.experienceLister.live.open,
         }}
         liveArrivalId={arrival === "listingLive" ? namedId : undefined}
+        stats={myStats}
+        statsAt={statsReadAt()}
       />
       </div>
       </PageFrame>
     </AgentShell>
   );
+}
+
+/** The moment the stats were read, handed to the rows so server and browser agree on days live. */
+function statsReadAt(): number {
+  return Date.now();
 }
 
 /** The listings could not be read: say so, and keep the way to start one. */

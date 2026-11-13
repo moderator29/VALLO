@@ -27,8 +27,10 @@ import { DeskSections } from "../_components/DeskSections";
  * submitted, whether it was answered, the local government asked about and
  * the reason when it was refused. The render's searches panels are drawn from
  * it and named for what they count (price checks), so no figure pretends to
- * be site search, which is still not recorded. Listing views stay "Not
- * recorded" (Request A8). Examples are excluded from every supply figure.
+ * be site search, which is still not recorded. Listing views come from the
+ * listing stats rollup (founder, 13 November 2026; the Listings desk under
+ * this one) and read "Not recorded" until its pending SQL is applied.
+ * Examples are excluded from every supply figure.
  */
 export type AnalyticsProps = {
   locale: Locale;
@@ -39,6 +41,8 @@ export type AnalyticsProps = {
   demand: PriceCheckDemand | null;
   /** Why listings were sent back, counted from reason codes; only reasons with a count. Null when there is nothing to show. */
   sentBack?: { code: string; label: string; count: number }[] | null;
+  /** Listing views in the range: null when the read failed, "missing" until the listing stats SQL is applied. */
+  views?: { views: number; previous: number | null; spark: number[] } | null | "missing";
 };
 
 /** Which buckets carry a date under the axis: every month, every third week, every seventh day. */
@@ -55,7 +59,7 @@ function bucketLabel(start: string, monthly: boolean, withYear: boolean, locale:
   });
 }
 
-export function AnalyticsView({ locale, range, bookings, supply, thin, demand, sentBack }: AnalyticsProps) {
+export function AnalyticsView({ locale, range, bookings, supply, thin, demand, sentBack, views = "missing" }: AnalyticsProps) {
   const shell = getDictionary(locale).admin.shell;
   const x = getDictionary(locale).experienceAdmin;
   const c = shell.analytics;
@@ -74,7 +78,19 @@ export function AnalyticsView({ locale, range, bookings, supply, thin, demand, s
       spark: demand ? { id: "an-checks", values: demand.buckets.map((b) => b.checks), label: c.priceChecks } : null,
       pending: retry,
     },
-    { key: "views", icon: { tier: "ui", name: "eye" }, label: c.listingViews, ...notRecorded("A8") },
+    views === "missing"
+      ? { key: "views", icon: { tier: "ui", name: "eye" }, label: c.listingViews, ...notRecorded("A8") }
+      : {
+          key: "views",
+          icon: { tier: "ui", name: "eye" },
+          label: c.listingViews,
+          value: views ? formatNumber(views.views, locale) : null,
+          delta: views ? periodDelta(views.views, views.previous) : null,
+          caption: views && views.previous !== null ? period : undefined,
+          spark: views ? { id: "an-views", values: views.spark, label: c.listingViews } : null,
+          href: "/admin/analytics/listings",
+          pending: retry,
+        },
     {
       key: "bookings",
       icon: { tier: "ui", name: "calendar-booking" },
