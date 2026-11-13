@@ -1313,7 +1313,9 @@
     flex-direction: column;
     align-items: center;
     justify-content: flex-start;
-    gap: var(--nf-space-3xs);
+    /* The word sits clear of its icon (the founder, 13 November 2026: the
+       label was too near the glyph at 2px). */
+    gap: var(--nf-space-xs);
     width: 100%;
     min-height: 4rem;
     padding: var(--nf-space-2xs) var(--nf-space-3xs);
@@ -2120,7 +2122,8 @@
     min-width: 0;
     flex-direction: column;
     align-items: center;
-    gap: var(--nf-space-2xs);
+    /* Clear of the plate, not tucked under it (13 November 2026). */
+    gap: var(--nf-space-xs);
     font-size: var(--nf-text-overline);
     font-weight: 600;
     line-height: 1.2;
