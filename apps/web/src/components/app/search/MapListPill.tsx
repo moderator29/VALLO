@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { UiIcon } from "@/design-system/icons/UiIcon";
+import { MapPillFlag } from "./MapPillFlag";
 import "@/app/css/catalogue.css";
 import "@/app/css/list-views.css";
 
@@ -15,9 +16,12 @@ import "@/app/css/list-views.css";
  */
 export function MapListPill({ href, to }: { href: string; to: "map" | "list" }) {
   return (
-    <Link href={href} prefetch data-testid="map-list-pill" data-to={to} className="nf-maplist-pill nf-m-press">
-      <UiIcon name={to === "map" ? "map" : "grid"} size={20} aria-hidden />
-      {to === "map" ? "Map" : "List"}
-    </Link>
+    <>
+      {to === "map" ? <MapPillFlag /> : null}
+      <Link href={href} prefetch data-testid="map-list-pill" data-to={to} className="nf-maplist-pill nf-m-press">
+        <UiIcon name={to === "map" ? "map" : "grid"} size={20} aria-hidden />
+        {to === "map" ? "Map" : "List"}
+      </Link>
+    </>
   );
 }

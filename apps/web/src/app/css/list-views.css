@@ -137,6 +137,47 @@
     }
   }
   /*
+   * THE GROUND FADES UP BEHIND THE PILL (Agent FEEL, 13 November 2026), the
+   * upper half of the dock's fade (chrome.css, `.nf-dockrow::before`). It is
+   * drawn inside the pill's own layer because the pill sits under the dock's:
+   * the dock's fade drawn over this row washed the pill out as if disabled.
+   * Inside a layer, a negative child paints OVER the element's own fill, so
+   * the fill moves to `::before` (-1) and the fade sits under it (`::after`,
+   * -2): fade, then the pill, then its words.
+   */
+  @media (max-width: 639.98px) {
+    .nf-maplist-pill[data-to="map"] {
+      background: none;
+      box-shadow: none;
+    }
+    .nf-maplist-pill[data-to="map"]::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: -1;
+      border-radius: inherit;
+      background: var(--nf-selected-fill);
+      box-shadow: var(--nf-selected-shadow-inline), var(--nf-elev-3);
+    }
+    .nf-maplist-pill[data-to="map"]::after {
+      content: "";
+      position: absolute;
+      left: 50%;
+      top: calc(var(--nf-space-lg) * -1);
+      bottom: calc(var(--nf-space-2xs) * -1 - var(--nf-space-lg));
+      z-index: -2;
+      width: 100vw;
+      translate: -50% 0;
+      pointer-events: none;
+      background: linear-gradient(
+        to bottom,
+        color-mix(in oklab, var(--nf-canvas-base) 0%, transparent) 0%,
+        color-mix(in oklab, var(--nf-canvas-base) 82%, transparent) var(--nf-space-lg),
+        color-mix(in oklab, var(--nf-canvas-base) 82%, transparent) 100%
+      );
+    }
+  }
+  /*
    * THE LAST ROW CLEARS THE PILL. The pill floats above the dock, and the
    * page only reserved the dock, so at the end of a result list "Show 24
    * more" scrolled to a stop underneath it (measured at 360, 390 and 430).
@@ -145,7 +186,8 @@
    */
   @media (max-width: 639.98px) {
     #main.nf-main--docked:has(.nf-maplist-pill[data-to="map"]) {
-      padding-bottom: calc(var(--nf-tabbar-clearance) + 3rem + var(--nf-space-md));
+      /* The pill's 3rem, and the ground's fade over its row (chrome.css). */
+      padding-bottom: calc(var(--nf-tabbar-clearance) + var(--nf-space-2xl) + var(--nf-space-lg));
     }
   }
 

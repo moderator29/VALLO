@@ -146,8 +146,14 @@ html[data-theme="light"] {
   }
 }
 
+/* THE SAME GROUND AS THE AMBIENT LAYER (Agent FEEL, 13 November 2026). The
+   founder saw long pages fade to near-black below about 1,400px: wherever the
+   fixed `.nf-ambient` ground is not behind a part of the page, what shows is
+   this, and it was `--nf-surface-canvas` (near-black at night) rather than the
+   ambient's own `--nf-canvas-base`. Now both are the one navy, so nothing
+   uncovers a different colour. */
 html {
-  background-color: var(--nf-surface-canvas);
+  background-color: var(--nf-canvas-base, var(--nf-surface-canvas));
 }
 
 body {

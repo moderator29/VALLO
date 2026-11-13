@@ -178,7 +178,9 @@
    * was wrong on every notched phone.
    */
   .nf-main--docked {
-    padding-bottom: var(--nf-tabbar-clearance);
+    /* And the ground's fade above the dock (`.nf-dockrow::before`), so the
+       last row of a page comes to rest clear of it, never inside it. */
+    padding-bottom: calc(var(--nf-tabbar-clearance) + var(--nf-space-lg));
   }
 
   /*
@@ -245,6 +247,49 @@
     transition:
       transform var(--nf-duration-base) var(--nf-ease-entrance),
       opacity var(--nf-duration-fast) var(--nf-ease-standard);
+  }
+
+  /*
+   * THE GROUND FADES UP UNDER THE DOCK (Agent FEEL, 13 November 2026; the
+   * founder's choice of three). On arrival the next card's heart sat at the
+   * dock line beside the "+", and a tap meant for the heart opened Create.
+   * The three islands stay separate; the page ground now rises behind them,
+   * so whatever passes under the bar reads as under it and is not aimed at.
+   * It spans the viewport (the row is centred, so 50% is the middle), takes no
+   * taps, and travels with the row when the dock hides. Where the Map pill
+   * floats above the dock, the fade reaches over its row as well.
+   */
+  .nf-dockrow::before {
+    content: "";
+    position: absolute;
+    left: 50%;
+    bottom: calc(-0.75rem - env(safe-area-inset-bottom, 0px));
+    z-index: -1;
+    width: 100vw;
+    height: calc(var(--nf-tabbar-clearance, 6rem) + var(--nf-space-lg));
+    translate: -50% 0;
+    pointer-events: none;
+    /* Clear at the top of the fade, most of the way to the ground by the
+       dock's own top edge (the first --nf-space-lg), nearly solid under it. */
+    background: linear-gradient(
+      to bottom,
+      color-mix(in oklab, var(--nf-canvas-base) 0%, transparent) 0%,
+      color-mix(in oklab, var(--nf-canvas-base) 82%, transparent) var(--nf-space-lg),
+      color-mix(in oklab, var(--nf-canvas-base) 96%, transparent) 100%
+    );
+  }
+  /* Under the Map pill's row the fade has already begun (list-views.css draws
+     it behind the pill, which floats below the dock's layer and must stay
+     above its own fade), so here it carries on rather than starting again. */
+  :root[data-map-pill] .nf-dockrow::before {
+    /* Up to the pill's foot and no further: drawn higher, the dock's layer
+       would lay its fade over the lower half of the pill. */
+    height: calc(var(--nf-tabbar-clearance, 6rem) + var(--nf-space-2xs));
+    background: linear-gradient(
+      to bottom,
+      color-mix(in oklab, var(--nf-canvas-base) 82%, transparent) 0%,
+      color-mix(in oklab, var(--nf-canvas-base) 96%, transparent) 100%
+    );
   }
 
   /*

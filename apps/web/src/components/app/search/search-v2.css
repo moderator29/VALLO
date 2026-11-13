@@ -65,6 +65,14 @@
     padding: 0;
     min-height: 0;
   }
+  /* THE RESULTS BAR IS SOLID (Agent FEEL, 13 November 2026). On the house
+     chrome material alone (88 per cent canvas over a blur) the card text that
+     scrolled under the chip row stayed legible through it, a ghost of "to
+     move in" beside "New listed". The page ground goes under it at full
+     strength; the blur stays as the edge's softness, never the only backing. */
+  .nf-shelf-bar.nf-glass--chrome {
+    background-color: var(--nf-canvas-base);
+  }
   /* PRESSED (Agent FEEL, 13 November 2026): the press audit found the
      Filters square the one control on /search that did not answer a finger. */
   .nf-shelf-box .nf-shelf-square,
