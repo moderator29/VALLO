@@ -171,6 +171,22 @@ export function StoryViewer({
       setSaved(on);
       setSaveCount((n) => n + (on ? 1 : -1));
     }
+    /* A save is said in the banner ON THE TAP (lib/ui/optimistic.ts); a
+       like shows on its heart. The server answer only corrects. */
+    if (kind === "SAVE") {
+      saveDoneBanner({
+        saved: on,
+        message: on ? "Story saved. It is in Saved, under Stories. Only you can see it." : "Removed from your saved stories.",
+        undo: async () => {
+          const back = await toggleStoryMark({ storyId: story.id, mark: "SAVE" });
+          return back.ok ? { ok: true } : { ok: false, error: back.error };
+        },
+        onUndone: () => {
+          setSaved(!on);
+          setSaveCount((n) => n + (on ? -1 : 1));
+        },
+      });
+    }
     startTransition(async () => {
       try {
         const result = await toggleStoryMark({ storyId: story.id, mark: kind });
@@ -184,21 +200,6 @@ export function StoryViewer({
           }
           banner.error(result.error);
           return;
-        }
-        /* A save is said in the banner; a like shows on its heart. */
-        if (kind === "SAVE") {
-          saveDoneBanner({
-            saved: on,
-            message: on ? "Story saved. It is in Saved, under Stories. Only you can see it." : "Removed from your saved stories.",
-            undo: async () => {
-              const back = await toggleStoryMark({ storyId: story.id, mark: "SAVE" });
-              return back.ok ? { ok: true } : { ok: false, error: back.error };
-            },
-            onUndone: () => {
-              setSaved(!on);
-              setSaveCount((n) => n + (on ? -1 : 1));
-            },
-          });
         }
         router.refresh();
       } catch (error) {

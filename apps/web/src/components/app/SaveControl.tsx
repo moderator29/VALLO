@@ -2,21 +2,10 @@
 
 import { useCallback, useId, useState, useSyncExternalStore } from "react";
 import { UiIcon } from "@/design-system/icons/UiIcon";
-import { toggleSave } from "@/lib/saved/actions";
-import { saveDoneBanner } from "@/lib/ui/save-banner";
+import { readLocalSaves } from "@/lib/saved/local";
 import { feedback } from "@/lib/ui/feedback";
-import { banner } from "@/lib/ui/toast";
-import {
-  saveRestaurant,
-  saveStay,
-  unsaveRestaurant,
-  unsaveStay,
-} from "@/lib/saved/places-actions";
-import { addLocalSave, readLocalSaves, removeLocalSave } from "@/lib/saved/local";
-import { enqueue, makeEntry } from "@/lib/offline/outbox";
+import { tapSave, useSessionSaved, type SavePlaceTarget } from "@/lib/saved/save-flow";
 import { useClientCopy } from "@/lib/i18n/client-copy";
-import { useSafeTransition } from "@/lib/ui/use-safe-transition";
-import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 
 /**
@@ -167,7 +156,7 @@ export function useDeviceSaved(listingId: string): boolean {
  * pairs of writes, by name, each revalidating /saved; this is the target a
  * card hands over so the tap lands in the right table.
  */
-export type SavePlaceTarget = { kind: "accommodation" | "restaurant"; id: string };
+export type { SavePlaceTarget } from "@/lib/saved/save-flow";
 
 export function useSaveControl(
   listingId: string,
@@ -183,155 +172,43 @@ export function useSaveControl(
   /* V-40 copy in the viewer's own language. */
   const OUTBOX_COPY = useClientCopy().platform.outbox;
   /**
-   * The person's own answer, once they have given one. `null` means they have
-   * not touched this heart on this page, so the stored truth wins.
+   * The person's own answer on this card, once they have given one. `null`
+   * means they have not touched this heart here, so this tab's last word on
+   * the listing (`useSessionSaved`, which survives a page coming back from the
+   * router cache) and then the stored truth win.
    */
   const [override, setOverride] = useState<boolean | null>(null);
-  /* Always null since Grade 1: the banner says it (see `say` below). */
+  /* Always null since Grade 1: the banner says it. */
   const note = null as SaveNote;
-  const [pending, startTransition] = useSafeTransition();
 
   const onDevice = useSyncExternalStore(
     subscribe,
     () => savedIds().has(listingId),
     () => false,
   );
-  const saved = override ?? (initialSaved || onDevice);
+  const session = useSessionSaved({ listingId, ...(place ? { place } : {}) });
+  const saved = override ?? session ?? (initialSaved || onDevice);
 
-  /* GRADE 1 (P0.4): what a save says goes to the ONE feedback banner at the
-     top of the screen, which has room for a whole sentence and never moves a
-     card under a thumb. `note` stays in the hook's answer for the callers that
-     still read it, and is null: the banner is the one place it is said. */
-  const say = useCallback((text: string, tone: "ok" | "error" | "kept" = "ok") => {
-    /* The tone as an option rather than `banner.success(...)`: the card's
-       dictionary slice test counts any `.success` as a namespace read. */
-    banner(text, { tone: tone === "kept" ? "info" : tone === "ok" ? "success" : "error", "data-testid": "save-banner" });
-  }, []);
-
-  /* The banner for a settled save or removal, with Undo as the real inverse. */
-  const done = useCallback(
-    (nowSaved: boolean, device = false) => {
-      saveDoneBanner({
-        saved: nowSaved,
-        device,
-        undo: async () => {
-          if (device) {
-            if (nowSaved) removeLocalSave(listingId);
-            else addLocalSave(listingId);
-            deviceChanged();
-            return { ok: true };
-          }
-          const back = place
-            ? place.kind === "accommodation"
-              ? nowSaved
-                ? await unsaveStay({ accommodationId: place.id })
-                : await saveStay({ accommodationId: place.id })
-              : nowSaved
-                ? await unsaveRestaurant({ restaurantId: place.id })
-                : await saveRestaurant({ restaurantId: place.id })
-            : await toggleSave({ listingId, want: !nowSaved });
-          return back.ok ? { ok: true } : { ok: false, error: back.error };
-        },
-        onUndone: () => setOverride(!nowSaved),
-      });
-    },
-    [listingId, place],
-  );
-
+  /* ANSWERED ON THE TAP (lib/saved/save-flow.ts): the heart, the haptic and
+     the banner all land in the tap's own task; the server call runs behind
+     and only corrects. Never disabled while a call is out: the next tap
+     sends the state it wants, so taps in a row cannot cross. */
   const toggle = useCallback(() => {
-    if (pending) return;
     const next = !saved;
-    setOverride(next);
-
-    /* V-40: no signal is not a failure. The intent is kept on the phone and
-       sent, as the state wanted, when the connection comes back. */
-    const keepForLater = async () => {
-      const entry = place
-        ? makeEntry("save_place", `${place.kind}:${place.id}`, next, Date.now())
-        : makeEntry("save_listing", listingId, next, Date.now());
-      if (entry && (await enqueue(entry))) {
-        say(next ? OUTBOX_COPY.savedWaiting : OUTBOX_COPY.removedWaiting, "kept");
-        return;
-      }
-      setOverride(!next);
-      say(OUTBOX_COPY.couldNotKeep, "error");
-    };
-
-    startTransition(async () => {
-      try {
-        if (typeof navigator !== "undefined" && navigator.onLine === false) {
-          await keepForLater();
-          return;
-        }
-        try {
-          await sendNow();
-        } catch {
-          /* The request never came back: the network dropped under it. */
-          await keepForLater();
-        }
-      } catch (error) {
-        if (!tapFailedOffline(error)) throw error;
-      }
+    /* B14: the light beat, on the flip itself (CRAFT_DOCTRINE 6: light for a
+       toggle); taking a heart back is quiet. */
+    if (next) feedback("select");
+    void tapSave({
+      target: { listingId, ...(place ? { place } : {}) },
+      next,
+      apply: setOverride,
+      words: OUTBOX_COPY,
+      deviceChanged,
+      "data-testid": "save-banner",
     });
+  }, [listingId, place, saved, OUTBOX_COPY]);
 
-    async function sendNow(): Promise<void> {
-      if (place) {
-        /* The place shelf. Save and unsave are separate intents rather than a
-           toggle, exactly as the actions are written: a double tap or a stale
-           tab cannot flip somebody's shortlist the wrong way. */
-        const result =
-          place.kind === "accommodation"
-            ? next
-              ? await saveStay({ accommodationId: place.id })
-              : await unsaveStay({ accommodationId: place.id })
-            : next
-              ? await saveRestaurant({ restaurantId: place.id })
-              : await unsaveRestaurant({ restaurantId: place.id });
-        if (!result.ok) {
-          setOverride(!next);
-          say(result.error, "error");
-          return;
-        }
-        if (next) feedback("select");
-        done(next);
-        return;
-      }
-
-      const result = await toggleSave({ listingId });
-
-      /* Signed out, or a catalogue id the foreign key can never accept. Both
-         are the device's answer and both are a real save. */
-      const deviceOwns =
-        (result.ok && result.data.mode === "local") ||
-        (!result.ok && result.error.startsWith("Sign in"));
-
-      if (deviceOwns) {
-        if (next) addLocalSave(listingId);
-        else removeLocalSave(listingId);
-        deviceChanged();
-        if (next) feedback("select");
-        done(next, true);
-        return;
-      }
-
-      if (!result.ok) {
-        // Nothing changed anywhere, so the heart goes back exactly as it was.
-        setOverride(!next);
-        say(result.error, "error");
-        return;
-      }
-
-      const settled = result.data.mode === "db" ? result.data.saved : next;
-      setOverride(settled);
-      /* B14: the heart is felt only once the save is ACCEPTED, and as the
-         toggle it is: the light beat (CRAFT_DOCTRINE 6). A medium beat is
-         for a primary action committing, and a heart is not one. */
-      if (settled) feedback("select");
-      done(settled);
-    }
-  }, [listingId, pending, place, saved, say, done, OUTBOX_COPY]);
-
-  return { saved, note, pending, toggle };
+  return { saved, note, pending: false, toggle };
 }
 
 /**

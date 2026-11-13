@@ -1,6 +1,6 @@
 "use client";
 
-import { banner } from "@/lib/ui/toast";
+import { banner, updateToast } from "@/lib/ui/toast";
 import { useCallback, useState } from "react";
 import Link from "next/link";
 import { UiIcon } from "@/design-system/icons/UiIcon";
@@ -61,18 +61,22 @@ export function SaveSearchControl({
 
   const save = useCallback(() => {
     if (pending) return;
+    /* Said on the tap (lib/ui/optimistic.ts); the stored name is added to
+       the same banner, in place, when the database answers. */
+    const said = banner.success("Search saved.");
     startTransition(async () => {
       try {
         const result = await saveSearch({ params });
-        /* Said by the one banner at the top of the screen (Grade 1). */
         if (!result.ok) {
-          banner.error(result.error);
+          banner.error(result.error, { retry: save });
           return;
         }
         /* The row the database returned, so the name and the alert state on
            screen are the stored ones rather than this component's guess. */
         setRow(result.data);
-        banner.success(`Search saved as ${result.data.label}`);
+        if (!updateToast(said, { message: `Search saved as ${result.data.label}` })) {
+          banner.success(`Search saved as ${result.data.label}`);
+        }
       } catch (error) {
         if (!tapFailedOffline(error)) throw error;
       }

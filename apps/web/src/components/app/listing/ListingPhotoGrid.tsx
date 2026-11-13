@@ -101,6 +101,7 @@ export function ListingPhotoGrid({
         <Button
           variant="quiet"
           size="sm"
+          className="nf-section-action"
           onClick={() => setShowAll(true)}
           aria-label={copy ? copy.viewAllMedia.replace("{count}", String(items.length)) : undefined}
           data-testid="photos-show-all"

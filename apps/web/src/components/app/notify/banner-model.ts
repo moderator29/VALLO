@@ -1,5 +1,6 @@
 import type { GlyphName } from "@/design-system/icons/glyphs";
 import { familyOf, isCallRow } from "@/app/(app)/notifications/family";
+import { BANNER_TIMING } from "@/lib/ui/toast";
 
 /**
  * THE IN-APP NOTIFICATION BANNER, AS RULES (founder, 1 November 2026: "how
@@ -8,8 +9,13 @@ import { familyOf, isCallRow } from "@/app/(app)/notifications/family";
 
 export type BannerItem = { id: string; kind: string; title: string; body: string | null; href: string | null };
 
-/** How long one banner stays before it leaves on its own, in ms. */
-export const BANNER_MS = 5000;
+/**
+ * How long one banner stays before it leaves on its own, in ms. On the one
+ * timing contract (`BANNER_TIMING` in lib/ui/toast.ts): a notification is
+ * something to read and tap, so it takes the long dwell every banner with an
+ * action takes, rather than a 5,000ms of its own.
+ */
+export const BANNER_MS = BANNER_TIMING.dwellLongMs;
 
 /** At most this many wait their turn; older ones are folded away rather than queued forever. */
 export const BANNER_QUEUE_MAX = 3;

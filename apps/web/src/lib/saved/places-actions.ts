@@ -23,7 +23,6 @@
  * a type. Anything new here is an async function or it belongs in `./places`.
  */
 
-import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { fail, ok, validate, type ActionResult } from "../actions/envelope";
 import {
@@ -80,11 +79,9 @@ export async function savePlace(input: {
         .eq("entity_id", parsed.data.entityId)
         .maybeSingle();
       if (existing) {
-        /* The same revalidation the first-write branch does. The row was put
-           there by another tab, so this request's cached /saved is the stale
-           one either way, and a save that answers "already yours" while the
-           shortlist still draws without it is the same bug as not saving. */
-        revalidatePath("/saved");
+        /* Already saved in another tab: no revalidation, as in the first-write
+           branch (see `toggleSave` in ./actions.ts for why); /saved refreshes
+           itself through `SavedFreshness` when this tab shows it. */
         return ok({
           entityKind: asSavedPlaceKind(existing.entity_kind),
           entityId: existing.entity_id,
@@ -95,7 +92,6 @@ export async function savePlace(input: {
     return fail(SAVE_DOWN_MESSAGE);
   }
 
-  revalidatePath("/saved");
   return ok({
     entityKind: asSavedPlaceKind(data.entity_kind),
     entityId: data.entity_id,
@@ -123,7 +119,6 @@ export async function unsavePlace(input: {
     .eq("entity_id", parsed.data.entityId);
   if (error) return fail(SAVE_DOWN_MESSAGE);
 
-  revalidatePath("/saved");
   return ok(null);
 }
 

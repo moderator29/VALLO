@@ -5,13 +5,13 @@ import type { Dictionary } from "@vallo/i18n/core";
 import { ListGroup, ListRow } from "@/components/ui/ListGroup";
 import { Switch } from "@/components/ui/Switch";
 import { readLongIdle, writeLongIdle } from "@/lib/passcode/idle-setting";
-import { platformLockAvailable } from "@/lib/security/webauthn-client";
+import { readBiometric } from "@/lib/native/biometric-capability";
 import { BIO_ENROL_HREF } from "@/components/passcode/biometric-offer";
 import { deviceKeyState, type DeviceKeyState } from "@/lib/platform/device-keys";
 
 type BioCopy = Pick<
   Dictionary["passcode"],
-  "bioGroup" | "bioRowTitle" | "bioRowUnset" | "bioRowSet" | "bioRowUnsupported"
+  "bioGroup" | "bioRowTitle" | "bioRowUnset" | "bioRowSet" | "bioRowUnsupported" | "bioRowUnsupportedApp"
 >;
 
 /**
@@ -36,12 +36,17 @@ export function PasskeyIdleSetting({ hasPasskey: accountHasKey, copy }: { hasPas
   const [here, setHere] = useState<DeviceKeyState | null>(null);
   /* Null until asked: the server cannot know what this device can do. */
   const [supported, setSupported] = useState<boolean | null>(null);
+  /* Inside the app, the sentence never sends the member to the app they are in. */
+  const [inApp, setInApp] = useState(false);
   useEffect(() => {
     setOn(readLongIdle());
     setHere(deviceKeyState());
     let live = true;
-    void platformLockAvailable().then((can) => {
-      if (live) setSupported(can);
+    /* The one decision every screen shares (lib/native/biometric-capability.ts). */
+    void readBiometric().then((reading) => {
+      if (!live) return;
+      setSupported(reading.available);
+      setInApp(reading.surface !== "web");
     });
     return () => {
       live = false;
@@ -53,7 +58,7 @@ export function PasskeyIdleSetting({ hasPasskey: accountHasKey, copy }: { hasPas
     return (
       <ListGroup label={copy.bioGroup}>
         {supported === false ? (
-          <ListRow title={copy.bioRowTitle} sub={copy.bioRowUnsupported} data-testid="passcode-bio-unsupported" />
+          <ListRow title={copy.bioRowTitle} sub={inApp ? copy.bioRowUnsupportedApp : copy.bioRowUnsupported} data-testid="passcode-bio-unsupported" />
         ) : (
           <ListRow
             title={copy.bioRowTitle}

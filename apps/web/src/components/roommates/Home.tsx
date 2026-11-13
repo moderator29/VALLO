@@ -202,7 +202,7 @@ export function SectionHead({ id, title, more, moreLabel, count }: { id?: string
         {count ? <span className="nf-rm-section__count">{count}</span> : null}
       </h2>
       {more ? (
-        <Link href={more} className="nf-rm-section__more">
+        <Link href={more} className="nf-rm-section__more nf-section-action">
           {moreLabel ?? "See all"}
           <UiIcon name="chevron-right" size={16} />
         </Link>

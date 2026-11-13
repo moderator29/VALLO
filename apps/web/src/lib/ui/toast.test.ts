@@ -1,5 +1,18 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { banner, currentToast, dismissToast, dwellFor, ERROR_HOLD_MS, subscribeToast, swipeDismisses, toast } from "./toast";
+import {
+  BANNER_CARRY_MS,
+  BANNER_TIMING,
+  banner,
+  currentToast,
+  dismissToast,
+  dwellFor,
+  ERROR_HOLD_MS,
+  noteRouteChange,
+  subscribeToast,
+  swipeDismisses,
+  toast,
+  updateToast,
+} from "./toast";
 
 describe("the one toast", () => {
   it("shows the newest message and replaces the last", () => {
@@ -66,10 +79,21 @@ describe("the one toast", () => {
   });
 
   it("restarts the clock for the same words instead of a second banner", () => {
+    /* The SAME id now (Agent FEEL, 13 November 2026). The host keys the card
+       on the id, so the new id this used to mint remounted the card and ran
+       its entrance a second time: the very "second slide-in" this rule exists
+       to prevent. The clock restart is carried by `shownAt` instead, which the
+       host watches; one banner, one entrance, a fresh dwell. */
+    vi.useFakeTimers();
+    vi.setSystemTime(1_000);
     const first = banner.success("Saved to your list");
+    const firstShown = currentToast()?.shownAt;
+    vi.setSystemTime(2_500);
     const second = banner.success("Saved to your list");
-    expect(second).not.toBe(first);
+    expect(second).toBe(first);
     expect(currentToast()?.message).toBe("Saved to your list");
+    expect(currentToast()?.shownAt).toBe(2_500);
+    expect(currentToast()?.shownAt).not.toBe(firstShown);
   });
 
   it("holds an error before a calmer message replaces it, then shows the newest", () => {
@@ -94,5 +118,67 @@ describe("the one toast", () => {
     banner.success("Saved");
     banner.error("Could not save");
     expect(currentToast()?.tone).toBe("error");
+  });
+
+  /* THE ONE TIMING CONTRACT (Agent FEEL, 13 November 2026). */
+  it("names one contract: raised on the tap, 3.2s, 6s with an action, tokens in and out", () => {
+    expect(BANNER_TIMING.raise).toBe("on-tap");
+    expect(BANNER_TIMING.dwellMs).toBe(3200);
+    expect(BANNER_TIMING.dwellLongMs).toBe(6000);
+    expect(BANNER_TIMING.errorHoldMs).toBe(ERROR_HOLD_MS);
+    expect(BANNER_TIMING.carryAcrossRouteMs).toBe(BANNER_CARRY_MS);
+    expect(BANNER_TIMING.enterToken).toBe("--nf-duration-base");
+    expect(BANNER_TIMING.exitToken).toBe("--nf-duration-fast");
+  });
+
+  it("carries a banner raised just before a route change onto the next page", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(10_000);
+    banner.success("Signed in. Welcome back.");
+    noteRouteChange(10_000 + BANNER_CARRY_MS - 1);
+    expect(currentToast()?.message).toBe("Signed in. Welcome back.");
+  });
+
+  it("lets an older banner leave with the page it was about, never before a second on screen", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(10_000);
+    const seen: (string | null)[] = [];
+    const off = subscribeToast((item) => seen.push(item?.message ?? null));
+    banner.success("Removed from Saved.", { action: { label: "Undo", run: () => undefined } });
+    noteRouteChange(10_000 + BANNER_CARRY_MS);
+    expect(currentToast()).toBeNull();
+    /* It leaves by the store going empty, so the host runs its exit; it is
+       never swapped for something else in the same frame. */
+    expect(seen).toEqual(["Removed from Saved.", null]);
+    off();
+  });
+
+  it("drops a message waiting behind an error when its page goes", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(10_000);
+    banner.error("Could not save");
+    banner.success("Saved");
+    noteRouteChange(10_000 + BANNER_CARRY_MS + 5);
+    expect(currentToast()).toBeNull();
+    vi.advanceTimersByTime(ERROR_HOLD_MS * 2);
+    expect(currentToast()).toBeNull();
+  });
+
+  it("changes a banner's words in place, keeping its id (no second entrance)", () => {
+    const id = banner.success("Saved. It is in Saved.", { action: { label: "Undo", run: () => undefined } });
+    expect(updateToast(id, { message: "Saved on this device. It is in Saved." })).toBe(true);
+    expect(currentToast()?.id).toBe(id);
+    expect(currentToast()?.message).toBe("Saved on this device. It is in Saved.");
+    expect(currentToast()?.action?.label).toBe("Undo");
+    expect(updateToast(id, { tone: "info", action: null })).toBe(true);
+    expect(currentToast()?.action).toBeUndefined();
+    expect(currentToast()?.tone).toBe("info");
+  });
+
+  it("does not update a banner that is no longer showing", () => {
+    const old = banner.success("One");
+    banner.success("Two");
+    expect(updateToast(old, { message: "Changed" })).toBe(false);
+    expect(currentToast()?.message).toBe("Two");
   });
 });

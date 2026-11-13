@@ -49,7 +49,7 @@ export function StaysFeatured({
       <div className="nf-feature-head">
         <h2 className="nf-h3">{title}</h2>
         {shown.length > 0 ? (
-          <Link href={seeAllHref} className="nf-link-quiet nf-tap nf-body-sm shrink-0 text-[var(--nf-content-link)]">
+          <Link href={seeAllHref} className="nf-section-action nf-link-quiet nf-tap nf-body-sm shrink-0">
             {copy.seeAll}
             <UiIcon name="arrow-right" size={ICON.inline} />
           </Link>

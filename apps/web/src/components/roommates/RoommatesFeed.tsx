@@ -27,6 +27,7 @@ import { tapFailedOffline } from "@/lib/offline/tap-failed";
 import { listSavedPlaces, savePlace, unsavePlace } from "@/lib/saved/places-actions";
 import { feedback } from "@/lib/ui/feedback";
 import { banner } from "@/lib/ui/toast";
+import { SAVE_WORDS } from "@/lib/ui/save-banner";
 import { bannerWithUndo } from "@/lib/ui/undo-banner";
 import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 
@@ -163,22 +164,27 @@ export function RoommatesFeed({
         else n.delete(id);
         return n;
       });
-    void (want ? savePlace({ entityKind: "roommate_listing", entityId: id }) : unsavePlace({ entityKind: "roommate_listing", entityId: id })).then((r) => {
-      if (!r.ok) {
+    /* Said on the tap (lib/ui/optimistic.ts); the server answer only corrects. */
+    bannerWithUndo(want ? copy.actions.saved : copy.ui.profile.removedSave, {
+      label: copy.area.undo,
+      undone: copy.area.undone,
+      undo: async () => {
+        const back = await (want ? unsavePlace({ entityKind: "roommate_listing", entityId: id }) : savePlace({ entityKind: "roommate_listing", entityId: id }));
+        return back.ok ? { ok: true } : { ok: false, error: back.error };
+      },
+      onUndone: () => flip(!want),
+    });
+    void (want ? savePlace({ entityKind: "roommate_listing", entityId: id }) : unsavePlace({ entityKind: "roommate_listing", entityId: id })).then(
+      (r) => {
+        if (r.ok) return;
         flip(!want);
         banner.error(r.error);
-        return;
-      }
-      bannerWithUndo(want ? copy.actions.saved : copy.ui.profile.removedSave, {
-        label: copy.area.undo,
-        undone: copy.area.undone,
-        undo: async () => {
-          const back = await (want ? unsavePlace({ entityKind: "roommate_listing", entityId: id }) : savePlace({ entityKind: "roommate_listing", entityId: id }));
-          return back.ok ? { ok: true } : { ok: false, error: back.error };
-        },
-        onUndone: () => flip(!want),
-      });
-    });
+      },
+      () => {
+        flip(!want);
+        banner.error(SAVE_WORDS.failed);
+      },
+    );
   };
 
   const active = feedActiveCount(filters);

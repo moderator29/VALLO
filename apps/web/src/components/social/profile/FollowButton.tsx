@@ -1,16 +1,13 @@
 "use client";
 
-import { banner } from "@/lib/ui/toast";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button, ButtonLink } from "@/components/ui/Button";
 import { useRequireAuth } from "@/components/auth/AuthGate";
 import { toggleFollow } from "@/lib/social/follows-actions";
 import { setOrKeep } from "@/lib/offline/send-or-keep";
-import { tapFailedOffline } from "@/lib/offline/tap-failed";
 import { POST_COPY } from "@/lib/social/posts-model";
-import { bannerWithUndo } from "@/lib/ui/undo-banner";
-import { useSafeTransition } from "@/lib/ui/use-safe-transition";
+import { sayNowSettleLater } from "@/lib/ui/optimistic";
 
 /**
  * Follow, and unfollow.
@@ -73,7 +70,6 @@ export function FollowButton({
   const router = useRouter();
   const { gateHref } = useRequireAuth();
   const [following, setFollowing] = useState(initialFollowing);
-  const [pending, startTransition] = useSafeTransition();
 
   /*
    * SIGNED OUT IT IS STILL A LINK, and it now remembers what it was for.
@@ -107,47 +103,48 @@ export function FollowButton({
     );
   }
 
+  /* SAID ON THE TAP (lib/ui/optimistic.ts): the label flips and the banner
+     goes up in the tap's own task; the server answer only corrects. Never
+     disabled while a call is out: each tap sends the state it wants. */
+  const tap = useRef(0);
   const onClick = () => {
     const next = !following;
+    const mine = ++tap.current;
     setFollowing(next);
-
-    startTransition(async () => {
-      try {
-        /* Follow shows at once; with no signal it is kept and sent later. */
-        const sent = await setOrKeep("follow", handle, next, () => toggleFollow({ handle, want: next }));
-        if (sent.state === "kept") return;
-        const result = sent.state === "sent" ? sent.result : null;
-        if (!result || !result.ok) {
+    const who = `@${handle}`;
+    void sayNowSettleLater({
+      message: (next ? POST_COPY.followedDone : POST_COPY.unfollowedDone).replace("{name}", who),
+      undo: {
+        undo: () => toggleFollow({ handle, want: !next }),
+        undone: (next ? POST_COPY.unfollowUndone : POST_COPY.followUndone).replace("{name}", who),
+        onUndone: () => {
           setFollowing(!next);
-          /* Said by the one banner at the top of the screen (Grade 1). */
-          banner.error(result && !result.ok ? result.error : "You are offline, and this phone could not keep that for later.", {
-            retry: onClick,
-          });
-          return;
-        }
-        /* The database is the authority even when it agrees with us: a second tab
-           may already have done this. */
-        setFollowing(result.data.following);
-        /* Said in the banner, with Undo: the inverse is the same call the
-           other way. A kept tap (no signal) is said when it is sent. */
-        const who = `@${handle}`;
-        bannerWithUndo(
-          (next ? POST_COPY.followedDone : POST_COPY.unfollowedDone).replace("{name}", who),
-          {
-            undo: () => toggleFollow({ handle, want: !next }),
-            undone: (next ? POST_COPY.unfollowUndone : POST_COPY.followUndone).replace("{name}", who),
-            onUndone: () => {
-              setFollowing(!next);
-              router.refresh();
-            },
-          },
-        );
-        router.refresh();
-      } catch (error) {
-        if (!tapFailedOffline(error)) throw error;
-      }
+          refreshProfile();
+        },
+      },
+      /* Follow shows at once; with no signal it is kept and sent later. */
+      send: () => setOrKeep("follow", handle, next, () => toggleFollow({ handle, want: next })),
+      rollBack: () => {
+        if (tap.current === mine) setFollowing(!next);
+      },
+      retry: onClick,
+      notKeptWords: "You are offline, and this phone could not keep that for later.",
+    }).then((result) => {
+      if (!result || !result.ok || tap.current !== mine) return;
+      /* The database is the authority even when it agrees with us: a second
+         tab may already have done this. */
+      setFollowing(result.data.following);
+      refreshProfile();
     });
   };
+
+  /* The follower count is kept by a trigger, so the profile it belongs to is
+     drawn again for the real figure. Only that profile: on a list of people
+     a refresh would render the whole list and empty the router cache (going
+     back would then refetch) for a number that list does not show. */
+  function refreshProfile() {
+    if (typeof window !== "undefined" && window.location.pathname === `/u/${handle}`) router.refresh();
+  }
 
   return (
     <div className={compact ? "shrink-0" : "flex flex-col items-end gap-2xs"}>
@@ -155,7 +152,6 @@ export function FollowButton({
         variant={following ? "secondary" : "primary"}
         size={compact ? "sm" : "md"}
         onClick={onClick}
-        disabled={pending}
         aria-pressed={following}
         aria-label={(following ? labels.unfollowAria : labels.followAria).replace(
           "{handle}",

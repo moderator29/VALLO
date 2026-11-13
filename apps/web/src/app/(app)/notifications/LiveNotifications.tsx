@@ -159,11 +159,12 @@ export function LiveNotifications({
     const before = items;
     setItems((prev) => prev.map((n) => ({ ...n, read: true })));
     /* What the press did is said by the one banner at the top of the screen
-       (Grade 1); the list itself is the record. */
+       (Grade 1), ON THE PRESS (lib/ui/optimistic.ts); a refusal replaces it
+       and the rows go back. The list itself is the record. */
+    banner.success(c.empty.title);
     void setOrKeep("read_notification", "all", true, () => markNotificationsRead({})).then((out) => {
       if (out.state === "kept") return;
       if (out.state === "sent" && out.result.ok) {
-        banner.success(c.empty.title);
         router.refresh();
         return;
       }
@@ -181,9 +182,9 @@ export function LiveNotifications({
     (id: string) => {
       const before = items;
       setItems((prev) => prev.filter((n) => n.id !== id));
+      banner.success(c.archived);
       void archiveNotifications({ ids: [id] }).then((result) => {
         if (result.ok) {
-          banner.success(c.archived);
           router.refresh();
           return;
         }
@@ -197,9 +198,9 @@ export function LiveNotifications({
   const archiveAll = useCallback(() => {
     const before = items;
     setItems([]);
+    banner.success(c.archivedAll);
     void archiveAllNotifications().then((result) => {
       if (result.ok) {
-        banner.success(c.archivedAll);
         router.refresh();
         return;
       }

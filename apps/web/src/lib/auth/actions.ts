@@ -376,16 +376,30 @@ export async function signInWithEmail(
 
   if (!emailConfigured()) return { ok: false, message: w.notConnected };
 
-  // Ten guesses a minute from one place is far more than a person mistyping a
-  // password and far less than a stuffing run is worth mounting.
-  const paced = await throttle("sign_in", subjectForIp(await callerIp()), 10, 60);
-  if (paced) return paced;
-
-  /* And the ceiling on one account, whatever it is guessed from. Sixty an
-     hour, for the reasons argued in full above the throttle helper. */
+  /*
+   * THE TWO COUNTS, IN ORDER AND BOUNDED (13 November 2026, the founder: "it
+   * sits on /sign-in"). Ten guesses a minute from one place, then the ceiling
+   * on one account whatever it is guessed from (sixty an hour, argued above
+   * the throttle helper). IN THAT ORDER, ON PURPOSE: an attempt the connection
+   * count refuses never touches the address's count, so one connection
+   * hammering a known address cannot spend the real owner's hour for them.
+   *
+   * Each is a write to the database, and a database having a slow moment
+   * (small inserts measured at tens of seconds on 13 November,
+   * docs/handoff/QUERY_TIMINGS_BEFORE_RESET_2026-11-13.md) held the person at
+   * a spinner for as long as it liked. So each count is given
+   * SIGN_IN_COUNT_WAIT_MS: one that has not answered by then is treated
+   * exactly as the limiter already treats a count that failed, as
+   * infrastructure trouble that lets the person through (the fail-open note at
+   * the top of `lib/security/rate-limit.ts`), and one line says so in the log.
+   */
   const email = field(formData, "email").trim();
   const address = subjectForEmail(email);
-  const perAddress = await consume({
+  const byConnection = await boundedCount({ bucket: "sign_in", subject: subjectForIp(await callerIp()), limit: 10, windowSeconds: 60 });
+  if (!byConnection.allowed) {
+    return { ok: false, message: w.tooMany.replace("{when}", byConnection.retryIn) };
+  }
+  const perAddress = await boundedCount({
     bucket: "sign_in_address",
     subject: address,
     limit: SIGN_IN_PER_ADDRESS_HOURLY,
@@ -428,13 +442,55 @@ export async function signInWithEmail(
     return { ok: false, message: authMessage(error.message, w) };
   }
 
-  // The session cookies are set. Drop every cached render so the shell picks
-  // up the real identity instead of the signed out view.
   (await cookies()).delete(CHOOSER_EMAIL_COOKIE);
+  /*
+   * SIGNED IN, SAID AT ONCE (13 November 2026). A `redirect()` from a server
+   * action does not answer until the page it points at has been fetched and
+   * has begun to stream: Next fetches `/home` from itself inside this request
+   * (`createRedirectRenderResult` in next/dist/server/app-render/
+   * action-handler.js), so the proxy's session read, the setup check and the
+   * app layout's reads all ran before a single byte of "it worked" reached the
+   * phone. Measured on production that was 8 seconds and more of an unchanged
+   * screen with a spinner after the password had already been accepted.
+   *
+   * So a submit made by the page's script (it carries the `next-action`
+   * header) is answered now, with where to go: the form says "Signed in" in
+   * the same frame and loads that page itself (`EmailAuthForm`). A whole-page
+   * load, so nothing cached from the signed-out screens survives, which is
+   * what `revalidatePath` was here for. A submit made before the script has
+   * run (no header) still gets the server redirect, with the banner cookie
+   * for its arrival.
+   */
+  if ((await headers()).has("next-action")) {
+    return { ok: true, next: landing };
+  }
   /* Grade 1: "Signed in" as the top banner on arrival (reference R4). */
   await rememberSuccess("signed-in");
   revalidatePath("/", "layout");
   redirect(landing);
+}
+
+/** The longest a sign-in waits for one of its two counts (above). */
+const SIGN_IN_COUNT_WAIT_MS = 2_500;
+
+async function boundedCount(request: Parameters<typeof consume>[0]): Promise<Awaited<ReturnType<typeof consume>>> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const late = new Promise<Awaited<ReturnType<typeof consume>> | "late">((resolve) => {
+    timer = setTimeout(() => resolve("late"), SIGN_IN_COUNT_WAIT_MS);
+  });
+  try {
+    const answer = await Promise.race([consume(request), late]);
+    const verdict = answer === "late" ? ({ allowed: true, degraded: true } as const) : answer;
+    /* A count that let the person through without counting is said, once, in
+       the log: the bucket and why, nothing that names the person or where they
+       are. A stall that switched the limiter off is then visible afterwards. */
+    if (verdict.allowed && verdict.degraded) {
+      console.warn(JSON.stringify({ event: "auth.sign_in.count_degraded", bucket: request.bucket, cause: answer === "late" ? "timeout" : "failed" }));
+    }
+    return verdict;
+  } finally {
+    clearTimeout(timer);
+  }
 }
 
 export async function signUpWithEmail(

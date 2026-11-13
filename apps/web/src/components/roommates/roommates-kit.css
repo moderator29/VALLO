@@ -378,7 +378,13 @@
   }
   .nf-rm-card__place > :first-child {
     flex: none;
-    color: var(--nf-brand-primary);
+  }
+  /* The place and the facts are the primary ink on every listing preview
+     (founder, 13 November 2026), the pin and the fact glyphs with them. */
+  .nf-rm-card__place,
+  .nf-rm-facts,
+  .nf-rm-facts li > :first-child {
+    color: var(--nf-content-primary);
   }
   .nf-rm-card__body {
     margin: 0;
@@ -431,7 +437,6 @@
     margin: 0;
     padding: 0;
     list-style: none;
-    color: var(--nf-content-secondary);
     font-size: var(--nf-text-caption);
   }
   .nf-rm-facts li {
@@ -442,7 +447,6 @@
   }
   .nf-rm-facts li > :first-child {
     flex: none;
-    color: var(--nf-content-muted);
   }
   .nf-rm-facts--row {
     display: flex;
@@ -851,7 +855,6 @@
     align-items: center;
     gap: var(--nf-space-3xs);
     min-block-size: 2.75rem;
-    color: var(--nf-content-link);
     font-size: var(--nf-text-body-sm);
     font-weight: 600;
     text-decoration: none;

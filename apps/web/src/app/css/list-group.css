@@ -30,11 +30,12 @@
     min-height: 1.5rem;
     padding-inline: var(--nf-space-2xs);
   }
-  /* The quiet action beside a section label ("See all 8", "Manage"). */
+  /* The quiet action beside a section label ("See all 8", "Manage"): the
+     primary ink, like every section action (see .nf-section-action). */
   .nf-list-section__action {
     font-size: var(--nf-text-body-sm);
     font-weight: 600;
-    color: var(--nf-content-link);
+    color: var(--nf-content-primary);
   }
 
   /* ------------------------------------------------------------- the card */

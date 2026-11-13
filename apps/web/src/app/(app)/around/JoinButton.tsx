@@ -41,7 +41,7 @@ export function JoinButton({
    */
   const pathname = usePathname();
   const search = useSearchParams();
-  const [pending, startTransition] = useSafeTransition();
+  const [, startTransition] = useSafeTransition();
   const [isJoined, setIsJoined] = useState(joined);
 
   const label = isJoined ? "Joined" : "Join";
@@ -56,6 +56,15 @@ export function JoinButton({
     const next = !isJoined;
     setIsJoined(next);
 
+    /* Said on the tap (lib/ui/optimistic.ts); the server answer only corrects. */
+    bannerWithUndo(next ? "You joined this area. Its posts are in your feed now." : "You left this area. Its posts leave your feed.", {
+      undo: () => (next ? leaveArea({ areaId }) : joinArea({ areaId })),
+      undone: next ? "You left this area again." : "You are back in this area.",
+      onUndone: () => {
+        setIsJoined(!next);
+        router.refresh();
+      },
+    });
     startTransition(async () => {
       try {
         const result = next
@@ -66,17 +75,9 @@ export function JoinButton({
           banner.error(result.error, { retry: toggle });
           return;
         }
-        /* Said by the one banner at the top of the screen (Grade 1). */
-        bannerWithUndo(next ? "You joined this area. Its posts are in your feed now." : "You left this area. Its posts leave your feed.", {
-          undo: () => (next ? leaveArea({ areaId }) : joinArea({ areaId })),
-          undone: next ? "You left this area again." : "You are back in this area.",
-          onUndone: () => {
-            setIsJoined(!next);
-            router.refresh();
-          },
-        });
         router.refresh();
       } catch (error) {
+        setIsJoined(!next);
         if (!tapFailedOffline(error)) throw error;
       }
     });
@@ -89,7 +90,6 @@ export function JoinButton({
           shared small button, `md` the shared medium one. */}
       <Button
         onClick={toggle}
-        disabled={pending}
         aria-pressed={isJoined}
         variant={isJoined ? "secondary" : "primary"}
         size={size}

@@ -15,6 +15,7 @@ import { collectionKey, inCollection } from "@/lib/saved/collections";
 import { readCollections } from "@/lib/saved/collections-read";
 import { listingShelf, placeShelf } from "./shelf-rows";
 import { ShelfSync } from "./ShelfSync";
+import { SavedFreshness } from "./SavedFreshness";
 import { resolveSession } from "@/lib/actions/session";
 import { shelfFromListing } from "@/lib/offline/shelf";
 import { comparable, compareTable } from "@/lib/saved/compare";
@@ -180,6 +181,7 @@ export default async function SavedPage({ searchParams }: { searchParams: Promis
       </div>
       {/* V-77: the saved listings, copied to the phone for when there is no
           signal, and any figure that moved since it was first copied. */}
+      <SavedFreshness render={crypto.randomUUID()} />
       {owner && <ShelfSync owner={owner} items={shelf} copy={t.platform.shelf} locale={locale} />}
       {session.state === "signed-in" && allItems.length > 0 ? (
         <CollectionsBar collections={collections} active={activeList?.id ?? null} />

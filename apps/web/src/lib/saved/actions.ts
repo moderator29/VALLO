@@ -13,9 +13,19 @@
  * Signed out, a platform listing returns the sign-in envelope. The tap is not
  * lost: the client has already written the save locally and re-plays it once
  * the account exists.
+ *
+ * NO `revalidatePath` (Agent FEEL, 13 November 2026). In this Next a server
+ * action that revalidates renders the whole CURRENT page into its response
+ * (`skipPageRendering` is false once `pathWasRevalidated` is set, in
+ * next/dist/server/app-render/action-handler.js), so every heart tapped on
+ * search or a listing waited for that page to render again, and it also
+ * dropped every page in the client router cache, so going back refetched and
+ * showed a skeleton. `/saved` holds no server cache to revalidate (it is
+ * dynamic and reads the session), so the only thing to keep honest is the
+ * router's copy of it: `SavedFreshness` refreshes /saved when it is shown
+ * after this tab changed a save (lib/saved/save-flow.ts).
  */
 
-import { revalidatePath } from "next/cache";
 import { after } from "next/server";
 import { recordFunnelStep } from "../funnel/record";
 import { z } from "zod";
@@ -84,7 +94,6 @@ export async function toggleSave(input: {
       .eq("user_id", session.user.id)
       .eq("listing_id", listingId);
     if (error) return fail(SAVE_DOWN_MESSAGE);
-    revalidatePath("/saved");
     return ok({ mode: "db", listingId, saved: false });
   }
 
@@ -96,7 +105,6 @@ export async function toggleSave(input: {
     if (error.code === "23503") return fail(GONE_MESSAGE);
     // 23505: already saved in another tab. The user's intent is satisfied.
     if (error.code === "23505") {
-      revalidatePath("/saved");
       /* A6: the funnel's "first result". The database keeps only the first. */
       after(() => recordFunnelStep("first_result"));
       return ok({ mode: "db", listingId, saved: true });
@@ -104,6 +112,5 @@ export async function toggleSave(input: {
     return fail(SAVE_DOWN_MESSAGE);
   }
 
-  revalidatePath("/saved");
   return ok({ mode: "db", listingId, saved: true });
 }

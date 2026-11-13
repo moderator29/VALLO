@@ -251,7 +251,7 @@
     font-weight: 600;
     line-height: 1.25;
     color: var(--nf-content-primary);
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
   }
   /* The one figure on the sheet: Poppins 600, tabular, 32 to 40. */
   .nf-doc__figure {
@@ -292,7 +292,7 @@
     font-weight: 600;
     font-variant-numeric: tabular-nums;
     color: var(--nf-content-primary);
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
   }
   /* A row whose value is prose (a sentence, not a figure) reads left. */
   .nf-doc__row--prose {
@@ -371,13 +371,13 @@
   .nf-doc__line-label {
     font-weight: 600;
     color: var(--nf-content-primary);
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
   }
   .nf-doc__line-hint {
     font-size: var(--nf-text-overline);
     line-height: 1.45;
     color: var(--nf-content-muted);
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
   }
   /* A part of the total nobody itemised (V-13): the attention ink on the
      label, the glyph and the figure, with the words that say why beside it,
@@ -401,7 +401,7 @@
   .nf-doc__ref {
     font-variant-numeric: tabular-nums;
     letter-spacing: 0.02em;
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
   }
 
   /* A confirmation or a state, said in words with a shape beside it. The

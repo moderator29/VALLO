@@ -558,6 +558,19 @@
   }
 
   /*
+   * THE SECTION ACTION: "See all", "View all" and their kin beside a section
+   * heading, on every surface. The primary ink, white at night and the ink by
+   * day (founder, 13 November 2026), not the link blue: it is a heading's
+   * companion, not a link in a sentence. It stays a link by its arrow, its
+   * hover rule (`.nf-link-quiet`), its focus ring and its 44pt target. Two
+   * classes on the button form so it outranks `.nf-btn--quiet`.
+   */
+  .nf-section-action,
+  .nf-btn.nf-section-action {
+    color: var(--nf-content-primary);
+  }
+
+  /*
    * THE ONE SCRIM FOR TEXT ON PHOTOGRAPHY.
    *
    * White type on a sunlit highlight is unreadable at any size, and this

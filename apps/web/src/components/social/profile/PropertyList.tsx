@@ -37,7 +37,7 @@ export function PropertyList({ properties }: { properties: PropertyCard[] }) {
               <p className="text-[length:var(--nf-text-body)] font-bold tracking-[-0.015em] text-[var(--nf-content-primary)]">
                 {property.title}
               </p>
-              <p className="mt-2xs inline-flex items-center gap-2xs text-[length:var(--nf-text-caption)] text-[var(--nf-content-muted)]">
+              <p className="mt-2xs inline-flex items-center gap-2xs text-[length:var(--nf-text-caption)] text-[var(--nf-content-primary)]">
                 <UiIcon name="location" size={13} />
                 {[property.area, property.city].filter(Boolean).join(", ")}
               </p>
@@ -48,7 +48,7 @@ export function PropertyList({ properties }: { properties: PropertyCard[] }) {
                     {property.pricePeriod === "year" ? "a year" : "a night"}
                   </span>
                 </p>
-                <p className="text-[length:var(--nf-text-overline)] text-[var(--nf-content-muted)]">
+                <p className="text-[length:var(--nf-text-overline)] text-[var(--nf-content-primary)]">
                   {countOf(property.bedrooms, "bedrooms")}
                   {" · "}
                   {countOf(property.bathrooms, "bathrooms")}

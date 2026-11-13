@@ -176,8 +176,11 @@
     gap: var(--nf-space-3xs);
     font-size: var(--nf-pcard-fact, var(--nf-text-overline));
     line-height: 1.3;
-    color: var(--nf-content-secondary);
-    overflow-wrap: anywhere;
+    /* The place, its pin, the facts, their glyphs and the "+N" are all the
+       primary ink (founder, 13 November 2026: white at night, not blue); by
+       day the same token is the ink, so they never go white on a light card. */
+    color: var(--nf-content-primary);
+    overflow-wrap: break-word;
   }
   /* The lister line (C3.3): the fact size under the place, at most two
      lines, so the role word at the end of "Listed by {name}, agent" is never
@@ -198,7 +201,7 @@
   .nf-pcard__where > svg {
     flex-shrink: 0;
     margin-top: 0.0625rem;
-    color: var(--nf-brand-secondary);
+    color: var(--nf-content-primary);
   }
   /* The figure. Brand blue on the night theme, as every price in the renders
      is, and the one thing on the card set in the display face. */
@@ -272,7 +275,7 @@
     border-top: 1px solid var(--nf-divider);
     font-size: var(--nf-pcard-fact, var(--nf-text-overline));
     line-height: 1.2;
-    color: var(--nf-content-secondary);
+    color: var(--nf-content-primary);
   }
   .nf-pcard--wide .nf-pcard__facts {
     font-size: var(--nf-text-overline);
@@ -284,15 +287,14 @@
     white-space: nowrap;
   }
   .nf-pcard__fact > svg {
-    color: var(--nf-content-muted);
+    color: var(--nf-content-primary);
   }
   /* The "+N" mark that stands for the facts a two-up card has no room for.
-     It reads as a count rather than as a fact, so it takes the muted tone and
-     the well fill, and it never wraps the row: it is the last cell on it. */
+     It never wraps the row: it is the last cell on it. */
   /* Plain text, not a chip (plan item 17): the count reads as the last
      fact on the line. */
   .nf-pcard__fact--more {
-    color: var(--nf-content-muted);
+    color: var(--nf-content-primary);
     font-weight: 400;
   }
 
@@ -1992,6 +1994,15 @@
     flex-shrink: 0;
     align-items: center;
     gap: var(--nf-space-xs);
+  }
+  /* The call and message glyphs are the brand blue on the white plate at
+     night (founder, 13 November 2026: "blue icons on the white background"),
+     not the solid tone's black. --nf-doc-accent is the brand blue as ink on
+     white, #005FE8 at 5.3:1 on the plate. Night only: by day the plate is
+     the ink and its own paper glyph stands, because blue on the ink plate
+     would not read. Three classes so it outranks .nf-plate.nf-plate--solid. */
+  :root:not([data-theme="light"]) .nf-plate.nf-plate--solid.nf-lister-act {
+    --nf-plate-v2-ink: var(--nf-doc-accent);
   }
   .nf-lister-act {
     cursor: pointer;

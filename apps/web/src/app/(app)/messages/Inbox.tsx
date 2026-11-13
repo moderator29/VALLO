@@ -543,6 +543,14 @@ export function Inbox({
   const toggleArchive = (row: InboxRow) => {
     const next = !row.archived;
     setArchivedLocal((current) => ({ ...current, [row.id]: next }));
+    /* Said ON THE TAP, with Undo for an archive (Survey A, Messages; Agent
+       FEEL: lib/ui/optimistic.ts); a refusal puts the row back and replaces it. */
+    const said = next ? inbox.archivedNote.replace("{name}", row.counterpartName) : inbox.movedBackNote;
+    if (next) {
+      banner.success(said, {
+        action: { label: POLISH_WORDS.undo, run: () => toggleArchive({ ...row, archived: true }) },
+      });
+    } else banner.success(said);
     startArchiving(async () => {
       try {
         const result = next
@@ -554,15 +562,9 @@ export function Inbox({
           banner.error(result.error, { retry: () => toggleArchive(row) });
           return;
         }
-        /* The banner says it, with Undo for an archive (Survey A, Messages). */
-        const said = next ? inbox.archivedNote.replace("{name}", row.counterpartName) : inbox.movedBackNote;
-        if (next) {
-          banner.success(said, {
-            action: { label: POLISH_WORDS.undo, run: () => toggleArchive({ ...row, archived: true }) },
-          });
-        } else banner.success(said);
         router.refresh();
       } catch (error) {
+        setArchivedLocal((current) => ({ ...current, [row.id]: !next }));
         if (!tapFailedOffline(error)) throw error;
       }
     });
@@ -577,11 +579,11 @@ export function Inbox({
   ) => {
     const before: ConversationPref = { pinnedAt: row.pinnedAt ?? null, mutedUntil: row.mutedUntil ?? null };
     setPrefsLocal((current) => ({ ...current, [row.id]: next }));
+    banner.success(said);
     void work()
       .then((result) => {
         if (result.ok) {
           setPrefsLocal((current) => ({ ...current, [row.id]: result.data }));
-          banner.success(said);
           return;
         }
         setPrefsLocal((current) => ({ ...current, [row.id]: before }));
@@ -614,10 +616,10 @@ export function Inbox({
   /* Swipe, Mark read: one conversation, said in the banner. */
   const markOneRead = (row: InboxRow) => {
     setReadLocal((current) => ({ ...current, [row.id]: true }));
+    banner.success(POLISH_WORDS.readDone);
     void markThreadRead({ conversationId: row.id })
       .then((result) => {
         if (result.ok) {
-          banner.success(POLISH_WORDS.readDone);
           router.refresh();
           return;
         }
@@ -629,16 +631,22 @@ export function Inbox({
         banner.error(result.error, { retry: () => markOneRead(row) });
       })
       .catch((error: unknown) => {
+        setReadLocal((current) => {
+          const rest = { ...current };
+          delete rest[row.id];
+          return rest;
+        });
         if (!tapFailedOffline(error)) throw error;
       });
   };
 
   const markAllRead = () => {
+    /* Said on the press; a refusal replaces it. */
+    banner.success("Everything is marked as read");
     startMarking(async () => {
       try {
         const result = await markInboxRead();
         if (result.ok) {
-          banner.success("Everything is marked as read");
           router.refresh();
           return;
         }

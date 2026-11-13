@@ -2,18 +2,10 @@
 
 import { useCallback, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { banner, type ToastTone } from "@/lib/ui/toast";
+import { banner } from "@/lib/ui/toast";
 import { UiIcon } from "@/design-system/icons/UiIcon";
 import { AuthGate } from "@/components/auth/AuthGate";
-import { toggleSave } from "@/lib/saved/actions";
-import { saveDoneBanner } from "@/lib/ui/save-banner";
-import {
-  saveRestaurant,
-  saveStay,
-  unsaveRestaurant,
-  unsaveStay,
-} from "@/lib/saved/places-actions";
-import { addLocalSave, removeLocalSave } from "@/lib/saved/local";
+import { tapSave, useSessionSaved } from "@/lib/saved/save-flow";
 import {
   deviceSavesChanged,
   useDeviceSaved,
@@ -29,8 +21,6 @@ import "@/app/css/catalogue.css";
 import "@/app/css/list-views.css";
 import { useSignInHref } from "@/lib/auth/use-sign-in-href";
 import { CompareToggle } from "@/components/app/compare/CompareToggle";
-import { useSafeTransition } from "@/lib/ui/use-safe-transition";
-import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
  * The two controls that float over the gallery: share and save.
@@ -135,7 +125,8 @@ export function ListingActions({
    */
   const [override, setOverride] = useState<boolean | null>(null);
   const onDevice = useDeviceSaved(listingId);
-  const saved = override ?? (initialSaved || onDevice);
+  const session = useSessionSaved({ listingId, ...(place ? { place } : {}) });
+  const saved = override ?? session ?? (initialSaved || onDevice);
   const setSaved = setOverride;
   const [shareOpen, setShareOpen] = useState(false);
   const t = useClientCopy();
@@ -175,107 +166,28 @@ export function ListingActions({
     }
     return door.current ?? Promise.resolve(null);
   }, [listingId, doorKind]);
-  const [pending, startTransition] = useSafeTransition();
-  /* What a tap did, said by the one banner at the top of the screen
-     (founder, 7 November 2026, "THE BANNER EVERYWHERE"), with Sign in as
-     its action when that is the way on. It was a chip beside the actions. */
+  /* What a refusal says, with Sign in as its action when that is the way on.
+     Said by the one banner at the top of the screen (founder, 7 November
+     2026, "THE BANNER EVERYWHERE"). */
   const router = useRouter();
-  const say = useCallback(
-    (text: string, prompt = false, tone: ToastTone = "success") => {
-      banner(text, {
-        tone,
-        "data-testid": "listing-action-message",
-        ...(prompt ? { action: { label: "Sign in", run: () => router.push(signInHref) } } : {}),
-      });
-    },
-    [router, signInHref],
-  );
+  const signIn = { label: "Sign in", run: () => router.push(signInHref) };
+  const outboxWords = t.platform.outbox;
 
-  /* The banner for a settled save or removal, with Undo as the real inverse. */
-  function done(nowSaved: boolean, device = false) {
-    saveDoneBanner({
-      saved: nowSaved,
-      device,
-      undo: async () => {
-        if (device) {
-          if (nowSaved) removeLocalSave(listingId);
-          else addLocalSave(listingId);
-          deviceSavesChanged();
-          return { ok: true };
-        }
-        const back = place
-          ? place.kind === "accommodation"
-            ? nowSaved
-              ? await unsaveStay({ accommodationId: place.id })
-              : await saveStay({ accommodationId: place.id })
-            : nowSaved
-              ? await unsaveRestaurant({ restaurantId: place.id })
-              : await saveRestaurant({ restaurantId: place.id })
-          : await toggleSave({ listingId, want: !nowSaved });
-        return back.ok ? { ok: true } : { ok: false, error: back.error };
-      },
-      onUndone: () => setSaved(!nowSaved),
-    });
-  }
-
+  /* ANSWERED ON THE TAP (lib/saved/save-flow.ts): heart, haptic and banner in
+     the tap's own task, the server behind it. The same flow as every card's
+     heart, so this page and the card behind it can never say two things. */
   function toggle() {
-    if (pending) return;
     const next = !saved;
-    setSaved(next);
-
-    startTransition(async () => {
-      try {
-        if (place) {
-          /* The other shelf. Save and unsave are separate intents, as the
-             actions are written, so a double tap cannot flip a shortlist the
-             wrong way. There is no device half here: `saved_items` takes
-             listing ids only, so a signed-out tap is answered by the sign-in
-             prompt the envelope already carries rather than by a local save
-             that could never be reconciled. */
-          const result =
-            place.kind === "accommodation"
-              ? next
-                ? await saveStay({ accommodationId: place.id })
-                : await unsaveStay({ accommodationId: place.id })
-              : next
-                ? await saveRestaurant({ restaurantId: place.id })
-                : await unsaveRestaurant({ restaurantId: place.id });
-          if (!result.ok) {
-            setSaved(!next);
-            say(result.error, result.error.startsWith("Sign in"), "error");
-            return;
-          }
-          done(next);
-          return;
-        }
-
-        const result = await toggleSave({ listingId });
-        if (!result.ok) {
-          // Nothing changed anywhere, so the heart goes back exactly as it was.
-          setSaved(!next);
-          say(result.error, result.error.startsWith("Sign in"), "error");
-          return;
-        }
-        if (result.data.mode === "local") {
-          // A catalogue id can never be a row, so the device owns this save.
-          if (next) addLocalSave(listingId);
-          else removeLocalSave(listingId);
-          if (next) feedback("select");
-          /* And the store is told, so every other heart for this listing on the
-             page behind this one moves with it rather than waiting for a reload. */
-          deviceSavesChanged();
-          done(next, true);
-          return;
-        }
-        setSaved(result.data.saved);
-        /* B14: a save is felt once the server ACCEPTS it, as the toggle it
-           is: the light beat (CRAFT_DOCTRINE 6: light for a toggle). "success"
-           is kept for payoffs, so a heart never feels like a settled payment. */
-        if (result.data.saved) feedback("select");
-        done(result.data.saved);
-      } catch (error) {
-        if (!tapFailedOffline(error)) throw error;
-      }
+    /* B14: the light beat on the flip; taking a heart back is quiet. */
+    if (next) feedback("select");
+    void tapSave({
+      target: { listingId, ...(place ? { place } : {}) },
+      next,
+      apply: setSaved,
+      words: outboxWords,
+      deviceChanged: deviceSavesChanged,
+      signIn,
+      "data-testid": "listing-action-message",
     });
   }
 
@@ -293,7 +205,7 @@ export function ListingActions({
       if (minted === null) {
         /* No door, no share. The listing's own address would unfurl as a
            sign-in page, which is the failure this replaces. */
-        say(t.frontDoor.share.failed, false, "error");
+        banner.error(t.frontDoor.share.failed, { "data-testid": "listing-action-message" });
         return;
       }
       url = minted;
@@ -327,14 +239,13 @@ export function ListingActions({
     } catch {
       copied = copyByExecCommand(url);
     }
-    say(
+    banner(
       copied
         ? t.frontDoor.share.copied
         : doorable
           ? `${t.frontDoor.share.copyFallback}: ${url}`
           : "Copy the link from your browser's address bar",
-      false,
-      copied ? "success" : "info",
+      { tone: copied ? "success" : "info", "data-testid": "listing-action-message" },
     );
   }
 
@@ -386,7 +297,6 @@ export function ListingActions({
           <button
             type="button"
             onClick={toggle}
-            disabled={pending}
             aria-pressed={saved}
             aria-label={saved ? "Remove from saved" : "Save this listing"}
             data-testid="listing-save"

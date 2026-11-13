@@ -9,6 +9,8 @@
  * password instead.
  */
 
+import { readBiometric } from "@/lib/native/biometric-capability";
+
 export function toB64url(bytes: ArrayBuffer | Uint8Array): string {
   const view = bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes);
   let text = "";
@@ -25,10 +27,16 @@ export function fromB64url(value: string): Uint8Array<ArrayBuffer> {
 }
 
 /** True when this browser can ask the phone's own lock. */
+/**
+ * ONE ANSWER FOR EVERY SCREEN (13 November 2026): the passcode lock, its
+ * setup offer, Settings Passcode, the unlock key, the money lock and its
+ * enrolment all ask here, and here asks `lib/native/biometric-capability.ts`,
+ * which knows that the iPhone app's web view can answer the browser's question
+ * "no" while the passkey ceremony is available to it.
+ */
 export async function platformLockAvailable(): Promise<boolean> {
   try {
-    if (typeof window === "undefined" || !window.PublicKeyCredential) return false;
-    return await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable();
+    return (await readBiometric()).available;
   } catch {
     return false;
   }

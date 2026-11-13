@@ -12,9 +12,11 @@ import "leaflet/dist/leaflet.css";
 import "@/app/css/map.css";
 import { UiIcon } from "@/design-system/icons/UiIcon";
 import { Button, ButtonLink } from "@/components/ui/Button";
-import { toggleSave } from "@/lib/saved/actions";
-import { saveDoneBanner } from "@/lib/ui/save-banner";
-import { addLocalSave, readLocalSaves, removeLocalSave } from "@/lib/saved/local";
+import { readLocalSaves } from "@/lib/saved/local";
+import { tapSave } from "@/lib/saved/save-flow";
+import { feedback } from "@/lib/ui/feedback";
+import { deviceSavesChanged } from "@/components/app/SaveControl";
+import { useClientCopy } from "@/lib/i18n/client-copy";
 import Image from "next/image";
 import { MapDock } from "./MapDock";
 import { MapCredit } from "./MapCredit";
@@ -33,12 +35,6 @@ import { countOf, formatNumber } from "@vallo/i18n/core";
 import { BrandIcon } from "@/design-system/icons/BrandIcon";
 import "./discovery.css";
 import "./search-v2.css";
-import { useSafeTransition } from "@/lib/ui/use-safe-transition";
-import { tapFailedOffline } from "@/lib/offline/tap-failed";
-import { banner } from "@/lib/ui/toast";
-
-/* What a save on the map did, said by the one banner (founder, 7 November 2026);
-   the same words the cards use (components/app/SaveControl.tsx). */
 
 /**
  * The discovery map.
@@ -86,9 +82,6 @@ const HALO = "var(--nf-panel-halo)";
 
 /** Space kept clear at the foot of the frame for the docked card. */
 const DOCK_ROOM = 96;
-
-/** Platform listing ids are uuids; catalogue ids are not. Mirrors the save action. */
-const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 type LeafletModule = typeof import("leaflet");
 type LeafletMap = import("leaflet").Map;
@@ -160,7 +153,6 @@ export function MapCanvas({
   const [locate, setLocate] = useState<Locate>({ phase: "idle" });
 
   const [savedIds, setSavedIds] = useState<ReadonlySet<string>>(() => new Set<string>());
-  const [savePending, startSave] = useSafeTransition();
 
   /*
    * The city the search landed on. Computed once, from the props the page
@@ -561,87 +553,29 @@ export function MapCanvas({
     // Compiler bails out of optimising the component.
   }, [fitToPlaces, setSelectedId]);
 
+  /* ANSWERED ON THE TAP (lib/saved/save-flow.ts), the same flow as every
+     other heart: the mark, the haptic and the banner in the tap's own task,
+     the server behind it, a refusal put back with Try again. */
+  const outboxWords = useClientCopy().platform.outbox;
   const save = useCallback(
     (listing: MapListing) => {
-      const wasSaved = savedIds.has(listing.id);
-      const onDevice = !UUID_RE.test(listing.id);
-      setSavedIds((previous) => {
-        const next = new Set(previous);
-        if (wasSaved) next.delete(listing.id);
-        else next.add(listing.id);
-        return next;
-      });
-      if (onDevice) {
-        if (wasSaved) removeLocalSave(listing.id);
-        else addLocalSave(listing.id);
-      }
-
-      startSave(async () => {
-        try {
-          const result = await toggleSave({ listingId: listing.id });
-          if (result.ok) {
-            if (result.data.mode === "db") {
-              // The database, not the tap, decides what the shortlist holds.
-              const truth = result.data.saved;
-              setSavedIds((previous) => {
-                const next = new Set(previous);
-                if (truth) next.add(listing.id);
-                else next.delete(listing.id);
-                return next;
-              });
-              saveDoneBanner({
-                saved: truth,
-                undo: async () => {
-                  const back = await toggleSave({ listingId: listing.id, want: !truth });
-                  return back.ok ? { ok: true } : { ok: false, error: back.error };
-                },
-                onUndone: () =>
-                  setSavedIds((previous) => {
-                    const next = new Set(previous);
-                    if (truth) next.delete(listing.id);
-                    else next.add(listing.id);
-                    return next;
-                  }),
-              });
-            } else {
-              const nowSaved = !wasSaved;
-              saveDoneBanner({
-                saved: nowSaved,
-                device: true,
-                undo: async () => {
-                  if (nowSaved) removeLocalSave(listing.id);
-                  else addLocalSave(listing.id);
-                  return { ok: true };
-                },
-                onUndone: () =>
-                  setSavedIds((previous) => {
-                    const next = new Set(previous);
-                    if (nowSaved) next.delete(listing.id);
-                    else next.add(listing.id);
-                    return next;
-                  }),
-              });
-            }
-            return;
-          }
-          if (onDevice) {
-            if (wasSaved) addLocalSave(listing.id);
-            else removeLocalSave(listing.id);
-          }
+      const next = !savedIds.has(listing.id);
+      if (next) feedback("select");
+      void tapSave({
+        target: { listingId: listing.id },
+        next,
+        apply: (on) =>
           setSavedIds((previous) => {
             const next = new Set(previous);
-            if (wasSaved) next.add(listing.id);
+            if (on) next.add(listing.id);
             else next.delete(listing.id);
             return next;
-          });
-          /* Said by the one banner at the top of the screen (founder, 7 November 2026). */
-          banner.error(result.error, { retry: () => save(listing) });
-        } catch (error) {
-          if (!tapFailedOffline(error)) throw error;
-        }
+          }),
+        words: outboxWords,
+        deviceChanged: deviceSavesChanged,
       });
     },
-    [savedIds],
+    [savedIds, outboxWords],
   );
 
   // -------------------------------------------------------------------- copy
@@ -1093,7 +1027,7 @@ export function MapCanvas({
             locale={locale}
             copy={copy}
             saved={savedIds.has(selected.id)}
-            saveBusy={savePending}
+            saveBusy={false}
             onSave={() => save(selected)}
             onDismiss={() => setSelectedId(null)}
           />

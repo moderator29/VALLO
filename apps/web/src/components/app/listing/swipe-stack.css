@@ -190,7 +190,7 @@
     gap: var(--nf-space-3xs);
     margin-block-start: var(--nf-space-3xs);
     font-size: var(--nf-text-caption);
-    color: var(--nf-content-on-media-secondary);
+    color: var(--nf-content-on-media);
   }
   .nf-stackface__meta {
     display: flex;

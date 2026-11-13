@@ -47,6 +47,9 @@ export type AuthField =
 
 export type AuthFormState = {
   ok: boolean;
+  /** Sign-in only, from a script-driven submit: signed in, go here now. The
+      form shows that it worked at once and navigates itself (actions.ts). */
+  next?: string;
   /** Where to go once the verifying moment has been on screen long enough. */
   verified?: string;
   /** The first name the account was made with, for "You're in, Ada." on the

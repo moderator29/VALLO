@@ -15,6 +15,7 @@ import { AuthPillButton } from "./slate";
 import { signUpMethodForEmail, startGoogleOAuth } from "@/lib/auth/actions";
 import { BannerOnArrival } from "@/components/ui/BannerOnArrival";
 import { useAuthBanner } from "./use-auth-banner";
+import { showSuccess } from "@/lib/ui/success-moments";
 import { ReferralField } from "./ReferralField";
 import { lookupReferrer } from "@/lib/referral/lookup-action";
 
@@ -121,6 +122,21 @@ export function EmailAuthForm({
 }) {
   const [state, formAction, pending] = useActionState(action, initialState);
   useAuthBanner(state);
+  /*
+   * SIGNED IN, SAID AT ONCE (13 November 2026). The action answers as soon as
+   * the password is accepted (`signInWithEmail`), instead of after the next
+   * page has been built on the server. "Signed in. Welcome back." goes up in
+   * the same frame, the pill keeps its spinner, and the page loads where the
+   * person was going. A whole-page load, so nothing from the signed-out
+   * screens is kept.
+   */
+  const [leaving, setLeaving] = useState(false);
+  useEffect(() => {
+    if (!state.ok || !state.next) return;
+    setLeaving(true);
+    showSuccess("signed-in");
+    window.location.replace(state.next);
+  }, [state]);
   const isSignUp = mode === "sign-up";
   /*
    * F-12: A REFUSED SUBMIT PUTS THE CURSOR ON THE FIRST THING TO FIX. Every
@@ -447,7 +463,7 @@ export function EmailAuthForm({
           {!isSignUp && !emailReady ? (
             <p className="nf-auth__notice">{t.auth.providerUnavailable}</p>
           ) : (
-            <AuthPillButton type="submit" loading={pending} className="nf-auth__cta">
+            <AuthPillButton type="submit" loading={pending || leaving} className="nf-auth__cta">
               {isSignUp ? t.signUp.createAccountCta : t.common.signIn}
             </AuthPillButton>
           )}

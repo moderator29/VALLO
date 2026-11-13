@@ -2,6 +2,7 @@
 
 import { banner } from "@/lib/ui/toast";
 import { bannerWithUndo } from "@/lib/ui/undo-banner";
+import { sayNowSettleLater } from "@/lib/ui/optimistic";
 import type { SheetWords } from "@/components/social/sheet-words";
 import { Button } from "@/components/ui/Button";
 import { DEFAULT_LOCALE, type Locale } from "@vallo/i18n/core";
@@ -486,25 +487,18 @@ export function Feed({
       const saved = !post.saved;
       if (saved) feedback("select");
       patch(post.id, { saved });
-      startTransition(async () => {
-        try {
-          const sent = await setOrKeep("save_post", post.id, saved, () => toggleMark({ postId: post.id, mark: "SAVE", want: saved }));
-          if (sent.state === "kept") return;
-          const result = sent.state === "sent" ? sent.result : null;
-          if (!result || !result.ok) {
-            patch(post.id, { saved: post.saved });
-            banner.error(result && !result.ok ? result.error : OUTBOX_KEEP_FAILED);
-            return;
-          }
-          /* Said in the banner, with Undo: the inverse is the same toggle. */
-          bannerWithUndo(saved ? POST_COPY.savedDone : POST_COPY.unsavedDone, {
-            undo: () => toggleMark({ postId: post.id, mark: "SAVE", want: !saved }),
-            undone: saved ? POST_COPY.unsavedUndone : POST_COPY.savedUndone,
-            onUndone: () => patch(post.id, { saved: !saved }),
-          });
-        } catch (error) {
-          if (!tapFailedOffline(error)) throw error;
-        }
+      /* Said on the tap, with Undo (lib/ui/optimistic.ts); the server answer
+         only corrects. A tap kept for later keeps its mark. */
+      void sayNowSettleLater({
+        message: saved ? POST_COPY.savedDone : POST_COPY.unsavedDone,
+        undo: {
+          undo: () => toggleMark({ postId: post.id, mark: "SAVE", want: !saved }),
+          undone: saved ? POST_COPY.unsavedUndone : POST_COPY.savedUndone,
+          onUndone: () => patch(post.id, { saved: !saved }),
+        },
+        send: () => setOrKeep("save_post", post.id, saved, () => toggleMark({ postId: post.id, mark: "SAVE", want: saved })),
+        rollBack: () => patch(post.id, { saved: post.saved }),
+        notKeptWords: OUTBOX_KEEP_FAILED,
       });
       return;
     }

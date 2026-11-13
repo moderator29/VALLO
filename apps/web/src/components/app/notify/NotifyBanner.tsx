@@ -27,6 +27,7 @@ import {
 } from "./banner-model";
 import { playInAppChime } from "@/lib/platform/chime";
 import { RemoteImage } from "@/components/ui/RemoteImage";
+import { bannerExitMs as exitMs } from "@/lib/ui/toast";
 import "./notify-banner.css";
 
 /**
@@ -85,13 +86,16 @@ export function NotifyBanner() {
     setQueue((q) => enqueue(q, item));
   });
 
+  /* The exit runs on the contract's exit token (`exitMs`, the same clock the
+     feedback banner leaves on), so reduced motion and the Motion setting
+     shorten it here too; it was a 220ms of its own. */
   const dismiss = useCallback(() => {
     setLeaving(true);
     setTimeout(() => {
       setQueue((q) => q.slice(1));
       setLeaving(false);
       setDrag(0);
-    }, 220);
+    }, exitMs());
   }, []);
 
   /* A gentle tap when one arrives, and the clock that sends it away. */

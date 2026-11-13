@@ -297,8 +297,11 @@
   }
 }
 
-/* A document in the checklist. */
-.nf-doc {
+/* A document in the checklist. Named nf-ofr-doc, not nf-doc: nf-doc is the
+   DocumentSheet (app/css/document.css), and this sheet stays in the document
+   after a soft navigation, so a shared name redrew the move-in ledger as
+   this two-column grid. */
+.nf-ofr-doc {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   gap: var(--nf-space-2xs) var(--nf-space-sm);
@@ -306,15 +309,15 @@
   padding-block: var(--nf-space-sm);
   border-top: var(--nf-border-width) solid var(--nf-border-subtle);
 }
-.nf-doc:first-child {
+.nf-ofr-doc:first-child {
   border-top: 0;
 }
-.nf-doc__line {
+.nf-ofr-doc__line {
   grid-column: 1 / -1;
   font-size: var(--nf-text-body-sm);
   color: var(--nf-content-muted);
 }
-.nf-doc__actions {
+.nf-ofr-doc__actions {
   grid-column: 1 / -1;
   display: flex;
   flex-wrap: wrap;

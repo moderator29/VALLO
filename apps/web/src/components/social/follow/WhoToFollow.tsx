@@ -115,7 +115,7 @@ export function PeopleRail({
     <div className="nf-fv2-rail__box" data-testid="people-rail">
       <div className="nf-fv2-rail__head">
         <h2 className="nf-fv2-rail__title">{title}</h2>
-        <Link href="/around/people" className="nf-fv2-rail__all">
+        <Link href="/around/people" className="nf-fv2-rail__all nf-section-action">
           {seeAll}
         </Link>
       </div>

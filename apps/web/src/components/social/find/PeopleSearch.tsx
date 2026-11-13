@@ -137,7 +137,7 @@ export function PeopleSearch({
                   </span>
                 </Link>
               ))}
-              <Link href={`/u?q=${encodeURIComponent(typed)}`} className="nf-pfind__all">
+              <Link href={`/u?q=${encodeURIComponent(typed)}`} className="nf-pfind__all nf-section-action">
                 {copy.seeAll.replace("{query}", `@${typed}`)}
               </Link>
             </>

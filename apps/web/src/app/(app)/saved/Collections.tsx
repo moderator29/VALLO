@@ -188,21 +188,21 @@ export function AddToList({
   const member = collections.filter((c) => c.keys.includes(itemKey));
 
   function toggle(collectionId: string, on: boolean) {
+    /* Said on the tap (lib/ui/optimistic.ts); a refusal replaces it. */
+    const name = collections.find((c) => c.id === collectionId)?.name ?? "";
+    saveDoneBanner({
+      saved: on,
+      message: (on ? WORDS.addedTo : WORDS.takenOff).replace("{name}", name),
+      undo: async () => {
+        const back = await setInCollection({ collectionId, kind, id, on: !on });
+        return back.ok ? { ok: true } : { ok: false, error: back.error };
+      },
+      onUndone: () => router.refresh(),
+    });
     start(async () => {
       const result = await setInCollection({ collectionId, kind, id, on });
-      if (result.ok) {
-        const name = collections.find((c) => c.id === collectionId)?.name ?? "";
-        saveDoneBanner({
-          saved: on,
-          message: (on ? WORDS.addedTo : WORDS.takenOff).replace("{name}", name),
-          undo: async () => {
-            const back = await setInCollection({ collectionId, kind, id, on: !on });
-            return back.ok ? { ok: true } : { ok: false, error: back.error };
-          },
-          onUndone: () => router.refresh(),
-        });
-        router.refresh();
-      } else banner.error(result.error, { retry: () => toggle(collectionId, on) });
+      if (result.ok) router.refresh();
+      else banner.error(result.error, { retry: () => toggle(collectionId, on) });
     });
   }
 

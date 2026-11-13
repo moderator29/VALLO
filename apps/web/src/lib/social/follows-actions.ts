@@ -25,7 +25,6 @@
  * cannot point a follow at somebody the viewer cannot even see.
  */
 
-import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { fail, ok, validate, type ActionResult } from "../actions/envelope";
@@ -175,7 +174,10 @@ async function settle(
   followeeId: string,
   following: boolean,
 ): Promise<ActionResult<FollowOutcome>> {
-  revalidatePath(`/u/${handle}`);
+  /* No `revalidatePath` (Agent FEEL, 13 November 2026): in this Next it
+     renders the whole current page into the action's answer and empties the
+     client router cache. The button redraws the profile it is on itself
+     (`router.refresh` in FollowButton), and only that one. */
 
   try {
     const { data, error } = await supabase

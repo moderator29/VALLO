@@ -30,6 +30,8 @@ export const passcodeEn = {
   bioRowUnset: "Set it up once with your password. The same key then unlocks Vallo and confirms payments.",
   bioRowSet: "Offered first when Vallo is locked. Your passcode stays as the fallback.",
   bioRowUnsupported: "This browser cannot reach this device's Face ID or fingerprint. The Vallo app and most phone browsers can.",
+  /** The same row inside the Vallo app, which must never point at itself. */
+  bioRowUnsupportedApp: "Face ID and fingerprint unlock cannot be reached from this version of the app. Your passcode keeps Vallo locked.",
   enterCode: "Enter your passcode",
   lockedTitle: "Vallo is locked",
   wrong: "That is not your passcode.",

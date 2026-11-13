@@ -1,20 +1,17 @@
 import { describe, expect, it } from "vitest";
-import { SKIP_QUIET_DAYS, readSkipCookie, setupDecision, splitFullName } from "./profile-setup-core";
+import * as core from "./profile-setup-core";
+import { SKIP_QUIET_DAYS, readSkipCookie, setupDecision } from "./profile-setup-core";
 
 const NOW = Date.parse("2026-11-10T09:00:00Z");
 const DAY = 24 * 60 * 60 * 1000;
-const base = { needName: true, needPhoto: true, skippedAt: null, shownThisSession: false, now: NOW };
+const base = { needPhoto: true, skippedAt: null, shownThisSession: false, now: NOW };
 
 describe("setupDecision", () => {
-  it("asks for the name first, then the photo", () => {
-    expect(setupDecision(base)).toEqual({ show: true, steps: ["name", "photo"] });
+  it("asks for a photo, and only a photo", () => {
+    expect(setupDecision(base)).toEqual({ show: true, steps: ["photo"] });
   });
-  it("asks only for what is missing", () => {
-    expect(setupDecision({ ...base, needName: false })).toEqual({ show: true, steps: ["photo"] });
-    expect(setupDecision({ ...base, needPhoto: false })).toEqual({ show: true, steps: ["name"] });
-  });
-  it("shows nothing when the name is confirmed and the photo is set", () => {
-    expect(setupDecision({ ...base, needName: false, needPhoto: false })).toEqual({ show: false });
+  it("shows nothing when the photo is set", () => {
+    expect(setupDecision({ ...base, needPhoto: false })).toEqual({ show: false });
   });
   it("shows at most once per session", () => {
     expect(setupDecision({ ...base, shownThisSession: true })).toEqual({ show: false });
@@ -22,7 +19,7 @@ describe("setupDecision", () => {
   it("stays quiet for the quiet days after a skip, then asks again", () => {
     expect(setupDecision({ ...base, skippedAt: NOW - DAY })).toEqual({ show: false });
     expect(setupDecision({ ...base, skippedAt: NOW - (SKIP_QUIET_DAYS * DAY - 1) })).toEqual({ show: false });
-    expect(setupDecision({ ...base, skippedAt: NOW - SKIP_QUIET_DAYS * DAY })).toEqual({ show: true, steps: ["name", "photo"] });
+    expect(setupDecision({ ...base, skippedAt: NOW - SKIP_QUIET_DAYS * DAY })).toEqual({ show: true, steps: ["photo"] });
   });
   it("treats a skip dated in the future as just now", () => {
     expect(setupDecision({ ...base, skippedAt: NOW + 5 * DAY })).toEqual({ show: false });
@@ -37,12 +34,18 @@ describe("readSkipCookie", () => {
   });
 });
 
-describe("splitFullName", () => {
-  it("splits the first word from the surname", () => {
-    expect(splitFullName("  Ada   Grace Okafor ")).toEqual({ firstName: "Ada", surname: "Grace Okafor" });
-  });
-  it("needs two names to match an ID", () => {
-    expect(splitFullName("PHANTOM")).toBeNull();
-    expect(splitFullName("   ")).toBeNull();
+/*
+ * "CONFIRM YOUR INFORMATION" IS GONE (13 November 2026, the founder): the name
+ * is given at sign-up on every path that makes an account. Nothing of the name
+ * step is left to ask with.
+ */
+describe("the name step", () => {
+  it("no longer exists: no name key, no splitter, no name step in any decision", () => {
+    expect("NAME_CONFIRMED_FEATURE" in core).toBe(false);
+    expect("splitFullName" in core).toBe(false);
+    for (const skippedAt of [null, NOW - 10 * DAY]) {
+      const decision = setupDecision({ ...base, skippedAt });
+      expect(decision.show && decision.steps).toEqual(["photo"]);
+    }
   });
 });

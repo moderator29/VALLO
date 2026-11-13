@@ -3,9 +3,7 @@ import "server-only";
 import { cookies } from "next/headers";
 import { reportReadError } from "@/lib/observability/read-error";
 import { createClient } from "@/lib/supabase/server";
-import { readFirstRunSeen } from "./store";
 import {
-  NAME_CONFIRMED_FEATURE,
   SETUP_SHOWN_COOKIE,
   SETUP_SKIP_COOKIE,
   readSkipCookie,
@@ -13,10 +11,10 @@ import {
   type SetupStep,
 } from "./profile-setup-core";
 
-export type ProfileSetupOwed = { steps: SetupStep[]; fullName: string; userId: string };
+export type ProfileSetupOwed = { steps: SetupStep[]; userId: string };
 
 /**
- * WHETHER THIS MEMBER IS SHOWN THE NAME AND PHOTO SHEETS NOW. Null for a
+ * WHETHER THIS MEMBER IS SHOWN THE PHOTO SHEET NOW. Null for a
  * signed-out visitor, for a member with nothing missing, for one inside the
  * quiet window and for one already shown the sheet this session. Any failed
  * read answers null: a first-run ask must never get in the way of the app, but
@@ -37,24 +35,20 @@ export async function profileSetupOwed(): Promise<ProfileSetupOwed | null> {
 
     const { data, error } = await supabase
       .from("profiles")
-      .select("first_name, surname, display_name, avatar_url")
+      .select("avatar_url")
       .eq("id", userId)
       .maybeSingle();
     await reportReadError("read.first-run.profile-setup", error);
     if (error || !data) return null;
 
-    const nameSeen = await readFirstRunSeen(NAME_CONFIRMED_FEATURE);
     const decision = setupDecision({
-      /* "unknown" (the store could not answer) is not "unseen": no ask. */
-      needName: nameSeen === "unseen",
       needPhoto: !data.avatar_url,
       skippedAt,
       shownThisSession,
       now: Date.now(),
     });
     if (!decision.show) return null;
-    const fullName = [data.first_name, data.surname].filter(Boolean).join(" ").trim() || (data.display_name ?? "").trim();
-    return { steps: decision.steps, fullName, userId };
+    return { steps: decision.steps, userId };
   } catch (error) {
     await reportReadError("read.first-run.profile-setup", error);
     return null;

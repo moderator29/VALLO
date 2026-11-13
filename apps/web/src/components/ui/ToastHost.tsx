@@ -1,11 +1,15 @@
 "use client";
 
 import { useEffect, useRef, useState, useSyncExternalStore, type PointerEvent } from "react";
+import { usePathname } from "next/navigation";
 import { UiIcon, type UiIconName } from "@/design-system/icons/UiIcon";
 import { useRootFlag } from "@/lib/ui/root-flag";
 import {
+  BANNER_TIMING,
+  bannerExitMs,
   currentToast,
   dismissToast,
+  noteRouteChange,
   subscribeToast,
   swipeDismisses,
   type ToastItem,
@@ -36,7 +40,9 @@ import {
  */
 /** `leave` 160ms: how long a leaving toast stays mounted (`--nf-duration-fast`). */
 export const TOAST_EXIT_MS = 160;
-const EXIT_MS = TOAST_EXIT_MS;
+
+/** The exit clock lives with the contract (`bannerExitMs` in lib/ui/toast.ts). */
+export const exitMs = bannerExitMs;
 
 function useToastItem(): ToastItem | null {
   return useSyncExternalStore(subscribeToast, currentToast, () => null);
@@ -61,6 +67,16 @@ export function ToastHost() {
     };
   }, []);
   const item = useToastItem();
+  /* THE ROUTE RULE (`BANNER_CARRY_MS`): a banner about the page being left
+     leaves with it; one raised by the tap that navigated is carried. The path
+     only, so a filter in the query string is not a new page. */
+  const pathname = usePathname();
+  const lastPath = useRef(pathname);
+  useEffect(() => {
+    if (lastPath.current === pathname) return;
+    lastPath.current = pathname;
+    noteRouteChange();
+  }, [pathname]);
   /* The item on screen, kept through its exit so it can leave rather than vanish. */
   const [shown, setShown] = useState<ToastItem | null>(null);
   const [leaving, setLeaving] = useState(false);
@@ -79,7 +95,7 @@ export function ToastHost() {
     const t = window.setTimeout(() => {
       setShown(null);
       setLeaving(false);
-    }, EXIT_MS);
+    }, exitMs());
     return () => window.clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps -- `shown` is read, the change that matters is `item`
   }, [item]);
@@ -140,8 +156,20 @@ function ToastCard({ item, leaving }: { item: ToastItem; leaving: boolean }) {
   const start = () => {
     if (timer.current !== null) return;
     startedAt.current = Date.now();
-    timer.current = window.setTimeout(() => dismissToast(item.id), Math.max(1200, remaining.current));
+    timer.current = window.setTimeout(() => dismissToast(item.id), Math.max(BANNER_TIMING.minResumeMs, remaining.current));
   };
+
+  /* The same words said again restart the clock in place (same id, a new
+     `shownAt`), with no second entrance. */
+  const clockFor = useRef(item.shownAt);
+  useEffect(() => {
+    if (clockFor.current === item.shownAt) return;
+    clockFor.current = item.shownAt;
+    stop();
+    remaining.current = item.durationMs;
+    start();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- the restart is keyed on `shownAt` alone
+  }, [item.shownAt]);
 
   useEffect(() => {
     start();

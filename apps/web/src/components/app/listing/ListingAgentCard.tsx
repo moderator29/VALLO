@@ -66,8 +66,10 @@ import "@/app/css/catalogue.css";
  * Given `lister` (the page's `readListerCard`), the card is the reference's
  * row: the photograph, the name with the published badge beside it
  * (`TierBadge`, from `person_badge`, never a guess), one role word under it
- * (Landlord, Agent or Agency), and two round monochrome buttons on the right,
- * call and message, on the solid plate: ink by day, paper at night. The person
+ * (Landlord, Agent or Agency), and two round buttons on the right,
+ * call and message, on the solid plate: paper glyphs on the ink plate by day,
+ * and at night brand-blue glyphs on the white plate (founder, 13 November
+ * 2026; the override is `.nf-lister-act` in catalogue.css). The person
  * is a link to their profile when they have claimed a handle.
  *
  * The name on this row is the lister's PUBLIC profile name, the same one their

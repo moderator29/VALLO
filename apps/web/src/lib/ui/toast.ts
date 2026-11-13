@@ -87,9 +87,75 @@ export const ERROR_HOLD_MS = 1500;
 export const TOAST_DWELL_MS = 3200;
 export const TOAST_DWELL_LONG_MS = 6000;
 
+/**
+ * A BANNER RAISED THIS CLOSE BEFORE A ROUTE CHANGE IS CARRIED ONTO THE NEXT
+ * PAGE; ONE OLDER THAN THIS LEAVES WITH THE PAGE IT WAS ABOUT.
+ *
+ * The founder (13 November 2026): banners "sometimes take time and sometimes
+ * vanish too fast" around going back. Both came from having no rule at all: a
+ * banner was free to outlive its page for six seconds, or to be swapped out by
+ * whatever the next page said on arrival. The rule now:
+ *
+ *   - raised under `BANNER_CARRY_MS` before the route changed: it is the
+ *     confirmation of the tap that navigated ("Signed in", "Listing
+ *     published"), so it stays and keeps its whole dwell on the new page;
+ *   - older: it is about the page that is going, so it leaves with it, on its
+ *     normal exit (`leave`, never an unmount), after at least a second on
+ *     screen, so it never reads as a flicker.
+ *
+ * Only the path counts as a route change: a filter written into the query
+ * string is the same page.
+ */
+export const BANNER_CARRY_MS = 1000;
+
+/**
+ * THE ONE TIMING CONTRACT, in one object, for every surface that drops a
+ * banner from the top (the feedback banner here and the notification banner
+ * in `components/app/notify`). The visual durations are tokens
+ * (`--nf-duration-base` in, `--nf-duration-fast` out, each 1ms under reduced
+ * motion and set by the Motion preference); the numbers here are the clocks
+ * that JavaScript owns.
+ */
+export const BANNER_TIMING = {
+  /** On screen from the tap: the banner is raised in the same task as the tap, never after a server answer. */
+  raise: "on-tap",
+  /** A confirmation. */
+  dwellMs: TOAST_DWELL_MS,
+  /** An error, a warning, or anything with an action (Undo, Try again). */
+  dwellLongMs: TOAST_DWELL_LONG_MS,
+  /** The least time a paused clock is given back when the finger lifts. */
+  minResumeMs: 1200,
+  /** How long an error holds the screen before a calmer message may replace it. */
+  errorHoldMs: 1500,
+  /** See `BANNER_CARRY_MS`. */
+  carryAcrossRouteMs: BANNER_CARRY_MS,
+  /** The token each phase runs on. */
+  enterToken: "--nf-duration-base",
+  exitToken: "--nf-duration-fast",
+} as const;
+
 /** The dwell a message gets when the caller does not name one. */
 export function dwellFor(tone: ToastTone, hasAction: boolean): number {
   return tone === "error" || tone === "warning" || hasAction ? TOAST_DWELL_LONG_MS : TOAST_DWELL_MS;
+}
+
+/** The exit token's default, for a server render or a page without tokens. */
+const EXIT_FALLBACK_MS = 160;
+
+/**
+ * How long a leaving banner stays mounted: the exit token as the page has it
+ * right now, so the Motion setting and reduced motion (1ms) are obeyed rather
+ * than a number written in JavaScript that only matches the default.
+ */
+export function bannerExitMs(): number {
+  if (typeof window === "undefined" || typeof document === "undefined") return EXIT_FALLBACK_MS;
+  try {
+    const raw = getComputedStyle(document.documentElement).getPropertyValue(BANNER_TIMING.exitToken).trim();
+    const value = raw.endsWith("ms") ? parseFloat(raw) : raw.endsWith("s") ? parseFloat(raw) * 1000 : NaN;
+    return Number.isFinite(value) && value >= 0 ? Math.min(value, 600) : EXIT_FALLBACK_MS;
+  } catch {
+    return EXIT_FALLBACK_MS;
+  }
 }
 
 type Listener = (item: ToastItem | null) => void;
@@ -125,10 +191,11 @@ function show(message: string, options: ToastOptions = {}): number {
   const action: ToastAction | undefined =
     options.action ?? (options.retry ? { label: options.retryLabel ?? "Try again", run: options.retry } : undefined);
 
-  /* The same words again: keep the banner, restart its clock (a new id does
-     that in the host), never a second slide-in. */
+  /* The same words again: keep the banner, restart its clock, never a second
+     slide-in. The id is KEPT (the host keys the card on it, so a new id was a
+     remount and a second entrance); the host restarts the clock on `shownAt`. */
   if (current && current.message === message && current.tone === tone && !action && !current.action) {
-    current = { ...current, id: nextId++, shownAt: now() };
+    current = { ...current, shownAt: now() };
     emit();
     return current.id;
   }
@@ -168,6 +235,52 @@ export function dismissToast(id?: number): void {
   }
   if (!current) return;
   if (id !== undefined && current.id !== id) return;
+  current = null;
+  if (waiting) {
+    promoteWaiting();
+    return;
+  }
+  emit();
+}
+
+/**
+ * Change what a banner on screen says WITHOUT a second entrance: the same id,
+ * so the host keeps the card and its clock. For the case an optimistic banner
+ * learns a detail from the server ("Saved" turns out to be "Saved on this
+ * device", or the tap was kept for later). A failure is not an update: it is
+ * a new `banner.error`, which comes in on its own entrance and dwell.
+ * Returns false when that banner is no longer the one showing.
+ */
+export function updateToast(
+  id: number,
+  patch: { message?: string; tone?: ToastTone; action?: ToastAction | null },
+): boolean {
+  if (!current || current.id !== id) return false;
+  const next: ToastItem = { ...current };
+  if (patch.message !== undefined) next.message = patch.message;
+  if (patch.tone !== undefined) next.tone = patch.tone;
+  if (patch.action === null) delete next.action;
+  else if (patch.action !== undefined) next.action = patch.action;
+  current = next;
+  emit();
+  return true;
+}
+
+/**
+ * The route changed (the PATH, not the query). Applies `BANNER_CARRY_MS`: a
+ * banner raised just before is carried, an older one leaves with its page.
+ * Anything waiting behind an error belonged to the old page too.
+ */
+export function noteRouteChange(at: number = now()): void {
+  if (waiting && at - waiting.shownAt >= BANNER_CARRY_MS) {
+    waiting = null;
+    if (waitTimer !== null) {
+      clearTimeout(waitTimer);
+      waitTimer = null;
+    }
+  }
+  if (!current) return;
+  if (at - current.shownAt < BANNER_CARRY_MS) return;
   current = null;
   if (waiting) {
     promoteWaiting();

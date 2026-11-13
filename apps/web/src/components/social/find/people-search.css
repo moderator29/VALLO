@@ -50,7 +50,6 @@
     padding: var(--nf-space-sm);
     font-size: var(--nf-text-body-sm);
     font-weight: 600;
-    color: var(--nf-brand-secondary);
     text-decoration: none;
     border-block-start: var(--nf-border-width) solid var(--nf-divider);
   }

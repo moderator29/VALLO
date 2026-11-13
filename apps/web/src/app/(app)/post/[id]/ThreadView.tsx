@@ -22,6 +22,7 @@ import { Tombstone } from "@/components/social/feed/Tombstone";
 import { leadProps } from "@/components/social/feed/lead";
 import { feedback } from "@/lib/ui/feedback";
 import { bannerWithUndo } from "@/lib/ui/undo-banner";
+import { sayNowSettleLater } from "@/lib/ui/optimistic";
 import {
   blockUser,
   muteTarget,
@@ -233,24 +234,18 @@ export function ThreadView({
       const saved = !post.saved;
       if (saved) feedback("select");
       patch(post.id, { saved });
-      startTransition(async () => {
-        try {
-          const sent = await setOrKeep("save_post", post.id, saved, () => toggleMark({ postId: post.id, mark: "SAVE", want: saved }));
-          if (sent.state === "kept") return;
-          const result = sent.state === "sent" ? sent.result : null;
-          if (!result || !result.ok) {
-            patch(post.id, { saved: post.saved });
-            banner.error(result && !result.ok ? result.error : OUTBOX_KEEP_FAILED);
-            return;
-          }
-          bannerWithUndo(saved ? POST_COPY.savedDone : POST_COPY.unsavedDone, {
-            undo: () => toggleMark({ postId: post.id, mark: "SAVE", want: !saved }),
-            undone: saved ? POST_COPY.unsavedUndone : POST_COPY.savedUndone,
-            onUndone: () => patch(post.id, { saved: !saved }),
-          });
-        } catch (error) {
-          if (!tapFailedOffline(error)) throw error;
-        }
+      /* Said on the tap, with Undo (lib/ui/optimistic.ts); the server answer
+         only corrects. */
+      void sayNowSettleLater({
+        message: saved ? POST_COPY.savedDone : POST_COPY.unsavedDone,
+        undo: {
+          undo: () => toggleMark({ postId: post.id, mark: "SAVE", want: !saved }),
+          undone: saved ? POST_COPY.unsavedUndone : POST_COPY.savedUndone,
+          onUndone: () => patch(post.id, { saved: !saved }),
+        },
+        send: () => setOrKeep("save_post", post.id, saved, () => toggleMark({ postId: post.id, mark: "SAVE", want: saved })),
+        rollBack: () => patch(post.id, { saved: post.saved }),
+        notKeptWords: OUTBOX_KEEP_FAILED,
       });
       return;
     }

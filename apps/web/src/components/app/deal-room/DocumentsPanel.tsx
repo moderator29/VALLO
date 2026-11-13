@@ -107,19 +107,19 @@ function DocumentRow({ doc, room, live, onReview }: { doc: DealDocument; room: D
   };
 
   return (
-    <div className="nf-doc" data-testid="document-row" data-state={doc.state}>
+    <div className="nf-ofr-doc" data-testid="document-row" data-state={doc.state}>
       <span className="font-semibold text-[var(--nf-content-primary)]">{DOCUMENT_CATEGORY_LABEL[doc.category]}</span>
       <StatusChip state={documentChip(doc.state)} size="sm">
         {DOCUMENT_STATE_WORD[doc.state]}
       </StatusChip>
-      <p className="nf-doc__line">
+      <p className="nf-ofr-doc__line">
         {DOCUMENT_STATE_DETAIL[doc.state]}
         {doc.uploadedAt ? ` Uploaded by ${doc.uploadedByName ?? "a party"}, ${formatWhen(doc.uploadedAt)}, version ${doc.version}.` : ""}
         {doc.reviewedAt ? ` Reviewed by ${doc.reviewedByName ?? "a reviewer"}, ${formatWhen(doc.reviewedAt)}.` : ""}
         {doc.note ? ` Note: ${doc.note}` : ""}
       </p>
       {live ? (
-        <div className="nf-doc__actions">
+        <div className="nf-ofr-doc__actions">
           {has ? (
             <Button size="sm" variant="secondary" loading={busy} onClick={() => void open()} data-testid="doc-open">
               Open
