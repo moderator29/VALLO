@@ -25,7 +25,7 @@ describe("the opening screen's markup", () => {
   });
 });
 
-const CHROMIUM = ["/opt/pw-browsers/chromium-1243/chrome-linux64/chrome", "/opt/pw-browsers/chromium-1194/chrome-linux/chrome", "/opt/pw-browsers/chromium/chrome-linux/chrome", "/usr/bin/chromium", "/usr/bin/google-chrome"].find((p) => existsSync(p));
+const CHROMIUM = ["/opt/pw-browsers/chromium-1194/chrome-linux/chrome", "/opt/pw-browsers/chromium/chrome-linux/chrome", "/usr/bin/chromium", "/usr/bin/google-chrome"].find((p) => existsSync(p));
 let browser: Browser | null = null;
 beforeAll(async () => {
   if (hasBrowser && CHROMIUM) browser = await chromium.launch({ executablePath: CHROMIUM, args: ["--no-sandbox"] });
@@ -63,7 +63,7 @@ const state = (page: import("playwright-core").Page) =>
     return { open: document.documentElement.dataset.open, display: cs.display, opacity: Number(cs.opacity), markWidth: Math.round(mark.width), markCentreY: Math.round(mark.top + mark.height / 2) };
   });
 
-describe.skipIf(!(hasBrowser || CHROMIUM) && !process.env.CI)("the opening screen, in a browser", () => {
+describe.skipIf(!hasBrowser && !process.env.CI)("the opening screen, in a browser", () => {
   it("is there from the first frame with the mark centred, and stays for the minimum", async () => {
     const { page, close } = await installed({ hydrate: 50 });
     await page.waitForSelector("#nf-open svg", { state: "attached" });

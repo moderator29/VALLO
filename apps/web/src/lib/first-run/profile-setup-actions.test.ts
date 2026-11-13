@@ -14,10 +14,6 @@ import { markProfileSetupShown, skipProfileSetup } from "./profile-setup-actions
 beforeEach(() => {
   seam.jar.clear();
 });
-  seam.mark.mockReset();
-  seam.jar.clear();
-  seam.signedIn = true;
-});
 
 describe("the name confirmation", () => {
   it("is gone: no action saves a name from the first-run sheet any more", () => {

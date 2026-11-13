@@ -70,6 +70,8 @@ export function FollowButton({
   const router = useRouter();
   const { gateHref } = useRequireAuth();
   const [following, setFollowing] = useState(initialFollowing);
+  /* Which tap is the latest, so a slow refusal never undoes a newer tap. */
+  const tap = useRef(0);
 
   /*
    * SIGNED OUT IT IS STILL A LINK, and it now remembers what it was for.
@@ -106,7 +108,6 @@ export function FollowButton({
   /* SAID ON THE TAP (lib/ui/optimistic.ts): the label flips and the banner
      goes up in the tap's own task; the server answer only corrects. Never
      disabled while a call is out: each tap sends the state it wants. */
-  const tap = useRef(0);
   const onClick = () => {
     const next = !following;
     const mine = ++tap.current;

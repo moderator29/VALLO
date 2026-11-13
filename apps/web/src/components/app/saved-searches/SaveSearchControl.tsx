@@ -68,7 +68,7 @@ export function SaveSearchControl({
       try {
         const result = await saveSearch({ params });
         if (!result.ok) {
-          banner.error(result.error, { retry: save });
+          banner.error(result.error);
           return;
         }
         /* The row the database returned, so the name and the alert state on

@@ -92,4 +92,46 @@ describe.skipIf(!hasBrowser && !process.env.CI)("Settings, Passcode: the Face ID
     },
     BROWSER_TEST_TIMEOUT,
   );
+
+  /* The lock asks the same question: a member with a key, inside the iPhone
+     app whose WebKit answers "no", is offered Face ID first, with the passcode
+     as the second door; on the website the same "no" leaves the keypad. */
+  const lock = `
+    import { getDictionary } from "@vallo/i18n";
+    import { PasscodeLock } from "@/components/passcode/PasscodeLock";
+    import { mount } from "@/lib/testing/browser-root";
+    mount(<PasscodeLock copy={getDictionary("en").passcode} locale="en" mode="code" length={4} name="Ada Okafor" passkey={true} verify={async () => ({ status: "error" })} />);
+  `;
+  it(
+    "the lock inside the iPhone app offers Face ID first even when WebKit's question says no",
+    async () => {
+      const { page, close } = await mountInBrowser({ entry: lock, reducedMotion: true, init: device({ bridge: "ios", webauthn: true, platformSays: false }) });
+      try {
+        await page.getByTestId("passcode-passkey").waitFor();
+        await page.waitForTimeout(200);
+        expect(await page.getByTestId("passcode-passkey").count()).toBe(1);
+        expect(await page.getByTestId("passcode-keypad").count()).toBe(0);
+        /* The passcode is one tap away: the fallback. */
+        await page.getByTestId("passcode-use-keypad").click();
+        await page.getByTestId("passcode-keypad").waitFor();
+      } finally {
+        await close();
+      }
+    },
+    BROWSER_TEST_TIMEOUT,
+  );
+  it(
+    "the lock on a website browser that cannot ask shows the keypad and no Face ID",
+    async () => {
+      const { page, close } = await mountInBrowser({ entry: lock, reducedMotion: true, init: device({ webauthn: true, platformSays: false }) });
+      try {
+        await page.getByTestId("passcode-keypad").waitFor();
+        await page.waitForTimeout(200);
+        expect(await page.getByTestId("passcode-passkey").count()).toBe(0);
+      } finally {
+        await close();
+      }
+    },
+    BROWSER_TEST_TIMEOUT,
+  );
 });
