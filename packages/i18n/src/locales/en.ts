@@ -392,6 +392,11 @@ export const en = {
     errorBody:
       "Something on our side stopped part way through. Nothing was submitted and no account was created or changed. Trying again usually settles it.",
     tryAgain: "Try again",
+    /* A weak signal on a sign-in screen is not a fault (13 November 2026). */
+    offlineTitle: "You are offline",
+    offlineBody: "This page needs a connection. It loads by itself when your signal comes back.",
+    weakTitle: "Weak connection",
+    weakBody: "This page did not finish loading on the connection you have. Vallo tries again by itself when the signal settles, or tap Try again.",
     backHome: "Back to the home page",
     reference: "Reference {digest}",
     loading: "Loading",
@@ -2827,7 +2832,7 @@ export const en = {
 
     photos: {
       intro:
-        "Add at least {min} photos or videos; {recommended} make a stronger listing. Up to {max} photos and {videos} videos of a minute or less. The first item is the cover and has to be a photo, so lead with the wide shot that sells the place.",
+        "Add at least {min} photos or videos; {recommended} make a stronger listing. Up to {total} in all, photos and videos together. Videos can be up to {seconds} seconds and {size} each, and are kept exactly as you recorded them, never compressed. The first item is the cover and has to be a photo, so lead with the wide shot that sells the place.",
       tooNarrow: "Photos need at least {width}px on their longest side so they look sharp on every screen.",
       choose: "Choose photos",
       /* STORE-04: the app's own camera, shown only inside the native app. */
@@ -2842,6 +2847,9 @@ export const en = {
       makeCover: "Make cover",
       remove: "Remove",
       ceiling: "A listing holds up to {max} photos.",
+      /* The founder's rule, 13 November 2026: fifteen in all, photos and videos together. */
+      total: "A listing holds up to {total} photos and videos together. Remove one to add another.",
+      totalCount: "{count} of {total}",
       notAnImage: "Add photos (for example JPG or PNG) or videos (MP4, MOV or WebM).",
       /* The video gate's refusals, one per cause, each naming what to do. */
       video: "Video",

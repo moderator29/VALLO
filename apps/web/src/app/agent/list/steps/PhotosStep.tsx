@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/Button";
 import { RemoteImage } from "@/components/ui/RemoteImage";
 import { ShotList } from "@/components/agent/ShotList";
 import { MediaViewer, type ViewerCopy, type ViewerItem } from "@/components/app/messages/MediaViewer";
-import { MAX_PHOTOS, MAX_VIDEOS, MIN_MEDIA, MIN_PHOTO_WIDTH, RECOMMENDED_MEDIA } from "@/lib/agent/listings-model";
+import { MAX_MEDIA, MAX_PHOTOS, MAX_UPLOAD_LABEL, MAX_VIDEO_SECONDS, MAX_VIDEOS, MIN_MEDIA, MIN_PHOTO_WIDTH, RECOMMENDED_MEDIA, mediaRoomLeft } from "@/lib/agent/listings-model";
 import { canMove } from "@/lib/listings/media-order";
 import { fill } from "../../_copy";
 import { Note } from "./parts";
@@ -81,9 +81,14 @@ export function PhotosStep({
       </div>
 
       <Note>
-        {fill(copy.photos.intro, { min: MIN_MEDIA, recommended: RECOMMENDED_MEDIA, max: MAX_PHOTOS, videos: MAX_VIDEOS })}{" "}
+        {fill(copy.photos.intro, { min: MIN_MEDIA, recommended: RECOMMENDED_MEDIA, max: MAX_PHOTOS, videos: MAX_VIDEOS, total: MAX_MEDIA, seconds: MAX_VIDEO_SECONDS, size: MAX_UPLOAD_LABEL })}{" "}
         {fill(copy.photos.tooNarrow, { width: MIN_PHOTO_WIDTH })}
       </Note>
+
+      {/* "12 of 15": the whole allowance, photos and videos together, always in view. */}
+      <p className="nf-body-sm text-[var(--nf-content-secondary)]" data-testid="listing-media-count">
+        {fill(copy.photos.totalCount, { count: photos.length + videos.length, total: MAX_MEDIA })}
+      </p>
 
       {/* The refusals are said by the banner; one line per refused file stays here. */}
       {problems.length > 0 && (
@@ -186,7 +191,7 @@ export function PhotosStep({
             </li>
           );
         })}
-        {(photos.length < MAX_PHOTOS || videos.length < MAX_VIDEOS) && (
+        {mediaRoomLeft(photos.length, videos.length) > 0 && (photos.length < MAX_PHOTOS || videos.length < MAX_VIDEOS) && (
           <li className="contents">
             <button type="button" className="nf-lw-add" onClick={onPick} disabled={uploading}>
               <span className="nf-lw-add__plus" aria-hidden="true">
@@ -196,7 +201,7 @@ export function PhotosStep({
             </button>
           </li>
         )}
-        {photos.length < MAX_PHOTOS && nativeCamera && (
+        {mediaRoomLeft(photos.length, videos.length) > 0 && photos.length < MAX_PHOTOS && nativeCamera && (
           <li className="contents">
             <button type="button" className="nf-lw-add" data-testid="listing-photo-camera" onClick={onCamera} disabled={uploading}>
               <span className="nf-lw-add__plus" aria-hidden="true">

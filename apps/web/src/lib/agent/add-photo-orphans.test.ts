@@ -20,6 +20,8 @@ const state = vi.hoisted(() => ({
   inspection: { ok: true, container: "mp4", durationSeconds: 42 } as Record<string, unknown>,
   videoRows: [] as Record<string, unknown>[],
   scrubOk: true,
+  /* How many rows a head-only count of each table answers. */
+  counts: { listing_photos: 0, listing_videos: 0 } as Record<string, number>,
 }));
 
 vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }));
@@ -32,7 +34,7 @@ vi.mock("../images/scrub", () => ({
 }));
 vi.mock("./video-inspect", () => ({ inspectStoredVideo: vi.fn(async () => state.inspection) }));
 
-function chain(resolveData: () => unknown, single?: () => unknown) {
+function chain(resolveData: () => unknown, single?: () => unknown, count?: () => number) {
   const c: Record<string, unknown> = {};
   let byPath = false;
   for (const step of ["select", "in", "order"]) c[step] = () => c;
@@ -43,7 +45,7 @@ function chain(resolveData: () => unknown, single?: () => unknown) {
   c.limit = () => c;
   c.maybeSingle = async () => ({ data: single ? single() : resolveData(), error: null });
   c.then = (resolve: (v: unknown) => unknown) =>
-    Promise.resolve({ data: byPath ? state.attached : resolveData(), error: null }).then(resolve);
+    Promise.resolve({ data: byPath ? state.attached : resolveData(), error: null, count: count ? count() : null }).then(resolve);
   return c;
 }
 
@@ -58,7 +60,7 @@ vi.mock("../actions/session", () => ({
         if (table === "agents") return chain(() => ({ id: "agent-1" }));
         if (table === "listings") return chain(() => ({ id: LISTING_ID, status: state.status }));
         if (table === "listing_photos") {
-          const c = chain(() => state.positions.map((position, i) => ({ id: `p${i}`, position })));
+          const c = chain(() => state.positions.map((position, i) => ({ id: `p${i}`, position })), undefined, () => state.positions.length);
           c.insert = () => ({
             select: () => ({
               single: async () =>
@@ -70,7 +72,7 @@ vi.mock("../actions/session", () => ({
           return c;
         }
         if (table === "listing_videos") {
-          const c = chain(() => null);
+          const c = chain(() => Array.from({ length: state.counts.listing_videos ?? 0 }, (_, i) => ({ id: `v${i}`, position: i })), undefined, () => state.counts.listing_videos ?? 0);
           c.insert = (row: Record<string, unknown>) => {
             state.videoRows.push(row);
             return { select: () => ({ single: async () => ({ data: { id: "new-video", position: 0 }, error: null }) }) };
@@ -106,6 +108,28 @@ beforeEach(() => {
   state.inspection = { ok: true, container: "mp4", durationSeconds: 42 };
   state.videoRows = [];
   state.scrubOk = true;
+  state.counts = { listing_photos: 0, listing_videos: 0 };
+});
+
+/*
+ * FIFTEEN IN ALL, PHOTOS AND VIDEOS TOGETHER (the founder, 13 November 2026),
+ * on the server as well as in the wizard: a sixteenth is refused and its
+ * upload removed, whichever kind it is.
+ */
+describe("the fifteen-in-all ceiling", () => {
+  it("refuses a photo when photos and videos already make fifteen, and removes its upload", async () => {
+    state.positions = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9].slice(0, 9);
+    state.counts.listing_videos = 6;
+    const result = await addPhoto({ listingId: LISTING_ID, storagePath: PATH });
+    expect(result.ok).toBe(false);
+    if (!result.ok) expect(result.error).toContain("up to 15 photos and videos together");
+    expect(state.removed).toEqual([[PATH]]);
+  });
+  it("lets a photo in at fourteen", async () => {
+    state.positions = [0, 1, 2, 3, 4, 5, 6, 7];
+    state.counts.listing_videos = 6;
+    expect((await addPhoto({ listingId: LISTING_ID, storagePath: PATH })).ok).toBe(true);
+  });
 });
 
 describe("addPhoto on refusal", () => {

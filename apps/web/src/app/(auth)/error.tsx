@@ -47,9 +47,9 @@ export default function AuthError({
   if (hold.view) {
     return (
       <div className="text-center" role="status">
-        <h1 className="nf-h3">{hold.view === "offline" ? "You are offline" : "Weak connection"}</h1>
+        <h1 className="nf-h3">{hold.view === "offline" ? a.offlineTitle : a.weakTitle}</h1>
         <p className="mt-sm text-[length:var(--nf-text-body-sm)] leading-relaxed text-[var(--nf-content-secondary)]">
-          {hold.view === "offline" ? "This page needs a connection. It loads by itself when your signal comes back." : "This page did not finish loading on the connection you have. Vallo tries again by itself when the signal settles, or tap Try again."}
+          {hold.view === "offline" ? a.offlineBody : a.weakBody}
         </p>
         <div className="mt-md flex flex-col">
           <Button variant="primary" size="lg" full onClick={reset}>

@@ -73,7 +73,27 @@ export const RECOMMENDED_MEDIA = 5;
 /** Kept for the callers that still name photos; it is the media minimum. */
 export const MIN_PHOTOS = MIN_MEDIA;
 
-/** The database allows positions 0 to 9, so ten photos per listing. */
+/**
+ * FIFTEEN IN ALL, PHOTOS AND VIDEOS TOGETHER (the founder, 13 November 2026:
+ * "image and video upload maximum should be 15"). Counted before anything is
+ * uploaded, in the wizard and again in `addPhoto` and `addVideo`, so nobody
+ * uploads a sixteenth and loses it.
+ */
+export const MAX_MEDIA = 15;
+
+/** How many more items this listing may take. */
+export function mediaRoomLeft(photos: number, videos: number): number {
+  return Math.max(0, MAX_MEDIA - photos - videos);
+}
+
+/**
+ * The database's own per-kind ceilings, which stand UNTIL the draft
+ * `supabase/drafts/listing_media_fifteen_2026-11-13.sql` is applied: photo
+ * positions 0 to 9 (`listing_photos` check) and three videos
+ * (`private.listing_video_ceiling`). Within them the fifteen-in-all rule
+ * already holds; once the draft runs, set both to MAX_MEDIA and any mix of
+ * fifteen is allowed.
+ */
 export const MAX_PHOTOS = 10;
 
 /** Narrower than this and the photo blurs on a modern phone screen. */

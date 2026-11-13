@@ -59,6 +59,7 @@ import {
 } from "./listings-queries";
 import {
   GATE_SUMMARY_MESSAGE,
+  MAX_MEDIA,
   MAX_PHOTOS,
   MAX_PHOTO_BYTES,
   MAX_PHOTO_LABEL,
@@ -718,6 +719,15 @@ export async function addPhoto(input: {
   if (readError) return refuse(PHOTO_FAILED_MESSAGE);
 
   const taken = new Set((existing ?? []).map((p) => p.position));
+  /* Fifteen in all, photos and videos together (listings-model.ts MAX_MEDIA). */
+  const { count: videoCount, error: videoCountError } = await gate.supabase
+    .from("listing_videos")
+    .select("id", { count: "exact", head: true })
+    .eq("listing_id", listingId);
+  if (videoCountError) return refuse(PHOTO_FAILED_MESSAGE);
+  if (taken.size + (videoCount ?? 0) >= MAX_MEDIA) {
+    return refuse(`A listing holds up to ${MAX_MEDIA} photos and videos together. Remove one to add another.`);
+  }
   if (taken.size >= MAX_PHOTOS) {
     return refuse(`A listing holds up to ${MAX_PHOTOS} photos. Remove one to add another.`);
   }
@@ -1296,6 +1306,10 @@ export async function addVideo(input: {
     .select("id", { count: "exact", head: true })
     .eq("listing_id", listingId);
   if (photoCountError) return refuse(VIDEO_FAILED_MESSAGE);
+  /* Fifteen in all, photos and videos together (listings-model.ts MAX_MEDIA). */
+  if (held.length + (photoCount ?? 0) >= MAX_MEDIA) {
+    return refuse(`A listing holds up to ${MAX_MEDIA} photos and videos together. Remove one to add another.`);
+  }
   const position = Math.max(
     (photoCount ?? 0) + held.length,
     held.reduce((highest, row) => Math.max(highest, row.position + 1), 0),

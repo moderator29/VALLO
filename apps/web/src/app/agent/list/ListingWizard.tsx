@@ -35,6 +35,7 @@ import { PriceGuidePanel, usePriceGuide } from "./PriceGuide";
 import { DraftMatches } from "./DraftMatches";
 import { feeNormLine, type GuideSubject } from "@/lib/price-check/wizard-guide";
 import {
+  MAX_MEDIA,
   MAX_PHOTOS,
   MAX_PHOTO_BYTES,
   MAX_PHOTO_LABEL,
@@ -64,6 +65,7 @@ import { RemoteImage } from "@/components/ui/RemoteImage";
 import { canMove, mergeMedia, photoFirst } from "@/lib/listings/media-order";
 import {
   looksLikeVideo,
+  fastStart,
   posterFrame,
   scrubVideoLocation,
   videoDuration,
@@ -1047,7 +1049,15 @@ export function ListingWizard({
       };
 
       let videoCount = videos.length;
+      /* Photos already on the listing plus those added in this pass. */
+      const photosNow = () => slot;
       for (const file of chosen) {
+        /* FIFTEEN IN ALL (the founder, 13 November 2026), counted before a
+           single byte is sent, so nobody uploads a sixteenth and loses it. */
+        if (photosNow() + videoCount >= MAX_MEDIA) {
+          refuse(file, fill(copy.photos.total, { total: MAX_MEDIA }));
+          continue;
+        }
         /* A VIDEO, mixed in with the photos in the one picker. */
         if (looksLikeVideo(file)) {
           if (videoCount >= MAX_VIDEOS) {
@@ -1208,9 +1218,12 @@ export function ListingWizard({
     }
 
     const scrubbed = await scrubVideoLocation(file);
+    /* Its index moved in front of its picture, so it starts playing at once on
+       a slow connection; not one frame re-encoded (lib/agent/video-prep.ts). */
+    const started = await fastStart(scrubbed);
     /* The original's last modified time is kept, so the same file is known
        again on a second press and its upload resumes rather than restarts. */
-    const clean = new File([scrubbed], file.name, { type: mime, lastModified: file.lastModified });
+    const clean = new File([started], file.name, { type: mime, lastModified: file.lastModified });
     const poster = await posterFrame(clean);
 
     const { data: session } = await supabase.auth.getSession();

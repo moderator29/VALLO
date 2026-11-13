@@ -1538,7 +1538,7 @@ export const ig: Dictionary = withFallback({
 
     photos: {
       intro:
-        "Tinye opekempe foto ma ọ bụ vidiyo {min}; {recommended} na-eme ndepụta ka ike. Ruo foto {max} na vidiyo {videos} nke otu nkeji ma ọ bụ nke dị mkpụmkpụ. Nke mbụ bụ foto mkpuchi ma ọ ga-abụrịrị foto, ya mere jiri foto sara mbara nke na-ere ebe ahụ malite.",
+        "Tinye opekempe foto ma ọ bụ vidiyo {min}; {recommended} na-eme ndepụta ka ike. Ruo {total} n'ozuzu, foto na vidiyo ọnụ. Vidiyo ọ bụla nwere ike ịdị ruo sekọnd {seconds} na {size}, a na-edebe ya otu ị siri see ya, a naghị apịkọta ya. Nke mbụ bụ foto mkpuchi ma ọ ga-abụrịrị foto, ya mere jiri foto sara mbara nke na-ere ebe ahụ malite.",
       tooNarrow: "Foto ga-esara opekempe {width}px ka ha pụta ìhè n'ihu ngwaọrụ ọ bụla.",
       choose: "Họrọ foto",
       addMore: "Tinye foto ọzọ",
