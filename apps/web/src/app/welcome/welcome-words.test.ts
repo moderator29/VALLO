@@ -8,7 +8,10 @@ import { describe, expect, it } from "vitest";
  * reading another section, this fails before the screen shows a blank.
  */
 const SRC = join(__dirname, "..", "..");
-const PASSED = new Set(["common", "interests", "onboardingMotion", "shape", "welcomeCards", "signUp", "platform"]);
+/* `experienceSettings` since 13 November 2026: the last step of first run is
+   the one notifications ask, whose words live under
+   `experienceSettings.notifications` (lib/i18n/slice.ts, the welcome slice). */
+const PASSED = new Set(["common", "interests", "onboardingMotion", "shape", "welcomeCards", "signUp", "platform", "experienceSettings"]);
 const FILES = ["components/app/welcome/FirstRun.tsx", "components/app/welcome/InterestChoices.tsx", "components/app/welcome/ArrivalAsks.tsx"];
 
 describe("the welcome screen's words", () => {

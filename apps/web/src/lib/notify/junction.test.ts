@@ -292,7 +292,10 @@ describe("the decision paths are actually wired to the junction", () => {
     expect(source).toContain("welcomeOnce");
     /* Every path: the six digit code, the emailed link, and the native Sign
        in with Apple sheet (STORE-02), which makes an account without either. */
-    expect(source.match(/await welcomeOnce\(/g) ?? []).toHaveLength(3);
+    /* One of the three runs after the response since 13 November 2026
+       (`afterResponse(() => welcomeOnce(...))` in the sign-up code step), so
+       both shapes count. */
+    expect(source.match(/(?:await |=> )welcomeOnce\(/g) ?? []).toHaveLength(3);
   });
 
   it("the welcome path queues and never posts, so the trigger cannot make it a second email", async () => {
