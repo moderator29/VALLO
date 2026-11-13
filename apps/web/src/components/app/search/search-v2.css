@@ -65,6 +65,19 @@
     padding: 0;
     min-height: 0;
   }
+  /* PRESSED (Agent FEEL, 13 November 2026): the press audit found the
+     Filters square the one control on /search that did not answer a finger. */
+  .nf-shelf-box .nf-shelf-square,
+  .nf-shelf-box .nf-shelf-sort--square > summary {
+    transition:
+      scale var(--nf-duration-press) var(--nf-ease-press),
+      background-color var(--nf-duration-press) var(--nf-ease-press);
+  }
+  .nf-shelf-box .nf-shelf-square:active,
+  .nf-shelf-box .nf-shelf-sort--square > summary:active {
+    background: var(--nf-brand-tint-1);
+    scale: var(--nf-press-scale);
+  }
   .nf-shelf-box .nf-shelf-square:focus-visible,
   .nf-shelf-box .nf-shelf-sort--square > summary:focus-visible {
     outline: var(--nf-focus-ring-width) solid var(--nf-focus-ring);

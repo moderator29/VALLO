@@ -166,6 +166,29 @@ async function haptics(): Promise<HeldHaptics> {
   return nativeHaptics;
 }
 
+/**
+ * THE FIRST TAP IS FELT ON THE TAP (Agent FEEL, 13 November 2026). The plugin
+ * is resolved through a dynamic `import()` of `@capacitor/core`, so the very
+ * first haptic of a session waited for that chunk to arrive and was felt late,
+ * after the heart had already filled. In the shell it is resolved once while
+ * the page is idle, so every tap, the first included, goes straight through.
+ * Nothing happens on the website.
+ */
+export function warmFeedback(): void {
+  if (typeof window === "undefined" || nativeHaptics !== undefined) return;
+  try {
+    if (!looksNative()) return;
+  } catch {
+    return;
+  }
+  const go = () => void haptics();
+  const idle = (window as unknown as { requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number })
+    .requestIdleCallback;
+  if (typeof idle === "function") idle(go, { timeout: 2000 });
+  else window.setTimeout(go, 1500);
+}
+if (typeof window !== "undefined") warmFeedback();
+
 function reducedMotion(): boolean {
   try {
     if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches === true) return true;
