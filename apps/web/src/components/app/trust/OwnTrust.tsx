@@ -1,7 +1,7 @@
 import type { Dictionary, Locale } from "@vallo/i18n/core";
 import { personChecks } from "@/lib/trust/checks";
 import { ownershipSeenFor } from "@/lib/trust/ownership-seen";
-import { readPersonChecksResult } from "@/lib/trust/person-checks-read";
+import { readPersonChecksResult, readPersonRegisters } from "@/lib/trust/person-checks-read";
 import { readMyPromise } from "@/lib/trust/promise-actions";
 import { OwnChecks, type OwnCheckRow } from "./OwnChecks";
 import { PersonReasons } from "./PersonReasons";
@@ -33,13 +33,15 @@ export async function OwnTrust({
   t: Dictionary;
 }) {
   const copy = t.trustReasons;
-  const [result, promise, ownershipSeen] = await Promise.all([
+  const [result, promise, ownershipSeen, registers] = await Promise.all([
     readPersonChecksResult(userId),
     readMyPromise(),
     isLister ? ownershipSeenFor(userId) : Promise.resolve(null),
+    isLister ? readPersonRegisters(userId) : Promise.resolve([]),
   ]);
   const facts = {
     ...result.facts,
+    registers,
     ownershipSeenAt: ownershipSeen,
     /* The member's own acceptance is read from their own row as well, so it
        shows even before the public function is asked. */

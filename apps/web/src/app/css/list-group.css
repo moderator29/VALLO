@@ -119,18 +119,25 @@
     flex: 1 1 auto;
     min-width: 0;
   }
+  /* `break-word`, never `anywhere` (13 November 2026). Both let one long
+     word break so it stays inside the card. But `anywhere` also counts
+     toward the min-content width: it tells the row that a single letter is
+     wide enough, so beside a long value or two actions the text column
+     shrinks until a name runs down the card a letter at a time.
+     `break-word` keeps the column's min-content at its longest word, so a
+     title wraps between its words. */
   .nf-list-row__title {
     font-size: var(--nf-text-row);
     line-height: var(--nf-leading-row);
     font-weight: 600;
     color: var(--nf-content-primary);
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
   }
   .nf-list-row__sub {
     font-size: var(--nf-text-caption);
     line-height: 1.4;
     color: var(--nf-content-muted);
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
   }
   /* Value above status, right-aligned: "N42,800" over "(dot) High". */
   .nf-list-row__end {

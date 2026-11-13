@@ -7,6 +7,9 @@ import { OwnChecks } from "@/components/app/trust/OwnChecks";
 import { PromiseFoot } from "@/components/app/trust/PromiseFoot";
 import { personChecks, personStats, reasonsTitle } from "@/lib/trust/checks";
 import { proofLines } from "@/lib/trust/proof-strip";
+import { PassportBook } from "@/components/passport/PassportBook";
+import { factsFrom, type PassportFacts } from "@/lib/passport/model";
+import { buildPassportView } from "@/lib/passport/view";
 
 /**
  * "WHY TRUST THIS SPACE?" AND "REASONS TO TRUST <NAME>", FROM FIXTURES.
@@ -15,7 +18,8 @@ import { proofLines } from "@/lib/trust/proof-strip";
  * carries no check by rule, so the live page can only ever show its empty
  * state. This page draws the real components with dated fixtures so the
  * dated states can be looked at: `?view=dated` (the default), `empty`,
- * `summary`, `summary-empty`, `person`, `own` (a member's own view, with the
+ * `summary`, `summary-empty`, `person`, `passport` (a visitor's passport),
+ * `own` (a member's own view, with the
  * checks they can still add) and `promise-foot` (the foot of /community; with
  * no database here it asks for its state, gets none, and draws nothing).
  *
@@ -73,6 +77,50 @@ export default async function TrustPreview({ searchParams }: { searchParams: Pro
           )}
           labels={copy.sheet}
         />
+      </main>
+    );
+  }
+
+  if (view === "passport") {
+    /* A visitor's passport, composed as app/(app)/passport/[who]/page.tsx
+       composes it: the book, the counts as a row, the dated checks. */
+    const facts = factsFrom({
+      subject_id: "00000000-0000-4000-8000-00000000a001",
+      handle: "amaka_homes",
+      display_name: "Amaka Nwosu",
+      photo: null,
+      roles: ["landlord", "hotel"],
+      joined_at: "2026-08-07T08:00:00Z",
+      verification: "gold",
+      rentals: 14,
+      stays: 62,
+      review_count: 41,
+      review_average: 4.8,
+      reply_band: "hour",
+      pidgin_ok: true,
+    }) as PassportFacts;
+    const book = buildPassportView(facts, t.passportV2, t.socialProfile.roleLine, "en");
+    const checks = personChecks(
+      {
+        identitySeenAt: "2026-08-09T08:00:00Z",
+        identityMethod: "seen",
+        registers: [{ kind: "lasrera", name: "Amaka Nwosu", company: null, checkedAt: "2026-09-01T09:00:00Z" }],
+        phoneConfirmedAt: "2026-08-07T08:10:00Z",
+        emailConfirmedAt: "2026-08-07T08:02:00Z",
+        promiseAcceptedAt: "2026-11-13T09:00:00Z",
+        ownershipSeenAt: "2026-08-20T08:00:00Z",
+      },
+      copy,
+      "en",
+    );
+    const stats = [
+      ...book.stats.filter((stat) => stat.figure).map((stat) => ({ key: stat.key, label: stat.label, value: stat.value })),
+      { key: "rating", label: copy.person.stats.rating, value: "4.8" },
+    ];
+    return (
+      <main className="mx-auto grid w-full max-w-xl gap-lg px-gutter pb-4xl pt-lg" data-testid="preview-trust-passport">
+        <PassportBook view={book} copy={t.passportV2} hideFigures hideLevel />
+        <PersonReasons title={reasonsTitle(book.name, copy)} lede={copy.person.lede} stats={stats} checks={checks} labels={copy.sheet} testId="passport-reasons" />
       </main>
     );
   }

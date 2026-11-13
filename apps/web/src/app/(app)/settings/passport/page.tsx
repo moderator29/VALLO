@@ -7,6 +7,7 @@ import { EmptyState, TYPE } from "@/components/app/Screen";
 import { PassportSettings } from "@/components/passport/PassportSettings";
 import { gateFirstRun } from "@/components/app/feature-onboarding/first-run-store";
 import { resolveSession } from "@/lib/actions/session";
+import { OwnTrust } from "@/components/app/trust/OwnTrust";
 import { withNext } from "@/lib/auth/next-link";
 import { readMyPassport } from "@/lib/passport/passport-read";
 
@@ -78,6 +79,18 @@ export default async function PassportSettingsPage({
         copy={copy}
         roleCopy={t.socialProfile.roleLine}
         locale={locale}
+        /* The member's own trust checks, between the book and its switches:
+           what others see, each with its date, then the ones they can still
+           add (never shown to anyone else). Draws nothing when there is
+           neither. The same component as on their profile. */
+        afterBook={
+          <OwnTrust
+            userId={session.user.id}
+            isLister={(mine.facts.roles ?? []).some((role) => role !== "renter")}
+            locale={locale}
+            t={t}
+          />
+        }
       />
     </PageFrame>
   );

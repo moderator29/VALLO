@@ -31,10 +31,6 @@
   .nf-reasons__row {
     min-block-size: 3.75rem;
   }
-  .nf-reasons__row .nf-list-row__title,
-  .nf-reasons__row .nf-list-row__sub {
-    overflow-wrap: break-word;
-  }
   .nf-reasons__sub {
     display: grid;
     gap: var(--nf-space-3xs);
@@ -77,6 +73,10 @@
     min-inline-size: 0;
     padding: var(--nf-space-md) var(--nf-space-sm);
     background: var(--nf-surface-primary);
+  }
+  /* Four facts sit as two and two, not as three and one left over. */
+  .nf-reasons-stats:has(> :nth-child(4):last-child) > .nf-reasons-stats__cell {
+    flex-basis: 40%;
   }
   .nf-reasons-stats__value {
     margin: 0;

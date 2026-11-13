@@ -128,11 +128,52 @@ comment on function public.person_trust_checks(uuid) is
 revoke all on function public.person_trust_checks(uuid) from public;
 grant execute on function public.person_trust_checks(uuid) to anon, authenticated;
 
+-- 4. A lister's register entries, for their public page (the founder's
+--    "agent's licence checked"). public.credentials is keyed by the person
+--    and is select-own; the listing page reads it through
+--    public.listing_credentials. This is the same fact by person: which
+--    register, the name the register shows (or the company, for a CAC
+--    directorship) and the date. NEVER THE NUMBER: the registration number is
+--    printed on a listing, where a renter can look it up against the lister
+--    in front of them, and has no place on a profile a stranger can read.
+--    Entries older than a year are not returned, as on a listing.
+create or replace function public.person_register_checks(p_user uuid)
+returns table (
+  kind          text,
+  register_name text,
+  company_name  text,
+  checked_at    timestamptz
+)
+language sql
+stable
+security definer
+set search_path to ''
+as $fn$
+  select c.kind, c.register_name, c.company_name, c.checked_at
+    from public.credentials c
+   where c.subject_id = p_user
+     and c.checked_at > now() - interval '1 year'
+     and exists (select 1 from public.social_profiles sp where sp.user_id = p_user)
+   order by c.kind;
+$fn$;
+
+comment on function public.person_register_checks(uuid) is
+  'A member''s dated register entries from the last year (LASRERA, ESVARBON, CAC directorship) for their public page: the register, the name it shows or the company, and the date. Never the registration number.';
+
+revoke all on function public.person_register_checks(uuid) from public;
+grant execute on function public.person_register_checks(uuid) to anon, authenticated;
+
 -- Read back. Raises, so a partial state never commits.
 do $check$
 begin
   if not has_function_privilege('authenticated', 'public.person_trust_checks(uuid)', 'EXECUTE') then
     raise exception 'person_trust_checks: authenticated cannot execute it';
+  end if;
+  if not has_function_privilege('authenticated', 'public.person_register_checks(uuid)', 'EXECUTE') then
+    raise exception 'person_register_checks: authenticated cannot execute it';
+  end if;
+  if has_table_privilege('anon', 'public.credentials', 'SELECT') then
+    raise exception 'credentials: anon can read the table itself';
   end if;
   if has_function_privilege('anon', 'public.accept_community_promise(text)', 'EXECUTE') then
     raise exception 'accept_community_promise: anon can execute it';

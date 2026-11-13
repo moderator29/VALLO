@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { getDictionary } from "@vallo/i18n";
 import { personChecks, personStats, reasonsTitle, spaceChecks, spaceExplainer } from "./checks";
-import { personFactsFrom } from "./person-checks-read";
+import { personFactsFrom, registersFrom } from "./person-checks-read";
 import { proofDate, proofLines, type ProofLine } from "./proof-strip";
 
 const t = getDictionary("en");
@@ -130,6 +130,29 @@ describe("a person's checks", () => {
     expect(JSON.stringify(facts)).not.toMatch(/\+234|@/);
     expect(personFactsFrom(null)).toEqual({});
     expect(personFactsFrom("x")).toEqual({});
+  });
+});
+
+describe("a lister's register entries on their own page", () => {
+  it("prints the register, the name it shows and the date, and never the number", () => {
+    const registers = registersFrom([
+      { kind: "lasrera", register_name: "Ada Okafor", company_name: null, checked_at: "2026-09-01T09:00:00Z", number: "LAS-4411" },
+      { kind: "cac_director", register_name: null, company_name: "Okafor Homes Ltd", checked_at: "2026-09-02T09:00:00Z", number: "RC-778" },
+      { kind: "something-else", register_name: "X", checked_at: "2026-09-02T09:00:00Z" },
+      { kind: "esvarbon", register_name: "Ada Okafor", checked_at: "not a date" },
+    ]);
+    expect(registers.map((r) => r.kind)).toEqual(["lasrera", "cac_director"]);
+    expect(JSON.stringify(registers)).not.toMatch(/LAS-4411|RC-778/);
+    const rows = personChecks({ identitySeenAt: "2026-08-14T09:00:00Z", registers, phoneConfirmedAt: "2026-08-15T09:00:00Z" }, copy, "en");
+    expect(rows.map((r) => r.kind)).toEqual(["personIdentity", "lasrera", "cacDirector", "phone"]);
+    expect(rows[1]?.detail).toBe("Ada Okafor");
+    expect(rows[2]?.detail).toBe("Okafor Homes Ltd");
+    expect(rows.map((r) => `${r.title} ${r.detail}`).join(" ")).not.toMatch(/LAS-4411|RC-778/);
+  });
+
+  it("an entry with no name to show is not a row", () => {
+    const rows = personChecks({ registers: [{ kind: "lasrera", name: "  ", company: null, checkedAt: "2026-09-01T09:00:00Z" }] }, copy, "en");
+    expect(rows).toEqual([]);
   });
 });
 

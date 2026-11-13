@@ -78,3 +78,44 @@ export async function readPersonChecksResult(userId: string): Promise<PersonChec
 export async function readPersonChecks(userId: string): Promise<PersonCheckFacts> {
   return (await readPersonChecksResult(userId)).facts;
 }
+
+const REGISTER_KINDS = ["lasrera", "esvarbon", "cac_director"] as const;
+type RegisterKind = (typeof REGISTER_KINDS)[number];
+
+/** The function's rows, narrowed. A registration number is never kept, even if a row carried one. Exported for its test. */
+export function registersFrom(rows: unknown): NonNullable<PersonCheckFacts["registers"]> {
+  if (!Array.isArray(rows)) return [];
+  const out: NonNullable<PersonCheckFacts["registers"]> = [];
+  for (const row of rows as Record<string, unknown>[]) {
+    if (!row || typeof row !== "object") continue;
+    const kind = REGISTER_KINDS.find((k) => k === row.kind) as RegisterKind | undefined;
+    const checkedAt = provableDate(typeof row.checked_at === "string" ? row.checked_at : null);
+    if (!kind || !checkedAt) continue;
+    out.push({
+      kind,
+      name: typeof row.register_name === "string" ? row.register_name : null,
+      company: typeof row.company_name === "string" ? row.company_name : null,
+      checkedAt,
+    });
+  }
+  return out;
+}
+
+/**
+ * A lister's dated register entries, by person (`person_register_checks`,
+ * the same pending migration). The register, the name it shows and the date;
+ * never the number. An empty list on any failure.
+ */
+export async function readPersonRegisters(userId: string): Promise<NonNullable<PersonCheckFacts["registers"]>> {
+  if (!UUID.test(userId) || !isSupabaseConfigured()) return [];
+  try {
+    const supabase = await createClient();
+    const rpc = (supabase.rpc as unknown as Rpc).bind(supabase);
+    const { data, error } = await rpc("person_register_checks", { p_user: userId });
+    await reportReadFault("read.trust.readPersonRegisters", error);
+    if (error) return [];
+    return registersFrom(data);
+  } catch {
+    return [];
+  }
+}

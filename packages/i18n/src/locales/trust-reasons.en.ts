@@ -220,6 +220,13 @@ export const trustReasonsEn = {
       what: "This person confirmed the email address on their account with a code or a link that Vallo sent to it.",
       not: "It does not say who they are. Vallo never shows the address on a profile.",
     },
+    /* A lister's register entry on their own page. The row's name is the
+       register's (`lasrera`, `esvarbon`, `cacDirector` above); the line under
+       it is the name the register shows, and never the number. */
+    personRegister: {
+      what: "A member of Vallo staff looked this registration up on the public register on this date. Entries older than a year are not shown.",
+      not: "It is not required to list on Vallo. It says nothing about any property or price, or about how they will treat you.",
+    },
     promise: {
       title: "Accepted the Community Promise",
       what: "This person read Vallo's Community Promise and accepted it: honest listings and messages, careful viewings, respect for the people they deal with, and reporting what does not belong here.",

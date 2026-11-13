@@ -26,17 +26,29 @@ export function PassportBook({
   copy,
   off = false,
   testId = "passport-book",
+  hideLevel = false,
+  hideFigures = false,
 }: {
   view: PassportView;
   copy: PassportCopy;
   /** The owner's preview when the passport is off: drawn faded. */
   off?: boolean;
   testId?: string;
+  /**
+   * A visitor's page draws the counts (rentals, stays, reviews) as the stats
+   * row under the book, and the identity check as a dated row that opens, so
+   * the book leaves them out there: a number is never printed twice. The
+   * owner's preview keeps both, because the switches beside it are about
+   * exactly those lines.
+   */
+  hideLevel?: boolean;
+  hideFigures?: boolean;
 }) {
   const rings = rosettePaths(view.number);
   const waves = wavePaths(view.number);
   const laceId = `vp-lace-${view.number}`;
-  const figureStats = view.stats.filter((s) => s.figure);
+  const shownStats = hideFigures ? view.stats.filter((s) => !s.figure) : view.stats;
+  const figureStats = shownStats.filter((s) => s.figure);
   const figures = figureStats.length;
   const lastFigure = figureStats[figureStats.length - 1]?.key;
   return (
@@ -112,7 +124,7 @@ export function PassportBook({
         </dl>
       </div>
 
-      {view.level ? (
+      {view.level && !hideLevel ? (
         <div className="nf-vp__level" data-testid="passport-level" data-tier={view.level.tier}>
           <span className="nf-vp__level-mark" aria-hidden="true">
             {view.level.tier === "none" ? <UiIcon name="user" size={18} /> : <TierBadge tier={view.level.tier} size={24} decorative />}
@@ -125,9 +137,9 @@ export function PassportBook({
         </div>
       ) : null}
 
-      {view.stats.length > 0 ? (
+      {shownStats.length > 0 ? (
         <ul className="nf-vp__stats" aria-label={copy.recordLabel} data-testid="passport-stats">
-          {view.stats.map((stat) => (
+          {shownStats.map((stat) => (
             <li
               key={stat.key}
               className={

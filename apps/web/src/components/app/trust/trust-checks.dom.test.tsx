@@ -341,3 +341,48 @@ describe.skipIf(!hasBrowser)("a member's own checks and the Community Promise, i
     }
   });
 });
+
+/*
+ * The platform's grouped list row itself (app/css/list-group.css), with the
+ * case that used to collapse: a long name beside a long value. The shared
+ * rule was `overflow-wrap: anywhere`, which let the title's column shrink to
+ * one letter; it is `break-word` now, and this holds it there.
+ */
+const longRowEntry = `
+  import { ListGroup, ListRow } from "@/components/ui/ListGroup";
+  import { mount } from "@/lib/testing/browser-root";
+  mount(
+    <ListGroup label="People">
+      <ListRow title="Oluwaseun Chukwuemeka-Olanrewaju Adebayo-Williams" sub="Chukwuemeka-Olanrewaju and Partners, Lekki Phase 1" value="12,500,000 a year" chevron onClick={() => {}} data-testid="long-row" />
+      <ListRow title="Ada" value="1" chevron onClick={() => {}} />
+    </ListGroup>,
+  );
+`;
+
+describe.skipIf(!hasBrowser)("the shared list row with a long name beside a value", () => {
+  it("wraps the name between its words at 390 and 320, and never into a column of letters", async () => {
+    for (const width of [390, 320]) {
+      const { page, close } = await mountInBrowser({ entry: longRowEntry, css: CSS, viewport: { width, height: 844 } });
+      try {
+        await page.waitForSelector('[data-testid="long-row"]');
+        const title = await page.$eval('[data-testid="long-row"] .nf-list-row__title', (el) => {
+          const r = el.getBoundingClientRect();
+          const cs = getComputedStyle(el);
+          return { width: r.width, lines: Math.round(r.height / parseFloat(cs.lineHeight)), wrap: cs.overflowWrap };
+        });
+        expect(title.wrap).toBe("break-word");
+        /* Room for its longest word, and no more lines than it has places to
+           break: three spaces and two hyphens make five pieces. A column of
+           letters would be forty lines. */
+        expect(title.width).toBeGreaterThan(90);
+        expect(title.lines).toBeLessThanOrEqual(5);
+        expect(await collapsed(page)).toEqual([]);
+        const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+        expect(overflow).toBeLessThanOrEqual(0);
+        if (width === 390) await maybeShot(page, "list-row-long-name-390");
+      } finally {
+        await close();
+      }
+    }
+  });
+});

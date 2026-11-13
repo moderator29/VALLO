@@ -10,7 +10,7 @@ import { FollowButton } from "@/components/social/profile/FollowButton";
 import { ProfileHeader } from "@/components/social/profile/ProfileHeader";
 import { ValloRecord } from "@/components/app/trust/ValloRecord";
 import { readUserRecord } from "@/lib/trust/record-read";
-import { readPersonChecks } from "@/lib/trust/person-checks-read";
+import { readPersonChecks, readPersonRegisters } from "@/lib/trust/person-checks-read";
 import { personChecks, personStats, reasonsTitle } from "@/lib/trust/checks";
 import { RECORD_MIN_COUNT, replyBand } from "@/lib/trust/record";
 import { PersonReasons } from "@/components/app/trust/PersonReasons";
@@ -197,7 +197,7 @@ export default async function SocialProfilePage({
     });
 
     const supabase = await createClient();
-    const [posts, replies, media, activity, properties, reviews, stories, record, badges, roleWords, passportOpen, ratingAgg, checkFacts] =
+    const [posts, replies, media, activity, properties, reviews, stories, record, badges, roleWords, passportOpen, ratingAgg, checkFacts, registers] =
       await Promise.all([
         isAgentPage ? Promise.resolve([]) : getProfileFeed(userId),
         isAgentPage ? Promise.resolve([]) : getProfileReplies(userId),
@@ -223,6 +223,9 @@ export default async function SocialProfilePage({
         /* The dates behind this person's checks (identity, mobile, email).
            No facts on any failure, and no facts draw no lines. */
         readPersonChecks(userId),
+        /* A lister's register entries (LASRERA, ESVARBON, the CAC), by name
+           and date and never by number. Nobody else has any. */
+        view.profile.isAgent ? readPersonRegisters(userId) : Promise.resolve([]),
       ]);
     const passportAction = view.isOwner ? (
       <ButtonLink href="/settings/passport" size="sm" variant="secondary" leadingIcon="id-card" data-testid="profile-your-passport">
@@ -245,7 +248,7 @@ export default async function SocialProfilePage({
      * card below it, so a number is never printed twice.
      */
     const reasonsCopy = t.trustReasons;
-    const reasonChecks = personChecks({ ...checkFacts, ownershipSeenAt: ownershipSeen }, reasonsCopy, locale);
+    const reasonChecks = personChecks({ ...checkFacts, registers, ownershipSeenAt: ownershipSeen }, reasonsCopy, locale);
     const recordReplies =
       record && !record.stopped && record.replied !== null && record.replied >= RECORD_MIN_COUNT ? replyBand(record.replyMedianMinutes) : null;
     const reasonStats = personStats(

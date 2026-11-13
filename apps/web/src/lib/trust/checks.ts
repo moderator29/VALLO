@@ -319,6 +319,12 @@ export type PersonCheckFacts = {
   /** When their identity check passed, and how. */
   identitySeenAt?: string | null;
   identityMethod?: "seen" | "nimc" | null;
+  /**
+   * Their dated register entries from the last year. The name the register
+   * shows (or the company, for a directorship) and the date: there is no
+   * field for the registration number, which belongs on a listing only.
+   */
+  registers?: { kind: "lasrera" | "esvarbon" | "cac_director"; name: string | null; company: string | null; checkedAt: string }[];
   /** When they entered the one-time code sent to their mobile. */
   phoneConfirmedAt?: string | null;
   /** When they confirmed the email address on the account. */
@@ -359,6 +365,27 @@ export function personChecks(facts: PersonCheckFacts, copy: Copy, locale: Locale
   };
   if (facts.identityMethod === "nimc") push("personIdentityNimc", facts.identitySeenAt, copy.who.nimc);
   else push("personIdentity", facts.identitySeenAt, copy.who.staff);
+  /* What they are registered as, straight after who they are. */
+  (facts.registers ?? []).forEach((entry, index) => {
+    const at = provableDate(entry.checkedAt);
+    const shown = (entry.kind === "cac_director" ? entry.company : entry.name)?.trim() ?? "";
+    /* An entry prints only with the name the register shows: a bare
+       "on the register" says a line exists, not whose it is. */
+    if (!at || shown === "") return;
+    const kind = entry.kind === "cac_director" ? "cacDirector" : entry.kind;
+    out.push({
+      id: `${kind}-${index}`,
+      kind,
+      title: copy.checks[kind].title,
+      detail: shown,
+      at,
+      date: proofDate(at, locale),
+      who: copy.who.staffRegister,
+      what: copy.checks.personRegister.what,
+      notProof: copy.checks.personRegister.not,
+      earn: null,
+    });
+  });
   push("phone", facts.phoneConfirmedAt, copy.who.code);
   push("email", facts.emailConfirmedAt, copy.who.code);
   push("promise", facts.promiseAcceptedAt, copy.who.member);
@@ -368,7 +395,8 @@ export function personChecks(facts: PersonCheckFacts, copy: Copy, locale: Locale
 
 /* ------------------------------------------------------------- the stats */
 
-export type TrustStat = { key: "reviews" | "rating" | "since" | "lets" | "replies"; label: string; value: string };
+/** One cell: a real figure and what it counts. `key` only tells the cells apart. */
+export type TrustStat = { key: string; label: string; value: string };
 
 /**
  * The numbers above a person's checks. REAL NUMBERS ONLY: a cell is built

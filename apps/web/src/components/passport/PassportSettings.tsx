@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { useRef, useState } from "react";
 import type { Locale } from "@vallo/i18n/core";
 import type { RoleLineCopy } from "@/lib/profile/role-line";
@@ -48,7 +49,14 @@ export function PassportSettings({
   copy,
   roleCopy,
   locale,
+  afterBook = null,
 }: {
+  /**
+   * Drawn between the book and its switches: the member's own trust checks
+   * (what others see, and what they can still add). A server-rendered node,
+   * handed in so this client component does not have to read anything.
+   */
+  afterBook?: ReactNode;
   facts: PassportFacts;
   initial: Settings;
   copy: PassportCopy;
@@ -99,6 +107,8 @@ export function PassportSettings({
           </p>
         ) : null}
       </section>
+
+      {afterBook}
 
       <SettingsGroup>
         <RowSwitch
