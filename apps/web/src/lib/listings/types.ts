@@ -384,6 +384,13 @@ export type Listing = {
    * rather than asserting it.
    */
   isDemo: boolean;
+  /**
+   * Listing stats (founder, 13 November 2026): lifetime views and current
+   * saves, attached to the listings a page draws by `withListingStats` in one
+   * query for the page. Absent until the pending SQL is applied or when the
+   * read failed; a card then draws no count. Never on an example.
+   */
+  stats?: { views: number; saves: number };
   instantBook: boolean;
   amenities: string[];
   /**

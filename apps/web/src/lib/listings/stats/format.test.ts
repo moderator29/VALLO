@@ -95,3 +95,20 @@ describe("conversion", () => {
     expect(conversionPercent(4, 0)).toBeNull();
   });
 });
+
+describe("the card's count line", () => {
+  it("shows saves from one and views from ten, never a zero, nothing on an example or without figures", async () => {
+    const { cardStatItems } = await import("./format");
+    expect(cardStatItems({ isDemo: true, stats: { views: 500, saves: 20 } })).toBeNull();
+    expect(cardStatItems({ isDemo: false, stats: null })).toBeNull();
+    expect(cardStatItems({ isDemo: false, stats: undefined })).toBeNull();
+    expect(cardStatItems({ isDemo: false, stats: { views: 0, saves: 0 } })).toBeNull();
+    expect(cardStatItems({ isDemo: false, stats: { views: 9, saves: 0 } })).toBeNull();
+    expect(cardStatItems({ isDemo: false, stats: { views: 9, saves: 1 } })?.map((i) => i.text)).toEqual(["1 save"]);
+    expect(cardStatItems({ isDemo: false, stats: { views: 10, saves: 0 } })?.map((i) => i.text)).toEqual(["10 views"]);
+    expect(cardStatItems({ isDemo: false, stats: { views: 1234, saves: 24 } })?.map((i) => [i.text, i.full])).toEqual([
+      ["1.2k views", "1,234 views"],
+      ["24 saves", "24 saves"],
+    ]);
+  });
+});

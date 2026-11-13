@@ -10,6 +10,12 @@ import { AgentShell } from "@/components/agent/AgentShell";
 import { STATS_RANGES, type DayFigures, type RankedRow, type StatsRange } from "@/lib/admin/reads/listing-stats-model";
 import { AdminPreviewFrame } from "../f5/AdminPreviewFrame";
 import { AGENT_LISTINGS, AGENT_PROFILE } from "../f5/ops-fixtures";
+import { ListingCard } from "@/components/app/ListingCard";
+import { HomeListingCard } from "@/components/app/home/HomeListingCard";
+import { homeCardCopyOf } from "@/components/app/home/home-card-copy";
+import { forListingCard } from "@/lib/i18n/slice";
+import { RENTAL, SHELF } from "../f3/fixtures";
+import "@/app/css/space-card.css";
 
 /**
  * LISTING STATS, FROM FIXTURES (founder, 13 November 2026). Real components,
@@ -19,6 +25,7 @@ import { AGENT_LISTINGS, AGENT_PROFILE } from "../f5/ops-fixtures";
  *   ?v=admin   Analytics > Listings in the console frame (&range=7d|30d|90d)
  *   ?v=empty   the desk before anything is counted, and before the SQL
  *   ?v=agent   the lister's own rows with their figures
+ *   ?v=cards   the count line on the search card and the home card
  */
 export const dynamic = "force-dynamic";
 
@@ -101,6 +108,42 @@ export default async function ListingStatsPreview({ searchParams }: { searchPara
           ) : null}
         </div>
       </AdminPreviewFrame>
+    );
+  }
+
+  if (v === "cards") {
+    const counts = [
+      { views: 1234, saves: 24 },
+      { views: 40, saves: 2 },
+      { views: 9, saves: 1 },
+      { views: 9, saves: 0 },
+    ];
+    const cards = SHELF.slice(0, 4).map((listing, i) => ({ ...listing, isDemo: false, stats: counts[i]! }));
+    const copy = homeCardCopyOf(t);
+    const cardCopy = forListingCard(t);
+    return (
+      <main className="nf-shell mx-auto max-w-3xl py-section">
+        <h1 className="nf-h2">Count line on the cards</h1>
+        <p className="nf-caption mt-xs">1.2k views and 24 saves; 40 views and 2 saves; 1 save (views under ten say nothing); nothing (no saves, nine views); and an example with figures, which draws none.</p>
+        <ul className="mt-lg grid gap-md" data-testid="search-cards">
+          {cards.map((listing, i) => (
+            <li key={listing.id}>
+              <ListingCard listing={listing} locale={locale} t={cardCopy} layout="row" brief index={i} />
+            </li>
+          ))}
+          <li>
+            <ListingCard listing={{ ...RENTAL, isDemo: true, stats: { views: 1234, saves: 24 } }} locale={locale} t={cardCopy} layout="row" brief index={4} />
+          </li>
+        </ul>
+        <h2 className="nf-h3 mt-lg">Home cards</h2>
+        <ul className="mt-sm grid gap-md sm:grid-cols-2" data-testid="home-cards">
+          {cards.slice(0, 2).map((listing) => (
+            <li key={listing.id}>
+              <HomeListingCard listing={listing} locale={locale} copy={copy} layout="card" />
+            </li>
+          ))}
+        </ul>
+      </main>
     );
   }
 

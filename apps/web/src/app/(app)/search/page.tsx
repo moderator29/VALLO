@@ -39,6 +39,7 @@ import {
 } from "@/components/app/search/shelf-query";
 import { getLocale } from "@/lib/locale";
 import { catalogueReader } from "@/lib/catalogue/listings";
+import { withListingStats } from "@/lib/listings/stats/read";
 import { factsOf, matchesFacts, matchesFilter } from "@/lib/listings/filter";
 import { nextChange } from "@/components/app/search/next-change";
 import {
@@ -433,7 +434,8 @@ export default async function SearchPage({
   const SHELF_STEP = 24;
   const moreParam = typeof raw.more === "string" ? Number.parseInt(raw.more, 10) : 1;
   const shelfSteps = Number.isFinite(moreParam) ? Math.min(Math.max(moreParam, 1), 40) : 1;
-  const drawn = listings.slice(0, SHELF_STEP * shelfSteps);
+  /* Listing stats: the cards' counts, one query for the ids drawn (cached per instance). */
+  const drawn = await withListingStats(listings.slice(0, SHELF_STEP * shelfSteps));
   const shelfHref = toShelfHref(query);
   const moreHref =
     drawn.length < listings.length ? `${shelfHref}${shelfHref.includes("?") ? "&" : "?"}more=${shelfSteps + 1}` : null;

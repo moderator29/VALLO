@@ -14,6 +14,7 @@ import { SpaceCard } from "@/components/ui/space-card/SpaceCard";
 import type { UiIconName } from "@/design-system/icons/UiIcon";
 import { SaveButton, useSaveControl } from "@/components/app/SaveControl";
 import { chipOf, factsOf, priceOf, type HomeCardCopy } from "@/components/app/home/home-card-copy";
+import { CardCounts } from "@/components/app/listing/CardCounts";
 import { PriceGuide } from "@/components/currency/Price";
 import { useAreaText } from "@/components/currency/DisplayMoneyProvider";
 import "@/app/css/home.css";
@@ -100,6 +101,7 @@ export function HomeListingCard({
           : null
       }
       facts={factsOf(listing, copy, locale, areaText)}
+      extra={<CardCounts stats={listing.stats} isDemo={listing.isDemo} locale={locale} />}
       reason={reason}
       reasonIcon={reasonIcon}
       photoLabel={copy.photoLabel}

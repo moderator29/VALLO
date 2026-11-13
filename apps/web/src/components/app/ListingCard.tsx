@@ -58,6 +58,7 @@ import { ProofStrip } from "@/components/app/listing/ProofStrip";
 import { CardPhotos, CARD_PHOTO_MAX } from "@/components/app/search/CardPhotos";
 import { proofFactsOf, proofLines } from "@/lib/trust/proof-strip";
 import { CardMenu, useCardMenu } from "@/components/app/listing/CardMenu";
+import { CardCounts } from "@/components/app/listing/CardCounts";
 import { OwnershipSeenMark } from "@/components/trust/OwnershipSeenMark";
 import { SpaceCard } from "@/components/ui/space-card/SpaceCard";
 import "@/app/css/catalogue.css";
@@ -621,6 +622,8 @@ export function ListingCard({
         reasonIcon={reason?.icon}
         extra={
           <>
+            {/* Listing stats: views and saves, a quiet line under the facts. */}
+            <CardCounts stats={listing.stats} isDemo={listing.isDemo} locale={locale} />
             {showAge && ageText && (
               <p className="nf-sc__sub" data-testid="card-listed-age" suppressHydrationWarning>
                 {isNew && (
@@ -1027,6 +1030,8 @@ export function ListingCard({
               )}
             </ul>
           )}
+          {/* Listing stats: views and saves, its own quiet line under the facts. */}
+          <CardCounts stats={listing.stats} isDemo={listing.isDemo} locale={locale} />
 
           {/* "Ownership seen", the owner's own mark, as on the listing page
               and the profile. A trust mark, so the short grid card keeps it

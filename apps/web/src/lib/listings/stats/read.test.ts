@@ -43,3 +43,32 @@ describe("the lister's read", () => {
     expect(await readMyListingStats(client(new Error("down")))).toBeNull();
   });
 });
+
+describe("the cards' counts, one query for the page", () => {
+  it("reads the page's ids in one call and keys them by listing", async () => {
+    const { fetchListingStatsFor } = await import("./read");
+    const calls: unknown[] = [];
+    const db = {
+      rpc: async (fn: string, args: unknown) => {
+        calls.push([fn, args]);
+        return { data: [{ listing_id: ID.toUpperCase(), views: "12", saves: 2 }, { listing_id: "x", views: 1, saves: 1 }], error: null };
+      },
+    };
+    const got = await fetchListingStatsFor(db, [ID, "00000000-0000-4000-8000-000000000002"]);
+    expect(calls).toEqual([["listing_public_stats_many", { p_ids: [ID, "00000000-0000-4000-8000-000000000002"] }]]);
+    expect([...got!.entries()]).toEqual([[ID, { views: 12, saves: 2 }]]);
+    expect(await fetchListingStatsFor(client({ data: null, error: { code: "PGRST202" } }), [ID])).toBeNull();
+  });
+
+  it("attaches nothing without a database, and leaves an example alone", async () => {
+    const { withListingStats } = await import("./read");
+    const rows = [
+      { id: ID, isDemo: false, title: "a" },
+      { id: "00000000-0000-4000-8000-000000000002", isDemo: true, title: "b" },
+    ];
+    const out = await withListingStats(rows);
+    expect(out).toEqual(rows);
+    expect(out.every((l) => !("stats" in l))).toBe(true);
+    expect(await withListingStats([])).toEqual([]);
+  });
+});

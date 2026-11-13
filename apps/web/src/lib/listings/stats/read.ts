@@ -109,3 +109,64 @@ export async function readMyListingStats(client: SupabaseClient | Rpc): Promise<
     return null;
   }
 }
+
+const CARD_BATCH = 60;
+
+/** The uncached batch read, given a client. Exported for tests. */
+export async function fetchListingStatsFor(client: Rpc, ids: readonly string[]): Promise<Map<string, StatsFigures> | null> {
+  try {
+    const { data, error } = await client.rpc("listing_public_stats_many", { p_ids: ids });
+    if (error || !Array.isArray(data)) return null;
+    const out = new Map<string, StatsFigures>();
+    for (const row of data as { listing_id?: unknown }[]) {
+      const figures = figuresFrom(row);
+      if (figures && typeof row.listing_id === "string" && UUID.test(row.listing_id)) out.set(row.listing_id.toLowerCase(), figures);
+    }
+    return out;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * THE CARDS' COUNTS, ONE QUERY FOR THE PAGE. The ids a page draws (at most
+ * sixty, the first screenful) are read in one call to
+ * `listing_public_stats_many`, through the same anonymous client and the same
+ * per-instance memo as the row, so a listing already held (its own page was
+ * just opened, or the last search drew it) costs nothing, and only the misses
+ * go to the database, together. A listing that is not live or is an example
+ * comes back absent, and so does everything while the SQL is not applied.
+ */
+export async function readListingStatsFor(ids: readonly string[], now: number = Date.now()): Promise<Map<string, StatsFigures>> {
+  const out = new Map<string, StatsFigures>();
+  if (!isSupabaseConfigured() || process.env.NF_DATA_SOURCE === "api") return out;
+  const wanted = [...new Set(ids.map((id) => id.toLowerCase()).filter((id) => UUID.test(id)))].slice(0, CARD_BATCH);
+  const misses: string[] = [];
+  for (const id of wanted) {
+    const hit = held.get(id);
+    if (hit && hit.expires > now) {
+      if (hit.value) out.set(id, hit.value);
+    } else misses.push(id);
+  }
+  if (misses.length === 0) return out;
+  const fetched = await fetchListingStatsFor(anonymousClient(), misses);
+  for (const id of misses) {
+    const value = fetched?.get(id) ?? null;
+    /* An absent row in a read that worked is a real answer (not live, or an
+       example) and is held as long as a figure; a failed read is held briefly. */
+    held.set(id, { value, expires: now + (fetched ? STATS_TTL_MS : FAILURE_TTL_MS) });
+    if (value) out.set(id, value);
+  }
+  return out;
+}
+
+/** The page's listings with their counts attached (`listing.stats`), in one read. Never throws. */
+export async function withListingStats<T extends { id: string; isDemo: boolean }>(listings: readonly T[]): Promise<T[]> {
+  const real = listings.filter((l) => !l.isDemo).map((l) => l.id);
+  if (real.length === 0) return [...listings];
+  const stats = await readListingStatsFor(real);
+  return listings.map((l) => {
+    const figures = l.isDemo ? undefined : stats.get(l.id.toLowerCase());
+    return figures ? { ...l, stats: figures } : l;
+  });
+}

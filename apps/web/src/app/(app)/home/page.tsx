@@ -9,6 +9,7 @@ import { getDictionary, type Locale } from "@vallo/i18n";
 import { getLocale } from "@/lib/locale";
 import { getHomeOverview } from "@/lib/app/home-queries";
 import { catalogueReader } from "@/lib/catalogue/listings";
+import { withListingStats } from "@/lib/listings/stats/read";
 import { HomeScreen } from "@/components/app/home/HomeScreen";
 import { UpNext } from "@/components/app/home/UpNext";
 import { getAgentContext } from "@/lib/agent/listings-queries";
@@ -157,10 +158,12 @@ export default async function HomePage() {
     return isPropertyMarket(marketOf(listing));
   });
   const ordered = orderByStatedIntent(pooled, stated);
-  const listings = ordered.slice(0, PREMIUM_SHOWN);
+  /* Listing stats: the cards' counts for everything drawn here, one query. */
+  const counted = await withListingStats(ordered.slice(0, PREMIUM_SHOWN + FEATURED_MORE));
+  const listings = counted.slice(0, PREMIUM_SHOWN);
   /* FEATURED LISTINGS: the same ranked pool, the places after the Premium
      carousel's six, so no place is drawn twice one under the other. */
-  const featuredMore = ordered.slice(PREMIUM_SHOWN, PREMIUM_SHOWN + FEATURED_MORE);
+  const featuredMore = counted.slice(PREMIUM_SHOWN);
   const intentApplied = stated.length > 0 && listings.some((listing) => (stated as readonly string[]).includes(listing.kind));
 
   /*

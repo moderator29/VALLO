@@ -159,3 +159,29 @@ export function conversionPercent(part: number, views: number): number | null {
   if (!(views > 0)) return null;
   return Math.round((Math.max(0, part) / views) * 1000) / 10;
 }
+
+/** Fewer views than this and a card says nothing about them: a small number on a card reads as a verdict. */
+export const CARD_VIEWS_FROM = 10;
+
+/**
+ * The card's quiet count line: "24 saves" from the first save, "1.2k views"
+ * from ten. Never a zero, never on an example, nothing without figures. Views
+ * then saves, so the larger number leads. Pure; client safe.
+ */
+export function cardStatItems({
+  isDemo,
+  stats,
+  locale = "en",
+  words = listingStatsEn,
+}: {
+  isDemo: boolean;
+  stats: StatsFigures | null | undefined;
+  locale?: Locale;
+  words?: ListingStatsWords;
+}): StatItem[] | null {
+  if (isDemo || !stats) return null;
+  const items: StatItem[] = [];
+  if (stats.views >= CARD_VIEWS_FROM) items.push({ key: "views", ...countPhrase(stats.views, words.views, locale) });
+  if (stats.saves >= 1) items.push({ key: "saves", ...countPhrase(stats.saves, words.saves, locale) });
+  return items.length > 0 ? items : null;
+}

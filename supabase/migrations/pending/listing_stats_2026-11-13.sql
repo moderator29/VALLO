@@ -44,7 +44,8 @@
  *   4. public.record_listing_view: counts one open of one listing, by a member
  *      (their id) or a guest (a key the server derives), once per viewer per
  *      listing per Lagos day. Service role only.
- *   5. Reads: listing_public_stats (the page's row; anon and authenticated),
+ *   5. Reads: listing_public_stats and listing_public_stats_many (the page's
+      row and the cards' counts; anon and authenticated),
  *      my_listing_stats (a lister's own listings only), and the staff desk's
  *      admin_listing_stats_daily, admin_listing_stats_ranked and
  *      admin_listing_stats_lifetime (admins, super admins and the read-only
@@ -384,6 +385,26 @@ $$;
 revoke execute on function public.listing_public_stats(uuid) from public;
 grant execute on function public.listing_public_stats(uuid) to anon, authenticated, service_role;
 
+/* The same two numbers for the listings one page draws (its cards), in one
+   call: at most 60 ids, live real listings only, so a page never pays one
+   read per card. */
+create or replace function public.listing_public_stats_many(p_ids uuid[])
+returns table (listing_id uuid, views bigint, saves integer)
+language sql
+stable
+security definer
+set search_path = ''
+as $$
+  select l.id, coalesce(c.views, 0)::bigint, coalesce(c.saves, 0)::integer
+    from unnest(coalesce(p_ids[1:60], array[]::uuid[])) as w(id)
+    join public.listings l on l.id = w.id
+    left join public.listing_counters c on c.listing_id = l.id
+   where l.status = 'PUBLISHED'
+     and not l.is_demo;
+$$;
+revoke execute on function public.listing_public_stats_many(uuid[]) from public;
+grant execute on function public.listing_public_stats_many(uuid[]) to anon, authenticated, service_role;
+
 /* A lister's own listings, and only theirs. */
 create or replace function public.my_listing_stats()
 returns table (listing_id uuid, views bigint, saves integer)
@@ -644,6 +665,7 @@ begin
      or not has_function_privilege('service_role', 'public.record_listing_view(uuid,uuid,text)', 'execute')
      or not has_function_privilege('anon', 'public.listing_public_stats(uuid)', 'execute')
      or not has_function_privilege('authenticated', 'public.listing_public_stats(uuid)', 'execute')
+     or not has_function_privilege('anon', 'public.listing_public_stats_many(uuid[])', 'execute')
      or has_function_privilege('anon', 'public.my_listing_stats()', 'execute')
      or not has_function_privilege('authenticated', 'public.my_listing_stats()', 'execute')
      or has_function_privilege('anon', 'public.admin_listing_stats_daily(integer,uuid)', 'execute')
@@ -662,7 +684,8 @@ begin
   if exists (
     select 1 from pg_proc p join pg_namespace n on n.oid = p.pronamespace
      where (n.nspname, p.proname) in (
-             ('public', 'record_listing_view'), ('public', 'listing_public_stats'), ('public', 'my_listing_stats'),
+             ('public', 'record_listing_view'), ('public', 'listing_public_stats'), ('public', 'listing_public_stats_many'),
+             ('public', 'my_listing_stats'),
              ('public', 'admin_listing_stats_daily'), ('public', 'admin_listing_stats_ranked'),
              ('public', 'admin_listing_stats_lifetime'), ('private', 'listing_stats_internal'),
              ('private', 'listing_stats_reader_ok'), ('private', 'listing_counters_on_daily'),
@@ -727,9 +750,14 @@ begin
     perform set_config('request.jwt.claims', json_build_object('role', 'anon')::text, true);
     set local role anon;
     select count(*) into v_rows from public.listing_public_stats(v_l);
-    reset role;
     if v_rows <> 1 then
+      reset role;
       raise exception 'probe: anon could not read the public stats (% rows)', v_rows;
+    end if;
+    select count(*) into v_rows from public.listing_public_stats_many(array[v_l, v_l, gen_random_uuid()]);
+    reset role;
+    if v_rows <> 2 then
+      raise exception 'probe: anon could not read the cards'' stats (% rows)', v_rows;
     end if;
 
     perform set_config('request.jwt.claim.sub', v_viewer::text, true);

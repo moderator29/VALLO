@@ -46,6 +46,7 @@ describe("an example listing never shows the row", () => {
     for (const name of [
       "public.record_listing_view",
       "public.listing_public_stats",
+      "public.listing_public_stats_many",
       "public.my_listing_stats",
       "private.listing_counters_on_save",
       "private.listing_daily_on_enquiry",

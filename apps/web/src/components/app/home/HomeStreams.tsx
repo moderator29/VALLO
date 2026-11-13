@@ -3,6 +3,7 @@ import "server-only";
 import type { Dictionary, Locale } from "@vallo/i18n/core";
 import type { Listing } from "@/lib/listings/types";
 import { catalogueReader } from "@/lib/catalogue/listings";
+import { withListingStats } from "@/lib/listings/stats/read";
 import { isPropertyMarket, marketOf } from "@/lib/listings/market";
 import { listSavedSearches } from "@/lib/saved/searches-queries";
 import { filterFor } from "@/lib/saved/search-alerts";
@@ -94,7 +95,7 @@ export async function NewListingsStream({ t, locale }: { t: Dictionary; locale: 
     /* Property and stays together: a real shortlet that just went live is as
        new as a flat. Real ones first (`newShelf`). */
     const rows = await catalogueReader().search({}, { limit: NEW_READ });
-    listings = shelfNow(rows);
+    listings = await withListingStats(shelfNow(rows));
   } catch {
     listings = [];
   }
