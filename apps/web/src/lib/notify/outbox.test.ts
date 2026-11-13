@@ -148,7 +148,23 @@ const AGENT = "66666666-6666-4666-8666-666666666666";
  * still exercised.
  */
 const contactForUser = vi.hoisted(() => vi.fn());
-vi.mock("../email/recipients", () => ({ contactForUser }));
+/*
+ * The drain now asks `resolveContact`, which tells a transient directory
+ * failure apart from a person with no address (13 November 2026). The spec
+ * keeps driving the simpler `contactForUser` shape and adapts it here, so a
+ * test that means "nobody to send to" still reads that way, and the two
+ * outcomes that did not exist before get their own cases below.
+ */
+const resolveContact = vi.hoisted(() => vi.fn());
+vi.mock("../email/recipients", () => ({
+  contactForUser,
+  resolveContact: async (...args: unknown[]) => {
+    const forced = resolveContact(...args);
+    if (forced) return forced;
+    const contact = await contactForUser(...args);
+    return contact ? { kind: "ok", contact } : { kind: "no-address" };
+  },
+}));
 
 /* Track A: the escrow templates are retired. The fixture is the agreement
    approval, which, like the escrow email before it, answers to no /settings
@@ -187,6 +203,8 @@ function recorder(): {
 beforeEach(() => {
   contactForUser.mockReset();
   contactForUser.mockResolvedValue({ email: "ada@example.com", name: "Ada Balogun" });
+  resolveContact.mockReset();
+  resolveContact.mockReturnValue(null);
 });
 
 afterEach(() => {
@@ -330,7 +348,40 @@ describe("what can never be sent is dropped rather than retried for ever", () =>
     expect(sent).toHaveLength(0);
     expect(result.counts.dropped).toBe(1);
     expect(rows[0]?.status).toBe("DROPPED");
-    expect(calls.settle[0]?.error).toBe("no contact for recipient");
+    expect(calls.settle[0]?.error).toBe("recipient has no address");
+  });
+
+  /*
+   * THE ONE THAT WAS WRONG IN PRODUCTION. Four of the five DROPPED rows in the
+   * live outbox on 13 November 2026 carried "no contact for recipient", which
+   * stood for a mute, a missing address AND an unreachable directory. The last
+   * of those is transient, and dropping it throws the letter away for good.
+   */
+  it("puts a row back when the directory could not be read, rather than dropping it", async () => {
+    resolveContact.mockReturnValue({ kind: "unreachable" });
+    const { admin, rows, calls } = fakeAdmin([agreementRow()]);
+    const { send, sent } = recorder();
+    const result = await drainEmailOutbox(admin, { configured: true, send });
+
+    expect(sent).toHaveLength(0);
+    expect(result.counts.dropped).toBe(0);
+    expect(result.counts.retried + result.counts.failed).toBe(1);
+    expect(rows[0]?.status).not.toBe("DROPPED");
+    expect(calls.settle[0]?.error).toBe("directory unreachable");
+  });
+
+  it("says which switch silenced a letter, so the column is readable a month later", async () => {
+    resolveContact.mockReturnValue({ kind: "muted" });
+    const { admin, rows, calls } = fakeAdmin([
+      agreementRow({ template: "listing.new_enquiry", payload: { conversation_id: "c", message_id: "m", listing_id: "l", enquirer_id: "e" } }),
+    ]);
+    const { send, sent } = recorder();
+    const result = await drainEmailOutbox(admin, { configured: true, send });
+
+    expect(sent).toHaveLength(0);
+    expect(result.counts.dropped).toBe(1);
+    expect(rows[0]?.status).toBe("DROPPED");
+    expect(calls.settle[0]?.error).toBe("recipient switched messages email off");
   });
 
   it("drops a payload that cannot make a message", async () => {

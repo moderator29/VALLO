@@ -46,7 +46,23 @@ const RECIPIENT = "11111111-1111-4111-8111-111111111111";
 /* The address lookup is a GoTrue admin call, the one hop a unit test cannot
    make. Everything downstream of it is real. */
 const contactForUser = vi.hoisted(() => vi.fn());
-vi.mock("../email/recipients", () => ({ contactForUser }));
+/*
+ * The drain now asks `resolveContact`, which tells a transient directory
+ * failure apart from a person with no address (13 November 2026). The spec
+ * keeps driving the simpler `contactForUser` shape and adapts it here, so a
+ * test that means "nobody to send to" still reads that way, and the two
+ * outcomes that did not exist before get their own cases below.
+ */
+const resolveContact = vi.hoisted(() => vi.fn());
+vi.mock("../email/recipients", () => ({
+  contactForUser,
+  resolveContact: async (...args: unknown[]) => {
+    const forced = resolveContact(...args);
+    if (forced) return forced;
+    const contact = await contactForUser(...args);
+    return contact ? { kind: "ok", contact } : { kind: "no-address" };
+  },
+}));
 
 type StoredRow = OutboxRow & { status: string; error: string | null };
 
@@ -202,6 +218,8 @@ beforeEach(() => {
   profileRole = null;
   contactForUser.mockReset();
   contactForUser.mockResolvedValue({ email: "ada@example.com", name: "Ada Balogun" });
+  resolveContact.mockReset();
+  resolveContact.mockReturnValue(null);
   /* A key has to be present or `sendEmail` answers `unconfigured` and never
      builds a request at all, which is the branch `outbox.test.ts` covers. */
   vi.stubEnv("RESEND_API_KEY", "re_test_key_for_the_wire_format");

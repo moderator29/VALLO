@@ -131,15 +131,73 @@ export async function contactForUser(
   /** When given, a person who has switched this channel off resolves to null. */
   channel?: EmailChannel,
 ): Promise<Contact | null> {
-  try {
-    if (channel && (await emailMuted(admin, userId, channel))) return null;
-    const { data, error } = await admin.auth.admin.getUserById(userId);
-    const email = (data?.user?.email ?? "").trim();
-    if (error || email.length === 0) return null;
-    return { email, name: await displayName(admin, userId) };
-  } catch {
-    return null;
+  const resolved = await resolveContact(admin, userId, channel);
+  return resolved.kind === "ok" ? resolved.contact : null;
+}
+
+/**
+ * Why there is no address, when that matters to the caller.
+ *
+ * MEASURED, 13 November 2026, project uccixoonmbhrnyczyigt. Five of the
+ * eighty-five rows ever written to `public.email_outbox` are DROPPED, and four
+ * of them carry the one reason string `no contact for recipient`. That string
+ * is the whole of what the queue knows, and it stands for four different
+ * conditions with four different right answers:
+ *
+ *   the person switched this channel off      terminal, and correct
+ *   their auth record carries no address      terminal, and correct
+ *   the account is gone                       terminal, and correct
+ *   GoTrue could not be reached just then     TRANSIENT, and dropping it
+ *                                             throws the letter away
+ *
+ * `contactForUser` collapses all four into null by design, because its nine
+ * other callers are best-effort sends that have nothing better to do with the
+ * difference. The drain does: it holds a durable row it is allowed to put back.
+ * Under the old reading, a GoTrue blip during one drain pass permanently
+ * DROPPED every row in that batch, and the column would have said the
+ * recipients had no address. So the reason is resolved once, here, where the
+ * reads happen, and the queue decides what to do with it.
+ */
+export type ContactResolution =
+  | { kind: "ok"; contact: Contact }
+  /** They have switched this channel off on /settings. Terminal. */
+  | { kind: "muted" }
+  /** The auth record has no address, or there is no auth record. Terminal. */
+  | { kind: "no-address" }
+  /** The directory could not be read. Transient: ask again later. */
+  | { kind: "unreachable" };
+
+/**
+ * The address and the reason, for a caller that can act on the reason.
+ *
+ * The one thing worth being exact about: an error FROM GoTrue and an empty
+ * address are told apart, which `contactForUser` could not do. A 500 or a
+ * network failure is `unreachable`; a successful read with no address on the
+ * record, or no record at all, is `no-address`.
+ */
+export async function resolveContact(
+  admin: AdminClient,
+  userId: string,
+  channel?: EmailChannel,
+): Promise<ContactResolution> {
+  if (channel) {
+    /* `emailMuted` already fails open, so an unreadable profile is not a mute
+       and the mail still goes. */
+    if (await emailMuted(admin, userId, channel)) return { kind: "muted" };
   }
+  let found: { email: string } | null;
+  try {
+    const { data, error } = await admin.auth.admin.getUserById(userId);
+    if (error) return { kind: "unreachable" };
+    const email = (data?.user?.email ?? "").trim();
+    found = email.length > 0 ? { email } : null;
+  } catch {
+    /* The client threw rather than answering, which is the same condition as
+       an error on the response and never a statement about the person. */
+    return { kind: "unreachable" };
+  }
+  if (!found) return { kind: "no-address" };
+  return { kind: "ok", contact: { email: found.email, name: await displayName(admin, userId) } };
 }
 
 /**

@@ -9,7 +9,7 @@ import {
   type SendFailureReason,
 } from "@/lib/email/client";
 import { siteUrl } from "@/lib/site";
-import { contactForUser, type EmailChannel } from "@/lib/email/recipients";
+import { resolveContact, type EmailChannel } from "@/lib/email/recipients";
 import { mailLanguageFor } from "@/lib/email/mail-language";
 import { signUnsubscribe, unsubscribeKey } from "@/lib/email/unsubscribe-token";
 
@@ -549,20 +549,36 @@ async function deliverOne(
   }
 
   /* The template decides whether a /settings switch applies; see the head. */
-  const contact = await contactForUser(admin, row.user_id, template.channel);
-  if (!contact) {
+  const resolved = await resolveContact(admin, row.user_id, template.channel);
+  if (resolved.kind === "unreachable") {
     /*
-     * Nobody to send to. The account was deleted, the address is gone, or
-     * this template answers to a switch and the person turned it off.
-     * Terminal rather than transient in all three: `contactForUser` swallows
-     * its own errors and answers null for every one of them, so this cannot
-     * tell them apart, and the honest reading of "no address" for a queue is
-     * that there is nobody at the other end who wants it. The row is kept,
-     * with the reason on it.
+     * THE DIRECTORY, NOT THE PERSON. Measured 13 November 2026: four of the
+     * five DROPPED rows in the live outbox carried the one string "no contact
+     * for recipient", which used to stand for this condition as well as for
+     * the three terminal ones. A GoTrue error during one drain pass therefore
+     * threw away every letter in that batch, permanently, and wrote a reason
+     * that blamed the recipient for it. A read that failed is the definition
+     * of transient, so the row goes back.
      */
-    await settleOutboxRow(admin, row, "drop", "no contact for recipient");
+    const settled = await settleOutboxRow(admin, row, "retry", "directory unreachable");
+    return settled === "FAILED" ? "failed" : "retried";
+  }
+  if (resolved.kind !== "ok") {
+    /*
+     * Nobody to send to, and terminal: either this template answers to a
+     * /settings switch and the person turned it off, or their auth record
+     * carries no address (deleted account, or never had one). Five more
+     * attempts change neither. The row is kept with the reason on it, and the
+     * reason now says WHICH, because the two want different answers from
+     * whoever reads the column next.
+     */
+    const reason = resolved.kind === "muted"
+      ? `recipient switched ${template.channel ?? "this"} email off`
+      : "recipient has no address";
+    await settleOutboxRow(admin, row, "drop", reason);
     return "dropped";
   }
+  const contact = resolved.contact;
 
   /* A11: the reader's language, read only for a template that writes it. */
   const language = template.localized ? await mailLanguageFor(admin, row.user_id) : undefined;
