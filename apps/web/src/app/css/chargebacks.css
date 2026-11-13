@@ -112,6 +112,7 @@
     font-weight: 600;
   }
   .nf-cb-ref {
+    /* Stays `anywhere` on purpose: a dispute reference is one token and must wrap inside its box (13 November 2026; the gate is app/css/overflow-wrap.test.ts). */
     overflow-wrap: anywhere;
     user-select: all;
     font-weight: 600;
@@ -159,7 +160,7 @@
   .nf-cb-facts dd {
     margin: 0;
     min-width: 0;
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
     color: var(--nf-content-primary);
   }
   .nf-cb-note {
@@ -222,7 +223,7 @@
     font-size: var(--nf-text-body-sm);
     line-height: 1.5;
     white-space: pre-wrap;
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
     color: var(--nf-content-primary);
   }
 
@@ -253,7 +254,7 @@
     margin: var(--nf-space-3xs) 0 0;
     font-size: var(--nf-text-caption);
     color: var(--nf-content-secondary);
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
   }
   .nf-cb-held__done {
     display: inline-flex;

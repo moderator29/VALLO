@@ -161,7 +161,7 @@
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 3;
     overflow: hidden;
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
     font-size: var(--nf-text-caption);
     font-weight: 600;
     line-height: 1.25;
@@ -1721,7 +1721,7 @@
     margin-top: var(--nf-space-3xs);
     font-size: var(--nf-text-caption);
     color: var(--nf-content-muted);
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
   }
 
   /* The availability card's two date fields, side by side. */

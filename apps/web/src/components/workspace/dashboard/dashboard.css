@@ -87,7 +87,7 @@
     letter-spacing: -0.02em;
     font-variant-numeric: tabular-nums;
     color: var(--nf-content-primary);
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
   }
   /* Money in a tile: one line, a step smaller, so a long figure is never cut mid-number. */
   .wsd-tile__figure--text {
@@ -345,12 +345,12 @@
     font-size: var(--nf-text-body-sm);
     font-weight: 600;
     color: var(--nf-content-primary);
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
   }
   .wsd-row__sub {
     font-size: var(--nf-text-caption);
     color: var(--nf-content-muted);
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
   }
   .wsd-row__end {
     flex: none;

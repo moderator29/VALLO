@@ -183,7 +183,7 @@
   }
   .nf-sg-object__name {
     max-inline-size: 100%;
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
     font-size: var(--nf-text-overline);
     color: var(--nf-content-muted);
   }

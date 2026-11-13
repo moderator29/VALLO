@@ -270,7 +270,7 @@
     text-align: end;
     font-weight: 600;
     color: var(--nf-content-secondary);
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
   }
   /* A reference: one tap takes all of it, and it is never cut. */
   .nf-success__mono {

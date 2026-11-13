@@ -310,7 +310,7 @@
     color: var(--nf-content-primary);
     font-size: var(--nf-text-body-sm);
     font-weight: 600;
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
   }
   .nf-lw2-answer__value[data-unset] {
     color: var(--nf-content-muted);

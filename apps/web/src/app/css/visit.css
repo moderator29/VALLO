@@ -677,7 +677,7 @@
     font-size: var(--nf-text-body-sm);
     font-weight: 600;
     color: var(--nf-content-primary);
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
   }
 
   /* ----------------------------------------------------- the status hero */
@@ -784,7 +784,7 @@
     font-weight: 600;
     line-height: 1.35;
     color: var(--nf-content-primary);
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
   }
   .nf-visit-tile__zone {
     display: block;
@@ -823,7 +823,7 @@
     font-size: var(--nf-text-body-sm);
     line-height: 1.5;
     color: var(--nf-content-secondary);
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
     white-space: pre-line;
   }
 

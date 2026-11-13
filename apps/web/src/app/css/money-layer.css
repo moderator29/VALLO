@@ -188,6 +188,7 @@
   }
   .nf-ref dd {
     min-width: 0;
+    /* Stays `anywhere` on purpose: a payment reference is one token and must wrap inside its box (13 November 2026; the gate is app/css/overflow-wrap.test.ts). */
     overflow-wrap: anywhere;
     font-family: var(--nf-font-mono, ui-monospace, monospace);
     color: var(--nf-content-primary);

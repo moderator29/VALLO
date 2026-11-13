@@ -167,7 +167,7 @@
     font-size: var(--nf-text-body-sm);
     line-height: 1.5;
     color: var(--nf-content-secondary);
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
   }
   .nf-vpath__when {
     font-size: var(--nf-text-caption);
@@ -179,7 +179,7 @@
     font-size: var(--nf-text-body-sm);
     line-height: 1.5;
     color: var(--nf-content-secondary);
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
   }
   .nf-vpath__note > span {
     font-weight: 600;

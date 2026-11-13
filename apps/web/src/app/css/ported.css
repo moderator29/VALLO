@@ -86,7 +86,7 @@
     padding-inline: 4rem 1rem;
     text-align: center;
     text-wrap: balance;
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
     pointer-events: none;
     font-family: var(--nf-font-sans);
     font-size: var(--nf-text-row);
@@ -257,7 +257,7 @@
   .nf-unfold__text {
     flex: 1 1 auto;
     min-inline-size: 0;
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
   }
   .nf-unfold__title {
     display: block;
@@ -310,7 +310,7 @@
     color: var(--nf-content-secondary);
     font-size: var(--nf-text-body-sm);
     line-height: 1.55;
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
     transform: translateY(-0.5rem);
     transition: transform var(--nf-duration-base) var(--nf-ease-entrance);
   }
@@ -500,7 +500,7 @@
   .nf-live__title,
   .nf-live__detail {
     margin: 0;
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
   }
   .nf-live__title {
     font-family: var(--nf-font-sans);
@@ -653,7 +653,7 @@
   }
   .nf-live__step-label {
     min-inline-size: 0;
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
   }
   .nf-live__meta {
     font-size: var(--nf-text-body-sm);
@@ -719,7 +719,7 @@
     font-weight: 600;
     letter-spacing: var(--nf-tracking-tight);
     color: var(--nf-content-primary);
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
   }
 
   /* The panel: the sheet's glass at radius 32, one hairline, brighter on the
@@ -804,7 +804,7 @@
   }
   .nf-innernav__label {
     min-inline-size: 0;
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
   }
 
   /* ============================================================ BATCH TRAY */
@@ -891,7 +891,7 @@
     flex: 1 1 8rem;
     min-inline-size: 0;
     margin: 0;
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
     font-family: var(--nf-font-sans);
     font-size: var(--nf-text-row);
     font-weight: 600;
@@ -940,7 +940,7 @@
   .nf-asi__title,
   .nf-asi__body {
     margin: 0;
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
   }
   .nf-asi__title {
     font-family: var(--nf-font-display);
@@ -999,7 +999,7 @@
     font-size: var(--nf-text-row);
     font-weight: 600;
     line-height: var(--nf-leading-row);
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
   }
   .nf-asi__row[data-danger] .nf-asi__label {
     color: var(--nf-state-error);
@@ -1009,7 +1009,7 @@
     margin-block-start: var(--nf-space-3xs);
     font-size: var(--nf-text-caption);
     color: var(--nf-content-muted);
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
   }
   .nf-asi__chevron {
     flex-shrink: 0;
@@ -1120,7 +1120,7 @@
     font-weight: 600;
     line-height: 1.15;
     letter-spacing: var(--nf-tracking-tight);
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
   }
   .nf-callcap__call {
     position: absolute;
@@ -1189,13 +1189,13 @@
     font-family: var(--nf-font-sans);
     font-size: var(--nf-text-row);
     font-weight: 600;
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
   }
   .nf-ai__body {
     font-size: var(--nf-text-body);
     line-height: 1.55;
     color: var(--nf-content-primary);
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
     /* The skeleton gives way to the first words: a 160ms crossfade. */
     animation: nf-ai-in var(--nf-duration-fast) var(--nf-ease-standard) both;
   }
@@ -1251,7 +1251,7 @@
     margin: 0;
     font-size: var(--nf-text-body-sm);
     color: var(--nf-state-error);
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
   }
   .nf-ai__actions {
     display: flex;

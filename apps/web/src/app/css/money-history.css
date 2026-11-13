@@ -168,7 +168,7 @@
     font-weight: 600;
     line-height: 1.25;
     color: var(--nf-content-primary);
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
   }
   .nf-history-row__party {
     display: block;

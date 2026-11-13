@@ -1171,7 +1171,7 @@
     max-width: 100%;
     text-align: center;
     line-height: 1.2;
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
   }
   .nf-admin-row__title {
     min-width: 0;
@@ -1181,7 +1181,7 @@
     font-size: var(--nf-text-body-sm);
     font-weight: 600;
     color: var(--nf-content-primary);
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
   }
   .nf-admin-row__sub {
     display: flex;
@@ -1190,7 +1190,7 @@
     margin-top: var(--nf-space-3xs);
     font-size: var(--nf-text-overline);
     color: var(--nf-content-secondary);
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
   }
   .nf-admin-row__detail {
     display: none;
@@ -2630,7 +2630,7 @@
     background: var(--nf-surface-inset);
     border-inline-start: 3px solid var(--nf-border-subtle);
     min-width: 0;
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
   }
   .nf-admin-store-check[data-state="pass"] {
     border-inline-start-color: var(--nf-state-success);
@@ -2813,7 +2813,7 @@
     margin: 0;
     font-size: var(--nf-text-body-sm);
     color: var(--nf-content-primary);
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
   }
   .nf-crash__type {
     font-weight: 600;
@@ -2822,7 +2822,7 @@
     margin: 0;
     font-size: var(--nf-text-caption);
     color: var(--nf-content-muted);
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
   }
   .nf-crash__stack summary {
     cursor: pointer;
@@ -2838,6 +2838,7 @@
     background: var(--nf-panel-hair);
     font-size: var(--nf-text-caption);
     white-space: pre-wrap;
+    /* Stays `anywhere` on purpose: a stack trace's paths are single tokens wider than any phone (13 November 2026; the gate is app/css/overflow-wrap.test.ts). */
     overflow-wrap: anywhere;
   }
   .nf-crash__actions {

@@ -397,6 +397,7 @@
     border-radius: var(--nf-radius-xs);
     background: var(--nf-surface-inset);
     font-size: var(--nf-text-caption);
+    /* Stays `anywhere` on purpose: a code token (a path, a key) must wrap inside the paragraph (13 November 2026; the gate is app/css/overflow-wrap.test.ts). */
     overflow-wrap: anywhere;
     color: var(--nf-content-primary);
   }

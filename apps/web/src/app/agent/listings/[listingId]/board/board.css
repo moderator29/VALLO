@@ -37,6 +37,7 @@
     font-weight: 600;
     letter-spacing: 0.16em;
     color: var(--nf-content-primary);
+    /* Stays `anywhere` on purpose: a listing code is one token and must wrap inside its box (13 November 2026; the gate is app/css/overflow-wrap.test.ts). */
     overflow-wrap: anywhere;
   }
   .nf-board__hint {

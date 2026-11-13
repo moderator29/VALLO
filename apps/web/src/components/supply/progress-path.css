@@ -116,7 +116,7 @@
     font-size: var(--nf-text-row);
     font-weight: 600;
     line-height: 1.3;
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
   }
   .nf-ppath__step[data-state="upcoming"] .nf-ppath__label {
     color: var(--nf-content-secondary);

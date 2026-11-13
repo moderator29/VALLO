@@ -62,7 +62,7 @@
     font-size: var(--nf-text-caption);
     font-weight: 600;
     line-height: 1.2;
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
   }
   .nf-icon-tile-option__tick {
     position: absolute;

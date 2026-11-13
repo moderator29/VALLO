@@ -115,7 +115,7 @@
     font-weight: 600;
     line-height: 1.25;
     color: var(--nf-content-primary);
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
   }
 
   .nf-door__place {
@@ -145,7 +145,7 @@
     letter-spacing: -0.015em;
     color: var(--nf-content-primary);
     font-variant-numeric: tabular-nums;
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
   }
 
   .nf-door__second {

@@ -8,6 +8,7 @@
   }
   .nf-copy-value__text {
     min-inline-size: 0;
+    /* Stays `anywhere` on purpose: the copied value (a link, a code) is one token and must wrap inside its box (13 November 2026; the gate is app/css/overflow-wrap.test.ts). */
     overflow-wrap: anywhere;
   }
   .nf-copy[data-copied] {

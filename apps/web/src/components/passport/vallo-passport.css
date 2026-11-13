@@ -151,7 +151,7 @@
     font-weight: 600;
     line-height: var(--nf-leading-row);
     color: var(--nf-content-primary);
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
   }
   .nf-vp__value--name {
     font-family: var(--nf-font-display);
@@ -326,7 +326,7 @@
     font-size: var(--nf-text-body-lg);
     font-weight: 600;
     letter-spacing: var(--nf-tracking-tight);
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
   }
   .nf-vpc__meta {
     font-size: var(--nf-text-caption);

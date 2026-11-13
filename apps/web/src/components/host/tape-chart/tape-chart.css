@@ -94,7 +94,7 @@
     line-height: 1.25;
     font-weight: 600;
     color: var(--nf-content-primary);
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
   }
   .nf-tape__room-sub {
     font-size: var(--nf-text-caption);

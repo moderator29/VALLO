@@ -39,7 +39,7 @@
     font-size: var(--nf-text-body-sm);
     font-weight: 600;
     color: var(--nf-content-primary);
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
   }
   .nf-staycost__cell--accent {
     border-color: var(--nf-brand-edge);

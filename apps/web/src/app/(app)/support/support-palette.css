@@ -83,7 +83,7 @@
   .nf-palette__q {
     flex: 1 1 auto;
     min-width: 0;
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
     font-size: var(--nf-text-body-sm);
     font-weight: 600;
     line-height: 1.35;

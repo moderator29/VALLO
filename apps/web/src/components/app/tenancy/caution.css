@@ -71,7 +71,7 @@
     font-size: var(--nf-text-body-sm);
     line-height: 1.5;
     color: var(--nf-content-secondary);
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
     white-space: pre-line;
   }
 
@@ -154,7 +154,7 @@
     font-weight: 600;
     line-height: 1.45;
     color: var(--nf-content-primary);
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
   }
 
   .nf-exchange__entry[data-mark="waiting"] .nf-exchange__what {

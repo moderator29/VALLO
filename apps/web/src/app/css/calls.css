@@ -152,7 +152,7 @@
     font-weight: 700;
     line-height: 1.15;
     max-width: 22ch;
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
   }
   .nf-call__context {
     margin: 0;
@@ -907,7 +907,7 @@
   }
   .nf-call-event__line {
     min-width: 0;
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
     color: inherit;
   }
   .nf-call-event__time {

@@ -311,7 +311,7 @@
     color: var(--nf-content-primary);
     font-size: var(--nf-text-body-sm);
     font-weight: 600;
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
   }
   .nf-admin-palette__lede {
     color: var(--nf-content-secondary);
@@ -424,7 +424,7 @@
     color: var(--nf-content-secondary);
     font-size: var(--nf-text-body-sm);
     font-weight: 600;
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
   }
   /* The figure is the subject of the tile: the biggest, heaviest thing on it. */
   .nf-admin-figure__value {
@@ -679,13 +679,13 @@
     display: block;
     color: var(--nf-content-primary);
     font-weight: 600;
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
   }
   .nf-paper-ledger__sub {
     display: block;
     color: var(--nf-content-muted);
     font-size: var(--nf-text-caption);
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
   }
   .nf-paper-ledger__amount {
     grid-column: 2;
@@ -967,7 +967,7 @@
     line-height: 1.02;
     letter-spacing: var(--nf-tracking-display);
     color: var(--nf-content-primary);
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
   }
   .nf-admin-hero__unit {
     color: var(--nf-content-muted);

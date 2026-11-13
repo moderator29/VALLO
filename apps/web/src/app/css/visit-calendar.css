@@ -379,7 +379,7 @@
   }
   /* A name wraps rather than losing its end: on the console it is two people. */
   .nf-vrow__name {
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
     font-size: var(--nf-text-body-sm);
     font-weight: 600;
   }
@@ -460,6 +460,6 @@
   }
   .nf-vdesk__facts dd {
     min-width: 0;
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
   }
 }

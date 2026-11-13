@@ -187,6 +187,7 @@
     border-bottom: var(--nf-border-width) solid var(--nf-border-subtle);
     text-align: start;
     vertical-align: top;
+    /* Stays `anywhere` on purpose: a table cell sizes to its longest token; an address or code in one must wrap, not widen the table (13 November 2026; the gate is app/css/overflow-wrap.test.ts). */
     overflow-wrap: anywhere;
   }
   .nf-dk-table thead th {
@@ -753,6 +754,7 @@
     cursor: pointer;
   }
   .nf-dk-copy code {
+    /* Stays `anywhere` on purpose: a code token (a path, a key) must wrap inside the paragraph (13 November 2026; the gate is app/css/overflow-wrap.test.ts). */
     overflow-wrap: anywhere;
     font-size: inherit;
   }

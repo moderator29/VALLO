@@ -245,7 +245,7 @@
     margin: 0;
     font-size: var(--nf-text-body);
     white-space: pre-wrap;
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
   }
   .nf-circle-reply__actions {
     display: flex;
@@ -451,7 +451,7 @@
     color: var(--nf-content-primary);
     font-size: var(--nf-text-body);
     line-height: 1.55;
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
   }
   .nf-ccom__stats {
     display: grid;
@@ -630,7 +630,7 @@
     letter-spacing: -0.02em;
     color: var(--nf-content-primary);
     text-wrap: pretty;
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
   }
   .nf-cthread__body {
     margin: 0;
@@ -638,7 +638,7 @@
     font-size: var(--nf-text-body);
     line-height: 1.6;
     white-space: pre-wrap;
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
   }
   .nf-cthread__listing {
     display: flex;
@@ -774,7 +774,7 @@
     font-size: var(--nf-text-body);
     line-height: 1.6;
     white-space: pre-wrap;
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
   }
   /* The reply bar stays docked above the dock and the keyboard while the
      thread scrolls (sticky, so it still sits in the flow at the foot). */
@@ -896,7 +896,7 @@
     font-size: var(--nf-text-h2);
     font-weight: 700;
     line-height: 1.1;
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
   }
   .nf-ccover__meta {
     color: var(--nf-content-secondary);

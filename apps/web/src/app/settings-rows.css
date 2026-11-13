@@ -450,7 +450,7 @@
     align-items: center;
     gap: 6px;
     min-inline-size: 0;
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
     font-size: var(--nf-text-body-lg);
     font-weight: 700;
     letter-spacing: -0.02em;
@@ -459,6 +459,7 @@
      ellipsis, which cut a long address to "someone.long@exam..." on a 390px
      phone, and the address is the one thing on this card a person checks. */
   .nf-hub-profile__email {
+    /* Stays `anywhere` on purpose: an email address is one token and must wrap inside the card (13 November 2026; the gate is app/css/overflow-wrap.test.ts). */
     overflow-wrap: anywhere;
     font-size: var(--nf-text-body-sm);
     color: var(--nf-content-secondary);
@@ -508,7 +509,7 @@
    */
   .nf-hub .nf-srow__sub {
     margin-top: 1px;
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
     font-size: var(--nf-text-overline);
     line-height: 1.35;
   }
@@ -646,13 +647,13 @@
     font-size: var(--nf-text-body-sm);
     line-height: 1.5;
     color: var(--nf-content-primary);
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
   }
   .nf-sett-lede__who {
     font-size: var(--nf-text-caption);
     line-height: 1.45;
     color: var(--nf-content-muted);
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
   }
 
   .nf-settings-nav {

@@ -144,7 +144,7 @@
     color: var(--nf-content-primary);
     font-variant-numeric: tabular-nums;
     text-align: end;
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
   }
 
   .nf-pp-row[data-strong] dd {
@@ -218,7 +218,7 @@
   .nf-pp-place__title {
     font-weight: 600;
     color: var(--nf-content-primary);
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
   }
 
   .nf-pp-place__area {

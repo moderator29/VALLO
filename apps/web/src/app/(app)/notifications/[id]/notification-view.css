@@ -45,7 +45,7 @@
   }
   .nf-nview__title {
     margin: 0;
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
     color: var(--nf-content-primary);
   }
   .nf-nview__when {
@@ -81,7 +81,7 @@
     background: var(--nf-surface-primary);
     box-shadow: var(--nf-tier-card-shadow);
     color: var(--nf-content-secondary);
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
   }
   /* A message reads as a quoted line, the way the thread draws a reply. */
   .nf-nview__lead--quote {
@@ -121,7 +121,7 @@
     margin: 0;
     min-width: 0;
     text-align: end;
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
     color: var(--nf-content-primary);
   }
 
@@ -206,7 +206,7 @@
   .nf-nview__step-title {
     margin: 0;
     color: var(--nf-content-secondary);
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
   }
   .nf-nview__step[aria-current="step"] .nf-nview__step-title {
     font-weight: 600;

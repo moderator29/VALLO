@@ -75,7 +75,7 @@
   .nf-rv-hub__summary {
     font-size: var(--nf-text-caption);
     color: var(--nf-content-muted);
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
   }
   .nf-rv-hub__flag {
     flex: none;
@@ -438,7 +438,7 @@
 
   .nf-rv-rows__cell {
     min-width: 0;
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
   }
 
   @media (max-width: 719px) {

@@ -42,7 +42,7 @@
     font-size: var(--nf-text-h1);
     font-weight: 700;
     line-height: 1.1;
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
   }
   .nf-rdesk-figure--sm {
     font-size: var(--nf-text-h2);
@@ -238,7 +238,7 @@
     margin: 0;
     font-size: var(--nf-text-body);
     font-weight: 600;
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
   }
   .nf-rdesk-item__who a {
     color: inherit;

@@ -190,6 +190,7 @@
     color: var(--nf-content-muted);
     /* The code may break anywhere it must; the words around it break as words
        (it was break-all, which split "quote" across two lines). */
+    /* Stays `anywhere` on purpose: a failure reference is one token and must wrap inside its box (13 November 2026; the gate is app/css/overflow-wrap.test.ts). */
     overflow-wrap: anywhere;
   }
   .nf-system__actions {

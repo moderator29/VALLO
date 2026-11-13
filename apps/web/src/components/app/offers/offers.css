@@ -126,7 +126,7 @@
 .nf-ofr-card__title {
   font-weight: 600;
   color: var(--nf-content-primary);
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
 }
 .nf-ofr-card__sub {
   font-size: var(--nf-text-body-sm);
@@ -217,7 +217,7 @@
   font-weight: 700;
   line-height: 1.25;
   color: var(--nf-content-primary);
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
 }
 .nf-room__four {
   display: grid;
@@ -506,7 +506,7 @@
   margin: 0;
   color: var(--nf-content-primary);
   font-weight: 600;
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
 }
 .nf-ofr-receipt__row--total {
   border-top: 2px solid var(--nf-border-strong);
@@ -781,7 +781,7 @@
 .nf-strip__value {
   color: var(--nf-content-primary);
   font-weight: 600;
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
 }
 .nf-strip__item[data-hot] {
   background: color-mix(in oklab, var(--nf-brand-primary) 10%, transparent);

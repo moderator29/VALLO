@@ -202,7 +202,7 @@
     font-size: var(--nf-text-overline);
     line-height: 1.25;
     color: var(--nf-content-primary);
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
   }
   .nf-ix-card__line {
     display: flex;
@@ -624,7 +624,7 @@
     line-height: 1.4;
     color: var(--nf-content-secondary);
     white-space: pre-wrap;
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
   }
   .nf-ix-notes__who {
     display: block;

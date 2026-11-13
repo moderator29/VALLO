@@ -451,5 +451,5 @@
   line-height: 1.625rem;
   font-weight: 600;
   letter-spacing: -0.01em;
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
 }

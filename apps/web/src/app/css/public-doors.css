@@ -371,7 +371,7 @@
     letter-spacing: -0.02em;
     text-align: center;
     color: var(--nf-content-primary);
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
   }
   .nf-calc__empty {
     padding-block: var(--nf-space-sm);

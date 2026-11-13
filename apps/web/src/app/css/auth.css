@@ -864,7 +864,7 @@
     line-height: 1.5;
     color: var(--nf-content-secondary);
     /* The notice can quote a searched word back (V-18). */
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
   }
   .nf-auth__form > .nf-auth__notice {
     margin-top: 0;

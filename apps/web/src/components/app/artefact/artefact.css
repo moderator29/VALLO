@@ -93,7 +93,7 @@
     font-weight: 600;
     line-height: 1.15;
     letter-spacing: var(--nf-tracking-display-sm);
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
   }
   .nf-cred__line {
     margin: 0;

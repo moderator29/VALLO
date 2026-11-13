@@ -47,7 +47,7 @@
     line-height: 1.5rem;
     font-weight: 600;
     letter-spacing: -0.01em;
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
   }
   .nf-decision__sub {
     margin: var(--nf-space-3xs) 0 0;
@@ -63,7 +63,7 @@
     font-size: var(--nf-text-body-sm);
     line-height: 1.5;
     color: var(--nf-content-secondary);
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
   }
   .nf-decision__lines {
     display: grid;

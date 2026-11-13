@@ -81,7 +81,7 @@
     font-size: var(--nf-text-body-sm);
     font-weight: 600;
     color: var(--nf-content-primary);
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
   }
   /* The photo tour: one wide tile that opens the place's photographs. */
   .nf-phototour {

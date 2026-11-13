@@ -134,6 +134,7 @@
   .nf-rewards-invite__link {
     margin: 0;
     font-weight: 600;
+    /* Stays `anywhere` on purpose: an invite link is one token and must wrap inside its box (13 November 2026; the gate is app/css/overflow-wrap.test.ts). */
     overflow-wrap: anywhere;
     user-select: all;
     -webkit-user-select: all;

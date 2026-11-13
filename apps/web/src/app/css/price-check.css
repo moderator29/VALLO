@@ -409,6 +409,7 @@
     has to be readable end to end on a 390px phone.
   */
   .nf-pc-share__url {
+    /* Stays `anywhere` on purpose: a web address is one token and must wrap inside its box (13 November 2026; the gate is app/css/overflow-wrap.test.ts). */
     overflow-wrap: anywhere;
     color: var(--nf-content-secondary);
     font-variant-numeric: tabular-nums;

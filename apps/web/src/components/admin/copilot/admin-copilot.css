@@ -99,7 +99,7 @@
     font-size: var(--nf-text-body-sm);
     line-height: 1.5;
     max-width: 92%;
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
   }
 
   .nf-copilot-turn[data-role="user"] {
@@ -332,7 +332,7 @@
 
   .nf-copilot-card__fields dd {
     margin: 0;
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
   }
 
   .nf-copilot-card__draft {
@@ -342,7 +342,7 @@
     background: var(--nf-surface-inset);
     font: inherit;
     white-space: pre-wrap;
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
   }
 
   .nf-copilot-card__actions {

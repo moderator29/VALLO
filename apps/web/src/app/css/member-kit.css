@@ -47,7 +47,7 @@
   .nf-scam-shield__lead {
     font-size: var(--nf-text-body-sm);
     line-height: 1.45;
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
   }
   .nf-scam-shield__lead strong {
     color: var(--nf-content-primary);

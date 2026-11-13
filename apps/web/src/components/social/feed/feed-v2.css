@@ -741,7 +741,7 @@
     line-height: 1.5;
     letter-spacing: -0.006em;
     white-space: pre-line;
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
   }
   .nf-pc .nf-pc__text--clamped {
     display: -webkit-box;

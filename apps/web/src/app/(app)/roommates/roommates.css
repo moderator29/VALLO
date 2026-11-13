@@ -352,7 +352,7 @@
     font-size: var(--nf-text-body);
     line-height: 1.65;
     white-space: pre-line;
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
   }
   .nf-rmv-headacts {
     display: inline-flex;
@@ -729,7 +729,7 @@
     letter-spacing: -0.015em;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
   }
   .nf-rml-summary {
     display: grid;

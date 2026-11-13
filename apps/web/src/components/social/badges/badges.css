@@ -101,7 +101,7 @@
     font-size: var(--nf-text-overline);
     font-weight: 600;
     line-height: 1.25;
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
   }
   /* A badge somebody at Vallo gave is a decision, not an achievement: it
      carries a second line saying so, never a different colour alone. */

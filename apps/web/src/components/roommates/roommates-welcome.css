@@ -905,7 +905,7 @@
     font-size: var(--nf-text-body-sm);
     line-height: 1.6;
     white-space: pre-wrap;
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
   }
   .nf-rmsv {
     display: grid;

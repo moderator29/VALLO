@@ -1826,7 +1826,7 @@
   }
   .nf-summary__figure {
     margin-block-start: var(--nf-space-2xs);
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
   }
   .nf-summary__sentence {
     font-size: var(--nf-text-body-sm);

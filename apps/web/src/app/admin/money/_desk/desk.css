@@ -164,7 +164,7 @@
     font-weight: 700;
     line-height: 1.1;
     color: var(--nf-content-primary);
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
   }
   .nf-md-kpi__value--quiet {
     font-size: var(--nf-text-body);
@@ -378,6 +378,7 @@
     font-family: ui-monospace, monospace;
     font-size: var(--nf-text-overline);
     color: var(--nf-content-muted);
+    /* Stays `anywhere` on purpose: a payment reference is one token and must wrap inside its box (13 November 2026; the gate is app/css/overflow-wrap.test.ts). */
     overflow-wrap: anywhere;
     user-select: all;
   }
