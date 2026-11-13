@@ -203,21 +203,77 @@ export type SettingsPatch = z.infer<typeof settingsPatchSchema>;
  * Deep merge a patch over the stored document. The merge happens on the
  * server against a fresh read, so two devices changing different toggles at
  * the same time cannot wipe each other's choice.
+ *
+ * KEYS THIS SCHEMA DOES NOT KNOW ARE KEPT, EXACTLY AS STORED (13 November
+ * 2026). This used to return the parsed document and nothing else, and the
+ * parse strips every key the zod schema does not name. So every save through
+ * here (a notification toggle, the interests question, the AI consent, the
+ * marketing opt-out at sign-up) silently erased whatever else the document
+ * held: `whatsappDoorbell`, which `lib/notify/whatsapp-drain.ts` and the
+ * database's WhatsApp door read, so a member who had it on lost it the next
+ * time they changed anything; `notifications.payments`, which the database
+ * mirror trigger then refilled from `wallet` and so could never differ from
+ * it; and `display` (the currency and floor-area preference,
+ * `lib/currency/preference.ts`). Nothing failed and nothing was logged.
+ *
+ * The rule now: the known keys are parsed, defaulted and merged as before, so
+ * a malformed value is still repaired on write; every other key at the top
+ * level, inside `notifications` and inside `privacy` is carried over as it
+ * was stored. A reader that wants one of those keys reads the raw document,
+ * as the drains already do. The return type names the known keys only; the
+ * carried keys are there at runtime and go to the database with the rest.
  */
 export function mergeSettings(
   currentRaw: unknown,
   patch: SettingsPatch & { aiConsent?: ResolvedProfileSettings["aiConsent"] },
 ): ResolvedProfileSettings {
   const current = parseSettings(currentRaw);
+  const raw = plainObject(currentRaw);
   return {
-    notifications: mergeNotifications(current.notifications, patch.notifications),
-    privacy: { ...current.privacy, ...patch.privacy },
+    ...raw,
+    notifications: {
+      ...unknownKeys(raw.notifications, KNOWN_NOTIFICATION_KEYS),
+      ...mergeNotifications(current.notifications, patch.notifications),
+    },
+    privacy: { ...unknownKeys(raw.privacy, KNOWN_PRIVACY_KEYS), ...current.privacy, ...patch.privacy },
     locale: patch.locale ?? current.locale,
     dataSaver: patch.dataSaver ?? current.dataSaver,
     interestsAsked: patch.interestsAsked ?? current.interestsAsked,
     welcomeSeen: patch.welcomeSeen ?? current.welcomeSeen,
     aiConsent: patch.aiConsent === undefined ? current.aiConsent : patch.aiConsent,
-  };
+  } as ResolvedProfileSettings;
+}
+
+/** A stored value as a plain object, or an empty one when it is anything else. */
+function plainObject(value: unknown): Record<string, unknown> {
+  return value && typeof value === "object" && !Array.isArray(value) ? (value as Record<string, unknown>) : {};
+}
+
+/* The keys the stored schema above names inside `notifications` and
+   `privacy`. They are left out of the carried-over copy, so a malformed
+   stored value under one of them (a `channels` string, say) is dropped or
+   repaired by the parse rather than carried back in beside it. */
+const KNOWN_NOTIFICATION_KEYS: ReadonlySet<string> = new Set([
+  "bookings",
+  "messages",
+  "wallet",
+  "marketing",
+  "savedPriceDrops",
+  "channels",
+  "quiet_hours",
+]);
+const KNOWN_PRIVACY_KEYS: ReadonlySet<string> = new Set([
+  "hideActivity",
+  "showOccupation",
+  "showHomeTown",
+  "profileVisibility",
+  "messagingAccess",
+  "contactDiscovery",
+]);
+
+/** The stored object's keys that the schema does not name, as stored. */
+function unknownKeys(value: unknown, known: ReadonlySet<string>): Record<string, unknown> {
+  return Object.fromEntries(Object.entries(plainObject(value)).filter(([key]) => !known.has(key)));
 }
 
 /* -------------------------------------------------------------------- avatar */
