@@ -1347,6 +1347,7 @@
   .nf-fv2-rail__all {
     display: inline-flex;
     align-items: center;
+    gap: var(--nf-gap-inline);
     min-block-size: 2.75rem;
     font-size: var(--nf-text-body-sm);
     font-weight: 600;

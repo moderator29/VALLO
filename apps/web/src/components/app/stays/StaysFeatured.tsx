@@ -51,7 +51,7 @@ export function StaysFeatured({
         {shown.length > 0 ? (
           <Link href={seeAllHref} className="nf-section-action nf-link-quiet nf-tap nf-body-sm shrink-0">
             {copy.seeAll}
-            <UiIcon name="arrow-right" size={ICON.inline} />
+            <UiIcon name="chevron-right" size={ICON.inline} />
           </Link>
         ) : null}
       </div>

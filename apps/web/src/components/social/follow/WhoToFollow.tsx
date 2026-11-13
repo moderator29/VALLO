@@ -117,6 +117,7 @@ export function PeopleRail({
         <h2 className="nf-fv2-rail__title">{title}</h2>
         <Link href="/around/people" className="nf-fv2-rail__all nf-section-action">
           {seeAll}
+          <UiIcon name="chevron-right" size={16} />
         </Link>
       </div>
       <ul className="nf-fv2-rail__list">

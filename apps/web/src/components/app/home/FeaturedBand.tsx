@@ -64,7 +64,7 @@ export function FeaturedBand({
             className="nf-section-action nf-link-quiet nf-tap nf-body-sm shrink-0"
           >
             {seeAllLabel}
-            <UiIcon name="arrow-right" size={ICON.inline} />
+            <UiIcon name="chevron-right" size={ICON.inline} />
           </Link>
         )}
       </div>
