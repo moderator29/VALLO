@@ -98,6 +98,30 @@ export function noteEntry(): void {
   }
 }
 
+/**
+ * Whether this history entry already carries a stamp, WITHOUT stamping it. A
+ * fresh push has none until `noteEntry` runs after it paints; an entry gone
+ * back or forward to has one. So it tells a traversal from a push even before
+ * `popstate` has been heard, which in WebKit can come after the router has
+ * already drawn the page.
+ */
+export function entryStamped(): boolean {
+  if (typeof window === "undefined") return false;
+  return typeof readState()?.[SEQ_KEY] === "number";
+}
+
+/**
+ * This history entry's stamp (`noteEntry` writes it if it is missing), so a
+ * caller can tell a return to an entry from a new arrival at the same address.
+ * Null where the browser refuses the stamp.
+ */
+export function entrySeq(): number | null {
+  if (typeof window === "undefined") return null;
+  noteEntry();
+  const seq = readState()?.[SEQ_KEY];
+  return typeof seq === "number" ? seq : null;
+}
+
 /** Is there a screen of OURS behind this one? */
 export function canGoBackInApp(): boolean {
   if (typeof window === "undefined") return false;

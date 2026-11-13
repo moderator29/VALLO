@@ -201,7 +201,9 @@ export function StoryViewer({
           banner.error(result.error);
           return;
         }
-        router.refresh();
+        /* No `router.refresh()`: the heart and its count are already this
+           viewer's own state, and a refresh renders the story again and
+           empties the router cache, so the page behind would refetch on back. */
       } catch (error) {
         if (!tapFailedOffline(error)) throw error;
       }

@@ -19,7 +19,6 @@
  */
 
 import { oncePerTap, tapKey } from "../offline/replay-guard";
-import { revalidatePath } from "next/cache";
 import { after } from "next/server";
 import { fail, ok, validate, type ActionResult } from "../actions/envelope";
 import {
@@ -943,7 +942,10 @@ export async function markInboxRead(): Promise<ActionResult<{ updated: number }>
       .select("id");
     if (updateError) return fail(READ_STATE_FAILED_MESSAGE);
 
-    revalidatePath("/messages");
+    /* No `revalidatePath` (Agent FEEL, 13 November 2026): in this Next it
+       renders the whole current page into the action's answer and empties the
+       client router cache. The inbox redraws itself once (`router.refresh` in
+       Inbox.tsx), which is all the unread dots need. */
     return ok({ updated: updated?.length ?? 0 });
   } catch {
     return fail(READ_STATE_FAILED_MESSAGE);

@@ -1,5 +1,6 @@
 "use client";
 
+import { refreshUnreadConversations } from "@/lib/messages/unread-live";
 import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { useClientCopy } from "@/lib/i18n/client-copy";
@@ -620,7 +621,11 @@ export function Inbox({
     void markThreadRead({ conversationId: row.id })
       .then((result) => {
         if (result.ok) {
-          router.refresh();
+          /* The row is already read on screen (`readLocal`); only the dock's
+             figure needs the database's word. Not `router.refresh()`: that
+             re-renders this whole inbox and empties the router cache, so the
+             page behind it would refetch on back (Agent FEEL, item 2). */
+          refreshUnreadConversations(0);
           return;
         }
         setReadLocal((current) => {
