@@ -32,7 +32,6 @@ import { complianceRiskEn } from "./compliance-risk.en";
 import { complianceBeneficialOwnershipEn } from "./compliance-17.en";
 /* The passcode lock (docs/PASSCODE.md), in its own module like the rest. */
 import { passcodeEn } from "./passcode.en";
-import { protectEn } from "./protect.en";
 import { verifyFlowEn } from "./verify-flow.en";
 import { inboxPlusEn } from "./inbox-plus.en";
 import { experienceLandingEn } from "./experience-landing.en";
@@ -6178,7 +6177,6 @@ export const en = {
   complianceBeneficialOwnership: complianceBeneficialOwnershipEn,
 
   passcode: passcodeEn,
-  protect: protectEn,
   verifyFlow: verifyFlowEn,
   inboxPlus: inboxPlusEn,
 
@@ -6410,7 +6408,6 @@ export const en = {
       accountCreated: { title: "Welcome to Vallo", body: "Your account is ready." },
       signedIn: { title: "Signed in. Welcome back.", body: "You are signed in on this device." },
       signedOut: { title: "You are signed out", body: "See you soon." },
-      profileConfirmed: { title: "Thanks, your profile is confirmed.", body: "Name saved." },
       photoAdded: { title: "Photo added", body: "Photo saved." },
       checkEmail: { title: "Check your email", body: "Code sent." },
       emailVerified: { title: "Email confirmed", body: "Your email address is confirmed on this account." },

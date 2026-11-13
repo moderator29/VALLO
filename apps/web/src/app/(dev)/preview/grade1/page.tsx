@@ -7,7 +7,6 @@
    by the preview layout's own guard. */
 import { getDictionary } from "@vallo/i18n";
 import { getLocale } from "@/lib/locale";
-import { PasscodeOfferCard } from "@/components/passcode/PasscodeOfferCard";
 import { PageFrame } from "@/components/app/PageFrame";
 import { Grade1Step, Grade1Banner, Grade1Verify } from "./Grade1Fixtures";
 import { Inbox, type InboxRow } from "@/app/(app)/messages/Inbox";
@@ -15,7 +14,6 @@ import { Inbox, type InboxRow } from "@/app/(app)/messages/Inbox";
 export default async function Page({ searchParams }: { searchParams: Promise<{ s?: string }> }) {
   const { s = "step" } = await searchParams;
   const t = getDictionary(await getLocale());
-  const copy = t.protect;
   if (s === "inbox") {
     /* Invented people and places for the screenshot only. */
     const rows: InboxRow[] = [
@@ -55,7 +53,6 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ s
   }
   return (
     <div className="mx-auto max-w-lg px-gutter">
-      <PasscodeOfferCard title={copy.offerTitle} body={copy.offerBody} action={copy.offerAction} dismiss={copy.offerDismiss} />
       <h1 className="nf-h1 mt-lg">Good afternoon, Ada</h1>
     </div>
   );

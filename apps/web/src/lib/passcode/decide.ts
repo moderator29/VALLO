@@ -40,9 +40,9 @@ export type LockMode =
 export type GateView =
   | { kind: "open" }
   /**
-   * Signed in, no passcode set. THE PASSCODE IS OPTIONAL (founder, 6 November
-   * 2026): the page shows, and the dashboard offers one with a dismissible
-   * alert (`PasscodeOffer`). Nothing is drawn in front of the page.
+   * Signed in, no passcode set. THE PASSCODE IS OFF BY DEFAULT (founder, 6 and
+   * 13 November 2026): the page shows and nothing asks. A passcode is turned on
+   * in Settings, Passcode only; the dashboard alert that offered one was removed.
    */
   | { kind: "unset" }
   /** `mint`: the page may show, and the browser should ask for an unlock cookie now. */

@@ -7,6 +7,7 @@ import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import { BROWSER_TEST_TIMEOUT, hasBrowser } from "@/lib/testing/mount-in-browser";
 import { OpeningScreen } from "./OpeningScreen";
 import { OPEN_CAP_MS, OPEN_MIN_MS, OPEN_SCRIPT } from "./open-script";
+import { launchScript } from "@/components/motion/launch-script";
 
 vi.setConfig({ testTimeout: BROWSER_TEST_TIMEOUT });
 
@@ -199,5 +200,35 @@ describe.skipIf(!hasBrowser && !process.env.CI)("the opening screen, in a browse
     await page.waitForFunction(() => document.documentElement.dataset.open === "on", null, { timeout: 1000 });
     expect((await state(page)).display).toBe("block");
     await close();
+  });
+
+  /*
+   * ONE OPENING ON THE WEBSITE, ACROSS LOADS (13 November 2026, a filmstrip:
+   * the drawn opening on the first load of /, then on the next whole-page load
+   * of /welcome the older launch layer, "Version 1.0.2" and all). Both scripts
+   * run as the root layout runs them: this one in the head, the older one at
+   * the foot of the body.
+   */
+  it("the older launch layer never plays on a later load of the session", async () => {
+    const ctx = await browser!.newContext({ viewport: { width: 390, height: 844 } });
+    const page = await ctx.newPage();
+    await page.route("http://vallo.test/**", (route) =>
+      route.fulfill({
+        contentType: "text/html",
+        body: `<!doctype html><html lang="en"><head><style>${CSS}</style><script>${OPEN_SCRIPT}</script></head><body>${renderToStaticMarkup(<OpeningScreen />)}<main>app</main><script>window.__nfOpenReady = true;</script><script>${launchScript("1.0.2")}</script></body></html>`,
+      }),
+    );
+    try {
+      await page.goto("http://vallo.test/", { waitUntil: "load" });
+      expect(await page.evaluate(() => document.documentElement.dataset.open)).toBe("on");
+      expect(await page.locator(".nf-launch").count()).toBe(0);
+      for (const path of ["/welcome", "/sign-in", "/home"]) {
+        await page.goto(`http://vallo.test${path}`, { waitUntil: "load" });
+        expect(await page.evaluate(() => document.documentElement.dataset.open)).toBe("off");
+        expect(await page.locator(".nf-launch").count()).toBe(0);
+      }
+    } finally {
+      await ctx.close();
+    }
   });
 });

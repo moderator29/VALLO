@@ -16,7 +16,6 @@ const LIFECYCLE: Record<string, string> = {
   "signed-out": "You are signed out",
   "password-changed": "Password changed",
   "email-verified": "Email confirmed",
-  "profile-confirmed": "Thanks, your profile is confirmed.",
   "photo-added": "Photo added",
 };
 

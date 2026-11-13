@@ -18,7 +18,6 @@ import { StillAvailableCard } from "@/components/agent/StillAvailableCard";
 import { readLiveFreshness } from "@/lib/agent/freshness-read";
 import { daysSinceConfirmed, dueForConfirmation } from "@/lib/agent/freshness";
 import { KycBanner } from "@/components/agent/KycBanner";
-import { PasscodeOffer } from "@/components/passcode/PasscodeOffer";
 import { getKycStanding } from "@/lib/agent/kyc-standing";
 import { readInspectionsForLister } from "@/lib/inspections/queries";
 import { ButtonLink } from "@/components/ui/Button";
@@ -126,8 +125,6 @@ export default async function AgentDashboardPage({
       >
         <PageFrame title={t.agent.nav.dashboard} back={false} width="wide">
         <div>
-        {/* P0.1: the passcode is offered, never forced. */}
-        <PasscodeOffer />
         {standing ? <KycBanner standing={standing} /> : null}
         {due.length > 0 ? (
           <div className="mb-block">

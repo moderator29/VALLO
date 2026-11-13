@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { OPEN_LAUNCH_SVG } from "./open-launch.generated";
-import { OPEN_MIN_MS, OPEN_SCRIPT } from "./open-script";
+import { OPEN_LAUNCH_SESSION_KEY, OPEN_MIN_MS, OPEN_SCRIPT } from "./open-script";
 
 /**
  * THE OPENING SCREEN, FIRST PAINT (10 November 2026). What must be true of the
@@ -117,5 +117,18 @@ describe("the first HTML", () => {
   it("does not play the older website launch layer under it", () => {
     const launch = readFileSync(join(WEB, "src", "components", "motion", "launch-script.ts"), "utf8");
     expect(launch).toContain("data-open')==='on'");
+  });
+  /*
+   * NOR ON THE NEXT LOAD (13 November 2026, found on a filmstrip of the
+   * website: the drawn opening on the first load, then on the next whole-page
+   * load of /welcome a second lockup with "Version 1.0.2" under it). The older
+   * layer only checked this one's attribute on the same load and spent its own
+   * session mark only when it played. The opening's script now spends that
+   * mark on every path, and the older layer returns when it finds it.
+   */
+  it("spends the older launch layer's session mark, which that layer reads before it plays", () => {
+    expect(OPEN_SCRIPT).toContain(`sessionStorage.setItem('${OPEN_LAUNCH_SESSION_KEY}','1')`);
+    const launch = readFileSync(join(WEB, "src", "components", "motion", "launch-script.ts"), "utf8");
+    expect(launch).toContain(`sessionStorage.getItem('${OPEN_LAUNCH_SESSION_KEY}'))return`);
   });
 });

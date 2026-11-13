@@ -164,7 +164,7 @@ export default async function AppLayout({
           <TermsUpdateMount />
         </Suspense>
       ) : null}
-      {/* After sign-up: confirm your name, then add a photo; each skippable,
+      {/* After sign-up: add a photo; each skippable,
           never more than once a session nor within days of a skip. */}
       {signedIn ? (
         <Suspense fallback={null}>
