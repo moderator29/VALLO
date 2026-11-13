@@ -308,7 +308,7 @@ export function OfferFlow(props: OfferFlowProps) {
             options={(["cash", "mortgage", "instalment"] as const).map((key) => ({ value: key, label: PAYMENT_LABEL[key], detail: PAYMENT_DETAIL[key] }))}
             testId="offer-pref"
           />
-          <div className="nf-reveal" data-open={draft.pref !== "cash" ? "" : undefined} inert={draft.pref === "cash"} data-testid="offer-reveal">
+          <div className="nf-ofr-reveal" data-open={draft.pref !== "cash" ? "" : undefined} inert={draft.pref === "cash"} data-testid="offer-reveal">
             <div>
               <div className="grid gap-sm pt-xs">
                 <NairaField
@@ -318,7 +318,7 @@ export function OfferFlow(props: OfferFlowProps) {
                   hint="Optional. A figure you propose to the seller, not a payment to Vallo."
                   data-testid="offer-deposit"
                 />
-                <div className="nf-reveal" data-open={draft.pref === "instalment" ? "" : undefined} inert={draft.pref !== "instalment"}>
+                <div className="nf-ofr-reveal" data-open={draft.pref === "instalment" ? "" : undefined} inert={draft.pref !== "instalment"}>
                   <div>
                     <div className="grid gap-xs pt-xs">
                       <p className="nf-section-label">Over how long</p>

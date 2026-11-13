@@ -159,13 +159,16 @@
   }
 }
 
-/* The Deal Room. */
-.nf-room {
+/* The Deal Room. Named nf-deal-room, not nf-room: nf-room is a landing
+   chapter (landing-rooms.css), and this sheet is unlayered and stays in the
+   document after a soft navigation, so the shared name made the landing's
+   chapters a one-column grid (check-css-collisions). */
+.nf-deal-room {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   gap: var(--nf-space-lg);
 }
-.nf-room > * {
+.nf-deal-room > * {
   min-width: 0;
 }
 .nf-room__cols {
@@ -1111,31 +1114,9 @@
     animation: nf-ofr-join 260ms var(--nf-ease-entrance) both;
   }
 }
-.nf-composer {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: var(--nf-space-xs);
-  align-items: end;
-  padding: var(--nf-space-xs);
-  border-radius: var(--nf-radius-card);
-  border: var(--nf-border-width) solid var(--nf-border-default);
-  background: var(--nf-surface-secondary);
-}
-.nf-composer textarea {
-  inline-size: 100%;
-  min-block-size: 2.75rem;
-  max-block-size: 9rem;
-  resize: none;
-  border: 0;
-  outline: 0;
-  background: transparent;
-  color: var(--nf-content-primary);
-  font: inherit;
-  padding: var(--nf-space-xs) var(--nf-space-sm);
-}
-.nf-composer:focus-within {
-  border-color: var(--nf-brand-primary);
-}
+/* The deal room's composer is the chat's bar (DealMessages.tsx, input-bar.css).
+   Its old .nf-composer grid lived here, unlayered, and redrew the messages
+   thread's composer after any visit to a deal room (check-css-collisions). */
 
 /* Inspection report: eight items with checks. */
 .nf-insp {
@@ -1166,47 +1147,24 @@
   color: var(--nf-content-muted);
 }
 
-/* The flow: steps slide and fade; an option reveals only its own fields. */
-.nf-flow-step {
-  display: grid;
-  gap: var(--nf-space-lg);
-}
-@media (prefers-reduced-motion: no-preference) {
-  :root:not([data-motion="calm"]):not([data-motion="off"]) .nf-flow-step[data-dir="forward"] {
-    animation: nf-flow-in-fwd 320ms var(--nf-ease-entrance) both;
-  }
-  :root:not([data-motion="calm"]):not([data-motion="off"]) .nf-flow-step[data-dir="back"] {
-    animation: nf-flow-in-back 320ms var(--nf-ease-entrance) both;
-  }
-}
-@keyframes nf-flow-in-fwd {
-  from {
-    opacity: 0;
-    transform: translateX(24px);
-  }
-}
-@keyframes nf-flow-in-back {
-  from {
-    opacity: 0;
-    transform: translateX(-24px);
-  }
-}
-.nf-reveal {
+/* An option reveals only its own fields. Named nf-ofr-reveal: the global
+   .nf-reveal (animation.css) also matched and held it 22px low. */
+.nf-ofr-reveal {
   display: grid;
   grid-template-rows: 0fr;
   opacity: 0;
   transition: grid-template-rows var(--nf-duration-base) var(--nf-ease-standard), opacity var(--nf-duration-base) var(--nf-ease-standard);
 }
-.nf-reveal[data-open] {
+.nf-ofr-reveal[data-open] {
   grid-template-rows: 1fr;
   opacity: 1;
 }
-.nf-reveal > div {
+.nf-ofr-reveal > div {
   overflow: hidden;
   min-block-size: 0;
 }
 @media (prefers-reduced-motion: reduce) {
-  .nf-reveal {
+  .nf-ofr-reveal {
     transition: none;
   }
 }

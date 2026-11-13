@@ -51,7 +51,9 @@
     pointer-events: none;
   }
 
-  .nf-door__mark {
+  /* nf-sdoor__mark, not nf-door__mark: that name is the supply door row's
+     plate in controls.css, and the two collided (check-css-collisions). */
+  .nf-sdoor__mark {
     display: flex;
     justify-content: center;
     padding-top: var(--nf-space-md);

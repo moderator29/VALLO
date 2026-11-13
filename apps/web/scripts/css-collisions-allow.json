@@ -1,0 +1,31 @@
+{
+  "//": "check-css-collisions.mjs allowlist. Every entry carries the reason it is not a bug. A new entry needs a sentence a reviewer can check, not a shrug.",
+  "collisions": {
+    ".nf-admin-drawer__panel": "admin-material.css is the console's material pass layered deliberately on top of admin.css (its header says so); both load on every admin route, admin-material after admin.css, so the wider panel always wins.",
+    ".nf-admin-row__kebab": "Same pair as .nf-admin-drawer__panel: admin-material.css raises admin.css's 36px kebab to the 44px icon control on purpose, loaded after it on every admin route.",
+    ".nf-dock-plus": "shell-m.css is the globals.css partial that overrides nav-island.css by position (its header: 'overridden by position in the cascade rather than by a specificity race'); both are in globals.css in a fixed order, so the result never depends on navigation.",
+    ".nf-dockmore__unread": "Same globals.css partial pair as .nf-dock-plus: shell-m.css overrides nav-island.css by its fixed position in globals.css.",
+    ".nf-drawer--left": "shell-m.css overrides overlays.css's drawer width by its fixed position in globals.css (the founder's full-height drawer); both always load together, in that order.",
+    ".nf-moment": "KNOWN COLLISION, NOT YET FIXED: SuccessMoment (premium-moments.css, grid) and BadgeMoment (components/social/badges/badges.css, flex) are two components sharing one name. The rename belongs in badges.css and BadgeMoment.tsx, which are HUNTER's files; reported to the lead 13 November 2026. Remove this entry when renamed.",
+    ".nf-pcard": "KNOWN COLLISION, NOT YET FIXED: the listing card (catalogue.css) and the people card (components/social/find/people-v2.css) share .nf-pcard. The rename belongs in people-v2.css and its component, HUNTER's files; reported to the lead 13 November 2026. Remove this entry when renamed.",
+    ".nf-pcard__facts": "Part of the .nf-pcard collision above (people-v2.css draws its own .nf-pcard__facts as a grid); same owner, same report, removed with it."
+  },
+  "unlayered": {
+    "src/app/css/base.css": "The document's own html and body rules and the tap-target pseudo-elements on .nf-link-quiet.nf-tap and .nf-numeric; base.css is first in globals.css and these are the floor every layer builds on, so they are written to hold against component padding that would shrink a 44pt target.",
+    "src/app/css/data-saver.css": "Every rule is under :root[data-save-data=\"on\"] and switches decoration off when the member asks to save data. It must beat every layered rule by design: a component layer that re-enabled an animation would break the promise.",
+    "src/app/css/input-bar.css": "The one input bar, written as :root .nf-composer.nf-composer ... so it wins over each feature's older composer styling on purpose. The two unscoped reaches (.nf-shelf-box, .nf-ai__composer) are the same bar on search and the assistant, drawn by this sheet by design.",
+    "src/app/css/member-kit.shared.css": "Accessibility preferences only: prefers-contrast more, data-contrast=more and forced-colors. They must beat any layered component colour, which is why they are unlayered.",
+    "src/app/css/messages-g1.css": "HUNTER's messages sheet: .nf-msg-menu is the message menu shared with threads.css, the same component in its two sheets. Left to its owner; listed for the lead.",
+    "src/app/css/print.css": "@media print only, scoped to [data-doc-print]: it has to beat the screen rules of document.css to print the one sheet and nothing else.",
+    "src/app/css/route-motion.css": "View-transition names and the route motion custom properties on :root; view-transition-name must be set once per element whatever the component layer says, or two elements claim one name and the transition is skipped.",
+    "src/app/css/share-card.css": "The share card frame (ShareCardFrame) is rendered to an image off screen; its three reaches are clean-17.css's centred-alignment variants of the same card, which are scoped by [data-align] and win where they apply. The other card that once shared this name was renamed to nf-share-post on 13 November 2026.",
+    "src/app/css/shell-m.css": "One unlayered rule, the night drawer, rail, tab bar and dock edge under :root:not([data-theme=light]); written unlayered so it wins over chrome.css and nav-island.css in every theme order. Same component, same owner.",
+    "src/app/css/signature-motion.css": "One rule under :root[data-save-data=on] that stops the logo and story ring motion when the member saves data; it must beat the layered animations.",
+    "src/app/css/spark.css": "Two rules under data-save-data, calm and off motion that stop the header dot and the button sweep; motion preferences must beat the layered animations.",
+    "src/app/css/status-track.css": "The status track component's own sheet. agreements.css, status-shapes.css and verified-payoff.css add motion and state to the same track scoped under their own ancestors (.nf-agr-track, .nf-vtrack-still). Not yet audited property by property: listed for the lead as a candidate for @layer components.",
+    "src/app/css/threads.css": "HUNTER's messages thread sheet: .nf-msg-menu is the same message menu as in messages-g1.css. Left to its owner; listed for the lead.",
+    "src/app/css/touch.css": "Touch floors: 16px inputs on coarse pointers (iOS zooms below that) and the tap highlight. Must beat every layered field style by design.",
+    "src/components/app/leaderboard/leaderboard-motion.css": "The leaderboard's motion companion to leaderboard.css: the same component's classes, split into two sheets by concern. Nothing outside the leaderboard uses the nf-lb names.",
+    "src/components/app/leaderboard/leaderboard.css": "The leaderboard's own sheet; its reaches are its motion companion (leaderboard-motion.css), the directory's .nf-lb__scope (the same scope control, reused on purpose) and .nf-btn under .nf-lb, which is scoped. Candidate for @layer components; listed for the lead."
+  }
+}

@@ -1178,6 +1178,11 @@
     display: block;
     height: 0;
   }
+  /* The row ends before the section index button and FADES out over its
+     last 1.5rem (founder, 13 November 2026: the last tab looked cut off
+     under the menu button). The fade sits over the row's own trailing
+     padding, so a row that fits shows every word whole, and a row that
+     scrolls says so instead of looking clipped. */
   .nf-detail-tabs__row {
     display: flex;
     flex: 1;
@@ -1185,6 +1190,8 @@
     overflow-x: auto;
     overscroll-behavior-x: contain;
     scrollbar-width: none;
+    padding-inline-end: var(--nf-space-lg);
+    mask-image: linear-gradient(to left, transparent, var(--nf-content-primary) var(--nf-space-lg));
   }
   .nf-detail-tabs__row::-webkit-scrollbar {
     display: none;
@@ -2093,6 +2100,12 @@
       display: none;
     }
   }
+  /* The Amenities section's full list: the same plates, wrapping on equal
+     columns, a row apart. */
+  .nf-amenity-plates.nf-amenity-plates--all {
+    grid-template-columns: repeat(auto-fill, minmax(4.5rem, 1fr));
+    row-gap: var(--nf-space-md);
+  }
   .nf-amenity-plate,
   .nf-amenity-plate__more {
     display: flex;
@@ -2260,23 +2273,10 @@
   /* ============================================================ stays home
      FD3DFE84: the headline with the glass hotel object, the search field
      with its filter glyph, the category tiles, the featured cards. */
-  .nf-stays-hero {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) 7.5rem;
-    align-items: center;
-    gap: var(--nf-space-md);
-  }
-  @media (min-width: 40rem) {
-    .nf-stays-hero {
-      grid-template-columns: minmax(0, 1fr) 10rem;
-    }
-  }
-  .nf-stays-hero__object {
-    display: block;
-    width: 100%;
-    aspect-ratio: 1;
-    filter: drop-shadow(0 0 22px var(--nf-glow-2));
-  }
+  /* The hero and the tile grid are drawn by stays.css alone. A second copy
+     here (a grid hero, a fixed three-column grid) collided with it on every
+     route that loads both, the winner decided by chunk order
+     (check-css-collisions). */
   /*
    * THE MARKET TILE, to GOVERNING-home-markets-target: a small glass object
    * at the top left, the name under it, an arrow at the bottom right, three
@@ -2292,12 +2292,6 @@
    * and this product does not have an honest per-category count to print,
    * so it prints none: rule 15, never an invented number.
    */
-  .nf-stays-tiles {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: var(--nf-space-xs);
-    overflow: visible;
-  }
   .nf-stays-tiles > li {
     min-width: 0;
   }

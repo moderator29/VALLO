@@ -687,7 +687,7 @@ export default async function ListingDetailPage({
   const isVisit = !isExample && (isRental || isSale);
   const visitHref = `/listing/${listing.id}/visit`;
   const stickyAction: StickyAction | null = isExample
-    ? { label: sx.closed.action.replace("{area}", areaName), href: realSoonHref }
+    ? { label: sx.closed.action.replace("{area}", areaName), href: realSoonHref, icon: "search" }
     : isBookable
       ? { label: t.catalogue.detail.checkAvailability, href: "#reserve" }
       : isVisit
@@ -1432,7 +1432,7 @@ export default async function ListingDetailPage({
                 {/* ------------------------------------------- amenities */}
                 <Section id="amenities" title={t.catalogue.detail.amenities} divided className="scroll-mt-16">
                   {listing.amenities.length > 0 ? (
-                    <ListingAmenityTiles amenities={listing.amenities} />
+                    <ListingAmenityTiles variant="plates" amenities={listing.amenities} />
                   ) : (
                     <ListingAmenities
                       locale={locale}

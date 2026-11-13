@@ -140,36 +140,36 @@ export function ShareComposer({
         </div>
       ) : null}
       <div className="nf-share__stage">
-        <div className="nf-share-card nf-share-card--enter">
-          <div className="nf-share-card__bg">
+        <div className="nf-share-post nf-share-post--enter">
+          <div className="nf-share-post__bg">
             {bg?.kind === "image" ? (
               <>
                 <Image src={bg.src} alt="" fill sizes="320px" />
-                {darken ? <span className="nf-share-card__darken" aria-hidden /> : null}
+                {darken ? <span className="nf-share-post__darken" aria-hidden /> : null}
               </>
             ) : (
               <span className={`nf-aurora nf-aurora--${bg?.kind === "aurora" ? bg.variant : "glow"}`} />
             )}
           </div>
-          <div className="nf-share-card__body">
+          <div className="nf-share-post__body">
             {subject.avatar ? (
-              <span className="nf-share-card__avatar">
+              <span className="nf-share-post__avatar">
                 <Image src={subject.avatar} alt="" fill sizes="88px" />
               </span>
             ) : subject.initial ? (
-              <span className="nf-share-card__avatar nf-share-card__initial" data-tone={toneOf(subject.initial)}>
+              <span className="nf-share-post__avatar nf-share-post__initial" data-tone={toneOf(subject.initial)}>
                 {Array.from(subject.initial.trim())[0]?.toLocaleUpperCase() ?? "V"}
               </span>
             ) : null}
-            {showHandle && subject.handle ? <span className="nf-share-card__handle">{subject.handle}</span> : null}
-            <span className="nf-share-card__headline">{headline}</span>
-            {lead?.sub ? <span className="nf-share-card__sub">{lead.sub}</span> : null}
+            {showHandle && subject.handle ? <span className="nf-share-post__handle">{subject.handle}</span> : null}
+            <span className="nf-share-post__headline">{headline}</span>
+            {lead?.sub ? <span className="nf-share-post__sub">{lead.sub}</span> : null}
             {showStats && subject.stats?.length ? (
-              <span className="nf-share-card__stats">
+              <span className="nf-share-post__stats">
                 {subject.stats.map((s, i) => (
-                  <span className="nf-share-card__stat-group" key={s.label} style={{ display: "contents" }}>
-                    {i > 0 ? <span className="nf-share-card__stat-divider" aria-hidden /> : null}
-                    <span className="nf-share-card__stat">
+                  <span className="nf-share-post__stat-group" key={s.label} style={{ display: "contents" }}>
+                    {i > 0 ? <span className="nf-share-post__stat-divider" aria-hidden /> : null}
+                    <span className="nf-share-post__stat">
                       <b>{s.value}</b>
                       <span>{s.label}</span>
                     </span>
@@ -177,7 +177,7 @@ export function ShareComposer({
                 ))}
               </span>
             ) : null}
-            <span className="nf-share-card__brand">
+            <span className="nf-share-post__brand">
               <Image src="/brand/vallo-mark.svg" alt="" width={18} height={16} />
               Vallo
             </span>

@@ -110,17 +110,17 @@
   }
   /* The card settles in once, transform and opacity only, resting under reduced motion. */
   @media (prefers-reduced-motion: no-preference) {
-    .nf-share-card--enter {
-      animation: nf-share-card-in var(--nf-duration-entrance) var(--nf-ease-spring) both;
+    .nf-share-post--enter {
+      animation: nf-share-post-in var(--nf-duration-entrance) var(--nf-ease-spring) both;
     }
   }
-  @keyframes nf-share-card-in {
+  @keyframes nf-share-post-in {
     from {
       opacity: 0;
       transform: scale(0.94) translateY(10px);
     }
   }
-  :root:is([data-motion="calm"], [data-motion="off"]) .nf-share-card--enter {
+  :root:is([data-motion="calm"], [data-motion="off"]) .nf-share-post--enter {
     animation: none;
   }
   .nf-share__stage {
@@ -131,9 +131,11 @@
     background: var(--nf-surface-inset);
   }
 
-  /* The card itself: a 4:5 portrait that reads the same in the app and when
+  /* The card itself (nf-share-post, not nf-share-card: that name is the
+     ShareCardFrame in share-card.css, and the two collided): a 4:5 portrait
+     that reads the same in the app and when
      it is forwarded. The background is a layer, the content sits on it. */
-  .nf-share-card {
+  .nf-share-post {
     position: relative;
     width: min(100%, 20rem);
     aspect-ratio: 4 / 5;
@@ -145,22 +147,22 @@
     box-shadow: var(--nf-elevation-floating);
     isolation: isolate;
   }
-  .nf-share-card__bg {
+  .nf-share-post__bg {
     position: absolute;
     inset: 0;
     z-index: 0;
   }
-  .nf-share-card__bg img {
+  .nf-share-post__bg img {
     object-fit: cover;
   }
   /* A vignette so white text always holds, whatever the background is. */
-  .nf-share-card__bg::after {
+  .nf-share-post__bg::after {
     content: "";
     position: absolute;
     inset: 0;
     background: var(--nf-scrim-cover);
   }
-  .nf-share-card__body {
+  .nf-share-post__body {
     position: relative;
     z-index: 1;
     height: 100%;
@@ -172,7 +174,7 @@
     padding: var(--nf-space-lg);
     text-align: center;
   }
-  .nf-share-card__avatar {
+  .nf-share-post__avatar {
     position: relative;
     width: 5.5rem;
     height: 5.5rem;
@@ -181,10 +183,10 @@
     background: var(--nf-surface-inset);
     box-shadow: var(--nf-elevation-raised);
   }
-  .nf-share-card__avatar img {
+  .nf-share-post__avatar img {
     object-fit: cover;
   }
-  .nf-share-card__initial {
+  .nf-share-post__initial {
     display: grid;
     place-items: center;
     font-family: var(--nf-font-display);
@@ -193,16 +195,16 @@
     color: var(--nf-content-on-brand);
     background: var(--nf-gradient-brand-ink);
   }
-  .nf-share-card__initial[data-tone="1"] { background: var(--nf-brand-primary); }
-  .nf-share-card__initial[data-tone="2"] { background: var(--nf-spark); }
-  .nf-share-card__initial[data-tone="3"] { background: var(--nf-state-success); }
-  .nf-share-card__initial[data-tone="4"] { background: var(--nf-state-info); }
-  .nf-share-card__sub {
+  .nf-share-post__initial[data-tone="1"] { background: var(--nf-brand-primary); }
+  .nf-share-post__initial[data-tone="2"] { background: var(--nf-spark); }
+  .nf-share-post__initial[data-tone="3"] { background: var(--nf-state-success); }
+  .nf-share-post__initial[data-tone="4"] { background: var(--nf-state-info); }
+  .nf-share-post__sub {
     font-size: var(--nf-text-body-sm);
     font-weight: 600;
     opacity: 0.86;
   }
-  .nf-share-card__darken {
+  .nf-share-post__darken {
     position: absolute;
     inset: 0;
     background: var(--nf-scrim-cover);
@@ -240,7 +242,7 @@
     outline: var(--nf-focus-ring-width) solid var(--nf-focus-ring);
     outline-offset: var(--nf-focus-ring-offset);
   }
-  .nf-share-card__handle {
+  .nf-share-post__handle {
     display: inline-flex;
     align-items: center;
     gap: var(--nf-space-3xs);
@@ -250,40 +252,40 @@
     font-size: var(--nf-text-body-sm);
     font-weight: 600;
   }
-  .nf-share-card__headline {
+  .nf-share-post__headline {
     font-size: var(--nf-text-display);
     font-weight: 700;
     letter-spacing: -0.02em;
     line-height: 1.05;
   }
-  .nf-share-card__stats {
+  .nf-share-post__stats {
     display: inline-flex;
     align-items: stretch;
     gap: var(--nf-space-md);
     margin-top: var(--nf-space-2xs);
   }
-  .nf-share-card__stat {
+  .nf-share-post__stat {
     display: flex;
     flex-direction: column;
     gap: 2px;
   }
-  .nf-share-card__stat b {
+  .nf-share-post__stat b {
     font-size: var(--nf-text-body-lg);
     font-weight: 700;
   }
-  .nf-share-card__stat span {
+  .nf-share-post__stat span {
     font-size: var(--nf-text-overline);
     font-weight: 400;
     opacity: 0.8;
     text-transform: uppercase;
     letter-spacing: 0.04em;
   }
-  .nf-share-card__stat-divider {
+  .nf-share-post__stat-divider {
     width: var(--nf-border-width);
     background: var(--nf-mw-white);
     opacity: 0.25;
   }
-  .nf-share-card__brand {
+  .nf-share-post__brand {
     display: inline-flex;
     align-items: center;
     gap: var(--nf-space-3xs);
@@ -291,7 +293,7 @@
     font-size: var(--nf-text-body-sm);
     font-weight: 700;
   }
-  .nf-share-card__brand img {
+  .nf-share-post__brand img {
     display: block;
   }
 

@@ -111,7 +111,7 @@ export function DealRoomView({ room, nowMs, initialTab = "overview", thread = []
   const wideTab = (tab === "overview" ? "negotiation" : tab) as RoomTab;
 
   return (
-    <div className="nf-room" data-tab={tab} data-testid="deal-room">
+    <div className="nf-deal-room" data-tab={tab} data-testid="deal-room">
       <header className="nf-room__head">
         <div className="nf-room__thumb" aria-hidden="true">
           {offer.listingThumb ? <RemoteImage src={offer.listingThumb} alt="" width={112} height={112} sizes="56px" /> : <UiIcon name="house" size={24} />}

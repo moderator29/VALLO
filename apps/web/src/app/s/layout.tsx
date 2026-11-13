@@ -17,7 +17,7 @@ import "./door.css";
 export default function DoorLayout({ children }: { children: React.ReactNode }) {
   return (
     <main id="main" className="nf-door">
-      <div className="nf-door__mark">
+      <div className="nf-sdoor__mark">
         <LogoMark size={40} title="Vallo" />
       </div>
       <div className="nf-door__stage">{children}</div>

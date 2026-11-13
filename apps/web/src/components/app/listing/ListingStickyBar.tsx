@@ -59,6 +59,10 @@ import "@/components/app/offers/offers.css";
 export type StickyAction = {
   label: string;
   href: string;
+  /** The glyph that names what the action does. A rental's action is a
+      visit (the calendar) unless the caller says otherwise: an example row's
+      "More spaces in {area}" is browsing, so it carries the search glyph. */
+  icon?: "calendar-booking" | "search";
 };
 
 export function ListingStickyBar({
@@ -353,7 +357,7 @@ export function ListingStickyBar({
               href={action.href}
               variant="primary"
               size="md"
-              leadingIcon={variant === "rental" ? "calendar-booking" : undefined}
+              leadingIcon={action.icon ?? (variant === "rental" ? "calendar-booking" : undefined)}
               className={sheen ? "nf-detail-foot__action nf-ofr-sheen" : "nf-detail-foot__action"}
               data-testid="sticky-action"
             >

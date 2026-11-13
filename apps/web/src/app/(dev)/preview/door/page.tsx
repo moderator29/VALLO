@@ -105,7 +105,7 @@ export default async function DoorPreview({
 
   return (
     <main className="nf-door">
-      <div className="nf-door__mark">
+      <div className="nf-sdoor__mark">
         <LogoMark size={40} title="Vallo" />
       </div>
       {shown.map((key) => (
