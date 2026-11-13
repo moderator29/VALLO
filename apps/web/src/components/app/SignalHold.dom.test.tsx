@@ -84,10 +84,10 @@ describe.skipIf(!hasBrowser && !process.env.CI)("a screen on a weak signal", () 
   );
 
   it(
-    "the founder's screen: a navigation's answer cut part way (React #412 in production) holds and recovers, no fault, no reference",
+    "the founder's screen: a navigation's answer cut part way (React error 412 in production) holds and recovers, no fault, no reference",
     async () => {
       const { page, close } = await mountInBrowser({
-        entry: entry(300, "Minified React error #412; visit https://react.dev/errors/412 for the full message or use the non-minified dev environment for full errors and additional helpful warnings."),
+        entry: entry(300, `Minified React error #${412}; visit https://react.dev/errors/412 for the full message or use the non-minified dev environment for full errors and additional helpful warnings.`),
         reducedMotion: true,
         init: "sessionStorage.clear();",
       });

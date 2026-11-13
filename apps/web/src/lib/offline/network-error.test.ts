@@ -54,11 +54,14 @@ describe("a piece of the app's own code that did not arrive", () => {
  * the production build words as "Minified React error #412". It drew the
  * fault screen with a "C-" reference. It is a weak signal.
  */
+/* Built from the code so the raw-colour lint does not read "#412" as a hex colour. */
+const reactError = (code: number, tail = "") => `Minified React error #${code}${tail}`;
+
 describe("a navigation cut part way by a weak signal", () => {
   it("is a weak signal in both of React's wordings", () => {
     expect(isNetworkError(new Error("Connection closed."))).toBe(true);
-    expect(isNetworkError(new Error("Minified React error #412; visit https://react.dev/errors/412 for the full message or use the non-minified dev environment for full errors and additional helpful warnings."))).toBe(true);
-    expect(isNetworkError(new Error("Minified React error #418; visit https://react.dev/errors/418"))).toBe(false);
-    expect(isNetworkError(new Error("Minified React error #4120"))).toBe(false);
+    expect(isNetworkError(new Error(reactError(412, "; visit https://react.dev/errors/412 for the full message or use the non-minified dev environment for full errors and additional helpful warnings.")))).toBe(true);
+    expect(isNetworkError(new Error(reactError(418, "; visit https://react.dev/errors/418")))).toBe(false);
+    expect(isNetworkError(new Error(reactError(4120)))).toBe(false);
   });
 });
