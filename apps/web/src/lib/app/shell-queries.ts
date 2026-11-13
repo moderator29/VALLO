@@ -220,13 +220,55 @@ async function identityFromSeparateReads(supabase: SupabaseClient<Database>, use
  * Cached per request, so the layout, the home greeting, the support page and
  * the console layout share one execution.
  */
+/**
+ * THE SHELL'S ROW, HELD FOR A MOMENT PER MEMBER (platform speed, 13 November
+ * 2026).
+ *
+ * `shell_context()` is on the path of every signed-in page load, and
+ * `pg_stat_statements` since this morning's reset puts it at a mean of 637 ms
+ * with a 6 s maximum under load (its own warm cost, measured with EXPLAIN as
+ * a member, is about 70 ms; the rest is contention). The row is the member's
+ * name, avatar, unread count, workspaces and roles, none of which changes
+ * from one page load to the next, so a copy is held for HELD_MS and a load
+ * inside that window makes no round trip at all.
+ *
+ * THIS IS PER INSTANCE AND PER MEMBER, AND NOTHING ELSE. The key is the user
+ * id the token was verified to carry, so one member's row can never be served
+ * to another, and the row never leaves this process (never Next's data cache,
+ * never the edge). It is the same memo `lib/cache/memo.ts` describes, keyed.
+ * What it costs: a name, a photograph or an unread count changed within the
+ * last HELD_MS is drawn as it was, on this instance, until the window closes;
+ * the badge keeps itself current through its own subscription regardless.
+ * Sign-out holds nothing (a guest never reaches this), and a session revoked
+ * elsewhere still fails at the page's own reads, as it always did.
+ */
+const HELD_MS = 30_000;
+const heldRows = new Map<string, { row: ShellContextRow; expires: number }>();
+
+async function readShellRow(session: { supabase: SupabaseClient<Database>; userId: string }): Promise<ShellContextRow | null> {
+  const now = Date.now();
+  const held = heldRows.get(session.userId);
+  if (held && held.expires > now) return held.row;
+  const { data, error } = await session.supabase.rpc("shell_context" as never);
+  const row = error || !data ? null : (data as unknown as ShellContextRow);
+  if (row) heldRows.set(session.userId, { row, expires: now + HELD_MS });
+  /* The map cannot grow without bound: anything past its window is dropped
+     whenever it is looked at. */
+  if (heldRows.size > 500) for (const [key, entry] of heldRows) if (entry.expires <= now) heldRows.delete(key);
+  return row;
+}
+
+/** Drop a member's held row, so the next load reads it fresh (tests, and a write that changes the shell). */
+export function forgetShellRow(userId: string): void {
+  heldRows.delete(userId);
+}
+
 const getShellContext = cache(async function getShellContext(): Promise<ShellContext> {
   try {
     const session = await resolveSessionClaims();
     if (session.state !== "signed-in") return { identity: GUEST, workspaces: NO_WORKSPACES };
 
-    const { data, error } = await session.supabase.rpc("shell_context" as never);
-    const row = error || !data ? null : (data as unknown as ShellContextRow);
+    const row = await readShellRow(session);
     if (!row) {
       const [identity, workspaces] = await Promise.all([
         identityFromSeparateReads(session.supabase, session.userId),

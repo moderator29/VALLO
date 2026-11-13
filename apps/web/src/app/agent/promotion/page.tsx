@@ -110,7 +110,7 @@ export default async function PromotionHubPage() {
                     <UiIcon name="trending-up" size={20} />
                   </IconPlate>
                 }
-                title={<span className="line-clamp-2 [overflow-wrap:anywhere]">{listing.title}</span>}
+                title={<span className="line-clamp-2 break-words">{listing.title}</span>}
                 sub={[listing.area, listing.city].filter(Boolean).join(", ") || undefined}
                 value={p.promote}
                 chevron
@@ -136,7 +136,7 @@ export default async function PromotionHubPage() {
               return (
                 <ListRow
                   key={purchase.id}
-                  title={<span className="line-clamp-2 [overflow-wrap:anywhere]">{title}</span>}
+                  title={<span className="line-clamp-2 break-words">{title}</span>}
                   sub={[
                     p.tiers[purchase.tier].name,
                     purchase.startsAt && purchase.endsAt

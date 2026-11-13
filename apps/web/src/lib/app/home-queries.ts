@@ -160,7 +160,15 @@ function firstLine(body: string | null, limit = 90): string {
   return lastSpace > 40 ? cut.slice(0, lastSpace) : cut;
 }
 
-export const getHomeOverview = cache(async function getHomeOverview(): Promise<HomeOverview> {
+/**
+ * `trending: false` skips the strip's reads (stories, posts and the signing of
+ * their photographs) and answers `trending: []`: for a page that draws the
+ * greeting and the place but never the strip (the stays home).
+ */
+export const getHomeOverview = cache(async function getHomeOverview(
+  wants: { trending?: boolean } = {},
+): Promise<HomeOverview> {
+  const withTrending = wants.trending !== false;
   const daypart = daypartFor(lagosHour());
   const base: HomeOverview = {
     daypart,
@@ -182,7 +190,7 @@ export const getHomeOverview = cache(async function getHomeOverview(): Promise<H
     const guest = await anonClient();
     if (!guest) return base;
     const anonymous = await readOpenPlaces(guest, "");
-    const trending = await readTrending(guest, anonymous.areas);
+    const trending = withTrending ? await readTrending(guest, anonymous.areas) : [];
     return { ...base, place: anonymous.place, areas: anonymous.areas, trending };
   }
 
@@ -234,7 +242,7 @@ export const getHomeOverview = cache(async function getHomeOverview(): Promise<H
         }
       : places.place;
 
-  const trending = await readTrending(supabase, places.areas);
+  const trending = withTrending ? await readTrending(supabase, places.areas) : [];
 
   return {
     daypart,

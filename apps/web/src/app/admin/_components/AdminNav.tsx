@@ -62,7 +62,7 @@ function Row({
       className={`nf-admin-nav__row${child ? " nf-admin-nav__row--child" : ""}${active ? " nf-admin-nav__row--on" : ""}`}
     >
       <NavIcon icon={item.icon} size={child ? 16 : 20} />
-      <span className="min-w-0 flex-1 [overflow-wrap:anywhere]">
+      <span className="min-w-0 flex-1 break-words">
         {label}
         {lede ? <span className="nf-admin-drawer__lede">{lede}</span> : null}
       </span>

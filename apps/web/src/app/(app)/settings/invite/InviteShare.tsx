@@ -14,7 +14,8 @@ export function InviteShare({ copy, url, code }: { copy: Dictionary["publicDoors
     <div className="grid gap-sm">
       <div className="nf-pd-card">
         <p className="nf-section-label">{copy.linkLabel}</p>
-        <p className="nf-numeric break-all font-semibold text-[var(--nf-content-primary)]" data-testid="invite-url">
+        {/* Stays `overflow-wrap: anywhere` on purpose: an invite link is one token and must wrap inside the card (13 November 2026; the gate is app/css/overflow-wrap.test.ts). */}
+        <p className="nf-numeric [overflow-wrap:anywhere] font-semibold text-[var(--nf-content-primary)]" data-testid="invite-url">
           {url}
         </p>
         <p className="nf-caption text-[var(--nf-content-muted)]">

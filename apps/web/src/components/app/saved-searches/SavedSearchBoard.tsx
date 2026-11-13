@@ -246,7 +246,7 @@ function SavedSearchRow({
               {/* The whole name, wrapped: a search is told apart by its last
                   words ("under 2m a year"), which the ellipsis cut at 390
                   (Round 3 sweep). */}
-              <span className={`${TYPE.rowTitle} min-w-0 [overflow-wrap:anywhere]`}>{row.label}</span>
+              <span className={`${TYPE.rowTitle} min-w-0 break-words`}>{row.label}</span>
               <UiIcon name="chevron-right" size={16} />
             </Link>
             {chips.length > 0 && (

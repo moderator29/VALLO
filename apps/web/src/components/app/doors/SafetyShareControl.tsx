@@ -154,7 +154,8 @@ export function SafetyShareControl({
       {phase.kind === "made" && (
         <div className="mt-sm">
           <p className="text-[length:var(--nf-text-caption)] text-[var(--nf-content-muted)]">{copy.linkLabel}</p>
-          <p className="mt-2xs select-all break-all text-[length:var(--nf-text-body-sm)] text-[var(--nf-content-secondary)]">
+          {/* Stays `overflow-wrap: anywhere` on purpose: a share link is one token and must wrap inside the card (13 November 2026; the gate is app/css/overflow-wrap.test.ts). */}
+          <p className="mt-2xs select-all [overflow-wrap:anywhere] text-[length:var(--nf-text-body-sm)] text-[var(--nf-content-secondary)]">
             {phase.url}
           </p>
           <div className="mt-sm grid gap-xs">

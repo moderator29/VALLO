@@ -112,7 +112,7 @@ export function AgentIdentityCard({
             hyphenated, and this is the agent's own name in their own
             workspace: "Oluwaseun Adeyemi-Ogun..." is the product telling
             somebody it could not be bothered to fit them in. It wraps. */}
-        <span className="block text-[length:var(--nf-text-body-sm)] font-semibold [overflow-wrap:anywhere]">
+        <span className="block text-[length:var(--nf-text-body-sm)] font-semibold break-words">
           {profile.displayName}
         </span>
         {profile.verified && (

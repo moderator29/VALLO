@@ -591,7 +591,7 @@ export function adminUi(t: Dictionary, locale: Locale) {
               the evidence, and it carried `truncate`: an operator deciding
               whether to admit an agent could not read the thing the decision
               rests on. */}
-          <span className="nf-caption block [overflow-wrap:anywhere]">{detail}</span>
+          <span className="nf-caption block break-words">{detail}</span>
         </span>
         <span className="sr-only">{pass ? c.passes : c.needsAttention}</span>
       </li>

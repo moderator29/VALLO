@@ -75,7 +75,7 @@ export function ListingHandoffShell({ fallback, verifiedLabel, id }: {
               </div>
             </div>
             <section className="nf-sc-top__panel nf-detail-lead">
-              <h1 className="nf-h2 [overflow-wrap:anywhere]">{hit.title}</h1>
+              <h1 className="nf-h2 break-words">{hit.title}</h1>
               <p className="mt-inline-tight inline-flex max-w-full items-center gap-inline nf-body text-[var(--nf-content-secondary)]">
                 <UiIcon name="location" size={20} className="shrink-0 text-[var(--nf-brand-secondary)]" />
                 <span className="min-w-0">{hit.place}</span>

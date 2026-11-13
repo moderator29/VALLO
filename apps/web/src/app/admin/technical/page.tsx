@@ -252,7 +252,7 @@ function Incidents({ incidents, updates, names, canMake, readable, summary }: { 
           {incidents.map((i) => (
             <li key={i.id} className="nf-panel nf-panel--card nf-admin-card p-md" data-testid="technical-incident">
               <div className="flex flex-wrap items-center gap-xs">
-                <span className="font-semibold text-[var(--nf-content-primary)] [overflow-wrap:anywhere]">{i.title}</span>
+                <span className="font-semibold text-[var(--nf-content-primary)] break-words">{i.title}</span>
                 <Badge tone={SEV_TONE[i.severity]}>{SEVERITY_SHORT[i.severity]}</Badge>
                 <Badge tone={STATUS_TONE[i.status]}>{INCIDENT_STATUS_LABEL[i.status]}</Badge>
               </div>
@@ -263,12 +263,12 @@ function Incidents({ incidents, updates, names, canMake, readable, summary }: { 
                 {i.resolvedAt ? <span>Resolved {shortDateTime(i.resolvedAt)}</span> : null}
               </p>
               <p className="nf-caption mt-3xs text-[var(--nf-content-secondary)]">{SEVERITY_LABEL[i.severity]}</p>
-              {i.summary ? <p className="nf-body-sm mt-xs whitespace-pre-wrap [overflow-wrap:anywhere]">{i.summary}</p> : null}
-              {i.resolutionSummary ? <p className="nf-body-sm mt-xs whitespace-pre-wrap [overflow-wrap:anywhere]"><strong>Resolution.</strong> {i.resolutionSummary}</p> : null}
+              {i.summary ? <p className="nf-body-sm mt-xs whitespace-pre-wrap break-words">{i.summary}</p> : null}
+              {i.resolutionSummary ? <p className="nf-body-sm mt-xs whitespace-pre-wrap break-words"><strong>Resolution.</strong> {i.resolutionSummary}</p> : null}
               {updates.filter((u) => u.incidentId === i.id).length > 0 ? (
                 <ol className="nf-body-sm mt-sm grid gap-3xs">
                   {updates.filter((u) => u.incidentId === i.id).map((u) => (
-                    <li key={u.id} className="[overflow-wrap:anywhere]">
+                    <li key={u.id} className="break-words">
                       <span className="nf-caption text-[var(--nf-content-secondary)]">{shortDateTime(u.createdAt)}{u.authorId && names[u.authorId] ? `, ${names[u.authorId]}` : ""}{u.statusAfter ? `, now ${INCIDENT_STATUS_LABEL[u.statusAfter].toLowerCase()}` : ""}</span>
                       <br />
                       {u.body}

@@ -188,7 +188,7 @@ export default async function InviteSettingsPage({
             <RowValue
               icon="link"
               label={copy.linkLabel}
-              value={<span className="nf-numeric break-all">{url.replace(/^https?:\/\//, "")}</span>}
+              value={<span className="nf-numeric [overflow-wrap:anywhere]">{url.replace(/^https?:\/\//, "")}</span>}
               testId="invite-url"
             />
             <RowLink

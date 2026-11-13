@@ -166,7 +166,7 @@ function CampaignCard({ campaign, results, canApprove, viaApprover }: { campaign
   return (
     <li className="nf-panel nf-panel--card nf-admin-card p-md" data-testid="marketing-campaign-card">
       <div className="flex flex-wrap items-center gap-xs">
-        <span className="font-semibold text-[var(--nf-content-primary)] [overflow-wrap:anywhere]">{campaign.name}</span>
+        <span className="font-semibold text-[var(--nf-content-primary)] break-words">{campaign.name}</span>
         <Badge tone={STATUS_TONE[campaign.status]}>{CAMPAIGN_STATUS_LABEL[campaign.status]}</Badge>
         <Badge tone={APPROVAL_TONE[campaign.approval]}>{APPROVAL_LABEL[campaign.approval]}</Badge>
       </div>
@@ -417,7 +417,7 @@ function CalendarPanel({ campaigns, month }: { campaigns: Campaign[]; month: str
               ) : (
                 <ul className="nf-body-sm grid gap-3xs">
                   {row.campaigns.map((c) => (
-                    <li key={c.id} className="[overflow-wrap:anywhere]">
+                    <li key={c.id} className="break-words">
                       {c.name} · {CHANNEL_LABEL[c.channel]} · {CAMPAIGN_STATUS_LABEL[c.status]} · {shortDate(c.startsOn)} to {shortDate(c.endsOn)}
                     </li>
                   ))}

@@ -141,7 +141,7 @@ export function PageHeader({
             <p className="nf-ph-desk__crumb">{breadcrumb.join(" · ")}</p>
           ) : null}
           <div className="flex min-w-0 flex-wrap items-center gap-x-sm gap-y-2xs">
-            <h1 className="nf-ph-desk__title [overflow-wrap:anywhere]">{title}</h1>
+            <h1 className="nf-ph-desk__title break-words">{title}</h1>
             {badge}
           </div>
           {subtitle ? <p className="nf-ph-desk__sub">{subtitle}</p> : null}
@@ -161,12 +161,12 @@ export function PageHeader({
         <div className="mt-group flex items-start gap-md">
           {leading}
           <div className="min-w-0 flex-1">
-            <h1 className="nf-h1 nf-page-title text-[var(--nf-content-primary)] [overflow-wrap:anywhere]">{title}</h1>
+            <h1 className="nf-h1 nf-page-title text-[var(--nf-content-primary)] break-words">{title}</h1>
             {subtitle &&
               (subtitleHref ? (
                 <Link
                   href={subtitleHref}
-                  className="nf-tap nf-lede mt-inline flex items-center gap-inline-tight text-[var(--nf-content-link)] underline-offset-4 [overflow-wrap:anywhere] hover:underline"
+                  className="nf-tap nf-lede mt-inline flex items-center gap-inline-tight text-[var(--nf-content-link)] underline-offset-4 break-words hover:underline"
                 >
                   <span className="min-w-0">{subtitle}</span>
                   <UiIcon name="chevron-right" size={ICON.inline} className="shrink-0" />
@@ -174,7 +174,7 @@ export function PageHeader({
               ) : (
                 /* The lede in the brand's quiet ink, which is how both renders
                    set the line under the title. */
-                <p className="nf-lede mt-inline text-[var(--nf-brand-secondary)] [overflow-wrap:anywhere]">
+                <p className="nf-lede mt-inline text-[var(--nf-brand-secondary)] break-words">
                   {subtitle}
                 </p>
               ))}
@@ -228,7 +228,7 @@ export function PageHeader({
           comment that asserts a fix is the easiest place in a codebase for one
           to hide.
 
-          `[overflow-wrap:anywhere]` is what actually keeps a long word inside
+          `break-words` is what actually keeps a long word inside
           the column; the clamp was never what stopped an overflow, only what
           hid it. A title long enough to wrap three times is a copy problem, and
           a copy problem you can read is better than one you cannot.
@@ -238,7 +238,7 @@ export function PageHeader({
           (subtitleHref ? (
             <Link
               href={subtitleHref}
-              className="nf-tap nf-body-sm mt-inline-tight flex items-center gap-inline-tight font-semibold leading-snug text-[var(--nf-content-link)] underline-offset-4 [overflow-wrap:anywhere] hover:underline"
+              className="nf-tap nf-body-sm mt-inline-tight flex items-center gap-inline-tight font-semibold leading-snug text-[var(--nf-content-link)] underline-offset-4 break-words hover:underline"
             >
               {/* `min-w-0` stays so the flex child can shrink; `truncate` goes,
                   because it was clipping the subtitle to one line inside a
@@ -247,7 +247,7 @@ export function PageHeader({
               <UiIcon name="chevron-right" size={ICON.inline} className="shrink-0" />
             </Link>
           ) : (
-            <p className="nf-body-sm mt-inline-tight leading-snug text-[var(--nf-content-muted)] [overflow-wrap:anywhere]">
+            <p className="nf-body-sm mt-inline-tight leading-snug text-[var(--nf-content-muted)] break-words">
               {subtitle}
             </p>
           ))}

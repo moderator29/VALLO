@@ -363,7 +363,7 @@ export function ResultSheet(props: ResultSheetProps) {
                 property, the person or the bank, and half of any of those is
                 worse than none. */}
             {fact.subject && (
-              <p className="nf-body mt-row text-[var(--nf-content-secondary)] [overflow-wrap:anywhere]">
+              <p className="nf-body mt-row text-[var(--nf-content-secondary)] break-words">
                 {fact.subject}
               </p>
             )}

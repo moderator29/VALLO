@@ -63,6 +63,7 @@ export function DealMessages({ conversationId, messages, counterpartyName, live 
                 <Fragment key={m.id}>
                   {sep ? <li className="nf-dmsgs__day">{day}</li> : null}
                   <li className="nf-dmsg" data-mine={m.mine ? "" : undefined}>
+                    {/* Stays `overflow-wrap: anywhere` on purpose: a web address pasted into a bubble must wrap inside it (13 November 2026; the gate is app/css/overflow-wrap.test.ts). */}
                     <p className="nf-body whitespace-pre-wrap [overflow-wrap:anywhere]">{m.body}</p>
                     <time className="nf-dmsg__time" dateTime={m.at}>
                       {m.mine ? "You" : counterpartyName} · {formatWhen(m.at)}

@@ -51,7 +51,7 @@ export function PageHead({
       <div className="min-w-0">
         {lead}
         <div className="flex min-w-0 flex-wrap items-center gap-x-sm gap-y-2xs">
-          <h1 className="nf-admin-page-head__title [overflow-wrap:anywhere]">{title}</h1>
+          <h1 className="nf-admin-page-head__title break-words">{title}</h1>
           {trail}
         </div>
         {lede ? <p className="nf-admin-page-head__lede">{lede}</p> : null}

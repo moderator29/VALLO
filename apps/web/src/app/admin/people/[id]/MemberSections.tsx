@@ -58,7 +58,7 @@ function Rows({ children }: { children: ReactNode }) {
 
 function Row({ children }: { children: ReactNode }) {
   return (
-    <li className="flex flex-wrap items-baseline gap-x-xs gap-y-3xs border-t border-[var(--nf-divider)] pt-inline nf-body-sm [overflow-wrap:anywhere]">
+    <li className="flex flex-wrap items-baseline gap-x-xs gap-y-3xs border-t border-[var(--nf-divider)] pt-inline nf-body-sm break-words">
       {children}
     </li>
   );

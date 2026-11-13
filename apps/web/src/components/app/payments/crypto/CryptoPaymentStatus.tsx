@@ -102,7 +102,8 @@ function Fact({ label, children, mono = false, numeric = false }: { label: strin
   return (
     <div className="min-w-0">
       <dt className="nf-caption text-[var(--nf-content-muted)]">{label}</dt>
-      <dd className={`nf-body mt-3xs break-all text-[var(--nf-content-primary)] ${mono ? "font-mono" : ""} ${numeric ? "tabular-nums" : ""}`}>
+      {/* Stays `overflow-wrap: anywhere` on purpose: an address or hash is one token and must wrap inside its cell (13 November 2026; the gate is app/css/overflow-wrap.test.ts). */}
+      <dd className={`nf-body mt-3xs [overflow-wrap:anywhere] text-[var(--nf-content-primary)] ${mono ? "font-mono" : ""} ${numeric ? "tabular-nums" : ""}`}>
         {children}
       </dd>
     </div>
@@ -115,7 +116,8 @@ function CopyRow({ label, value, copyLabel, copiedLabel, mono = true }: { label:
     <div className="flex items-start gap-sm">
       <div className="min-w-0 flex-1">
         <p className="nf-caption text-[var(--nf-content-muted)]">{label}</p>
-        <p className={`nf-body mt-3xs break-all text-[var(--nf-content-primary)] ${mono ? "font-mono" : "font-semibold"}`}>{value}</p>
+        {/* Stays `overflow-wrap: anywhere` on purpose: an address or hash is one token and must wrap inside its cell (13 November 2026; the gate is app/css/overflow-wrap.test.ts). */}
+        <p className={`nf-body mt-3xs [overflow-wrap:anywhere] text-[var(--nf-content-primary)] ${mono ? "font-mono" : "font-semibold"}`}>{value}</p>
       </div>
       <Button
         variant="secondary"

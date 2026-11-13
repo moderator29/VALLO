@@ -97,6 +97,7 @@ export function ChargebackCase({
 
       <header>
         <p className="nf-caption text-[var(--nf-content-secondary)]">{d.overline}</p>
+        {/* Stays `overflow-wrap: anywhere` on purpose: a dispute reference is one token and must wrap inside the head (13 November 2026; the gate is app/css/overflow-wrap.test.ts). */}
         <h1 className="nf-h1 mt-3xs [overflow-wrap:anywhere]">{row.reference || row.providerDisputeId}</h1>
         <div className="nf-cb-hero">
           <span className="nf-cb-hero__amount" data-testid="chargeback-amount">

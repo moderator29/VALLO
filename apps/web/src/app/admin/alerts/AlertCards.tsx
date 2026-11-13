@@ -183,6 +183,7 @@ export function DriftCard({
       <dl className="mt-xs grid gap-2xs text-[length:var(--nf-text-caption)]">
         <div className="flex flex-wrap gap-x-sm">
           <dt className="text-[var(--nf-content-muted)]">Alert</dt>
+          {/* Stays `overflow-wrap: anywhere` on purpose: a reference is one token and must wrap inside its cell (13 November 2026; the gate is app/css/overflow-wrap.test.ts). */}
           <dd className="font-mono text-[var(--nf-content-secondary)] [overflow-wrap:anywhere] [user-select:all]">
             {alert.id}
           </dd>
@@ -190,6 +191,7 @@ export function DriftCard({
         {alert.entityId && (
           <div className="flex flex-wrap gap-x-sm">
             <dt className="text-[var(--nf-content-muted)]">Names</dt>
+            {/* Stays `overflow-wrap: anywhere` on purpose: a reference is one token and must wrap inside its cell (13 November 2026; the gate is app/css/overflow-wrap.test.ts). */}
             <dd className="font-mono text-[var(--nf-content-secondary)] [overflow-wrap:anywhere] [user-select:all]">
               {alert.entityId}
             </dd>

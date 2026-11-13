@@ -182,7 +182,8 @@ function CryptoSheet({
               />
             ) : (
               <>
-                <p className="nf-display mt-inline break-all font-bold leading-none">
+                {/* Stays `overflow-wrap: anywhere` on purpose: a crypto amount is one long token and must wrap inside the panel (13 November 2026; the gate is app/css/overflow-wrap.test.ts). */}
+                <p className="nf-display mt-inline [overflow-wrap:anywhere] font-bold leading-none">
                   {step.view.cryptoAmount} <span className="text-[length:max(0.55em,0.75rem)] font-semibold opacity-80">{step.view.asset}</span>
                 </p>
                 <p className="nf-body-sm mt-inline opacity-80">

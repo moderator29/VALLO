@@ -1,7 +1,9 @@
 import "server-only";
 
 import { cache } from "react";
-import { createClient as createSupabaseClient } from "@supabase/supabase-js";
+import { createClient as createSupabaseClient, type SupabaseClient } from "@supabase/supabase-js";
+
+import type { Database } from "../supabase/database.types";
 
 import { isSupabaseConfigured, SUPABASE_ANON_KEY, SUPABASE_URL } from "../supabase/env";
 import type { StaysClient } from "../stays/db";
@@ -14,6 +16,7 @@ import {
   type RestaurantRows,
 } from "../stays/queries";
 import { openState } from "../stays/hours";
+import { businessCoverPairs } from "../stays/business-photos";
 import { PAGE_SIZE } from "../stays/filters";
 import type { RestaurantCard, RestaurantDetail, StayDetail, StaySearchRow } from "../stays/types";
 import { CATALOGUE_LISTS_TAG, catalogueCached, stayTag, venueTag } from "./cache";
@@ -97,4 +100,14 @@ export async function publicRestaurants(
     listRestaurantRows(where, limit, { client: anonymousClient(), strict: true }),
   );
   return restaurantCardsFrom(rows ?? (await listRestaurantRows(where, limit)), new Date(), scope.openNow === true);
+}
+
+/** The venues' cover photographs (public bucket URLs), from the shared cache. */
+export async function publicBusinessCovers(businessIds: readonly string[]): Promise<Map<string, string>> {
+  const ids = [...new Set(businessIds)].sort();
+  if (!isSupabaseConfigured() || ids.length === 0) return new Map();
+  const kept = await held(["covers", stableKey(ids)], [CATALOGUE_LISTS_TAG], () =>
+    businessCoverPairs(ids, { client: anonymousClient() as unknown as SupabaseClient<Database>, strict: true }),
+  );
+  return new Map(kept ?? (await businessCoverPairs(ids)));
 }

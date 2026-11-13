@@ -123,7 +123,7 @@ export function ExternalLinkSheet({
           </p>
           {/* The destination on its own line, unshortened and selectable.
               A warning that hides the thing it is warning about is theatre. */}
-          <p className="nf-body break-all font-semibold text-[var(--nf-content-primary)]">
+          <p className="nf-body [overflow-wrap:anywhere] font-semibold text-[var(--nf-content-primary)]">
             {host}
           </p>
           <Button variant="primary" size="lg" full onClick={copy}>

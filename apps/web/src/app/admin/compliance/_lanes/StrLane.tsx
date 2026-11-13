@@ -87,7 +87,7 @@ async function StrLaneView({ t, params }: ComplianceLaneProps) {
                 <p className="nf-caption mt-inline-tight">{copy.openedOn.replace("{date}", lagosTime(c.openedAt))}</p>
                 <p className="nf-body-sm mt-row"><span className="font-semibold">{copy.groundsLabel}: </span>{c.grounds}</p>
                 {c.links.length > 0 && (
-                  <p className="nf-caption mt-inline break-all">
+                  <p className="nf-caption mt-inline [overflow-wrap:anywhere]">
                     {copy.linksLabel}: {c.links.map((l) => `${l.kind} ${l.ref}`).join(", ")}
                   </p>
                 )}

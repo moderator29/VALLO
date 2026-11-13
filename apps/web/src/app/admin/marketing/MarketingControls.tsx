@@ -301,6 +301,7 @@ export function UtmBuilder({ campaigns }: { campaigns: Pick<Campaign, "id" | "na
       </div>
       <div className="nf-panel nf-panel--card nf-admin-card p-md" aria-live="polite">
         <p className="nf-caption text-[var(--nf-content-secondary)]">{built.ok ? "Your tracked link" : "The link appears here once the required fields are filled in"}</p>
+        {/* Stays `overflow-wrap: anywhere` on purpose: the built link is one token and must wrap inside the panel (13 November 2026; the gate is app/css/overflow-wrap.test.ts). */}
         <p className="nf-body-sm mt-3xs [overflow-wrap:anywhere]" data-testid="utm-output">{built.ok ? built.url : touched ? built.error : "Fill in the page, source, medium and campaign."}</p>
       </div>
       <div className="flex flex-wrap gap-xs">

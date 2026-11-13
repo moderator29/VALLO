@@ -63,6 +63,7 @@ export function BookingChargebacksView({
         <ul className="mt-sm grid gap-xs">
           {read.data.map((row) => (
             <li key={row.id} className="flex flex-wrap items-center justify-between gap-xs">
+              {/* Stays `overflow-wrap: anywhere` on purpose: a dispute reference is one token and must wrap inside its cell (13 November 2026; the gate is app/css/overflow-wrap.test.ts). */}
               <Link href={`${CHARGEBACKS_BASE}/${row.id}`} className="font-mono font-semibold underline underline-offset-2 [overflow-wrap:anywhere]">
                 {row.reference || row.providerDisputeId}
               </Link>

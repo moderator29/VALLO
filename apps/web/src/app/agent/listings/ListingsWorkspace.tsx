@@ -437,7 +437,7 @@ function ListingRow({
           */}
           <div className="flex flex-col items-start gap-2xs sm:flex-row sm:items-start sm:justify-between sm:gap-xs">
             <h3
-              className="line-clamp-3 min-w-0 text-[length:var(--nf-text-body-sm)] font-semibold [overflow-wrap:anywhere]"
+              className="line-clamp-3 min-w-0 text-[length:var(--nf-text-body-sm)] font-semibold break-words"
               title={listing.title}
             >
               {listing.title}
@@ -471,7 +471,7 @@ function ListingRow({
             <p className="mt-2xs flex items-center gap-xs text-[length:var(--nf-text-caption)] text-[var(--nf-content-muted)]">
               <UiIcon name="location" size={12} className="shrink-0" />
               <span
-                className="min-w-0 line-clamp-2 [overflow-wrap:anywhere]"
+                className="min-w-0 line-clamp-2 break-words"
                 title={[listing.area, listing.city].filter(Boolean).join(", ")}
               >
                 {[listing.area, listing.city].filter(Boolean).join(", ")}

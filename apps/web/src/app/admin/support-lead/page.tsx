@@ -325,13 +325,13 @@ function Policy({ notes, names, canMake, canApprove, readable }: { notes: Policy
           {notes.map((n) => (
             <li key={n.id} className="nf-admin-card p-md" data-testid="support-lead-policy-note">
               <div className="flex flex-wrap items-center gap-xs">
-                <span className="font-semibold [overflow-wrap:anywhere]">{n.title}</span>
+                <span className="font-semibold break-words">{n.title}</span>
                 <Badge tone={POLICY_TONE[n.status]}>{POLICY_STATUS_LABEL[n.status]}</Badge>
               </div>
               {n.approvedAt ? <p className="nf-caption text-[var(--nf-content-secondary)]">Approved on {shortDate(n.approvedAt)}{n.approvedBy && names[n.approvedBy] ? ` by ${names[n.approvedBy]}` : ""}</p> : null}
               <details className="mt-xs">
                 <summary className="nf-body-sm cursor-pointer">Read the note</summary>
-                <p className="nf-body-sm mt-xs whitespace-pre-wrap [overflow-wrap:anywhere]">{n.body}</p>
+                <p className="nf-body-sm mt-xs whitespace-pre-wrap break-words">{n.body}</p>
                 <div className="mt-xs"><CopyButton text={`${n.title}\n\n${n.body}`} label="Policy note" /></div>
               </details>
               <div className="mt-sm"><PolicyActions note={n} canMake={canMake} canApprove={canApprove} /></div>

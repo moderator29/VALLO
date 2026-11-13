@@ -201,11 +201,11 @@ function Row({ row, selected, href, now }: { row: SupportQueueRow; selected: boo
         <span className="mt-2xs block text-[length:var(--nf-text-body-sm)] font-semibold leading-snug text-[var(--nf-content-primary)]">
           {supportTopicLabel(row.topic) ?? "A general question"}
         </span>
-        <span className="mt-3xs line-clamp-2 block text-[length:var(--nf-text-caption)] text-[var(--nf-content-secondary)] [overflow-wrap:anywhere]">
+        <span className="mt-3xs line-clamp-2 block text-[length:var(--nf-text-caption)] text-[var(--nf-content-secondary)] break-words">
           {row.preview}
         </span>
         <span className="mt-2xs flex flex-wrap items-center gap-x-xs text-[length:var(--nf-text-overline)] text-[var(--nf-content-muted)]">
-          <span className="[overflow-wrap:anywhere]">{row.name}</span>
+          <span className="break-words">{row.name}</span>
           <span aria-hidden="true">·</span>
           <span>{ago(row.lastActivityAt, now)}</span>
           {row.replyCount > 0 ? (
@@ -235,7 +235,7 @@ function Fact({ label, value }: { label: string; value: ReactNode }) {
   return (
     <div className="flex items-baseline justify-between gap-xs border-b border-[var(--nf-border-subtle)] py-2xs last:border-b-0">
       <dt className="nf-caption text-[var(--nf-content-muted)]">{label}</dt>
-      <dd className="text-right text-[length:var(--nf-text-body-sm)] text-[var(--nf-content-primary)] [overflow-wrap:anywhere]">{value}</dd>
+      <dd className="text-right text-[length:var(--nf-text-body-sm)] text-[var(--nf-content-primary)] break-words">{value}</dd>
     </div>
   );
 }
@@ -348,7 +348,7 @@ function Trail({ detail }: { detail: SupportTicketDetail }) {
             <li key={`${t.at}-${i}`} className="text-[length:var(--nf-text-caption)]">
               <span className="font-semibold text-[var(--nf-content-primary)]">{t.who}</span>{" "}
               <span className="text-[var(--nf-content-secondary)]">{t.what}</span>
-              {t.detail ? <span className="text-[var(--nf-content-secondary)] [overflow-wrap:anywhere]">: {t.detail}</span> : null}
+              {t.detail ? <span className="text-[var(--nf-content-secondary)] break-words">: {t.detail}</span> : null}
               <span className="block text-[var(--nf-content-muted)]">{when(t.at)}</span>
             </li>
           ))}
@@ -403,7 +403,7 @@ function Ticket({
           </Link>
         </div>
         <h2 className="nf-h3 mt-xs">{supportTopicLabel(row.topic) ?? "A general question"}</h2>
-        <p className="mt-3xs nf-caption text-[var(--nf-content-secondary)] [overflow-wrap:anywhere]">
+        <p className="mt-3xs nf-caption text-[var(--nf-content-secondary)] break-words">
           From {row.name} · filed {when(row.createdAt)}
           {detail.waitingSince && open ? ` · waiting on us since ${when(detail.waitingSince)}` : ""}
         </p>

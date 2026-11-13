@@ -130,6 +130,7 @@ function ArrangementRow({
     <li className="nf-row flex-wrap items-start" data-testid="arrangement-row" data-status={row.status}>
       <span className="min-w-[14rem] flex-1 basis-0">
         <span className="nf-body flex flex-wrap items-center gap-xs font-semibold text-content">
+          {/* Stays `overflow-wrap: anywhere` on purpose: a reference is one token and must wrap inside its cell (13 November 2026; the gate is app/css/overflow-wrap.test.ts). */}
           <span className="font-mono [overflow-wrap:anywhere]">{row.reference}</span>
           <span className="nf-numeric">{formatMoney(row.amountMinor, locale, "NGN")}</span>
         </span>
@@ -144,7 +145,7 @@ function ArrangementRow({
           {facts.map((f) => (
             <div key={f.label} className="flex flex-wrap gap-x-xs">
               <dt className="nf-caption text-content-secondary">{f.label}</dt>
-              <dd className="nf-caption m-0 text-content [overflow-wrap:anywhere]">{f.value}</dd>
+              <dd className="nf-caption m-0 text-content break-words">{f.value}</dd>
             </div>
           ))}
         </dl>

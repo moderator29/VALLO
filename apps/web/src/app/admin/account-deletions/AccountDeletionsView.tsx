@@ -45,7 +45,7 @@ export function AccountDeletionsView({ read, range, canSeeNotes }: { read: ViewR
   ];
 
   return (
-    <div className="nf-console grid grid-cols-[minmax(0,1fr)] gap-md [overflow-wrap:anywhere]" data-testid="account-deletions-desk">
+    <div className="nf-console grid grid-cols-[minmax(0,1fr)] gap-md break-words" data-testid="account-deletions-desk">
       <PageHead title="Account deletions" lede={lede} action={<CopyActions summary={summaryText(a)} csv={csvText(a)} disabled={a.total === 0} />} />
       <TabRow items={tabs} label="Time range" />
       {a.total === 0 ? (

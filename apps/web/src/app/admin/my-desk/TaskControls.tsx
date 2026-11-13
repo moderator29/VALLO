@@ -147,7 +147,7 @@ export function TaskCard({
   return (
     <li className="nf-panel nf-panel--card nf-admin-card p-md" data-testid="my-desk-task" data-overdue={overdue ? "true" : undefined}>
       <div className="flex flex-wrap items-center gap-xs">
-        <span className="font-semibold text-[var(--nf-content-primary)] [overflow-wrap:anywhere]">{task.title}</span>
+        <span className="font-semibold text-[var(--nf-content-primary)] break-words">{task.title}</span>
         <Badge tone={STATUS_TONE[task.status]}>{STATUS_LABEL[task.status]}</Badge>
         {overdue ? <Badge tone="error">Overdue</Badge> : null}
         {task.priority === "urgent" || task.priority === "high" ? <Badge tone="pending">{PRIORITY_LABEL[task.priority]}</Badge> : null}

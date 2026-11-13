@@ -120,7 +120,7 @@ export function BroadcastPaste({
                   .map((key) => (
                     <li key={key} className="flex items-baseline justify-between gap-row nf-body-sm">
                       <span className="text-[var(--nf-content-muted)]">{copy.fields[key]}</span>
-                      <span className="min-w-0 text-right text-[var(--nf-content-primary)] [overflow-wrap:anywhere]">
+                      <span className="min-w-0 text-right text-[var(--nf-content-primary)] break-words">
                         {value(key)}
                       </span>
                     </li>
@@ -136,7 +136,7 @@ export function BroadcastPaste({
                 {result.parse.notCarried.map((item) => (
                   <li key={`${item.kind}-${item.text}`} className="nf-body-sm">
                     <span className="text-[var(--nf-content-muted)]">{copy.kinds[item.kind]}: </span>
-                    <span className="text-[var(--nf-content-primary)] [overflow-wrap:anywhere]">{item.text}</span>
+                    <span className="text-[var(--nf-content-primary)] break-words">{item.text}</span>
                   </li>
                 ))}
               </ul>

@@ -37,6 +37,7 @@ describe("pages draw the public catalogue from the cache", () => {
     ["app/(app)/stays/page.tsx", /catalogueReader\(\)/],
     ["app/(app)/restaurants/page.tsx", /publicRestaurants\(/],
     ["app/(app)/restaurants/page.tsx", /catalogueReader\(\)/],
+    ["app/(app)/restaurants/page.tsx", /publicBusinessCovers\(/],
     ["app/(app)/stay/[id]/page.tsx", /publicStayDetail\(/],
     ["app/(app)/restaurant/[id]/page.tsx", /publicRestaurantDetail\(/],
     ["app/(app)/home/page.tsx", /catalogueReader\(\)/],
@@ -49,7 +50,11 @@ describe("pages draw the public catalogue from the cache", () => {
     const source = read(path);
     expect(source).toMatch(pattern);
     expect(source).not.toMatch(/getListingRepository\(\)/);
-    expect(source).not.toMatch(/\b(getStayDetail|getRestaurantDetail|listStaysShelf|listRestaurants)\(/);
+    expect(source).not.toMatch(/\b(getStayDetail|getRestaurantDetail|listStaysShelf|listRestaurants|businessCoverUrls)\(/);
+  });
+
+  it("the stays home reads the greeting without the trending strip it never draws", () => {
+    expect(read("app/(app)/stays/page.tsx")).toMatch(/getHomeOverview\(\{ trending: false \}\)/);
   });
 
   it("checkout keeps the live stay read, because it takes a payment at the rate it shows", () => {
@@ -62,7 +67,7 @@ describe("pages draw the public catalogue from the cache", () => {
     expect(listings).toMatch(/new SupabaseListingRepository\([\s\S]*?,\s*true,\s*\)/);
     const stays = read("lib/catalogue/stays.ts");
     expect(stays).toMatch(/persistSession: false/);
-    expect(stays.match(/strict: true/g)?.length).toBe(4);
+    expect(stays.match(/strict: true/g)?.length).toBe(5);
   });
 });
 

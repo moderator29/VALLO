@@ -272,7 +272,7 @@ export function ListingStickyBar({
                button is for: "Five bedroom villa for sale in Oniru Vict..." is
                the one sentence on the screen, cut. It wraps, and the bar grows
                by a line on the few rows that need it. */
-            <span className="text-[length:var(--nf-text-body-sm)] font-semibold leading-snug text-[var(--nf-content-primary)] [overflow-wrap:anywhere]">
+            <span className="text-[length:var(--nf-text-body-sm)] font-semibold leading-snug text-[var(--nf-content-primary)] break-words">
               {fallbackLabel}
             </span>
           )}

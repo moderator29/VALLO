@@ -63,7 +63,7 @@ export default async function AnnouncementsPage() {
             {list.map((a) => (
               <li key={a.id} className="nf-panel nf-panel--card nf-admin-card p-md" data-testid="my-desk-announcement">
                 <div className="flex flex-wrap items-center gap-xs">
-                  <span className="font-semibold text-[var(--nf-content-primary)] [overflow-wrap:anywhere]">{a.title}</span>
+                  <span className="font-semibold text-[var(--nf-content-primary)] break-words">{a.title}</span>
                   {a.pinned ? <Badge tone="info">Pinned</Badge> : null}
                   {!a.read ? <Badge tone="pending">Unread</Badge> : null}
                   <span className="nf-caption text-[var(--nf-content-secondary)]">

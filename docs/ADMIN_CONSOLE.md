@@ -1260,7 +1260,9 @@ figures that vary by area already list their areas.
 ### 14.1 Listings (Analytics > Listings, `/admin/analytics/listings`)
 
 Added 13 November 2026 with the stats row on every listing page ("12 days on
-Vallo | 340 views | 18 saves"). `?range=7d`, `30d` (default) or `90d`. Admins
+Vallo | 340 views | 18 saves") and the quiet count line on the listing cards
+("1.2k views  24 saves": saves from one, views from ten, never on an example;
+`listing_public_stats_many`, one query for the ids a page draws). `?range=7d`, `30d` (default) or `90d`. Admins
 and super admins, and staff holding the read-only `analyst` scope (it is on
 their staff frame beside the Trust overview). Reads:
 `lib/admin/reads/listing-stats.ts`, each one SQL function over the daily

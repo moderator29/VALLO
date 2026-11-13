@@ -9,7 +9,7 @@ import type { DocFeedbackRead } from "./read";
 export function DocFeedbackView({ read, days }: { read: DocFeedbackRead; days: number }) {
   const DAYS = days;
   return (
-    <div className="nf-console grid grid-cols-[minmax(0,1fr)] gap-md [overflow-wrap:anywhere]" data-testid="doc-feedback-desk">
+    <div className="nf-console grid grid-cols-[minmax(0,1fr)] gap-md break-words" data-testid="doc-feedback-desk">
       <PageHead
         title="Pages that fail"
         lede={`What members answered to "Was this helpful?" on the help centre, the guides and the docs, over the last ${DAYS} days. The pages with the most "no" come first.`}
@@ -31,6 +31,7 @@ export function DocFeedbackView({ read, days }: { read: DocFeedbackRead; days: n
             {read.rows.map((row, i) => (
               <li key={row.page} className="grid gap-2xs border-t border-[var(--nf-border-subtle)] px-md py-sm first:border-t-0">
                 <div className="flex flex-wrap items-baseline justify-between gap-sm">
+                  {/* Stays `overflow-wrap: anywhere` on purpose: a page path is one token and must wrap inside the row (13 November 2026; the gate is app/css/overflow-wrap.test.ts). */}
                   <Link href={row.page} className="min-w-0 font-semibold text-[var(--nf-content-link)] [overflow-wrap:anywhere] hover:underline">
                     <span className="nf-numeric text-[var(--nf-content-muted)]">{i + 1}. </span>
                     {row.page}

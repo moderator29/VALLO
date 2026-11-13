@@ -69,7 +69,7 @@ export function MoveInLedger({
         </span>
         <span className="min-w-0 flex-1">
           <span className="flex items-start justify-between gap-xs">
-            <span className="nf-body font-semibold leading-snug text-[var(--nf-content-primary)] [overflow-wrap:anywhere]">
+            <span className="nf-body font-semibold leading-snug text-[var(--nf-content-primary)] break-words">
               {listing.title}
             </span>
             <span className="nf-badge nf-badge--info nf-detail-tag shrink-0">{t.catalogue.card.forRent}</span>

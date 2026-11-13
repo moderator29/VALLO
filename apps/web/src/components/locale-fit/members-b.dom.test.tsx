@@ -48,7 +48,7 @@ describe.skipIf(!hasBrowser && !process.env.CI)("locale fit: listing detail, res
             <div className="relative z-10">
               <Stack>
                 <Section className="nf-glass nf-glass--card nf-detail-lead scroll-mt-16" id="overview">
-                  <h1 className="nf-h2 [overflow-wrap:anywhere]">{listing.title}</h1>
+                  <h1 className="nf-h2 break-words">{listing.title}</h1>
                   <a href="#location" className={"nf-tap mt-inline-tight inline-flex max-w-full items-center gap-inline " + TYPE.body}>
                     <UiIcon name="location" size={ICON.inline} className="shrink-0" />
                     <span className="min-w-0">{where}</span>

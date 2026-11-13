@@ -151,10 +151,10 @@ export function AuditRow({ row, ui, base }: { row: AuditRowView; ui: AdminUi; ba
         <div className="nf-admin-row__body">
           <dl className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-sm gap-y-2xs text-[length:var(--nf-text-caption)]">
             <dt className="text-[var(--nf-content-muted)]">{AUDIT_COPY.action}</dt>
-            <dd className="nf-numeric break-words [overflow-wrap:anywhere]">{row.action}</dd>
+            <dd className="nf-numeric break-words">{row.action}</dd>
 
             <dt className="text-[var(--nf-content-muted)]">{AUDIT_COPY.by}</dt>
-            <dd className="break-words [overflow-wrap:anywhere]">
+            <dd className="break-words">
               {row.actorId ? (
                 <Link
                   href={queueHref(base, {}, { q: row.actorId })}
@@ -169,7 +169,7 @@ export function AuditRow({ row, ui, base }: { row: AuditRowView; ui: AdminUi; ba
             </dd>
 
             <dt className="text-[var(--nf-content-muted)]">{AUDIT_COPY.target}</dt>
-            <dd className="break-words [overflow-wrap:anywhere]">
+            <dd className="break-words">
               {typeLabel}
               {row.entityId && (
                 <>

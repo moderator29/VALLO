@@ -26,7 +26,8 @@ export default async function InvitePreview() {
         <InviteReadyPill label="Your invite is ready" url={url} shareText={door.shareText.replace("{url}", url)} shareAria={copy.shareAria} />
         <InviteTicket copy={copy} code={code} url={url} shareText={door.shareText.replace("{url}", url)} whatsappLabel={door.whatsapp} dismissLabel={t.experienceUi.notNow} autoplay={false} />
         <SettingsGroup label={copy.groupLabel}>
-          <RowValue icon="link" label={copy.linkLabel} value={<span className="nf-numeric break-all">{url.replace(/^https?:\/\//, "")}</span>} testId="invite-url" />
+          {/* Stays `overflow-wrap: anywhere` on purpose: an invite link is one token and must wrap inside the row (13 November 2026; the gate is app/css/overflow-wrap.test.ts). */}
+          <RowValue icon="link" label={copy.linkLabel} value={<span className="nf-numeric [overflow-wrap:anywhere]">{url.replace(/^https?:\/\//, "")}</span>} testId="invite-url" />
           <RowLink href="/settings/invite/how-it-works" icon="info" label={copy.howTitle} sub={copy.howSub} testId="invite-how-row" />
           <RowLink href="/settings/invite/referrals" icon="users" label={copy.referralsTitle} sub={copy.referrals.lede} testId="invite-referrals-row" />
           <RowLink href="/rewards" icon="hand-coins" label={t.experienceRewards.title} sub={t.experienceRewards.inviteHub.balanceRowSub} testId="invite-rewards-door" />

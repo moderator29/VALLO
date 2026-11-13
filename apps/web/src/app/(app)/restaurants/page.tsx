@@ -3,9 +3,8 @@ import { forStayCard } from "@/lib/i18n/slice";
 import { getDictionary, type Locale } from "@vallo/i18n";
 import { getLocale } from "@/lib/locale";
 import { catalogueReader } from "@/lib/catalogue/listings";
-import { publicRestaurants } from "@/lib/catalogue/stays";
+import { publicBusinessCovers, publicRestaurants } from "@/lib/catalogue/stays";
 import { hoursLabel } from "@/lib/stays/hours";
-import { businessCoverUrls } from "@/lib/stays/business-photos";
 import { StayCard } from "@/components/app/stays/StayCard";
 import { stayCardFromListing, type StayCardData } from "@/components/app/stays/stay-card-model";
 import { restaurantPlate } from "@/components/app/stays/restaurant-plates";
@@ -49,7 +48,7 @@ export default async function RestaurantsPage() {
   /* The venues' own photographs (P3), in one read for the whole shelf rather
      than one per card. A venue with none is simply absent from the map and
      keeps the category plate below, which is labelled as a stand-in. */
-  const covers = await businessCoverUrls(venues.map((venue) => venue.business.id));
+  const covers = await publicBusinessCovers(venues.map((venue) => venue.business.id));
 
   const cards: StayCardData[] = [
     ...venues.map<StayCardData>((venue) => ({

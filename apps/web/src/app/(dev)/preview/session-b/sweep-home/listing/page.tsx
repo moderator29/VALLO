@@ -99,7 +99,7 @@ export default async function SweepListing() {
                       </StatusPill>
                     </div>
                     <div className="nf-detail-head mt-sm">
-                      <h1 className="nf-detail-head__title nf-h2 [overflow-wrap:anywhere]">{listing.title}</h1>
+                      <h1 className="nf-detail-head__title nf-h2 break-words">{listing.title}</h1>
                       {headline}
                     </div>
                     <p className="nf-detail-meta mt-xs">

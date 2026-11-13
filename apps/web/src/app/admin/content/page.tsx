@@ -162,7 +162,7 @@ function ItemCard({ item, canApprove, viaApprover }: { item: ContentItem; canApp
   return (
     <li className="nf-panel nf-panel--card nf-admin-card p-md" data-testid="content-item-card">
       <div className="flex flex-wrap items-center gap-xs">
-        <span className="font-semibold text-[var(--nf-content-primary)] [overflow-wrap:anywhere]">{item.title}</span>
+        <span className="font-semibold text-[var(--nf-content-primary)] break-words">{item.title}</span>
         <Badge tone={STATUS_TONE[item.status]}>{STATUS_LABEL[item.status]}</Badge>
         {late ? <Badge tone="error">{daysLate(item)} days late</Badge> : null}
       </div>
@@ -175,13 +175,13 @@ function ItemCard({ item, canApprove, viaApprover }: { item: ContentItem; canApp
       {item.summary ? <p className="nf-body-sm mt-xs whitespace-pre-wrap">{item.summary}</p> : null}
       {item.status === "draft" && item.reviewNote ? <p className="nf-caption mt-xs" role="note">Sent back: {item.reviewNote}</p> : null}
       {item.linkUrl ? (
-        <p className="nf-caption mt-xs flex flex-wrap items-center gap-xs [overflow-wrap:anywhere]">
+        <p className="nf-caption mt-xs flex flex-wrap items-center gap-xs break-words">
           <span>Source: {item.linkUrl}</span>
           <CopyButton text={item.linkUrl} label="Link" icon="link" />
         </p>
       ) : null}
       {item.publishedUrl ? (
-        <p className="nf-caption mt-xs flex flex-wrap items-center gap-xs [overflow-wrap:anywhere]">
+        <p className="nf-caption mt-xs flex flex-wrap items-center gap-xs break-words">
           <a className="font-semibold text-[var(--nf-content-link)] hover:underline" href={item.publishedUrl} target="_blank" rel="noreferrer noopener">{item.publishedUrl}</a>
           <CopyButton text={item.publishedUrl} label="Live link" icon="link" />
         </p>
@@ -189,7 +189,7 @@ function ItemCard({ item, canApprove, viaApprover }: { item: ContentItem; canApp
       {item.body ? (
         <details className="mt-sm">
           <summary className="nf-body-sm cursor-pointer">Read the text</summary>
-          <p className="nf-body-sm mt-xs whitespace-pre-wrap [overflow-wrap:anywhere]">{item.body}</p>
+          <p className="nf-body-sm mt-xs whitespace-pre-wrap break-words">{item.body}</p>
           <div className="mt-xs"><CopyButton text={item.body} label="Text" /></div>
         </details>
       ) : null}
@@ -263,7 +263,7 @@ function Calendar({ items, month }: { items: ContentItem[]; month: string }) {
               <p className="nf-caption text-[var(--nf-content-secondary)]">Week {w.label}</p>
               {w.items.length === 0 ? <p className="nf-body-sm">Nothing planned.</p> : (
                 <ul className="nf-body-sm grid gap-3xs">
-                  {w.items.map((i) => <li key={i.id} className="[overflow-wrap:anywhere]">{shortDate(i.plannedFor)} · {i.title} · {KIND_LABEL[i.kind]} · {STATUS_LABEL[i.status]}</li>)}
+                  {w.items.map((i) => <li key={i.id} className="break-words">{shortDate(i.plannedFor)} · {i.title} · {KIND_LABEL[i.kind]} · {STATUS_LABEL[i.status]}</li>)}
                 </ul>
               )}
             </li>
@@ -307,7 +307,7 @@ function KbGaps({ entries }: { entries: { id: string; title: string; fields: Rec
       ) : entries.length === 0 ? (
         <p className="nf-body-sm">The Customer Support Lead has no open knowledge-base gaps.</p>
       ) : (
-        <ul className="nf-body-sm grid gap-3xs">{entries.map((e) => <li key={e.id} className="[overflow-wrap:anywhere]">{e.title}{e.fields.seen ? ` (${e.fields.seen})` : ""}</li>)}</ul>
+        <ul className="nf-body-sm grid gap-3xs">{entries.map((e) => <li key={e.id} className="break-words">{e.title}{e.fields.seen ? ` (${e.fields.seen})` : ""}</li>)}</ul>
       )}
       <Source>Read only. The Customer Support Lead keeps this list; once an answer is published they mark it answered.</Source>
     </Panel>

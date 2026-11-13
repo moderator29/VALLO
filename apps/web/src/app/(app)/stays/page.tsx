@@ -104,8 +104,11 @@ export default async function StaysHomePage() {
     /* The greeting, the name and the place, the SAME read the property home
        does. Kept on this side on the founder's instruction even though the
        render drops them: a flip changes what you are browsing, never who you
-       are or where you are. */
-    getHomeOverview(),
+       are or where you are. WITHOUT the trending strip (platform speed,
+       13 November 2026): this page never draws it, and reading it was three
+       more waves of round trips (stories, posts, their signed photo URLs)
+       before the shelf could paint. */
+    getHomeOverview({ trending: false }),
   ]);
   const savedKeys = savedKeySet(savedPlaces.ok ? savedPlaces.data : []);
   const canSavePlaces = session.state === "signed-in";

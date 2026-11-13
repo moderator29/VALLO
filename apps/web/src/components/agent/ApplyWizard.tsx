@@ -603,7 +603,7 @@ export function ApplyWizard({
             {TEXT_FIELDS.filter((f) => values[f]).map((f) => (
               <div key={f} className="flex items-center justify-between gap-md px-md py-sm text-[length:var(--nf-text-caption)]">
                 <dt className="text-[var(--nf-content-muted)]">{a.fields[f as keyof typeof a.fields] ?? f}</dt>
-                <dd className="font-semibold [overflow-wrap:anywhere]">{values[f]}</dd>
+                <dd className="font-semibold break-words">{values[f]}</dd>
               </div>
             ))}
           </dl>

@@ -78,7 +78,7 @@ export default async function ContactPage({
                 <p className="nf-overline">Support email</p>
                 <a
                   href={`mailto:${SUPPORT_EMAIL}`}
-                  className="nf-tap mt-inline inline-block break-all text-[length:var(--nf-text-h4)] font-bold text-[var(--nf-content-link)] hover:underline sm:text-[length:var(--nf-text-h3)]"
+                  className="nf-tap mt-inline inline-block [overflow-wrap:anywhere] text-[length:var(--nf-text-h4)] font-bold text-[var(--nf-content-link)] hover:underline sm:text-[length:var(--nf-text-h3)]"
                 >
                   {SUPPORT_EMAIL}
                 </a>

@@ -83,7 +83,7 @@ export function Fact({ label, children }: { label: string; children: ReactNode }
   return (
     <div className="grid gap-3xs">
       <dt className="nf-caption text-[var(--nf-content-secondary)]">{label}</dt>
-      <dd className="nf-body-sm [overflow-wrap:anywhere]">{children}</dd>
+      <dd className="nf-body-sm break-words">{children}</dd>
     </div>
   );
 }

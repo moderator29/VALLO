@@ -17,6 +17,7 @@ import { AreaMapTile } from "@/components/app/maps/AreaMapTile";
 import { MapCreditsInfo } from "@/components/app/maps/MapCreditsInfo";
 import { areaPoint } from "@/components/app/search/mapGeo";
 import { chipOf, factsOf, priceOf, type HomeCardCopy } from "@/components/app/home/home-card-copy";
+import { CardCounts } from "@/components/app/listing/CardCounts";
 import { PriceGuide } from "@/components/currency/Price";
 import { useAreaText } from "@/components/currency/DisplayMoneyProvider";
 import "@/app/css/home.css";
@@ -133,6 +134,7 @@ function StackCard({
             : null
         }
         facts={factsOf(listing, copy.card, locale, areaText)}
+        extra={<CardCounts stats={listing.stats} isDemo={listing.isDemo} locale={locale} />}
         rating={rated ? `${formatRating(listing.rating, locale)} (${listing.reviewCount} ${copy.reviews})` : null}
         overlay={
           point ? (

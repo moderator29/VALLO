@@ -318,12 +318,12 @@ function BookingCard({
               their own stock, so the two strings are not the same kind of
               string and do not want the same treatment.
             */}
-            <h3 className="text-[length:var(--nf-text-body-sm)] font-semibold [overflow-wrap:anywhere]">
+            <h3 className="text-[length:var(--nf-text-body-sm)] font-semibold break-words">
               {booking.guestName}
             </h3>
             <p className="mt-3xs flex items-center gap-xs text-[length:var(--nf-text-caption)] text-[var(--nf-content-secondary)]">
               <UiIcon name="house" size={12} className="shrink-0" />
-              <span className="min-w-0 line-clamp-2 [overflow-wrap:anywhere]" title={booking.listingTitle}>
+              <span className="min-w-0 line-clamp-2 break-words" title={booking.listingTitle}>
                 {booking.listingTitle}
               </span>
             </p>

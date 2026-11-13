@@ -163,7 +163,7 @@ function Card({ entry, def, canMake, canApprove, agents, names }: { entry: Entry
   return (
     <li className="nf-panel nf-panel--card nf-admin-card p-md" data-testid="entry-card">
       <div className="flex flex-wrap items-center gap-xs">
-        <span className="font-semibold text-[var(--nf-content-primary)] [overflow-wrap:anywhere]">{entry.title}</span>
+        <span className="font-semibold text-[var(--nf-content-primary)] break-words">{entry.title}</span>
         <Badge tone={TONE[entry.status] ?? "info"}>{ENTRY_STATUS_LABEL[entry.status]}</Badge>
         {overdue ? <Badge tone="error">Overdue</Badge> : null}
       </div>
@@ -177,11 +177,11 @@ function Card({ entry, def, canMake, canApprove, agents, names }: { entry: Entry
         def.steps ? (
           <ol className="nf-body-sm mt-xs grid list-decimal gap-3xs pl-md">
             {stepsOf(entry.body).map((s, i) => (
-              <li key={i} className="[overflow-wrap:anywhere]">{s}</li>
+              <li key={i} className="break-words">{s}</li>
             ))}
           </ol>
         ) : (
-          <p className="nf-body-sm mt-xs whitespace-pre-wrap [overflow-wrap:anywhere]">{entry.body}</p>
+          <p className="nf-body-sm mt-xs whitespace-pre-wrap break-words">{entry.body}</p>
         )
       ) : null}
       {shown.length > 0 || counts.total > 0 ? (
@@ -189,7 +189,7 @@ function Card({ entry, def, canMake, canApprove, agents, names }: { entry: Entry
           {shown.map((f) => (
             <div key={f.key}>
               <dt className="nf-caption text-[var(--nf-content-secondary)]">{f.label}</dt>
-              <dd className="nf-body-sm whitespace-pre-wrap [overflow-wrap:anywhere]">{f.type === "select" ? (f.options?.find((o) => o.value === entry.fields[f.key])?.label ?? entry.fields[f.key]) : entry.fields[f.key]}</dd>
+              <dd className="nf-body-sm whitespace-pre-wrap break-words">{f.type === "select" ? (f.options?.find((o) => o.value === entry.fields[f.key])?.label ?? entry.fields[f.key]) : entry.fields[f.key]}</dd>
             </div>
           ))}
           {counts.total > 0 ? (
@@ -207,7 +207,7 @@ function Card({ entry, def, canMake, canApprove, agents, names }: { entry: Entry
         </dl>
       ) : null}
       {entry.linkUrl ? (
-        <p className="nf-caption mt-xs flex flex-wrap items-center gap-xs [overflow-wrap:anywhere]">
+        <p className="nf-caption mt-xs flex flex-wrap items-center gap-xs break-words">
           <a className="font-semibold text-[var(--nf-content-link)] hover:underline" href={entry.linkUrl} target="_blank" rel="noreferrer noopener">{entry.linkUrl}</a>
           <CopyButton text={entry.linkUrl} label="Link" icon="link" />
         </p>

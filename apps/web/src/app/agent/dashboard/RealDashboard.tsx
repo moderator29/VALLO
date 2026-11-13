@@ -314,7 +314,7 @@ export function RealDashboard({
                     <UiIcon name="calendar-booking" size={20} />
                   </IconPlate>
                 }
-                title={<span className="line-clamp-2 [overflow-wrap:anywhere]">{booking.listingTitle}</span>}
+                title={<span className="line-clamp-2 break-words">{booking.listingTitle}</span>}
                 sub={fill(d.stayDates, {
                   from: formatDate(new Date(`${booking.checkIn}T00:00:00Z`), locale, {
                     day: "numeric",

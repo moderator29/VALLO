@@ -110,6 +110,7 @@ export default async function AdminPaymentsPage({
                   <TR key={row.id}>
                     <TD className="font-semibold text-[var(--nf-content-primary)]">{row.planName}</TD>
                     <TD>{s.statuses[row.status as keyof typeof s.statuses] ?? row.status}</TD>
+                    {/* Stays `overflow-wrap: anywhere` on purpose: an id is one token and must wrap inside its cell (13 November 2026; the gate is app/css/overflow-wrap.test.ts). */}
                     <TD className="[overflow-wrap:anywhere] [user-select:all]">{row.userId}</TD>
                     <TD>{row.mode ?? s.trial}</TD>
                     <TD>{row.endsAt ? ui.when(row.endsAt) : ""}</TD>
@@ -267,6 +268,7 @@ export default async function AdminPaymentsPage({
                       label={ui.columnLabel("transactionStatus", payment.status)}
                     />
                   </TD>
+                  {/* Stays `overflow-wrap: anywhere` on purpose: a reference is one token and must wrap inside its cell (13 November 2026; the gate is app/css/overflow-wrap.test.ts). */}
                   <TD className="font-semibold text-[var(--nf-content-primary)] [overflow-wrap:anywhere] [user-select:all]">
                     {payment.providerRef ?? payment.id}
                   </TD>

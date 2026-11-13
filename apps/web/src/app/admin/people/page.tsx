@@ -108,7 +108,7 @@ export default async function PeoplePage({
                 {read.data.hits.map((p) => (
                   <li
                     key={p.userId}
-                    className="flex flex-wrap items-baseline gap-x-xs gap-y-3xs border-t border-[var(--nf-divider)] pt-inline nf-body-sm [overflow-wrap:anywhere]"
+                    className="flex flex-wrap items-baseline gap-x-xs gap-y-3xs border-t border-[var(--nf-divider)] pt-inline nf-body-sm break-words"
                   >
                     <Link href={`/admin/people/${p.userId}`} className="inline-flex min-h-11 items-center font-semibold underline underline-offset-2">
                       {p.name ?? "No name given"}

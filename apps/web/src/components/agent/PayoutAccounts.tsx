@@ -291,7 +291,7 @@ function AccountRow({ account }: { account: PayoutAccount }) {
           {/* The account holder's name on the screen where money leaves the
               platform. Never clipped: an operator or an agent checking a
               payout against a bank statement needs the whole string. */}
-          <p className="text-[length:var(--nf-text-body-sm)] font-semibold text-[var(--nf-content-primary)] [overflow-wrap:anywhere]">
+          <p className="text-[length:var(--nf-text-body-sm)] font-semibold text-[var(--nf-content-primary)] break-words">
             {account.accountName}
           </p>
           <p className="nf-numeric mt-2xs text-[length:var(--nf-text-caption)] text-[var(--nf-content-secondary)]">

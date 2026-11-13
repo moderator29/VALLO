@@ -24,6 +24,8 @@ import "server-only";
  * honestly with a category plate and a "No photographs yet" chip.
  */
 
+import type { SupabaseClient } from "@supabase/supabase-js";
+import type { Database } from "../supabase/database.types";
 import { createClient } from "../supabase/server";
 import { isSupabaseConfigured } from "../supabase/env";
 import { accommodationPhotoUrl } from "./photos";
@@ -78,24 +80,43 @@ export async function listBusinessPhotos(businessId: string): Promise<BusinessPh
 export async function businessCoverUrls(
   businessIds: readonly string[],
 ): Promise<Map<string, string>> {
-  const covers = new Map<string, string>();
+  return new Map(await businessCoverPairs(businessIds));
+}
+
+/**
+ * The same read as `businessCoverUrls`, answered as `[businessId, url]` pairs
+ * so the public catalogue cache can keep it (a Map does not survive the data
+ * cache's JSON; pairs do). `client` reads through a given client instead of
+ * the request's own; `strict` throws on a failed read instead of answering
+ * empty, so a cache never keeps a failure (`lib/catalogue/stays.ts`).
+ */
+export async function businessCoverPairs(
+  businessIds: readonly string[],
+  options: { client?: SupabaseClient<Database>; strict?: boolean } = {},
+): Promise<[string, string][]> {
+  const pairs: [string, string][] = [];
   const ids = [...new Set(businessIds.filter((id) => UUID_RE.test(id)))];
-  if (!isSupabaseConfigured() || ids.length === 0) return covers;
+  if (!isSupabaseConfigured() || ids.length === 0) return pairs;
   try {
-    const supabase = await createClient();
+    const supabase = options.client ?? (await createClient());
     const { data, error } = await supabase
       .from("business_photos")
       .select("business_id, storage_path, position")
       .in("business_id", ids)
       .order("position", { ascending: true });
-    if (error || !data) return covers;
+    if (error && options.strict) throw new Error("business photos read failed");
+    if (error || !data) return pairs;
     /* Ordered by position, so the first row seen for a venue is its cover and
        every later one is passed over. */
+    const seen = new Set<string>();
     for (const row of data) {
-      if (!covers.has(row.business_id)) covers.set(row.business_id, businessPhotoUrl(row.storage_path));
+      if (seen.has(row.business_id)) continue;
+      seen.add(row.business_id);
+      pairs.push([row.business_id, businessPhotoUrl(row.storage_path)]);
     }
-    return covers;
-  } catch {
-    return covers;
+    return pairs;
+  } catch (thrown) {
+    if (options.strict) throw thrown;
+    return pairs;
   }
 }
