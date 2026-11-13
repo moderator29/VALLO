@@ -7,6 +7,7 @@ import { readPasscodeSession, readPasscodeStatus, sessionSignedInWithin } from "
 import { FRESH_RESET_SECONDS } from "@/lib/passcode/rules";
 import { PasscodeSettings } from "./PasscodeSettings";
 import { PasskeyIdleSetting } from "./PasskeyIdleSetting";
+import { TurnOffPasscode } from "./TurnOffPasscode";
 import { passkeyUnlockOffered } from "@/lib/passcode/passkey-unlock";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -47,6 +48,8 @@ export default async function PasscodeSettingsPage() {
     askCurrent = !sessionSignedInWithin(session, FRESH_RESET_SECONDS);
   }
 
+  const hasPasskey = state === "set" ? await passkeyUnlockOffered().catch(() => false) : false;
+
   return (
     <PageFrame title={copy.screenTitle} fallback="/settings" width="narrow">
       <PasscodeSettings
@@ -59,7 +62,11 @@ export default async function PasscodeSettingsPage() {
         avatarUrl={identity.avatarUrl}
       />
       {state === "set" ? (
-        <PasskeyIdleSetting hasPasskey={await passkeyUnlockOffered().catch(() => false)} copy={copy} />
+        <>
+          <PasskeyIdleSetting hasPasskey={hasPasskey} copy={copy} />
+          {/* The way back to no passcode (13 November 2026): proven, never a tap alone. */}
+          <TurnOffPasscode copy={copy} locale={locale} length={length} passkey={hasPasskey} />
+        </>
       ) : null}
     </PageFrame>
   );

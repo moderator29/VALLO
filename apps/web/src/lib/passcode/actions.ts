@@ -15,6 +15,7 @@ import {
   writeUnlock,
 } from "./state";
 import { passcodeKey, RESET_INTENT_SECONDS, signResetIntent } from "./unlock-cookie";
+import { turnPasscodeOff } from "./turn-off";
 
 /**
  * THE PASSCODE'S SERVER ACTIONS: set (first, change, reset), verify, lock and
@@ -222,4 +223,42 @@ export async function forgotPasscodeAction(next?: string | null): Promise<never>
   const query = new URLSearchParams({ notice: "passcode-reset" });
   if (back) query.set("next", back);
   redirect(`/sign-in?${query.toString()}`);
+}
+
+export type TurnOffResult =
+  | { ok: true }
+  | { ok: false; reason: "signed-out" | "not-set" | "wrong" | "paced" | "error" | "locked-out"; attempt?: VerifyResult; retryAfterSeconds?: number };
+
+/**
+ * TURN THE PASSCODE OFF, PROVEN BY THE CURRENT CODE (13 November 2026). The
+ * code is checked by the database exactly as the lock checks it
+ * (`passcode_verify`: counted, paced, ten wrong ends the session), and only a
+ * right code turns the lock off (`turn-off.ts`). Face ID is the other proof
+ * (`finishPasscodeOffWithKey` in passkey-unlock.ts).
+ */
+export async function turnOffPasscodeAction(code: string): Promise<TurnOffResult> {
+  const session = await readPasscodeSession();
+  if (session.state !== "signed-in") return { ok: false, reason: "signed-out" };
+  if (typeof code !== "string" || !(isWellFormed(code, 6) || isWellFormed(code, 4))) {
+    return { ok: false, reason: "wrong", attempt: { status: "wrong", ...attemptsLeft(0) } };
+  }
+  const wait = await paced(session.userId, [VERIFY_PER_USER, VERIFY_PER_IP]);
+  if (wait !== null) return { ok: false, reason: "paced", retryAfterSeconds: wait };
+  let outcome: VerifyOutcome;
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data, error } = await (session.supabase as any).rpc("passcode_verify", { p_code: code });
+    outcome = error ? { status: "error" } : parseVerify(data);
+  } catch {
+    outcome = { status: "error" };
+  }
+  if (outcome.status === "unset") return { ok: false, reason: "not-set" };
+  if (outcome.status === "reset_required") {
+    await endThisSession();
+    return { ok: false, reason: "locked-out" };
+  }
+  if (outcome.status !== "ok") return { ok: false, reason: outcome.status === "error" ? "error" : "wrong", attempt: toVerifyResult(outcome) };
+  if (!(await turnPasscodeOff(session.userId, "code"))) return { ok: false, reason: "error" };
+  revalidatePath("/", "layout");
+  return { ok: true };
 }

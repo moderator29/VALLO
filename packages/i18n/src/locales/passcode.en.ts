@@ -107,6 +107,17 @@ export const passcodeEn = {
   notSet: "You have not set a passcode yet.",
   lockNote: "Vallo locks after 5 minutes away, and in every new tab.",
 
+  /**
+   * TURN IT OFF (13 November 2026, the founder: the passcode is off by
+   * default and the member chooses, so a member who turned it on can turn it
+   * off; never on a tap alone, always proven by the current code or Face ID).
+   */
+  turnOff: "Turn off passcode",
+  turnOffTitle: "Turn off your passcode",
+  turnOffBody: "Enter your current passcode. Vallo will then open without one on this account.",
+  turnOffWithKey: "Use Face ID or fingerprint",
+  turnOffCancel: "Keep my passcode",
+  turnedOff: "Passcode turned off. Vallo opens without it now, and you can turn it on again here any time.",
   keypadLabel: "Passcode keypad",
   deleteKey: "Delete",
   digitsEntered: "{count} of {total} digits entered",
