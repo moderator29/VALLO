@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useLayoutEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
-import { noteEntry } from "@/lib/ui/history";
+import { entryStamped, noteEntry } from "@/lib/ui/history";
 
 /**
  * Scroll position, the big-app way: forward lands at the top, back lands where
@@ -138,6 +138,12 @@ function writePositions(positions: Record<string, number>): void {
 export function ScrollToTop() {
   const pathname = usePathname();
   const poppedAt = useRef(0);
+  /* The position a traversal is waiting to put back, until the page it
+     belongs to has committed (see the layout effect below). */
+  const pendingRestore = useRef<{ url: string; target: number } | null>(null);
+  /* The path React has on screen, which `popstate` cannot read from `location`
+     (by then it already names the entry being returned to). */
+  const committedPath = useRef(pathname);
 
   useEffect(() => {
     noteEntry();
@@ -202,6 +208,16 @@ export function ScrollToTop() {
 
       const step = () => {
         if (restoreUntil !== deadline) return; /* superseded or cancelled */
+        /* The page being returned to is not in the document yet: scrolling
+           now would move the page being LEFT. Wait for the commit. */
+        if (pendingRestore.current) {
+          if (Date.now() > deadline) {
+            restoreUntil = 0;
+            return;
+          }
+          window.requestAnimationFrame(step);
+          return;
+        }
         if (Date.now() > deadline) {
           restoreUntil = 0;
           return;
@@ -235,8 +251,16 @@ export function ScrollToTop() {
       poppedAt.current = Date.now();
       noteEntry();
       const target = readPositions()[currentUrl()];
-      if (typeof target === "number" && target > 0) restore(target);
-      else window.scrollTo({ top: 0, left: 0, behavior: "instant" as ScrollBehavior });
+      /* Only a traversal to another PATH waits for its page to commit; a
+         query-only one (`?q=Lagos` back to `?q=Abuja`) is the same page. */
+      const want = typeof target === "number" && target > 0 ? target : 0;
+      const otherPage = window.location.pathname !== committedPath.current;
+      pendingRestore.current = otherPage ? { url: currentUrl(), target: want } : null;
+      if (want > 0) restore(want);
+      /* To the top: for another page, in the layout effect once it is in the
+         document (scrolling now would jump the page being left); for the same
+         page, now. */
+      else if (!otherPage) window.scrollTo({ top: 0, left: 0, behavior: "instant" as ScrollBehavior });
     };
 
     /* One set of listeners doing two jobs: they mark a scroll as the reader's
@@ -262,6 +286,51 @@ export function ScrollToTop() {
       window.removeEventListener("keydown", onGesture);
     };
   }, []);
+
+  /*
+   * BACK LANDS IN PLACE ON ITS FIRST FRAME (Agent FEEL, 13 November 2026).
+   *
+   * `popstate` fires while the page being left is still in the document, so
+   * the restore above can only start trying on the next animation frame, and
+   * measured on a production build the page being returned to was drawn ONE
+   * FRAME at the top before it jumped to where it was left (/search: scrollY 0
+   * at 105ms, 900 at 121ms). A layout effect runs after React has put the
+   * returning page in the document and before the browser paints it (and
+   * inside the view transition's update, so its "new" picture is taken in
+   * place). Here the position is put back synchronously when the page is
+   * already tall enough; the rAF loop above still finishes anything that
+   * arrives later.
+   */
+  useLayoutEffect(() => {
+    const changed = committedPath.current !== pathname;
+    committedPath.current = pathname;
+    let pending = pendingRestore.current;
+    /* WEBKIT ORDER. The router can draw the returning page before this
+       component has heard `popstate`, so nothing is pending yet. A returned-to
+       entry is already stamped (a push is not, until it paints), so it is a
+       traversal all the same, and its position is put back here. */
+    /* `location` must already name this page: on a push the router writes the
+       new entry after this effect, so the stamp and the address read here
+       would still be the page being left. */
+    if (!pending && changed && window.location.pathname === pathname && entryStamped()) {
+      const target = readPositions()[currentUrl()];
+      if (typeof target === "number" && target > 0) {
+        pending = { url: currentUrl(), target };
+        poppedAt.current = Date.now();
+      }
+    }
+    if (!pending) return;
+    pendingRestore.current = null;
+    /* Somewhere else was reached instead: nothing to put back. */
+    if (pending.url !== currentUrl()) return;
+    /* Grace restarts at the commit, so a slow page is not then sent to the top
+       by the push handler below. */
+    poppedAt.current = Date.now();
+    const reachable = document.documentElement.scrollHeight - window.innerHeight >= pending.target - 2;
+    if (pending.target === 0 || reachable) {
+      window.scrollTo({ top: pending.target, left: 0, behavior: "instant" as ScrollBehavior });
+    }
+  }, [pathname]);
 
   /* A push lands at the top. A traversal is `popstate`'s to handle, and it has
      already run by the time this fires. */
