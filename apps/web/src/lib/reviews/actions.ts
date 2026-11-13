@@ -23,6 +23,7 @@
 
 import { oncePerTap, tapKey } from "../offline/replay-guard";
 import { revalidatePath } from "next/cache";
+import { catalogueChanged } from "@/lib/catalogue/invalidate";
 import type { Database } from "../supabase/database.types";
 import { phoneGateFor } from "../phone-otp/gate";
 import { fail, formDataToObject, ok, validate, type ActionResult } from "../actions/envelope";
@@ -182,6 +183,7 @@ async function submitReviewWork(
   // The listing's rating aggregate and its written reviews both change, and so
   // does the trips hub's per stay control.
   const href = hotelId ? `/stay/${hotelId}` : `/listing/${listingId}`;
+  catalogueChanged(hotelId ? { stayId: hotelId } : { listingId });
   revalidatePath(href);
   revalidatePath("/bookings");
 

@@ -1,5 +1,5 @@
 import { getDictionary } from "@vallo/i18n";
-import { getListingRepository } from "@/lib/listings/repository";
+import { catalogueReader } from "@/lib/catalogue/listings";
 import type { Listing, ListingKind } from "@/lib/listings/types";
 import { getLocale } from "@/lib/locale";
 import { MapCanvas, type MapCity } from "./MapCanvas";
@@ -96,7 +96,7 @@ export async function RealMap({
 
   // The map follows the text query it was given, so it shows the same places
   // the results header counts rather than the whole country every time.
-  const catalogue = listings ?? (await getListingRepository().search({ q: active }));
+  const catalogue = listings ?? (await catalogueReader().search({ q: active }));
 
   const cityAt = new Map(pins.map((pin) => [pin.city.toLowerCase(), pin]));
   const placed: { listing: Listing; at: { lat: number; lng: number }; byArea: boolean }[] = [];

@@ -23,6 +23,7 @@
  */
 
 import { revalidatePath } from "next/cache";
+import { catalogueChanged } from "@/lib/catalogue/invalidate";
 import { z } from "zod";
 import { fail, ok, validate, type ActionResult } from "../actions/envelope";
 import { adminRefusal, requireAdmin } from "./guard";
@@ -108,6 +109,7 @@ export async function decideHeldItem(input: {
   }
   if (status !== "ok") return fail(SERVICE_DOWN);
 
+  catalogueChanged();
   revalidatePath("/admin/queue");
   revalidatePath("/admin");
   return ok(null);

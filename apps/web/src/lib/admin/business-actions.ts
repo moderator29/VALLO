@@ -33,6 +33,7 @@
 
 import { withPublicPoint } from "../supabase/public-point";
 import { revalidatePath } from "next/cache";
+import { catalogueChanged } from "@/lib/catalogue/invalidate";
 import { ARRIVAL_DECLARATION_NEEDED, arrivalChargesDeclared } from "../stays/arrival-gate";
 import { withBusinessPrivate } from "../supabase/private-fields";
 import { z } from "zod";
@@ -441,6 +442,7 @@ export async function publishAccommodation(input: {
 
   if (businessPublished === false) {
     refreshConsole();
+    catalogueChanged();
     revalidatePath("/stays");
     return fail(
       "The property is published, but the business could not be marked live at the same time. Open the business and publish it from there.",
@@ -452,6 +454,7 @@ export async function publishAccommodation(input: {
      and cannot be found on a dated search. */
   if (roomsError) {
     refreshConsole();
+    catalogueChanged();
     revalidatePath("/stays");
     return fail(
       "The property is published, but its rooms could not be put on sale, so it will show no price. Publish it again in a moment.",
@@ -459,6 +462,7 @@ export async function publishAccommodation(input: {
   }
   if (inventoryError) {
     refreshConsole();
+    catalogueChanged();
     revalidatePath("/stays");
     return fail(
       "The property is published and priced, but its nights could not be opened, so a search with dates on it will not find the property. Publish it again in a moment.",
@@ -466,6 +470,7 @@ export async function publishAccommodation(input: {
   }
 
   refreshConsole();
+  catalogueChanged();
   revalidatePath("/stays");
   return ok(null);
 }
@@ -629,6 +634,7 @@ export async function publishRestaurant(input: {
   );
 
   refreshConsole();
+  catalogueChanged();
   revalidatePath("/restaurants");
   return ok(null);
 }

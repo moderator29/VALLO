@@ -20,7 +20,7 @@ function areaPoint(lat: number | null, lng: number | null): { lat: number; lng: 
   if (lat === null || lng === null || !Number.isFinite(lat) || !Number.isFinite(lng)) return null;
   return { lat: Math.round(lat * 100) / 100, lng: Math.round(lng * 100) / 100 };
 }
-import { getStayDetail } from "@/lib/stays/queries";
+import { publicStayDetail } from "@/lib/catalogue/stays";
 import { listSavedPlaces } from "@/lib/saved/places-actions";
 import { isSaved, savedKeySet } from "@/lib/saved/places";
 import { accommodationPhotoUrl } from "@/lib/stays/photos";
@@ -46,7 +46,7 @@ type Search = Promise<Record<string, string | string[] | undefined>>;
  * catalogue listing rather than drawing an error, so the two URLs never drift.
  */
 async function readStayDetail(id: string): Promise<StayDetail | null> {
-  const detail = await getStayDetail(id);
+  const detail = await publicStayDetail(id);
   if (!detail) return null;
 
   const { accommodation } = detail;

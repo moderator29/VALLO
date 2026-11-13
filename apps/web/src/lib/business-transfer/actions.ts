@@ -43,6 +43,7 @@
  */
 
 import { revalidatePath } from "next/cache";
+import { catalogueChanged } from "@/lib/catalogue/invalidate";
 import { fail, formDataToObject, ok, validate, type ActionResult } from "../actions/envelope";
 import { NOT_CONFIGURED_MESSAGE, SIGNED_OUT_MESSAGE, resolveSession } from "../actions/session";
 import { asRecord, callDeletionRpc } from "../account-deletion/rpc";
@@ -380,6 +381,8 @@ export async function closeBusiness(
     .eq("owner_id", user.id);
   if (businessError) return fail(GATED_MESSAGE);
 
+  /* A closed business leaves the public shelves at once. */
+  catalogueChanged();
   revalidatePath("/host/transfer");
   revalidatePath("/host");
   revalidatePath("/settings/account");

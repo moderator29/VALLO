@@ -1307,6 +1307,14 @@ export async function loadOwnListingAnyStatus(supabase: Client, id: string): Pro
   }
 }
 
+/** A read failure that has already been reported, rethrown by a strict reader. */
+export class ReportedReadFailure extends Error {
+  constructor() {
+    super("catalogue read failed");
+    this.name = "ReportedReadFailure";
+  }
+}
+
 export class SupabaseListingRepository implements ListingRepository {
   readonly isSeed = false;
 
@@ -1316,7 +1324,17 @@ export class SupabaseListingRepository implements ListingRepository {
    * read passes a cookie-free anonymous client instead (OPS-11), because a
    * value cached for every visitor must be the one a stranger would see.
    */
-  constructor(private readonly connect: () => Promise<Client> = createClient) {}
+  constructor(
+    private readonly connect: () => Promise<Client> = createClient,
+    /**
+     * Strict: a failed read THROWS (after it is reported) instead of answering
+     * empty. Only the cached public reader asks for this (`lib/catalogue`),
+     * because an empty answer returned from inside a cache would be kept and
+     * served to everybody; a throw keeps nothing. Every other caller keeps the
+     * empty answer it always had.
+     */
+    private readonly strict: boolean = false,
+  ) {}
 
   /**
    * The published catalogue, newest and featured first.
@@ -1558,6 +1576,7 @@ export class SupabaseListingRepository implements ListingRepository {
         .limit(rowCap(opts.limit));
       if (error) {
         await catalogueReadFailed("search", error);
+        if (this.strict) throw new ReportedReadFailure();
         return [];
       }
       if (!data) return [];
@@ -1565,7 +1584,9 @@ export class SupabaseListingRepository implements ListingRepository {
       const listings = await mapRows(supabase, data as unknown as ListingRow[]);
       return listings.filter((l) => matchesFilter(l, filter));
     } catch (error) {
+      if (error instanceof ReportedReadFailure) throw error;
       await catalogueReadFailed("search", error);
+      if (this.strict) throw error;
       return [];
     }
   }
@@ -1602,13 +1623,16 @@ export class SupabaseListingRepository implements ListingRepository {
         .maybeSingle();
       if (error) {
         await catalogueReadFailed("by_id", error);
+        if (this.strict) throw new ReportedReadFailure();
         return null;
       }
       if (!data) return null;
       const [listing] = await mapRows(supabase, [data as unknown as ListingRow]);
       return listing ?? null;
     } catch (error) {
+      if (error instanceof ReportedReadFailure) throw error;
       await catalogueReadFailed("by_id", error);
+      if (this.strict) throw error;
       return null;
     }
   }
@@ -1635,13 +1659,16 @@ export class SupabaseListingRepository implements ListingRepository {
         .maybeSingle();
       if (error) {
         await catalogueReadFailed("by_reference", error);
+        if (this.strict) throw new ReportedReadFailure();
         return null;
       }
       if (!data) return null;
       const [listing] = await mapRows(supabase, [data as unknown as ListingRow]);
       return listing ?? null;
     } catch (error) {
+      if (error instanceof ReportedReadFailure) throw error;
       await catalogueReadFailed("by_reference", error);
+      if (this.strict) throw error;
       return null;
     }
   }

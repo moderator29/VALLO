@@ -25,6 +25,7 @@ import { CompareTray } from "@/components/app/compare/CompareTray";
 import { WidgetBridge } from "@/components/app/WidgetBridge";
 import { ContrastSync } from "@/components/app/account/ContrastSync";
 import { MemberKeys } from "@/components/app/MemberKeys";
+import { IntentPrefetch } from "@/components/app/IntentPrefetch";
 import { getLocale } from "@/lib/locale";
 import { getShellIdentity, getShellWorkspaces } from "@/lib/app/shell-queries";
 import { getSide } from "@/lib/side";
@@ -173,6 +174,8 @@ export default async function AppLayout({
       <ContrastSync />
       {/* B17: the desktop keyboard layer (fine pointer only). */}
       <MemberKeys />
+      {/* Platform speed: a catalogue page is fetched whole as the finger lands. */}
+      <IntentPrefetch />
       {/* V-40: what was done offline is sent, and what was paid is resolved. */}
       <OfflineTray />
       {/* Backlog row 7: places set aside to compare, wherever the reader is. */}

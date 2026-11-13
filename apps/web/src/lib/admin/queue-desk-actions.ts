@@ -2,6 +2,7 @@
 
 import { randomUUID } from "node:crypto";
 import { revalidatePath } from "next/cache";
+import { catalogueChanged } from "@/lib/catalogue/invalidate";
 import { redirect } from "next/navigation";
 import { getDictionary } from "@vallo/i18n";
 import { createAdminClient } from "../supabase/admin";
@@ -192,6 +193,7 @@ export async function bulkAct(formData: FormData): Promise<void> {
     }
   }
 
+  catalogueChanged();
   revalidatePath("/admin/queue");
   redirect(back(formData, { bulk: `${done}-${skipped}-${failed}` }));
 }

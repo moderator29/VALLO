@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import { marketOf } from "@/lib/listings/market";
 import { getDictionary, intlTag, type Locale } from "@vallo/i18n";
 import { getLocale } from "@/lib/locale";
-import { getListingRepository } from "@/lib/listings/repository";
-import { listStaysShelf } from "@/lib/stays/queries";
+import { catalogueReader } from "@/lib/catalogue/listings";
+import { publicStaysShelf } from "@/lib/catalogue/stays";
 import type { Listing, ListingKind } from "@/lib/listings/types";
 import { Suspense } from "react";
 import { InviteStepNudge } from "@/components/app/referral/InviteStepNudge";
@@ -61,7 +61,7 @@ export const dynamic = "force-dynamic";
  * empty while one read has rows and the other does not.
  */
 async function readShelf(kinds: readonly ListingKind[], perKind: number): Promise<Listing[]> {
-  const repo = getListingRepository();
+  const repo = catalogueReader();
   /* UX-10: only listings actually let by the night are stays, so each kind
      is read a little deeper and filtered before it is interleaved. */
   const rows = (await Promise.all(kinds.map((kind) => repo.search({ kind }, { limit: perKind * 4 })))).map(
@@ -98,7 +98,7 @@ export default async function StaysHomePage() {
    * present and refusing.
    */
   const [projection, session, savedPlaces, overview] = await Promise.all([
-    listStaysShelf({}, 6),
+    publicStaysShelf({}, 6),
     resolveSession(),
     listSavedPlaces(),
     /* The greeting, the name and the place, the SAME read the property home

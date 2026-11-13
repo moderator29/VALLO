@@ -32,6 +32,7 @@
 
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
+import { catalogueChanged } from "@/lib/catalogue/invalidate";
 import { withBusinessPrivate } from "../supabase/private-fields";
 import { fail, ok, validate, type ActionResult } from "../actions/envelope";
 import { phoneGateFor } from "../phone-otp/gate";
@@ -108,6 +109,7 @@ function refreshHostSurfaces(): void {
 function refreshVenueSurfaces(): void {
   revalidatePath("/host");
   revalidatePath("/host/photos");
+  catalogueChanged();
   revalidatePath("/restaurants");
 }
 
@@ -125,6 +127,7 @@ function refreshVenueSurfaces(): void {
  */
 function refreshRoomSurfaces(): void {
   revalidatePath("/host");
+  catalogueChanged();
   revalidatePath("/host/rooms");
   revalidatePath("/stays");
 }
@@ -132,6 +135,7 @@ function refreshRoomSurfaces(): void {
 function refreshPropertySurfaces(): void {
   revalidatePath("/host");
   revalidatePath("/host/apply");
+  catalogueChanged();
   revalidatePath("/host/photos");
   revalidatePath("/stays");
 }

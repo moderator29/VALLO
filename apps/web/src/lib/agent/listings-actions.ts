@@ -24,6 +24,7 @@
 
 import { LISTING_KEPT_MESSAGE, isMandateRetentionRefusal } from "../compliance/beneficial-ownership";
 import { revalidatePath } from "next/cache";
+import { catalogueChanged } from "@/lib/catalogue/invalidate";
 import { after } from "next/server";
 import { hashListingPhotos } from "../photo-hash/hash-server";
 import { fail, ok, validate, type ActionResult } from "../actions/envelope";
@@ -173,7 +174,12 @@ async function ownedListing(
   return data;
 }
 
-function refreshAgentSurfaces() {
+function refreshAgentSurfaces(listingId?: string) {
+  /* Platform speed: the public catalogue keeps a shared copy of every
+     published listing and every search over them (`lib/catalogue`). A change
+     here expires the listing's copy and every list it could appear in, at
+     once; with no id named, the whole catalogue. */
+  catalogueChanged({ listingId });
   revalidatePath("/agent/listings");
   revalidatePath("/agent/list");
   revalidatePath("/agent/dashboard");
@@ -805,7 +811,7 @@ export async function addPhoto(input: {
      never fails it. */
   after(() => hashListingPhotos(listingId));
 
-  refreshAgentSurfaces();
+  refreshAgentSurfaces(listingId);
   return ok({ photoId: created.id, position: created.position });
 }
 
@@ -988,7 +994,7 @@ export async function removePhoto(input: {
     .map((p) => ({ id: p.id, path: p.storage_path }));
   await applyOrder(gate.supabase, listingId, remaining);
 
-  refreshAgentSurfaces();
+  refreshAgentSurfaces(listingId);
   return ok(null);
 }
 
@@ -1035,7 +1041,7 @@ export async function reorderPhotos(input: {
     .eq("listing_id", listingId)
     .order("position", { ascending: true });
 
-  refreshAgentSurfaces();
+  refreshAgentSurfaces(listingId);
   return ok({
     photos: (settled ?? []).map((p) => ({ id: p.id, path: p.storage_path })),
   });
@@ -1109,7 +1115,7 @@ export async function reorderMedia(input: {
     gate.supabase.from("listing_videos").select("id, position").eq("listing_id", listingId),
   ]);
 
-  refreshAgentSurfaces();
+  refreshAgentSurfaces(listingId);
   return ok({
     photos: (settledPhotos.data ?? []).map((p) => ({ id: p.id, path: p.storage_path, position: p.position })),
     videos: (settledVideos.data ?? []).map((v) => ({ id: v.id, position: v.position })),
@@ -1423,7 +1429,7 @@ export async function setAmenities(input: {
     if (insertError) return fail("We could not save the amenities just now. Please try again.");
   }
 
-  refreshAgentSurfaces();
+  refreshAgentSurfaces(listingId);
   return ok(null);
 }
 

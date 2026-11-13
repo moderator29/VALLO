@@ -1,6 +1,6 @@
 import "@/app/css/landing-3d.css";
 import type { Dictionary, Locale } from "@vallo/i18n/core";
-import { getListingRepository } from "@/lib/listings/repository";
+import { catalogueReader } from "@/lib/catalogue/listings";
 import { landingCatalogue } from "@/lib/listings/landing-catalogue";
 import type { Listing, ListingKind } from "@/lib/listings/types";
 import { isSocialEnabled } from "@/lib/social/flag";
@@ -45,7 +45,7 @@ export async function landingData(): Promise<LandingData> {
      repository (empty or API-backed) otherwise. Only the catalogue is
      needed, for the per-kind counts. */
   const [shared, stats, social] = await Promise.all([landingCatalogue(), getPlatformStats(), isSocialEnabled()]);
-  const catalogue: Listing[] = shared ? shared.catalogue : await getListingRepository().search();
+  const catalogue: Listing[] = shared ? shared.catalogue : await catalogueReader().search();
   const tally = new Map<ListingKind, number>();
   for (const l of catalogue) tally.set(l.kind, (tally.get(l.kind) ?? 0) + 1);
   const complete = stats !== null && catalogue.length > 0 && catalogue.length === stats.listings;

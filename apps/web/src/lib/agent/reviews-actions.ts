@@ -20,6 +20,7 @@
  */
 
 import { revalidatePath } from "next/cache";
+import { catalogueChanged } from "@/lib/catalogue/invalidate";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "../supabase/database.types";
 import { fail, formDataToObject, ok, validate, type ActionResult } from "../actions/envelope";
@@ -55,7 +56,10 @@ async function revalidateListingOf(
       .select("listing_id")
       .eq("id", reviewId)
       .maybeSingle();
-    if (data?.listing_id) revalidatePath(`/listing/${data.listing_id}`);
+    if (data?.listing_id) {
+      catalogueChanged({ listingId: data.listing_id });
+      revalidatePath(`/listing/${data.listing_id}`);
+    }
   } catch {
     // The console is already revalidated; the public page follows on its own.
   }

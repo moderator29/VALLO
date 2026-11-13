@@ -1,6 +1,6 @@
 import type { Dictionary, Locale } from "@vallo/i18n/core";
 import { forListingCard } from "@/lib/i18n/slice";
-import { getListingRepository } from "@/lib/listings/repository";
+import { catalogueReader } from "@/lib/catalogue/listings";
 import { isPropertyMarket, marketOf } from "@/lib/listings/market";
 import type { Listing } from "@/lib/listings/types";
 import { ListingCard } from "@/components/app/ListingCard";
@@ -34,7 +34,7 @@ export async function SimilarListings({
   title: string;
   seeAllLabel: string;
 }) {
-  const repo = getListingRepository();
+  const repo = catalogueReader();
   const intent = listing.intent;
   const near = listing.area || listing.city;
   const keep = (rows: Listing[]) =>

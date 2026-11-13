@@ -17,6 +17,7 @@
  */
 
 import { revalidatePath } from "next/cache";
+import { catalogueChanged } from "@/lib/catalogue/invalidate";
 import { z } from "zod";
 import { fail, ok, validate, type ActionResult } from "../actions/envelope";
 import { NOT_CONFIGURED_MESSAGE, SIGNED_OUT_MESSAGE, resolveSession } from "../actions/session";
@@ -132,6 +133,7 @@ export async function removeCalendarImport(input: unknown): Promise<ActionResult
   const result = (data ?? {}) as { status?: string; released?: number };
   if (result.status !== "ok") return fail(w.notYours);
   refresh();
+  catalogueChanged();
   revalidatePath("/stays");
   return ok({ released: Number(result.released ?? 0) });
 }

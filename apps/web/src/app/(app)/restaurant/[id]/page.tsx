@@ -8,7 +8,7 @@ import { listingById } from "@/lib/listings/listing-by-id";
 import { formatNumber } from "@vallo/i18n";
 import type { UiIconName } from "@/design-system/icons/UiIcon";
 import type { SpecPair } from "@/components/app/listing/DetailAnatomy";
-import { getRestaurantDetail } from "@/lib/stays/queries";
+import { publicRestaurantDetail } from "@/lib/catalogue/stays";
 import { hoursLabel } from "@/lib/stays/hours";
 import { listBusinessPhotos } from "@/lib/stays/business-photos";
 import { listSavedPlaces } from "@/lib/saved/places-actions";
@@ -75,7 +75,7 @@ export async function generateMetadata({
   const restaurant = listing && listing.kind === "restaurant" ? listing : null;
   /* The business-grade venue answers here too, or every M7 restaurant would
      carry the fallback title in the tab and in a shared link. */
-  const venue = restaurant ?? (await getRestaurantDetail(id));
+  const venue = restaurant ?? (await publicRestaurantDetail(id));
   const dictionary = getDictionary(await getLocale());
   if (!venue) {
     return { title: dictionary.restaurantPage.fallbackTitle };
@@ -143,7 +143,7 @@ export default async function RestaurantPage({ params }: { params: Promise<{ id:
   /* Both halves are asked for at once: a listing found by this id carries
      this id, so the venue read never depended on the listing's answer
      (Track M performance). */
-  const [listing, detail] = await Promise.all([listingById(id), getRestaurantDetail(id)]);
+  const [listing, detail] = await Promise.all([listingById(id), publicRestaurantDetail(id)]);
   /* UI-P2-03: premises let on a rent or sold are Property, not a place to
      book a table; they move to the rental template. */
   if (listing && isPropertyMarket(marketOf(listing))) redirect(`/listing/${id}`);

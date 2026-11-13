@@ -21,6 +21,7 @@
 import { identityGateApplies, identityRefusal, listerIdentityStatus } from "@/lib/verification/lister-identity";
 import { composeReviewNote, isReviewReasonCode } from "./review-reasons";
 import { revalidatePath } from "next/cache";
+import { catalogueChanged } from "@/lib/catalogue/invalidate";
 import { eddGateMessage, isEddGateRefusal } from "../compliance/gate";
 import { ARRIVAL_DECLARATION_NEEDED, arrivalChargesDeclared } from "../stays/arrival-gate";
 import { fail, ok, validate, type ActionResult } from "../actions/envelope";
@@ -350,6 +351,8 @@ export async function resolveReport(input: {
     // Best effort.
   }
 
+  /* A report can end in a takedown; the catalogue is told either way. */
+  catalogueChanged();
   revalidatePath("/admin/queue");
   revalidatePath("/admin");
   return ok(null);
@@ -1086,6 +1089,9 @@ async function decideListing(input: ListingDecisionInput, opts: { quiet?: boolea
     // Best effort, as every other admin decision's audit row.
   }
 
+  /* A decision publishes, sends back or takes down a listing: the public
+     catalogue's copy of it, and every list it is on, is expired at once. */
+  catalogueChanged({ listingId: listing.id });
   revalidatePath("/admin/listings");
   revalidatePath("/admin");
   return ok(null);

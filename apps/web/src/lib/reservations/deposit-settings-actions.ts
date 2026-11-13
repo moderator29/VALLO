@@ -20,6 +20,7 @@
  */
 
 import { revalidatePath } from "next/cache";
+import { catalogueChanged } from "@/lib/catalogue/invalidate";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { getDictionary } from "@vallo/i18n";
 import { fail, ok, type ActionResult } from "../actions/envelope";
@@ -131,6 +132,7 @@ export async function saveDepositSettings(input: {
 
   const { data: after } = await db.from("restaurant_deposit_rules").select("*").eq("business_id", businessId);
   revalidatePath("/host/reservations");
+  catalogueChanged({ venueId: businessId });
   revalidatePath(`/restaurant/${businessId}`);
   return ok({
     settings: settingsFromRules(((after ?? []) as Parameters<typeof ruleFromRow>[0][]).map(ruleFromRow)),

@@ -2,7 +2,7 @@ import "server-only";
 
 import type { Dictionary, Locale } from "@vallo/i18n/core";
 import type { Listing } from "@/lib/listings/types";
-import { getListingRepository } from "@/lib/listings/repository";
+import { catalogueReader } from "@/lib/catalogue/listings";
 import { isPropertyMarket, marketOf } from "@/lib/listings/market";
 import { listSavedSearches } from "@/lib/saved/searches-queries";
 import { filterFor } from "@/lib/saved/search-alerts";
@@ -59,7 +59,7 @@ export async function BestMatchesStream({
   try {
     const state = await listSavedSearches();
     if (state.state === "signed-in") {
-      const repo = getListingRepository();
+      const repo = catalogueReader();
       searches = await Promise.all(
         state.searches.slice(0, SEARCHES_READ).map(async (search) => ({
           label: search.label,
@@ -93,7 +93,7 @@ export async function NewListingsStream({ t, locale }: { t: Dictionary; locale: 
   try {
     /* Property and stays together: a real shortlet that just went live is as
        new as a flat. Real ones first (`newShelf`). */
-    const rows = await getListingRepository().search({}, { limit: NEW_READ });
+    const rows = await catalogueReader().search({}, { limit: NEW_READ });
     listings = shelfNow(rows);
   } catch {
     listings = [];

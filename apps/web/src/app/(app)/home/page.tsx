@@ -8,7 +8,7 @@ import { redirect } from "next/navigation";
 import { getDictionary, type Locale } from "@vallo/i18n";
 import { getLocale } from "@/lib/locale";
 import { getHomeOverview } from "@/lib/app/home-queries";
-import { getListingRepository } from "@/lib/listings/repository";
+import { catalogueReader } from "@/lib/catalogue/listings";
 import { HomeScreen } from "@/components/app/home/HomeScreen";
 import { UpNext } from "@/components/app/home/UpNext";
 import { getAgentContext } from "@/lib/agent/listings-queries";
@@ -63,7 +63,7 @@ export const dynamic = "force-dynamic";
  * is Session 2's to decide (a ranked SQL read is request W2-R2).
  */
 async function readStatedKinds(
-  repo: ReturnType<typeof getListingRepository>,
+  repo: ReturnType<typeof catalogueReader>,
 ): Promise<{ tuning: IntentTuning; stated: SpaceTypeKey[]; forThem: Listing[] }> {
   const tuning = await readIntentTuning();
   const stated = tuning.interests
@@ -77,7 +77,7 @@ async function readStatedKinds(
 export default async function HomePage() {
   const locale: Locale = await getLocale();
   const t = getDictionary(locale);
-  const repo = getListingRepository();
+  const repo = catalogueReader();
   /*
    * Every read on this page is independent of the others and free of side
    * effects, so they go out together rather than one after another: each is a

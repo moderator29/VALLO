@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { catalogueChanged } from "@/lib/catalogue/invalidate";
 import { z } from "zod";
 import { fail, ok, validate, type ActionResult } from "../actions/envelope";
 import { adminRefusal, requireAdmin } from "../admin/guard";
@@ -89,6 +90,7 @@ export async function submitOffer(input: SubmitOfferInput): Promise<ActionResult
   );
   if (result.ok) {
     revalidatePath("/offers");
+    catalogueChanged({ listingId: parsed.data.listingId });
     revalidatePath(`/listing/${parsed.data.listingId}`);
   }
   return result;

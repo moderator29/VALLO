@@ -3,7 +3,7 @@ import { reportReadError } from "@/lib/observability/read-error";
 import { pointSelect } from "../supabase/public-point";
 
 import { isSupabaseConfigured } from "../supabase/env";
-import { staysClient } from "./db";
+import { staysClient, type StaysClient } from "./db";
 import { openState } from "./hours";
 import { PAGE_SIZE } from "./filters";
 import type {
@@ -28,6 +28,16 @@ import type {
  * re-implements that rule. Every failure degrades into a renderable state:
  * an empty shelf, a null detail. Nothing here throws.
  */
+
+/**
+ * How a read is made. By default through the request's own RLS-bound client,
+ * answering empty on any failure, as these reads always have. The public
+ * catalogue cache (`lib/catalogue/stays.ts`) passes a cookie-free anonymous
+ * client and `strict`, so a failed read THROWS instead of answering empty: an
+ * empty answer returned inside the shared cache would be kept and served to
+ * everybody, and a throw keeps nothing.
+ */
+export type StaysReadOptions = { client?: StaysClient; strict?: boolean };
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -84,10 +94,11 @@ function finiteOrNull(value: unknown): number | null {
 export async function listStaysShelf(
   scope: { stateCode?: string; city?: string } = {},
   limit = PAGE_SIZE,
+  options: StaysReadOptions = {},
 ): Promise<StaySearchRow[]> {
   if (!isSupabaseConfigured()) return [];
   try {
-    const supabase = await staysClient();
+    const supabase = options.client ?? (await staysClient());
     const { data, error } = await supabase.rpc("stays_search", {
       p_entity_kinds: ["listing", "accommodation"],
       p_state_code: scope.stateCode,
@@ -95,9 +106,11 @@ export async function listStaysShelf(
       p_limit: limit,
     });
     await reportReadError("read.stays.listStaysShelf", error);
+    if (error && options.strict) throw new Error("stays shelf read failed");
     if (error || !data) return [];
     return data;
-  } catch {
+  } catch (thrown) {
+    if (options.strict) throw thrown;
     return [];
   }
 }
@@ -107,12 +120,15 @@ export async function listStaysShelf(
  * photos in order, amenities, room types with their rate plans and each
  * plan's policy, and the property-level policy summary.
  */
-export async function getStayDetail(accommodationId: string): Promise<StayDetail | null> {
+export async function getStayDetail(
+  accommodationId: string,
+  options: StaysReadOptions = {},
+): Promise<StayDetail | null> {
   if (!isSupabaseConfigured() || !UUID_RE.test(accommodationId)) return null;
   try {
-    const supabase = await staysClient();
+    const supabase = options.client ?? (await staysClient());
 
-    const { data: accommodation } = await supabase
+    const { data: accommodation, error: accommodationError } = await supabase
       /* NOT `select("*")`. Same reason as the business read below: this page
          is opened by signed-out visitors and `accommodations` withholds
          `address`, `reviewer_id` and `review_notes` from `anon`, exactly as
@@ -123,6 +139,7 @@ export async function getStayDetail(accommodationId: string): Promise<StayDetail
       .select(await pointSelect(asAuth(supabase), ACCOMMODATION_PUBLIC_COLUMNS))
       .eq("id", accommodationId)
       .maybeSingle();
+    if (accommodationError && options.strict) throw new Error("stay read failed");
     if (!accommodation) return null;
 
     const [businessRes, photosRes, amenityLinksRes, roomTypesRes, catalogueRes] = await Promise.all([
@@ -166,6 +183,11 @@ export async function getStayDetail(accommodationId: string): Promise<StayDetail
         .maybeSingle(),
     ]);
 
+    if (options.strict && [businessRes, photosRes, amenityLinksRes, roomTypesRes].some((r) => r.error)) {
+      /* Reported first, then thrown so the cached reader keeps nothing. */
+      for (const r of [businessRes, photosRes, amenityLinksRes, roomTypesRes]) if (r.error) await reportReadError("read.stays.getStay", r.error);
+      throw new Error("stay read failed");
+    }
     // A business that is not visible to this caller is a property that is not
     // on the shelf for them either.
     if (!businessRes.data) return null;
@@ -188,16 +210,21 @@ export async function getStayDetail(accommodationId: string): Promise<StayDetail
         : Promise.resolve({ data: [] as RatePlanRow[] }),
     ]);
 
+    if (options.strict && [amenitiesRes, plansRes].some((r) => "error" in r && r.error)) {
+      for (const r of [amenitiesRes, plansRes]) if ("error" in r && r.error) await reportReadError("read.stays.getStay", r.error);
+      throw new Error("stay read failed");
+    }
     const plans = plansRes.data ?? [];
     const policyIds = new Set<string>(plans.map((plan) => plan.cancellation_policy_id));
     if (accommodation.cancellation_policy_id) policyIds.add(accommodation.cancellation_policy_id);
 
     const policies = new Map<string, CancellationPolicyRow>();
     if (policyIds.size > 0) {
-      const { data } = await supabase
+      const { data, error: policyError } = await supabase
         .from("cancellation_policies")
         .select("id, name, summary, rules, is_free_until_hours, refund_to")
         .in("id", [...policyIds]);
+      if (policyError && options.strict) throw new Error("stay read failed");
       for (const policy of data ?? []) policies.set(policy.id, policy);
     }
 
@@ -229,7 +256,8 @@ export async function getStayDetail(accommodationId: string): Promise<StayDetail
           }
         : null,
     };
-  } catch {
+  } catch (thrown) {
+    if (options.strict) throw thrown;
     return null;
   }
 }
@@ -238,11 +266,12 @@ export async function getStayDetail(accommodationId: string): Promise<StayDetail
 export async function getRestaurantDetail(
   businessId: string,
   now: Date = new Date(),
+  options: StaysReadOptions = {},
 ): Promise<RestaurantDetail | null> {
   if (!isSupabaseConfigured() || !UUID_RE.test(businessId)) return null;
   try {
-    const supabase = await staysClient();
-    const { data: business } = await supabase
+    const supabase = options.client ?? (await staysClient());
+    const { data: business, error: businessError } = await supabase
       /* NOT `select("*")`. This read is issued by a signed-out visitor on
          `/restaurant/[id]`, and `businesses` withholds its personal columns
          from `anon` (ledger section 68). A star here asks for `cac_number`,
@@ -253,6 +282,7 @@ export async function getRestaurantDetail(
       .eq("id", businessId)
       .eq("kind", "restaurant")
       .maybeSingle();
+    if (businessError && options.strict) throw new Error("restaurant read failed");
     if (!business) return null;
 
     const [profileRes, windowsRes] = await Promise.all([
@@ -265,6 +295,7 @@ export async function getRestaurantDetail(
         .order("opens"),
     ]);
 
+    if (options.strict && (profileRes.error || windowsRes.error)) throw new Error("restaurant read failed");
     const windows: ServiceWindowRow[] = windowsRes.data ?? [];
     const state = openState(windows, now);
     return {
@@ -274,7 +305,8 @@ export async function getRestaurantDetail(
       open_now: state.open_now,
       hours: state.hours,
     };
-  } catch {
+  } catch (thrown) {
+    if (options.strict) throw thrown;
     return null;
   }
 }
@@ -291,7 +323,33 @@ export async function listRestaurants(
 ): Promise<RestaurantCard[]> {
   if (!isSupabaseConfigured()) return [];
   try {
-    const supabase = await staysClient();
+    const rows = await listRestaurantRows({ stateCode: scope.stateCode, city: scope.city }, limit);
+    return restaurantCardsFrom(rows, now, scope.openNow === true);
+  } catch {
+    return [];
+  }
+}
+
+/** A published restaurant's rows, before the clock is applied to its hours. */
+export type RestaurantRows = {
+  business: RestaurantCard["business"];
+  profile: RestaurantCard["profile"];
+  windows: ServiceWindowRow[];
+};
+
+/**
+ * The rows behind `listRestaurants`, with no clock in them, so the public
+ * catalogue cache can keep them and the open-now line is still worked out on
+ * every request (`restaurantCardsFrom`).
+ */
+export async function listRestaurantRows(
+  scope: { stateCode?: string; city?: string } = {},
+  limit = PAGE_SIZE,
+  options: StaysReadOptions = {},
+): Promise<RestaurantRows[]> {
+  if (!isSupabaseConfigured()) return [];
+  try {
+    const supabase = options.client ?? (await staysClient());
     let query = supabase
       .from("businesses")
       .select(
@@ -309,6 +367,7 @@ export async function listRestaurants(
 
     const { data: businesses, error } = await query;
     await reportReadError("read.stays.listRestaurants", error);
+    if (error && options.strict) throw new Error("restaurant list read failed");
     if (error || !businesses || businesses.length === 0) return [];
     const ids = businesses.map((b) => b.id);
 
@@ -316,6 +375,7 @@ export async function listRestaurants(
       supabase.from("restaurant_profiles").select("*").in("business_id", ids),
       supabase.from("service_windows").select("*").in("business_id", ids),
     ]);
+    if (options.strict && (profilesRes.error || windowsRes.error)) throw new Error("restaurant list read failed");
 
     const profiles = new Map((profilesRes.data ?? []).map((p) => [p.business_id, p]));
     const windowsByBusiness = new Map<string, ServiceWindowRow[]>();
@@ -325,18 +385,22 @@ export async function listRestaurants(
       windowsByBusiness.set(w.business_id, list);
     }
 
-    const cards: RestaurantCard[] = businesses.map((business) => {
-      const state = openState(windowsByBusiness.get(business.id) ?? [], now);
-      return {
-        business,
-        profile: profiles.get(business.id) ?? null,
-        open_now: state.open_now,
-        hours: state.hours,
-      };
-    });
-
-    return scope.openNow ? cards.filter((card) => card.open_now) : cards;
-  } catch {
+    return businesses.map((business) => ({
+      business,
+      profile: profiles.get(business.id) ?? null,
+      windows: windowsByBusiness.get(business.id) ?? [],
+    }));
+  } catch (thrown) {
+    if (options.strict) throw thrown;
     return [];
   }
+}
+
+/** The cards, with open-now worked out on `now`'s Lagos clock. */
+export function restaurantCardsFrom(rows: RestaurantRows[], now: Date, openNowOnly: boolean): RestaurantCard[] {
+  const cards: RestaurantCard[] = rows.map(({ business, profile, windows }) => {
+    const state = openState(windows, now);
+    return { business, profile, open_now: state.open_now, hours: state.hours };
+  });
+  return openNowOnly ? cards.filter((card) => card.open_now) : cards;
 }

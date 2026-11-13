@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { catalogueChanged } from "@/lib/catalogue/invalidate";
 import { z } from "zod";
 import { fail, ok, type ActionResult } from "../actions/envelope";
 import { NOT_CONFIGURED_MESSAGE, SIGNED_OUT_MESSAGE, resolveSession } from "../actions/session";
@@ -62,6 +63,7 @@ export async function closeListingWithReason(input: {
   }
 
   revalidatePath("/agent/listings");
+  catalogueChanged({ listingId: parsed.data.listingId });
   revalidatePath(`/listing/${parsed.data.listingId}`);
   const closed = typeof (data as { closed?: unknown } | null)?.closed === "number" ? (data as { closed: number }).closed : 1;
   return ok({ closed });
@@ -83,6 +85,7 @@ export async function answerOwnerHeartbeat(input: { listingId: string }): Promis
 
   const { data, error } = await callLandlordRpc(session.supabase, "owner_heartbeat_answer", { p_listing: id.data });
   if (error) return fail("That answer did not reach us. Nothing has changed. Please try again.");
+  catalogueChanged({ listingId: id.data });
   revalidatePath("/agent/listings");
   return ok({ public: (data as { public?: unknown } | null)?.public === true });
 }

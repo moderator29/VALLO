@@ -41,15 +41,20 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function SettingsPage() {
   const locale = await getLocale();
   const t = getDictionary(locale);
-  const [account, sessions, agentContext, rewardsRead] = await Promise.all([
+  const [account, sessions, agentContext, rewardsRead, phoneOn] = await Promise.all([
     loadProfileState(),
     loadSessions(),
     getAgentContext(),
     /* The Rewards row's line. Today the read answers not-live and calls nothing. */
     readMyRewards(),
+    /* Platform speed: the phone switch is read with the rest, not after
+       them inside the markup, so the page waits one round trip less. */
+    phoneConfirmationOn(),
   ]);
   const signedIn = account.state === "signed-in";
   const profile = signedIn ? account.profile : null;
+  /* A QA account is never asked for a phone, so it is not shown the door. */
+  const phoneAsked = signedIn && phoneOn && !(await isQaTester(profile?.userId));
 
   /* Null, not zero, when the list could not be read. A row reading "0
      devices" to somebody reading it while signed in is a worse lie than no
@@ -92,8 +97,7 @@ export default async function SettingsPage() {
           notifications={profile ? profile.settings.notifications : null}
           deviceCount={deviceCount}
           phoneRow={
-            /* A QA account is never asked for a phone, so it is not shown the door. */
-            signedIn && (await phoneConfirmationOn()) && !(await isQaTester(profile?.userId))
+            phoneAsked
               ? { label: t.trustVisible.phone.title, sub: t.trustVisible.phone.subtitle }
               : null
           }

@@ -25,6 +25,7 @@
  */
 
 import { revalidatePath } from "next/cache";
+import { catalogueChanged } from "@/lib/catalogue/invalidate";
 import { z } from "zod";
 import { fail, ok, validate, type ActionResult } from "../actions/envelope";
 import { NOT_CONFIGURED_MESSAGE, SIGNED_OUT_MESSAGE, resolveSession } from "../actions/session";
@@ -108,6 +109,7 @@ async function ownedRoom(roomTypeId: string): Promise<Owned> {
 function refresh(): void {
   revalidatePath("/host/calendar");
   revalidatePath("/host/rooms");
+  catalogueChanged();
   revalidatePath("/stays");
 }
 

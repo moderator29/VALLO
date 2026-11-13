@@ -38,7 +38,7 @@ import {
   type ShelfQuery,
 } from "@/components/app/search/shelf-query";
 import { getLocale } from "@/lib/locale";
-import { getListingRepository } from "@/lib/listings/repository";
+import { catalogueReader } from "@/lib/catalogue/listings";
 import { factsOf, matchesFacts, matchesFilter } from "@/lib/listings/filter";
 import { nextChange } from "@/components/app/search/next-change";
 import {
@@ -226,7 +226,7 @@ export default async function SearchPage({
   /* Shown only while it still describes the chips on screen. */
   const said = saidText && wordsShown(query, parseWords(saidText)) ? saidText : null;
 
-  const repo = getListingRepository();
+  const repo = catalogueReader();
   /* The three catalogue reads: the results, the pool the sheet counts against (the whole
      catalogue for the current text), and the whole catalogue for the map. */
   /* V-41: "No flooding reported" is judged on facts this page reads, not in

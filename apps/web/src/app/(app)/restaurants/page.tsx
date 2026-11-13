@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import { forStayCard } from "@/lib/i18n/slice";
 import { getDictionary, type Locale } from "@vallo/i18n";
 import { getLocale } from "@/lib/locale";
-import { getListingRepository } from "@/lib/listings/repository";
-import { listRestaurants } from "@/lib/stays/queries";
+import { catalogueReader } from "@/lib/catalogue/listings";
+import { publicRestaurants } from "@/lib/catalogue/stays";
 import { hoursLabel } from "@/lib/stays/hours";
 import { businessCoverUrls } from "@/lib/stays/business-photos";
 import { StayCard } from "@/components/app/stays/StayCard";
@@ -35,8 +35,8 @@ export default async function RestaurantsPage() {
   const locale: Locale = await getLocale();
   const t = getDictionary(locale);
   const [listings, venues, session, savedPlaces] = await Promise.all([
-    getListingRepository().search({ kind: "restaurant" }),
-    listRestaurants(),
+    catalogueReader().search({ kind: "restaurant" }),
+    publicRestaurants(),
     resolveSession(),
     listSavedPlaces(),
   ]);
