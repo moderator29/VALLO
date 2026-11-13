@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore } from "react";
 import { UiIcon, type UiIconName } from "@/design-system/icons/UiIcon";
 import { BackControl } from "@/components/ui/BackControl";
 import { useClientCopy } from "@/lib/i18n/client-copy";
@@ -17,7 +17,10 @@ import { usePhotoViewer } from "./PhotoViewer";
 import { clockOf, type GalleryMedia } from "./gallery-media";
 import "@/app/css/catalogue.css";
 import "@/app/css/list-views.css";
-import { SafeVideo } from "@/components/app/media/SafeVideo";
+import { SafeVideo, savingData } from "@/components/app/media/SafeVideo";
+
+/* Data saving is read once per render; it does not change under a page. */
+const noSubscription = () => () => undefined;
 
 /**
  * The immersive media hero.
@@ -170,6 +173,8 @@ export function ListingGallery({
      away unmounts its player, which stops it (and its sound). The file is
      fetched only from the moment "Watch video" is pressed. */
   const [playing, setPlaying] = useState<number | null>(null);
+  /* The tile plays by itself unless the phone or the person is saving data. */
+  const tilePlays = !useSyncExternalStore(noSubscription, savingData, () => true);
   useEffect(() => {
     if (playing !== null && playing !== active) setPlaying(null);
   }, [active, playing]);
@@ -395,23 +400,26 @@ export function ListingGallery({
                 className="absolute inset-0 z-[1] cursor-zoom-in"
               />
             )}
-            {video && playing === i && (
-              /* Muted until the viewer unmutes, with its controls, and never
-                 on its own: it starts only because "Watch video" was pressed. */
+            {video && (playing === i || (tilePlays && active === i)) && (
+              /* THE GALLERY TILE PLAYS ON ITS OWN, MUTED (13 November 2026):
+                 the slide in view plays while it is half on screen and pauses
+                 when it leaves, its controls there to unmute; never on data
+                 saving, where "Watch video" below starts it instead. Nothing is
+                 fetched until it is seen (SafeVideo). */
               <SafeVideo
                 src={video.src}
                 poster={video.poster ?? undefined}
                 controls
-                autoPlay
+                autoPlayInView
                 muted
                 playsInline
-                preload="auto"
+                preload="metadata"
                 aria-label={`${title}, video${video.durationSeconds ? `, ${clockOf(video.durationSeconds)}` : ""}`}
                 data-testid="gallery-video"
                 className="absolute inset-0 z-[3] h-full w-full bg-[var(--nf-overlay-media-deep)] object-contain"
               />
             )}
-            {video && playing !== i && (
+            {video && playing !== i && !(tilePlays && active === i) && (
               <>
                 {/* The still is a target too, for a thumb; the button below
                     is the one a keyboard and a screen reader reach. */}
@@ -551,7 +559,7 @@ export function ListingGallery({
       )}
       {/* Off while a video plays: it sat on the player's mute and full-screen
           controls, and the sound is the first thing a viewer reaches for. */}
-      {count > 0 && playing === null && (
+      {count > 0 && playing === null && !(tilePlays && mixed?.[active]?.kind === "video") && (
         <p
           data-testid="gallery-counter"
           /* `--nf-radius-sm`, the same 28px-plate ratio as the stand-in chip

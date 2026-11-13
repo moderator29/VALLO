@@ -23,6 +23,23 @@ import { refreshMediaUrl } from "@/lib/media/refresh-url";
  *   5. A source with no readable URL (null) is the failure sentence at once,
  *      not an empty box.
  *
+ * AND IT FEELS FAST AND FINE (13 November 2026, the founder: "make sure all
+ * videos are high quality and users feel it and love it"):
+ *
+ *   - NOTHING IS FETCHED UNTIL IT IS SEEN. `preload` is "none" while the
+ *     element is off screen and becomes the caller's choice (by default
+ *     "metadata": the length and the first frame, a few kilobytes) the moment
+ *     it is half in view. A gallery of five clips no longer starts five
+ *     downloads.
+ *   - ALWAYS INLINE. `playsInline` is set on every video, so an iPhone never
+ *     throws a clip into its full-screen player on its own; full screen is the
+ *     native one, from the controls, when the person asks for it.
+ *   - `autoPlayInView`: muted, it plays while at least half of it is on screen
+ *     and pauses when it leaves. Only the listing gallery's tile asks for it,
+ *     and never on data saving.
+ *   - The poster is drawn before any frame (and the element's ground is the
+ *     deep media colour, never a black box while it waits).
+ *
  * English words by default; a caller with its own dictionary passes them.
  */
 
@@ -32,6 +49,8 @@ export type SafeVideoProps = Omit<VideoHTMLAttributes<HTMLVideoElement>, "src" |
   failedText?: string;
   /** The link that opens the file by itself. */
   openText?: string;
+  /** Muted playback while at least half of it is on screen (the gallery tile only). */
+  autoPlayInView?: boolean;
 };
 
 /** The URL with the first-frame fragment, unless it already carries one or a poster stands in. */
@@ -47,6 +66,7 @@ export function SafeVideo({
   autoPlay,
   failedText = "This video could not be played here.",
   openText = "Open the video",
+  autoPlayInView = false,
   className,
   ...rest
 }: SafeVideoProps) {
@@ -64,6 +84,32 @@ export function SafeVideo({
     setLive(src);
     setFailed(!src);
   }, [src]);
+
+  /* Seen yet? Until then nothing is fetched. A browser with no observer is
+     treated as having seen it, so a video is never left unloaded for good. */
+  const [seen, setSeen] = useState(() => typeof window !== "undefined" && typeof IntersectionObserver === "undefined");
+  useEffect(() => {
+    const el = ref.current;
+    if (!el || failed || typeof IntersectionObserver === "undefined") return;
+    const saving = autoPlayInView && savingData();
+    const watcher = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) setSeen(true);
+          if (!autoPlayInView || saving) continue;
+          if (entry.isIntersecting) {
+            el.muted = true;
+            void el.play()?.catch(() => undefined);
+          } else if (!el.paused) {
+            el.pause();
+          }
+        }
+      },
+      { threshold: 0.5 },
+    );
+    watcher.observe(el);
+    return () => watcher.disconnect();
+  }, [autoPlayInView, failed, live]);
 
   /* Sound-on autoplay refused: start it muted rather than not at all. */
   useEffect(() => {
@@ -131,11 +177,25 @@ export function SafeVideo({
       ref={ref}
       src={withFirstFrame(live, poster, preload)}
       poster={poster}
-      preload={preload}
+      preload={seen ? (preload ?? "metadata") : "none"}
       autoPlay={autoPlay}
       className={className}
       onError={onError}
       {...rest}
+      playsInline
+      {...(autoPlayInView ? { muted: true } : {})}
+      style={{ backgroundColor: "var(--nf-overlay-media-deep)", ...rest.style }}
     />
   );
+}
+
+/** The phone or the person asked for less data: no video plays on its own. */
+export function savingData(): boolean {
+  try {
+    if (document.documentElement.dataset.saveData === "on") return true;
+    const connection = (navigator as unknown as { connection?: { saveData?: boolean } }).connection;
+    return connection?.saveData === true;
+  } catch {
+    return false;
+  }
 }

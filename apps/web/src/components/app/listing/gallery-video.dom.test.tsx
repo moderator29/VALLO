@@ -67,25 +67,25 @@ describe.skipIf(!hasBrowser && !process.env.CI)("ListingGallery with videos", ()
       }
       expect(await panes.nth(1).getByTestId("gallery-open").count()).toBe(0);
 
-      /* Never autoplays, nothing fetched before the press. */
+      /* Nothing plays, and nothing is fetched, while a photo is on screen. */
       expect(await page.locator("video").count()).toBe(0);
 
-      /* Swipe to the first video, then press its pill. */
+      /* THE TILE PLAYS ON ITS OWN, MUTED (13 November 2026): swiping to the
+         first video puts its player there without a press, muted, with its
+         controls, and fetching only what a first frame needs. */
       await track.evaluate((el) => el.scrollTo({ left: el.clientWidth, behavior: "instant" as ScrollBehavior }));
       await page.waitForTimeout(400);
-      expect((await page.getByTestId("gallery-counter").textContent())?.replace(/\s/g, "")).toContain("2/5");
-      await panes.nth(1).getByTestId("gallery-watch").click();
+      expect((await page.getByTestId("gallery-counter").count())).toBe(0);
       const player = page.getByTestId("gallery-video");
       await player.waitFor();
       const state = await player.evaluate((v: HTMLVideoElement) => ({
         src: v.getAttribute("src"),
         muted: v.muted,
         controls: v.controls,
+        inline: v.hasAttribute("playsinline"),
       }));
-      expect(state).toEqual({ src: "/v/a.mp4", muted: true, controls: true });
+      expect(state).toEqual({ src: "/v/a.mp4", muted: true, controls: true, inline: true });
       expect(await panes.nth(1).getByTestId("gallery-watch").count()).toBe(0);
-      /* The counter steps off the player's controls while it plays. */
-      expect(await page.getByTestId("gallery-counter").count()).toBe(0);
 
       /* No cover pill while the slide on screen is a video. */
       expect(await page.getByTestId("gallery-watch-cover").count()).toBe(0);
@@ -103,6 +103,23 @@ describe.skipIf(!hasBrowser && !process.env.CI)("ListingGallery with videos", ()
       expect((await page.getByTestId("gallery-counter").count())).toBe(0);
       expect(await track.evaluate((el) => Math.round(el.scrollLeft / el.clientWidth))).toBe(1);
       expect(await page.getByTestId("gallery-watch-cover").count()).toBe(0);
+    } finally {
+      await close();
+    }
+  });
+
+  /* DATA SAVING: nothing plays on its own; the pill starts it, as before. */
+  it("on data saving, swiping to a video plays nothing until its pill is pressed", async () => {
+    const { page, close } = await mountInBrowser({ entry, css: await appCss(), init: 'document.addEventListener("DOMContentLoaded", function () { document.documentElement.dataset.saveData = "on"; }); document.documentElement && (document.documentElement.dataset.saveData = "on");' });
+    try {
+      const track = page.locator('[role="group"][aria-label^="Photographs of"]');
+      await track.waitFor();
+      const panes = track.locator(":scope > div");
+      await track.evaluate((el) => el.scrollTo({ left: el.clientWidth, behavior: "instant" as ScrollBehavior }));
+      await page.waitForTimeout(400);
+      expect(await page.locator("video").count()).toBe(0);
+      await panes.nth(1).getByTestId("gallery-watch").click();
+      await page.getByTestId("gallery-video").waitFor();
     } finally {
       await close();
     }

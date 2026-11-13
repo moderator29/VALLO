@@ -351,7 +351,11 @@ describe.skipIf(!hasBrowser && !process.env.CI)("the chat's full-screen media vi
       await page.getByTestId("video-tile").click();
       await page.getByTestId("media-viewer").waitFor();
       expect(await page.getByTestId("media-viewer-video").count()).toBe(1);
-      expect(await page.getByTestId("media-viewer-video").getAttribute("src")).toBe(VIDEO_MESSAGE.file.url);
+      /* No poster here, and it loads metadata only (13 November 2026), so the
+         source asks for frame one (SafeVideo's withFirstFrame): never a black box. */
+      expect(await page.getByTestId("media-viewer-video").getAttribute("src")).toBe(`${VIDEO_MESSAGE.file.url}#t=0.001`);
+      expect(await page.getByTestId("media-viewer-video").getAttribute("preload")).not.toBe("auto");
+      expect(await page.getByTestId("media-viewer-video").evaluate((v: HTMLVideoElement) => v.controls && v.hasAttribute("playsinline") && !v.autoplay)).toBe(true);
       /* The photo before it is one swipe away. */
       expect(await position(page)).toBe("2 of 2");
       await page.keyboard.press("ArrowLeft");

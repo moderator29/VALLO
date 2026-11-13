@@ -539,10 +539,8 @@ function Lightbox({
                   src={item.src}
                   poster={item.poster ?? undefined}
                   controls
-                  autoPlay
-                  muted
                   playsInline
-                  preload="auto"
+                  preload="metadata"
                   aria-label={`${title}, video ${i + 1} of ${items.length}${item.durationSeconds ? `, ${clockOf(item.durationSeconds)}` : ""}`}
                   data-testid="lightbox-video"
                   className="h-full w-full object-contain"

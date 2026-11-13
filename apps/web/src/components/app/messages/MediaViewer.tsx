@@ -477,9 +477,8 @@ export function MediaViewer({
                     <SafeVideo
                       src={slide.src}
                       controls
-                      autoPlay
                       playsInline
-                      preload="auto"
+                      preload="metadata"
                       aria-label={`${slide.name}, ${copy.video}`}
                       data-testid="media-viewer-video"
                       className="nf-media-viewer__media"
