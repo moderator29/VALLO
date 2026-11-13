@@ -4,9 +4,12 @@
  *
  *   V-56: an on-platform move-in pays the agency fee into a held payment
  *   instead of to the agent, released on keys received or, failing a problem,
- *   14 days after move-in. The rest is paid now. The flag readers are in
- *   `money-holds-flags.ts`; the pay screen draws these lines only when both
- *   `rent_agency_hold` and `held_payments` are on.
+ *   14 days after move-in. The rest is paid now. The pay screen draws these
+ *   lines only when both `rent_agency_hold` and `held_payments` are on.
+ *   (`money-holds-flags.ts` held the flag readers and was deleted on
+ *   13 November 2026 as unreachable, nothing imported it. This line used to
+ *   point at it, and a comment naming a file that no longer exists is how an
+ *   hour gets lost.)
  *
  *   V-92: a shortlet caution is a hold on the guest's own wallet, released 48
  *   hours after check-out unless the host claims damage with photos first.

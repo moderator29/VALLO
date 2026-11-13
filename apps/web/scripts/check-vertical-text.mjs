@@ -159,7 +159,7 @@ const SCAN = `(() => {
       const cs = getComputedStyle(p);
       if (cs.display === "none" || cs.visibility === "hidden" || cs.contentVisibility === "hidden") return true;
       if (cs.clipPath && cs.clipPath.startsWith("inset(50%")) return true;
-      if (cs.clip && cs.clip !== "auto" && /rect\(0px(,| )/.test(cs.clip)) return true;
+      if (cs.clip && cs.clip.indexOf("rect(0px") === 0) return true;
       const r = p.getBoundingClientRect();
       if ((r.width <= 1 || r.height <= 1) && cs.overflow !== "visible") return true;
       p = p.parentElement;
