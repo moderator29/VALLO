@@ -169,6 +169,33 @@ describe("one opening inside the app", () => {
   });
 });
 
+/*
+ * A TOUCH ENDS IT (13 November 2026). The layer took every tap for its whole
+ * hold, 3.5 to 4.2 seconds, while its own comment said a tap was not
+ * swallowed. The first touch or key now starts the crossfade at once.
+ */
+describe("a touch or a key during the opening", () => {
+  it("starts the crossfade at once, long before the minimum, and the layer is gone after the fade", () => {
+    for (const kind of ["pointerdown", "keydown"]) {
+      const r = run({ ready: false });
+      r.begin();
+      r.advance(400);
+      expect(r.attrs["data-open"]).toBe("on");
+      r.listeners[kind]!({});
+      expect(r.attrs["data-open"]).toBe("leave");
+      r.advance(400 + OPEN_FADE_MS + 60);
+      expect(r.attrs["data-open"]).toBe("off");
+    }
+  });
+  it("does nothing while the opening is not showing (a warm open, or a shell still waiting for its splash)", () => {
+    const warm = run({ warm: true });
+    expect(warm.listeners.pointerdown).toBeUndefined();
+    const waiting = run({ native: true });
+    waiting.listeners.pointerdown!({});
+    expect(waiting.attrs["data-open"]).toBeUndefined();
+  });
+});
+
 describe("the opening screen's timing", () => {
   it("is visible for at least the minimum even when the page is ready at once", () => {
     const r = run({ ready: true });

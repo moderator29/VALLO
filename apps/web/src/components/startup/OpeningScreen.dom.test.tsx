@@ -25,7 +25,7 @@ describe("the opening screen's markup", () => {
   });
 });
 
-const CHROMIUM = ["/opt/pw-browsers/chromium-1194/chrome-linux/chrome", "/opt/pw-browsers/chromium/chrome-linux/chrome", "/usr/bin/chromium", "/usr/bin/google-chrome"].find((p) => existsSync(p));
+const CHROMIUM = ["/opt/pw-browsers/chromium-1243/chrome-linux64/chrome", "/opt/pw-browsers/chromium-1194/chrome-linux/chrome", "/opt/pw-browsers/chromium/chrome-linux/chrome", "/usr/bin/chromium", "/usr/bin/google-chrome"].find((p) => existsSync(p));
 let browser: Browser | null = null;
 beforeAll(async () => {
   if (hasBrowser && CHROMIUM) browser = await chromium.launch({ executablePath: CHROMIUM, args: ["--no-sandbox"] });
@@ -34,16 +34,21 @@ afterAll(async () => {
   await browser?.close();
 });
 
-async function installed(opts: { reduced?: boolean; hydrate?: number | null; lock?: boolean; guarded?: boolean } = {}) {
+async function installed(opts: { reduced?: boolean; hydrate?: number | null; lock?: boolean; guarded?: boolean; shell?: "1.0.2" | "older" } = {}) {
   const ctx = await browser!.newContext({ viewport: { width: 390, height: 844 }, reducedMotion: opts.reduced ? "reduce" : "no-preference" });
   const page = await ctx.newPage();
   // an installed app: the standalone display mode
   await page.addInitScript(`const mm = window.matchMedia.bind(window); window.matchMedia = (q) => /display-mode: standalone/.test(q) ? { matches: true, media: q, addEventListener() {}, removeEventListener() {} } : mm(q);`);
+  /* The native bridge as it is at document start: the shell's user agent mark,
+     and the plugin headers Capacitor injects before any page script runs. */
+  if (opts.shell) {
+    await page.addInitScript(`window.Capacitor = { PluginHeaders: [{ name: "SplashScreen", methods: [{ name: "hide" }] }${opts.shell === "1.0.2" ? ', { name: "ValloShell", methods: [{ name: "setPrivacyCover" }, { name: "handoff" }] }' : ""}], isNativePlatform: function () { return true; } };`);
+  }
   await page.route("http://vallo.test/**", (route) =>
     route.fulfill({
       contentType: "text/html",
       body: `<!doctype html><html lang="en"><head><meta name="viewport" content="width=device-width, initial-scale=1"><style>${CSS}</style><script>${OPEN_SCRIPT}</script></head><body>${renderToStaticMarkup(<OpeningScreen />)}
-        ${opts.guarded ? '<div data-passcode-guarded="">app</div>' : "<main>app</main>"}
+        ${opts.guarded ? '<div data-passcode-guarded="">app</div>' : '<main><button id="under" onclick="window.__pressed=(window.__pressed||0)+1">Book</button></main>'}
         <script>${opts.hydrate === null ? "" : `setTimeout(() => { window.__nfOpenReady = true; ${opts.guarded ? "document.documentElement.setAttribute('data-guard-ready','');" : ""} }, ${opts.hydrate ?? 100})`}</script></body></html>`,
     }),
   );
@@ -58,7 +63,7 @@ const state = (page: import("playwright-core").Page) =>
     return { open: document.documentElement.dataset.open, display: cs.display, opacity: Number(cs.opacity), markWidth: Math.round(mark.width), markCentreY: Math.round(mark.top + mark.height / 2) };
   });
 
-describe.skipIf(!hasBrowser && !process.env.CI)("the opening screen, in a browser", () => {
+describe.skipIf(!(hasBrowser || CHROMIUM) && !process.env.CI)("the opening screen, in a browser", () => {
   it("is there from the first frame with the mark centred, and stays for the minimum", async () => {
     const { page, close } = await installed({ hydrate: 50 });
     await page.waitForSelector("#nf-open svg", { state: "attached" });
@@ -136,6 +141,63 @@ describe.skipIf(!hasBrowser && !process.env.CI)("the opening screen, in a browse
       [...document.querySelectorAll(".nf-open__launch .l, .nf-open__launch .t, .nf-open__launch .mv")].map((n) => Number(getComputedStyle(n).opacity)),
     );
     expect(Math.min(...landed)).toBe(1);
+    await close();
+  });
+
+  /*
+   * A TOUCH ENDS IT (13 November 2026). The layer took every tap for its whole
+   * hold, 3.5 to 4.2 seconds, and its comment said it did not. A real tap in a
+   * real browser now starts the crossfade at once, the layer stops taking input
+   * that instant, and the button under it is not pressed by a tap that was
+   * aimed at a picture.
+   */
+  it("a tap during the opening lifts it at once, and is not delivered to a button the person could not see", async () => {
+    const { page, close } = await installed({ hydrate: null });
+    await page.waitForFunction(() => document.documentElement.dataset.open === "on");
+    await page.waitForTimeout(500);
+    const box = (await page.locator("#under").boundingBox())!;
+    await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
+    expect(await page.evaluate(() => document.documentElement.dataset.open)).toBe("leave");
+    expect(await page.evaluate(() => getComputedStyle(document.getElementById("nf-open")!).pointerEvents)).toBe("none");
+    expect(await page.evaluate(() => (window as unknown as { __pressed?: number }).__pressed ?? 0)).toBe(0);
+    await page.waitForFunction(() => getComputedStyle(document.getElementById("nf-open")!).display === "none", null, { timeout: 1500 });
+    /* The next tap is the page's. */
+    await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
+    expect(await page.evaluate(() => (window as unknown as { __pressed?: number }).__pressed ?? 0)).toBe(1);
+    await close();
+  });
+
+  it("a key during the opening lifts it at once", async () => {
+    const { page, close } = await installed({ hydrate: null });
+    await page.waitForFunction(() => document.documentElement.dataset.open === "on");
+    await page.keyboard.press("Tab");
+    expect(await page.evaluate(() => document.documentElement.dataset.open)).toBe("leave");
+    await close();
+  });
+
+  /*
+   * ONE OPENING IN THE APP (13 November 2026). A 1.0.2 binary draws its own
+   * opening natively; this layer must never draw over the page after it. An
+   * older binary has none, and this layer is still its opening.
+   */
+  it("inside a 1.0.2 binary, the layer is never drawn: off before the first frame and still off after every wait", async () => {
+    const { page, close } = await installed({ hydrate: 50, shell: "1.0.2" });
+    await page.waitForSelector("#nf-open svg", { state: "attached" });
+    expect(await page.evaluate(() => document.documentElement.dataset.open)).toBe("off");
+    expect((await state(page)).display).toBe("none");
+    await page.evaluate(() => window.dispatchEvent(new Event("nf:splash-down")));
+    await page.waitForTimeout(800);
+    expect((await state(page)).display).toBe("none");
+    await close();
+  });
+
+  it("inside an older binary with no opening of its own, the layer plays once the splash is down", async () => {
+    const { page, close } = await installed({ hydrate: 50, shell: "older" });
+    await page.waitForSelector("#nf-open svg", { state: "attached" });
+    await page.evaluate(() => document.documentElement.setAttribute("data-native", "true"));
+    await page.evaluate(() => window.dispatchEvent(new Event("nf:splash-down")));
+    await page.waitForFunction(() => document.documentElement.dataset.open === "on", null, { timeout: 1000 });
+    expect((await state(page)).display).toBe("block");
     await close();
   });
 });

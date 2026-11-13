@@ -49,8 +49,10 @@
  *   so the page never shows half-built chrome or an unlocked frame before the
  *   Face ID lock; and never later than OPEN_CAP_MS. The stylesheet lifts it by
  *   itself at 2,500ms if this script never runs.
- * A tap during the opening is not swallowed by the page underneath: the layer
- * takes it, and the opening is at most OPEN_CAP_MS long.
+ * A TOUCH OR A KEY DURING THE OPENING ENDS IT AT ONCE: the layer starts its
+ * crossfade on the first `pointerdown` or `keydown` and stops taking input that
+ * instant. (It used to hold every tap for its whole hold and say otherwise.)
+ * Untouched, the opening is at most OPEN_CAP_MS long.
  */
 
 /** Shortest time the mark is seen once its animation has begun. */
@@ -120,7 +122,17 @@ export const OPEN_SCRIPT =
   "var min=still?" + OPEN_MIN_STILL_MS + ":" + OPEN_MIN_MS + ",cap=" + OPEN_CAP_MS + ",t0=0,gone=0;" +
   "function ready(){if(!W.__nfOpenReady)return false;" +
   "if(D.querySelector('[data-passcode-guarded]')&&!r.hasAttribute('data-guard-ready')&&!D.querySelector('.nf-passcode'))return false;return true}" +
-  "function leave(){if(gone)return;gone=1;r.setAttribute('data-open','leave');setTimeout(function(){r.setAttribute('data-open','off')}," + (OPEN_FADE_MS + 40) + ")}" +
+  "function leave(){if(gone)return;gone=1;try{D.removeEventListener('pointerdown',skip,true);D.removeEventListener('keydown',skip,true)}catch(e){}r.setAttribute('data-open','leave');setTimeout(function(){r.setAttribute('data-open','off')}," + (OPEN_FADE_MS + 40) + ")}" +
+  /* A TOUCH OR A KEY ENDS IT AT ONCE (13 November 2026). The layer covers the
+     page and takes every tap while it is up, and it used to keep them all for
+     its whole hold, three and a half to four seconds: a person who tapped got
+     nothing and read the app as frozen. Now the first touch or key starts the
+     crossfade there and then. The touch itself does nothing else: the layer
+     stops taking input the moment it leaves, so the release lands on the
+     page, but a click needs its press and release on the same element, and
+     that tap was never meant for a button the person could not yet see. */
+  "function skip(){if(r.getAttribute('data-open')==='on')leave()}" +
+  "try{D.addEventListener('pointerdown',skip,true);D.addEventListener('keydown',skip,true)}catch(e){}" +
   "function tick(){var age=performance.now()-t0;if(age>=cap||(age>=min&&ready()))leave();else setTimeout(tick,40)}" +
   "function start(){if(t0)return;t0=performance.now();tick()}" +
   "D.addEventListener('animationstart',function(e){if(e.animationName==='nf-open-in')start()},true);" +

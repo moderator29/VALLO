@@ -14,14 +14,17 @@
  * has the mark: no script, no image fetch (the mark is inline SVG in the first
  * HTML, `OpeningScreen.tsx`).
  *
- * WHEN IT SHOWS. Only in an installed app (`display-mode: standalone`, which is
- * what an iPhone home-screen web app is), never on the native shell (its own
- * launch plays there) and never in a browser tab. `open-script.ts` hides it on
- * a warm open (the same session) and lifts it once the page is ready.
+ * WHEN IT SHOWS. The first load of a browser session on the website and in an
+ * installed web app, and inside an app binary older than 1.0.2. Never inside a
+ * 1.0.2 or later binary, which draws the opening natively (`LaunchMark`):
+ * `open-script.ts` turns it off there before the first frame, so the app has
+ * one opening, not two. The script also hides it on a warm open (the same
+ * session) and lifts it once the page is ready.
  *
  * WHEN IT GOES. The script lifts it after its minimum time and once the page
- * (and the passcode guard) have decided what to show, a crossfade of 320ms.
- * With no script at all, the animation `nf-open-cap` lifts it by 4,500ms. The
+ * (and the passcode guard) have decided what to show, a crossfade of 320ms, or
+ * at once on the first touch or key. With no script at all, the animation
+ * `nf-open-cap` lifts it by 4,500ms (its 4,200ms delay and 300ms run). The
  * same ground and mark size and position are drawn into the iOS launch images
  * (scripts/build-brand-launch.mjs), so iOS's own snapshot hands over to this
  * screen without a visible move.
