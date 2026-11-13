@@ -44,7 +44,16 @@ describe("a long name stays inside the people card (UI-10)", () => {
     const css = readFileSync(join(process.cwd(), "src/app/social-feed.css"), "utf8");
     const at = css.indexOf("  .nf-people__name > :first-child {");
     expect(at).toBeGreaterThan(-1);
-    expect(css.slice(at, css.indexOf("}", at))).toContain("overflow-wrap: anywhere");
+    /* `break-word`, not `anywhere` (13 November 2026). Both let a single long
+       word break so it never runs past the card, which is what UI-10 asked
+       for. But `anywhere` also counts toward the min-content width: it told
+       the flex row that one letter was wide enough, the name column shrank to
+       about 70px beside the two actions, and "Joseph Agboola" ran down the
+       card as "Josep / h / Agbool / a". `break-word` keeps the column's
+       min-content at the longest word, so a name wraps between its words. */
+    const rule = css.slice(at, css.indexOf("}", at));
+    expect(rule).toContain("overflow-wrap: break-word");
+    expect(rule).not.toContain("overflow-wrap: anywhere");
     expect(css.slice(css.indexOf("  .nf-people__name {"), at)).toContain("min-inline-size: 0");
   });
 });

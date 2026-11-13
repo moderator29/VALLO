@@ -10,11 +10,8 @@ import { doorHonestyLine, readDoorHonesty } from "@/lib/tenancy/door";
 import { marketOf } from "@/lib/listings/market";
 import { PageHeader } from "@/components/app/PageHeader";
 import { Section, Stack, TYPE } from "@/components/app/Screen";
-import { ButtonLink } from "@/components/ui/Button";
 import { ValloRecord } from "@/components/app/trust/ValloRecord";
 import { TrustFacts } from "@/components/app/listing/TrustFacts";
-import { ProofStrip } from "@/components/app/listing/ProofStrip";
-import { forProofStrip } from "@/lib/i18n/slice";
 import { earnedTrust, withEarnedTrust } from "@/components/app/listing/earned-trust";
 import { ListingAgentCard } from "@/components/app/listing/ListingAgentCard";
 import { ReplyTimeLine } from "@/components/app/listing/ReplyTimeLine";
@@ -32,6 +29,13 @@ import { CautionRecordLine } from "@/components/app/listing/CautionRecordLine";
  * listing page keeps a summary and the door to this one, so nothing a person
  * needs to act is a tap away: the price, the fees and every dated fact stay on
  * the listing page too.
+ *
+ * EVERY CHECK OPENS (13 November 2026). Each dated fact is a row; tapping it
+ * says when, who did it, what was looked at and what it does not prove. The
+ * rows are in two groups, the space and the person who listed it, because
+ * "identity seen" and "title document seen" are claims about different
+ * things. With nothing dated the page says so and then explains how a space
+ * earns each check, so the answer to the question is never one bare sentence.
  *
  * EVERY FACT IS A DATE AND EVERY ABSENCE IS SILENT. Nothing here is a tick,
  * nothing is "not verified", and an example row reads as a plain unchecked
@@ -78,25 +82,24 @@ export default async function SpaceTrustPage({ params }: { params: Promise<{ id:
 
       <Stack className="nf-trust-page">
         <Section className="nf-trust-page__lead">
-          <p className={TYPE.body}>{copy.lede}</p>
-          <div className="mt-block">
+          <div>
+            {/* Every dated fact as a row that opens, split by what was looked
+                at, under the one sentence the page is read by. With nothing
+                dated: the plain statement, the one person
+                who can answer (never on an example row, which has nobody to
+                message), and how a space earns each check. */}
             <TrustFacts
               listingId={listing.id}
               trust={trust}
-              strip={<ProofStrip lines={proof} variant="full" t={forProofStrip(t)} locale={locale} />}
+              strip={null}
               proofCount={proof.length}
+              lines={proof}
               locale={locale}
               t={t}
               variant="full"
+              askHref={nothingDated && !listing.isDemo ? messageHref : null}
             />
           </div>
-          {/* The empty state's way forward: the one person who can answer.
-              Never on an example row, which has nobody to message. */}
-          {nothingDated && !listing.isDemo && (
-            <ButtonLink href={messageHref} variant="secondary" leadingIcon="chat-bubble" className="mt-block w-full sm:w-auto">
-              {copy.noneAction}
-            </ButtonLink>
-          )}
         </Section>
 
         {doorLine && (

@@ -14,6 +14,7 @@ import { landingRoomsEn } from "./landing-rooms.en";
 import { afterTheGateEn } from "./after-the-gate.en";
 import { cryptoPayEn } from "./crypto-pay.en";
 import { trustVisibleEn } from "./trust-visible.en";
+import { trustReasonsEn } from "./trust-reasons.en";
 import { memberKitEn } from "./member-kit.en";
 import { visitEn } from "./visit.en";
 import { memberFlowsEn } from "./member-flows.en";
@@ -6160,6 +6161,8 @@ export const en = {
   afterTheGate: afterTheGateEn,
   cryptoPay: cryptoPayEn,
   trustVisible: trustVisibleEn,
+  /* Reasons to trust: the dated checks on a space and a person, and their sheet. */
+  trustReasons: trustReasonsEn,
   /* B5 to B17: the member kit. */
   memberKit: memberKitEn,
   /* Schedule a visit: the two-step flow at /listing/[id]/visit. */

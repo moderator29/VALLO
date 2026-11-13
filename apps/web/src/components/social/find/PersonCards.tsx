@@ -30,11 +30,11 @@ export type PersonCardData = {
 
 function Face({ name, avatarUrl }: { name: string; avatarUrl: string | null }) {
   return (
-    <span className="nf-pcard__face" aria-hidden="true">
+    <span className="nf-ppl-card__face" aria-hidden="true">
       {avatarUrl ? (
         <RemoteImage src={avatarUrl} alt="" width={128} height={128} sizes="64px" loading="lazy" />
       ) : (
-        <span className="nf-pcard__monogram">{initial(name)}</span>
+        <span className="nf-ppl-card__monogram">{initial(name)}</span>
       )}
     </span>
   );
@@ -51,7 +51,7 @@ function Action({ action, signedIn }: { action: CardAction; signedIn: boolean })
       </ButtonLink>
     );
   }
-  return <span className="nf-pcard__you">{action.label}</span>;
+  return <span className="nf-ppl-card__you">{action.label}</span>;
 }
 
 /**
@@ -71,26 +71,26 @@ export function PersonCard({
   openLabel: string;
 }) {
   return (
-    <li className="nf-pcard" data-testid="person-card">
-      <Link href={card.href} className="nf-pcard__open" aria-label={openLabel} />
+    <li className="nf-ppl-card" data-testid="person-card">
+      <Link href={card.href} className="nf-ppl-card__open" aria-label={openLabel} />
       <Face name={card.name} avatarUrl={card.avatarUrl} />
-      <span className="nf-pcard__name">
+      <span className="nf-ppl-card__name">
         <span>{card.name}</span>
         {card.tier !== "none" ? <TierBadge tier={card.tier} size={14} /> : null}
       </span>
       {card.roleWord ? (
-        <span className="nf-pcard__role">{card.roleWord}</span>
+        <span className="nf-ppl-card__role">{card.roleWord}</span>
       ) : card.handle ? (
-        <span className="nf-pcard__handle">@{card.handle}</span>
+        <span className="nf-ppl-card__handle">@{card.handle}</span>
       ) : null}
-      <span className="nf-pcard__facts">
+      <span className="nf-ppl-card__facts">
         {card.facts.map((line) => (
           <span key={line} className="nf-numeric">
             {line}
           </span>
         ))}
       </span>
-      <span className="nf-pcard__act">
+      <span className="nf-ppl-card__act">
         <Action action={card.action} signedIn={signedIn} />
       </span>
     </li>
@@ -109,18 +109,18 @@ export function PersonRowItem({
 }) {
   return (
     <li className="nf-ppl__rowitem" data-testid="person-row">
-      <Link href={card.href} className="nf-pcard__open" aria-label={openLabel} />
+      <Link href={card.href} className="nf-ppl-card__open" aria-label={openLabel} />
       <Face name={card.name} avatarUrl={card.avatarUrl} />
       <span className="nf-ppl__who">
-        <span className="nf-pcard__name">
+        <span className="nf-ppl-card__name">
           <span>{card.name}</span>
           {card.tier !== "none" ? <TierBadge tier={card.tier} size={14} /> : null}
         </span>
-        <span className="nf-pcard__handle">
+        <span className="nf-ppl-card__handle">
           {[card.roleWord, card.handle ? `@${card.handle}` : null, ...card.facts].filter(Boolean).join(" · ")}
         </span>
       </span>
-      <span className="nf-pcard__act">
+      <span className="nf-ppl-card__act">
         <Action action={card.action} signedIn={signedIn} />
       </span>
     </li>

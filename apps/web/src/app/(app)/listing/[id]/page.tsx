@@ -1601,6 +1601,7 @@ export default async function ListingDetailPage({
                     <TrustFacts
                       listingId={listing.id}
                       trust={trust}
+                      lines={proof}
                       strip={
                         /* V-03, THE PROOF STRIP: each line opens what the
                            check is and is not. Nothing at all when nothing is

@@ -212,8 +212,8 @@ describe.skipIf(!hasBrowser && !process.env.CI)("the badge row", () => {
       await page.getByTestId("badge-code-0").click();
       await page.getByTestId("badge-moment").waitFor();
       const names = await page.evaluate(() => [
-        getComputedStyle(document.querySelector(".nf-moment__burst")!).animationName,
-        getComputedStyle(document.querySelector(".nf-moment__medal")!).animationName,
+        getComputedStyle(document.querySelector(".nf-medal-moment__burst")!).animationName,
+        getComputedStyle(document.querySelector(".nf-medal-moment__medal")!).animationName,
       ]);
       expect(names).toEqual(["none", "none"]);
     } finally {
@@ -226,7 +226,7 @@ describe.skipIf(!hasBrowser && !process.env.CI)("the badge row", () => {
     try {
       await page.getByTestId("badge-code-0").click();
       await page.getByTestId("badge-moment").waitFor();
-      const first = await page.evaluate(() => getComputedStyle(document.querySelector(".nf-moment__medal")!).animationDuration);
+      const first = await page.evaluate(() => getComputedStyle(document.querySelector(".nf-medal-moment__medal")!).animationDuration);
       expect(first.split(",")[0]?.trim()).toBe("0.62s");
     } finally {
       await close();

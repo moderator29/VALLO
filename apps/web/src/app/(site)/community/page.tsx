@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { publicPageMetadata } from "@/lib/i18n/public-metadata";
 import { SiteHead } from "@/components/site/SiteHead";
 import Link from "next/link";
+import { getDictionary } from "@vallo/i18n";
+import { PromiseFoot } from "@/components/app/trust/PromiseFoot";
 
 /* A10: the title and description in the page's own language, with its
    canonical and hreflang (lib/i18n/public-metadata.ts; words in publicMeta). */
@@ -50,6 +52,9 @@ const SECTIONS: {
   },
 ];
 
+/* The acceptance control's words. The page is English, as its sections are. */
+const PROMISE_WORDS = getDictionary("en").trustReasons.own;
+
 export default function CommunityPromisePage() {
   return (
     <>
@@ -79,6 +84,22 @@ export default function CommunityPromisePage() {
             </section>
           ))}
         </div>
+
+        {/* ------------------------------------------------ the acceptance */}
+        {/* A signed-in member who has not accepted gets the one action; one
+            who has sees the day they did. A visitor sees neither (the
+            component asks after it mounts, so the page stays static). */}
+        <PromiseFoot
+          locale="en"
+          words={{
+            accept: PROMISE_WORDS.promiseAccept,
+            accepted: PROMISE_WORDS.promiseAccepted,
+            done: PROMISE_WORDS.promiseDone,
+            failed: PROMISE_WORDS.promiseFailed,
+            signedOut: PROMISE_WORDS.promiseSignedOut,
+            note: PROMISE_WORDS.promiseNote,
+          }}
+        />
 
         {/* -------------------------------------------------- cross link */}
         <p className="mt-block text-center text-[length:var(--nf-text-body-sm)] text-[var(--nf-content-muted)]">

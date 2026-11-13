@@ -95,7 +95,7 @@
 
   /* A profile card. The whole card opens the profile; its action keeps its
      own tap above the link. */
-  .nf-pcard {
+  .nf-ppl-card {
     position: relative;
     display: grid;
     flex: none;
@@ -111,17 +111,17 @@
     text-align: center;
     scroll-snap-align: start;
   }
-  .nf-pcard__open {
+  .nf-ppl-card__open {
     position: absolute;
     inset: 0;
     z-index: 0;
     border-radius: var(--nf-radius-xl);
   }
-  .nf-pcard__open:focus-visible {
+  .nf-ppl-card__open:focus-visible {
     outline: var(--nf-focus-ring-width) solid var(--nf-focus-ring);
     outline-offset: var(--nf-focus-ring-offset);
   }
-  .nf-pcard__face {
+  .nf-ppl-card__face {
     display: grid;
     place-items: center;
     inline-size: 4rem;
@@ -131,12 +131,12 @@
     border-radius: var(--nf-radius-circle);
     background: var(--nf-surface-raised);
   }
-  .nf-pcard__face img {
+  .nf-ppl-card__face img {
     inline-size: 100%;
     block-size: 100%;
     object-fit: cover;
   }
-  .nf-pcard__monogram {
+  .nf-ppl-card__monogram {
     display: grid;
     place-items: center;
     inline-size: 100%;
@@ -146,7 +146,7 @@
     font-size: var(--nf-text-h4);
     font-weight: 700;
   }
-  .nf-pcard__name {
+  .nf-ppl-card__name {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -157,12 +157,12 @@
     font-weight: 700;
     line-height: 1.3;
   }
-  .nf-pcard__name > span:first-child {
+  .nf-ppl-card__name > span:first-child {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
-  .nf-pcard__role {
+  .nf-ppl-card__role {
     padding: var(--nf-space-3xs) var(--nf-space-xs);
     border-radius: var(--nf-radius-pill);
     background: var(--nf-brand-tint-1);
@@ -171,7 +171,7 @@
     font-weight: 600;
     line-height: 1.3;
   }
-  .nf-pcard__handle {
+  .nf-ppl-card__handle {
     max-inline-size: 100%;
     overflow: hidden;
     color: var(--nf-content-muted);
@@ -179,7 +179,7 @@
     text-overflow: ellipsis;
     white-space: nowrap;
   }
-  .nf-pcard__facts {
+  .nf-ppl-card__facts {
     display: grid;
     gap: var(--nf-space-3xs);
     min-block-size: 2.5rem;
@@ -188,7 +188,7 @@
     font-size: var(--nf-text-caption);
     line-height: 1.3;
   }
-  .nf-pcard__act {
+  .nf-ppl-card__act {
     position: relative;
     z-index: 1;
     display: flex;
@@ -196,11 +196,11 @@
     inline-size: 100%;
     margin-block-start: auto;
   }
-  .nf-pcard__act > *,
-  .nf-pcard__act :is(button, a) {
+  .nf-ppl-card__act > *,
+  .nf-ppl-card__act :is(button, a) {
     inline-size: 100%;
   }
-  .nf-pcard__you {
+  .nf-ppl-card__you {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -229,7 +229,7 @@
     border: var(--nf-border-width) solid var(--nf-card-border);
     background: var(--nf-surface-primary);
   }
-  .nf-ppl__rowitem .nf-pcard__face {
+  .nf-ppl__rowitem .nf-ppl-card__face {
     flex: none;
     inline-size: 3rem;
     block-size: 3rem;
@@ -242,22 +242,22 @@
     min-inline-size: 0;
     text-align: start;
   }
-  .nf-ppl__who .nf-pcard__name {
+  .nf-ppl__who .nf-ppl-card__name {
     justify-content: flex-start;
   }
-  .nf-ppl__who .nf-pcard__handle {
+  .nf-ppl__who .nf-ppl-card__handle {
     max-inline-size: 100%;
   }
-  .nf-ppl__rowitem .nf-pcard__open {
+  .nf-ppl__rowitem .nf-ppl-card__open {
     border-radius: var(--nf-radius-xl);
   }
-  .nf-ppl__rowitem .nf-pcard__act {
+  .nf-ppl__rowitem .nf-ppl-card__act {
     flex: none;
     inline-size: auto;
     margin: 0;
   }
-  .nf-ppl__rowitem .nf-pcard__act > *,
-  .nf-ppl__rowitem .nf-pcard__act :is(button, a) {
+  .nf-ppl__rowitem .nf-ppl-card__act > *,
+  .nf-ppl__rowitem .nf-ppl-card__act :is(button, a) {
     inline-size: auto;
   }
   .nf-ppl__note {

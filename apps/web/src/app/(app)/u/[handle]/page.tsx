@@ -10,6 +10,10 @@ import { FollowButton } from "@/components/social/profile/FollowButton";
 import { ProfileHeader } from "@/components/social/profile/ProfileHeader";
 import { ValloRecord } from "@/components/app/trust/ValloRecord";
 import { readUserRecord } from "@/lib/trust/record-read";
+import { readPersonChecks } from "@/lib/trust/person-checks-read";
+import { personChecks, personStats, reasonsTitle } from "@/lib/trust/checks";
+import { RECORD_MIN_COUNT, replyBand } from "@/lib/trust/record";
+import { PersonReasons } from "@/components/app/trust/PersonReasons";
 /* ONE empty-state anatomy across the whole product. See EmptyPanel. */
 import { EmptyPanel } from "@/components/social/profile/EmptyPanel";
 import { ProfileMenu } from "@/components/social/profile/ProfileMenu";
@@ -193,7 +197,7 @@ export default async function SocialProfilePage({
     });
 
     const supabase = await createClient();
-    const [posts, replies, media, activity, properties, reviews, stories, record, badges, roleWords, passportOpen, ratingAgg] =
+    const [posts, replies, media, activity, properties, reviews, stories, record, badges, roleWords, passportOpen, ratingAgg, checkFacts] =
       await Promise.all([
         isAgentPage ? Promise.resolve([]) : getProfileFeed(userId),
         isAgentPage ? Promise.resolve([]) : getProfileReplies(userId),
@@ -216,6 +220,9 @@ export default async function SocialProfilePage({
            and no read. */
         view.signedIn && !view.isOwner ? passportIsOpen(userId) : Promise.resolve(false),
         isAgentPage ? getAgentRatingAggregate(agentId) : Promise.resolve(null),
+        /* The dates behind this person's checks (identity, mobile, email).
+           No facts on any failure, and no facts draw no lines. */
+        readPersonChecks(userId),
       ]);
     const passportAction = view.isOwner ? (
       <ButtonLink href="/settings/passport" size="sm" variant="secondary" leadingIcon="id-card" data-testid="profile-your-passport">
@@ -228,6 +235,28 @@ export default async function SocialProfilePage({
     ) : null;
     /* "Ownership seen": a reviewer approved this owner's proof of ownership. */
     const ownershipSeen = view.profile.isAgent ? await ownershipSeenFor(userId) : null;
+
+    /*
+     * REASONS TO TRUST (13 November 2026). The person's dated checks, each a
+     * row that opens to say when, who, what was looked at and what it does not
+     * prove, under a row of real numbers. Built only from dates the database
+     * holds: a check with no date is not a row, and the section is absent
+     * when there is nothing dated to show. The agent's reviews stay in the
+     * card below it, so a number is never printed twice.
+     */
+    const reasonsCopy = t.trustReasons;
+    const reasonChecks = personChecks({ ...checkFacts, ownershipSeenAt: ownershipSeen }, reasonsCopy, locale);
+    const recordReplies =
+      record && !record.stopped && record.replied !== null && record.replied >= RECORD_MIN_COUNT ? replyBand(record.replyMedianMinutes) : null;
+    const reasonStats = personStats(
+      {
+        memberSince: view.profile.claimedAt,
+        lets: record && !record.stopped ? record.lets : null,
+        replyBand: recordReplies,
+      },
+      reasonsCopy,
+      locale,
+    );
 
     return (
       /* Room under the tabs' last line for the dock (`pb-4xl`): a short
@@ -251,6 +280,15 @@ export default async function SocialProfilePage({
           badgeCopy={badgeCopyOf(t)}
           shareUrl={`${siteUrl().replace(/\/+$/, "")}/u/${view.profile.handle}`}
           roleLine={roleLine(roleWords, t.socialProfile.roleLine)}
+          reasons={
+            <PersonReasons
+              title={reasonsTitle(view.profile.displayLabel, reasonsCopy)}
+              lede={reasonsCopy.person.lede}
+              stats={reasonStats}
+              checks={reasonChecks}
+              labels={reasonsCopy.sheet}
+            />
+          }
           /* V-34: a lister's Record, in the credentials section. Null for a
              member who is not one, and then nothing is drawn. */
           record={

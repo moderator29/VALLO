@@ -1,0 +1,333 @@
+/*
+ * REASONS TO TRUST (13 November 2026): the dated checks on a space and a
+ * person, the stats above a person's checks, the sheet a check opens, and the
+ * empty state of "Why trust this space?".
+ *
+ * The rows are the platform's grouped list (app/css/list-group.css), so this
+ * sheet styles only what is the trust view's own: the date under a row's
+ * name, the stats row, the empty panel and the sheet's four answers. Tokens
+ * only; both themes come from the tokens.
+ *
+ * NOTHING HERE CAN COLLAPSE TO A COLUMN OF LETTERS. Every text track is
+ * `minmax(0, 1fr)` with `overflow-wrap: break-word`, which (unlike
+ * `anywhere`) does not shrink an element's min-content width, so a long
+ * register name wraps at a word and a flex or grid ancestor is never told
+ * that one character is wide enough.
+ */
+@layer components {
+  .nf-reasons {
+    display: grid;
+    gap: var(--nf-space-lg);
+    min-inline-size: 0;
+  }
+  .nf-reasons__count {
+    font-size: var(--nf-text-caption);
+    font-weight: 400;
+    font-variant-numeric: tabular-nums;
+    color: var(--nf-content-muted);
+  }
+  /* A check's row is two lines: its name, then its date. 60px, so the whole
+     row is the target and the chevron is only a sign. */
+  .nf-reasons__row {
+    min-block-size: 3.75rem;
+  }
+  .nf-reasons__row .nf-list-row__title,
+  .nf-reasons__row .nf-list-row__sub {
+    overflow-wrap: break-word;
+  }
+  .nf-reasons__sub {
+    display: grid;
+    gap: var(--nf-space-3xs);
+    min-inline-size: 0;
+  }
+  .nf-reasons__detail {
+    color: var(--nf-content-secondary);
+    overflow-wrap: break-word;
+  }
+  /* The date is the fact, so it is drawn in the primary ink, never the muted
+     one a sub line usually takes. */
+  .nf-reasons__date {
+    font-size: var(--nf-text-body-sm);
+    font-weight: 400;
+    font-variant-numeric: tabular-nums;
+    color: var(--nf-content-primary);
+  }
+
+  /* ------------------------------------------------------------ the stats */
+  /* Real numbers only, one cell per fact that exists. The cells share the
+     row equally, so one cell reads as a line and three read as a row. */
+  .nf-reasons-stats {
+    /* The card is the grouped list's own (the wrapper carries
+       `.nf-list-group`), so the numbers and the checks under them are one
+       material. Inside it the cells wrap, at most three to a row on a phone,
+       and a short last row stretches to fill it: five facts sit as three and
+       two, never as five slivers. The hairlines are the 1px gaps showing the
+       divider colour under the cells. */
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--nf-border-width);
+    margin: 0;
+    background: var(--nf-divider);
+  }
+  .nf-reasons-stats__cell {
+    display: grid;
+    flex: 1 1 6.25rem;
+    gap: var(--nf-space-3xs);
+    align-content: start;
+    min-inline-size: 0;
+    padding: var(--nf-space-md) var(--nf-space-sm);
+    background: var(--nf-surface-primary);
+  }
+  .nf-reasons-stats__value {
+    margin: 0;
+    font-family: var(--nf-font-display);
+    font-size: var(--nf-text-body-lg);
+    line-height: 1.25;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    color: var(--nf-content-primary);
+    overflow-wrap: break-word;
+  }
+  .nf-reasons-stats__label {
+    font-size: var(--nf-text-caption);
+    line-height: 1.35;
+    font-weight: 400;
+    color: var(--nf-content-secondary);
+    overflow-wrap: break-word;
+  }
+  /* The value is read first and the label second, whatever the source order
+     a definition list needs. */
+  .nf-reasons-stats__cell dt {
+    order: 2;
+  }
+  .nf-reasons-stats__cell dd {
+    order: 1;
+  }
+
+  /* ------------------------------------------------- a person's section */
+  /* Where a profile header places the section: a section's distance under
+     what is above it, the same step the credentials take. */
+  .nf-reasons-slot {
+    margin-block-start: var(--nf-space-lg);
+  }
+  .nf-reasons-slot:empty {
+    display: none;
+  }
+  .nf-reasons-person {
+    display: grid;
+    gap: var(--nf-space-md);
+    min-inline-size: 0;
+  }
+  .nf-reasons-person__title {
+    margin: 0;
+    font-family: var(--nf-font-display);
+    font-size: var(--nf-text-h3);
+    line-height: 1.25;
+    font-weight: 600;
+    color: var(--nf-content-primary);
+    overflow-wrap: break-word;
+  }
+  .nf-reasons-person__lede {
+    margin: 0;
+    font-size: var(--nf-text-body-sm);
+    line-height: 1.5;
+    color: var(--nf-content-secondary);
+  }
+
+  /* ------------------------------------------- a member's own, to add */
+  .nf-own-checks {
+    display: grid;
+    gap: var(--nf-space-xs);
+    min-inline-size: 0;
+  }
+  .nf-own-checks__lede {
+    margin: 0;
+    padding-inline: var(--nf-space-2xs);
+    font-size: var(--nf-text-caption);
+    line-height: 1.45;
+    color: var(--nf-content-muted);
+  }
+  /* "Add" is an action, so it takes the link ink; everything else in the
+     row is information and stays in the ordinary inks. */
+  .nf-own-checks__add {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--nf-space-3xs);
+    font-size: var(--nf-text-body-sm);
+    font-weight: 600;
+    color: var(--nf-content-link);
+    white-space: nowrap;
+  }
+  .nf-own-checks__promise {
+    display: grid;
+    gap: var(--nf-space-md);
+    padding: 0 0 var(--nf-space-md);
+  }
+  .nf-own-checks__points {
+    display: grid;
+    gap: var(--nf-space-sm);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .nf-own-checks__points li {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: var(--nf-space-sm);
+    align-items: start;
+    font-size: var(--nf-text-body);
+    line-height: 1.5;
+    color: var(--nf-content-primary);
+  }
+  .nf-own-checks__tick {
+    margin-block-start: var(--nf-space-2xs);
+    color: var(--nf-brand-secondary);
+  }
+  .nf-own-checks__read {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--nf-space-3xs);
+    justify-self: start;
+    min-block-size: 2.75rem;
+    font-size: var(--nf-text-body-sm);
+    font-weight: 600;
+    color: var(--nf-content-link);
+    text-decoration: none;
+  }
+  .nf-own-checks__note {
+    margin: 0;
+    font-size: var(--nf-text-body-sm);
+    line-height: 1.5;
+    color: var(--nf-content-secondary);
+  }
+
+  /* The foot of the Community Promise: the note, then the one action. */
+  .nf-promise-foot {
+    display: grid;
+    justify-items: start;
+    gap: var(--nf-space-md);
+    margin-block-start: var(--nf-space-xl);
+    padding: var(--nf-space-lg) var(--nf-space-md);
+    border-radius: var(--nf-radius-card);
+    border: var(--nf-border-width) solid var(--nf-tier-card-edge);
+    background: var(--nf-surface-primary);
+    box-shadow: var(--nf-card-shadow);
+  }
+  .nf-promise-foot__note,
+  .nf-promise-foot--done {
+    margin-block-end: 0;
+    font-size: var(--nf-text-body);
+    line-height: 1.55;
+    color: var(--nf-content-primary);
+  }
+  .nf-promise-foot__note {
+    margin-block-start: 0;
+  }
+
+  /* ------------------------------------------------------ the empty state */
+  /* A plain statement, not a card: it is the page's own answer, and a card
+     above the explainer's card would be two boxes saying one thing. */
+  .nf-reasons-empty {
+    display: grid;
+    justify-items: start;
+    gap: var(--nf-space-sm);
+  }
+  .nf-reasons-empty__title {
+    margin: 0;
+    font-family: var(--nf-font-display);
+    font-size: var(--nf-text-h3);
+    line-height: 1.25;
+    font-weight: 600;
+    color: var(--nf-content-primary);
+    overflow-wrap: break-word;
+  }
+  .nf-reasons-empty__body {
+    margin: 0;
+    max-inline-size: 38rem;
+    font-size: var(--nf-text-body);
+    line-height: 1.55;
+    color: var(--nf-content-secondary);
+  }
+  .nf-reasons-empty__action {
+    margin-block-start: var(--nf-space-2xs);
+  }
+  /* The rule the dated page is read under: one sentence in the primary ink. */
+  .nf-reasons__lede {
+    margin: 0;
+    max-inline-size: 38rem;
+    font-size: var(--nf-text-body);
+    line-height: 1.55;
+    color: var(--nf-content-primary);
+  }
+  .nf-reasons-earn {
+    display: grid;
+    gap: var(--nf-space-sm);
+    min-inline-size: 0;
+  }
+  .nf-reasons-earn__title {
+    margin: 0;
+    font-family: var(--nf-font-display);
+    font-size: var(--nf-text-h3);
+    line-height: 1.25;
+    font-weight: 600;
+    color: var(--nf-content-primary);
+  }
+  .nf-reasons-earn__lede {
+    margin: 0;
+    font-size: var(--nf-text-body-sm);
+    line-height: 1.5;
+    color: var(--nf-content-secondary);
+  }
+
+  /* ------------------------------------------------------------ the sheet */
+  .nf-reasons-sheet {
+    display: grid;
+    gap: var(--nf-space-md);
+    margin: 0;
+    /* No side padding of its own: the sheet's body already insets its
+       content to the title's left edge, and a second inset set the answers
+       16px to the right of the question they answer. */
+    padding: 0 0 var(--nf-space-lg);
+  }
+  .nf-reasons-sheet__item {
+    display: grid;
+    gap: var(--nf-space-3xs);
+    min-inline-size: 0;
+  }
+  .nf-reasons-sheet__item dt {
+    font-size: var(--nf-text-label);
+    line-height: var(--nf-leading-label);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: var(--nf-tracking-label);
+    color: var(--nf-content-muted);
+  }
+  .nf-reasons-sheet__item dd {
+    margin: 0;
+    font-size: var(--nf-text-body);
+    line-height: 1.55;
+    color: var(--nf-content-primary);
+    overflow-wrap: break-word;
+  }
+  .nf-reasons-sheet__item dd time {
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+  .nf-reasons-sheet__detail {
+    font-weight: 400;
+  }
+  /* What it does not prove sits apart, under a hairline: it is the answer a
+     reader is least likely to be given anywhere else. */
+  .nf-reasons-sheet__item--limit {
+    padding-block-start: var(--nf-space-md);
+    border-block-start: var(--nf-border-width) solid var(--nf-divider);
+  }
+
+  /* Wide screens: the space's page gives the checks two columns beside the
+     lister, and a person's stats keep their natural width. */
+  @media (min-width: 64rem) {
+    .nf-reasons-stats-card {
+      max-inline-size: 34rem;
+    }
+  }
+}

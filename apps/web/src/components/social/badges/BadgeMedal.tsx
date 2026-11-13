@@ -14,7 +14,7 @@ import { useId } from "react";
  * centre so the badge's own object stands out, and two ribbon tails.
  *
  * Square, 240 by 240. The medal's centre is (120, 108); the caller seats the
- * badge's object in the pale disc (`.nf-moment__object`). Decorative: the
+ * badge's object in the pale disc (`.nf-medal-moment__object`). Decorative: the
  * badge's name is on the button that holds it.
  */
 const LOBES = 16;

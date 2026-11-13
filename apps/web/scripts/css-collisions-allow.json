@@ -5,10 +5,7 @@
     ".nf-admin-row__kebab": "Same pair as .nf-admin-drawer__panel: admin-material.css raises admin.css's 36px kebab to the 44px icon control on purpose, loaded after it on every admin route.",
     ".nf-dock-plus": "shell-m.css is the globals.css partial that overrides nav-island.css by position (its header: 'overridden by position in the cascade rather than by a specificity race'); both are in globals.css in a fixed order, so the result never depends on navigation.",
     ".nf-dockmore__unread": "Same globals.css partial pair as .nf-dock-plus: shell-m.css overrides nav-island.css by its fixed position in globals.css.",
-    ".nf-drawer--left": "shell-m.css overrides overlays.css's drawer width by its fixed position in globals.css (the founder's full-height drawer); both always load together, in that order.",
-    ".nf-moment": "KNOWN COLLISION, NOT YET FIXED: SuccessMoment (premium-moments.css, grid) and BadgeMoment (components/social/badges/badges.css, flex) are two components sharing one name. The rename belongs in badges.css and BadgeMoment.tsx, which are HUNTER's files; reported to the lead 13 November 2026. Remove this entry when renamed.",
-    ".nf-pcard": "KNOWN COLLISION, NOT YET FIXED: the listing card (catalogue.css) and the people card (components/social/find/people-v2.css) share .nf-pcard. The rename belongs in people-v2.css and its component, HUNTER's files; reported to the lead 13 November 2026. Remove this entry when renamed.",
-    ".nf-pcard__facts": "Part of the .nf-pcard collision above (people-v2.css draws its own .nf-pcard__facts as a grid); same owner, same report, removed with it."
+    ".nf-drawer--left": "shell-m.css overrides overlays.css's drawer width by its fixed position in globals.css (the founder's full-height drawer); both always load together, in that order."
   },
   "unlayered": {
     "src/app/css/base.css": "The document's own html and body rules and the tap-target pseudo-elements on .nf-link-quiet.nf-tap and .nf-numeric; base.css is first in globals.css and these are the floor every layer builds on, so they are written to hold against component padding that would shrink a 44pt target.",

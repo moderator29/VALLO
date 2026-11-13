@@ -150,7 +150,7 @@ export default async function PeoplePage({
                     </span>
                   )}
                 </span>
-                <span className="min-w-0">
+                <span className="nf-people__text">
                   <span className="nf-people__name">
                     <span className="truncate-none">{person.displayLabel}</span>
                     {/* The mark comes from the published badge only, as on the
@@ -193,18 +193,32 @@ export default async function PeoplePage({
               {person.isViewer ? (
                 <span className="nf-people__you">You</span>
               ) : (
-                <span className="flex shrink-0 items-center gap-xs">
+                <span className="nf-people__acts">
                   <FollowButton
                     handle={person.handle}
                     initialFollowing={person.viewerFollows}
                     signedIn={view.signedIn}
                     compact
                   />
+                  {/* Message, twice in the markup and once on screen: the
+                      round glyph on a phone, where the word would squeeze the
+                      name into a column of letters, and the word from a
+                      tablet up. Only one is ever displayed, so only one is
+                      in the tab order and the accessibility tree. */}
+                  <ButtonLink
+                    href={`/u/${person.handle}/message`}
+                    variant="icon"
+                    round
+                    leadingIcon="messages"
+                    className="nf-people__msg--glyph"
+                    aria-label={w.messageLabel.replace("{name}", person.displayLabel)}
+                  />
                   <ButtonLink
                     href={`/u/${person.handle}/message`}
                     size="sm"
                     variant="secondary"
                     leadingIcon="messages"
+                    className="nf-people__msg--word"
                     aria-label={w.messageLabel.replace("{name}", person.displayLabel)}
                   >
                     {w.messageAction}

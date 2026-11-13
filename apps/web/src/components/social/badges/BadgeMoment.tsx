@@ -140,26 +140,26 @@ export function BadgeMoment({
       fullPage
       testId="badge-moment"
     >
-      <div className="nf-moment" key={play}>
-        <div className="nf-moment__stage">
-          <div className="nf-moment__burst" aria-hidden="true" />
+      <div className="nf-medal-moment" key={play}>
+        <div className="nf-medal-moment__stage">
+          <div className="nf-medal-moment__burst" aria-hidden="true" />
           <button
             type="button"
-            className="nf-moment__medal"
+            className="nf-medal-moment__medal"
             onClick={replay}
             aria-label={replayed ? badge.name : `${badge.name}. ${copy.replayHint}`}
           >
-            <BadgeMedal className="nf-moment__art" />
-            <span className="nf-moment__object" aria-hidden="true">
+            <BadgeMedal className="nf-medal-moment__art" />
+            <span className="nf-medal-moment__object" aria-hidden="true">
               <BrandIcon name={object} fill drawn={96} />
             </span>
           </button>
         </div>
-        <p className="nf-moment__overline">{copy.overline}</p>
-        <h2 className="nf-moment__title">{badge.name}</h2>
-        <p className="nf-moment__line">{badge.description}</p>
-        <p className="nf-moment__date">{badge.grantedLabel}</p>
-        <div className="nf-moment__actions">
+        <p className="nf-medal-moment__overline">{copy.overline}</p>
+        <h2 className="nf-medal-moment__title">{badge.name}</h2>
+        <p className="nf-medal-moment__line">{badge.description}</p>
+        <p className="nf-medal-moment__date">{badge.grantedLabel}</p>
+        <div className="nf-medal-moment__actions">
           {profileHref ? (
             <Button variant="primary" size="lg" full onClick={viewProfile} data-testid="badge-view-profile">
               {copy.viewProfile}

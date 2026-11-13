@@ -89,6 +89,7 @@ export function ProfileHeader({
   shareUrl,
   roleLine,
   record = null,
+  reasons = null,
 }: {
   profile: SocialProfileView;
   isOwner: boolean;
@@ -131,6 +132,13 @@ export function ProfileHeader({
    * agent's reviews.
    */
   record?: React.ReactNode;
+  /**
+   * "Reasons to trust <name>": the person's real numbers and dated checks
+   * (`components/app/trust/PersonReasons.tsx`), built by the page. It is
+   * drawn above the credentials, under its own heading, and is null (and
+   * then absent) when there is nothing dated to show.
+   */
+  reasons?: React.ReactNode;
 }) {
   const copy = t.socialProfile;
   const name = profile.displayLabel || `@${profile.handle}`;
@@ -265,6 +273,9 @@ export function ProfileHeader({
           </Link>
         </p>
       ) : null}
+
+      {/* ------------------------------------------- the reasons to trust */}
+      {reasons ? <div className="nf-reasons-slot">{reasons}</div> : null}
 
       {/* ------------------------------------------------- the credentials */}
       {/* What vouches for them, in one section under one label: the badges

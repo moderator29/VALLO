@@ -1780,14 +1780,54 @@
     font-weight: 700;
     color: var(--nf-content-primary);
   }
+  /* A NAME BREAKS BETWEEN ITS WORDS, NEVER BETWEEN ITS LETTERS (13 November
+     2026). This was `overflow-wrap: anywhere`, which counts toward the
+     min-content width: it told the row that one letter was wide enough, so
+     beside the two buttons the column shrank to about 70px and "Joseph
+     Agboola" ran down the card as "Josep / h / Agbool / a". `break-word`
+     wraps at a space and breaks inside a word only when that one word is
+     longer than the whole column, and it leaves the column's min-content at
+     the longest word. The column itself is given its room by the row (the
+     message action is a round glyph on a phone, see `.nf-people__msg`). */
   .nf-people__name > :first-child {
     min-inline-size: 0;
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
   }
+  /* A handle is one token: it is cut with an ellipsis, never wrapped. */
   .nf-people__handle {
     display: block;
+    max-inline-size: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
     font-size: 0.8125rem;
     color: var(--nf-content-muted);
+  }
+  /* The text column takes what the avatar and the actions leave, and may
+     shrink to it, so the handle's ellipsis has a width to be cut at. */
+  .nf-people__text {
+    display: block;
+    flex: 1 1 auto;
+    min-inline-size: 0;
+  }
+  /* The row's actions. On a phone "Message" is the round glyph (its name is
+     still read out); from a tablet up there is room for the word. */
+  .nf-people__acts {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    gap: var(--nf-space-xs);
+  }
+  .nf-people__msg--word {
+    display: none;
+  }
+  @media (min-width: 640px) {
+    .nf-people__msg--glyph {
+      display: none;
+    }
+    .nf-people__msg--word {
+      display: inline-flex;
+    }
   }
   .nf-people__bio {
     display: block;

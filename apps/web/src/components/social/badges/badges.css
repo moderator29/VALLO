@@ -146,7 +146,7 @@
 
   /* --------------------------------------------------------- the moment */
 
-  .nf-moment {
+  .nf-medal-moment {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -156,7 +156,7 @@
     padding: var(--nf-space-xl) var(--nf-space-md) var(--nf-space-lg);
     text-align: center;
   }
-  .nf-moment__stage {
+  .nf-medal-moment__stage {
     position: relative;
     display: grid;
     place-items: center;
@@ -171,7 +171,7 @@
    * opens. Quiet by construction: it is a tint behind the medal and the only
    * glow on the screen. It never turns.
    */
-  .nf-moment__burst {
+  .nf-medal-moment__burst {
     position: absolute;
     inset: -28%;
     background: repeating-conic-gradient(
@@ -181,10 +181,10 @@
     );
     -webkit-mask-image: radial-gradient(closest-side, black 18%, transparent 100%);
     mask-image: radial-gradient(closest-side, black 18%, transparent 100%);
-    animation: nf-moment-burst var(--nf-duration-deliberate) var(--nf-ease-spring) both;
+    animation: nf-medal-moment-burst var(--nf-duration-deliberate) var(--nf-ease-spring) both;
     pointer-events: none;
   }
-  @keyframes nf-moment-burst {
+  @keyframes nf-medal-moment-burst {
     from {
       opacity: 0;
       scale: 0.6;
@@ -196,7 +196,7 @@
   }
 
   /* A button, so the medal can be tapped to play again (once). */
-  .nf-moment__medal {
+  .nf-medal-moment__medal {
     position: relative;
     display: grid;
     place-items: center;
@@ -209,15 +209,15 @@
     -webkit-tap-highlight-color: transparent;
     /* Scale in, then the pop: the one moment in the product allowed to. */
     animation:
-      nf-moment-medal var(--nf-duration-deliberate) var(--nf-ease-spring) both,
-      nf-moment-pop 180ms var(--nf-ease-entrance) var(--nf-duration-deliberate) both;
+      nf-medal-moment-medal var(--nf-duration-deliberate) var(--nf-ease-spring) both,
+      nf-medal-moment-pop 180ms var(--nf-ease-entrance) var(--nf-duration-deliberate) both;
   }
-  .nf-moment__medal:focus-visible {
+  .nf-medal-moment__medal:focus-visible {
     outline: var(--nf-focus-ring-width) solid var(--nf-focus-ring);
     outline-offset: 6px;
     border-radius: var(--nf-radius-circle);
   }
-  @keyframes nf-moment-medal {
+  @keyframes nf-medal-moment-medal {
     from {
       opacity: 0;
       scale: 0.6;
@@ -227,7 +227,7 @@
       scale: 1;
     }
   }
-  @keyframes nf-moment-pop {
+  @keyframes nf-medal-moment-pop {
     0% {
       scale: 1;
     }
@@ -239,7 +239,7 @@
     }
   }
   /* The drawn medal: a vector, so it is sharp at any size and density. */
-  .nf-moment__art {
+  .nf-medal-moment__art {
     inline-size: 100%;
     block-size: 100%;
     display: block;
@@ -248,21 +248,21 @@
   }
   /* The badge's own object, sitting in the medal's pale centre (centre at
      120 by 108 of 240, the disc 56 across from it). */
-  .nf-moment__object {
+  .nf-medal-moment__object {
     position: absolute;
     inset: 26.5% 31.5% 36.5%;
     display: grid;
     place-items: center;
   }
 
-  .nf-moment__overline,
-  .nf-moment__title,
-  .nf-moment__line,
-  .nf-moment__date,
-  .nf-moment__actions {
-    animation: nf-moment-rise var(--nf-duration-base) var(--nf-ease-entrance) both;
+  .nf-medal-moment__overline,
+  .nf-medal-moment__title,
+  .nf-medal-moment__line,
+  .nf-medal-moment__date,
+  .nf-medal-moment__actions {
+    animation: nf-medal-moment-rise var(--nf-duration-base) var(--nf-ease-entrance) both;
   }
-  .nf-moment__overline {
+  .nf-medal-moment__overline {
     margin: 0;
     font-size: var(--nf-text-overline);
     font-weight: 600;
@@ -271,7 +271,7 @@
     color: var(--nf-content-muted);
     animation-delay: 380ms;
   }
-  .nf-moment__title {
+  .nf-medal-moment__title {
     margin: 0;
     font-family: var(--nf-font-display);
     font-size: var(--nf-text-h1);
@@ -279,27 +279,27 @@
     line-height: 1.15;
     animation-delay: 440ms;
   }
-  .nf-moment__line {
+  .nf-medal-moment__line {
     margin: 0;
     max-inline-size: 26rem;
     line-height: 1.55;
     color: var(--nf-content-secondary);
     animation-delay: 500ms;
   }
-  .nf-moment__date {
+  .nf-medal-moment__date {
     margin: 0;
     font-size: var(--nf-text-caption);
     color: var(--nf-content-muted);
     animation-delay: 540ms;
   }
-  .nf-moment__actions {
+  .nf-medal-moment__actions {
     display: grid;
     gap: var(--nf-space-xs);
     inline-size: min(100%, 22rem);
     margin-block-start: var(--nf-space-md);
     animation-delay: 620ms;
   }
-  @keyframes nf-moment-rise {
+  @keyframes nf-medal-moment-rise {
     from {
       opacity: 0;
       translate: 0 12px;
@@ -313,13 +313,13 @@
   /* ----------------------------------------------------- reduced motion */
 
   @media (prefers-reduced-motion: reduce) {
-    .nf-moment__burst,
-    .nf-moment__medal,
-    .nf-moment__overline,
-    .nf-moment__title,
-    .nf-moment__line,
-    .nf-moment__date,
-    .nf-moment__actions {
+    .nf-medal-moment__burst,
+    .nf-medal-moment__medal,
+    .nf-medal-moment__overline,
+    .nf-medal-moment__title,
+    .nf-medal-moment__line,
+    .nf-medal-moment__date,
+    .nf-medal-moment__actions {
       animation: none;
     }
     .nf-merit-tile {
@@ -340,13 +340,13 @@
    *         stagger delay, so the lines are simply there with the medal.
    *   Off   nothing moves at all: every beat sits in its settled state.
    */
-  :root[data-motion="calm"] .nf-moment__medal {
-    animation: nf-moment-medal var(--nf-duration-deliberate) var(--nf-ease-spring) both;
+  :root[data-motion="calm"] .nf-medal-moment__medal {
+    animation: nf-medal-moment-medal var(--nf-duration-deliberate) var(--nf-ease-spring) both;
   }
-  :root[data-motion="calm"] :is(.nf-moment__overline, .nf-moment__title, .nf-moment__line, .nf-moment__date, .nf-moment__actions) {
+  :root[data-motion="calm"] :is(.nf-medal-moment__overline, .nf-medal-moment__title, .nf-medal-moment__line, .nf-medal-moment__date, .nf-medal-moment__actions) {
     animation-delay: 0s;
   }
-  :root[data-motion="off"] :is(.nf-moment__burst, .nf-moment__medal, .nf-moment__overline, .nf-moment__title, .nf-moment__line, .nf-moment__date, .nf-moment__actions) {
+  :root[data-motion="off"] :is(.nf-medal-moment__burst, .nf-medal-moment__medal, .nf-medal-moment__overline, .nf-medal-moment__title, .nf-medal-moment__line, .nf-medal-moment__date, .nf-medal-moment__actions) {
     animation: none;
   }
   :root:is([data-motion="calm"], [data-motion="off"]) .nf-merit-tile {

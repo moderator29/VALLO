@@ -29,6 +29,7 @@ import { badgeCopyOf } from "@/components/social/badges/badge-copy";
 import { readProfileBadges } from "@/components/social/profile/badges-read";
 import { IdentityCredentials } from "@/components/app/identity/IdentityHeader";
 import { ValloRecord } from "@/components/app/trust/ValloRecord";
+import { OwnTrust } from "@/components/app/trust/OwnTrust";
 import { readUserRecord } from "@/lib/trust/record-read";
 import { readMyPassportOn } from "@/lib/passport/passport-read";
 import { readOwnRoleWords } from "@/lib/profile/role-facts";
@@ -305,6 +306,11 @@ export default async function ProfilePage({
           }}
         />
       </div>
+
+      {/* The member's own trust checks: what others see on their profile,
+          each with its date, and the ones they can still add (the Community
+          Promise is accepted here). Draws nothing when there is neither. */}
+      <OwnTrust userId={profile.userId} isLister={agentContext.state === "agent"} locale={locale} t={t} />
 
       <AccountBody
         counts={profile.counts}
