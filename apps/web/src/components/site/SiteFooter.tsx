@@ -5,6 +5,9 @@ import { Logo } from "@/design-system/brand/Logo";
 import { SocialLinks } from "@/components/ui/SocialLinks";
 import { COMPANY_REGISTERED_OFFICE } from "@/lib/legal/company";
 import { NewsletterForm } from "./NewsletterForm";
+import { StoreBadges } from "./landing/StoreBadges";
+import { storeBadges } from "./landing/store-badges";
+import { requestSurface } from "@/lib/auth/surface";
 import "@/app/css/site.css";
 
 /**
@@ -19,7 +22,34 @@ import "@/app/css/site.css";
  * Instagram and TikTok today, LinkedIn the day its page address is set. A
  * network with no address is not drawn.
  */
-export function SiteFooter({ t }: { t: Dictionary }) {
+export async function SiteFooter({ t }: { t: Dictionary }) {
+  /*
+   * THE STORE BADGES, ON EVERY PAGE OF THE WEBSITE AND NOT ONLY THE LANDING
+   * (the founder, 13 November 2026: "we are up and going on Play Store and
+   * App Store now, so update the link on our websites so people can click
+   * from our website and download, anywhere that says we are not live").
+   *
+   * They were drawn in two bands of the landing page and nowhere else, so a
+   * visitor reading About, Help, For hosts or any of the other public doors
+   * was never told the apps exist. The footer is the one surface all of them
+   * share.
+   *
+   * `storeBadges()` decides what is drawn, here as on the landing: the
+   * official artwork either way, a link only when that store's URL is set and
+   * is that store's own address, and nothing at all inside a native shell,
+   * where an install badge is noise at best and a rejection at worst. The
+   * surface is read the same way the landing reads it, from the user agent,
+   * so the two cannot disagree. The site layout already withholds this whole
+   * footer from a shell; the landing renders it either way, which is why the
+   * check lives here rather than in a caller.
+   */
+  const badges = storeBadges({
+    /* `NEXT_PUBLIC_*` is inlined at build time, so a newly set store URL
+       needs a redeploy before the badge becomes a link. */
+    appStoreUrl: process.env.NEXT_PUBLIC_APP_STORE_URL,
+    playStoreUrl: process.env.NEXT_PUBLIC_PLAY_STORE_URL,
+    native: (await requestSurface()) !== "web",
+  });
   const f = t.landing.footer;
   const face = t.landing.face;
   const doors = t.publicDoors.nav;
@@ -130,6 +160,10 @@ export function SiteFooter({ t }: { t: Dictionary }) {
               <span className="sr-only">{face.footer.registeredOfficeLabel}: </span>
               {COMPANY_REGISTERED_OFFICE}
             </address>
+            {/* The official artwork, drawn inline (StoreBadges.tsx). Nothing
+                is rendered when the list is empty, which is every native
+                request. */}
+            <StoreBadges badges={badges} labels={t.landingRooms.badges} className="nf-site-footer__badges" />
           </div>
 
           {columns.map((col) => (

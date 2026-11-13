@@ -184,6 +184,14 @@
     letter-spacing: 0.02em;
     color: var(--nf-content-secondary);
   }
+  /* IN THE FOOTER, the badges close the brand block, so they need the same
+     air the lines above them have and nothing else: the badge family's own
+     size, wrap and focus rules all still apply. Added 13 November 2026 when
+     the badges moved from the landing's two bands onto every page of the
+     website. */
+  .nf-site-footer__badges {
+    margin-block-start: var(--nf-space-sm);
+  }
   .nf-store-badge:focus-visible {
     outline: var(--nf-focus-ring-width) solid var(--nf-focus-ring);
     outline-offset: 3px;
