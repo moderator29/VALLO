@@ -153,7 +153,11 @@
     right: calc(var(--nf-sc-gap) + var(--nf-space-xs));
     z-index: 3;
   }
-  .nf-sc .nf-sc__heart > button {
+  /* Any button inside the heart's slot, not only a direct child: a signed-out
+     visitor's heart is wrapped by the sign-up gate (`AuthGate`), and with
+     `> button` it missed this rule and drew as a navy glass square while a
+     member's drew as the white disc. One card, one heart. */
+  .nf-sc .nf-sc__heart button {
     display: grid;
     place-items: center;
     width: 2.75rem;
@@ -162,7 +166,13 @@
     border: 0;
     border-radius: var(--nf-radius-circle);
     background: var(--nf-content-on-media);
-    color: var(--nf-ink-on-photo);
+    /* A GLYPH ON A WHITE DISC IS THE BRAND BLUE, NEVER BLACK (the founder,
+       13 November 2026; the same rule the lister's call and message discs
+       follow). `--nf-doc-accent` is the brand blue as ink on white, 5.3 to 1
+       on the disc, and the disc is white in both themes, so the same ink
+       holds by day and at night. The saved heart is the same blue, filled:
+       the fill says "saved", the colour never has to. */
+    color: var(--nf-doc-accent);
     box-shadow: var(--nf-elevation-raised);
   }
 
@@ -181,7 +191,8 @@
     border: 0;
     border-radius: var(--nf-radius-circle);
     background: var(--nf-content-on-media);
-    color: var(--nf-ink-on-photo);
+    /* The same blue glyph as the heart beside it. */
+    color: var(--nf-doc-accent);
     box-shadow: var(--nf-elevation-raised);
   }
 

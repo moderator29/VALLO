@@ -65,7 +65,7 @@ export function StayStackCard({
       rating={rating}
       price={price}
       openLabel={t.catalogue.stays.stack.open}
-      photoNote={stay.photo ? undefined : t.catalogue.card.noPhotos}
+      photoNote={stay.photo ? undefined : stay.standIn ? t.stays.standInCaption : t.catalogue.card.noPhotos}
       eager={eager}
       heart={
         gateSave ? (

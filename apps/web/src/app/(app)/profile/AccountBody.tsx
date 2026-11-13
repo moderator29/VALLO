@@ -286,11 +286,25 @@ export function AccountBody({
                 sub="Name, nickname and phone number"
                 testId="row-details"
               />
+              {/* The address sits in the row's own text column, under the
+                  label, where every other row's second line sits. As the
+                  row's `value` it was too long to fit beside the label, so
+                  the row wrapped it onto a line of its own and pushed it to
+                  the right edge: an address floating out of line with
+                  everything around it (13 November 2026). It wraps inside
+                  the column and only ever breaks when it is longer than the
+                  whole line. */}
               <RowValue
                 icon="mail"
                 label="Email"
-                value={email}
-                sub="Your email address cannot be changed."
+                sub={
+                  <>
+                    <span className="block text-[var(--nf-content-primary)] [overflow-wrap:break-word]" data-testid="profile-email">
+                      {email}
+                    </span>
+                    <span className="block">Your email address cannot be changed.</span>
+                  </>
+                }
               />
               <RowLink
                 href="/settings/place"

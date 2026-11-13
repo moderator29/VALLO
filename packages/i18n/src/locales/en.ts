@@ -658,6 +658,10 @@ export const en = {
     restaurantsLine: "Book a table on Vallo. The restaurant confirms, and the conversation lives inside the reservation.",
     restaurantsEmptyTitle: "No restaurants listed here yet",
     restaurantsEmptyBody: "Restaurants come onto Vallo through their owners. When one near you lists, it appears here.",
+    /* The caption on a card that shows a Vallo stand-in picture because the
+       place has sent none: it says what the picture is not, since "no
+       photographs yet" printed over a picture read as a contradiction. */
+    standInCaption: "Not a photo of this place",
     tripsTitle: "Trips",
     tripsLine: "Your stays and reservations, by date.",
     findStay: "Find a stay",

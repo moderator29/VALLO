@@ -145,7 +145,14 @@ export function StayCard({
               {stay.hours.label}
             </span>
           )}
-          {!stay.photo && <span className="nf-sc__nophoto">{t.catalogue.card.noPhotos}</span>}
+          {/* No photograph from the place. With a stand-in picture on the
+              card the caption says what that picture is not; with only the
+              drawn frame it says there are none yet. */}
+          {!stay.photo && (
+            <span className="nf-sc__nophoto" data-testid="stay-card-photo-note">
+              {stay.standIn ? t.stays.standInCaption : t.catalogue.card.noPhotos}
+            </span>
+          )}
         </>
       }
       extra={

@@ -810,12 +810,64 @@
     padding-left: var(--nf-space-sm);
     padding-right: 3.25rem;
   }
-  /* On a phone the frame steps down a size so the name keeps two whole lines
-     beside the figure and the heart. */
+  /* ON A PHONE THE NAME GETS THE WHOLE ROW (13 November 2026). Three columns
+     side by side left the name about 90px beside "N1.8m to move in" and the
+     heart, so "Mini flat in Yaba" was cut to "Mini flat in..." over two
+     lines. The words and the value give up their own boxes here
+     (`display: contents`) and their four parts are placed on the shelf's
+     grid: the name runs the full width beside the picture, the place and
+     the status sit under it on the left, and the figure sits compact on the
+     right with its unit under it. Wider screens keep the three columns. */
   @media (max-width: 30rem) {
     .nf-shelf-row .nf-shelf__thumb {
       width: 3.5rem;
       height: 3.5rem;
+    }
+    .nf-shelf-row .nf-shelf {
+      grid-template-columns: auto minmax(0, 1fr) auto;
+      grid-template-areas:
+        "thumb title title"
+        "thumb where figure"
+        "thumb status figure";
+      align-items: start;
+      column-gap: var(--nf-space-sm);
+      row-gap: var(--nf-space-3xs);
+    }
+    .nf-shelf-row .nf-shelf__frame {
+      grid-area: thumb;
+      align-self: center;
+    }
+    .nf-shelf-row .nf-shelf__words,
+    .nf-shelf-row .nf-shelf__value {
+      display: contents;
+    }
+    .nf-shelf-row .nf-shelf__title {
+      grid-area: title;
+      /* A name wraps between its words; only a single word longer than the
+         row may break. */
+      overflow-wrap: break-word;
+    }
+    .nf-shelf-row .nf-shelf__where {
+      grid-area: where;
+      align-self: center;
+    }
+    .nf-shelf-row .nf-shelf__status {
+      grid-area: status;
+      /* Under the place, on the left: the value's end alignment is for the
+         figure, and the status no longer sits in that column. */
+      justify-self: start;
+      text-align: start;
+    }
+    .nf-shelf-row .nf-shelf__figure {
+      grid-area: figure;
+      align-self: center;
+      text-align: end;
+      line-height: 1.25;
+    }
+    /* The unit under the figure, not beside it: "to move in" on the same
+       line is what made the column 120px wide. */
+    .nf-shelf-row .nf-shelf__unit {
+      display: block;
     }
   }
   .nf-shelf-row__remove {
