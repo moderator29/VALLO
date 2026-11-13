@@ -287,3 +287,56 @@ family in `lib/push/family.ts` (coordinate with the lead for push edits).
 Native review and the requests Agent NATIVE sends for component files,
 backend (D-02 policies, R-04 idempotent alerts, B-05 read waves), the crash
 log follow-ups, Vallo Circle, and every review, gate and commit.
+
+## Agent FE-BUGS (frontend defects by measurement; relaunched 13 November 2026)
+
+Owns: `apps/web/src/app/**` except `app/api/**`, any `actions.ts` and any
+`*.server.ts`; `components/**` except `components/admin/copilot/**` (the lead
+is in there); `design-system/**`; `packages/design-tokens/**`;
+`apps/web/scripts/**` for new detectors.
+
+The founder, 12 November: "many areas many pages, I need your frontend agent
+to find every single one of them and fix it all, and find more and more ones".
+
+1. **The gibberish rendering.** The move-in cost breakdown draws one character
+   per line. Reproduce it, find the mechanism, then write a detector in the
+   shape of `scripts/check-css-tokens.mjs` and sweep the platform with it. A
+   detector and a sweep is the deliverable, not one page fixed.
+2. **The composer, platform wide.** `aaf900fca` moved the keyboard contract
+   onto a class, but `grade1.css` and `input-bar.css` still dress the box and
+   the send disc through `form.nf-composer`, so a composer that is not a form
+   silently gets nothing. Every surface, with keyboard-open and keyboard-closed
+   measured per surface, which has never been done.
+3. **Dead CSS**: about 233 of the 342 class names remain, plus
+   `premium-motion-2.css` (81 dead selectors, verdict in `6972ed6f1`).
+4. **Accessibility**: no skip link; a duplicate `<main>` on 12 money routes;
+   every `/host/*` page missing an `<h1>`.
+5. Then its own targets, each justified by a measurement before it is fixed.
+
+## Agent BE-BUGS (backend and data defects by measurement; relaunched 13 November 2026)
+
+Owns: `apps/web/src/lib/**` except `lib/native/**` and `lib/observability/**`;
+`app/api/**`; every `actions.ts` and `*.server.ts`; `supabase/**`;
+`apps/web/scripts/**` for probes. The live database is READ ONLY to it: every
+change is a file in `supabase/migrations/pending/` for the founder to run.
+
+1. **The bypassed-notification class of bug**, live now and the reason this
+   queue starts here. `public.admin_grant_staff` grants, audits, notifies and
+   enqueues the letter; `private.grant_staff_role` writes the notification
+   only; a direct insert into `staff_grants` does none of it. Two new admins
+   got a line in the app and no email, with a good template sitting unused.
+   Sweep every write path against `docs/NOTIFICATIONS_MAP.md` and against the
+   template registry: a template no caller ever enqueues is a bug, and so is a
+   caller that skips its notifying sibling. `admin_grant_staff` also returns
+   `already_admin` and stops before the email, so a person who holds the role
+   can never be sent their position letter by any path.
+2. **Dead backend code**: about 16 files, each confirmed unreachable by a
+   runtime string and a dynamic import, not only by grep.
+3. **Jobs nobody calls.** `ad5537cec` fixed a payout sweep nothing called.
+   Prove a live caller for every drain, cron and sweep, and read the backlog
+   of `email_outbox`, `push_queue`, `whatsapp_queue`, `listing_match_queue`
+   and `sanctions_screen_queue`.
+4. **Supabase advisors**, security and performance, with a reason for anything
+   it judges noise.
+5. **`stays_search` under real load**, from `pg_stat_statements` as it stands.
+6. Then its own targets, each justified by a measurement before it is fixed.
