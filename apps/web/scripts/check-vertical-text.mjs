@@ -88,12 +88,19 @@ const { chromium } = require("playwright-core");
 const CHROME =
   process.env.VALLO_CHROMIUM ?? "/opt/pw-browsers/chromium-1243/chrome-linux64/chrome";
 
-/** Fewer than this many characters per line box is gibberish, not a column. */
-const MAX_CHARS_PER_LINE = 2.6;
-/** One or two stray line boxes are a normal wrap. Four is a pattern. */
-const MIN_LINES = 4;
+/** Fewer than this many characters per line is gibberish, not a column. */
+const MAX_CHARS_PER_LINE = 4;
+/** One or two stray lines are a normal wrap. Three is a pattern. */
+const MIN_LINES = 3;
 /** Below this a run is too short for the average to mean anything. */
-const MIN_CHARS = 4;
+const MIN_CHARS = 5;
+/**
+ * The second signal, and the one that names the mechanism rather than the
+ * symptom: a box holding real words whose content width is under this many
+ * times its own font size has collapsed towards min-content, whatever the
+ * characters happened to do inside it. About 4 characters of Inter.
+ */
+const MIN_WIDTH_IN_FONT_SIZES = 2.4;
 
 function arg(name, fallback) {
   const i = process.argv.indexOf(`--${name}`);
@@ -108,6 +115,21 @@ const SCAN = `(() => {
   const MAX_PER_LINE = ${MAX_CHARS_PER_LINE};
   const MIN_LINES = ${MIN_LINES};
   const MIN_CHARS = ${MIN_CHARS};
+  const MIN_WIDTH_IN_FONT_SIZES = ${MIN_WIDTH_IN_FONT_SIZES};
+  /*
+   * ONE RECT IS NOT ONE LINE. \`getClientRects()\` returns a rect per box
+   * FRAGMENT, and a soft hyphen, a bidi run or a mid-line font fallback each
+   * add one. "Air conditioning" hyphenated over five lines came back as eight
+   * rects, which is how a line count of 8 for 16 characters appeared on a
+   * blemish rather than on gibberish. Rects are grouped by the top edge they
+   * share (rounded, because sub-pixel tops differ by a hair) so a line is a
+   * line.
+   */
+  const countLines = (rects) => {
+    const tops = new Set();
+    for (const r of rects) tops.add(Math.round(r.top));
+    return tops.size;
+  };
   const describe = (el) => {
     const parts = [];
     let p = el;
@@ -121,6 +143,29 @@ const SCAN = `(() => {
     }
     return parts.join(" < ");
   };
+  /*
+   * VISUALLY HIDDEN TEXT IS NOT A BUG. The screen-reader pattern in this
+   * product clips a box to a pixel (\`inline-size: 1px\` with
+   * \`clip-path: inset(50%)\`, or the older \`clip: rect(0 0 0 0)\`), and the
+   * docs tables hide a whole \`thead\` that way at phone width. Text inside
+   * one of those is laid out one character per line by design and is on
+   * nobody's screen, so the first run of this check reported five sr-only
+   * table headers as gibberish. An ancestor that clips itself out of sight
+   * takes its text out of scope.
+   */
+  const hidden = (el) => {
+    let p = el;
+    while (p && p !== document.documentElement) {
+      const cs = getComputedStyle(p);
+      if (cs.display === "none" || cs.visibility === "hidden" || cs.contentVisibility === "hidden") return true;
+      if (cs.clipPath && cs.clipPath.startsWith("inset(50%")) return true;
+      if (cs.clip && cs.clip !== "auto" && /rect\(0px(,| )/.test(cs.clip)) return true;
+      const r = p.getBoundingClientRect();
+      if ((r.width <= 1 || r.height <= 1) && cs.overflow !== "visible") return true;
+      p = p.parentElement;
+    }
+    return false;
+  };
   const out = [];
   const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
   let node;
@@ -130,24 +175,37 @@ const SCAN = `(() => {
     const el = node.parentElement;
     if (!el) continue;
     const cs = getComputedStyle(el);
-    if (cs.display === "none" || cs.visibility === "hidden") continue;
     /* Deliberately vertical text is not this bug. */
     if (cs.writingMode && cs.writingMode !== "horizontal-tb") continue;
     if (cs.textOrientation === "upright") continue;
+    if (hidden(el)) continue;
     const range = document.createRange();
     range.selectNodeContents(node);
     const rects = Array.from(range.getClientRects()).filter((r) => r.width > 0 && r.height > 0);
-    if (rects.length < MIN_LINES) continue;
-    const perLine = text.length / rects.length;
-    if (perLine > MAX_PER_LINE) continue;
-    const box = el.getBoundingClientRect();
+    if (rects.length === 0) continue;
+    const lines = countLines(rects);
+    const perLine = text.length / lines;
+    /* How wide the words were actually given, in units of their own type
+       size. Measured from the line boxes, not from the element, because an
+       inline element's box is the union of its fragments. */
+    const widest = Math.max(...rects.map((r) => r.width));
+    const fontSize = parseFloat(cs.fontSize) || 16;
+    const widthInEm = widest / fontSize;
+    const vertical = lines >= MIN_LINES && perLine <= MAX_PER_LINE;
+    /* Two lines is a wrap. "Apr 28" over two lines in a squeezed table column
+       is worth knowing about and is not what the founder photographed, so the
+       floor is the same three lines for both signals. */
+    const collapsed = lines >= MIN_LINES && widthInEm <= MIN_WIDTH_IN_FONT_SIZES;
+    if (!vertical && !collapsed) continue;
     out.push({
       text: text.slice(0, 70),
       chars: text.length,
-      lines: rects.length,
+      lines,
       perLine: Number(perLine.toFixed(2)),
-      width: Math.round(box.width),
-      wrap: cs.overflowWrap + "/" + cs.wordBreak,
+      width: Math.round(widest),
+      em: Number(widthInEm.toFixed(2)),
+      signal: vertical && collapsed ? "vertical+collapsed" : vertical ? "vertical" : "collapsed",
+      wrap: cs.overflowWrap + "/" + cs.wordBreak + "/" + cs.hyphens,
       path: describe(el),
     });
   }
@@ -203,9 +261,19 @@ async function worker(queue) {
     await ctx.addCookies([{ name: "nf_theme", value: job.theme, url: base }]);
     const page = await ctx.newPage();
     try {
-      await page.goto(base + job.route, { waitUntil: "domcontentloaded", timeout: 30_000 });
-      await page.waitForTimeout(250);
-      const hits = await page.evaluate(SCAN);
+      /* A HARD CEILING PER PAGE. One route that never settles must not take
+         the sweep with it: a stalled load reads as a load that could not be
+         measured, which is reported, and the run carries on. */
+      const hits = await Promise.race([
+        (async () => {
+          await page.goto(base + job.route, { waitUntil: "domcontentloaded", timeout: 20_000 });
+          await page.waitForTimeout(250);
+          return page.evaluate(SCAN);
+        })(),
+        new Promise((_, reject) =>
+          setTimeout(() => reject(new Error("page did not settle within 30s")), 30_000),
+        ),
+      ]);
       for (const hit of hits) findings.push({ ...hit, ...job });
     } catch (error) {
       failures.push({ ...job, error: String(error).split("\n")[0] });
@@ -246,6 +314,7 @@ for (const f of findings) {
   g.seen.push(`${f.theme} ${f.width}`);
   g.lines = Math.max(g.lines, f.lines);
   g.perLine = Math.min(g.perLine, f.perLine);
+  g.em = Math.min(g.em, f.em);
   groups.set(key, g);
 }
 
@@ -269,7 +338,7 @@ console.error(
 );
 for (const g of [...groups.values()].sort((a, b) => a.perLine - b.perLine)) {
   console.error(
-    `  ${g.route}  [${g.lines} lines for ${g.chars} chars, ${g.perLine}/line, ${g.width}px wide, overflow-wrap/word-break: ${g.wrap}]\n` +
+    `  ${g.route}  [${g.signal}: ${g.lines} lines for ${g.chars} chars, ${g.perLine}/line, ${g.width}px = ${g.em}em wide, overflow-wrap/word-break/hyphens: ${g.wrap}]\n` +
       `      "${g.text}"\n` +
       `      ${g.path}\n` +
       `      seen at: ${[...new Set(g.seen)].join(", ")}`,

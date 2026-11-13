@@ -198,7 +198,46 @@ async function run(request: Request): Promise<NextResponse> {
      (`lib/cron/freshness.ts`, 3 hours) fed even with one scheduler down. */
   const outcome = reconcileAuditOutcome(summary);
   if (outcome === "clean" && (await cleanRunRecordedRecently(admin))) {
-    return NextResponse.json({ ok: true, apply, needsAttention: report.needsAttention, recorded: false });
+    /*
+     * THE SHORT ANSWER STILL HAS TO LOOK LIKE THE RECONCILER, and for four
+     * days it did not. MEASURED 13 November 2026 on the live project: four
+     * open HIGH alerts titled "Money reconciliation: the last call reached
+     * something that is not the reconciler", one a day since 9 November, each
+     * quoting this exact body back:
+     *
+     *   {"ok":true,"apply":true,"needsAttention":false,"recorded":false}
+     *
+     * and each saying "no payment is being reconciled", which was NOT TRUE.
+     * The run had happened and had found nothing. What had changed is the
+     * shape of the reply: `private.request_money_reconciliation` decides
+     * whether the call reached this route or the site shell by looking for
+     * `"charges"` in the body together with `"ok":true`, and R-03's heartbeat
+     * short-circuit answered without a `charges` key. So every clean run
+     * inside the heartbeat was read as a renamed or shadowed route.
+     *
+     * That is worse than noise. It is a HIGH alert on the money desk that
+     * cries wolf every day, and the day the route really is shadowed the desk
+     * will have four identical rows above it saying the same thing.
+     *
+     * The counts are already in hand, so the short answer carries the same
+     * `charges` block as the long one. The watcher needs no migration and
+     * nothing else about the heartbeat changes: the audit row is still
+     * skipped, which is all R-03 was for.
+     */
+    return NextResponse.json({
+      ok: true,
+      apply,
+      charges: {
+        seen: report.charges.chargesSeen,
+        ours: report.charges.chargesOurs,
+        unavailable: report.charges.unavailable,
+        reason: report.charges.reason,
+        refundedMinor: report.charges.refundedMinor,
+        gaps: report.charges.gaps,
+      },
+      needsAttention: report.needsAttention,
+      recorded: false,
+    });
   }
 
   await recordMoneyAudit(admin, {
