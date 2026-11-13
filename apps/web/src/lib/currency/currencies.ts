@@ -35,6 +35,11 @@
  * amount at checkout. Turning this into multi-currency pricing is not a
  * refactor; it is a legal and product decision for the founder, with advice.
  *
+ * NO "PER MONTH" EQUIVALENT OF A YEARLY RENT, EVER (lead's ruling, 13
+ * November 2026). Nigerian rent is paid a year or two up front. "About
+ * ₦350,000 a month" on a card reads as an offer to pay monthly that no
+ * listing makes. Do not propose it again without answering that.
+ *
  * THE RATES are display rates only (`public.display_exchange_rates`, filled by
  * `/api/cron/display-rates`, read by `rates-store.ts`). They are never used to
  * charge, refund, pay out or reconcile anything.

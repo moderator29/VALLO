@@ -108,4 +108,48 @@ export const experienceSettingsEn = {
     /** The note under the theme control on `/settings/appearance`. */
     themeNote: "Dark is the default. System follows your phone.",
   },
+
+  /* ------------------------------------------------------------ preferences */
+  /**
+   * Currency and floor area on `/settings/region` (Agent CURRENCY, 13 November
+   * 2026), and the guide figure beside naira prices (`components/currency`).
+   * Naira is the price of record: every line here says a converted figure is
+   * a guide and that payment is in naira. Never word it as a price or offer.
+   */
+  preferences: {
+    currency: "Currency",
+    currencySub: "Adds a rough guide beside naira prices. You always pay in naira.",
+    sheetTitle: "Show a guide in",
+    sheetIntro:
+      "Prices on Vallo are set and paid in naira. Choose another currency and we add an approximate figure beside each naira price, worked out from a daily exchange rate. You always pay in naira, and you see the exact amount before you pay.",
+    automatic: "Automatic",
+    /** `{currency}` is what Automatic shows this reader now, e.g. "Nigerian naira (NGN)". */
+    automaticSub: "Follows where you are. Right now: {currency}",
+    nairaSub: "Naira only, with no guide figure",
+    /** The guide beside a naira price. `{amount}` is "£2,516". */
+    about: "about {amount}",
+    /** Below one whole unit. `{amount}` is "£1". */
+    under: "less than {amount}",
+    /** Said to a screen reader after the naira price. `{amount}` is "2,516 British pounds". */
+    aboutSpoken: "approximately {amount}, as a guide. You pay in naira.",
+    /** Shown on this page only, when the reader chose a currency and no fresh rate is stored. */
+    noRate: "Today's exchange rate is not available yet, so prices show in naira only.",
+    /** `{date}` is when the source last updated; `{rate}` is "₦1,788.34"; `{code}` is "GBP". */
+    rateLine: "Guide rate: 1 {code} is about {rate}, updated {date}.",
+    example: "How a price reads",
+    /** The example price is a stay at this many naira a night. */
+    exampleSub: "A stay at {naira} a night",
+    /** The source's required credit, worded as its terms ask. Do not reword. */
+    attribution: "Rates By Exchange Rate API",
+    area: "Floor area",
+    areaSub: "Listings give floor area in square metres. Choose square feet to see it converted.",
+    areaSqm: "Square metres (m²)",
+    areaSqft: "Square feet (sq ft)",
+    sqmShort: "m²",
+    sqftShort: "sq ft",
+    /** The example floor area line. `{area}` is "120 m²" or "1,292 sq ft". */
+    areaExample: "A 120 m² flat reads: {area}",
+    saveFailed: "That did not save. Check your connection and try again.",
+    choose: "Choose",
+  },
 };
