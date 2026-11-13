@@ -1081,25 +1081,38 @@
     flex-wrap: wrap;
     align-items: baseline;
     gap: var(--nf-space-3xs) var(--nf-space-xs);
-    color: var(--nf-content-secondary);
+    /* The place is information, so it takes the primary ink (the founder,
+       13 November 2026: the place and the facts lines white, blue kept for
+       what is tapped). On this card that is white over the photograph. */
+    color: var(--nf-content-primary);
+    font-size: var(--nf-text-body-sm);
+  }
+  /* The facts line under the place: information, so the primary ink. */
+  .nf-pcf__facts {
+    color: var(--nf-content-primary);
     font-size: var(--nf-text-body-sm);
   }
   .nf-pcf__price {
     color: var(--nf-content-primary);
+    font-family: var(--nf-font-display);
+    font-size: var(--nf-text-body);
     font-weight: 700;
   }
   .nf-pcf__period {
     color: var(--nf-content-secondary);
     font-weight: 600;
   }
+  /* The author's own words, above the listing they are about: the post's
+     voice, so it is read first, in the primary ink at the reading size. */
   .nf-pcf__caption {
     display: -webkit-box;
     overflow: hidden;
-    color: var(--nf-content-secondary);
-    font-size: var(--nf-text-body-sm);
+    color: var(--nf-content-primary);
+    font-size: var(--nf-text-body);
     line-height: 1.45;
     -webkit-box-orient: vertical;
-    -webkit-line-clamp: 2;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
   }
   .nf-pcf__row {
     display: flex;

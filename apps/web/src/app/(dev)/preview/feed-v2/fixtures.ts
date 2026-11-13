@@ -147,6 +147,30 @@ export const POSTS: PostView[] = [
       amenities: ["Parking", "Generator", "Water"],
     },
   }),
+  /* A member posting a listing to the feed ("Post to your feed"): the same
+     editorial card with the Shared badge, their own words above the listing. */
+  post({
+    id: "00000000-0000-4000-8000-0000000fd007",
+    author: person(2, "ada_okafor", "Ada Okafor"),
+    body: "Saw this one on Saturday. The fees are all stated and the road does not flood.",
+    createdLabel: "1h ago",
+    likeCount: 12,
+    replyCount: 3,
+    repostCount: 0,
+    listingShare: { listingId: "00000000-0000-4000-8000-0000000fd0a3", available: true },
+    listing: {
+      id: "00000000-0000-4000-8000-0000000fd0a3",
+      title: "Three bedroom terrace in Lekki Phase 1",
+      area: "Lekki Phase 1",
+      city: "Lagos",
+      priceLabel: "N4,500,000",
+      periodLabel: "a year",
+      photoUrl: house,
+      verified: false,
+      beds: 3,
+      baths: 4,
+    },
+  }),
   /* A member featuring a listing with no pictures of their own: the
      full-bleed editorial card (founder, 7 November 2026). */
   post({

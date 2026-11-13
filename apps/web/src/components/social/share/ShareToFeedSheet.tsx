@@ -130,31 +130,8 @@ export function ShareToFeedSheet({ open, onClose, listingId }: { open: boolean; 
         </div>
       ) : (
         <div className="nf-lsp">
-          <p className="nf-lsp__label nf-caption">{SHARE_WORDS.previewLabel}</p>
-          <div className="nf-lsp__card" data-testid="share-preview">
-            <div className="nf-lsp__media">
-              {ready?.listing.photoUrl ? (
-                <PostPicture src={ready.listing.photoUrl} alt="" width={600} height={750} sizes="(max-width: 640px) 90vw, 420px" />
-              ) : (
-                <span className="nf-pcf__empty" aria-hidden="true">
-                  <UiIcon name="house" size={40} />
-                </span>
-              )}
-              <span className="nf-pcf__scrim" aria-hidden="true" />
-              <span className="nf-pcf__tag nf-lsp__badge">{SHARE_WORDS.badge}</span>
-              <div className="nf-lsp__foot" data-theme="dark">
-                <p className="nf-pcf__title">{ready?.listing.title}</p>
-                <p className="nf-pcf__line">
-                  <span>{ready?.listing.place}</span>
-                  <span className="nf-pcf__price nf-numeric">
-                    {ready?.listing.priceLabel} <span className="nf-pcf__period">{ready?.listing.periodLabel}</span>
-                  </span>
-                </p>
-                {checked.ok && checked.note ? <p className="nf-pcf__caption">{checked.note}</p> : null}
-              </div>
-            </div>
-          </div>
-
+          {/* THE MEMBER'S WORDS FIRST, THE LISTING UNDER THEM (the founder, 13
+              November 2026): the same order the post takes in the feed. */}
           <label className="nf-lsp__note">
             <span className="nf-body font-semibold">{SHARE_WORDS.noteLabel}</span>
             <textarea
@@ -171,6 +148,43 @@ export function ShareToFeedSheet({ open, onClose, listingId }: { open: boolean; 
               {length > LISTING_SHARE_NOTE_MAX ? ` ${SHARE_WORDS.noteTooLong}` : !checked.ok && length > 0 ? ` ${checked.error}` : ""}
             </span>
           </label>
+
+          <p className="nf-lsp__label nf-caption">{SHARE_WORDS.previewLabel}</p>
+          <div className="nf-lsp__card" data-testid="share-preview">
+            <div className="nf-lsp__media">
+              {ready?.listing.photoUrl ? (
+                <PostPicture src={ready.listing.photoUrl} alt="" width={600} height={750} sizes="(max-width: 640px) 90vw, 420px" />
+              ) : (
+                <span className="nf-pcf__empty" aria-hidden="true">
+                  <UiIcon name="house" size={40} />
+                </span>
+              )}
+              <span className="nf-pcf__scrim" aria-hidden="true" />
+              <span className="nf-pcf__tag nf-lsp__badge">{SHARE_WORDS.badge}</span>
+              {/* The listing is attached, and can be taken off. With it gone
+                  there is nothing to post, so the X closes the sheet. */}
+              <button
+                type="button"
+                className="nf-lsp__remove"
+                onClick={onClose}
+                aria-label={SHARE_WORDS.removeAttachment}
+                data-testid="share-remove-attachment"
+              >
+                <UiIcon name="close" size={18} />
+              </button>
+              <div className="nf-lsp__foot" data-theme="dark">
+                <p className="nf-pcf__title">{ready?.listing.title}</p>
+                <p className="nf-pcf__line">
+                  <span>{ready?.listing.place}</span>
+                  <span className="nf-pcf__price nf-numeric">
+                    {ready?.listing.priceLabel} <span className="nf-pcf__period">{ready?.listing.periodLabel}</span>
+                  </span>
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <p className="nf-lsp__attach-note nf-caption">{SHARE_WORDS.attachmentNote}</p>
 
           <p className="nf-lsp__slots nf-body" data-testid="share-slots">
             <UiIcon name="feed" size={16} />

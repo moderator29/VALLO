@@ -676,6 +676,9 @@ export function PostCard({
             </span>
           </div>
 
+          {/* The member's own words come first, above the listing they are
+              about (the founder, 13 November 2026). */}
+          {hasWords ? <p className="nf-pcf__caption">{post.body}</p> : null}
           {featured ? (
             <>
               <h3 className="nf-pcf__title">{featured.title}</h3>
@@ -685,6 +688,13 @@ export function PostCard({
                   {featured.priceLabel} <span className="nf-pcf__period">{featured.periodLabel}</span>
                 </span>
               </p>
+              {/* The key facts, only the ones the listing itself states: a
+                  count of nothing is not drawn. */}
+              {featureFacts(featured, words).length > 0 ? (
+                <p className="nf-pcf__facts nf-numeric" data-testid="post-feature-facts">
+                  {featureFacts(featured, words).join(" \u00b7 ")}
+                </p>
+              ) : null}
             </>
           ) : (
             <>
@@ -692,7 +702,6 @@ export function PostCard({
               <p className="nf-pcf__line">{SHARE_CARD_WORDS.goneNote}</p>
             </>
           )}
-          {hasWords ? <p className="nf-pcf__caption">{post.body}</p> : null}
 
           <div className="nf-pcf__row">
             <ActionRows
@@ -1145,4 +1154,15 @@ function describe(post: PostView, words: CardWords): string {
   const who = post.author?.displayLabel ?? post.author?.handle ?? words.someone;
   if (!post.author?.isAgent) return words.describePlain.replace("{name}", who);
   return (post.author.supplyRole === "owner" ? words.describeLandlord : words.describeAgent).replace("{name}", who);
+}
+
+/** Bedrooms and bathrooms as the listing states them, for the editorial card. */
+function featureFacts(
+  listing: { beds?: number | null; baths?: number | null },
+  words: { bedsShort: string; bathsShort: string },
+): string[] {
+  return [
+    typeof listing.beds === "number" && listing.beds > 0 ? words.bedsShort.replace("{count}", String(listing.beds)) : null,
+    typeof listing.baths === "number" && listing.baths > 0 ? words.bathsShort.replace("{count}", String(listing.baths)) : null,
+  ].filter((fact): fact is string => fact !== null);
 }

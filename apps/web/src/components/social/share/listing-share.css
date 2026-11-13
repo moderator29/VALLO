@@ -40,6 +40,46 @@
     background: transparent;
     color: var(--nf-content-primary);
   }
+  /* The X on the attached listing: a 44pt target on the photograph's corner,
+     the white disc with the brand-blue glyph every control on a photograph
+     carries. */
+  .nf-lsp__remove {
+    position: absolute;
+    inset-block-start: var(--nf-space-xs);
+    inset-inline-end: var(--nf-space-xs);
+    z-index: 2;
+    display: grid;
+    place-items: center;
+    inline-size: 2.75rem;
+    block-size: 2.75rem;
+    padding: 0;
+    border: 0;
+    border-radius: var(--nf-radius-circle);
+    background: var(--nf-content-on-media);
+    color: var(--nf-doc-accent);
+    box-shadow: var(--nf-elevation-raised);
+    cursor: pointer;
+    transition: scale var(--nf-duration-press) var(--nf-ease-press);
+  }
+  .nf-lsp__remove:active {
+    scale: var(--nf-press-scale);
+  }
+  .nf-lsp__remove:focus-visible {
+    outline: var(--nf-focus-ring-width) solid var(--nf-content-on-media);
+    outline-offset: 2px;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .nf-lsp__remove {
+      transition: none;
+    }
+    .nf-lsp__remove:active {
+      scale: none;
+    }
+  }
+  .nf-lsp__attach-note {
+    margin: 0;
+    color: var(--nf-content-muted);
+  }
   .nf-lsp__note {
     display: grid;
     gap: var(--nf-space-2xs);
@@ -54,10 +94,6 @@
     background: var(--nf-surface-raised);
     color: var(--nf-content-primary);
     font: inherit;
-  }
-  .nf-lsp__textarea:focus-visible {
-    outline: var(--nf-focus-ring-width) solid var(--nf-focus-ring);
-    outline-offset: var(--nf-focus-ring-offset);
   }
   .nf-lsp__slots {
     display: flex;
