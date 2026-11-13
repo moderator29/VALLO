@@ -3,7 +3,8 @@
 import { ResultScreen } from "@/components/app/ResultSheet";
 import { useErrorReport } from "@/lib/observability/use-error-report";
 import { useClientCopy } from "@/lib/i18n/client-copy";
-import { useSignalBoundary } from "@/lib/offline/use-offline";
+import { useSignalHold } from "@/lib/offline/use-offline";
+import { SignalHold } from "@/components/app/SignalHold";
 
 /**
  * The host workspace's error boundary. There was none, so a failed host read
@@ -25,9 +26,11 @@ export default function HostError({
   const copy = useClientCopy();
   /* No signal is not a fault: the same calm words as the app's boundary, and
      the segment loads itself again when the signal returns. */
-  const offline = useSignalBoundary(error, reset);
-  /* A weak signal: no page, a short line at the bottom, and the screen again. */
-  if (offline === "retrying") return null;
+  const hold = useSignalHold(error, reset);
+  const offline = hold.view;
+  /* A weak signal: the page's shape stays, and the screen is tried again by
+     itself with growing gaps (lib/offline/use-offline.ts, 13 November 2026). */
+  if (offline === "retrying") return <SignalHold tries={hold.tries} onRetry={reset} />;
   if (offline) {
     return (
       <main id="main" className="flex min-h-dvh flex-col items-center justify-center px-gutter py-section">

@@ -5,6 +5,8 @@ import { ICON_PLATE_GLYPH, IconPlate } from "@/components/ui/IconPlate";
 import { KIND_GLYPH } from "@/components/ui/State";
 import { UiIcon } from "@/design-system/icons/UiIcon";
 import { useErrorReport } from "@/lib/observability/use-error-report";
+import { useSignalHold } from "@/lib/offline/use-offline";
+import { SignalHold } from "@/components/app/SignalHold";
 import { PlainSystemMoment } from "./offline/SystemFrame";
 
 /**
@@ -32,6 +34,43 @@ export default function Error({
   /* Logs to the console (the only record when `SENTRY_DSN` is unset), sends
      the scrubbed report, and returns the short reference (C13). */
   const reference = useErrorReport(error, "client.route_boundary", "[vallo] route error");
+  /*
+   * A WEAK SIGNAL IS NOT A FAULT HERE EITHER (13 November 2026, the founder's
+   * screenshot inside the app: this screen, "Reference C-...", on a slow
+   * connection). This boundary catches what the app's own boundaries cannot:
+   * a failure in a segment's LAYOUT (the app shell itself), and every route
+   * group without a boundary of its own. It had no signal handling at all, so
+   * a request that died on a weak signal there drew the fault screen. Now it
+   * holds the page's shape and tries again by itself, like the app's boundary.
+   */
+  const hold = useSignalHold(error, reset);
+  if (hold.view === "retrying") {
+    return (
+      <main id="main" className="px-gutter py-section">
+        <SignalHold tries={hold.tries} onRetry={reset} />
+      </main>
+    );
+  }
+  if (hold.view === "offline" || hold.view === "weak") {
+    return (
+      <PlainSystemMoment home="/home-or-landing">
+        <div data-state-kind="offline" role="status">
+          <p className="nf-system__overline">Connection</p>
+          <h1 className="nf-system__title">{hold.view === "offline" ? "You are offline" : "Weak connection"}</h1>
+          <p className="nf-system__body">
+            {hold.view === "offline"
+              ? "This screen needs a connection. It loads by itself when your signal comes back."
+              : "This screen did not finish loading on the connection you have. Vallo tries again by itself when the signal settles, or tap Try again."}
+          </p>
+        </div>
+        <div className="nf-system__actions">
+          <Button variant="primary" size="lg" full onClick={reset}>
+            Try again
+          </Button>
+        </div>
+      </PlainSystemMoment>
+    );
+  }
 
   return (
     /* The lockup links to `/home-or-landing`, not `/`. An error boundary is

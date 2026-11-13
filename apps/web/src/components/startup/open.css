@@ -75,6 +75,17 @@
   :root[data-native]:not([data-open="on"]):not([data-open="leave"]) .nf-open {
     display: none;
   }
+  /* IT TAKES A TAP ONLY WHILE IT IS SHOWING (13 November 2026, measured by
+     Agent FEEL: a layer re-lit after it had gone sat at an opacity of 1e-16
+     over the page and took every tap, so the page looked normal and did
+     nothing). Only "on" takes input; every other state, however it was
+     reached, lets the tap through to the page. */
+  .nf-open {
+    pointer-events: none;
+  }
+  :root[data-open="on"] .nf-open {
+    pointer-events: auto;
+  }
   :root[data-open="leave"] .nf-open {
     opacity: 0;
     pointer-events: none;
@@ -215,6 +226,7 @@
     to {
       opacity: 0;
       visibility: hidden;
+      pointer-events: none;
     }
   }
 

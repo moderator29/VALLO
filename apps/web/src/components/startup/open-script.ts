@@ -114,12 +114,19 @@ export const OPEN_SCRIPT =
   "if(own){r.setAttribute('data-open','off');return}}" +
   "var warm=true;try{warm=!!sessionStorage.getItem('" + OPEN_SESSION_KEY + "');if(!warm)sessionStorage.setItem('" + OPEN_SESSION_KEY + "','1')}catch(e){}" +
   "if(warm){r.setAttribute('data-open','off');return}" +
-  "var lit=0;function light(){if(lit)return;lit=1;r.setAttribute('data-open','on')}" +
+  /* LIT ONCE, NEVER AFTER IT HAS GONE, AND TIMED FROM WHEN IT IS SHOWN (13
+     November 2026, measured by Agent FEEL on production with the shell's user
+     agent and no splash signal: the hold was armed at DOMContentLoaded whether
+     or not the layer was lit, so it "left" a layer nobody saw, and then the
+     6s fallback lit it AGAIN over the page, where nothing would ever send it
+     away, and it took every tap). The clock now starts only from light(), and
+     light() refuses once the layer has gone. */
+  "var lit=0,gone=0;function light(){if(lit||gone)return;lit=1;r.setAttribute('data-open','on');if(D.readyState==='loading')D.addEventListener('DOMContentLoaded',arm,{once:true});else arm()}" +
   /* The shell waits for the splash to be down; the website lights up at once. */
   "if(nat){if(W.__nfSplashDown)light();else{try{W.addEventListener('nf:splash-down',light,{once:true})}catch(e){}setTimeout(light," + OPEN_NATIVE_WAIT_MS + ")}}else light();" +
   "var still=false;try{still=W.matchMedia('(prefers-reduced-motion: reduce)').matches}catch(e){}" +
   "var mo=r.getAttribute('data-motion');if(mo==='calm'||mo==='off')still=true;" +
-  "var min=still?" + OPEN_MIN_STILL_MS + ":" + OPEN_MIN_MS + ",cap=" + OPEN_CAP_MS + ",t0=0,gone=0;" +
+  "var min=still?" + OPEN_MIN_STILL_MS + ":" + OPEN_MIN_MS + ",cap=" + OPEN_CAP_MS + ",t0=0;" +
   "function ready(){if(!W.__nfOpenReady)return false;" +
   "if(D.querySelector('[data-passcode-guarded]')&&!r.hasAttribute('data-guard-ready')&&!D.querySelector('.nf-passcode'))return false;return true}" +
   "function leave(){if(gone)return;gone=1;try{D.removeEventListener('pointerdown',skip,true);D.removeEventListener('keydown',skip,true)}catch(e){}r.setAttribute('data-open','leave');setTimeout(function(){r.setAttribute('data-open','off')}," + (OPEN_FADE_MS + 40) + ")}" +
@@ -134,8 +141,7 @@ export const OPEN_SCRIPT =
   "function skip(){if(r.getAttribute('data-open')==='on')leave()}" +
   "try{D.addEventListener('pointerdown',skip,true);D.addEventListener('keydown',skip,true)}catch(e){}" +
   "function tick(){var age=performance.now()-t0;if(age>=cap||(age>=min&&ready()))leave();else setTimeout(tick,40)}" +
-  "function start(){if(t0)return;t0=performance.now();tick()}" +
+  "function start(){if(t0||!lit)return;t0=performance.now();tick()}" +
   "D.addEventListener('animationstart',function(e){if(e.animationName==='nf-open-in')start()},true);" +
   "function arm(){requestAnimationFrame(function(){requestAnimationFrame(start)})}" +
-  "if(D.readyState==='loading')D.addEventListener('DOMContentLoaded',arm,{once:true});else arm();" +
   "}catch(e){try{r.setAttribute('data-open','off')}catch(x){}}})();";

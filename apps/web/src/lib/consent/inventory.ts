@@ -60,6 +60,8 @@ export const STORAGE_INVENTORY: readonly StorageItem[] = [
   { id: "consent", name: "vallo_consent", kind: "cookie", category: "necessary", purpose: "Remembers the cookie choice you made here, and which version of this notice you saw.", lifetime: YEAR },
   { id: "session", name: "sb-*-auth-token*", kind: "cookie", category: "necessary", purpose: "Keeps you signed in. Set by our sign-in provider.", lifetime: "While you stay signed in, up to about 13 months", setBy: "Supabase" },
   { id: "locale", name: "nf_locale", kind: "cookie", category: "necessary", purpose: "Remembers the language you chose.", lifetime: YEAR },
+  { id: "currency", name: "vallo_currency", kind: "cookie", category: "necessary", purpose: "Remembers the currency you chose for the approximate guide beside naira prices, so a page shows it straight away. Prices are always charged in naira.", lifetime: "About 13 months" },
+  { id: "area-unit", name: "vallo_area", kind: "cookie", category: "necessary", purpose: "Remembers whether you read floor areas in square metres or square feet.", lifetime: "About 13 months" },
   { id: "theme", name: "nf_theme", kind: "cookie", category: "necessary", purpose: "Remembers light, dark or system, so the page draws in your theme straight away.", lifetime: YEAR },
   { id: "settings", name: "nf_settings", kind: "localStorage", category: "necessary", purpose: "Your display and notification choices on this device.", lifetime: DEVICE },
   { id: "motion", name: "nf_motion", kind: "cookie", category: "necessary", purpose: "Remembers if you asked for less motion.", lifetime: YEAR },

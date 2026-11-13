@@ -6,7 +6,7 @@ import { chromium, type Browser } from "playwright-core";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import { BROWSER_TEST_TIMEOUT, hasBrowser } from "@/lib/testing/mount-in-browser";
 import { OpeningScreen } from "./OpeningScreen";
-import { OPEN_CAP_MS, OPEN_MIN_MS, OPEN_SCRIPT } from "./open-script";
+import { OPEN_CAP_MS, OPEN_MIN_MS, OPEN_NATIVE_WAIT_MS, OPEN_SCRIPT } from "./open-script";
 
 vi.setConfig({ testTimeout: BROWSER_TEST_TIMEOUT });
 
@@ -199,5 +199,56 @@ describe.skipIf(!hasBrowser && !process.env.CI)("the opening screen, in a browse
     await page.waitForFunction(() => document.documentElement.dataset.open === "on", null, { timeout: 1000 });
     expect((await state(page)).display).toBe("block");
     await close();
+  });
+
+  /*
+   * THE REPLAY OVER THE PAGE (13 November 2026, measured by Agent FEEL on
+   * production with the shell's user agent and no splash signal: the layer
+   * "left" unseen, then the 6s fallback lit it again over the page, a late
+   * signal could too, and the layer then took every tap at an opacity of
+   * 1e-16). Driven here with the real script and the real sheet: an older
+   * shell (no ValloShell), hydrated at once, the splash never signalling.
+   */
+  it(
+    "an older shell's opening is shown once, from the fallback, leaves, never returns, and the page then takes the tap",
+    async () => {
+      const { page, close } = await installed({ hydrate: 50, shell: "older" });
+      try {
+        await page.evaluate(() => document.documentElement.setAttribute("data-native", "true"));
+        /* Before the fallback: nothing shown, nothing timed, and taps reach the page. */
+        await page.waitForTimeout(OPEN_CAP_MS + 300);
+        expect(await page.evaluate(() => document.documentElement.dataset.open ?? null)).toBeNull();
+        await page.locator("#under").click({ timeout: 2000 });
+        expect(await page.evaluate(() => (window as unknown as { __pressed?: number }).__pressed ?? 0)).toBe(1);
+        /* The fallback lights it once. */
+        await page.waitForFunction(() => document.documentElement.dataset.open === "on", null, { timeout: OPEN_NATIVE_WAIT_MS });
+        /* It goes after its minimum (the page is ready), and stays gone. */
+        await page.waitForFunction(() => document.documentElement.dataset.open === "off", null, { timeout: OPEN_CAP_MS + 2000 });
+        await page.evaluate(() => window.dispatchEvent(new Event("nf:splash-down")));
+        await page.waitForTimeout(600);
+        expect(await page.evaluate(() => document.documentElement.dataset.open)).toBe("off");
+        expect(await page.evaluate(() => getComputedStyle(document.getElementById("nf-open")!).display)).toBe("none");
+        await page.locator("#under").click({ timeout: 2000 });
+        expect(await page.evaluate(() => (window as unknown as { __pressed?: number }).__pressed ?? 0)).toBe(2);
+      } finally {
+        await close();
+      }
+    },
+    OPEN_NATIVE_WAIT_MS + OPEN_CAP_MS + 20_000,
+  );
+  it("a layer that is not \"on\" never takes a tap, whatever state it was left in", async () => {
+    const { page, close } = await installed({ hydrate: null });
+    try {
+      await page.waitForFunction(() => document.documentElement.dataset.open === "on");
+      expect(await page.evaluate(() => getComputedStyle(document.getElementById("nf-open")!).pointerEvents)).toBe("auto");
+      for (const state of ["leave", "off"]) {
+        await page.evaluate((v) => document.documentElement.setAttribute("data-open", v), state);
+        expect(await page.evaluate(() => getComputedStyle(document.getElementById("nf-open")!).pointerEvents)).toBe("none");
+      }
+      await page.evaluate(() => document.documentElement.removeAttribute("data-open"));
+      expect(await page.evaluate(() => getComputedStyle(document.getElementById("nf-open")!).pointerEvents)).toBe("none");
+    } finally {
+      await close();
+    }
   });
 });

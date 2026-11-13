@@ -34,6 +34,7 @@ function run(env: Env = {}) {
   if (env.motion) attrs["data-motion"] = env.motion;
   if (env.guardReady) attrs["data-guard-ready"] = "";
   const listeners: Record<string, (e: unknown) => void> = {};
+  const windowListeners: Record<string, (e: unknown) => void> = {};
   const store = new Map<string, string>(env.warm ? [[OPEN_SESSION_KEY, "1"]] : []);
   const root = {
     hasAttribute: (k: string) => k in attrs,
@@ -47,6 +48,9 @@ function run(env: Env = {}) {
     matchMedia: (q: string) => ({ matches: q.includes("display-mode") ? env.standalone !== false : q.includes("reduced-motion") ? !!env.reduced : false }),
     __nfOpenReady: env.ready ?? false,
     Capacitor: env.pluginHeaders ? { PluginHeaders: env.pluginHeaders } : undefined,
+    addEventListener: (n: string, f: (e: unknown) => void) => {
+      windowListeners[n] = f;
+    },
   } as Record<string, unknown>;
   const D = {
     documentElement: root,
@@ -90,7 +94,9 @@ function run(env: Env = {}) {
     // the first frame: the animation starts
     while (rafs.length) rafs.shift()!();
   };
-  return { attrs, W, advance, begin, listeners, setReady: () => (W.__nfOpenReady = true), setNow: (n: number) => (now = n) };
+  /* The splash's own signal, arriving whenever the test says. */
+  const relight = () => windowListeners["nf:splash-down"]?.({});
+  return { attrs, W, advance, begin, listeners, relight, setReady: () => (W.__nfOpenReady = true), setNow: (n: number) => (now = n) };
 }
 
 describe("the opening screen's decision", () => {
@@ -193,6 +199,49 @@ describe("a touch or a key during the opening", () => {
     const waiting = run({ native: true });
     waiting.listeners.pointerdown!({});
     expect(waiting.attrs["data-open"]).toBeUndefined();
+  });
+});
+
+/*
+ * NEVER LIT AFTER IT HAS GONE (13 November 2026, measured by Agent FEEL on
+ * production with the shell's user agent and no splash signal: the hold ran
+ * from DOMContentLoaded although nothing was shown, "left", and then the 6s
+ * fallback lit the layer again over the page, where it stayed and took taps).
+ */
+describe("an older shell's opening, timed from when it is shown", () => {
+  it("does not run its clock, or leave, before it is lit", () => {
+    const r = run({ native: true, ready: true });
+    r.begin();
+    r.advance(OPEN_CAP_MS + 500);
+    expect(r.attrs["data-open"]).toBeUndefined();
+  });
+  it("lit by the fallback, it then holds for the minimum from that moment, leaves, and never comes back", () => {
+    const r = run({ native: true, ready: true });
+    r.begin();
+    r.advance(OPEN_NATIVE_WAIT_MS + 10);
+    expect(r.attrs["data-open"]).toBe("on");
+    r.begin();
+    r.advance(OPEN_NATIVE_WAIT_MS + OPEN_MIN_MS - 100);
+    expect(r.attrs["data-open"]).toBe("on");
+    r.advance(OPEN_NATIVE_WAIT_MS + OPEN_MIN_MS + 100);
+    expect(r.attrs["data-open"]).toBe("leave");
+    r.advance(OPEN_NATIVE_WAIT_MS + OPEN_MIN_MS + OPEN_FADE_MS + 200);
+    expect(r.attrs["data-open"]).toBe("off");
+    /* A late splash signal, or any other light, changes nothing now. */
+    r.W.__nfSplashDown = true;
+    r.relight();
+    r.advance(OPEN_NATIVE_WAIT_MS * 3);
+    expect(r.attrs["data-open"]).toBe("off");
+  });
+  it("a late splash signal after a touch sent it away does not bring it back either", () => {
+    const r = run({ native: true, ready: false });
+    r.advance(OPEN_NATIVE_WAIT_MS + 10);
+    expect(r.attrs["data-open"]).toBe("on");
+    r.listeners.pointerdown!({});
+    r.advance(OPEN_NATIVE_WAIT_MS + OPEN_FADE_MS + 200);
+    expect(r.attrs["data-open"]).toBe("off");
+    r.relight();
+    expect(r.attrs["data-open"]).toBe("off");
   });
 });
 

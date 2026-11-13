@@ -105,6 +105,12 @@ export const STARTUP_RELEASE_MS = 100;
 /** On the native shell, the longest the opening waits, held at its first frame. */
 export const NATIVE_WAIT_MS = 300;
 
+/** After a script file of ours failed, how long past the page's load it may take to come alive before it loads itself again. */
+export const CHUNK_GRACE_MS = 2500;
+
+/** The once-a-minute guard on that reload (sessionStorage), shared with lib/offline/use-offline.ts. */
+export const CHUNK_RELOAD_KEY = "nf_chunk_reload";
+
 /** Where the last run's boot trace is kept, as one line. */
 export const BOOT_TRACE_KEY = "nf_boot_trace";
 
@@ -150,6 +156,27 @@ export const STARTUP_NATIVE_SCRIPT = [
   "if(W.__nfLoud){var go=function(){requestAnimationFrame(function(){requestAnimationFrame(handoff)})};",
   "if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',go,{once:true});else go()}",
   "})();",
+  /*
+   * A PIECE OF THE PAGE'S OWN CODE THAT DID NOT ARRIVE (13 November 2026, the
+   * founder on a weak signal). Measured on production with the first request
+   * for three of the page's script files dropped: the browser never asked for
+   * them again, the page never became interactive, and every tap did nothing.
+   * Asking again by adding the same script was tried and measured too: the
+   * file arrives, but the runtime had already given up on it, and the page
+   * still did not wake. So when a script file of ours fails, the page waits
+   * for its own load and CHUNK_GRACE_MS more; if it has still not come alive
+   * (`__nfOpenReady`, set by OpenReady once React has hydrated), it loads
+   * itself again, at most once a minute per address (`nf_chunk_reload`,
+   * shared with the error boundaries' own reload in lib/offline/use-offline.ts).
+   */
+  "(function(){try{var W=window,D=document,armed=0;",
+  "function check(){if(W.__nfOpenReady)return;if(W.__nfMark)W.__nfMark('chunk:reload');",
+  "try{var v=(sessionStorage.getItem('" + CHUNK_RELOAD_KEY + "')||'').split('@');if(v[0]===location.pathname&&Date.now()-Number(v[1]||0)<60000)return;sessionStorage.setItem('" + CHUNK_RELOAD_KEY + "',location.pathname+'@'+Date.now())}catch(x){return}",
+  "location.reload()}",
+  "function later(){setTimeout(check," + CHUNK_GRACE_MS + ")}",
+  "W.addEventListener('error',function(e){try{var el=e.target;if(!el||el.tagName!=='SCRIPT'||!el.src||el.src.indexOf('/_next/static/')<0)return;",
+  "if(W.__nfMark)W.__nfMark('chunk:failed');if(armed)return;armed=1;",
+  "if(D.readyState==='complete')later();else W.addEventListener('load',later,{once:true})}catch(x){}},true)}catch(e){}})();",
 ].join("");
 
 export const STARTUP_SCRIPT = [

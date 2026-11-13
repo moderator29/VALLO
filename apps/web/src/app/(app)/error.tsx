@@ -4,7 +4,8 @@ import { Button, ButtonLink } from "@/components/ui/Button";
 import { useErrorReport } from "@/lib/observability/use-error-report";
 import { useClientCopy } from "@/lib/i18n/client-copy";
 import { StateMoment } from "@/components/ui/StateMoment";
-import { useSignalBoundary } from "@/lib/offline/use-offline";
+import { useSignalHold } from "@/lib/offline/use-offline";
+import { SignalHold } from "@/components/app/SignalHold";
 
 /**
  * Personal Mode's error boundary: the brand moment, inside the chrome.
@@ -50,9 +51,11 @@ export default function AppError({
      because the phone is offline says so in one calm line, with no reference
      to quote and no "tell support", and loads itself again when the signal
      returns. The same words in the agent and host boundaries. */
-  const offline = useSignalBoundary(error, reset);
-  /* A weak signal: no page, a short line at the bottom, and the screen again. */
-  if (offline === "retrying") return null;
+  const hold = useSignalHold(error, reset);
+  const offline = hold.view;
+  /* A weak signal: the page's shape stays, and the screen is tried again by
+     itself with growing gaps (lib/offline/use-offline.ts, 13 November 2026). */
+  if (offline === "retrying") return <SignalHold tries={hold.tries} onRetry={reset} />;
   if (offline) {
     return (
       <StateMoment

@@ -2,6 +2,8 @@
 import "@/app/css/auth.css";
 
 import { useErrorReport } from "@/lib/observability/use-error-report";
+import { useSignalHold } from "@/lib/offline/use-offline";
+import { SignalHold } from "@/components/app/SignalHold";
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 import { useClientCopy } from "@/lib/i18n/client-copy";
@@ -38,6 +40,25 @@ export default function AuthError({
 }) {
   const a = useClientCopy().authFlow;
   const reference = useErrorReport(error, "client.auth_boundary", "[vallo] auth route error");
+  /* A weak signal is not a fault (13 November 2026): the page's shape stays
+     and the screen is tried again by itself (lib/offline/use-offline.ts). */
+  const hold = useSignalHold(error, reset);
+  if (hold.view === "retrying") return <SignalHold tries={hold.tries} onRetry={reset} />;
+  if (hold.view) {
+    return (
+      <div className="text-center" role="status">
+        <h1 className="nf-h3">{hold.view === "offline" ? "You are offline" : "Weak connection"}</h1>
+        <p className="mt-sm text-[length:var(--nf-text-body-sm)] leading-relaxed text-[var(--nf-content-secondary)]">
+          {hold.view === "offline" ? "This page needs a connection. It loads by itself when your signal comes back." : "This page did not finish loading on the connection you have. Vallo tries again by itself when the signal settles, or tap Try again."}
+        </p>
+        <div className="mt-md flex flex-col">
+          <Button variant="primary" size="lg" full onClick={reset}>
+            {a.tryAgain}
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="text-center">
