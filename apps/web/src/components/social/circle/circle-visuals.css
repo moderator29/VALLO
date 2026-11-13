@@ -178,13 +178,28 @@
     font-size: var(--nf-text-caption);
     opacity: 0.85;
   }
+  /* ONE ROW THAT SCROLLS, not a pile that wraps (13 November 2026): the
+     topics are a way in, and two or three wrapped lines of them pushed the
+     discussions off the first screen. The row bleeds to the screen edge so
+     a cut chip shows there is more to the side. */
   .nf-ctopics {
     display: flex;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     gap: var(--nf-space-xs);
-    margin: 0;
-    padding: 0;
+    margin: 0 calc(var(--nf-space-md) * -1);
+    padding: 0 var(--nf-space-md);
     list-style: none;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+    scroll-snap-type: x proximity;
+  }
+  .nf-ctopics::-webkit-scrollbar {
+    display: none;
+  }
+  .nf-ctopics > li {
+    flex: none;
+    scroll-snap-align: start;
   }
   .nf-ctopic {
     display: inline-flex;
@@ -192,10 +207,13 @@
     min-block-size: var(--nf-touch-target, 2.75rem);
     padding-inline: var(--nf-space-md);
     border: var(--nf-border-width) solid var(--nf-brand-edge-soft);
-    border-radius: var(--nf-radius-circle);
+    /* A soft rectangle, as every chip is (the shape law). This was
+       `--nf-radius-circle`, which is 50%: on a wide chip that draws an oval. */
+    border-radius: var(--nf-radius-control);
     background: var(--nf-surface-secondary);
     color: var(--nf-content-primary);
     font-size: var(--nf-text-body-sm);
+    white-space: nowrap;
     text-decoration: none;
   }
   .nf-ctopic:hover {

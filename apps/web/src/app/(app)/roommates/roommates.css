@@ -1764,32 +1764,9 @@
     font-size: var(--nf-text-caption);
     font-weight: 600;
   }
-  .nf-rmdash__areas {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(10.5rem, 1fr));
-    gap: var(--nf-space-sm);
-    margin: 0;
-    padding: 0;
-    list-style: none;
-  }
-  .nf-rmdash__area {
-    display: grid;
-    gap: var(--nf-space-3xs);
-    min-block-size: 4.5rem;
-    padding: var(--nf-space-sm);
-    border: var(--nf-border-width) solid var(--nf-tier-card-edge);
-    border-radius: var(--nf-radius-card);
-    background: var(--nf-surface-primary);
-    color: var(--nf-content-primary);
-    text-decoration: none;
-  }
-  .nf-rmdash__area-title {
-    font-weight: 600;
-  }
-  .nf-rmdash__area-body {
-    color: var(--nf-content-muted);
-    font-size: var(--nf-text-caption);
-  }
+  /* The eight areas are the platform's grouped list now (`RoommatesDirectory`
+     in _parts/Dashboard.tsx, 13 November 2026), so the tile grid's rules that
+     stood here are gone with it. */
 
   /* THE SCHOOL PICKER (browse by state, search inside the pill, chosen chip) */
   .nf-rmsp__chosen {

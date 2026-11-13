@@ -6,6 +6,7 @@ import { PageFrame } from "@/components/app/PageFrame";
 import { CircleBanner, CircleComposeFab, CircleDestinations, CircleFeaturedCard, CirclePostCard, CircleSortRow, CircleTabs, type CircleFace } from "@/components/social/circle/CircleVisuals";
 import { PullToRefresh } from "@/components/ui/PullToRefresh";
 import { ButtonLink } from "@/components/ui/Button";
+import { UiIcon } from "@/design-system/icons/UiIcon";
 import { CIRCLE_COPY } from "@/lib/features/circle/copy";
 import { CATEGORY_LABEL, CIRCLE_TABS, PROFESSIONAL_LABEL, TAB_TYPE, countWords, readSort, readTab, type CircleCategory, type CircleTab, type ProfessionalKind } from "@/lib/features/circle/model";
 import { readCircleHome, readCirclePosts, readFollowingPosts, readMyInvites, readNeighbourhoods, readProfessionals } from "@/lib/features/circle/queries";
@@ -96,22 +97,47 @@ async function TabBody({
         <div className="nf-circle">
           {invites.length > 0 && <InviteList invites={invites} />}
           <PopularTopics communities={[...home.mine, ...home.communities]} />
-          <Section title={C.home.featured} more="/circle?tab=discussions">
-            {home.trending.length ? (
-              <ul className="nf-circle-list" data-testid="circle-featured">
-                {home.trending.map((p) => (
-                  <li key={p.id}>
-                    <CircleFeaturedCard post={p} now={now} />
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <CircleEmpty>{C.empty.posts}</CircleEmpty>
-            )}
-          </Section>
-          <Section title={C.sections.questions} more="/circle?tab=ask">
-            {home.questions.length ? <PostList posts={home.questions} now={now} /> : <CircleEmpty>{C.empty.questions}</CircleEmpty>}
-          </Section>
+          {/* A SHELF WITH NOTHING ON IT IS NOT DRAWN, and two empty shelves
+              are one invitation, not two boxes (13 November 2026). With no
+              discussion and no question yet, the page says so once and
+              offers both ways to start; with one of the two, only the shelf
+              that has something is drawn. */}
+          {home.trending.length === 0 && home.questions.length === 0 ? (
+            <CircleEmpty
+              icon="chat-bubble"
+              action={
+                <span className="nf-circle-empty__actions">
+                  <ButtonLink href={home.signedIn ? "/circle/new" : "/sign-up?next=%2Fcircle%2Fnew"} variant="primary" size="md" data-testid="circle-start">
+                    {C.community.newPost}
+                  </ButtonLink>
+                  <ButtonLink href={home.signedIn ? "/circle/ask" : "/sign-up?next=%2Fcircle%2Fask"} variant="secondary" size="md" data-testid="circle-ask-first">
+                    {C.home.dest.ask}
+                  </ButtonLink>
+                </span>
+              }
+            >
+              {C.empty.posts}
+            </CircleEmpty>
+          ) : (
+            <>
+              {home.trending.length ? (
+                <Section title={C.home.featured} more="/circle?tab=discussions">
+                  <ul className="nf-circle-list" data-testid="circle-featured">
+                    {home.trending.map((p) => (
+                      <li key={p.id}>
+                        <CircleFeaturedCard post={p} now={now} />
+                      </li>
+                    ))}
+                  </ul>
+                </Section>
+              ) : null}
+              {home.questions.length ? (
+                <Section title={C.sections.questions} more="/circle?tab=ask">
+                  <PostList posts={home.questions} now={now} />
+                </Section>
+              ) : null}
+            </>
+          )}
         </div>
         <div className="nf-circle">
           <RoommatesDoor />
@@ -251,8 +277,12 @@ function Section({ title, more, id, children }: { title: string; more?: string; 
       <div className="nf-circle-section__head">
         <h2 className="nf-circle-section__title">{title}</h2>
         {more ? (
-          <Link href={more} className="nf-link">
+          /* The platform's one section action: the primary ink and a
+             chevron, never an arrow and never the link blue (the founder,
+             13 November 2026). */
+          <Link href={more} className="nf-section-action nf-link-quiet nf-tap nf-body-sm nf-circle-section__more">
             See all
+            <UiIcon name="chevron-right" size={16} />
           </Link>
         ) : null}
       </div>

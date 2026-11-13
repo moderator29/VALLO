@@ -1,7 +1,7 @@
-import Link from "next/link";
-
 import { SectionHead, counted, type RoommatesCopy } from "@/components/roommates";
 import { ButtonLink } from "@/components/ui/Button";
+import { IconPlate } from "@/components/ui/IconPlate";
+import { ListGroup, ListRow } from "@/components/ui/ListGroup";
 import { UiIcon, type UiIconName } from "@/design-system/icons/UiIcon";
 import { dashboardCounts, nextAction, type NextAction } from "@/lib/features/roommates/home-dashboard";
 import { ROOMMATES_ROUTES } from "@/lib/features/roommates/model";
@@ -60,6 +60,10 @@ export function RoommatesDashboard({ home, t }: { home: RoommatesHome; t: Roomma
   ].filter((x): x is string => Boolean(x));
   /* The profile cards above own those two steps. */
   const showNext = action.kind !== "profile";
+  /* With nothing waiting and no next step of its own (the profile card owns
+     that one), the desk would be a heading over "Nothing is waiting on you".
+     A section with nothing in it is not drawn. */
+  if (home.signedIn && counts.length === 0 && !showNext) return null;
   return (
     <section className="nf-rmdash" aria-labelledby="rm-dash" data-testid="roommates-dashboard" data-next={action.kind}>
       <SectionHead id="rm-dash" title={D.title} />
@@ -93,22 +97,41 @@ export function RoommatesDashboard({ home, t }: { home: RoommatesHome; t: Roomma
           </ButtonLink>
         </div>
       ) : null}
-      <h3 className="nf-rmdash__kicker">{D.areasTitle}</h3>
-      <ul className="nf-rmdash__areas" data-testid="roommates-areas">
-        {AREAS.map((a) => {
-          const words = D.areas[a.key];
-          return (
-
-            <li key={a.href}>
-              <Link href={a.href} className="nf-rmdash__area">
-                <UiIcon name={a.icon} size={20} />
-                <span className="nf-rmdash__area-title">{words.title}</span>
-                <span className="nf-rmdash__area-body">{words.body}</span>
-              </Link>
-            </li>
-          );
-        })}
-      </ul>
     </section>
+  );
+}
+
+/**
+ * EVERYTHING IN VALLO ROOMMATES, AS ONE COMPACT LIST (13 November 2026).
+ *
+ * These eight areas were a grid of tiles in the middle of the home, directly
+ * above a second grid of four doors that led to half of the same places. They
+ * are the platform's grouped list now, at the foot of the page: a place to
+ * find an area by name, after the content, with every route it ever led to
+ * still one tap away (discover, groups, schools, corps members, my
+ * roommates, split costs, add a check, the safety guide).
+ */
+export function RoommatesDirectory({ t }: { t: RoommatesCopy }) {
+  const D = t.area.dash;
+  return (
+    <ListGroup label={D.areasTitle} labelAs="h2" data-testid="roommates-areas">
+      {AREAS.map((a) => {
+        const words = D.areas[a.key];
+        return (
+          <ListRow
+            key={a.href}
+            href={a.href}
+            leading={
+              <IconPlate size="md" shape="round" tone="neutral">
+                <UiIcon name={a.icon} size={20} />
+              </IconPlate>
+            }
+            title={words.title}
+            sub={words.body}
+            chevron
+          />
+        );
+      })}
+    </ListGroup>
   );
 }

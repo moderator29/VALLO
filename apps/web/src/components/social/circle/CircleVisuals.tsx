@@ -86,7 +86,7 @@ export function CircleBanner({
   const H = CIRCLE_COPY.home;
   const S = CIRCLE_COPY.stats;
   /* Real counts only: a zero or an unreadable count is not drawn. */
-  const figures = [
+  const figures: { key: string; n: number; words: readonly [string, string] }[] = [
     { key: "posts", n: stats?.posts ?? 0, words: S.posts },
     { key: "active", n: stats?.active ?? 0, words: S.activeShort },
     { key: "communities", n: stats?.communities ?? 0, words: S.communities },
@@ -96,6 +96,12 @@ export function CircleBanner({
   const shown = (withPhoto.length ? withPhoto : faces).slice(0, 4);
   const members = stats?.members ?? 0;
   const more = Math.max(0, members - shown.length);
+  /* ONE TREATMENT FOR THE COUNTS. With faces to show, the members are the
+     line of faces and its count. With none, "1 member" was a lone line of
+     small bold text above figures drawn a different way; it joins the
+     figures instead, as the first of them. */
+  const peopleLine = Boolean(stats) && members > 0 && shown.length > 0;
+  if (stats && members > 0 && !peopleLine) figures.unshift({ key: "members", n: members, words: S.members });
   return (
     <section className="nf-cbn" data-theme="dark" aria-labelledby="circle-banner-title" data-testid="circle-hero">
       <span className="nf-cbn__art" aria-hidden="true">
@@ -107,7 +113,7 @@ export function CircleBanner({
           {H.heroTitle}
         </h2>
         <p className="nf-cbn__line">{H.heroLine}</p>
-        {stats && members > 0 ? (
+        {peopleLine ? (
           <p className="nf-cbn__people" data-testid="circle-stats">
             {shown.length ? (
               <span className="nf-cbn__faces" aria-hidden="true">

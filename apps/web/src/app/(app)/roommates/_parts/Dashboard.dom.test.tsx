@@ -2,7 +2,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import { getDictionary } from "@vallo/i18n";
 import type { RoommatesHome } from "@/lib/features/roommates/queries";
-import { RoommatesDashboard } from "./Dashboard";
+import { RoommatesDashboard, RoommatesDirectory } from "./Dashboard";
 
 const t = getDictionary("en").roommates;
 const home = (over: Partial<RoommatesHome>): RoommatesHome => ({
@@ -12,12 +12,14 @@ const home = (over: Partial<RoommatesHome>): RoommatesHome => ({
 const html = (h: RoommatesHome) => renderToStaticMarkup(<RoommatesDashboard home={h} t={t} />);
 
 describe("the Roommates home dashboard", () => {
-  it("a new person: no next card (the profile card owns it), an honest empty count, every area", () => {
-    const out = html(home({ myStatus: "none" }));
-    expect(out).toContain('data-next="profile"');
-    expect(out).not.toContain("roommates-next\"");
-    expect(out).toContain(t.area.dash.countsEmpty);
+  it("a new person: the desk is not drawn at all (the profile card owns the next step)", () => {
+    expect(html(home({ myStatus: "none" }))).toBe("");
+  });
+  it("the directory keeps every area one tap away, as a list", () => {
+    const out = renderToStaticMarkup(<RoommatesDirectory t={t} />);
+    expect(out).toContain('data-testid="roommates-areas"');
     for (const href of ["/roommates/discover", "/roommates/groups", "/roommates/campus", "/roommates/nysc", "/roommates/me", "/roommates/split", "/roommates/verify", "/roommates/safety"]) expect(out).toContain(`href="${href}"`);
+    expect(out.match(/class="nf-list-item"/g)).toHaveLength(8);
   });
   it("a ready person with requests: the first next action is the requests, with real counts", () => {
     const out = html(home({ pending: { requests: 2, invites: 0, viewings: 1 } }));

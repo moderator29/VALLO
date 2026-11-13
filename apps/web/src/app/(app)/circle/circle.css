@@ -173,8 +173,10 @@
     gap: var(--nf-space-sm);
     padding: var(--nf-space-xl) var(--nf-space-md);
     border-radius: var(--nf-radius-card);
-    border: var(--nf-border-width) dashed var(--nf-brand-edge-soft);
-    background: var(--nf-surface-inset);
+    /* The card's own material, not a dashed well: the sunken, near-black box
+       read as a hole in the navy ground (13 November 2026). */
+    border: var(--nf-border-width) solid var(--nf-tier-card-edge);
+    background: var(--nf-surface-primary);
     color: var(--nf-content-secondary);
     font-size: var(--nf-text-body-sm);
     text-align: center;
@@ -187,6 +189,22 @@
     border-radius: var(--nf-radius-circle);
     background: var(--nf-brand-tint-1);
     color: var(--nf-brand-primary);
+  }
+  .nf-circle-empty__actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--nf-space-xs);
+  }
+  /* "See all" and its chevron sit on one line, on a 44pt target. */
+  .nf-circle-section__more {
+    display: inline-flex;
+    flex-shrink: 0;
+    align-items: center;
+    gap: var(--nf-space-3xs);
+    min-block-size: 2.75rem;
+    font-weight: 600;
+    white-space: nowrap;
   }
   .nf-circle-empty__words {
     max-inline-size: 26rem;

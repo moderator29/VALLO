@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import { RoommatesDashboard } from "./Dashboard";
+import { RoommatesDashboard, RoommatesDirectory } from "./Dashboard";
 
 import { PageFrame } from "@/components/app/PageFrame";
 import { RoommatesFeed } from "@/components/roommates/RoommatesFeed";
@@ -178,7 +178,37 @@ export function RoommatesHomeView({ home, t: copy, now, feed }: { home: Roommate
       testId="roommates-promo"
     />
   );
-  const order = active ? [stats, recommended, rooms, promo, together, journeys, schools, nysc, how] : [journeys, stats, how, rooms, promo, recommended, together, schools, nysc];
+  /*
+   * ONE ORDER, AND ONLY WHAT HAS SOMETHING IN IT (13 November 2026; the
+   * founder: "don't just scatter the platform, upgrade and flow").
+   *
+   * The page had grown to seven screens of stacked sections: the four doors,
+   * then a second grid of eight doors, then three shelves that were empty
+   * boxes with a button each, then the same routes again. It now reads top
+   * to bottom as one path: what do you want to do (the four doors, once),
+   * what is here (the posts), what is waiting on you (the desk), then the
+   * live shelves, then how it works and where else to go.
+   *
+   * A SHELF WITH NOTHING ON IT IS NOT DRAWN. Each empty shelf carried one
+   * action, and every one of those actions is still on the page: "Create
+   * your roommate profile" is the profile card and the desk's next step,
+   * "Offer a room" is the third door, "Start a group" is the fourth door and
+   * the promo. The posts list keeps its own empty state, so an empty
+   * platform says so once, not five times.
+   *
+   * The counts are drawn when at least two of them are above zero; one
+   * figure beside two zeros is a row of noughts, and the hero already
+   * carries the live count.
+   */
+  const shelves = [
+    home.recommended.length ? recommended : null,
+    home.rooms.length ? rooms : null,
+    home.together.length ? together : null,
+  ];
+  const figures = home.stats ? [home.stats.people, home.stats.rooms, home.stats.groups].filter((n) => n > 0).length : 0;
+  const order = active
+    ? [...shelves, promo, schools, nysc, how, figures >= 2 ? stats : null]
+    : [how, ...shelves, promo, schools, nysc, figures >= 2 ? stats : null];
 
   return (
     <PageFrame title={copy.title} fallback="/home" width="wide">
@@ -186,6 +216,7 @@ export function RoommatesHomeView({ home, t: copy, now, feed }: { home: Roommate
         <div className="nf-rmp" data-testid="roommates-home">
         {hero}
         <RoommatesFirstRun startHref="#rmfd-title" />
+        {journeys}
         {feed ? (
           <>
             <RoommatesFeed initial={feed.initial} tab={feed.tab} filters={feed.filters} signedIn={home.signedIn} now={now} />
@@ -211,7 +242,11 @@ export function RoommatesHomeView({ home, t: copy, now, feed }: { home: Roommate
         ) : null}
         {order}
         <TrustTiles t={copy} />
-        <SafetyStrip t={copy} />
+        {/* Everything else in Vallo Roommates, as one compact list at the
+            foot: every area keeps its way in (the safety guide and "add a
+            check" among them), without a second grid of doors above the
+            content. */}
+        <RoommatesDirectory t={copy} />
         </div>
       </PullToRefresh>
     </PageFrame>
