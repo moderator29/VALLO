@@ -98,9 +98,7 @@
     ".next-a11y/types/**/*.ts",
     ".next-a11y/dev/types/**/*.ts",
     ".next-z/types/**/*.ts",
-    ".next-z/dev/types/**/*.ts",
-    ".next-layout/types/**/*.ts",
-    ".next-layout/dev/types/**/*.ts"
+    ".next-z/dev/types/**/*.ts"
   ],
   "exclude": [
     "node_modules",
