@@ -87,6 +87,43 @@ if (routes.length === 0) {
 }
 
 /* ---------------------------------------------------------------------------
+ * MARKER CLASSES: a class the markup wears on purpose with no rule of its own.
+ * Every one below was checked by hand on 13 November 2026, with what it is for,
+ * because an unexplained entry here would hide the fault this script exists to
+ * catch. A class gets in only when it is a hook for a test, for a descendant
+ * selector or for a script, never because a rule for it is missing.
+ */
+const MARKER_CLASSES = new Map([
+  [
+    "nf-btn__label",
+    "The label span inside Button, DropdownButton, ListingStickyBar and " +
+      "PlaceActions. It carries no style of its own; it is the handle a " +
+      "descendant rule and two Button tests reach the words by.",
+  ],
+  [
+    "nf-logo-art",
+    "On every Logo and LogoMarkLive drawing, as the handle the passcode " +
+      "screen sizes the mark by and as the mark the logo sweep test looks for.",
+  ],
+  [
+    "nf-host-group",
+    "The block of the host group whose __title and __note are styled in " +
+      "agent.css. The block's own material comes from nf-panel nf-panel--card " +
+      "beside it, so the block class is a namespace rather than a rule.",
+  ],
+  [
+    "nf-site-newsletter",
+    "The newsletter form element. Its field and button are styled through " +
+      "nf-site-newsletter-field; the form itself needs nothing.",
+  ],
+  [
+    "nf-tab--circle",
+    "The Circle slot on the bottom bar, named so the tab can be found and so " +
+      "a later rule has somewhere to land. The slot draws as nf-tab today.",
+  ],
+]);
+
+/* ---------------------------------------------------------------------------
  * Where in the repository each class is declared, so a missing class can name
  * the file that did not arrive instead of only itself.
  */
@@ -159,6 +196,8 @@ const HARVEST = `(async (href) => {
 
 const jobs = [];
 for (const theme of themes) for (const route of routes) jobs.push({ theme, route });
+/* The queue is drained with `shift()`, so the total is kept before the run. */
+const total = jobs.length;
 
 const findings = [];
 const failures = [];
@@ -209,7 +248,9 @@ async function worker(queue) {
             }
             for (const name of harvested.classes) inCss.add(name);
           }
-          const orphans = scan.inMarkup.filter((name) => !inCss.has(name)).sort();
+          const orphans = scan.inMarkup
+            .filter((name) => !inCss.has(name) && !MARKER_CLASSES.has(name))
+            .sort();
           return { orphans, readable: scan.readable, opaque: scan.opaque.length, unfetched };
         })(),
         new Promise((_, reject) => setTimeout(() => reject(new Error("page did not settle within 30s")), 30_000)),
@@ -226,12 +267,12 @@ async function worker(queue) {
     } finally {
       await ctx.close();
       done += 1;
-      if (done % 50 === 0) process.stderr.write(`  ... ${done}/${jobs.length} page loads\n`);
+      if (done % 50 === 0) process.stderr.write(`  ... ${done}/${total} page loads\n`);
     }
   }
 }
 
-await Promise.all(Array.from({ length: concurrency }, () => worker(jobs.slice(0, jobs.length) && jobs)));
+await Promise.all(Array.from({ length: concurrency }, () => worker(jobs)));
 await browser.close();
 
 if (jsonOut) writeFileSync(jsonOut, JSON.stringify({ findings, failures }, null, 2));
@@ -242,9 +283,10 @@ for (const failure of failures) {
 
 if (findings.length === 0) {
   console.log(
-    `css delivery: clean - ${jobs.length} page loads (${routes.length} route(s), ${width} wide, ` +
+    `css delivery: clean - ${total} page loads (${routes.length} route(s), ${width} wide, ` +
       `${themes.join(" and ")}), every nf- class in the markup is matched by a rule in a stylesheet ` +
-      `the page loaded (${crossOrigin} cross-origin sheet reference(s) skipped). ` +
+      `the page loaded (${crossOrigin} sheet(s) read by fetch, ${MARKER_CLASSES.size} marker ` +
+      "classes listed in MARKER_CLASSES). " +
       "SIGNED OUT only: this is no evidence about a signed-in screen.",
   );
   process.exit(failures.length > 0 ? 1 : 0);
