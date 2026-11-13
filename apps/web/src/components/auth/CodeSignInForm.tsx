@@ -48,6 +48,13 @@ export function CodeSignInForm({ mode, t, next }: { mode: Mode; t: Dictionary; n
     mode === "email" ? verifyEmailSignInCode : verifyPhoneSignInCode,
     CODE_START,
   );
+  /* SIGNED IN, SAID AT ONCE (SPEED, 13 November 2026): the action answers
+     with where to go as soon as the code is accepted, and the page loads it
+     here as a whole page, the pill keeping its spinner on the way. */
+  const leaving = Boolean(checked.next);
+  useEffect(() => {
+    if (checked.next) window.location.replace(checked.next);
+  }, [checked]);
   const [code, setCode] = useState("");
   const [phoneValue, setPhoneValue] = useState("");
   const verifyForm = useRef<HTMLFormElement>(null);
@@ -102,7 +109,7 @@ export function CodeSignInForm({ mode, t, next }: { mode: Mode; t: Dictionary; n
   const onDigits = (value: string) => {
     const digits = value.replace(/\D/g, "");
     setCode(digits);
-    if (digits.length === codeLength && !verifying) verifyForm.current?.requestSubmit();
+    if (digits.length === codeLength && !verifying && !leaving) verifyForm.current?.requestSubmit();
   };
 
   return (
@@ -163,7 +170,7 @@ export function CodeSignInForm({ mode, t, next }: { mode: Mode; t: Dictionary; n
             cellsLabel={t.authFlow.codeCells.replace("{count}", lengthWord)}
           />
           <div className="nf-auth__actions">
-            <AuthPillButton type="submit" loading={verifying} className="nf-auth__cta" data-testid={`code-verify-${mode}`}>
+            <AuthPillButton type="submit" loading={verifying || leaving} className="nf-auth__cta" data-testid={`code-verify-${mode}`}>
               {copy.verify}
             </AuthPillButton>
           </div>

@@ -10,6 +10,13 @@ export type CodeSignInState = {
   error?: "badTarget" | "badCode" | "wrongCode" | "limited" | "failed" | "off";
   /** The address the code went to, masked for display. */
   shown?: string;
+  /**
+   * Signed in: where to go (SPEED, 13 November 2026). A submit made by the
+   * page's script is answered with this instead of a server redirect, which
+   * made Next build the next page inside the same request before a byte of
+   * "it worked" reached the phone. The form loads it itself.
+   */
+  next?: string;
 };
 
 export const CODE_START: CodeSignInState = { step: "ask" };

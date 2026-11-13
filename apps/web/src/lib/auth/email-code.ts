@@ -9,6 +9,7 @@ import { safeReturnPath } from "@/lib/security/return-path";
 import { rememberFirstCodeSignIn } from "./first-sign-in-server";
 import type { CodeSignInState } from "./code-sign-in-state";
 import { CONFIRMATION_CODE_RE } from "./confirmation-code";
+import { isUnreachableAuthError } from "./unreachable";
 
 /**
  * A3. SIGN IN WITH A CODE BY EMAIL, NO PASSWORD.
@@ -74,6 +75,8 @@ export async function verifyEmailSignInCode(_prev: CodeSignInState, formData: Fo
 
   const supabase = await createClientWithAgent();
   const { data, error } = await supabase.auth.verifyOtp({ email, token, type: "email" });
+  /* SPEED: a check that never got an answer is not a wrong code. */
+  if (error && isUnreachableAuthError(error)) return { step: "code", target: email, shown: maskAddress(email), error: "failed" };
   if (error) return { step: "code", target: email, shown: maskAddress(email), error: "wrongCode" };
   /* A first sign-in (this code confirmed the address) earns "Welcome to
      Vallo" on the next screen, by the one-shot cookie. */
@@ -81,7 +84,12 @@ export async function verifyEmailSignInCode(_prev: CodeSignInState, formData: Fo
 
   /* The address the chooser remembered is spent, as after a password sign-in. */
   (await cookies()).delete("nf_chooser_email");
-  revalidatePath("/", "layout");
   const next = formData.get("next");
-  redirect((typeof next === "string" && safeReturnPath(next, "")) || "/home");
+  const landing = (typeof next === "string" && safeReturnPath(next, "")) || "/home";
+  /* SIGNED IN, SAID AT ONCE (SPEED, 13 November 2026), as the password
+     sign-in does: a script submit gets where to go and loads it as a whole
+     page; only a submit made before the script ran keeps the redirect. */
+  if ((await headers()).has("next-action")) return { step: "code", target: email, shown: maskAddress(email), next: landing };
+  revalidatePath("/", "layout");
+  redirect(landing);
 }

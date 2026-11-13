@@ -1433,6 +1433,8 @@ export const en = {
   },
 
   auth: {
+    /** Under the sign-in button once a submit has waited five seconds (13 November 2026). */
+    stillWorking: "Still working. This is taking longer than usual, and nothing you typed is lost.",
     welcomeBack: "Welcome back",
     signInToContinue: "Sign in to continue",
     createAccount: "Create your account",

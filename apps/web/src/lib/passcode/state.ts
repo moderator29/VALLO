@@ -55,10 +55,18 @@ export function sessionSignedInWithin(session: PasscodeSession, windowSeconds: n
   return session.state === "signed-in" && isFreshSignIn(session.amr, Math.floor(Date.now() / 1000), windowSeconds);
 }
 
-export async function readPasscodeStatus(supabase: SupabaseClient): Promise<PasscodeStatus> {
+export async function readPasscodeStatus(supabase: SupabaseClient, options: { waitMs?: number } = {}): Promise<PasscodeStatus> {
   try {
+    /* `waitMs` (SPEED, 13 November 2026): a caller in front of a tap (the
+       Face ID proof) ends the read after that long, and the answer is
+       `error`, which never opens anything. The layout's gate keeps the
+       server client's own deadline: there an early `error` would draw the
+       lock for a member who never set a passcode. */
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data, error } = await (supabase as any).rpc("passcode_status");
+    const call = (supabase as any).rpc("passcode_status");
+    const { data, error } = await (options.waitMs && typeof call?.abortSignal === "function"
+      ? call.abortSignal(AbortSignal.timeout(options.waitMs))
+      : call);
     if (error) return { state: "error" };
     return parseStatus(data);
   } catch {

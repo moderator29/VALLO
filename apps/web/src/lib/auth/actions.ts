@@ -52,6 +52,8 @@ import { setupOnRecord, setupStillOwed } from "./finish-setup-server";
 import { contentRefusal } from "@/lib/safety/content-refusal";
 import { claimInviteFromCookie, inviteCodeFromCookie } from "@/lib/referral/server";
 import { recordFunnelStep } from "@/lib/funnel/record";
+import { afterResponse } from "./after-response";
+import { isUnreachableAuthError } from "./unreachable";
 import type {
   AuthField,
   AuthFormState,
@@ -427,12 +429,23 @@ export async function signInWithEmail(
     };
   }
 
-  const supabase = await createClientWithAgent(); // V-19: GoTrue records the browser, not Node
+  /* V-19: GoTrue records the browser, not Node. SPEED: and the password
+     check has SIGN_IN_AUTH_WAIT_MS to answer; a GoTrue that has not answered
+     by then is said as "cannot reach accounts, nothing you typed was lost",
+     with the pill ready for another try, never as a spinner with no end. */
+  const supabase = await createClientWithAgent({ deadlineMs: SIGN_IN_AUTH_WAIT_MS });
   const landing = landingAfterAuth(formData);
-  const { error } = await supabase.auth.signInWithPassword({
-    email,
-    password: field(formData, "password"),
-  });
+  let error: { message: string; name?: string; status?: number } | null = null;
+  try {
+    ({ error } = await supabase.auth.signInWithPassword({
+      email,
+      password: field(formData, "password"),
+    }));
+  } catch (thrown) {
+    /* supabase-js answers a lost request with an error rather than a throw;
+       this is the belt for a fetch that throws anyway. */
+    error = { message: thrown instanceof Error ? thrown.message : "fetch failed", status: 0 };
+  }
 
   if (error) {
     /* Checked before the general mapper, because a deactivated account is the
@@ -440,6 +453,7 @@ export async function signInWithEmail(
     if (isDeactivatedAccountError(error.message)) {
       return { ok: false, ...deactivatedAccountNotice() };
     }
+    if (isUnreachableAuthError(error)) return { ok: false, message: w.notConnected };
     return { ok: false, message: authMessage(error.message, w) };
   }
 
@@ -473,6 +487,17 @@ export async function signInWithEmail(
 
 /** The longest a sign-in waits for one of its two counts (above). */
 const SIGN_IN_COUNT_WAIT_MS = 2_500;
+
+/**
+ * The longest the password check itself may take (SPEED, 13 November 2026).
+ * GoTrue answers a healthy sign-in in well under a second (bcrypt and the
+ * session insert); eight seconds is only ever reached by a stall, and the
+ * whole action is then bounded at about 2.5 + 2.5 + 8 seconds in the worst
+ * case instead of open-ended. An abort here costs nothing: a password check
+ * that completed after the abort leaves an unused session row, never a
+ * spent credential.
+ */
+const SIGN_IN_AUTH_WAIT_MS = 8_000;
 
 async function boundedCount(request: Parameters<typeof consume>[0]): Promise<Awaited<ReturnType<typeof consume>>> {
   let timer: ReturnType<typeof setTimeout> | undefined;
@@ -559,7 +584,10 @@ export async function signUpWithEmail(
     },
   });
 
-  if (error) return { ok: false, message: authMessage(error.message, w) };
+  if (error) {
+    if (isUnreachableAuthError(error)) return { ok: false, message: w.notConnected };
+    return { ok: false, message: authMessage(error.message, w) };
+  }
 
   /*
    * THE ADDRESS ALREADY HAS AN ACCOUNT, and Supabase will not say so.
@@ -604,16 +632,24 @@ export async function signUpWithEmail(
   /* NEWS AND UPDATES. The default is on, so only a NO is written: the box was
      shown (`marketingAsked`) and left unticked. A request that never carried the
      box says nothing and the default stands. */
+  /* SPEED (13 November 2026): both writes run after the response
+     (`afterResponse`, Next's `after()`), not in front of the code screen.
+     They decide nothing the person sees next, they still run on every
+     sign-up, and each already catches its own failure (the receipt raises
+     its alert). The form's values are read here, inside the request. */
   if (data.user && field(formData, "marketingAsked") === "1" && field(formData, "marketingEmail") !== "yes") {
-    await switchMarketingOff(data.user.id);
+    const userId = data.user.id;
+    afterResponse(() => switchMarketingOff(userId));
   }
 
   if (data.user) {
     const submitted = field(formData, "termsVersion").trim();
     if (submitted === TERMS_VERSION) {
-      await recordTermsAcceptance(data.user.id, "signup_email", {
-        ageConfirmed: ageConfirmed(field(formData, "ageConfirmed")),
-      });
+      const adult = ageConfirmed(field(formData, "ageConfirmed"));
+      /* Awaited, not deferred: the edge gate reads this receipt on the very
+         next page, and a member whose rows were not there yet would be sent
+         back to finish setting up (see finishSocialSetup). One fast write. */
+      await recordTermsAcceptance(data.user.id, "signup_email", { ageConfirmed: adult });
     }
   }
 
@@ -763,14 +799,27 @@ export async function verifySignUpCode(
   /* Ten a minute per address and twenty a minute per connection. A million
      codes against one address is the attack, and a person mistyping the code
      three times is the case that must not be caught by it. */
-  const pacedEmail = await throttle("sign_up_verify", subjectForEmail(email), 10, 60);
+  /* SPEED (13 November 2026): the two counts are asked TOGETHER, one round
+     trip instead of two. Unlike the password sign-in's pair (which must stay
+     in order, see signInWithEmail), nothing here depends on the order: the
+     address count is the one an attacker would aim at, and it was always
+     asked first, so it is spent exactly as before; the only difference is
+     that an attempt the address count refuses now also counts against the
+     connection it came from, which only ever slows the sender. */
+  const ip = subjectForIp(await callerIp());
+  const [pacedEmail, pacedIp] = await Promise.all([
+    throttle("sign_up_verify", subjectForEmail(email), 10, 60),
+    throttle("sign_up_verify_ip", ip, 20, 60),
+  ]);
   if (pacedEmail) return pacedEmail;
-  const pacedIp = await throttle("sign_up_verify_ip", subjectForIp(await callerIp()), 20, 60);
   if (pacedIp) return pacedIp;
 
   const supabase = await createClientWithAgent(); // V-19: GoTrue records the browser, not Node
   const { data, error } = await supabase.auth.verifyOtp({ email, token, type: "signup" });
 
+  /* A check that never got an answer is not a wrong code (SPEED): it says
+     so, and the code stays in the field for one more tap. */
+  if (error && isUnreachableAuthError(error)) return { ok: false, message: w.notConnected };
   if (error || !data.session) {
     return {
       ok: false,
@@ -795,7 +844,13 @@ export async function verifySignUpCode(
    * here because the trigger lives in a schema that is not ours, and because
    * this call site is cheap. It cannot fail this action.
    */
-  if (data.user) await welcomeOnce(data.user.id);
+  /* SPEED: after the response. The welcome row is already queued by the
+     database trigger in the verify's own transaction; this second path
+     can only answer `already`, so nobody waits for it. */
+  if (data.user) {
+    const userId = data.user.id;
+    afterResponse(() => welcomeOnce(userId));
+  }
   // The session cookies are set. Drop every cached render so the shell picks
   // the signed-in tree rather than the anonymous one it rendered a moment ago.
   revalidatePath("/", "layout");

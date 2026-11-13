@@ -11,6 +11,7 @@ import { rememberFirstCodeSignIn } from "./first-sign-in-server";
 import { claimInviteFromCookie } from "@/lib/referral/server";
 import { isSixDigits, type CodeSignInState } from "./code-sign-in-state";
 import { phoneSignInEnabled } from "./phone-sign-in-flag";
+import { isUnreachableAuthError } from "./unreachable";
 
 /**
  * A2. SIGN IN (OR UP) WITH A PHONE NUMBER, THE CODE BY WHATSAPP OR SMS.
@@ -60,6 +61,8 @@ export async function verifyPhoneSignInCode(_prev: CodeSignInState, formData: Fo
 
   const supabase = await createClientWithAgent();
   const { data, error } = await supabase.auth.verifyOtp({ phone, token, type: "sms" });
+  /* SPEED: a check that never got an answer is not a wrong code. */
+  if (error && isUnreachableAuthError(error)) return { step: "code", target: phone, shown: formatPhone(phone), error: "failed" };
   if (error) return { step: "code", target: phone, shown: formatPhone(phone), error: "wrongCode" };
   /* A first sign-in (this code confirmed the number) earns "Welcome to
      Vallo" on the next screen, by the one-shot cookie. */
@@ -68,7 +71,10 @@ export async function verifyPhoneSignInCode(_prev: CodeSignInState, formData: Fo
      kept in this browser is claimed now (a new account only). */
   await claimInviteFromCookie();
 
-  revalidatePath("/", "layout");
   const next = formData.get("next");
-  redirect((typeof next === "string" && safeReturnPath(next, "")) || "/home");
+  const landing = (typeof next === "string" && safeReturnPath(next, "")) || "/home";
+  /* SPEED: answered at once to a script submit, as the email code is. */
+  if ((await headers()).has("next-action")) return { step: "code", target: phone, shown: formatPhone(phone), next: landing };
+  revalidatePath("/", "layout");
+  redirect(landing);
 }

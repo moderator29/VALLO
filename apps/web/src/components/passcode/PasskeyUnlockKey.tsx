@@ -7,6 +7,29 @@ import { assertPlatformKey, platformLockAvailable } from "@/lib/security/webauth
 import type { DeviceLock } from "@/lib/security/device-lock";
 import { beginPasskeyUnlock, finishPasskeyUnlock, type PasskeyUnlockStart } from "@/lib/passcode/passkey-unlock";
 import { noteDeviceKeyFailed, rememberDeviceKey, type DeviceKeyState } from "@/lib/platform/device-keys";
+import { NO_ANSWER, withinMs } from "@/lib/passcode/within";
+
+/**
+ * THE LONGEST THE BUTTON WAITS ON THE SERVER (SPEED, 13 November 2026). The
+ * challenge and the proof are one database round trip each on the server
+ * (`lib/passcode/passkey-unlock.ts`), each bounded there at three seconds; a
+ * request that still has no answer after these is a lost one, and the tap
+ * answers "that did not work" with the keypad beside it instead of a
+ * spinner with no end. A proof the server accepted after the wait still set
+ * its unlock cookie, so the next screen finds the app open.
+ */
+const BEGIN_WAIT_MS = 6_000;
+const FINISH_WAIT_MS = 10_000;
+
+/** The answer, or null when it did not come in time or failed. */
+async function inTime<T>(work: Promise<T>, ms: number): Promise<T | null> {
+  try {
+    const answer = await withinMs(work, ms);
+    return answer === NO_ANSWER ? null : answer;
+  } catch {
+    return null;
+  }
+}
 
 /**
  * "Unlock with Face ID or fingerprint" (C14). The device proves the person
@@ -58,8 +81,8 @@ export function PasskeyUnlockKey({
   const ready = useRef<{ start: Extract<PasskeyUnlockStart, { state: "ready" }>; at: number } | null>(null);
   const prefetch = useCallback(async () => {
     try {
-      const start = await beginPasskeyUnlock();
-      ready.current = start.state === "ready" ? { start, at: Date.now() } : null;
+      const start = await inTime(beginPasskeyUnlock(), BEGIN_WAIT_MS);
+      ready.current = start?.state === "ready" ? { start, at: Date.now() } : null;
     } catch {
       ready.current = null;
     }
@@ -77,9 +100,9 @@ export function PasskeyUnlockKey({
       let start: PasskeyUnlockStart | null = held;
       if (!start) {
         if (!(await platformLockAvailable())) return onFailed(noteDeviceKeyFailed());
-        start = await beginPasskeyUnlock();
+        start = await inTime(beginPasskeyUnlock(), BEGIN_WAIT_MS);
       }
-      if (start.state !== "ready") return onFailed("unknown");
+      if (!start || start.state !== "ready") return onFailed("unknown");
       const proof = await assertPlatformKey({
         challenge: start.challenge,
         rpId: start.rpId,
@@ -89,11 +112,14 @@ export function PasskeyUnlockKey({
         waitMs: 20_000,
       });
       if (!proof) return onFailed(noteDeviceKeyFailed());
-      const result = await finishPasskeyUnlock({
-        challenge: start.challenge,
-        ...proof,
-      });
-      if (result.ok) {
+      const result = await inTime(
+        finishPasskeyUnlock({
+          challenge: start.challenge,
+          ...proof,
+        }),
+        FINISH_WAIT_MS,
+      );
+      if (result?.ok) {
         rememberDeviceKey(proof.credentialId);
         onUnlocked();
       } else onFailed("unknown");

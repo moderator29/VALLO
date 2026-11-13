@@ -3,6 +3,7 @@ import "server-only";
 import { createServerClient } from "@supabase/ssr";
 import { cookies, headers } from "next/headers";
 import type { Database } from "../supabase/database.types";
+import { deadlineFetch, SUPABASE_DEADLINE_MS } from "../supabase/deadline-fetch";
 import { requireSupabasePublicEnv } from "../supabase/env";
 import { describeDevice } from "./device";
 
@@ -74,13 +75,27 @@ export function forwardedAgentHeader(agent: string | null | undefined): Record<s
   return value ? { "user-agent": value } : {};
 }
 
-export async function createClientWithAgent() {
+/**
+ * SPEED (13 November 2026): this client had NO deadline, unlike `createClient`
+ * (PERF-SWEEP 6). A GoTrue call that stalled with its socket open held the
+ * sign-in pill on its spinner for as long as the platform let the function
+ * run. Now `/auth/v1` and `/rest/v1` calls end after `deadlineMs` (the same
+ * fifteen seconds as every server client unless the caller asks for less) and
+ * come back as an error the form can offer again. The password sign-in asks
+ * for less (`SIGN_IN_AUTH_WAIT_MS` in lib/auth/actions.ts); the code checks
+ * keep the long one, because an abort after GoTrue has spent a code would
+ * leave the person holding a used code.
+ */
+export async function createClientWithAgent(options: { deadlineMs?: number } = {}) {
   const { url, anonKey } = requireSupabasePublicEnv();
   const cookieStore = await cookies();
   const agent = (await headers()).get("user-agent");
 
   return createServerClient<Database>(url, anonKey, {
-    global: { headers: forwardedAgentHeader(agent) },
+    global: {
+      headers: forwardedAgentHeader(agent),
+      fetch: deadlineFetch({ ms: options.deadlineMs ?? SUPABASE_DEADLINE_MS }),
+    },
     cookies: {
       getAll() {
         return cookieStore.getAll();

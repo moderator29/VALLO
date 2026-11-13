@@ -25,15 +25,23 @@ vi.mock("../actions/session", () => ({
     user: { id: "user-1" },
     supabase: { auth: { getSession: async () => ({ data: { session: { access_token: token } } }) } },
   }),
+  /* SPEED: the unlock identifies the caller from the verified token. */
+  resolveSessionClaims: async () => ({
+    state: "signed-in",
+    userId: "user-1",
+    supabase: { auth: { getClaims: async () => ({ data: { claims: { sub: "user-1", session_id: SESSION } }, error: null }) } },
+  }),
 }));
+const fakeAdmin = vi.hoisted(() => ({
+  from: () => ({
+    select: () => ({ eq: () => ({ eq: () => ({ maybeSingle: async () => ({ data: { id: "k1", public_key_spki: "AA", alg: -7, sign_count: 0 } }) }) }) }),
+    update: () => ({ eq: async () => ({}) }),
+  }),
+}));
+vi.mock("../supabase/admin", () => ({ createAdminClient: () => fakeAdmin }));
+vi.mock("../supabase/service", () => ({ isServiceConfigured: () => true }));
 vi.mock("../security/rate-limit", () => ({ consume: async () => ({ allowed: true }), subjectForUser: (id: string) => id }));
 vi.mock("../security/money-step-up", () => ({
-  admin: () => ({
-    from: () => ({
-      select: () => ({ eq: () => ({ eq: () => ({ maybeSingle: async () => ({ data: { id: "k1", public_key_spki: "AA", alg: -7, sign_count: 0 } }) }) }) }),
-      update: () => ({ eq: async () => ({}) }),
-    }),
-  }),
   ceremonyOrigin: async () => ({ origin: "https://www.vallospaces.com", rpId: "www.vallospaces.com" }),
   listCredentialIds: async () => ["cred"],
   mintChallenge: async (_a: unknown, _u: string, _p: string, d: string | null) => {

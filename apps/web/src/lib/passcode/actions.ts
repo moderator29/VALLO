@@ -61,14 +61,58 @@ async function callerIp(): Promise<string> {
   }
 }
 
+/**
+ * The pacing counts, ASKED TOGETHER (SPEED, 13 November 2026): one database
+ * round trip in front of the code instead of one per count.
+ *
+ * Why this pair may run at once when the password sign-in's pair may not:
+ * the sign-in counts an ADDRESS anybody can type, so its order is what stops
+ * a stranger spending the owner's hour (lib/auth/actions.ts). Here both
+ * subjects belong to the caller: the account is the signed-in session's own,
+ * and the address is where the request came from. Counting both on every
+ * attempt only ever slows the one sending the attempts. The database's own
+ * count inside `passcode_verify` (a pause after five wrong, a sign-out at
+ * ten) is unchanged and is still the limit that matters.
+ *
+ * The longest wait among the refusals is the one said.
+ */
 async function paced(userId: string, rules: { bucket: string; limit: number; windowSeconds: number }[]): Promise<number | null> {
   const ip = await callerIp();
-  for (const rule of rules) {
-    const subject = rule.bucket.endsWith("_ip") ? subjectForIp(ip) : subjectForUser(userId);
-    const verdict = await consume({ ...rule, subject });
-    if (!verdict.allowed) return verdict.retryAfterSeconds;
+  const verdicts = await Promise.all(
+    rules.map((rule) => consume({ ...rule, subject: rule.bucket.endsWith("_ip") ? subjectForIp(ip) : subjectForUser(userId) })),
+  );
+  let wait: number | null = null;
+  for (const verdict of verdicts) {
+    if (!verdict.allowed) wait = Math.max(wait ?? 0, verdict.retryAfterSeconds);
   }
-  return null;
+  return wait;
+}
+
+/**
+ * The longest a passcode check waits for the database (SPEED, 13 November
+ * 2026). `passcode_verify` is one row and one bcrypt (cost 10, tens of
+ * milliseconds); six seconds is only reached in a stall. Ended, the check
+ * answers `error`, which the lock already treats as a lost answer and asks
+ * again under the SAME attempt id, so the database counts the code once
+ * however many times it is asked (`patient-verify.ts`).
+ */
+const PASSCODE_RPC_WAIT_MS = 6_000;
+
+type RpcAnswer = PromiseLike<{ data: unknown; error: unknown }>;
+type VerifyCaller = {
+  rpc: (fn: string, args: Record<string, unknown>) => RpcAnswer & { abortSignal?: (signal: AbortSignal) => RpcAnswer };
+};
+
+async function callVerify(supabase: unknown, args: Record<string, unknown>): Promise<VerifyOutcome> {
+  try {
+    const call = (supabase as VerifyCaller).rpc("passcode_verify", args);
+    const { data, error } = await (typeof call.abortSignal === "function"
+      ? call.abortSignal(AbortSignal.timeout(PASSCODE_RPC_WAIT_MS))
+      : call);
+    return error ? { status: "error" } : parseVerify(data);
+  } catch {
+    return { status: "error" };
+  }
 }
 
 function toVerifyResult(outcome: VerifyOutcome): VerifyResult {
@@ -121,17 +165,10 @@ export async function verifyPasscodeAction(code: string, attemptId?: string): Pr
   const wait = await paced(session.userId, [VERIFY_PER_USER, VERIFY_PER_IP]);
   if (wait !== null) return { status: "paced", retryAfterSeconds: wait };
 
-  let outcome: VerifyOutcome;
-  try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data, error } = await (session.supabase as any).rpc(
-      "passcode_verify",
-      typeof attemptId === "string" && ATTEMPT_ID.test(attemptId) ? { p_code: code, p_attempt: attemptId } : { p_code: code },
-    );
-    outcome = error ? { status: "error" } : parseVerify(data);
-  } catch {
-    outcome = { status: "error" };
-  }
+  const outcome = await callVerify(
+    session.supabase,
+    typeof attemptId === "string" && ATTEMPT_ID.test(attemptId) ? { p_code: code, p_attempt: attemptId } : { p_code: code },
+  );
 
   if (outcome.status === "ok") {
     await writeUnlock(session.userId);
@@ -244,14 +281,7 @@ export async function turnOffPasscodeAction(code: string): Promise<TurnOffResult
   }
   const wait = await paced(session.userId, [VERIFY_PER_USER, VERIFY_PER_IP]);
   if (wait !== null) return { ok: false, reason: "paced", retryAfterSeconds: wait };
-  let outcome: VerifyOutcome;
-  try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data, error } = await (session.supabase as any).rpc("passcode_verify", { p_code: code });
-    outcome = error ? { status: "error" } : parseVerify(data);
-  } catch {
-    outcome = { status: "error" };
-  }
+  const outcome = await callVerify(session.supabase, { p_code: code });
   if (outcome.status === "unset") return { ok: false, reason: "not-set" };
   if (outcome.status === "reset_required") {
     await endThisSession();

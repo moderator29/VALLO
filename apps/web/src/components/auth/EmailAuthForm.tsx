@@ -61,6 +61,10 @@ type SignUpErrors = Partial<Record<"firstName" | "surname" | "email" | "password
  * Every word either mode draws comes out of the dictionary under `signUp` or
  * `auth`.
  */
+
+/** How long a pending submit waits before saying it is still working. */
+const SLOW_AFTER_MS = 5_000;
+
 export function EmailAuthForm({
   mode,
   t,
@@ -137,6 +141,20 @@ export function EmailAuthForm({
     showSuccess("signed-in");
     window.location.replace(state.next);
   }, [state]);
+  /*
+   * A SPINNER THAT SAYS SOMETHING (SPEED, 13 November 2026). The server side
+   * of a sign-in is bounded now (each count 2.5 s at most, the password check
+   * 8 s, lib/auth/actions.ts), so the pill always comes back with an answer.
+   * If it has not after SLOW_AFTER_MS, a line under it says the wait is not
+   * the person's doing, rather than leaving a spinner alone on the screen.
+   */
+  const [slow, setSlow] = useState(false);
+  if (!pending && slow) setSlow(false);
+  useEffect(() => {
+    if (!pending) return;
+    const timer = window.setTimeout(() => setSlow(true), SLOW_AFTER_MS);
+    return () => window.clearTimeout(timer);
+  }, [pending]);
   const isSignUp = mode === "sign-up";
   /*
    * F-12: A REFUSED SUBMIT PUTS THE CURSOR ON THE FIRST THING TO FIX. Every
@@ -467,6 +485,11 @@ export function EmailAuthForm({
               {isSignUp ? t.signUp.createAccountCta : t.common.signIn}
             </AuthPillButton>
           )}
+          {slow && pending ? (
+            <p className="nf-auth__notice" role="status" aria-live="polite" data-testid="auth-slow">
+              {t.auth.stillWorking}
+            </p>
+          ) : null}
         </div>
       </form>
 
