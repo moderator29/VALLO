@@ -84,22 +84,24 @@ export type CurrencyMeta = {
   symbol: string;
   /** ISO 4217 minor-unit digits. */
   decimals: 0 | 2;
+  /** A space between sign and figure, as the currency is written at home ("KSh 1,234", "R1,234"). */
+  spaced: boolean;
   /** Said to the ear after a number ("2,516 British pounds"). */
   spoken: string;
 };
 
 export const CURRENCY_META: Readonly<Record<DisplayCurrency, CurrencyMeta>> = {
-  NGN: { code: "NGN", name: "Nigerian naira", symbol: "₦", decimals: 2, spoken: "naira" },
-  USD: { code: "USD", name: "US dollar", symbol: "US$", decimals: 2, spoken: "US dollars" },
-  GBP: { code: "GBP", name: "British pound", symbol: "£", decimals: 2, spoken: "British pounds" },
-  EUR: { code: "EUR", name: "Euro", symbol: "€", decimals: 2, spoken: "euros" },
-  CAD: { code: "CAD", name: "Canadian dollar", symbol: "CA$", decimals: 2, spoken: "Canadian dollars" },
-  GHS: { code: "GHS", name: "Ghanaian cedi", symbol: "GH₵", decimals: 2, spoken: "Ghanaian cedis" },
-  ZAR: { code: "ZAR", name: "South African rand", symbol: "R", decimals: 2, spoken: "South African rand" },
-  KES: { code: "KES", name: "Kenyan shilling", symbol: "KSh", decimals: 2, spoken: "Kenyan shillings" },
-  AED: { code: "AED", name: "UAE dirham", symbol: "AED", decimals: 2, spoken: "UAE dirhams" },
-  XOF: { code: "XOF", name: "West African CFA franc", symbol: "CFA", decimals: 0, spoken: "CFA francs" },
-  AUD: { code: "AUD", name: "Australian dollar", symbol: "A$", decimals: 2, spoken: "Australian dollars" },
+  NGN: { code: "NGN", name: "Nigerian naira", symbol: "₦", decimals: 2, spaced: false, spoken: "naira" },
+  USD: { code: "USD", name: "US dollar", symbol: "US$", decimals: 2, spaced: false, spoken: "US dollars" },
+  GBP: { code: "GBP", name: "British pound", symbol: "£", decimals: 2, spaced: false, spoken: "British pounds" },
+  EUR: { code: "EUR", name: "Euro", symbol: "€", decimals: 2, spaced: false, spoken: "euros" },
+  CAD: { code: "CAD", name: "Canadian dollar", symbol: "CA$", decimals: 2, spaced: false, spoken: "Canadian dollars" },
+  GHS: { code: "GHS", name: "Ghanaian cedi", symbol: "GH₵", decimals: 2, spaced: false, spoken: "Ghanaian cedis" },
+  ZAR: { code: "ZAR", name: "South African rand", symbol: "R", decimals: 2, spaced: false, spoken: "South African rand" },
+  KES: { code: "KES", name: "Kenyan shilling", symbol: "KSh", decimals: 2, spaced: true, spoken: "Kenyan shillings" },
+  AED: { code: "AED", name: "UAE dirham", symbol: "AED", decimals: 2, spaced: true, spoken: "UAE dirhams" },
+  XOF: { code: "XOF", name: "West African CFA franc", symbol: "CFA", decimals: 0, spaced: true, spoken: "CFA francs" },
+  AUD: { code: "AUD", name: "Australian dollar", symbol: "A$", decimals: 2, spaced: false, spoken: "Australian dollars" },
 };
 
 const CODES: ReadonlySet<string> = new Set(DISPLAY_CURRENCIES);

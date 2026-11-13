@@ -383,6 +383,8 @@ const PUBLIC_API_PATHS = new Set([
   "/api/cron/offers-sweep",
   /* Crypto payments read back from the provider, behind the cron bearer. */
   "/api/cron/crypto-reconcile",
+  /* The display exchange rates (lib/currency/rates-job.ts), behind the cron bearer. */
+  "/api/cron/display-rates",
   /* Escrow arrangements read back from the payment partner, behind the cron bearer. */
   "/api/cron/arrangements-reconcile",
   "/api/cron/email-outbox",

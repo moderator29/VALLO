@@ -104,6 +104,10 @@
     {
       "path": "/api/cron/calls-sweep",
       "schedule": "*/5 * * * *"
+    },
+    {
+      "path": "/api/cron/display-rates",
+      "schedule": "50 0,12 * * *"
     }
   ]
 }

@@ -89,6 +89,8 @@ export const VERCEL_JOBS: readonly VercelJob[] = [
   { name: "rewards-payouts", cron: "22 * * * *", schedule: "Hourly at :22", maxGapHours: 3, audit: { entityType: "cron_job", term: "rewards-payouts" } },
   /* VC1: closes the provider rooms of finished calls. Skipped while `video_calls` is off. */
   { name: "calls-sweep", cron: "*/5 * * * *", schedule: "Every 5 minutes", maxGapHours: 1, audit: { entityType: "cron_job", term: "calls-sweep" } },
+  /* The display exchange rates for the "about" figure beside naira prices (lib/currency/rates-job.ts). Display only. */
+  { name: "display-rates", cron: "50 0,12 * * *", schedule: "Twice daily at 01:50 and 13:50 Lagos (00:50 and 12:50 UTC)", maxGapHours: 26, audit: { entityType: "cron_job", term: "display-rates" } },
 ];
 
 /**

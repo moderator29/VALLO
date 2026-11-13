@@ -138,6 +138,9 @@ export const WATCHED_JOBS: readonly WatchedJob[] = [
      through the same audit door as its siblings and was NOT on this list;
      O2 found the gap and left the line to the owner rather than writing it. */
   { job: "account-purge", schedule: "daily at 03:15 UTC", maxGapHours: 26 },
+  /* The display exchange rates. Silence here shows as naira only once the
+     stored rates pass 48 hours, which is safe and would otherwise go unseen. */
+  { job: "display-rates", schedule: "twice daily at 00:50 and 12:50 UTC (01:50 and 13:50 Lagos)", maxGapHours: 26 },
   /* The reconciliation, matched by the action it writes rather than by an
      entity id it does not write. Three hours of silence on an hourly job that
      recovers money is already too long; see the note above for what three

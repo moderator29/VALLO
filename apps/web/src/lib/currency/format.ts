@@ -42,10 +42,10 @@ export function wholeUnits(minor: number, currency: DisplayCurrency): number {
   return Math.trunc(minor / per);
 }
 
-/** Sign then figure, with the space the CFA letters need and the signs do not. */
+/** Sign then figure, spaced as the currency is written at home (`CurrencyMeta.spaced`). */
 function withSymbol(currency: DisplayCurrency, figure: string, negative: boolean): string {
-  const { symbol } = CURRENCY_META[currency];
-  const spaced = /[A-Za-z]$/.test(symbol) ? `${symbol} ${figure}` : `${symbol}${figure}`;
+  const { symbol, spaced: space } = CURRENCY_META[currency];
+  const spaced = space ? `${symbol} ${figure}` : `${symbol}${figure}`;
   return negative ? `-${spaced}` : spaced;
 }
 
