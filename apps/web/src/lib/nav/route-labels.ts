@@ -30,6 +30,7 @@ const NAMES: Readonly<Record<string, string>> = {
   "/sign-up": "sign up",
   "/sign-up/email": "sign up",
   "/sign-up/finish": "finishing sign up",
+  "/sign-up/photo": "adding a profile photo",
   "/compare": "compare",
   "/forgot-password": "password reset",
   "/welcome": "the welcome",

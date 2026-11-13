@@ -347,6 +347,9 @@ const EXPECTED_PUBLIC = new Set([
   /* B-2: "Finish setting up". Public like every door so it can never loop;
      the page itself sends somebody signed out to sign in. */
   "/sign-up/finish",
+  /* The profile photo step at the end of sign-up (13 November 2026). The
+     page itself sends a stranger to /sign-in, exactly as /sign-up/finish does. */
+  "/sign-up/photo",
   "/start",
   "/welcome",
   /* The share door (V-07): one card, area only, one button into sign in. */

@@ -48,7 +48,7 @@ export const COVERAGE: readonly CoverageGroup[] = [
   },
   {
     needsNone: "Page plumbing a member passes through without a decision: a callback, a code step, the offline card, a first-run card.",
-    routes: ["/auth/callback", "/offline", "/first-run/[feature]", "/sign-in/email", "/sign-in/phone", "/sign-up/finish", "/welcome"],
+    routes: ["/auth/callback", "/offline", "/first-run/[feature]", "/sign-in/email", "/sign-in/phone", "/sign-up/finish", "/sign-up/photo", "/welcome"],
   },
   /* ------------------------------------------------------------------ account */
   {

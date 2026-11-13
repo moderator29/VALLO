@@ -47,6 +47,7 @@ import { isGlobalDoneFlag } from "@/lib/ui/success-moments";
 import { rememberSuccess } from "@/lib/ui/success-cookie";
 import { doneFlagForLinkType } from "./link-moment";
 import { finishSetupHref, SETUP_DONE_CLAIM } from "./finish-setup";
+import { photoStepHref } from "./photo-step";
 import { setupOnRecord, setupStillOwed } from "./finish-setup-server";
 import { contentRefusal } from "@/lib/safety/content-refusal";
 import { claimInviteFromCookie, inviteCodeFromCookie } from "@/lib/referral/server";
@@ -642,7 +643,8 @@ export async function signUpWithEmail(
      a one-shot HttpOnly cookie rather than a forgeable `?done=`
      (lib/ui/success-cookie.ts, `SuccessFlagHost`). */
   await rememberSuccess("account-created");
-  redirect(landingAfterAuth(formData));
+  /* The last step of sign-up is the profile photo (lib/auth/photo-step.ts). */
+  redirect(photoStepHref(landingAfterAuth(formData)));
 }
 
 /**
@@ -816,7 +818,7 @@ export async function verifySignUpCode(
   const name = typeof given === "string" && given.trim() ? given.trim().slice(0, 40) : undefined;
   /* Form, then the email code, then straight in. The phone is asked at the
      first deal, not here (6 November 2026). */
-  return { ok: true, verified: landingAfterAuth(formData), ...(name ? { name } : {}) };
+  return { ok: true, verified: photoStepHref(landingAfterAuth(formData)), ...(name ? { name } : {}) };
 }
 
 /**
@@ -1005,6 +1007,12 @@ export async function completeEmailVerification(input: {
      by the one-shot cookie; a magic-link sign-in and a recovery earn none. */
   const moment = doneFlagForLinkType(input.type);
   if (isGlobalDoneFlag(moment)) await rememberSuccess(moment);
+  /* A new account by its sign-up link goes through the photo step first
+     (lib/auth/photo-step.ts). */
+  if (moment === "account-created") {
+    revalidatePath("/", "layout");
+    return { ok: true, next: photoStepHref(next) };
+  }
   /* A RETURNING SIGN-IN BY LINK OR PROVIDER is greeted like a password
      sign-in: "Signed in. Welcome back." (founder, 7 November 2026, "THE
      BANNER EVERYWHERE"; it was silent). The link type cannot tell a new
@@ -1298,7 +1306,8 @@ export async function finishSocialSetup(
   /* "Welcome to Vallo" on arrival, by the one-shot HttpOnly cookie, exactly
      as the email sign-up does (lib/ui/success-cookie.ts). */
   await rememberSuccess("account-created");
-  redirect(landingAfterAuth(formData));
+  /* Then the last step of sign-up, the profile photo (lib/auth/photo-step.ts). */
+  redirect(photoStepHref(landingAfterAuth(formData)));
 }
 
 /* ------------------------------------------------------------ password reset */

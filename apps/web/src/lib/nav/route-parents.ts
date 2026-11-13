@@ -196,6 +196,7 @@ export const ROUTE_PARENTS: Readonly<Record<string, ParentRoute>> = {
      app down rather than bouncing between the gate and this screen. Its own
      "Not you? Sign out" is the way out. */
   "/sign-up/finish": ROOT,
+  "/sign-up/photo": ROOT,
   /* The phone step of signing up (29 October 2026): reached once, from the
      app layout, with the account already signed in. A root, like finish. */
   "/forgot-password": "/sign-in",
@@ -810,6 +811,7 @@ export const NON_NAVIGABLE: Readonly<Record<string, string>> = {
   "/api/calls/webhook": "media provider webhook (VC1), signed.",
   "/api/cron/calls-sweep": "scheduled job, bearer token.",
   "/api/cron/canary": "scheduled job, bearer token.",
+  "/api/cron/display-rates": "scheduled job, bearer token.",
   "/api/cron/calendar-sync": "scheduled job, bearer token (C2, behind CALENDAR_SYNC_ENABLED).",
   "/api/calendar/feed": "C2: a room's calendar as iCal for another site to subscribe to, behind its secret token.",
   "/host/earnings/statement/csv": "C9: one month's payout statement as a CSV download, not a page.",

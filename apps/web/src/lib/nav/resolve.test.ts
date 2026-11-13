@@ -78,7 +78,7 @@ describe("the map itself", () => {
        gate holds there has nothing above it to go back to. */
     /* `/home-or-landing` is a redirect, declared so the browsing screens can
        name it as their parent; it only ever lands on `/` or `/home`. */
-    expect(roots.sort()).toEqual(["/", "/home", "/home-or-landing", "/sign-up/finish", "/stays", "/welcome"]);
+    expect(roots.sort()).toEqual(["/", "/home", "/home-or-landing", "/sign-up/finish", "/sign-up/photo", "/stays", "/welcome"]);
   });
 
   it("puts a dynamic route under the shelf it came off, not under home", () => {

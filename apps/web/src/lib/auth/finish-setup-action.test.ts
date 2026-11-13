@@ -158,19 +158,21 @@ describe("finishSocialSetup refuses without both ticks, on the server", () => {
 });
 
 describe("finishSocialSetup records, then goes on", () => {
-  it("writes the receipt for the server-resolved user and lands on next with Welcome to Vallo", async () => {
+  /* 13 November 2026: the last step of sign-up is the profile photo
+     (lib/auth/photo-step.ts), which then goes on to `next`. */
+  it("writes the receipt for the server-resolved user and goes to the photo step, carrying next, with Welcome to Vallo", async () => {
     const { finishSocialSetup } = await import("./actions");
-    await expect(finishSocialSetup({ ok: false }, form())).rejects.toThrow("REDIRECT:/listing/abc");
+    await expect(finishSocialSetup({ ok: false }, form())).rejects.toThrow("REDIRECT:/sign-up/photo?next=%2Flisting%2Fabc");
     expect(seam.record).toHaveBeenCalledWith("u-google", "signup_oauth", { ageConfirmed: true });
     expect(seam.profileUpdates).toEqual([{ first_name: "Ada", surname: "Obi" }]);
     expect(seam.success).toHaveBeenCalledWith("account-created");
     expect(seam.adminUpdate).toHaveBeenCalledWith("u-google", { app_metadata: { vallo_setup_done: true } });
   });
 
-  it("an unsafe next becomes /home", async () => {
+  it("an unsafe next becomes /home, after the photo step", async () => {
     const { finishSocialSetup } = await import("./actions");
     await expect(finishSocialSetup({ ok: false }, form({ next: "//evil.example" }))).rejects.toThrow(
-      "REDIRECT:/home",
+      "REDIRECT:/sign-up/photo?next=%2Fhome",
     );
   });
 

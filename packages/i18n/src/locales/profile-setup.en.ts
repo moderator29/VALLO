@@ -1,20 +1,25 @@
 /**
- * The first-run sheet after sign-up: add a photo. Skippable, and it comes back
- * on a later visit, not every visit (`lib/first-run/profile-setup-core.ts`).
- * "Confirm your information" and its copy were removed on 13 November 2026:
- * the name is given at sign-up.
+ * The profile photo, asked as the last step of sign-up (lib/auth/photo-step.ts),
+ * skippable in one tap. On 13 November 2026 "Confirm your information" was
+ * removed (the name is given at sign-up) and the photo sheet that rose over the
+ * first page after sign-up moved here, into sign-up itself.
  */
 export const profileSetupEn = {
-  close: "Close",
-  skip: "Skip for now",
-  photo: {
+  /**
+   * THE LAST STEP OF SIGN-UP (13 November 2026): the photo, asked before the
+   * account lands, never after it. Skippable in one tap, never shamed.
+   */
+  step: {
     title: "Add a profile photo",
-    description: "A clear photo helps people you meet on Vallo recognise you. It is optional, and you can add one any time from your profile.",
-    choose: "Choose a photo",
-    avatarLabel: "Profile photo placeholder",
-    failed: "We could not upload that photo. Check your connection and try again.",
-    badType: "Choose a JPG, PNG or WebP photo.",
-    tooBig: "That photo is over 10MB. Please choose a smaller one.",
-    unreadable: "We could not prepare that photo, so it was not uploaded. Try a different one.",
+    body: "People you meet and deal with on Vallo see it beside your name. You can change it any time.",
+    choose: "Choose from your photos",
+    take: "Take a photo",
+    change: "Choose another",
+    continue: "Continue",
+    skip: "Skip for now",
+    saving: "Saving your photo",
+    later: "This photo did not upload on your connection. Continue, and add it any time from your profile.",
+    previewLabel: "Your profile photo",
+    emptyLabel: "No photo chosen yet",
   },
 };

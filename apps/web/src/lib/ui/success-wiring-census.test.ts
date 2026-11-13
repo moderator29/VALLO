@@ -39,7 +39,9 @@ const WIRED: [file: string, gate: RegExp][] = [
   ["app/(app)/checkout/[bookingId]/PayPanel.tsx", /result\.data\.settled\s*\?\s*\{ kind: "paid"/],
   ["app/(app)/rent/pay/[inspectionId]/PayPanel.tsx", /result\.data\.settled\s*\?\s*\{ kind: "paid"/],
   ["lib/auth/actions.ts", /rememberSuccess\("password-changed"\);\s*redirect\("\/home"\)/],
-  ["lib/auth/actions.ts", /rememberSuccess\("account-created"\);\s*redirect\(landingAfterAuth\(formData\)\)/],
+  /* Since 13 November 2026 a new account passes the profile photo step on its
+     way to where it was going (lib/auth/photo-step.ts). */
+  ["lib/auth/actions.ts", /rememberSuccess\("account-created"\);\s*redirect\(photoStepHref\(landingAfterAuth\(formData\)\)\)/],
 ];
 
 describe("the success sheet is wired, and gated on ok, in every flow the DOM suite does not drive", () => {
