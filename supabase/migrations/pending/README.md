@@ -81,3 +81,12 @@ Safe to run twice. Rollback: `rollback/offers_rollback.sql` (the two enum values
 Postgres: `supabase/tests/offers/` (end to end, and a race of two sellers and two
 tabs accepting at once). Until it runs, the offers screens degrade to "not
 available" and nothing else changes.
+
+## Display exchange rates (13 November 2026)
+
+`display_exchange_rates_2026-11-13.sql`. NOT APPLIED. Creates the server-only
+table the currency guide reads (naira per unit of each currency, the source and
+its time), with RLS on and no grant to `anon` or `authenticated`. Safe to run
+twice. The read-back at its foot asks each role with `has_table_privilege`.
+Until it runs, every page shows naira only and the twice-daily rates job
+records nothing; no price, payment or booking is affected either way.
