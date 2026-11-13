@@ -1,8 +1,15 @@
 /*
+ * SUPERSEDED. DO NOT RUN THIS ONE. Run
+ * `promote_bd_and_social_to_admin_2026-11-12.sql` instead: it does everything
+ * this file does, plus the admin role the founder asked for, and it has his
+ * own super admin address filled in rather than a placeholder. This file is
+ * kept only as the record of what was written before both accounts existed.
+ *
  * TWO STAFF GRANTS: BUSINESS DEVELOPMENT AND SOCIAL MEDIA (the founder,
  * 12 November 2026).
  *
- * READ THIS BEFORE YOU RUN IT. Neither account exists yet. Checked against
+ * READ THIS BEFORE YOU RUN IT. Neither account existed when this was written.
+ * Both do now (12 Nov, evening). Checked against
  * the live database on 12 November:
  *
  *   select id, email from auth.users

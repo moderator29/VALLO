@@ -44,20 +44,27 @@ declare
   v_result jsonb;
 begin
   /* ------------------------------------------------------------------ *
-   * WHO IS GRANTING. Put your own super admin address on the next line.
-   * The role function refuses anybody who is not a super admin, so this
-   * cannot be used to promote somebody from a lesser account.
+   * WHO IS GRANTING. The founder's own super admin account, filled in
+   * rather than left as a placeholder (12 November 2026: running it with
+   * the placeholder still in raised "No super admin found for that
+   * address", which is the file doing its job, not a fault in the account).
+   *
+   * Verified read-only against the live database before this was sent:
+   * phantomfcalls@gmail.com is 2255d905-0f31-437e-b719-aa2e4a18e03d and
+   * holds agent, super_admin and user. The role function below refuses any
+   * actor who is not a super admin, so this line cannot be edited into a
+   * promotion from a lesser account.
    * ------------------------------------------------------------------ */
   select u.id into v_actor
   from auth.users u
   join public.user_roles r on r.user_id = u.id
-  where lower(u.email) = lower('REPLACE_WITH_YOUR_SUPER_ADMIN_EMAIL')
+  where lower(u.email) = lower('phantomfcalls@gmail.com')
     and r.role = 'super_admin'
   limit 1;
 
   if v_actor is null then
     raise exception
-      'No super admin found for that address. Put your own super admin email on the line above and run this again. Nothing was changed.';
+      'No super admin found for phantomfcalls@gmail.com. That account held super_admin when this file was written, so check it still does before anything else. Nothing was changed.';
   end if;
 
   select id into v_bd     from auth.users where lower(email) = 'sophiaduru0@gmail.com'       limit 1;
