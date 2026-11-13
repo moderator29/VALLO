@@ -24,7 +24,7 @@
  * WHEN IT GOES. The script lifts it after its minimum time and once the page
  * (and the passcode guard) have decided what to show, a crossfade of 320ms, or
  * at once on the first touch or key. With no script at all, the animation
- * `nf-open-cap` lifts it by 4,500ms (its 4,200ms delay and 300ms run). The
+ * `nf-open-cap` lifts it by 3,500ms (its 3,200ms delay and 300ms run). The
  * same ground and mark size and position are drawn into the iOS launch images
  * (scripts/build-brand-launch.mjs), so iOS's own snapshot hands over to this
  * screen without a visible move.
@@ -45,7 +45,7 @@
       color-mix(in srgb, var(--nf-brand-primary) 24%, var(--nf-surface-artwork)) 0%,
       var(--nf-surface-artwork) 100%
     );
-    animation: nf-open-cap 300ms var(--nf-ease-exit) 4200ms forwards;
+    animation: nf-open-cap 300ms var(--nf-ease-exit) 3200ms forwards;
   }
   /*
    * THE WEBSITE PLAYS IT TOO (the founder, 11 November 2026). This was

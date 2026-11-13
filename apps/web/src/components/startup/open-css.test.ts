@@ -24,8 +24,10 @@ describe("open.css", () => {
     /* The shell shows it, but only once the splash is down and "on" is set. */
     expect(css).toMatch(/:root\[data-native\]:not\(\[data-open="on"\]\):not\(\[data-open="leave"\]\) \.nf-open\s*\{\s*display: none/);
   });
-  it("lifts itself by 4,500ms with no script at all", () => {
-    expect(css).toMatch(/animation: nf-open-cap 300ms [^;]* 4200ms forwards/);
+  /* 3,200ms since 13 November 2026 (the founder shortened the opening to a
+     2,400ms hold); the backstop follows the script's cap. */
+  it("lifts itself by 3,500ms with no script at all", () => {
+    expect(css).toMatch(/animation: nf-open-cap 300ms [^;]* 3200ms forwards/);
     expect(css).toMatch(/@keyframes nf-open-cap\s*\{\s*to\s*\{\s*opacity: 0;\s*visibility: hidden/);
   });
   it("crossfades rather than cutting", () => {

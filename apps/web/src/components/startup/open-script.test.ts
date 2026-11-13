@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { OPEN_NATIVE_METHOD, OPEN_NATIVE_PLUGIN, OPEN_CAP_MS, OPEN_CSS_CAP_MS, OPEN_FADE_MS, OPEN_MIN_MS, OPEN_MIN_STILL_MS, OPEN_NATIVE_WAIT_MS, OPEN_SCRIPT, OPEN_SESSION_KEY } from "./open-script";
+import { OPEN_HARD_GRACE_MS, OPEN_NATIVE_METHOD, OPEN_NATIVE_PLUGIN, OPEN_CAP_MS, OPEN_CSS_CAP_MS, OPEN_FADE_MS, OPEN_MIN_MS, OPEN_MIN_STILL_MS, OPEN_NATIVE_WAIT_MS, OPEN_SCRIPT, OPEN_SESSION_KEY } from "./open-script";
 
 /**
  * THE OPENING SCREEN'S CONTROLLER (10 November 2026). The script is run here
@@ -245,6 +245,30 @@ describe("an older shell's opening, timed from when it is shown", () => {
   });
 });
 
+/*
+ * NO FRAME, STILL GONE (13 November 2026, Agent HUNTER: WebKit with the
+ * shell's user agent and no bridge, the layer on top 25s after load). The hold
+ * starts on a frame; a hidden or background web view paints none. A plain
+ * timer from the moment the layer is lit sends it away regardless.
+ */
+describe("a lit layer whose clock never starts", () => {
+  it("leaves by the cap plus a short grace even when no frame ever arrives, on the website and in an older shell", () => {
+    for (const env of [{}, { native: true }]) {
+      const r = run({ ...env, ready: false });
+      /* No begin(): no animation frame is ever delivered. */
+      if (env.native) r.advance(OPEN_NATIVE_WAIT_MS + 10);
+      expect(r.attrs["data-open"]).toBe("on");
+      const litAt = env.native ? OPEN_NATIVE_WAIT_MS + 10 : 0;
+      r.advance(litAt + OPEN_CAP_MS + OPEN_HARD_GRACE_MS - 50);
+      expect(r.attrs["data-open"]).toBe("on");
+      r.advance(litAt + OPEN_CAP_MS + OPEN_HARD_GRACE_MS + 50);
+      expect(r.attrs["data-open"]).toBe("leave");
+      r.advance(litAt + OPEN_CAP_MS + OPEN_HARD_GRACE_MS + OPEN_FADE_MS + 200);
+      expect(r.attrs["data-open"]).toBe("off");
+    }
+  });
+});
+
 describe("the opening screen's timing", () => {
   it("is visible for at least the minimum even when the page is ready at once", () => {
     const r = run({ ready: true });
@@ -309,17 +333,22 @@ describe("the opening screen's timing", () => {
 });
 
 describe("the opening screen's budget", () => {
-  /* The founder asked for it slower on 10 November 2026: about 3.5 seconds. */
-  it("is visible for about 3.5 seconds once ready, and capped near 4,500ms in all", () => {
-    expect(OPEN_MIN_MS).toBeGreaterThanOrEqual(3000);
-    expect(OPEN_MIN_MS).toBeLessThanOrEqual(3800);
+  /*
+   * The founder asked for it slower on 10 November 2026 (about 3.5 seconds),
+   * then on 13 November 2026 said yes to 2.4 seconds: the drawing finishes at
+   * 1,780ms, so it is still seen whole, and the extra 1.1 seconds of a
+   * motionless lockup went on every cold open of the website.
+   */
+  it("is visible for about 2.4 seconds once ready, long enough for the whole drawing, and capped near 3,500ms in all", () => {
+    expect(OPEN_MIN_MS).toBeGreaterThanOrEqual(1260 + 520 + 400);
+    expect(OPEN_MIN_MS).toBeLessThanOrEqual(2600);
     expect(OPEN_MIN_STILL_MS).toBeGreaterThanOrEqual(900);
     expect(OPEN_CAP_MS).toBeGreaterThan(OPEN_MIN_MS);
-    expect(OPEN_CAP_MS + OPEN_FADE_MS).toBeLessThanOrEqual(4600);
+    expect(OPEN_CAP_MS + OPEN_FADE_MS).toBeLessThanOrEqual(3600);
   });
   it("has a stylesheet backstop that starts lifting at the same cap", () => {
     const css = readFileSync(join(__dirname, "open.css"), "utf8");
     expect(css).toMatch(new RegExp(`nf-open-cap 300ms [^;]* ${OPEN_CSS_CAP_MS}ms forwards`));
-    expect(OPEN_CSS_CAP_MS + 300).toBeLessThanOrEqual(4500);
+    expect(OPEN_CSS_CAP_MS + 300).toBeLessThanOrEqual(3500);
   });
 });

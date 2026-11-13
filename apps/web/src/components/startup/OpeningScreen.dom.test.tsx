@@ -2,7 +2,7 @@ import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { renderToStaticMarkup } from "react-dom/server";
 import { transformSync } from "esbuild";
-import { chromium, type Browser } from "playwright-core";
+import { chromium, webkit, type Browser } from "playwright-core";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import { BROWSER_TEST_TIMEOUT, hasBrowser } from "@/lib/testing/mount-in-browser";
 import { OpeningScreen } from "./OpeningScreen";
@@ -37,6 +37,8 @@ afterAll(async () => {
 async function installed(opts: { reduced?: boolean; hydrate?: number | null; lock?: boolean; guarded?: boolean; shell?: "1.0.2" | "older" } = {}) {
   const ctx = await browser!.newContext({ viewport: { width: 390, height: 844 }, reducedMotion: opts.reduced ? "reduce" : "no-preference" });
   const page = await ctx.newPage();
+  /* When each state was first set, by the page's own clock. */
+  await page.addInitScript(`window.__openTimes = {}; new MutationObserver(function () { var v = document.documentElement.getAttribute("data-open"); if (v && !(v in window.__openTimes)) window.__openTimes[v] = performance.now(); }).observe(document, { subtree: true, attributes: true, attributeFilter: ["data-open"] });`);
   // an installed app: the standalone display mode
   await page.addInitScript(`const mm = window.matchMedia.bind(window); window.matchMedia = (q) => /display-mode: standalone/.test(q) ? { matches: true, media: q, addEventListener() {}, removeEventListener() {} } : mm(q);`);
   /* The native bridge as it is at document start: the shell's user agent mark,
@@ -77,8 +79,15 @@ describe.skipIf(!hasBrowser && !process.env.CI)("the opening screen, in a browse
     expect(first.markWidth).toBeGreaterThanOrEqual(Math.round(390 * 0.72 * 0.94));
     expect(first.markWidth).toBeLessThanOrEqual(Math.round(390 * 0.72 * 1.06));
     expect(Math.abs(first.markCentreY - Math.round(844 * 0.46))).toBeLessThanOrEqual(8);
-    await page.waitForTimeout(OPEN_MIN_MS - 250);
-    expect((await state(page)).open).toBe("on");
+    /* Timed inside the page, from the moment the layer was lit to the moment
+       it began to leave, so a busy machine cannot make the test early. */
+    await page.waitForFunction(() => document.documentElement.dataset.open === "leave", null, { timeout: OPEN_CAP_MS + 2000 });
+    const held = await page.evaluate(() => {
+      const t = (window as unknown as { __openTimes?: Record<string, number> }).__openTimes ?? {};
+      return (t.leave ?? 0) - (t.on ?? 0);
+    });
+    expect(held).toBeGreaterThanOrEqual(OPEN_MIN_MS - 20);
+    expect(held).toBeLessThanOrEqual(OPEN_CAP_MS + 200);
     await close();
   });
   it("crossfades away once ready, within the cap", async () => {
@@ -251,4 +260,57 @@ describe.skipIf(!hasBrowser && !process.env.CI)("the opening screen, in a browse
       await close();
     }
   });
+
+  /*
+   * HUNTER'S CONFIGURATION (13 November 2026): WebKit, the shell's user agent,
+   * no ValloShell bridge (a browser, or a build older than 1.0.2), the page
+   * hydrated at once. On production the layer "left" unseen, came back "on"
+   * at the 6s fallback, and was still the top element over the sign-in form
+   * 25s later. Here, in WebKit: lit once at most, gone by the cap, never lit
+   * again, and the page's own button takes the tap at the end.
+   */
+  it.each([
+    ["no bridge at all", ""],
+    ["an older build, a bridge without ValloShell.handoff", 'window.Capacitor = { PluginHeaders: [{ name: "SplashScreen", methods: [{ name: "hide" }] }], isNativePlatform: function () { return true; } };'],
+  ])(
+    "WebKit with the shell's user agent, %s: the layer never stays on top",
+    async (_label, bridge) => {
+      const wk = await webkit.launch();
+      try {
+        const ctx = await wk.newContext({ viewport: { width: 390, height: 844 }, userAgent: "Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 VALLO-NATIVE" });
+        const page = await ctx.newPage();
+        if (bridge) await page.addInitScript(bridge);
+        await page.route("http://vallo.test/**", (route) =>
+          route.fulfill({
+            contentType: "text/html",
+            /* The platform script's mark first, as in the real head. */
+            body: `<!doctype html><html lang="en"><head><meta name="viewport" content="width=device-width, initial-scale=1"><style>${CSS}</style><script>document.documentElement.setAttribute("data-native","true")</script><script>${OPEN_SCRIPT}</script></head><body>${renderToStaticMarkup(<OpeningScreen />)}<main><button id="under" style="margin-top:500px;width:200px;height:60px" onclick="window.__pressed=(window.__pressed||0)+1">Sign in</button></main><script>setTimeout(function(){window.__nfOpenReady=true},50)</script></body></html>`,
+          }),
+        );
+        await page.goto("http://vallo.test/sign-in", { waitUntil: "load" });
+        const seen: string[] = [];
+        for (let i = 0; i < 14; i += 1) {
+          await page.waitForTimeout(1000);
+          seen.push(
+            await page.evaluate(() => {
+              const b = document.getElementById("under")!.getBoundingClientRect();
+              const top = document.elementFromPoint(b.left + b.width / 2, b.top + b.height / 2);
+              return `${document.documentElement.dataset.open ?? "-"}:${top?.closest("#nf-open") ? "LAYER" : "page"}`;
+            }),
+          );
+        }
+        /* Once it has gone it never comes back, and by the end the page is on top. */
+        const firstOff = seen.findIndex((s) => s.startsWith("off"));
+        expect(firstOff, seen.join(" ")).toBeGreaterThanOrEqual(0);
+        expect(seen.slice(firstOff).every((s) => s === "off:page"), seen.join(" ")).toBe(true);
+        expect(seen.filter((s) => s.startsWith("on")).length, seen.join(" ")).toBeLessThanOrEqual(Math.ceil((OPEN_CAP_MS + 600) / 1000) + 1);
+        await page.locator("#under").click({ timeout: 2000 });
+        expect(await page.evaluate(() => (window as unknown as { __pressed?: number }).__pressed ?? 0)).toBe(1);
+        await ctx.close();
+      } finally {
+        await wk.close();
+      }
+    },
+    40_000,
+  );
 });

@@ -55,20 +55,29 @@
  * Untouched, the opening is at most OPEN_CAP_MS long.
  */
 
-/** Shortest time the mark is seen once its animation has begun. */
-export const OPEN_MIN_MS = 3500;
+/**
+ * Shortest time the mark is seen once its animation has begun. 2,400ms (the
+ * founder, 13 November 2026, yes to the proposal): the drawing's last letter
+ * lands at 1,780ms, so the whole drawing is still seen and settles for about
+ * 0.6s, where 3,500ms held a finished, motionless lockup for 1.7s on every
+ * cold open of the website.
+ */
+export const OPEN_MIN_MS = 2400;
 
 /** The same, where nothing moves (reduced motion, Calm, Off): the still mark. */
 export const OPEN_MIN_STILL_MS = 900;
 
 /** Longest, from the first frame, before the crossfade starts whatever is not ready. */
-export const OPEN_CAP_MS = 4200;
+export const OPEN_CAP_MS = 3200;
+
+/** After the cap, the most a lit layer can stay up if no frame ever arrives to start its clock. */
+export const OPEN_HARD_GRACE_MS = 600;
 
 /** The crossfade (matches open.css). */
 export const OPEN_FADE_MS = 320;
 
 /** The stylesheet's own backstop when no script runs: it starts lifting at this time. */
-export const OPEN_CSS_CAP_MS = 4200;
+export const OPEN_CSS_CAP_MS = 3200;
 
 /** Longest the shell waits for the splash to come down before playing anyway. */
 export const OPEN_NATIVE_WAIT_MS = 6000;
@@ -121,7 +130,14 @@ export const OPEN_SCRIPT =
      6s fallback lit it AGAIN over the page, where nothing would ever send it
      away, and it took every tap). The clock now starts only from light(), and
      light() refuses once the layer has gone. */
-  "var lit=0,gone=0;function light(){if(lit||gone)return;lit=1;r.setAttribute('data-open','on');if(D.readyState==='loading')D.addEventListener('DOMContentLoaded',arm,{once:true});else arm()}" +
+  /* AND A HARD CEILING THAT NEEDS NO FRAME (13 November 2026, Agent HUNTER:
+     WebKit with the shell's user agent, the layer still on top 25s after
+     load). The hold is timed from a frame (`requestAnimationFrame`), and a web
+     view that is hidden or starting in the background paints none, so the
+     clock might never start. A plain timer set when the layer is lit sends it
+     away at OPEN_CAP_MS + OPEN_HARD_GRACE_MS whatever else has or has not
+     happened. */
+  "var lit=0,gone=0;function light(){if(lit||gone)return;lit=1;r.setAttribute('data-open','on');setTimeout(function(){if(!gone)leave()}," + (OPEN_CAP_MS + OPEN_HARD_GRACE_MS) + ");if(D.readyState==='loading')D.addEventListener('DOMContentLoaded',arm,{once:true});else arm()}" +
   /* The shell waits for the splash to be down; the website lights up at once. */
   "if(nat){if(W.__nfSplashDown)light();else{try{W.addEventListener('nf:splash-down',light,{once:true})}catch(e){}setTimeout(light," + OPEN_NATIVE_WAIT_MS + ")}}else light();" +
   "var still=false;try{still=W.matchMedia('(prefers-reduced-motion: reduce)').matches}catch(e){}" +
