@@ -59,7 +59,7 @@ export function SampleEmails({ initial }: { initial: string }) {
     <div className="grid gap-sm" data-testid="sample-emails">
       <label className="block">
         <span className="nf-label">Send to (one or two addresses)</span>
-        <input className="nf-field" value={to} onChange={(e) => setTo(e.target.value)} inputMode="email" autoComplete="off" />
+        <input className="nf-field" value={to} onChange={(e) => setTo(e.target.value)} inputMode="email" autoCapitalize="none" autoCorrect="off" spellCheck={false} autoComplete="off" />
       </label>
       <Button type="button" onClick={run} disabled={busy || to.trim().length < 5}>
         {busy ? "Sending" : "Send every email as a sample"}

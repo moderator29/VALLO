@@ -567,6 +567,7 @@ export function SupportDesk({ now, tab, q, queue, selected, missing, copy }: Sup
                 <input
                   className="nf-field w-full"
                   type="search"
+                  enterKeyHint="search"
                   name="q"
                   defaultValue={q}
                   placeholder="Reference or email address"

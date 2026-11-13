@@ -52,10 +52,14 @@ describe("text fields and the generic focus ring", () => {
   });
 });
 
-describe("a search field draws no focus ring of its own", () => {
+describe("a text field draws no focus ring of its own (13 November 2026)", () => {
   const controls = readFileSync(join(__dirname, "controls.css"), "utf8");
-  it("the shared field's focus halo skips search inputs", () => {
-    expect(controls).toContain('.nf-field:not([type="search"]):focus {');
-    expect(controls).toContain('.nf-field--glass:not([type="search"]):focus {');
+  it("the shared field's focus halo is the select's alone", () => {
+    expect(controls).not.toContain('.nf-field:not([type="search"]):focus {');
+    expect(controls).not.toContain('.nf-field--glass:not([type="search"]):focus {');
+    expect(controls).toContain("select.nf-field:focus {");
+    expect(controls).toContain("select.nf-field--glass:focus {");
   });
+  /* The platform-wide gate, every sheet and every field, is
+     `src/app/text-entry.test.ts`. */
 });

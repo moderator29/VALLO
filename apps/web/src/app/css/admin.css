@@ -409,11 +409,6 @@
   .nf-admin-bar__search input::placeholder {
     color: var(--nf-content-secondary);
   }
-  .nf-admin-bar__search input:focus {
-    outline: none;
-    border-color: var(--nf-focus-ring);
-    box-shadow: 0 0 0 3px var(--nf-glow-2);
-  }
   .nf-admin-bar__search-glyph {
     position: absolute;
     left: var(--nf-space-sm);
@@ -689,11 +684,6 @@
   }
   .nf-admin-search__field input::placeholder {
     color: var(--nf-content-muted);
-  }
-  .nf-admin-search__field input:focus {
-    outline: none;
-    border-color: var(--nf-focus-ring);
-    box-shadow: 0 0 0 3px var(--nf-glow-2);
   }
   .nf-admin-search__glyph {
     position: absolute;

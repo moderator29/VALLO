@@ -32,23 +32,14 @@
   box-shadow: var(--nf-float-shadow);
 }
 /*
- * NO LIT RECTANGLE ROUND THE BAR WHEN A THUMB TAPS IT (the founder, 11
- * November 2026). Tapping the field used to run the brand edge round the
- * whole composer, which is a desktop focus ring drawn on a phone: iMessage
- * and WhatsApp light nothing, and the caret already says where the typing
- * goes. So on a touch screen the bar keeps its resting edge.
- *
- * THE RING IS KEPT WHERE IT IS THE ONLY INDICATOR. On a pointer-and-keyboard
- * machine a person tabbing through the page needs to see which control has
- * focus, and a text caret alone is not enough at a glance, so the edge still
- * lights there. `(hover: hover) and (pointer: fine)` is the test this
- * repository already uses for that machine (buttons.css, brand-glass.css).
+ * NO LIT RECTANGLE ROUND THE BAR WHEN THE FIELD TAKES FOCUS (the founder, 11
+ * and 13 November 2026). Tapping the field used to run the brand edge round
+ * the whole composer, which is a desktop focus ring drawn on a phone:
+ * iMessage and WhatsApp light nothing, and the caret already says where the
+ * typing goes. The desktop kept the edge until 13 November; now the bar keeps
+ * its resting edge everywhere ("it should only be the container"). The tool
+ * and send buttons inside keep their own keyboard ring.
  */
-@media (hover: hover) and (pointer: fine) {
-  :root .nf-composer.nf-composer .nf-composer__box:focus-within {
-    border-color: var(--nf-brand-edge);
-  }
-}
 :root .nf-composer.nf-composer .nf-composer__row {
   display: contents;
 }
@@ -142,16 +133,8 @@
   backdrop-filter: blur(var(--nf-glass-blur)) saturate(var(--nf-glass-saturate));
   box-shadow: var(--nf-float-shadow);
 }
-:root .nf-ai__composer.nf-ai__composer:focus-within {
-  border-color: var(--nf-brand-edge);
-  outline: var(--nf-focus-ring-width) solid var(--nf-focus-ring);
-  outline-offset: var(--nf-focus-ring-offset);
-}
-/* The ring belongs to the whole bar, so the send disc reads as inside it. The
-   inner field no longer draws its own ring around the text area alone. */
-:root .nf-ai__composer.nf-ai__composer .nf-ai__well:focus-within {
-  outline: 0;
-}
+/* No ring round the bar or the well inside it when the field is focused:
+   the bar is the container and the caret is the focus (13 November 2026). */
 :root .nf-ai__composer.nf-ai__composer .nf-ai__well {
   min-block-size: 2.5rem;
   padding: 0 var(--nf-space-3xs) 0 var(--nf-space-xs);

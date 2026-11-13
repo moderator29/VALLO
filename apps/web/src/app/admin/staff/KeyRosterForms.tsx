@@ -136,7 +136,7 @@ export function MarkInternalForm() {
     >
       <label className="grid gap-2xs nf-caption">
         <span>Email address</span>
-        <input className="nf-field" type="email" value={email} maxLength={320} onChange={(e) => setEmail(e.target.value)} />
+        <input className="nf-field" type="email" inputMode="email" autoCapitalize="none" autoCorrect="off" spellCheck={false} value={email} maxLength={320} onChange={(e) => setEmail(e.target.value)} />
       </label>
       <Button type="submit" variant="secondary" size="sm" disabled={pending || email.trim().length < 5}>
         Leave out of figures

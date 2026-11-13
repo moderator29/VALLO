@@ -171,11 +171,9 @@
     box-shadow:
       inset 0 1px 3px var(--nf-shade-2),
       var(--nf-rim-lit);
-    transition: border-color var(--nf-duration-fast) var(--nf-ease-standard);
   }
-  .nf-site-newsletter-field:focus-within {
-    border-color: var(--nf-focus-ring);
-  }
+  /* The capsule keeps its resting edge when the field inside it is focused:
+     the caret is the focus (`text-entry.css`, 13 November 2026). */
   /* 44, the tap floor (R-B), for the field and its submit: they drew 40
      (the second audit, S-E). */
   .nf-site-newsletter-field input {
@@ -196,9 +194,6 @@
   }
   .nf-site-newsletter-field input::placeholder {
     color: var(--nf-content-muted);
-  }
-  .nf-site-newsletter-field input:focus-visible {
-    outline: none;
   }
   /*
    * THE FOOTER'S SUBMIT WAS A CIRCLE, ON EVERY PAGE THAT DRAWS THE FOOTER.

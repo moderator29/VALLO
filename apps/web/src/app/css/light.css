@@ -424,10 +424,10 @@
    * (`controls.css`) is the night's sunken well: an inset fill, an inner
    * shadow and a gradient rim, which on paper read as a grey box pressed
    * into the page. Here it is a white sheet with the brand edge and a hair
-   * of contact shadow, and focus deepens the edge to the brand and lays the
-   * soft halo outside it (the text-field ring in `base.css` still draws on
-   * top for keyboard focus). The auth fields take the same edge (`auth.css`, the light slate). Search
-   * fields keep their resting look on focus, as everywhere else.
+   * of contact shadow. A text field keeps that sheet when focused, the caret
+   * is the focus (the founder, 13 November 2026); a select deepens its edge
+   * to the brand and lays the soft halo outside it. The auth fields take the
+   * same edge (`auth.css`, the light slate).
    * ---------------------------------------------------------------- */
   :root[data-theme="light"] .nf-field:not(.nf-field--glass):not(:where([data-theme="dark"] *)) {
     background:
@@ -436,23 +436,19 @@
     box-shadow: var(--nf-elevation-raised);
   }
   @media (hover: hover) {
-    :root[data-theme="light"] .nf-field:not(.nf-field--glass):not(:focus):not(:disabled):hover:not(:where([data-theme="dark"] *)) {
+    :root[data-theme="light"] .nf-field:not(.nf-field--glass):not(:disabled):hover:not(:where([data-theme="dark"] *)) {
       background:
         linear-gradient(var(--nf-paper-field-fill), var(--nf-paper-field-fill)) padding-box,
         linear-gradient(var(--nf-paper-field-edge-hover), var(--nf-paper-field-edge-hover)) border-box;
     }
   }
-  :root[data-theme="light"] .nf-field:not(.nf-field--glass):not([type="search"]):focus:not(:where([data-theme="dark"] *)) {
-    background:
-      linear-gradient(var(--nf-paper-field-fill), var(--nf-paper-field-fill)) padding-box,
-      linear-gradient(var(--nf-brand-primary), var(--nf-brand-primary)) border-box;
+  /* Focus: a text field keeps exactly this resting sheet (`text-entry.css`).
+     The select, a picker, keeps its halo; its brand edge is in controls.css. */
+  :root[data-theme="light"] select.nf-field:not(.nf-field--glass):focus:not(:where([data-theme="dark"] *)) {
     box-shadow: 0 0 0 3px var(--nf-paper-field-halo);
   }
   @media (pointer: coarse) {
-    :root[data-theme="light"] .nf-field:not(.nf-field--glass):not([type="search"]):focus:not(:where([data-theme="dark"] *)) {
-      background:
-        linear-gradient(var(--nf-paper-field-fill), var(--nf-paper-field-fill)) padding-box,
-        linear-gradient(color-mix(in oklab, var(--nf-brand-primary) 55%, transparent), color-mix(in oklab, var(--nf-brand-primary) 55%, transparent)) border-box;
+    :root[data-theme="light"] select.nf-field:not(.nf-field--glass):focus:not(:where([data-theme="dark"] *)) {
       box-shadow: none;
     }
   }

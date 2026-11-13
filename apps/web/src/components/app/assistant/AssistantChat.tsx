@@ -999,7 +999,7 @@ export function AssistantChat({
             <label htmlFor="assistant-input" className="sr-only">
               Message Vallo AI
             </label>
-            <div className="nf-ai__well nf-focus-well">
+            <div className="nf-ai__well">
               <UiIcon name="bot" size={20} />
               <input
                 id="assistant-input"

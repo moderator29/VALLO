@@ -91,6 +91,8 @@ export function OffersTable({ rows, nowMs }: { rows: AdminOfferRow[]; nowMs: num
             hideLabel
             placeholder="Search reference, property or person (press /)"
             leadingIcon="search"
+            inputMode="search"
+            enterKeyHint="search"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             clearable="Clear search"

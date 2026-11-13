@@ -1,0 +1,121 @@
+/*
+ * A TEXT FIELD LOOKS NATIVE WHEN IT IS TAPPED (the founder, 13 November
+ * 2026, on the sign-in Email field: "that long rectangle line ... that's blue
+ * remove it ... it should only be the container and when tap on it and want
+ * it type it should looks native").
+ *
+ * THE RULE, FOR EVERY CONTROL THAT TAKES TYPING (an input of any text-like
+ * type, a textarea, a contenteditable composer). Focus by touch, by mouse
+ * and by keyboard changes nothing about the field or the box around it: no
+ * outline, no ring, no halo, no glow, no extra shadow, no edge colour, no
+ * lift. The container looks exactly as it did before the tap and the
+ * blinking caret is the only sign, as in iOS and Android's own fields.
+ *
+ * WHAT DREW THE RING ON SIGN-IN. Three things at once: a halo span inside
+ * the field's box (`.nf-auth-field__halo`, a 3px brand shadow 4px outside
+ * the card, faded in by `:focus-within`), the auth field's own focus rule
+ * (the edge turned brand blue), and `.nf-field--glass:focus` in controls.css
+ * (a strong edge and a 3px glow). All three are gone, with every other
+ * per-field ring on the platform, and `text-entry.test.ts` keeps them gone.
+ *
+ * WHY THIS SHEET IS UNLAYERED. The platform's keyboard ring in `base.css`
+ * (`:where(a, button, input, ...):focus-visible`) is unlayered on purpose, so
+ * it outranks every component, and a layered `outline: none` on a field can
+ * never beat it. This sheet is imported straight after base.css, its
+ * selectors carry the same weight as that ring (one pseudo-class in a
+ * `:where()`), so it wins by order, and it outranks every layered field rule
+ * whatever their specificity. It names elements only, never a component
+ * class, so it reaches nobody's component (`check-css-collisions.mjs`).
+ *
+ * NOT HERE, ON PURPOSE. Buttons, links, checkboxes, radios, switches,
+ * sliders, tabs and selects keep the keyboard ring: those have no caret, and
+ * a keyboard user needs to see where they are. The passcode keypad and the
+ * one-time-code cells keep their current-cell mark, which is the content and
+ * not a ring (`auth.css`, `.nf-code__*`; `passcode.css`).
+ *
+ * The 16px floor that stops iOS zooming into a focused field is `touch.css`.
+ */
+:where(
+    input:not(
+      [type="checkbox"],
+      [type="radio"],
+      [type="range"],
+      [type="file"],
+      [type="button"],
+      [type="submit"],
+      [type="reset"],
+      [type="image"],
+      [type="color"],
+      [type="hidden"]
+    ),
+    textarea,
+    [contenteditable]:not([contenteditable="false"]),
+    [role="textbox"],
+    [role="searchbox"]
+  ) {
+  /* No grey flash under the thumb (body sets it too; a field says so itself
+     so a parent that sets a colour cannot hand one down). */
+  -webkit-tap-highlight-color: transparent;
+}
+:where(
+    input:not(
+      [type="checkbox"],
+      [type="radio"],
+      [type="range"],
+      [type="file"],
+      [type="button"],
+      [type="submit"],
+      [type="reset"],
+      [type="image"],
+      [type="color"],
+      [type="hidden"]
+    ),
+    textarea,
+    [contenteditable]:not([contenteditable="false"]),
+    [role="textbox"],
+    [role="searchbox"]
+  ):focus {
+  outline: none;
+}
+
+/*
+ * A SEARCH FIELD IS A PLAIN TEXT FIELD: no platform field chrome, no
+ * magnifier and no platform clear cross. A field that offers clearing draws
+ * its own button (the place picker, the shelf), which stays.
+ */
+input[type="search"] {
+  -webkit-appearance: none;
+  appearance: none;
+}
+input[type="search"]::-webkit-search-decoration,
+input[type="search"]::-webkit-search-cancel-button,
+input[type="search"]::-webkit-search-results-button,
+input[type="search"]::-webkit-search-results-decoration {
+  -webkit-appearance: none;
+  appearance: none;
+  display: none;
+}
+
+/*
+ * NO AUTOFILL PAINT. A saved address or password used to arrive on the
+ * browser's own pale blue or yellow ground with black text, over the field's
+ * glass. The browser sets that ground and ink with `!important` in its own
+ * sheet, which no author rule can outrank; a transition can, because a
+ * running transition sits above every origin. So the change to the
+ * browser's colours is made to wait a day, and the text is painted in the
+ * field's own ink through the one property the browser does not set.
+ * `allow-discrete` carries the same wait to the ground's gradient layers,
+ * which the browser clears with `background-image: none`; it is written as a
+ * second declaration so a browser that does not know it keeps the first.
+ */
+:where(input, textarea, select):is(:-webkit-autofill, :autofill) {
+  -webkit-text-fill-color: var(--nf-content-primary);
+  caret-color: var(--nf-content-primary);
+  transition:
+    background-color 0s 86400s,
+    color 0s 86400s;
+  transition:
+    background-color 0s 86400s,
+    background-image 0s 86400s allow-discrete,
+    color 0s 86400s;
+}

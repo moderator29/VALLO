@@ -967,13 +967,8 @@
   .nf-composer__field::placeholder {
     color: var(--nf-content-muted);
   }
-  .nf-composer__field:focus {
-    outline: none;
-    border-color: var(--nf-focus-ring);
-    box-shadow:
-      inset 0 1px 0 var(--nf-glass-rim),
-      0 0 0 3px var(--nf-glow-2);
-  }
+  /* Focused, the field is the same well: no ring, no edge, no glow. The
+     caret is the focus (`text-entry.css`). */
   /* The send is the one filled control on the bar. */
   .nf-composer__send {
     display: grid;
@@ -1341,10 +1336,6 @@
     border: var(--nf-border-width) solid var(--nf-tier-card-edge);
     background: var(--nf-surface-primary);
     box-shadow: var(--nf-card-shadow);
-  }
-  .nf-composer__field:focus {
-    border-color: var(--nf-focus-ring);
-    box-shadow: 0 0 0 3px color-mix(in oklab, var(--nf-focus-ring) 24%, transparent);
   }
   .nf-composer__send {
     border: var(--nf-border-width) solid transparent;

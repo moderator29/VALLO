@@ -54,7 +54,7 @@ function OpenForm() {
       </label>
       <label className="grid gap-3xs text-[length:var(--nf-text-caption)]">
         New email address
-        <input name="newEmail" type="email" required className="nf-field" />
+        <input name="newEmail" type="email" inputMode="email" autoCapitalize="none" autoCorrect="off" spellCheck={false} required className="nf-field" />
       </label>
       <label className="grid gap-3xs text-[length:var(--nf-text-caption)]">
         NIN the person gave

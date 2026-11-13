@@ -165,7 +165,7 @@ export function ChargebacksDesk({
         </label>
         <label className="block nf-cb-filters__wide">
           <span className="nf-label">{f.search}</span>
-          <input name="q" type="search" className="nf-field w-full" placeholder={f.searchPlaceholder} defaultValue={query.q ?? ""} autoComplete="off" />
+          <input name="q" type="search" enterKeyHint="search" className="nf-field w-full" placeholder={f.searchPlaceholder} defaultValue={query.q ?? ""} autoComplete="off" />
         </label>
         <div className="nf-cb-filters__actions">
           <button type="submit" className="nf-btn nf-btn--primary nf-btn--sm">

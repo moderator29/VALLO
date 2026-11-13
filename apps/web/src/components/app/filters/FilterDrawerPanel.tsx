@@ -1261,6 +1261,7 @@ export function FilterDrawerPanel({
                 <span className="sr-only">{copy.location}</span>
                 <input
                   type="search"
+                  enterKeyHint="search"
                   autoComplete="off"
                   data-testid="filter-search"
                   value={draft.q}

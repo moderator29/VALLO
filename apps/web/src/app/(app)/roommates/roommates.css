@@ -219,9 +219,6 @@
     background: var(--nf-btn-glass-fill);
     box-shadow: var(--nf-float-shadow);
   }
-  .nf-rmd-search:focus-within {
-    border-color: var(--nf-brand-edge);
-  }
   .nf-rmd-search__glyph {
     display: grid;
     place-items: center;
@@ -1814,9 +1811,6 @@
     border: var(--nf-border-width) solid var(--nf-tier-card-edge);
     border-radius: var(--nf-radius-pill);
     background: var(--nf-surface-primary);
-  }
-  .nf-rmsp__search:focus-within {
-    border-color: var(--nf-brand-primary);
   }
   .nf-rmsp__input {
     flex: 1;

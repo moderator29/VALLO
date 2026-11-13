@@ -54,7 +54,7 @@ export function GrantStaffForm({
     >
       <label className="grid gap-2xs nf-body">
         <span>Email on their Vallo account</span>
-        <input className="nf-field" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
+        <input className="nf-field" type="email" inputMode="email" autoCapitalize="none" autoCorrect="off" spellCheck={false} required value={email} onChange={(e) => setEmail(e.target.value)} />
       </label>
       <label className="grid gap-2xs nf-body">
         <span>Position</span>

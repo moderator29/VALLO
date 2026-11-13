@@ -248,7 +248,7 @@ export function OffersWorkspace({ made, received, initialTab, nowMs }: OffersWor
       {data.counts.all > 0 ? (
         <div className="nf-dt-bar" data-testid="offers-filter-bar">
           <div className="hidden min-w-[16rem] flex-1 lg:block">
-            <TextField label="Search" hideLabel placeholder="Search property, person or reference (press /)" leadingIcon="search" value={query} onChange={(e) => setQuery(e.target.value)} clearable="Clear search" onClear={() => setQuery("")} data-testid="offers-search" />
+            <TextField label="Search" hideLabel placeholder="Search property, person or reference (press /)" leadingIcon="search" inputMode="search" enterKeyHint="search" value={query} onChange={(e) => setQuery(e.target.value)} clearable="Clear search" onClear={() => setQuery("")} data-testid="offers-search" />
           </div>
           <ChipRow label="Filter by state" radiogroup bleed={false} fadeEdges={false}>
             {visibleFilters.map((f) => (

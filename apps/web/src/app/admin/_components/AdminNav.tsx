@@ -254,7 +254,7 @@ export function ConsoleSearch({
       <label className="sr-only" htmlFor="admin-console-search">
         {label}
       </label>
-      <input id="admin-console-search" ref={input} type="search" placeholder={placeholder} />
+      <input id="admin-console-search" ref={input} type="search" enterKeyHint="search" placeholder={placeholder} />
       {hint ? (
         <span className="nf-admin-bar__hint" aria-hidden="true">
           {hint}

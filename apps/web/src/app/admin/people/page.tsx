@@ -51,6 +51,7 @@ export default async function PeoplePage({
             id="people-q"
             name="q"
             type="search"
+            enterKeyHint="search"
             defaultValue={q}
             autoComplete="off"
             spellCheck={false}

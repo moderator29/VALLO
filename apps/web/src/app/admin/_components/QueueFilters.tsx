@@ -206,6 +206,7 @@ export async function QueueFilters({
               <UiIcon name="search" size={20} className="nf-admin-search__glyph" />
               <input
                 type="search"
+                enterKeyHint="search"
                 name="q"
                 defaultValue={query.q ?? ""}
                 placeholder={searchPlaceholder ?? common.searchPlaceholder}

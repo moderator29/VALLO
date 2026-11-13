@@ -137,6 +137,7 @@ export function ShelfBar({
             id="shelf-q"
             name="q"
             type="search"
+            enterKeyHint="search"
             autoComplete="off"
             defaultValue={query.q ?? ""}
             placeholder={sv.placeholder}

@@ -417,13 +417,13 @@ export function StayFilterSheetPanel({
               <label className="nf-filters__row">
                 <UiIcon name="location" size={ICON.inline} />
                 <span className="sr-only">{copy.filters.location}</span>
-                <input type="search" value={draft.q} data-testid="stay-q" placeholder={copy.filters.locationPlaceholder}
+                <input type="search" enterKeyHint="search" value={draft.q} data-testid="stay-q" placeholder={copy.filters.locationPlaceholder}
                   onChange={(e) => setDraft((c) => ({ ...c, q: e.target.value }))} className="nf-filters__row-input" />
               </label>
               <label className="nf-filters__row mt-xs">
                 <UiIcon name="map" size={ICON.inline} />
                 <span className="sr-only">{copy.stays.nearLandmark}</span>
-                <input type="search" value={draft.near} data-testid="stay-near" placeholder={copy.stays.nearLandmark}
+                <input type="search" enterKeyHint="search" value={draft.near} data-testid="stay-near" placeholder={copy.stays.nearLandmark}
                   onChange={(e) => setDraft((c) => ({ ...c, near: e.target.value }))} className="nf-filters__row-input" />
               </label>
               {draft.near.trim() && (

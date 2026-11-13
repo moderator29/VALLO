@@ -94,6 +94,7 @@ export function SupportSearch({
             aria-label={copy.heading}
             autoComplete="off"
             enterKeyHint="search"
+            inputMode="search"
             placeholder={copy.placeholder}
             value={query}
             onChange={(e) => {

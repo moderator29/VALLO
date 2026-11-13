@@ -55,6 +55,7 @@ export function LookupPanel({
           <span className="nf-label">{c.field}</span>
           <input
             type="search"
+            enterKeyHint="search"
             name="q"
             defaultValue={term}
             placeholder={c.placeholder}

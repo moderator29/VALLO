@@ -96,6 +96,10 @@ export function AddFlatmate({
             <input
               {...control}
               type="email"
+              inputMode="email"
+              autoCapitalize="none"
+              autoCorrect="off"
+              spellCheck={false}
               autoComplete="off"
               className="nf-field"
               value={email}

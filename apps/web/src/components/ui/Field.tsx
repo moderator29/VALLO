@@ -379,6 +379,18 @@ export function TextField({
   );
   const controlled = rest.value !== undefined;
   const filled = controlled ? String(rest.value ?? "").length > 0 : typedInto;
+  /*
+   * THE PHONE KEYBOARD, SET FOR WHAT IS TYPED (13 November 2026). An address
+   * is never capitalised, corrected or spell-checked and gets the @ keyboard;
+   * a search field's return key says Search. Defaults only: anything the call
+   * site passes wins, because it is spread after.
+   */
+  const keyboard =
+    rest.type === "email"
+      ? ({ inputMode: "email", autoCapitalize: "none", autoCorrect: "off", spellCheck: false } as const)
+      : rest.type === "search"
+        ? ({ inputMode: "search", enterKeyHint: "search" } as const)
+        : {};
   const showClear = Boolean(clearable) && filled && !rest.disabled && !rest.readOnly;
 
   const clear = () => {
@@ -424,6 +436,7 @@ export function TextField({
           ) : null}
 
           <input
+            {...keyboard}
             {...rest}
             {...control}
             ref={ref}

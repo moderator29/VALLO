@@ -145,6 +145,7 @@ export default async function Page({
         <UiIcon name="search" size={20} className="nf-agent-find__glyph" />
         <input
           type="search"
+          enterKeyHint="search"
           name="q"
           defaultValue={query}
           aria-label={t.common.search}

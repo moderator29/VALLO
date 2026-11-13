@@ -168,13 +168,16 @@ describe.skipIf(!hasBrowser && !process.env.CI)("tapping the chat bar", () => {
     }
   });
 
-  it("still lights the edge on a pointer-and-keyboard machine, where it is the only indicator", async () => {
+  /* The desktop lit the edge until 13 November 2026, when the founder asked
+     for every text field to look native when focused: only the container,
+     with the caret as the sign (`app/css/text-entry.css`). */
+  it("lights nothing on a pointer-and-keyboard machine either", async () => {
     const { page, close } = await mountInBrowser({ entry, css: CSS });
     try {
       expect(await page.evaluate(() => matchMedia("(hover: hover) and (pointer: fine)").matches)).toBe(true);
       const resting = await edge(page);
       await page.focus("#thread-input");
-      expect(await edge(page)).not.toBe(resting);
+      expect(await edge(page)).toBe(resting);
     } finally {
       await close();
     }

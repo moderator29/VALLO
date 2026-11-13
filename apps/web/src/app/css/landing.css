@@ -857,12 +857,8 @@
   .nf-landing-pill-field input::placeholder {
     color: var(--nf-content-muted);
   }
-  .nf-landing-pill-field input:focus-visible {
-    outline: none;
-  }
-  .nf-landing-pill-field:focus-within {
-    color: var(--nf-content-primary);
-  }
+  /* Focused, the field and its glyph stay exactly as they rest: the caret
+     is the focus (`text-entry.css`, 13 November 2026). */
 
   /* The quiet segmented track (spec section 7). The count and the chosen
      index come from the component (`--nf-seg-count`, `--nf-seg-index`), so
@@ -1007,9 +1003,6 @@
       min-height: 3rem;
       padding-inline-end: var(--nf-space-sm);
       background: transparent;
-    }
-    .nf-landing-pill-field:focus-within {
-      box-shadow: none;
     }
     .nf-landing-pill-segments {
       width: 17rem;

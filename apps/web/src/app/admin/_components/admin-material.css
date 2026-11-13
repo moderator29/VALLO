@@ -266,12 +266,6 @@
   .nf-admin-palette__field input::placeholder {
     color: var(--nf-content-muted);
   }
-  .nf-admin-palette__field input:focus {
-    outline: none;
-  }
-  .nf-admin-palette__field:focus-within {
-    border-bottom-color: var(--nf-focus-ring);
-  }
   .nf-admin-palette__list {
     flex: 1 1 auto;
     min-height: 0;

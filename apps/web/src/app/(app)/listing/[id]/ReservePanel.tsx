@@ -692,6 +692,10 @@ export function ReservePanel({
                 id={`${uid}-guest-email`}
                 name="guestEmail"
                 type="email"
+                inputMode="email"
+                autoCapitalize="none"
+                autoCorrect="off"
+                spellCheck={false}
                 autoComplete="off"
                 maxLength={160}
                 value={guestEmail}

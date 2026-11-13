@@ -129,6 +129,10 @@ export function ContactForm({
           <span className="nf-overline mb-inline block">Email</span>
           <input
             type="email"
+            inputMode="email"
+            autoCapitalize="none"
+            autoCorrect="off"
+            spellCheck={false}
             name="email"
             autoComplete="email"
             className="nf-field"

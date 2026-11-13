@@ -53,6 +53,10 @@ export function NewsletterForm({
         <input
           id="nf-newsletter-email"
           type="email"
+          inputMode="email"
+          autoCapitalize="none"
+          autoCorrect="off"
+          spellCheck={false}
           name="email"
           autoComplete="email"
           placeholder={placeholder}

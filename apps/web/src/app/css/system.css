@@ -229,9 +229,6 @@
     pointer-events: none;
     transition: color var(--nf-duration-fast) var(--nf-ease-standard);
   }
-  .nf-system__search:focus-within .nf-system__search-glyph {
-    color: var(--nf-brand-secondary);
-  }
 
   /* --------------------------------------------------------------- podium */
   .nf-system__podium {

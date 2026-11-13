@@ -48,8 +48,9 @@
  */
 @layer base {
   /* A search field is a plain text field: no platform field chrome and no
-     platform magnifier, on iOS and desktop WebKit alike. The platform's small
-     clear button stays, so a bare search bar can still be emptied. */
+     platform magnifier, on iOS and desktop WebKit alike. Since 13 November
+     2026 the platform's clear button is hidden too (app/css/text-entry.css):
+     the product draws its own where a field needs one. */
   input[type="search"] {
     -webkit-appearance: none;
     appearance: none;
@@ -285,9 +286,9 @@ html {
  *
  * WHAT IT DOES NOW. Text-entry controls (any input that takes typing, and
  * textarea) never take the generic outline. Focus on a text field is carried by
- * the field itself (`.nf-field:focus`: border and halo) or by its shell
- * (`.nf-focus-well:focus-within` and the shelf, hero, landing and admin
- * shells), which is what the design always said. Buttons, links, checkboxes,
+ * nothing at all since 13 November 2026: the founder wants a field to look
+ * native, the container and the caret only, no ring, halo or edge change
+ * (app/css/text-entry.css and its gate, app/text-entry.test.ts). Buttons, links, checkboxes,
  * radios, switches, ranges and every other control keep the ring above. This is
  * unlayered and after the ring, at the same specificity, so it wins by order.
  */
@@ -346,19 +347,6 @@ html {
     [role="switch"]
   ):focus-visible {
   outline-offset: calc(-1 * var(--nf-focus-ring-width));
-}
-
-/*
- * A bare input inside a styled shell.
- *
- * Three search bars (the landing hero, the search page and the place picker)
- * suppress the input's own outline so the shell reads as one control, and then
- * nothing drew a ring at all: tabbing into the platform's most-used field
- * showed a keyboard user absolutely nothing. The shell carries it instead.
- */
-.nf-focus-well:focus-within {
-  outline: var(--nf-focus-ring-width) solid var(--nf-focus-ring);
-  outline-offset: var(--nf-focus-ring-offset);
 }
 
 /*

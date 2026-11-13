@@ -235,7 +235,7 @@ export function PlacePicker({
         </div>
       ) : null}
 
-      <div className="nf-enter__search nf-focus-well">
+      <div className="nf-enter__search">
         <UiIcon name="search" size={16} className="shrink-0 text-[var(--nf-content-muted)]" />
         <input
           ref={searchRef}
@@ -254,6 +254,7 @@ export function PlacePicker({
           }
           autoComplete="off"
           spellCheck={false}
+          enterKeyHint="search"
           data-testid="place-picker-search"
         />
       </div>

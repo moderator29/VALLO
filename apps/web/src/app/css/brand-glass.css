@@ -341,7 +341,8 @@
 
   /* ------------------------------------------------------ conversation
      The header sits on a glass strip with the luminous hairline under it;
-     the composer's field is the glass, its focus ring unchanged. */
+     the composer's field is the glass, focused or not (a focused field
+     draws no ring: `text-entry.css`). */
   :root:not([data-theme="light"]) .nf-thread__head {
     border-block-end-color: var(--nf-night-glass-edge);
     background: var(--nf-night-glass-fill);
@@ -349,7 +350,7 @@
   :root:not([data-theme="light"]) .nf-composer {
     border-block-start-color: var(--nf-night-glass-edge);
   }
-  :root:not([data-theme="light"]) .nf-composer__field:not(:focus) {
+  :root:not([data-theme="light"]) .nf-composer__field {
     border-color: var(--nf-night-glass-edge);
     background: var(--nf-night-glass-fill);
     box-shadow: var(--nf-night-glass-shadow);

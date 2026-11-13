@@ -261,7 +261,8 @@
     max-width: 11rem;
     margin-top: 0;
   }
-  .nf-stays-input:focus-visible,
+  /* The select keeps its keyboard ring; `.nf-stays-input`, a text field,
+     shows focus by its caret alone (`text-entry.css`, 13 November 2026). */
   .nf-stays-select:focus-visible {
     outline: var(--nf-border-width-strong) solid var(--nf-focus-ring);
     outline-offset: 2px;

@@ -416,6 +416,10 @@ const PUBLIC_API_PATHS = new Set([
      a random visit id, never a person, and is rate limited per address. */
   "/api/funnel",
   "/api/health/catalogue",
+  /* Listing stats: the view beacon. It records one listing id per page view,
+     same-site and browser only, rate limited per address; a guest is a
+     salted daily hash in the database, never an address or a cookie. */
+  "/api/listing-view",
   "/api/landlord/inbound",
   "/api/push/key",
   "/api/paystack/reconcile",

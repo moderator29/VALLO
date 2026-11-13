@@ -504,9 +504,9 @@
     background: var(--nf-glass-well-fill);
     border-radius: var(--nf-radius-control);
   }
-  .nf-shelf-field:focus-within {
-    /* A search field draws no ring, border or glow when it is focused (the founder, 26 October 2026). The caret is the focus. */
-  }
+  /* A search field draws no ring, border or glow when it is focused (the
+     founder, 26 October and 13 November 2026). The caret is the focus
+     (`text-entry.css`). */
   .nf-shelf-field > svg {
     flex-shrink: 0;
     color: var(--nf-content-secondary);
@@ -899,7 +899,10 @@
   .nf-filters__row-select > option {
     color: var(--nf-content-inverse);
   }
-  .nf-filters__row:focus-within {
+  /* A row that holds a select lights its edge while the select is open; a
+     row that holds a text field keeps its resting edge (the caret is the
+     focus, `text-entry.css`). */
+  .nf-filters__row:has(.nf-filters__row-select:focus) {
     border-color: var(--nf-selected-edge);
   }
   .nf-filters__row-label {

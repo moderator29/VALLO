@@ -657,10 +657,6 @@
   .nf-ix-notes__field:disabled {
     cursor: not-allowed;
   }
-  .nf-ix-notes__field:focus-visible {
-    outline: 2px solid var(--nf-lit-cyan);
-    outline-offset: 1px;
-  }
 
   /* ------------------------------------------------------- the outcome */
 

@@ -171,6 +171,7 @@ export function OccupationEditor({ rows }: { rows: Occupation[] }) {
 
       <input
         type="search"
+        enterKeyHint="search"
         value={query}
         onChange={(event) => setQuery(event.target.value)}
         placeholder="Filter by name, category or code"
@@ -370,6 +371,7 @@ export function LocalGovernmentEditor({
         </select>
         <input
           type="search"
+          enterKeyHint="search"
           value={query}
           onChange={(event) => setQuery(event.target.value)}
           placeholder="Filter by name or code"

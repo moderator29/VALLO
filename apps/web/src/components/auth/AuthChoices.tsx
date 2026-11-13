@@ -103,6 +103,7 @@ export function AuthChoices({
             id="auth-email"
             name="email"
             type="email"
+            autoCorrect="off"
             required
             autoComplete="email"
             inputMode="email"

@@ -549,9 +549,11 @@
 
 /*
  * FOCUS RINGS the audit found missing (29 September 2026): the follower and
- * following counts and the website link on a public profile, and the home
- * hero's search field, showed focus by a colour change alone, which a
- * keyboard reader cannot find. Each gets the product's one ring.
+ * following counts and the website link on a public profile showed focus by
+ * a colour change alone, which a keyboard reader cannot find. Each gets the
+ * product's one ring. The home hero's search field had one here too, and it
+ * went on 13 November 2026: a text field shows focus by its caret alone
+ * (`text-entry.css`).
  */
 @layer components {
   .nf-social-count:focus-visible,
@@ -559,9 +561,5 @@
     outline: var(--nf-focus-ring-width) solid var(--nf-focus-ring);
     outline-offset: 3px;
     border-radius: var(--nf-radius-xs);
-  }
-  .nf-hero-plate__search:has(.nf-hero-plate__input:focus-visible) {
-    outline: var(--nf-focus-ring-width) solid var(--nf-focus-ring);
-    outline-offset: 2px;
   }
 }

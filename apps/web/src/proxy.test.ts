@@ -398,6 +398,8 @@ const EXPECTED_PUBLIC = new Set([
      first-party funnel beacon, rate limited, recording no person. */
   "/api/email/unsubscribe",
   "/api/funnel",
+  /* Listing stats: the view beacon, same-site, rate limited, no person stored. */
+  "/api/listing-view",
   /* VC1: the media provider's webhook, behind its signature over the body. */
   "/api/calls/webhook",
   "/api/cron/account-purge",

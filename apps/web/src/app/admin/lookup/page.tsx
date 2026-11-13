@@ -39,7 +39,7 @@ export default async function LookupPage({ searchParams }: { searchParams: Promi
         <label className="sr-only" htmlFor="lookup-q">
           What to look up
         </label>
-        <input id="lookup-q" name="q" type="search" defaultValue={q} className="nf-field min-w-0 flex-1" autoFocus />
+        <input id="lookup-q" name="q" type="search" enterKeyHint="search" defaultValue={q} className="nf-field min-w-0 flex-1" autoFocus />
         <Button type="submit" variant="primary">
           Look up
         </Button>

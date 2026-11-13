@@ -110,6 +110,10 @@ function AddToSupport() {
         <input
           className="nf-field w-full"
           type="email"
+          inputMode="email"
+          autoCapitalize="none"
+          autoCorrect="off"
+          spellCheck={false}
           required
           value={email}
           onChange={(e) => setEmail(e.target.value)}

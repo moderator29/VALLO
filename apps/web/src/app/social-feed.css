@@ -2691,14 +2691,8 @@
   .nf-compose-page__field::placeholder {
     color: var(--nf-content-muted);
   }
-  /* The page is the field: no box, no ring round it (the caret is the
-     focus). The platform's field ring is for a field among others. */
-  .nf-compose-page .nf-compose-page__field:focus,
-  .nf-compose-page .nf-compose-page__field:focus-visible {
-    outline: none;
-    border: 0;
-    box-shadow: none;
-  }
+  /* The page is the field: no box, no ring round it, focused or not (the
+     caret is the focus, `text-entry.css`). */
   /* The platform ring is unlayered (base.css) and outranks any layered
      rule, so the field turns it off through the ring's own token, set on
      the element; the blinking caret in an otherwise empty page is the
@@ -3454,10 +3448,6 @@
   .nf-story-compose__place input::placeholder {
     color: color-mix(in oklab, var(--nf-content-on-media) 45%, transparent);
   }
-  .nf-story-compose__headline:focus-visible,
-  .nf-story-compose__standfirst:focus-visible {
-    box-shadow: 0 2px 0 0 var(--nf-brand-secondary);
-  }
   .nf-story-compose__place {
     display: flex;
     align-items: center;
@@ -3479,9 +3469,6 @@
     color: var(--nf-content-on-media);
     font-size: var(--nf-text-caption);
     outline: none;
-  }
-  .nf-story-compose__place input:focus-visible {
-    border-color: var(--nf-brand-secondary);
   }
 
   /* One bar of bare actions, the order under a post: like and comment

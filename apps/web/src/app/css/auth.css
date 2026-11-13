@@ -66,7 +66,6 @@
     --nf-slate-light: color-mix(in oklab, var(--nf-brand-quiet) 34%, transparent);
     --nf-slate-obj-shadow: color-mix(in oklab, var(--nf-surface-artwork) 22%, transparent);
     --nf-slate-page-light: color-mix(in oklab, var(--nf-brand-primary) 16%, transparent);
-    --nf-slate-halo: color-mix(in oklab, var(--nf-brand-quiet) 34%, transparent);
     --nf-auth-gutter: var(--nf-space-md);
     /* THE FOCUS RING. The platform's ring is one unlayered rule
        (`base.css`) that reads `--nf-focus-ring`; it is steered here rather
@@ -103,7 +102,6 @@
     --nf-slate-light: color-mix(in oklab, var(--nf-brand-primary) 60%, transparent);
     --nf-slate-obj-shadow: color-mix(in oklab, var(--nf-surface-artwork) 60%, transparent);
     --nf-slate-page-light: color-mix(in oklab, var(--nf-brand-primary) 9%, transparent);
-    --nf-slate-halo: color-mix(in oklab, var(--nf-brand-primary) 20%, transparent);
   }
 
   /* ========================================================== THE SCREEN */
@@ -498,25 +496,13 @@
   .nf-slate-input::placeholder {
     color: var(--nf-content-muted);
   }
-  /* The 1.5px ink edge IS the focus indicator (the reference's outline), so
-     the platform ring is set to nothing on a field rather than drawn twice. */
+  /* A FIELD LOOKS THE SAME FOCUSED AS AT REST (the founder, 13 November
+     2026: "it should only be the container"). No ring, no edge colour, no
+     halo: the caret is the focus. `text-entry.css` holds the rule for every
+     text field on the platform. */
   .nf-auth .nf-field,
   .nf-slate-input {
     --nf-focus-ring-width: 0px;
-  }
-  .nf-auth .nf-field:focus,
-  .nf-slate-input:focus {
-    outline: none;
-    border-color: var(--nf-brand-primary);
-    background: var(--nf-slate-card);
-    box-shadow: var(--nf-slate-card-shadow);
-  }
-  @media (pointer: coarse) {
-    .nf-auth .nf-field:focus,
-    .nf-slate-input:focus {
-      border-color: color-mix(in oklab, var(--nf-brand-primary) 55%, transparent);
-      box-shadow: none;
-    }
   }
   .nf-auth .nf-field[aria-invalid="true"],
   .nf-slate-input[aria-invalid="true"] {
@@ -546,47 +532,15 @@
   }
 
   /*
-   * THE FIELDS, ALIVE (30 September). Focus lifts a soft halo in around the
-   * card (the ink edge stays the indicator; the halo is the light around it)
-   * and the label takes the ink; while somebody types, the halo breathes;
-   * an address that is shaped like one gets a small tick that pops in at the
-   * right of the card. Opacity and transform only; reduced motion keeps the
-   * halo and drops the breathing and the pop.
+   * THE FIELDS, ALIVE (30 September), LESS THE FOCUS LIGHT (13 November).
+   * The halo that lifted in around the card on focus and breathed while
+   * somebody typed was the second rounded ring in the founder's screenshot,
+   * and the label taking the ink on focus went with it: a focused field is
+   * the same container as a resting one. What stays is the small tick that
+   * pops in at the right of the card once an address is shaped like one.
    */
   .nf-auth-field__box {
     position: relative;
-  }
-  .nf-auth-field__halo {
-    position: absolute;
-    inset: -4px;
-    border-radius: calc(var(--nf-radius-control) + 4px);
-    box-shadow:
-      0 0 0 3px var(--nf-slate-halo),
-      0 10px 28px -12px var(--nf-slate-halo);
-    pointer-events: none;
-    opacity: 0;
-    transform: scale(0.97);
-    transition:
-      opacity var(--nf-duration-base) var(--nf-ease-standard),
-      transform var(--nf-duration-base) var(--nf-ease-entrance);
-  }
-  .nf-auth-field__box:focus-within .nf-auth-field__halo {
-    opacity: 1;
-    transform: none;
-  }
-  .nf-auth-field__box:focus-within:has(input:not(:placeholder-shown)) .nf-auth-field__halo {
-    animation: nf-slate-breathe 1.6s var(--nf-ease-standard) infinite alternate;
-  }
-  @keyframes nf-slate-breathe {
-    to {
-      opacity: 0.55;
-    }
-  }
-  .nf-auth-field .nf-label {
-    transition: color var(--nf-duration-fast) var(--nf-ease-standard);
-  }
-  .nf-auth-field:focus-within .nf-label {
-    color: var(--nf-slate-ink);
   }
   .nf-auth-field__box:has(input[type="email"]:not(:placeholder-shown):valid:not([aria-invalid="true"]))::after {
     content: "";
@@ -1274,7 +1228,7 @@
 
   /* ============================================================== MOTION */
   /* Calm and Off: nothing drifts or floats; the objects simply appear. */
-  :root:is([data-motion="calm"], [data-motion="off"]) :is(.nf-slate-top__light, .nf-auth-field__halo),
+  :root:is([data-motion="calm"], [data-motion="off"]) .nf-slate-top__light,
   :root:is([data-motion="calm"], [data-motion="off"]) .nf-auth::after {
     animation: none;
   }
@@ -1368,7 +1322,6 @@
     .nf-slate-top__light,
     .nf-slate-top__obj,
     .nf-auth::after,
-    .nf-auth-field__box .nf-auth-field__halo,
     .nf-auth-field__box::after,
     .nf-code__digit,
     .nf-code__cells,
@@ -1377,9 +1330,6 @@
     .nf-arrival__title,
     .nf-arrival__body {
       animation: none !important;
-    }
-    .nf-auth-field__halo {
-      transition: none;
     }
     .nf-slate-top,
     .nf-slate-top__brand,

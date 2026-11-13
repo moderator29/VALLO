@@ -163,8 +163,8 @@ export function Field({
         label={label}
         optional={optional && t ? t.signUp.optional : undefined}
       />
-      {/* The box carries the focus halo and the typing light (auth.css,
-          "THE FIELDS, ALIVE"); decorative, the input is unchanged. */}
+      {/* The box carries the address tick (auth.css, "THE FIELDS, ALIVE");
+          focus paints nothing on it, so the field reads native. */}
       <div className="nf-auth-field__box">
         <input
           id={id}
@@ -183,7 +183,6 @@ export function Field({
             : {})}
           {...(onBlur ? { onBlur: (event) => onBlur(event.target.value) } : {})}
         />
-        <span className="nf-auth-field__halo" aria-hidden="true" />
       </div>
       <FieldError id={errorId} error={error} />
     </div>
@@ -319,7 +318,6 @@ export function PasswordField({
         >
           <EyeGlyph off={visible} />
         </button>
-        <span className="nf-auth-field__halo" aria-hidden="true" />
       </div>
       <FieldError id={errorId} error={error} />
     </div>

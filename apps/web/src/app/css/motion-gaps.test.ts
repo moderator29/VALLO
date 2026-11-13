@@ -154,8 +154,10 @@ describe("principle 10, the marketing and loading loops (Session 3, C1)", () => 
          their own loops (the code caret, the focal glow, the welcome scenes'
          float and breath). Each is stopped by reduced motion, Calm and Off.
          The onboarding's own loops (onboarding-motion.css) became finite on
-         7 October: each floats or sweeps a few times and rests. */
-      "app/css/auth.css": 5,
+         7 October: each floats or sweeps a few times and rests. The focus
+         halo's breathing while somebody typed left on 13 November 2026, with
+         the halo (a focused field draws nothing, `text-entry.css`). */
+      "app/css/auth.css": 4,
       "app/welcome/welcome.css": 3,
       /* THE FOUNDER'S RULING (October 2026): the landing's floating 3D objects
          keep their gentle continuous float. Only when ObjectField sets

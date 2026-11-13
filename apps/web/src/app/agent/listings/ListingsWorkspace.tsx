@@ -41,6 +41,9 @@ import "@/app/css/lister-live.css";
 import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
 import { banner } from "@/lib/ui/toast";
+import { listingStatsEn } from "@vallo/i18n/en/listing-stats";
+import { agentStatItems, type StatsFigures } from "@/lib/listings/stats/format";
+import { ListingStatsRow } from "@/components/app/listing/ListingStatsRow";
 
 /**
  * The agent's listings workspace.
@@ -366,6 +369,8 @@ function ListingRow({
   /** V-31: the owner of this listing has an open "still available?" question. */
   ownerAsk?: boolean;
   ownerCopy?: Dictionary["landlord"]["owner"] | undefined;
+  /** Listing stats: this listing's own views and saves, and the time they were read. */
+  stats?: { figures: StatsFigures; at: number } | null | undefined;
 }) {
   const waitingOnIdentity = Boolean(identityPending) && (listing.status === "SUBMITTED" || listing.status === "UNDER_REVIEW" || listing.status === "APPROVED");
   const editable = EDITABLE.includes(listing.status) && !closedReason;

@@ -289,6 +289,9 @@ function BusinessRow({
           <input
             id={`email-${business.id}`}
             type="email"
+            autoCapitalize="none"
+            autoCorrect="off"
+            spellCheck={false}
             inputMode="email"
             autoComplete="off"
             className="nf-field"

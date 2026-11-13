@@ -193,11 +193,6 @@
       inset 0 1px 3px var(--nf-shade-2),
       var(--nf-rim-lit);
   }
-  .nf-agent-find input:focus {
-    outline: none;
-    border-color: var(--nf-focus-ring);
-    box-shadow: var(--nf-selected-rim), 0 0 0 3px var(--nf-glow-2);
-  }
   .nf-agent-find__glyph {
     position: absolute;
     left: var(--nf-space-xs);

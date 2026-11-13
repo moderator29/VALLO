@@ -72,7 +72,7 @@ export function AddProspectForm() {
         </label>
         <label className="grid gap-2xs nf-body">
           <span>Email</span>
-          <input className="nf-field" type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+          <input className="nf-field" type="email" inputMode="email" autoCapitalize="none" autoCorrect="off" spellCheck={false} value={email} onChange={(e) => setEmail(e.target.value)} />
         </label>
         <label className="grid gap-2xs nf-body">
           <span>Phone</span>

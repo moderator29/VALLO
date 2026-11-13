@@ -38,12 +38,9 @@
   .nf-palette__input::placeholder {
     color: var(--nf-content-muted);
   }
-  .nf-palette__input:focus-visible {
-    outline: none;
-  }
-  .nf-palette__field:focus-within {
-    /* A search field draws no ring, border or glow when it is focused (the founder, 26 October 2026). The caret is the focus. */
-  }
+  /* A search field draws no ring, border or glow when it is focused (the
+     founder, 26 October and 13 November 2026). The caret is the focus
+     (`text-entry.css`). */
   .nf-palette__status {
     margin: 0;
     padding: var(--nf-space-xs) var(--nf-space-md) var(--nf-space-2xs);

@@ -103,6 +103,7 @@ export function HomeHero({
             id={id}
             name="q"
             type="search"
+            enterKeyHint="search"
             autoComplete="off"
             placeholder={searchPlaceholder}
             className="nf-hero-plate__input"

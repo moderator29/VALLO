@@ -45,6 +45,7 @@ export function StaySearchBar({
           id="stays-q"
           name="q"
           type="search"
+          enterKeyHint="search"
           autoComplete="off"
           defaultValue={q}
           placeholder={copy.wherePlaceholder}

@@ -669,9 +669,6 @@
     border: var(--nf-border-width) solid var(--nf-brand-edge-soft);
     background: var(--nf-glass-well-fill);
   }
-  .nf-ai__well:focus-within {
-    border-color: var(--nf-selected-edge);
-  }
   .nf-ai__well > svg {
     flex-shrink: 0;
     color: var(--nf-brand-secondary);
@@ -842,15 +839,12 @@
     margin-top: var(--nf-space-2xs);
     padding: var(--nf-space-3xs) var(--nf-space-3xs) var(--nf-space-3xs) var(--nf-space-md);
   }
-  .nf-hero-plate__search:focus-within {
-    /* A search field draws no ring, border or glow when it is focused (the founder, 26 October 2026). The caret is the focus. */
-  }
+  /* A search field draws no ring, border or glow when it is focused, and
+     its glyph keeps its colour (the founder, 26 October and 13 November
+     2026). The caret is the focus (`text-entry.css`). */
   .nf-hero-plate__glyph {
     flex-shrink: 0;
     color: var(--nf-content-muted);
-  }
-  .nf-hero-plate__search:focus-within .nf-hero-plate__glyph {
-    color: var(--nf-brand-secondary);
   }
   .nf-hero-plate__input {
     min-width: 0;

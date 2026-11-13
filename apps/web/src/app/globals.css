@@ -57,6 +57,9 @@
 @import "./css/fonts.css";
 @import "./css/theme.css";
 @import "./css/base.css";
+/* Straight after base.css, whose unlayered keyboard ring it answers for text
+   fields by order (text-entry.css says why). */
+@import "./css/text-entry.css";
 @import "./css/glass.css";
 /* What stays global of motion.css: the anchored-heading scroll margin and the
    typing keyframes glass.css names; the member layouts load the rest (C6, 6 October). */
