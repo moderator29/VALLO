@@ -40,6 +40,7 @@ import { isSocialEnabled } from "@/lib/social/flag";
 import { isFeatureEnabled } from "@/lib/flags";
 import { CallLayerMount } from "@/components/calls/CallLayerMount";
 import { GyroTiltInit } from "@/components/motion/GyroTiltInit";
+import { SaveEducation } from "@/components/app/SaveEducation";
 /* C12: the feed's motion sheet, out of `globals.css`; only this tree draws a post. */
 import "@/app/css/feed-m.css";
 
@@ -189,6 +190,8 @@ export default async function AppLayout({
       <OfflineTray />
       {/* Backlog row 7: places set aside to compare, wherever the reader is. */}
       <CompareTray />
+      {/* First-save education: the saved-heart sheet, once per device. */}
+      <SaveEducation />
       {/* V-98: the home-screen widget's token, in the native app only. */}
       <WidgetBridge />
       {/* VC1: incoming calls on any page, and the one call surface, only
