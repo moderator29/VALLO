@@ -183,6 +183,31 @@ this table at the end of every round.
 | M8 | Motion and performance from the baseline (7, phase 6) | Agent | Queued |
 | M9 | Final QA, security probes and the second audit (7, phase 7) | The agent that did not build it | Queued |
 
+## 14 November 2026, later: the new session takes over (lead plus two agents)
+
+The branch is `claude/wonderful-lovelace-wk1b1v` (main took everything at
+`4baa05fb`; the old audit branch is gone from the remote). The queue with the
+eight stages moved to `WORK_QUEUE.md`, rewritten. The register is
+`BUG_REGISTER.md` (new). The Supabase audit's live baseline opened in
+`docs/DB_NOTES.md`.
+
+Verified on live: `staff_desks_only_2026-11-14.sql` applied and correct, both
+position holders acknowledged the handbook, desks open.
+
+Lead shipped (commit ids in `git log`): the alert fold measured against
+`last_seen_at` with a test (`17bde0ab`); the incoming-calls realtime
+recursion fix with a test (`1094b98f`, 69 crash rows on live); the audit
+baseline (`70453708`); the insert-limit backstop file (`ae230b0b`). Pending
+SQL for the founder, all tested twice on the local stub:
+`alerts_cleanup_2026-11-14.sql`, `scoped_staff_listing_doors_2026-11-14.sql`
+(unblocks the BD Director's listings desk reads),
+`insert_limits_bookings_inspections_briefs_2026-11-14.sql`.
+
+The previous session's small-works agents landed nothing; S1 to S6 restarted
+from zero in this session. Agent INPUT is on S1 (the pill; partial store work
+recovered), Agent SHEETS on S3 (CountTabs). The container was fresh: one
+`npm ci` at the root, agents told never to install.
+
 **File ownership while S1 to S6 run.** INPUT: `lib/ui/toast.ts`,
 `components/ui/ToastHost.tsx`, every composer (the thread's `ThreadView.tsx`
 and `components/app/messages/*`, the support composer, the feed composer),
