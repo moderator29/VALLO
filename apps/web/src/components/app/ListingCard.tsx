@@ -623,7 +623,7 @@ export function ListingCard({
         extra={
           <>
             {/* Listing stats: views and saves, a quiet line under the facts. */}
-            <CardCounts stats={listing.stats} isDemo={listing.isDemo} locale={locale} />
+            <CardCounts stats={listing.stats} rating={listing.rating} reviewCount={listing.reviewCount} locale={locale} />
             {showAge && ageText && (
               <p className="nf-sc__sub" data-testid="card-listed-age" suppressHydrationWarning>
                 {isNew && (
@@ -1031,7 +1031,7 @@ export function ListingCard({
             </ul>
           )}
           {/* Listing stats: views and saves, its own quiet line under the facts. */}
-          <CardCounts stats={listing.stats} isDemo={listing.isDemo} locale={locale} />
+          <CardCounts stats={listing.stats} rating={listing.rating} reviewCount={listing.reviewCount} locale={locale} />
 
           {/* "Ownership seen", the owner's own mark, as on the listing page
               and the profile. A trust mark, so the short grid card keeps it

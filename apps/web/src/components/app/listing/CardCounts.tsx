@@ -1,46 +1,64 @@
 import { listingStatsEn } from "@vallo/i18n/en/listing-stats";
 import type { Locale } from "@vallo/i18n/core";
+import { StarMeter } from "@/components/ui/StarMeter";
 import { UiIcon } from "@/design-system/icons/UiIcon";
-import { cardStatItems, type StatsFigures } from "@/lib/listings/stats/format";
+import { cardStatItems, compactCount, countPhrase, type StatsFigures } from "@/lib/listings/stats/format";
+import { shownRating } from "@/lib/listings/stats/rating";
 
 /**
- * THE CARD'S COUNT LINE (founder, 13 November 2026): "1.2k views  24 saves",
- * one quiet muted line under the card's facts, each with its small glyph in
- * brand blue, tabular digits. Its own line, never a cell of the facts row, so
- * it can never push the facts to wrap at 390; it wraps on its own if it must.
- * Views only from ten, saves from one, never a zero, nothing on an example
- * or without figures (`cardStatItems`). Server and client safe.
+ * THE CARD'S SIGNAL LINE (founder, 14 November 2026): the rating, then how
+ * many people have looked and saved, on one quiet line under the card's facts.
+ *
+ *   [ ★★⯪☆☆ 2.5 New ]   eye 1.2k   heart 24
+ *
+ * The rating sits in its own soft capsule, five stars filled to the half, so
+ * every card carries it in the same place. A listing with reviews shows its
+ * average and how many reviews; one with none shows the 2.5 every listing
+ * starts at and the word "New", and a screen reader is told it is not yet
+ * rated (`lib/listings/stats/rating.ts`). The counts are bare figures beside
+ * their glyphs: views from the first, saves from the first, never a zero
+ * (`cardStatItems`). Its own line, never a cell of the facts row, so it can
+ * never push the facts to wrap at 390. Server and client safe.
  */
 export function CardCounts({
   stats,
-  isDemo,
+  rating,
+  reviewCount,
   locale,
   className,
 }: {
   stats: StatsFigures | null | undefined;
-  isDemo: boolean;
+  rating?: number | null;
+  reviewCount?: number | null;
   locale: Locale;
   className?: string;
 }) {
-  const items = cardStatItems({ isDemo, stats, locale });
-  if (!items) return null;
+  const words = listingStatsEn;
+  const shown = shownRating({ rating, reviewCount }, locale);
+  const items = cardStatItems({ stats, locale }) ?? [];
+  const ratingSentence = shown.rated
+    ? `${words.rating.outOf.replace("{rating}", shown.text)}, ${countPhrase(shown.count, words.rating.reviews, locale).full}.`
+    : words.rating.startsAt.replace("{rating}", shown.text);
   return (
     <p
-      className={["nf-sc__sub nf-numeric text-[var(--nf-content-muted)]", className ?? ""].filter(Boolean).join(" ")}
+      className={["nf-sc__sub nf-signal nf-numeric", className ?? ""].filter(Boolean).join(" ")}
       data-testid="card-counts"
-      aria-label={listingStatsEn.rowLabel}
     >
+      <span className="nf-signal__rating" data-stat="rating" data-rated={shown.rated ? "true" : "false"}>
+        <StarMeter stars={shown.stars} size={12} />
+        <span className="nf-signal__figure" aria-hidden="true">
+          {shown.text}
+        </span>
+        <span className="nf-signal__note" aria-hidden="true">
+          {shown.rated ? `(${compactCount(shown.count, locale)})` : words.rating.isNew}
+        </span>
+        <span className="sr-only">{ratingSentence} </span>
+      </span>
       {items.map((item) => (
-        <span key={item.key} className="inline-flex items-center gap-3xs whitespace-nowrap" data-stat={item.key}>
-          <UiIcon name={item.key === "views" ? "eye" : "heart"} size={12} className="shrink-0 text-[var(--nf-brand-primary)]" />
-          {item.text === item.full ? (
-            <span>{item.text}</span>
-          ) : (
-            <>
-              <span aria-hidden="true">{item.text}</span>
-              <span className="sr-only">{item.full}</span>
-            </>
-          )}
+        <span key={item.key} className="nf-signal__count" data-stat={item.key}>
+          <UiIcon name={item.key === "views" ? "eye" : "heart"} size={13} className="shrink-0" />
+          <span aria-hidden="true">{item.text}</span>
+          <span className="sr-only">{item.full}. </span>
         </span>
       ))}
     </p>

@@ -842,6 +842,7 @@ export const NON_NAVIGABLE: Readonly<Record<string, string>> = {
   "/api/email/unsubscribe": "RFC 8058 one-click unsubscribe (A12), POSTed by a mailbox provider with a signed token; a GET goes on to /email/preferences.",
   "/api/funnel": "the first-party funnel beacon (A6); answers 204, not a page.",
   "/api/listing-view": "the listing view beacon (listing stats); answers 204, not a page.",
+  "/api/listing-share": "the listing share beacon (listing stats); answers 204, not a page.",
   "/api/auth/sms-hook": "Supabase Auth's Send SMS hook (A2), Standard Webhooks signature; delivers a phone code, not a page.",
   "/join/[code]": "an invite link: keeps the code in a cookie and goes on to the sign-up door, which shows the one onboarding first (A5, 7 October 2026); a redirect, not a page.",
   "/join/[code]/start": "the old invite door's address, the same hand-off as /join/[code] (A5); a redirect, not a page.",

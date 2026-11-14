@@ -101,7 +101,7 @@ export function HomeListingCard({
           : null
       }
       facts={factsOf(listing, copy, locale, areaText)}
-      extra={<CardCounts stats={listing.stats} isDemo={listing.isDemo} locale={locale} />}
+      extra={<CardCounts stats={listing.stats} rating={listing.rating} reviewCount={listing.reviewCount} locale={locale} />}
       reason={reason}
       reasonIcon={reasonIcon}
       photoLabel={copy.photoLabel}

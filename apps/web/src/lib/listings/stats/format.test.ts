@@ -52,8 +52,20 @@ describe("time on Vallo", () => {
 });
 
 describe("which items a listing shows", () => {
-  it("draws nothing for an example, whatever the figures", () => {
-    expect(listingStatItems({ isDemo: true, publishedAt: ago(3), figures: { views: 50, saves: 2 }, now: NOW })).toBeNull();
+  it("gives an example its counts but never a time on Vallo", () => {
+    expect(listingStatItems({ isDemo: true, publishedAt: ago(3), figures: { views: 50, saves: 2, shares: 4 }, now: NOW })?.map((i) => i.text)).toEqual([
+      "50 views",
+      "2 saves",
+      "4 shares",
+    ]);
+  });
+
+  it("shows shares from the first one, and never before the database knows them", () => {
+    const texts = (shares?: number) =>
+      listingStatItems({ isDemo: false, publishedAt: ago(3), figures: { views: 5, saves: 1, ...(shares === undefined ? {} : { shares }) }, now: NOW })?.map((i) => i.key);
+    expect(texts()).toEqual(["days", "views", "saves"]);
+    expect(texts(0)).toEqual(["days", "views", "saves"]);
+    expect(texts(1)).toEqual(["days", "views", "saves", "shares"]);
   });
 
   it("fails closed: no figures (SQL not applied, read failed) means no row, not even the age", () => {
@@ -96,19 +108,39 @@ describe("conversion", () => {
   });
 });
 
-describe("the card's count line", () => {
-  it("shows saves from one and views from ten, never a zero, nothing on an example or without figures", async () => {
+describe("the card's counts", () => {
+  it("shows views and saves from the first, as bare figures, never a zero, an example like any other", async () => {
     const { cardStatItems } = await import("./format");
-    expect(cardStatItems({ isDemo: true, stats: { views: 500, saves: 20 } })).toBeNull();
-    expect(cardStatItems({ isDemo: false, stats: null })).toBeNull();
-    expect(cardStatItems({ isDemo: false, stats: undefined })).toBeNull();
-    expect(cardStatItems({ isDemo: false, stats: { views: 0, saves: 0 } })).toBeNull();
-    expect(cardStatItems({ isDemo: false, stats: { views: 9, saves: 0 } })).toBeNull();
-    expect(cardStatItems({ isDemo: false, stats: { views: 9, saves: 1 } })?.map((i) => i.text)).toEqual(["1 save"]);
-    expect(cardStatItems({ isDemo: false, stats: { views: 10, saves: 0 } })?.map((i) => i.text)).toEqual(["10 views"]);
-    expect(cardStatItems({ isDemo: false, stats: { views: 1234, saves: 24 } })?.map((i) => [i.text, i.full])).toEqual([
-      ["1.2k views", "1,234 views"],
-      ["24 saves", "24 saves"],
+    expect(cardStatItems({ stats: null })).toBeNull();
+    expect(cardStatItems({ stats: undefined })).toBeNull();
+    expect(cardStatItems({ stats: { views: 0, saves: 0 } })).toBeNull();
+    expect(cardStatItems({ stats: { views: 0, saves: 1 } })?.map((i) => [i.key, i.text, i.full])).toEqual([["saves", "1", "1 save"]]);
+    expect(cardStatItems({ stats: { views: 1, saves: 0 } })?.map((i) => [i.key, i.text, i.full])).toEqual([["views", "1", "1 view"]]);
+    expect(cardStatItems({ stats: { views: 1234, saves: 24 } })?.map((i) => [i.text, i.full])).toEqual([
+      ["1.2k", "1,234 views"],
+      ["24", "24 saves"],
+    ]);
+  });
+});
+
+describe("the listing page's tiles", () => {
+  it("draws views and saves always, shares once known, and nothing without figures", async () => {
+    const { listingPulse } = await import("./format");
+    expect(listingPulse({ figures: null })).toBeNull();
+    expect(listingPulse({ figures: { views: 0, saves: 0 } })?.map((t) => [t.key, t.value, t.label])).toEqual([
+      ["views", "0", "views"],
+      ["saves", "0", "saves"],
+    ]);
+    expect(listingPulse({ figures: { views: 1, saves: 1, shares: 1 } })?.map((t) => [t.key, t.value, t.label, t.full])).toEqual([
+      ["views", "1", "view", "1 view"],
+      ["saves", "1", "save", "1 save"],
+      ["shares", "1", "share", "1 share"],
+    ]);
+    /* Compact on the tile, whole for a screen reader, never rounded up. */
+    expect(listingPulse({ figures: { views: 12_480, saves: 1_999, shares: 0 } })?.map((t) => [t.value, t.full])).toEqual([
+      ["12.4k", "12,480 views"],
+      ["1.9k", "1,999 saves"],
+      ["0", "0 shares"],
     ]);
   });
 });

@@ -1795,6 +1795,156 @@
     border-inline-start: var(--nf-border-width) solid var(--nf-divider);
   }
 
+  /* ------------------------------------------------- card signal line */
+  /* The rating in its capsule, then views and saves as bare figures
+     (`components/app/listing/CardCounts.tsx`). */
+  .nf-signal {
+    align-items: center;
+    column-gap: var(--nf-space-sm);
+    row-gap: var(--nf-space-2xs);
+    color: var(--nf-content-muted);
+  }
+  .nf-signal__rating {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--nf-space-2xs);
+    padding: var(--nf-space-3xs) var(--nf-space-xs);
+    border-radius: var(--nf-radius-pill);
+    background: var(--nf-surface-raised);
+    white-space: nowrap;
+  }
+  .nf-signal__figure {
+    font-weight: 600;
+    color: var(--nf-content-primary);
+  }
+  .nf-signal__note {
+    color: var(--nf-content-muted);
+  }
+  .nf-signal__count {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--nf-space-2xs);
+    white-space: nowrap;
+  }
+  .nf-signal__count > svg {
+    color: var(--nf-brand-primary);
+  }
+
+  /* ---------------------------------------------- listing page pulse */
+  /* Views, saves, shares and the rating as tiles
+     (`components/app/listing/ListingPulse.tsx`). */
+  .nf-pulse__row {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--nf-space-2xs);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .nf-pulse__row[data-count="3"] {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  /* On a phone the figure has the tile's whole width ("12.4k" in 57px), the
+     glyph sits small beside the word under it. From 640 the tile opens out:
+     the glyph in its soft disc, the figure, the word, on one line. */
+  .nf-pulse__tile {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-areas: "figure figure" "disc word";
+    align-items: center;
+    column-gap: var(--nf-space-2xs);
+    row-gap: var(--nf-space-3xs);
+    min-width: 0;
+    padding: var(--nf-space-xs);
+    border: var(--nf-border-width) solid var(--nf-card-border);
+    border-radius: var(--nf-radius-md);
+    background: var(--nf-surface-primary);
+  }
+  .nf-pulse__disc {
+    grid-area: disc;
+    display: grid;
+    place-items: center;
+    width: 0.8125rem;
+    height: 0.8125rem;
+    color: var(--nf-brand-primary);
+  }
+  .nf-pulse__disc > svg {
+    width: 0.8125rem;
+    height: 0.8125rem;
+  }
+  .nf-pulse__disc--rating {
+    display: none;
+    color: var(--nf-rating);
+  }
+  .nf-pulse__tile--rating .nf-pulse__word {
+    grid-column: 1 / -1;
+  }
+  .nf-pulse__figure {
+    grid-area: figure;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: var(--nf-text-body);
+    font-weight: 700;
+    line-height: 1.25;
+    color: var(--nf-content-primary);
+  }
+  .nf-pulse__word {
+    grid-area: word;
+    display: flex;
+    align-items: center;
+    min-width: 0;
+    min-height: 1rem;
+    font-size: var(--nf-text-caption);
+    line-height: 1.2;
+    color: var(--nf-content-muted);
+  }
+  .nf-pulse__foot {
+    display: flex;
+    flex-wrap: wrap;
+    column-gap: var(--nf-space-sm);
+    row-gap: var(--nf-space-3xs);
+    margin-top: var(--nf-space-xs);
+    font-size: var(--nf-text-caption);
+    color: var(--nf-content-muted);
+  }
+  .nf-pulse__foot > span + span {
+    padding-inline-start: var(--nf-space-sm);
+    border-inline-start: var(--nf-border-width) solid var(--nf-divider);
+  }
+  @media (min-width: 40rem) {
+    .nf-pulse__row {
+      gap: var(--nf-space-sm);
+    }
+    .nf-pulse__tile {
+      grid-template-columns: auto auto minmax(0, 1fr);
+      grid-template-areas: "disc figure word";
+      column-gap: var(--nf-space-xs);
+      padding: var(--nf-space-sm);
+    }
+    .nf-pulse__disc {
+      width: 1.75rem;
+      height: 1.75rem;
+      border-radius: var(--nf-radius-circle);
+      background: var(--nf-brand-primary-soft);
+    }
+    .nf-pulse__disc > svg {
+      width: 0.9375rem;
+      height: 0.9375rem;
+    }
+    .nf-pulse__disc--rating {
+      display: grid;
+      background: color-mix(in oklab, var(--nf-rating) 16%, transparent);
+    }
+    .nf-pulse__tile--rating .nf-pulse__word {
+      grid-column: auto;
+    }
+    .nf-pulse__figure {
+      overflow: visible;
+    }
+  }
+
   /* ------------------------------------------------------- summary card */
   .nf-summary {
     display: grid;

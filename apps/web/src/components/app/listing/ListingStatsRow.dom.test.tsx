@@ -2,7 +2,8 @@
  * THE LISTING STATS ROW AND ITS BEACON, mounted in a real Chromium at phone
  * width (founder, 13 November 2026). The row draws the three items in order
  * with tabular figures, a compact figure keeps its whole number for a screen
- * reader, an example draws nothing, and axe finds nothing. The beacon sends
+ * reader, an example shows its counts but no time on Vallo, and axe finds
+ * nothing. The beacon sends
  * exactly once after the page has been visible for a second, and not while the
  * tab is hidden.
  */
@@ -63,19 +64,28 @@ describe.skipIf(!hasBrowser && !process.env.CI)("the listing stats row", () => {
     }
   });
 
-  it("draws nothing at all for an example listing, or when the figures could not be read", async () => {
-    for (const args of [
-      `{ isDemo: true, publishedAt: ago(30), figures: { views: 50, saves: 3 } }`,
-      `{ isDemo: false, publishedAt: ago(30), figures: null }`,
-    ]) {
-      const { page, close } = await mountInBrowser({ entry: rowEntry(args), css: productCss("app/css/base.css", "app/css/controls.css") });
-      try {
-        await page.getByTestId("after").waitFor();
-        expect(await page.getByTestId("listing-stats").count()).toBe(0);
-        expect(await page.locator("body").innerText()).not.toMatch(/on Vallo|views|saves/);
-      } finally {
-        await close();
-      }
+  it("gives an example its counts without a time on Vallo, and draws nothing when the figures could not be read", async () => {
+    const example = await mountInBrowser({
+      entry: rowEntry(`{ isDemo: true, publishedAt: ago(30), figures: { views: 50, saves: 3, shares: 2 } }`),
+      css: productCss("app/css/base.css", "app/css/controls.css"),
+    });
+    try {
+      await example.page.getByTestId("listing-stats").waitFor();
+      expect(await example.page.locator("[data-stat] .nf-numeric").allInnerTexts()).toEqual(["50 views", "3 saves", "2 shares"]);
+      expect(await example.page.locator("body").innerText()).not.toMatch(/on Vallo/);
+    } finally {
+      await example.close();
+    }
+    const failed = await mountInBrowser({
+      entry: rowEntry(`{ isDemo: false, publishedAt: ago(30), figures: null }`),
+      css: productCss("app/css/base.css", "app/css/controls.css"),
+    });
+    try {
+      await failed.page.getByTestId("after").waitFor();
+      expect(await failed.page.getByTestId("listing-stats").count()).toBe(0);
+      expect(await failed.page.locator("body").innerText()).not.toMatch(/on Vallo|views|saves/);
+    } finally {
+      await failed.close();
     }
   });
 });

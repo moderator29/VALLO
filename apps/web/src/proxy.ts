@@ -420,6 +420,8 @@ const PUBLIC_API_PATHS = new Set([
      same-site and browser only, rate limited per address; a guest is a
      salted daily hash in the database, never an address or a cookie. */
   "/api/listing-view",
+  /* Listing stats: the share beacon, under the same rules as the view one. */
+  "/api/listing-share",
   "/api/landlord/inbound",
   "/api/push/key",
   "/api/paystack/reconcile",

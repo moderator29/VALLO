@@ -52,10 +52,13 @@ function whole(value: unknown): number | null {
 /** One row of `listing_public_stats` or `my_listing_stats` into figures, or null when it is not a true row. */
 export function figuresFrom(row: unknown): StatsFigures | null {
   if (!row || typeof row !== "object") return null;
-  const r = row as { views?: unknown; saves?: unknown };
+  const r = row as { views?: unknown; saves?: unknown; shares?: unknown };
   const views = whole(r.views);
   const saves = whole(r.saves);
-  return views === null || saves === null ? null : { views, saves };
+  if (views === null || saves === null) return null;
+  /* `shares` arrives only once the shares migration is applied. */
+  const shares = r.shares === undefined || r.shares === null ? null : whole(r.shares);
+  return shares === null ? { views, saves } : { views, saves, shares };
 }
 
 /** The uncached read, given a client. Exported for tests. */
@@ -162,11 +165,13 @@ export async function readListingStatsFor(ids: readonly string[], now: number = 
 
 /** The page's listings with their counts attached (`listing.stats`), in one read. Never throws. */
 export async function withListingStats<T extends { id: string; isDemo: boolean }>(listings: readonly T[]): Promise<T[]> {
-  const real = listings.filter((l) => !l.isDemo).map((l) => l.id);
-  if (real.length === 0) return [...listings];
-  const stats = await readListingStatsFor(real);
+  /* Examples too (founder, 14 November 2026): their counts are of real people.
+     Until the shares migration is applied the database answers nothing for an
+     example, and its card draws no count. */
+  if (listings.length === 0) return [];
+  const stats = await readListingStatsFor(listings.map((l) => l.id));
   return listings.map((l) => {
-    const figures = l.isDemo ? undefined : stats.get(l.id.toLowerCase());
+    const figures = stats.get(l.id.toLowerCase());
     return figures ? { ...l, stats: figures } : l;
   });
 }
