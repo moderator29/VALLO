@@ -9,7 +9,7 @@ import {
   SUPPLY_DOOR_HREF,
   WORKSPACE_STANDING_COPY,
 } from "@/lib/supply/roles";
-import { MAX_UPLOAD_LABEL, MAX_VIDEOS, MAX_VIDEO_SECONDS, MIN_MEDIA, RECOMMENDED_MEDIA } from "@/lib/agent/listings-model";
+import { MAX_MEDIA, MAX_UPLOAD_LABEL, MAX_VIDEO_SECONDS, MIN_MEDIA, RECOMMENDED_MEDIA } from "@/lib/agent/listings-model";
 import { EDIT_WINDOW_MINUTES, POST_MAX, POST_MEDIA_MAX } from "@/lib/social/posts-model";
 import { MODERATOR_CAN, MODERATOR_CANNOT } from "@/lib/social/areas-model";
 import type { DocChapter, DocSection } from "./chapters";
@@ -514,8 +514,8 @@ export const LISTING_ON_VALLO: DocChapter = {
           </li>
           <li>The first item is the cover, and it must be a photo.</li>
           <li>
-            Up to {MAX_VIDEOS} videos, each up to {MAX_UPLOAD_LABEL} and {MAX_VIDEO_SECONDS} seconds, as MP4,
-            MOV or WebM.
+            Up to {MAX_MEDIA} photos and videos together, in any mix. A video can be up to {MAX_UPLOAD_LABEL} and{" "}
+            {MAX_VIDEO_SECONDS} seconds, as MP4, MOV or WebM.
           </li>
         </ul>
       ),

@@ -862,12 +862,12 @@ async function applyOrder(
     return -1;
   };
 
-  // Ten photos and ten slots leaves nowhere to step aside, so park the row
+  // Every slot taken (fifteen photos) leaves nowhere to step aside, so park the row
   // that belongs last and put it back once the rest have settled.
   /*
    * Parking deletes the row, and V-70's shot label (`listing_photo_slots`)
    * hangs off the photo id with ON DELETE CASCADE, so the parked photo lost
-   * its label on every reorder at ten photos. The label is read first and put
+   * its label on every reorder of a full row. The label is read first and put
    * back on the new row.
    */
   let parked: { path: string; to: number; slot: string | null } | null = null;
@@ -1052,7 +1052,7 @@ export async function reorderPhotos(input: {
  * cover). Photos take their rank among photos, which `applyOrder` writes
  * without breaking the unique, 0..9 position; each video takes its place in
  * the whole row (lib/listings/media-order.ts). Returns both lists as stored,
- * because at ten photos one photo row is re-made with a new id.
+ * because with every slot taken one photo row is re-made with a new id.
  */
 export async function reorderMedia(input: {
   listingId: string;

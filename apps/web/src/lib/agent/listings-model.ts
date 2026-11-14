@@ -87,14 +87,13 @@ export function mediaRoomLeft(photos: number, videos: number): number {
 }
 
 /**
- * The database's own per-kind ceilings, which stand UNTIL the draft
- * `supabase/drafts/listing_media_fifteen_2026-11-13.sql` is applied: photo
- * positions 0 to 9 (`listing_photos` check) and three videos
- * (`private.listing_video_ceiling`). Within them the fifteen-in-all rule
- * already holds; once the draft runs, set both to MAX_MEDIA and any mix of
- * fifteen is allowed.
+ * Any mix of fifteen: the database holds photo positions 0 to 14 and one
+ * ceiling over photos and videos together
+ * (`supabase/migrations/pending/listing_media_fifteen_2026-11-14.sql`, applied
+ * 14 November 2026). So a listing may be fifteen photos, and there is no
+ * separate photo limit below the total.
  */
-export const MAX_PHOTOS = 10;
+export const MAX_PHOTOS = MAX_MEDIA;
 
 /** Narrower than this and the photo blurs on a modern phone screen. */
 export const MIN_PHOTO_WIDTH = 1600;
@@ -184,8 +183,8 @@ export const PHOTO_MIME_TYPES = [
 /** What a walkthrough may be. QuickTime is here because an iPhone records .mov. */
 export const VIDEO_MIME_TYPES = ["video/mp4", "video/quicktime", "video/webm"] as const;
 
-/** Walkthroughs per listing. The database counts them under a lock too. */
-export const MAX_VIDEOS = 3;
+/** Videos per listing: no separate limit below the fifteen in all, which the database counts under a lock. */
+export const MAX_VIDEOS = MAX_MEDIA;
 
 /**
  * The longest walkthrough a lister may attach, in seconds. The table itself

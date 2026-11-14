@@ -275,7 +275,7 @@ export const FAQS: Faq[] = [
   {
     category: "Listing your property",
     q: "How many photos and videos does a listing need?",
-    a: "At least 3 photos or videos, and 5 is recommended. They go in one uploader. The first item is the cover and must be a photo. You can add up to 3 videos, each up to 100MB and 60 seconds, as MP4, MOV or WebM.",
+    a: "At least 3 photos or videos, and 5 is recommended. They go in one uploader. The first item is the cover and must be a photo. A listing holds up to 15 photos and videos together, in any mix. A video can be up to 100MB and 60 seconds, as MP4, MOV or WebM.",
   },
   {
     category: "Listing your property",

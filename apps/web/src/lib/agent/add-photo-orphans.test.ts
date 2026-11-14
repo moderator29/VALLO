@@ -146,11 +146,18 @@ describe("addPhoto on refusal", () => {
     expect(state.removed).toEqual([[PATH]]);
   });
 
-  it("removes the uploaded object at the ten photo ceiling", async () => {
-    state.positions = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+  it("removes the uploaded object at the fifteen item ceiling", async () => {
+    state.positions = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14];
     const result = await addPhoto({ listingId: LISTING_ID, storagePath: PATH });
     expect(result.ok).toBe(false);
     expect(state.removed).toEqual([[PATH]]);
+  });
+
+  it("takes an eleventh photo: there is no photo limit below the fifteen in all", async () => {
+    state.positions = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+    const result = await addPhoto({ listingId: LISTING_ID, storagePath: PATH });
+    expect(result.ok).toBe(true);
+    expect(state.removed).toEqual([]);
   });
 
   it("removes the uploaded object when the row insert fails", async () => {

@@ -3,7 +3,7 @@ import { FEE_RULES } from "@/lib/trust/fee-rules";
 import { NO_INSPECTION_FEE, PAYMENT_GATE_SENTENCE, REFUND_ROUTE } from "@/lib/money/copy";
 import { HOTEL_ROOM_BY_CARD, PAY_INSIDE_VALLO, PRICE_IS_THE_PRICE, STAYS_PAID_BY_CARD } from "@/app/(site)/docs/facts";
 import { bpsLabel } from "@/lib/site/move-in-calculator";
-import { MAX_UPLOAD_LABEL, MAX_VIDEOS, MAX_VIDEO_SECONDS, MIN_MEDIA, RECOMMENDED_MEDIA } from "@/lib/agent/listings-model";
+import { MAX_MEDIA, MAX_UPLOAD_LABEL, MAX_VIDEO_SECONDS, MIN_MEDIA, RECOMMENDED_MEDIA } from "@/lib/agent/listings-model";
 import { WIZARD_WORDS } from "@/app/agent/list/steps/copy";
 import type { UiIconName } from "@/design-system/icons/UiIcon";
 import { getDictionary } from "@vallo/i18n";
@@ -227,7 +227,7 @@ export const GUIDES: readonly Guide[] = [
             list: [
               `At least ${MIN_MEDIA} items, and ${RECOMMENDED_MEDIA} is recommended. Photos and videos go in one uploader.`,
               "The first item is the cover, and it must be a photo. Lead with the wide shot that sells it.",
-              `Up to ${MAX_VIDEOS} videos, each up to ${MAX_UPLOAD_LABEL} and ${MAX_VIDEO_SECONDS} seconds.`,
+              `Up to ${MAX_MEDIA} photos and videos together, in any mix. A video can be up to ${MAX_UPLOAD_LABEL} and ${MAX_VIDEO_SECONDS} seconds.`,
             ],
           },
           `Then the description. ${WIZARD_WORDS.describe.subtitle}`,

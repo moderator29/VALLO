@@ -3,7 +3,7 @@ import { FEE_PROVIDER_CHARGES, FEE_ROUND_NOTE, FEE_WHO_PAYS, NO_INSPECTION_FEE, 
 import { FEE_PERCENT } from "@/lib/money/fee-schedule";
 import { SUPPLY_DOOR_HREF } from "@/lib/supply/roles";
 import { MAX_DAYS_AHEAD, MAX_PARTY } from "@/lib/reservations/limits";
-import { MAX_UPLOAD_LABEL, MAX_VIDEOS, MAX_VIDEO_SECONDS, MIN_MEDIA, RECOMMENDED_MEDIA } from "@/lib/agent/listings-model";
+import { MAX_MEDIA, MAX_UPLOAD_LABEL, MAX_VIDEO_SECONDS, MIN_MEDIA, RECOMMENDED_MEDIA } from "@/lib/agent/listings-model";
 import { VERIFICATION_ORDER, type VerificationRung } from "@/lib/trust/verification";
 import type { UiIconName } from "@/design-system/icons/UiIcon";
 
@@ -184,8 +184,8 @@ export const QUICK_START: DocChapter = {
           </li>
           <li>The first item is the cover, and the cover must be a photo.</li>
           <li>
-            Add up to {MAX_VIDEOS} videos, each up to {MAX_UPLOAD_LABEL} and {MAX_VIDEO_SECONDS} seconds,
-            as MP4, MOV or WebM.
+            A listing holds up to {MAX_MEDIA} photos and videos together, in any mix. A video can be up to{" "}
+            {MAX_UPLOAD_LABEL} and {MAX_VIDEO_SECONDS} seconds, as MP4, MOV or WebM.
           </li>
         </ul>
       ),

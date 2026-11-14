@@ -31,13 +31,13 @@ import {
   MAX_ESTATE_NAME,
   MAX_FLOORS,
   MAX_GATE_DIRECTIONS,
+  MAX_MEDIA,
   MAX_PHOTOS,
   MAX_PRICE_KOBO,
   MAX_SALE_PRICE_KOBO,
   MAX_SECURITY_PHONE,
   MAX_TENANCY_MONTHS,
   MAX_TITLE_LENGTH,
-  MAX_VIDEOS,
   MAX_VIDEO_SECONDS,
   MIN_DRAFT_TITLE_LENGTH,
   MIN_YEAR_BUILT,
@@ -428,7 +428,7 @@ export const reorderMediaSchema = z.object({
       }),
     )
     .min(1, "There is nothing to reorder.")
-    .max(MAX_PHOTOS + MAX_VIDEOS, "A listing holds fewer items than that.")
+    .max(MAX_MEDIA, "A listing holds fewer items than that.")
     .refine((items) => items[0]?.kind === "photo", "The first item is the cover, and a cover has to be a photo."),
 });
 
