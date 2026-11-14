@@ -181,7 +181,7 @@ export function ProfileMenu({
     const url = `${window.location.origin}/u/${handle}`;
     if (typeof navigator !== "undefined" && navigator.clipboard) {
       void navigator.clipboard.writeText(url);
-      banner.success(POST_COPY.copied);
+      banner.quick(POST_COPY.copied);
       return;
     }
     banner.info(`The address is ${displayHost()}/u/${handle}`);

@@ -253,10 +253,13 @@
  * no action, gone by itself (in on fast, held 1.4s, out inside his 0.4s).
  * It never takes the pointer, so nothing under it is ever blocked.
  *
- * THE SHAPE LAW HOLDS BY RATIO: the pill is 2.25rem tall and `--nf-radius-lg`
- * (18px) is half of that, so it reads as a capsule the way the badge's 6px
- * reads on 22px, without borrowing a control's pill token. It is a status,
- * not a control: no border token on a resting control, nothing to press.
+ * IT IS A CAPSULE, AND IT IS SMALL (the founder, 14 November 2026, looking at
+ * the first build: "make them smaller and also a pill shape not rectangle
+ * shape"). `--nf-radius-pill` on a thing that is not a control: the shape law
+ * reserves the capsule for controls so that a capsule means "selectable", and
+ * nothing here is selectable or even takes the pointer, so the reading holds.
+ * Small enough to sit under a thumb without covering the row it confirms:
+ * 1.75rem tall, caption type, a 1rem tick.
  */
 .nf-quick-host {
   position: fixed;
@@ -289,12 +292,12 @@
 .nf-quick {
   display: inline-flex;
   align-items: center;
-  gap: var(--nf-space-xs);
-  min-block-size: 2.25rem;
-  max-inline-size: min(20rem, 100%);
-  padding-block: var(--nf-space-2xs);
+  gap: var(--nf-space-2xs);
+  min-block-size: 1.75rem;
+  max-inline-size: min(17rem, 100%);
+  padding-block: 0;
   padding-inline: var(--nf-space-xs) var(--nf-space-sm);
-  border-radius: var(--nf-radius-lg);
+  border-radius: var(--nf-radius-pill);
   border: var(--nf-border-width) solid var(--nf-toast-edge);
   background: var(--nf-toast-bg);
   color: var(--nf-toast-ink);
@@ -325,14 +328,14 @@
 .nf-quick__mark {
   display: grid;
   place-items: center;
-  inline-size: 1.25rem;
-  block-size: 1.25rem;
+  inline-size: 1rem;
+  block-size: 1rem;
   flex-shrink: 0;
   color: var(--nf-toast-mark-success);
 }
 .nf-quick__text {
   margin: 0;
-  font-size: var(--nf-text-body-sm);
+  font-size: var(--nf-text-caption);
   font-weight: 600;
   line-height: 1.2;
   overflow-wrap: break-word;

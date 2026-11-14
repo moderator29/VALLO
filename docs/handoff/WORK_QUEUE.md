@@ -22,10 +22,10 @@ Testing, Bug fixing, Re-auditing, Completed.
 
 | # | Task (handoff section) | Owner | Stage |
 |---|---|---|---|
-| S1 | Confirmation pill `banner.quick`, and the copy and save moments moved onto it (6.1) | Agent INPUT | Implementing |
-| S2 | Paste: photos as attachments, long text as a chip, link chips, one-tap codes, cleaning, safety (6.2) | Agent INPUT | Queued behind S1 |
-| S3 | `CountTabs` shared part, then inbox, notifications, saved (6.3 part 1) | Agent SHEETS | Implementing |
-| S4 | `ActionSheet` shared part, then inbox rows, card menu, profile menu, post menu (6.3 part 2) | Agent SHEETS | Queued behind S3 |
+| S1 | Confirmation pill `banner.quick`, and the copy and save moments moved onto it (6.1) | Agent INPUT | Completed (seen on the preview at 390, dark and light; 42 touched tests green; not seen on a real phone) |
+| S2 | Paste: photos as attachments, long text as a chip, link chips, one-tap codes, cleaning, safety (6.2) | Agent INPUT | Implementing |
+| S3 | `CountTabs` shared part, then inbox, notifications, saved (6.3 part 1) | Agent SHEETS | Completed (seen on the preview at 390 and 1440, both themes; mounted screen suites green; not seen signed in on live) |
+| S4 | `ActionSheet` shared part, then inbox rows, card menu, profile menu, post menu (6.3 part 2) | Agent SHEETS | Implementing |
 | S5 | Keyboard pass over every field, composer on the keyboard, accessory bar (6.4) | Agent INPUT | Queued behind S2 |
 | S6 | The remaining CountTabs and ActionSheet screens in the 6.3 tables (offers, bookings, search, agent and host) | Agent SHEETS | Queued behind S4 |
 | M1 | One bug register, every open finding re-checked against the code today (7, phase 1) | Lead | Researching |
@@ -54,6 +54,19 @@ SHEETS: `components/ui/Sheet.tsx`, the new `CountTabs.tsx` and
 
 Neither touches `app/admin`. The lead works only in files neither holds
 (docs, the bug register, SQL).
+
+## Rulings made by the lead while S1 and S3 landed (confirm with the founder only if he asks)
+
+- Inbox: no "Groups" tab (the conversation model has no groups; a tab that
+  can never fill is dishonest) and the Property and Stays sides stay on the
+  Segmented control above the row rather than folding into it.
+- Saved: "Compare" stays out of the tab row (it is a two-item picker beside
+  Sort, not a list filter); Saved searches moved into the row as a tab.
+- Compare picks get no quick pill: the tick on the pick itself is the
+  confirmation, and the two-at-a-time swap note stays on the top banner.
+- Heart saves lose the top banner's Undo button: the pill says Saved or
+  Removed, and the opposite tap within the pill's life is the silent undo
+  (handoff 6.1). FOUNDER-VISIBLE change, named in the report to him.
 
 ## Notes
 

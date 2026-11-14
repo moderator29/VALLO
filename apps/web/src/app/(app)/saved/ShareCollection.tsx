@@ -27,7 +27,7 @@ export function ShareCollection({ collection }: { collection: SavedCollection | 
     }
     try {
       await navigator.clipboard.writeText(url);
-      banner.success("Link copied");
+      banner.quick("Link copied");
     } catch {
       banner.error("Could not copy the link. Try again.");
     }
