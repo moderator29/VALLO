@@ -9,7 +9,7 @@ import { formatMoney, intlTag, plural } from "@vallo/i18n/core";
 import { PageHeader } from "@/components/app/PageHeader";
 import { EmptyState } from "@/components/app/Screen";
 import { Button, ButtonLink } from "@/components/ui/Button";
-import { Chip, ChipRow } from "@/components/ui/Chip";
+import { CountTabs } from "@/components/ui/CountTabs";
 import { IconPlate, ICON_PLATE_GLYPH } from "@/components/ui/IconPlate";
 import { ListGroup } from "@/components/ui/ListGroup";
 import { UiIcon } from "@/design-system/icons/UiIcon";
@@ -93,6 +93,12 @@ type Copy = Dictionary["experienceInbox"]["notifications"];
 type Entry = { row: NotificationItem; verdict: SeverityVerdict };
 
 /** Where a row goes when it is tapped: its conversation, else its full view. */
+/** What the filter row can be on: everything, only the unread, or one family. */
+type FilterKey = NotificationFamily | "all" | "unread";
+
+/* English only for now: the dictionary has no words for an empty Unread view. */
+const UNREAD_EMPTY = { title: "Nothing unread", body: "You have read everything here." };
+
 function rowHref(n: NotificationItem, family: NotificationFamily): string {
   if (family === "messages" && n.href) return n.href;
   return `/notifications/${n.id}`;
@@ -128,7 +134,7 @@ export function LiveNotifications({
   const [items, setItems] = useState<NotificationItem[]>(initial);
   const [more, setMore] = useState(initialMore);
   const [loadingOlder, setLoadingOlder] = useState(false);
-  const [family, setFamily] = useState<NotificationFamily | "all">("all");
+  const [family, setFamily] = useState<FilterKey>("all");
 
   /* Rows this screen archived, so a server read that was already on its way
      cannot bring one back (`adoptFresh`). */
@@ -282,7 +288,12 @@ export function LiveNotifications({
   }, [items]);
 
   const shown = useMemo(
-    () => (family === "all" ? items : items.filter((n) => familyOf(n) === family)),
+    () =>
+      family === "all"
+        ? items
+        : family === "unread"
+          ? items.filter((n) => !n.read)
+          : items.filter((n) => familyOf(n) === family),
     [items, family],
   );
 
@@ -371,22 +382,29 @@ export function LiveNotifications({
   const nowMs = now > 0 ? now : undefined;
   const days = splitByDay(sectioned.earlier, (e) => e.row.createdAt);
 
+  /* The filter as the shared count tabs (handoff 6.3): All, Unread while
+     something is unread (or while it is the view), then one tab per family.
+     Every count is the unread rows already in `items`; nothing is fetched. */
+  const filterKeys: FilterKey[] = [
+    "all",
+    ...(unreadCount > 0 || family === "unread" ? (["unread"] as const) : []),
+    ...FAMILY_ORDER,
+  ];
   const chips = (
-    <ChipRow label={c.filterLabel} radiogroup className="nf-notif__chips">
-      {(["all", ...FAMILY_ORDER] as const).map((key) => (
-        <Chip
-          key={key}
-          behaviour="choice"
-          size="md"
-          selected={family === key}
-          onSelectedChange={() => setFamily(key)}
-          {...(key !== "all" && unreadBy[key] > 0 ? { count: unreadBy[key] } : {})}
-          data-testid={`notifications-filter-${key}`}
-        >
-          {c.families[key]}
-        </Chip>
-      ))}
-    </ChipRow>
+    <CountTabs<FilterKey>
+      label={c.filterLabel}
+      className="nf-notif__chips"
+      bleed
+      value={family}
+      onChange={setFamily}
+      countLabel={(n) => `${n} ${c.unreadMark.toLowerCase()}`}
+      items={filterKeys.map((key) => ({
+        key,
+        label: key === "unread" ? c.unreadMark : c.families[key],
+        count: key === "all" ? 0 : key === "unread" ? unreadCount : unreadBy[key],
+        testId: `notifications-filter-${key}`,
+      }))}
+    />
   );
 
   return (
@@ -403,8 +421,8 @@ export function LiveNotifications({
       {shown.length === 0 ? (
         <EmptyState
           icon="bell-badge"
-          title={fill(c.emptyFamily.title, { family: c.families[family] })}
-          body={c.emptyFamily.body}
+          title={family === "unread" ? UNREAD_EMPTY.title : fill(c.emptyFamily.title, { family: c.families[family] })}
+          body={family === "unread" ? UNREAD_EMPTY.body : c.emptyFamily.body}
           action={
             <Button variant="secondary" onClick={() => setFamily("all")}>
               {c.emptyFamily.action}

@@ -169,10 +169,10 @@ this table at the end of every round.
 |---|---|---|---|
 | S1 | Confirmation pill, `banner.quick`, and moving the copy and save moments onto it (6.1) | Agent INPUT | Implementing |
 | S2 | Paste: photos, long text, links, codes, cleaning (6.2) | Agent INPUT | Queued behind S1 |
-| S3 | `CountTabs`, the shared part, then inbox, notifications, saved (6.3 part 1) | Agent SHEETS | Implementing |
-| S4 | `ActionSheet`, the shared part, then inbox rows, card menu, profile menu, post menu (6.3 part 2) | Agent SHEETS | Queued behind S3 |
+| S3 | `CountTabs`, the shared part, then inbox, notifications, saved (6.3 part 1) | Agent SHEETS | Done, reviewed and committed 14 November (lead ran its 48 test files, the type check and looked at the screenshots) |
+| S4 | `ActionSheet`, the shared part, then inbox rows, card menu, profile menu, post menu (6.3 part 2) | Agent SHEETS | Done, reviewed and committed 14 November. Behaviour changes for the founder to accept or reverse: the inbox row's archive icon became a More button (Archive is in the sheet and the swipe); Block, Remove share and Delete list now ask first |
 | S5 | Keyboard pass over every field, and the composer on the keyboard (6.4) | Agent INPUT | Queued behind S2 |
-| S6 | The remaining screens for CountTabs and ActionSheet in the 6.3 tables | Agent SHEETS | Queued |
+| S6 | The remaining screens for CountTabs and ActionSheet in the 6.3 tables | Agent SHEETS | PARTLY: the inbox header options and the saved list links are done. Left: bookings, offers, search results, the agent workspace and inboxes, the console queues; the card menu's price, Report and See similar (need `ListingCard.tsx`); the post menu's author (needs `Feed.tsx` and the post `ThreadView.tsx`); saved tabs by kind (needs the founder's decision: it would be a second tab row). Unused rules to remove: `inbox-archive` in `grade1.css`, `.nf-post__menu.nf-social-more__menu` in `social-profile.css`, `.nf-card-menu__head` in `details.css` |
 | M1 | One bug register, re-checked against the code (7, phase 1) | Lead, then an agent | Queued |
 | M2 | Measured Core Web Vitals baseline on the eleven pages (7, phase 1) | Agent | Queued |
 | M3 | Supabase audit: queries, indexes, realtime, cron, storage, RLS, auth sessions (8) | Agent | Queued |

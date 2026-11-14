@@ -1,12 +1,12 @@
 "use client";
 
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
-import Link from "next/link";
+import { useCallback, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ReportSheet } from "@/components/social/ReportSheet";
 import type { ReportWords } from "@/components/social/sheet-words";
 import { useOverlay } from "@/lib/ui/use-overlay";
 import { Sheet } from "@/components/ui/Sheet";
+import { ActionSheet, type ActionSheetRow } from "@/components/ui/ActionSheet";
 import {
   blockUser,
   muteTarget,
@@ -85,37 +85,8 @@ export function ProfileMenu({
   const [blocked, setBlocked] = useState(false);
   const [reporting, setReporting] = useState(false);
   const [pending, startTransition] = useSafeTransition();
-  const menuRef = useRef<HTMLDivElement>(null);
   const openerRef = useRef<HTMLButtonElement>(null);
   const blockedRef = useRef<HTMLDivElement>(null);
-
-  /*
-   * THE MENU OPENS WHOLLY ON SCREEN (D79, founder: it "renders clipped off
-   * the right edge"). It hangs from the trigger's start edge; where that
-   * would run past the viewport it hangs from the end edge instead, and if a
-   * narrow screen still cuts it, it is slid back inside an 8px margin. Read
-   * and written before paint, so it never flashes in the wrong place.
-   */
-  useLayoutEffect(() => {
-    const menu = menuRef.current;
-    if (!open || !menu) return;
-    const MARGIN = 8;
-    const viewport = document.documentElement.clientWidth;
-    const fits = () => {
-      const box = menu.getBoundingClientRect();
-      return box.left >= MARGIN && box.right <= viewport - MARGIN;
-    };
-    menu.style.insetInlineStart = "";
-    menu.style.insetInlineEnd = "";
-    menu.style.translate = "";
-    if (fits()) return;
-    menu.style.insetInlineStart = "auto";
-    menu.style.insetInlineEnd = "0px";
-    if (fits()) return;
-    const box = menu.getBoundingClientRect();
-    const shift = box.left < MARGIN ? MARGIN - box.left : viewport - MARGIN - box.right;
-    menu.style.translate = `${shift}px 0`;
-  }, [open]);
 
   const who = displayLabel || `@${handle}`;
 
@@ -133,11 +104,11 @@ export function ProfileMenu({
    * Three overlays live in this component and they are not the same kind of
    * thing, so they do not get the same treatment.
    *
-   * The MENU is a `role="menu"` popover. It never claimed `aria-modal` and it
-   * must not start: a menu is not a modal, nothing behind it is inert, and
-   * trapping Tab in a four-row popover strands the keyboard. It keeps Escape
-   * and its focus return, which it already had, and that is the whole
-   * contract for a popover.
+   * The MENU is the shared action sheet (components/ui/ActionSheet.tsx,
+   * handoff 6.3): the platform's sheet on a phone, and on a wide screen with
+   * a mouse a popover hung from the `…`, kept wholly on screen (D79, founder:
+   * the old menu "renders clipped off the right edge"). Escape, Back, the
+   * focus trap and the return to the `…` are the shared part's.
    *
    * The BLOCK CONFIRM is the platform's `Sheet`: a dismissable question, so
    * it takes the drag and flick to close, Back, Escape and the focus trap
@@ -157,19 +128,6 @@ export function ProfileMenu({
      this reader. */
   useOverlay({ open: blocked, onClose: noop, panelRef: blockedRef });
 
-  useEffect(() => {
-    if (!open) return;
-    menuRef.current?.querySelector<HTMLButtonElement>("button")?.focus();
-    const onKey = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        setOpen(false);
-        openerRef.current?.focus();
-      }
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [open]);
-
   /**
    * Copy, not share. Share is its own control beside this one now, and two
    * menu rows that open the same sheet is one row too many. Copying is a
@@ -177,7 +135,6 @@ export function ProfileMenu({
    * already writing, with no sheet in the way.
    */
   const copyLink = () => {
-    setOpen(false);
     const url = `${window.location.origin}/u/${handle}`;
     if (typeof navigator !== "undefined" && navigator.clipboard) {
       void navigator.clipboard.writeText(url);
@@ -194,7 +151,6 @@ export function ProfileMenu({
   };
 
   const onMute = () => {
-    setOpen(false);
     if (requireSignIn()) return;
     const next = !muted;
     startTransition(async () => {
@@ -311,93 +267,72 @@ export function ProfileMenu({
     );
   }
 
+  /* The rows: the same four acts the menu always had, each a real one.
+     Report and Block are the destructive pair, last, and each asks in a
+     sheet of its own (the report form; the block that explains itself), so
+     the action sheet hands over to those rather than asking twice. */
+  const rows: ActionSheetRow[] = [
+    { id: "copy", label: "Copy link to this page", icon: "link", onSelect: copyLink, testId: "profile-menu-copy" },
+    ...(isOwner
+      ? [{ id: "edit", label: "Edit your profile", icon: "pencil" as const, href: `/u/${handle}/edit`, testId: "profile-menu-edit" }]
+      : [
+          {
+            id: "mute",
+            label: muted ? `Unmute ${who}` : `Mute ${who}`,
+            ...(muted ? {} : { hint: "Their posts stay out of your feeds." }),
+            icon: muted ? ("bell" as const) : ("mute" as const),
+            onSelect: onMute,
+            testId: "profile-menu-mute",
+          },
+          {
+            id: "report",
+            kind: "danger" as const,
+            label: reportWords.reportWho.replace("{who}", () => who),
+            icon: "flag" as const,
+            confirm: "own" as const,
+            onSelect: () => {
+              if (requireSignIn()) return;
+              setReporting(true);
+            },
+            testId: "profile-menu-report",
+          },
+          {
+            id: "block",
+            kind: "danger" as const,
+            label: `Block ${who}`,
+            icon: "block" as const,
+            confirm: "own" as const,
+            onSelect: () => {
+              if (requireSignIn()) return;
+              setConfirmBlock(true);
+            },
+            testId: "profile-menu-block",
+          },
+        ]),
+  ];
+
   return (
     <>
-      <div className="relative">
-        <button
-          ref={openerRef}
-          type="button"
-          className={onCover ? "nf-social-round nf-btn--glass" : "nf-social-more nf-btn--glass"}
-          aria-label={`More actions for ${who}`}
-          aria-haspopup="menu"
-          aria-expanded={open}
-          onClick={() => setOpen((value) => !value)}
-        >
-          <UiIcon name="more" size={20} />
-        </button>
-
-        {open ? (
-          <>
-            <button
-              type="button"
-              aria-label="Close menu"
-              className="fixed inset-0 z-20 cursor-default"
-              onClick={() => setOpen(false)}
-            />
-            <div
-              ref={menuRef}
-              role="menu"
-              aria-label={`Actions for ${who}`}
-              className="nf-post__menu nf-social-more__menu"
-            >
-              <button
-                type="button"
-                role="menuitem"
-                className="nf-post__menu-item"
-                onClick={copyLink}
-              >
-                Copy link to this page
-              </button>
-
-              {isOwner ? (
-                <Link
-                  role="menuitem"
-                  href={`/u/${handle}/edit`}
-                  className="nf-post__menu-item"
-                  onClick={() => setOpen(false)}
-                >
-                  Edit your profile
-                </Link>
-              ) : (
-                <>
-                  <button
-                    type="button"
-                    role="menuitem"
-                    className="nf-post__menu-item"
-                    onClick={onMute}
-                  >
-                    {muted ? `Unmute ${who}` : `Mute ${who}`}
-                  </button>
-                  <button
-                    type="button"
-                    role="menuitem"
-                    className="nf-post__menu-item nf-post__menu-item--danger"
-                    onClick={() => {
-                      setOpen(false);
-                      if (requireSignIn()) return;
-                      setReporting(true);
-                    }}
-                  >
-                    {reportWords.reportWho.replace("{who}", () => who)}
-                  </button>
-                  <button
-                    type="button"
-                    role="menuitem"
-                    className="nf-post__menu-item nf-post__menu-item--danger"
-                    onClick={() => {
-                      setOpen(false);
-                      if (requireSignIn()) return;
-                      setConfirmBlock(true);
-                    }}
-                  >
-                    Block {who}
-                  </button>
-                </>
-              )}
-            </div>
-          </>
-        ) : null}
-      </div>
+      <button
+        ref={openerRef}
+        type="button"
+        className={onCover ? "nf-social-round nf-btn--glass" : "nf-social-more nf-btn--glass"}
+        aria-label={`More actions for ${who}`}
+        aria-haspopup="dialog"
+        aria-expanded={open}
+        onClick={() => setOpen((value) => !value)}
+      >
+        <UiIcon name="more" size={20} />
+      </button>
+      <ActionSheet
+        open={open}
+        onOpenChange={setOpen}
+        title={`Actions for ${who}`}
+        anchor={openerRef}
+        testId="profile-menu"
+        header={{ title: who, ...(displayLabel ? { subtitle: `@${handle}` } : {}) }}
+        rows={rows}
+      />
 
       {/* ------------------------------------------------ before the block */}
       <Sheet

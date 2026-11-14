@@ -1,7 +1,13 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
 import type { UiIconName } from "@/design-system/icons/UiIcon";
-import { ActionSheetIllustrated, type ActionSheetRow } from "@/components/ui/ActionSheetIllustrated";
+import {
+  ActionSheet as SharedActionSheet,
+  type ActionSheetQuick,
+  type ActionSheetRow,
+} from "@/components/ui/ActionSheet";
+import { ConfirmSheet } from "@/components/ui/ConfirmSheet";
 import { countOf } from "@vallo/i18n/core";
 import type { MenuWords } from "./sheet-words";
 import { SHARE_WORDS } from "@/lib/features/listing-share/model";
@@ -9,27 +15,35 @@ import { SHARE_WORDS } from "@/lib/features/listing-share/model";
 /**
  * The sheet behind a card's `…`.
  *
- * It is the platform's illustrated action sheet (north star 15.2, reference
- * 43): a clay object on a soft ground, a title, one line, then hairline rows
- * each with a round glyph plate, the action and the sentence that says what it
- * actually does, and one quiet dismiss. It used to be a generic list in a plain
- * `Sheet`, which is exactly the pattern 15.2 says this component replaces.
+ * Since 14 November 2026 it is the platform's shared action sheet
+ * (components/ui/ActionSheet.tsx, handoff 6.3): a header card that says what
+ * the sheet is about, Share, Save and Copy link as round quick actions (the
+ * three everybody knows by their glyph), then the rows, and a Done bar. On a
+ * phone it is the platform's sheet; a wide screen with a mouse gets the
+ * sheet's own centred dialog, because the callers pass no trigger to hang a
+ * popover from.
  *
- * Every row carries a title AND the sentence that says what it does, because
- * "Hide" and "Not interested" and "Mute" are three words people cannot tell
- * apart and the difference between them matters: one is about a post, one is
- * about a feed, one is about a person. The sentence rides in the row's `hint`.
+ * Every ROW still carries a title AND the sentence that says what it does,
+ * because "Hide" and "Not interested" and "Mute" are three words people cannot
+ * tell apart and the difference between them matters: one is about a post, one
+ * is about a feed, one is about a person. The sentence rides in the row's
+ * second line. The quick actions are the ones whose word needs no sentence.
  *
  * **The rows change with what was tapped.** A person's post does not offer
  * "Contact Agent", because there is no agent to contact, and a control that
  * cannot work should not be there to press. What is offered is decided by the
  * caller and passed in, so this component holds no knowledge of what a post is.
  *
+ * **The destructive rows are last and each one asks first.** Delete is
+ * confirmed by the caller's slide (`DeleteSheet`) and Report by its form
+ * (`ReportSheet`), so those two are handed straight over. Block and Remove
+ * share had no question in front of them, only an Undo afterwards; they now
+ * ask in the shared `ConfirmSheet`, in the row's own words, and the Undo
+ * still follows.
+ *
  * Everything about being a sheet (drag or flick to close, Escape, Back, the
- * focus trap and return, the counted scroll lock, the home-indicator inset, a
- * body that scrolls when ten two-line rows are taller than a phone held
- * sideways) is `Sheet`'s, inherited through `ActionSheetIllustrated`. A danger
- * row takes the rose plate and label and never glows.
+ * focus trap and return, the counted scroll lock, the home-indicator inset) is
+ * `Sheet`'s, inherited through the shared part.
  */
 
 export type SheetAction = {
@@ -42,6 +56,11 @@ export type SheetAction = {
   danger?: boolean;
 };
 
+/** The acts drawn as round quick actions, in this order, when the caller offers them. */
+const QUICK_KEYS = ["share", "save", "copy"] as const;
+/** Destructive acts the caller already confirms in a sheet of its own. */
+const OWN_CONFIRM = new Set(["delete", "report"]);
+
 export function ActionSheet({
   label,
   actions,
@@ -50,38 +69,102 @@ export function ActionSheet({
   body,
   dismissLabel,
 }: {
-  /** What this sheet is about: the title, and the dialog's accessible name. */
+  /** What this sheet is about: the header card's title, and the dialog's accessible name. */
   label: string;
   actions: SheetAction[];
   onChoose: (key: string) => void;
   onClose: () => void;
   /** The one line under the title, in the reader's language (`sheetWordsOf`). */
   body: string;
-  /** The single quiet dismiss, the locale's "Not now" (`sheetWordsOf`). */
+  /** The locale's "Not now" (`sheetWordsOf`): the way out of a question asked before a destructive act. */
   dismissLabel: string;
 }) {
-  const rows: ActionSheetRow[] = actions.map((action) => ({
-    id: action.key,
-    label: action.title,
-    hint: action.note,
-    icon: action.glyph ?? action.icon ?? "sliders",
-    danger: action.danger,
-    onSelect: () => onChoose(action.key),
-  }));
+  /* The caller mounts this while its menu is up and unmounts it in `onClose`.
+     A destructive act is asked about AFTER the sheet has closed, so the
+     close is reported only once nothing is waiting on an answer. */
+  const [open, setOpen] = useState(true);
+  const [asking, setAsking] = useState<SheetAction | null>(null);
+  const closed = useRef(onClose);
+  useEffect(() => {
+    closed.current = onClose;
+  }, [onClose]);
+  useEffect(() => {
+    if (!open && asking === null) closed.current();
+  }, [open, asking]);
+
+  const iconOf = (action: SheetAction): UiIconName => action.glyph ?? action.icon ?? "sliders";
+
+  const quick: ActionSheetQuick[] = QUICK_KEYS.flatMap((key) => {
+    const action = actions.find((a) => a.key === key);
+    return action
+      ? [
+          {
+            id: action.key,
+            label: action.title,
+            icon: iconOf(action),
+            onSelect: () => onChoose(action.key),
+            testId: `post-action-${action.key}`,
+          },
+        ]
+      : [];
+  });
+
+  const rows: ActionSheetRow[] = actions
+    .filter((action) => !(QUICK_KEYS as readonly string[]).includes(action.key))
+    .map((action) =>
+      action.danger
+        ? {
+            id: action.key,
+            kind: "danger" as const,
+            label: action.title,
+            hint: action.note,
+            icon: iconOf(action),
+            confirm: "own" as const,
+            onSelect: () => {
+              if (OWN_CONFIRM.has(action.key)) onChoose(action.key);
+              else setAsking(action);
+            },
+            testId: `post-action-${action.key}`,
+          }
+        : {
+            id: action.key,
+            label: action.title,
+            hint: action.note,
+            icon: iconOf(action),
+            onSelect: () => onChoose(action.key),
+            testId: `post-action-${action.key}`,
+          },
+    );
 
   return (
-    <ActionSheetIllustrated
-      open
-      onOpenChange={(next) => {
-        if (!next) onClose();
-      }}
-      title={label}
-      body={body}
-      object="local-talks"
-      rows={rows}
-      dismissLabel={dismissLabel}
-      testId="post-action-sheet"
-    />
+    <>
+      <SharedActionSheet
+        open={open}
+        onOpenChange={setOpen}
+        title={label}
+        header={{ title: label, subtitle: body }}
+        quick={quick}
+        rows={rows}
+        testId="post-action-sheet"
+      />
+      {asking ? (
+        <ConfirmSheet
+          open
+          onOpenChange={(next) => {
+            if (!next) setAsking(null);
+          }}
+          title={`${asking.title}?`}
+          line={asking.note}
+          confirmLabel={asking.title}
+          cancelLabel={dismissLabel}
+          onConfirm={() => {
+            onChoose(asking.key);
+            setAsking(null);
+          }}
+          testId="post-action-confirm"
+        />
+      ) : null}
+    </>
   );
 }
 

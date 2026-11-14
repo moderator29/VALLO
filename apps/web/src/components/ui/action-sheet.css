@@ -1,0 +1,332 @@
+@layer components {
+  /* THE ACTION SHEET (components/ui/ActionSheet.tsx): what can be done with
+     one thing, in two cards and a Done bar. The cards are the platform's list
+     card (list-group.css: the card radius, the tier edge, the primary
+     surface), laid on the platform's sheet; on a wide screen with a mouse the
+     same cards sit in a popover hung from the control that opened it. */
+  .nf-acts {
+    display: grid;
+    gap: var(--nf-space-sm);
+    min-inline-size: 0;
+  }
+  .nf-acts__card {
+    position: relative;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    overflow: clip;
+    border: var(--nf-border-width) solid var(--nf-tier-card-edge);
+    border-radius: var(--nf-radius-card);
+    background: var(--nf-surface-primary);
+    box-shadow: var(--nf-card-shadow);
+  }
+
+  /* ------------------------------------------------------- the header card */
+  .nf-acts__head {
+    display: flex;
+    align-items: center;
+    gap: var(--nf-space-sm);
+    inline-size: 100%;
+    min-block-size: 4rem;
+    padding: var(--nf-space-sm) var(--nf-space-md);
+    border: 0;
+    background: none;
+    color: var(--nf-content-primary);
+    font: inherit;
+    text-align: start;
+    text-decoration: none;
+  }
+  :is(a, button).nf-acts__head {
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .nf-acts__media {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+  }
+  .nf-acts__head-text {
+    display: grid;
+    flex: 1 1 auto;
+    gap: var(--nf-space-3xs);
+    min-inline-size: 0;
+  }
+  .nf-acts__head-title {
+    font-size: var(--nf-text-body);
+    font-weight: 600;
+    line-height: 1.3;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .nf-acts__head-sub {
+    font-size: var(--nf-text-caption);
+    line-height: 1.35;
+    color: var(--nf-content-secondary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* The quick actions: up to four round plates in equal cells, a word under
+     each. A cell is the whole target, 64 px tall or more. */
+  .nf-acts__quick {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(0, 1fr);
+    gap: var(--nf-space-2xs);
+    margin: 0;
+    padding: var(--nf-space-xs);
+    list-style: none;
+  }
+  .nf-acts__quick[data-divided="true"] {
+    border-block-start: var(--nf-border-width) solid var(--nf-divider);
+  }
+  .nf-acts__quick-item {
+    display: flex;
+    min-inline-size: 0;
+  }
+  .nf-acts__quick-btn {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    gap: var(--nf-space-2xs);
+    min-inline-size: 2.75rem;
+    min-block-size: 4rem;
+    padding: var(--nf-space-xs) var(--nf-space-3xs);
+    border: 0;
+    border-radius: var(--nf-radius-control);
+    background: none;
+    color: var(--nf-content-primary);
+    font: inherit;
+    text-align: center;
+    text-decoration: none;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: background-color var(--nf-duration-fast) var(--nf-ease-standard);
+  }
+  .nf-acts__quick-btn:disabled {
+    opacity: 0.5;
+    cursor: default;
+  }
+  .nf-acts__quick-label {
+    max-inline-size: 100%;
+    font-size: var(--nf-text-caption);
+    font-weight: 600;
+    line-height: 1.25;
+    color: var(--nf-content-secondary);
+    overflow-wrap: break-word;
+  }
+  .nf-acts__quick-btn[aria-pressed="true"] .nf-acts__quick-label {
+    color: var(--nf-content-link);
+  }
+
+  /* --------------------------------------------------------- the rows card */
+  .nf-acts__li {
+    position: relative;
+  }
+  .nf-acts__li + .nf-acts__li::before,
+  .nf-acts__row--radio + .nf-acts__row--radio::before {
+    content: "";
+    position: absolute;
+    inset-block-start: 0;
+    inset-inline: var(--nf-space-md) 0;
+    block-size: var(--nf-border-width);
+    background: var(--nf-divider);
+    pointer-events: none;
+  }
+  .nf-acts__group {
+    display: grid;
+  }
+  .nf-acts__row {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: var(--nf-space-sm);
+    inline-size: 100%;
+    min-block-size: 3.25rem;
+    padding: var(--nf-space-xs) var(--nf-space-md);
+    border: 0;
+    background: none;
+    color: var(--nf-content-primary);
+    font: inherit;
+    text-align: start;
+    text-decoration: none;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: background-color var(--nf-duration-fast) var(--nf-ease-standard);
+  }
+  .nf-acts__row:disabled,
+  .nf-acts__row[data-disabled="true"] {
+    opacity: 0.5;
+    cursor: default;
+  }
+  .nf-acts__icon {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    inline-size: 1.5rem;
+    color: var(--nf-content-secondary);
+  }
+  .nf-acts__text {
+    display: grid;
+    flex: 1 1 auto;
+    gap: var(--nf-space-3xs);
+    min-inline-size: 0;
+  }
+  .nf-acts__label {
+    font-size: var(--nf-text-row);
+    font-weight: 600;
+    line-height: var(--nf-leading-row);
+    overflow-wrap: break-word;
+  }
+  .nf-acts__hint {
+    font-size: var(--nf-text-caption);
+    line-height: 1.35;
+    color: var(--nf-content-secondary);
+    overflow-wrap: break-word;
+  }
+  .nf-acts__value {
+    flex: none;
+    max-inline-size: 45%;
+    font-size: var(--nf-text-body-sm);
+    color: var(--nf-content-secondary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .nf-acts__chevron {
+    flex: none;
+    color: var(--nf-content-muted);
+  }
+  /* The destructive row: the danger ink on the word and its glyph. */
+  .nf-acts__row[data-danger="true"] :is(.nf-acts__label, .nf-acts__icon) {
+    color: var(--nf-state-error);
+  }
+  /* The radio at the end of a row: a ring, filled with the brand when chosen. */
+  .nf-acts__radio {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    inline-size: 1.5rem;
+    block-size: 1.5rem;
+    border: var(--nf-border-width) solid var(--nf-border-strong);
+    border-radius: var(--nf-radius-circle);
+    color: var(--nf-content-on-brand);
+  }
+  .nf-acts__radio[data-checked="true"] {
+    border-color: var(--nf-brand-primary);
+    background: var(--nf-brand-primary);
+  }
+
+  :is(.nf-acts__row, .nf-acts__quick-btn, a.nf-acts__head, button.nf-acts__head):focus-visible {
+    outline: var(--nf-focus-ring-width) solid var(--nf-focus-ring);
+    outline-offset: calc(-1 * var(--nf-focus-ring-width));
+  }
+  @media (hover: hover) and (pointer: fine) {
+    :is(button, a).nf-acts__row:not(:disabled):hover,
+    label.nf-acts__row:not([data-disabled="true"]):hover,
+    .nf-acts__quick-btn:not(:disabled):hover,
+    :is(a, button).nf-acts__head:hover {
+      background: var(--nf-brand-tint-1);
+    }
+  }
+  :is(button, a).nf-acts__row:not(:disabled):active,
+  .nf-acts__quick-btn:not(:disabled):active,
+  :is(a, button).nf-acts__head:active {
+    background: var(--nf-brand-tint-2);
+  }
+
+  /* ------------------------------------------------- on the platform sheet */
+  /* The grip stays; the cards start close under it, and the Done bar is the
+     sheet's footer, a full-width button of its own. */
+  .nf-sheet.nf-acts-sheet .nf-sheet__body {
+    padding-block-end: var(--nf-space-sm);
+  }
+
+  /* UNDER REDUCED MOTION THE SHEET FADES. Every sheet stops sliding there
+     (overlays.css); this one is short enough that a cross-fade is kinder than
+     a cut, so it stays where it will rest and only its opacity changes. The
+     two `:not()` match the specificity of the rules this answers. */
+  @media (prefers-reduced-motion: reduce) {
+    .nf-sheet.nf-acts-sheet:not(.nf-sheet--page):not(.nf-sheet--side) {
+      opacity: 0;
+      transform: translateY(var(--nf-sheet-y, 0px));
+      transition: opacity var(--nf-acts-fade) var(--nf-ease-standard);
+    }
+    .nf-sheet.nf-acts-sheet[data-open="true"]:not(.nf-sheet--page):not(.nf-sheet--side) {
+      opacity: 1;
+      transition: opacity var(--nf-acts-fade) var(--nf-ease-standard);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) and (min-width: 64rem) and (pointer: fine) {
+    .nf-sheet.nf-acts-sheet:not(.nf-sheet--page):not(.nf-sheet--side) {
+      transform: translateY(calc(-50% + var(--nf-sheet-y, 0px)));
+    }
+  }
+
+  /* The same answer for the app's own Motion setting at Calm or Off, which
+     writes `data-reduce-motion` on the root (lib/motion/motion-pref.ts). */
+  :root[data-reduce-motion="1"] .nf-sheet.nf-acts-sheet:not(.nf-sheet--page):not(.nf-sheet--side) {
+    opacity: 0;
+    transform: translateY(var(--nf-sheet-y, 0px));
+    transition: opacity var(--nf-acts-fade) var(--nf-ease-standard);
+  }
+  :root[data-reduce-motion="1"] .nf-sheet.nf-acts-sheet[data-open="true"]:not(.nf-sheet--page):not(.nf-sheet--side) {
+    opacity: 1;
+  }
+  @media (min-width: 64rem) and (pointer: fine) {
+    :root[data-reduce-motion="1"] .nf-sheet.nf-acts-sheet:not(.nf-sheet--page):not(.nf-sheet--side) {
+      transform: translateY(calc(-50% + var(--nf-sheet-y, 0px)));
+    }
+  }
+
+  /* ------------------------------------------------------------ the popover */
+  /* A wide screen with a mouse: the same cards hung from the control that
+     opened them. No scrim; the panel material every menu on the platform
+     wears. Placed by two custom properties the component writes. */
+  .nf-acts-pop {
+    position: fixed;
+    inset-block-start: var(--nf-acts-y, 0px);
+    inset-inline-start: 0;
+    translate: var(--nf-acts-x, 0px) 0;
+    z-index: calc(var(--nf-z-modal) + 1);
+    inline-size: min(22rem, calc(100vw - 1rem));
+    max-block-size: calc(100dvh - 1rem);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: var(--nf-space-xs);
+    border: var(--nf-border-width) solid var(--nf-panel-edges);
+    /* The cards' corner plus the panel's own inset, so the two corners are
+       drawn from one centre. */
+    border-radius: calc(var(--nf-radius-card) + var(--nf-space-xs));
+    background: var(--nf-panel-fill-card);
+    -webkit-backdrop-filter: blur(var(--nf-panel-blur));
+    backdrop-filter: blur(var(--nf-panel-blur));
+    box-shadow:
+      var(--nf-panel-rim),
+      var(--nf-panel-glow),
+      var(--nf-elevation-overlay);
+    /* Unplaced for the frame before it is measured, so it never flashes in a corner. */
+    visibility: hidden;
+    opacity: 0;
+    transform-origin: top;
+    transition: opacity var(--nf-duration-fast) var(--nf-ease-standard);
+  }
+  .nf-acts-pop[data-placed="true"] {
+    visibility: visible;
+    opacity: 1;
+  }
+}
+
+/* How long the fade lasts. Declared on the root, outside the motion tokens,
+   because under reduced motion every motion token is one millisecond and a
+   fade that short is the cut this is here to soften. */
+:root {
+  --nf-acts-fade: 140ms;
+}

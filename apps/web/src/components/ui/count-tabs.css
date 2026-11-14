@@ -1,0 +1,121 @@
+@layer components {
+  /* THE COUNT TABS (components/ui/CountTabs.tsx): a sideways-scrolling row of
+     filter tabs, the chosen one filled, the rest quiet, each able to carry a
+     count. The row scrolls with no scrollbar; a tab never shrinks, so a count
+     cannot run under its neighbour; every tab is 44 px or more in both axes. */
+  .nf-count-tabs {
+    min-inline-size: 0;
+    max-inline-size: 100%;
+  }
+  .nf-count-tabs__row {
+    display: flex;
+    align-items: center;
+    gap: var(--nf-space-2xs);
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  .nf-count-tabs__row::-webkit-scrollbar {
+    display: none;
+  }
+  /* Out to the screen edges inside a guttered page, resting on the gutter. */
+  .nf-count-tabs--bleed .nf-count-tabs__row {
+    margin-inline: calc(-1 * var(--nf-pad-shell));
+    padding-inline: var(--nf-pad-shell);
+    scroll-padding-inline: var(--nf-pad-shell);
+  }
+  .nf-count-tabs__list {
+    display: flex;
+    flex: none;
+    align-items: center;
+    gap: var(--nf-space-2xs);
+  }
+  .nf-count-tabs__trailing {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+  }
+
+  .nf-count-tab {
+    /* The containing block of the tab's screen-reader words: left to the
+       page, a hidden span in a tab scrolled off the edge widens the page. */
+    position: relative;
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    gap: var(--nf-space-2xs);
+    min-block-size: 2.75rem;
+    min-inline-size: 2.75rem;
+    padding: var(--nf-pad-chip-block) var(--nf-pad-chip-inline);
+    border: var(--nf-border-width) solid transparent;
+    border-radius: var(--nf-radius-control);
+    background: transparent;
+    color: var(--nf-content-secondary);
+    font: inherit;
+    font-size: var(--nf-text-body-sm);
+    font-weight: 600;
+    line-height: 1.2;
+    white-space: nowrap;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition:
+      background-color var(--nf-duration-fast) var(--nf-ease-standard),
+      border-color var(--nf-duration-fast) var(--nf-ease-standard),
+      color var(--nf-duration-fast) var(--nf-ease-standard);
+  }
+  @media (hover: hover) {
+    .nf-count-tab:hover {
+      color: var(--nf-content-primary);
+      background: var(--nf-surface-secondary);
+    }
+  }
+  /* The chosen tab: the platform's one selected-chip fill, the brand tint
+     with the brand ink on a brand hairline, and no glow. */
+  .nf-count-tab[data-selected="true"] {
+    color: var(--nf-content-link);
+    background: var(--nf-brand-tint-2);
+    border-color: var(--nf-border-brand);
+  }
+  /* The ring is drawn inside the tab: the scroller clips whatever leaves it,
+     and room made for an outer ring with a negative margin pushed the row
+     two pixels past a page that has no gutter. */
+  .nf-count-tab:focus-visible {
+    outline: var(--nf-focus-ring-width) solid var(--nf-focus-ring);
+    outline-offset: calc(-1 * var(--nf-focus-ring-width));
+  }
+  .nf-count-tab__label {
+    flex: none;
+  }
+  /* The count: the platform's count plate (the inbox row's own), a small
+     rounded rectangle that grows with "9+" and never shrinks. */
+  .nf-count-tab__count {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    min-inline-size: 1.375rem;
+    block-size: 1.375rem;
+    padding-inline: var(--nf-space-2xs);
+    border-radius: var(--nf-radius-badge);
+    background: var(--nf-count-fill);
+    color: var(--nf-count-ink);
+    font-size: 0.75rem;
+    font-weight: 600;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+  }
+  /* A plain total (how many a list holds): a neutral plate, so it is never
+     read as something unread. */
+  .nf-count-tab__count[data-tone="quiet"] {
+    background: var(--nf-surface-raised);
+    color: var(--nf-content-secondary);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .nf-count-tab {
+      transition: none;
+    }
+  }
+}

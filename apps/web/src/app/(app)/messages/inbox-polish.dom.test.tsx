@@ -4,7 +4,9 @@
  * Search marks where each row matched (and a preview that matched past its
  * first line is re-cut around the match); a row slides left on touch to
  * uncover Mark read and Archive; Archive is said in the top banner with
- * Undo. The server actions are staged by the harness.
+ * Undo. A row's More button, and a long press on the row, open its action
+ * sheet with the same actions the swipe has. The views are the shared count
+ * tabs. The server actions are staged by the harness.
  */
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import type { Page } from "playwright-core";
@@ -21,7 +23,14 @@ vi.setConfig({ testTimeout: BROWSER_TEST_TIMEOUT });
 beforeAll(warmBrowser);
 afterAll(closeBrowser);
 
-const CSS = productCss("app/css/threads.css", "app/css/grade1.css", "app/css/messages-g1.css");
+const CSS = productCss(
+  "app/css/threads.css",
+  "app/css/grade1.css",
+  "app/css/messages-g1.css",
+  "components/ui/count-tabs.css",
+  "components/ui/action-sheet.css",
+  "app/(app)/messages/inbox-menu.css",
+);
 
 const entry = `
   import { getDictionary } from "@vallo/i18n";
@@ -237,6 +246,146 @@ describe.skipIf(!hasBrowser && !process.env.CI)("the inbox's polish", () => {
       await page.mouse.move(box.x + 20, box.y + box.height / 2, { steps: 6 });
       await page.mouse.up();
       expect(await row.evaluate((el) => (el as HTMLElement).style.transform)).toBe("");
+    } finally {
+      await close();
+    }
+  });
+  it("draws the views as count tabs: radios, 44 px or more, a count on the tab with a queue, no sideways scroll", async () => {
+    const { page, close } = await mountInBrowser({ entry, css: CSS });
+    try {
+      const tabs = page.locator('[data-testid="inbox-views"] [role="radio"]');
+      await expect.poll(() => tabs.count()).toBeGreaterThanOrEqual(2);
+      expect(await page.getByTestId("inbox-view-recent").getAttribute("aria-checked")).toBe("true");
+      for (const tab of await tabs.all()) {
+        const box = (await tab.boundingBox())!;
+        expect(box.height).toBeGreaterThanOrEqual(44);
+        expect(box.width).toBeGreaterThanOrEqual(44);
+      }
+      expect(await page.getByTestId("inbox-view-unread").locator("[data-count-badge]").count()).toBe(1);
+      expect(await page.getByTestId("inbox-view-recent").locator("[data-count-badge]").count()).toBe(0);
+      await page.getByTestId("inbox-view-unread").click();
+      expect(await page.getByTestId("inbox-view-unread").getAttribute("aria-checked")).toBe("true");
+      expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
+    } finally {
+      await close();
+    }
+  });
+
+  it("opens a row's action sheet from its More button with the swipe's own actions, and archives from it", async () => {
+    const { page, close } = await mountInBrowser({
+      entry,
+      css: CSS,
+      init: "window.__prefsOpen = true;",
+      reducedMotion: true,
+      actions: {
+        archiveConversation: `async () => ({ ok: true, data: { archived: true } })`,
+        unarchiveConversation: `async () => ({ ok: true, data: { archived: false } })`,
+      },
+    });
+    try {
+      const rows = page.getByTestId("inbox-row");
+      const before = await rows.count();
+      const name = (await rows.nth(1).locator(".truncate").first().textContent()) ?? "";
+      const href = await rows.nth(1).getAttribute("href");
+      const more = page.getByTestId("inbox-row-more").nth(1);
+      expect((await more.boundingBox())!.width).toBeGreaterThanOrEqual(44);
+      expect((await more.boundingBox())!.height).toBeGreaterThanOrEqual(44);
+      await more.click();
+      const sheet = page.getByRole("dialog", { name: `Actions for ${name}` });
+      await sheet.waitFor();
+      expect(await more.getAttribute("aria-expanded")).toBe("true");
+      /* The header card is the person, and opens the conversation. */
+      expect(await page.getByTestId("inbox-row-menu-open").getAttribute("href")).toBe(href);
+      expect(await sheet.locator(".nf-acts__head-title").textContent()).toBe(name);
+      /* Nothing unread on this row: Pin, Mute (which asks for how long) and Archive. */
+      expect(await sheet.locator(".nf-acts__label").allTextContents()).toEqual(["Pin", "Mute", "Archive"]);
+      expect(await page.getByTestId("inbox-row-menu-mute").locator(".nf-acts__chevron").count()).toBe(1);
+      await page.getByTestId("inbox-row-menu-archive").click();
+      await expect.poll(() => rows.count()).toBe(before - 1);
+      await expect.poll(() => page.getByRole("button", { name: "Undo" }).count()).toBe(1);
+      const calls = await page.evaluate(() => ((window as unknown as { __calls: unknown[][] }).__calls ?? []).map((c) => c[0]));
+      expect(calls).toContain("archiveConversation");
+    } finally {
+      await close();
+    }
+  });
+
+  it("opens the same sheet on a long press, and Mute from it asks for how long", async () => {
+    const { page, close } = await mountInBrowser({
+      entry,
+      css: CSS,
+      init: "window.__prefsOpen = true;",
+      reducedMotion: true,
+      actions: {
+        muteConversation: `async (input) => ({ ok: true, data: { pinnedAt: null, mutedUntil: input.until ? "2100-01-01T00:00:00.000Z" : null } })`,
+      },
+    });
+    try {
+      const rows = page.getByTestId("inbox-row");
+      const name = (await rows.nth(1).locator(".truncate").first().textContent()) ?? "";
+      /* A finger held on the row, not moving. */
+      await page.evaluate(() => {
+        const row = document.querySelectorAll<HTMLElement>('[data-testid="inbox-row"]')[1]!;
+        const box = row.getBoundingClientRect();
+        row.dispatchEvent(
+          new PointerEvent("pointerdown", { bubbles: true, cancelable: true, pointerId: 7, pointerType: "touch", isPrimary: true, clientX: box.left + 80, clientY: box.top + 20 }),
+        );
+      });
+      const sheet = page.getByRole("dialog", { name: `Actions for ${name}` });
+      await sheet.waitFor();
+      await page.evaluate(() => {
+        const row = document.querySelectorAll<HTMLElement>('[data-testid="inbox-row"]')[1]!;
+        row.dispatchEvent(new PointerEvent("pointerup", { bubbles: true, cancelable: true, pointerId: 7, pointerType: "touch", isPrimary: true }));
+      });
+      /* The click that ends a hold is swallowed for a moment after the lift
+         (use-long-press.ts), so the lifting finger cannot press a row. */
+      await page.waitForTimeout(450);
+      /* The hold opened the sheet and did not open the conversation. */
+      expect(await page.evaluate(() => window.location.pathname.startsWith("/messages/"))).toBe(false);
+      await page.getByTestId("inbox-row-menu-mute").click();
+      await page.getByTestId("inbox-mute-8h").click();
+      await expect.poll(() => page.getByText("Muted. You will not be notified about this chat").count()).toBe(1);
+      expect(await rows.nth(1).getByRole("img", { name: "Muted" }).count()).toBe(1);
+    } finally {
+      await close();
+    }
+  });
+
+  it("draws no More button on a row that has no action to offer", async () => {
+    const bare = entry.replace("canMarkRead", "").replace("archiveOpen", "");
+    const { page, close } = await mountInBrowser({ entry: bare, css: CSS });
+    try {
+      await expect.poll(() => page.getByTestId("inbox-row").count()).toBeGreaterThan(0);
+      expect(await page.getByTestId("inbox-row-more").count()).toBe(0);
+    } finally {
+      await close();
+    }
+  });
+  it("opens the inbox's options from the header's More button as plain rows with a Done bar", async () => {
+    const { page, close } = await mountInBrowser({ entry, css: CSS, reducedMotion: true });
+    try {
+      const more = page.getByTestId("inbox-more");
+      await more.click();
+      const sheet = page.getByTestId("inbox-menu");
+      await sheet.waitFor();
+      expect(await more.getAttribute("aria-expanded")).toBe("true");
+      /* Rows only: no header card, no quick actions. */
+      expect(await sheet.locator(".nf-acts__head, .nf-acts__quick").count()).toBe(0);
+      expect(await sheet.locator(".nf-acts__row").count()).toBeGreaterThanOrEqual(6);
+      for (const row of await sheet.locator(".nf-acts__row").all()) {
+        expect((await row.boundingBox())!.height).toBeGreaterThanOrEqual(52);
+      }
+      expect(await page.getByTestId("inbox-compose").getAttribute("href")).toBe("/search");
+      /* A row filters the list and closes the sheet. */
+      await page.getByTestId("inbox-menu-archived").click();
+      await sheet.waitFor({ state: "detached" });
+      expect(await page.getByTestId("inbox-view-archived").getAttribute("aria-checked")).toBe("true");
+      /* Done closes it and chooses nothing. */
+      await more.click();
+      await sheet.waitFor();
+      await page.getByTestId("inbox-menu-done").click();
+      await sheet.waitFor({ state: "detached" });
+      expect(await page.getByTestId("inbox-view-archived").getAttribute("aria-checked")).toBe("true");
     } finally {
       await close();
     }

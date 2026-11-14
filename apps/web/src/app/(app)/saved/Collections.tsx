@@ -3,6 +3,9 @@
 import { useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { Sheet } from "@/components/ui/Sheet";
+import { Button } from "@/components/ui/Button";
+import { CountTabs } from "@/components/ui/CountTabs";
+import { ConfirmSheet } from "@/components/ui/ConfirmSheet";
 import { TextField } from "@/components/ui/Field";
 import { UiIcon } from "@/design-system/icons/UiIcon";
 import { createCollection, deleteCollection, renameCollection, setInCollection } from "@/lib/saved/collections-actions";
@@ -11,7 +14,13 @@ import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { banner } from "@/lib/ui/toast";
 import { saveDoneBanner } from "@/lib/ui/save-banner";
 
+/** The key of the tab that shows every saved thing; a list's key is its id. */
+const ALL = "all";
+
 const WORDS = {
+  lists: "Lists",
+  onePlace: "1 saved",
+  places: "{n} saved",
   all: "All",
   newList: "New list",
   name: "Name of the list",
@@ -22,6 +31,9 @@ const WORDS = {
   none: "You have no lists yet. Name one below.",
   deleteList: "Delete this list",
   deleteNote: "Deleting a list never removes anything you saved.",
+  deleteTitle: "Delete {name}?",
+  deleteConfirm: "Delete list",
+  keep: "Keep it",
   done: "Done",
   renameList: "Rename this list",
   rename: "Rename",
@@ -39,6 +51,7 @@ export function CollectionsBar({ collections, active }: { collections: SavedColl
   const pathname = usePathname();
   const [creating, setCreating] = useState(false);
   const [renaming, setRenaming] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [name, setName] = useState("");
   const [renameValue, setRenameValue] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -97,41 +110,58 @@ export function CollectionsBar({ collections, active }: { collections: SavedColl
   const current = collections.find((c) => c.id === active) ?? null;
   return (
     <div className="mb-heading" data-testid="saved-collections">
-      <div className="nf-scroll-x nf-scroll-x--gutter flex gap-xs" role="tablist" aria-label="Lists">
-        {/* "All" leads with the App Store stack glyph (SHARE_AND_CONTROLS.md section 3): every saved thing in one place. */}
-        <button type="button" role="tab" aria-selected={!current} className={`nf-chip inline-flex items-center gap-2xs${!current ? " nf-chip--on" : ""}`} onClick={() => go(null)}>
-          <UiIcon name="stack" size={14} />
-          {WORDS.all}
-        </button>
-        {collections.map((c) => (
-          <button
-            key={c.id}
-            type="button"
-            role="tab"
-            aria-selected={current?.id === c.id}
-            className={`nf-chip whitespace-nowrap${current?.id === c.id ? " nf-chip--on" : ""}`}
-            onClick={() => go(c.id)}
-          >
-            {c.name}
-          </button>
-        ))}
-        <button type="button" className="nf-chip whitespace-nowrap" onClick={() => setCreating(true)} data-testid="new-list">
-          <UiIcon name="plus" size={14} />
-          {WORDS.newList}
-        </button>
-      </div>
+      {/* The lists as the shared count tabs (handoff 6.3): All, then each
+          list with how many saved things it holds, then the way to make one,
+          which scrolls with the row. "All" leads with the stack glyph
+          (SHARE_AND_CONTROLS.md section 3): every saved thing in one place.
+          The totals are the lists already read for this page. */}
+      <CountTabs
+        label={WORDS.lists}
+        mode="tabs"
+        bleed
+        value={current?.id ?? ALL}
+        onChange={(key) => go(key === ALL ? null : key)}
+        countTone="quiet"
+        countLabel={(n) => (n === 1 ? WORDS.onePlace : WORDS.places.replace("{n}", String(n)))}
+        items={[
+          { key: ALL, label: WORDS.all, icon: "stack" as const, testId: "saved-list-all" },
+          ...collections.map((c) => ({ key: c.id, label: c.name, count: c.keys.length, testId: "saved-list" })),
+        ]}
+        trailing={
+          <Button variant="quiet" size="md" leadingIcon="plus" onClick={() => setCreating(true)} data-testid="new-list">
+            {WORDS.newList}
+          </Button>
+        }
+      />
+      {/* What can be done to the list that is open: each a full 44 px
+          control (they were two underlined words inside a sentence, 20 px
+          tall), with the note that deleting it removes nothing saved. */}
       {current ? (
-        <p className="nf-caption mt-inline-tight text-[var(--nf-content-secondary)]">
-          {WORDS.deleteNote}{" "}
-          <button type="button" className="underline" disabled={pending} onClick={() => remove(current.id)}>
-            {WORDS.deleteList}
-          </button>
-          {" / "}
-          <button type="button" className="underline" disabled={pending} onClick={openRename}>
-            {WORDS.renameList}
-          </button>
-        </p>
+        <div className="mt-inline-tight" data-testid="saved-list-manage">
+          <div className="flex flex-wrap items-center gap-xs">
+            <Button variant="quiet" size="md" leadingIcon="pencil" disabled={pending} onClick={openRename} data-testid="saved-list-rename">
+              {WORDS.renameList}
+            </Button>
+            <Button variant="dangerQuiet" size="md" leadingIcon="trash" disabled={pending} onClick={() => setDeleting(true)} data-testid="saved-list-delete">
+              {WORDS.deleteList}
+            </Button>
+          </div>
+        </div>
       ) : null}
+      <ConfirmSheet
+        open={deleting}
+        onOpenChange={setDeleting}
+        title={WORDS.deleteTitle.replace("{name}", current?.name ?? "")}
+        line={WORDS.deleteNote}
+        confirmLabel={WORDS.deleteConfirm}
+        cancelLabel={WORDS.keep}
+        pending={pending}
+        onConfirm={() => {
+          setDeleting(false);
+          if (current) remove(current.id);
+        }}
+        testId="saved-list-delete-confirm"
+      />
       <Sheet
         open={creating}
         onOpenChange={setCreating}

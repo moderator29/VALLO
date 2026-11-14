@@ -131,7 +131,12 @@ export function Sheet({
    * string rather than a boolean because an unlabelled X is invisible to a
    * screen reader and this platform ships four locales.
    */
-  closeLabel?: string;
+  /**
+   * `null` draws no close control at all, for a sheet whose own full-width
+   * bar is the way out (the action sheet's Done). Left out, a sheet gets the
+   * default X; the swipe, the scrim, Escape and Back close it either way.
+   */
+  closeLabel?: string | null;
   /** The footer's quiet action. Label is the localised word. */
   reset?: { label: string; onClick(): void; disabled?: boolean };
   /** The footer's lit primary. `loading` keeps the label and shows the line. */
@@ -183,7 +188,7 @@ export function Sheet({
 }) {
   /* GRADE 1 (survey SW3): every sheet has a close X unless it is a centred
      card (a moment with its own Continue). A caller's own words still win. */
-  closeLabel = closeLabel ?? (card ? undefined : "Close");
+  closeLabel = closeLabel === null ? undefined : (closeLabel ?? (card ? undefined : "Close"));
   const titleId = useId();
   const sheetRef = useRef<HTMLDivElement | null>(null);
   const restoreFocus = useRef<HTMLElement | null>(null);

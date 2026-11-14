@@ -1,0 +1,35 @@
+@layer components {
+  /* THE ROW'S MORE BUTTON (Inbox.tsx): the control that opens one
+     conversation's action sheet for a mouse and a keyboard. Quiet, so a list
+     of conversations is not a column of buttons; a full 44 px target. On a
+     machine with a mouse it shows on the row's hover, on focus and while its
+     sheet is open. The list's class is in front so it outranks the icon
+     button's own surface. */
+  .nf-inbox-list li .nf-inbox-more {
+    border-color: transparent;
+    background: transparent;
+    box-shadow: none;
+    color: var(--nf-content-muted);
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .nf-inbox-list li .nf-inbox-more {
+      opacity: 0;
+      transition: opacity var(--nf-duration-fast) var(--nf-ease-standard);
+    }
+    .nf-inbox-list li:hover .nf-inbox-more,
+    .nf-inbox-list li .nf-inbox-more:focus-visible,
+    .nf-inbox-list li .nf-inbox-more[aria-expanded="true"] {
+      opacity: 1;
+    }
+  }
+  /* The held row sinks a little while the finger is down, so the hold is
+     felt before the sheet opens. iOS would otherwise answer the hold with
+     its own link preview. */
+  .nf-inbox-list .nf-inbox-row {
+    -webkit-touch-callout: none;
+  }
+  .nf-inbox-list .nf-inbox-row[data-holding] {
+    scale: var(--nf-press-scale);
+    transition: scale var(--nf-duration-press) var(--nf-ease-press);
+  }
+}
