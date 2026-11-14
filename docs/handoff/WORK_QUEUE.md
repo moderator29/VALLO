@@ -1,142 +1,65 @@
-# THE GRADE 1 WORK QUEUE
+# THE NEXT-GENERATION WORK QUEUE
 
-Merged on 7 November 2026 from `SURVEY_A_MEMBER_PUBLIC.md` (153 findings,
-168 member and public routes) and `SURVEY_B_WORKSPACES_BACKEND.md` (84
-findings: agent, host, admin, backend, live database). Founder rulings in
-`FOUNDER_DECISIONS.md` win. IDs (SW1, X-02, LW-01...) point into the surveys.
+Rewritten 14 November 2026 for the platform-wide upgrade. The old Grade 1
+queue this file held is finished and lives in git history (`4baa05fb` and
+before) and in the surveys it was merged from. Read
+`NEXT_GEN_HANDOFF.md` first; the founder's briefs are in
+`NEXT_GEN_BRIEF_VERBATIM.md`; rulings in `FOUNDER_DECISIONS.md` win.
 
-Three builders at most at any time: the lead plus Builder A and Builder B,
-always on separate files. Every round ends with the lead's gates: tsc, eslint,
-the em dash and CSS checks, the touched tests, a production build and
-screenshots at 390 and 360 wide in light and dark.
+Branch: `claude/wonderful-lovelace-wk1b1v` (main took the whole earlier
+branch at `4baa05fb` on 14 November; the old audit branch is gone from the
+remote). Never push to main without the founder's literal word. Never deploy.
 
-## THE TEAM (founder, 7 November 2026)
+Two agents at most at any time, never in the same file. The lead owns the
+queue, every review, every commit, every SQL file and every message to the
+founder. A task is Completed only when it was run and seen, not when code
+was written.
 
-Three at most, always on separate files:
+Stages: Queued, Researching, Ready for implementation, Implementing,
+Testing, Bug fixing, Re-auditing, Completed.
 
-| Who | Owns | Queue |
-|---|---|---|
-| Lead (this session) | ALL native iOS and Android work (section 11 of the brief: status bar, safe areas, edge to edge, keyboard and window resize, Android back and predictive back, deep links and App Links, push speed, splash, lifecycle, haptics, permissions, WKWebView and Android WebView performance), plus coordination, review, gates and every commit | "Native" below |
-| Agent FE (frontend upgrade) | Every frontend page and shared component outside messages: banner sweep, PageFrame, StepFrame, sheets, empty and loading states, listing wizard, workspaces, admin desks, saved collections, Activity Centre, design consistency | Rounds 1 to 3, 5 to 7 |
-| Agent MSG (messages) | Messages only: the composer with the mic that becomes Send, voice notes, reactions, true delivery states, the pinned assistant with Talk to a person, support as an inner page | Round 4 |
+## The queue
 
-New frontend ideas from the founder go into Agent FE's queue with a clear
-brief; new native ideas go to the Lead. Hauslet screenshots are references
-for the JOB a screen does, never a design to copy: Vallo's version must look
-like Vallo and differ from theirs.
+| # | Task (handoff section) | Owner | Stage |
+|---|---|---|---|
+| S1 | Confirmation pill `banner.quick`, and the copy and save moments moved onto it (6.1) | Agent INPUT | Implementing |
+| S2 | Paste: photos as attachments, long text as a chip, link chips, one-tap codes, cleaning, safety (6.2) | Agent INPUT | Queued behind S1 |
+| S3 | `CountTabs` shared part, then inbox, notifications, saved (6.3 part 1) | Agent SHEETS | Implementing |
+| S4 | `ActionSheet` shared part, then inbox rows, card menu, profile menu, post menu (6.3 part 2) | Agent SHEETS | Queued behind S3 |
+| S5 | Keyboard pass over every field, composer on the keyboard, accessory bar (6.4) | Agent INPUT | Queued behind S2 |
+| S6 | The remaining CountTabs and ActionSheet screens in the 6.3 tables (offers, bookings, search, agent and host) | Agent SHEETS | Queued behind S4 |
+| M1 | One bug register, every open finding re-checked against the code today (7, phase 1) | Lead | Researching |
+| M2 | Measured Core Web Vitals baseline on the eleven pages, throttled phone profile (7, phase 1) | Agent | Queued |
+| M3 | Supabase audit: queries, indexes, realtime, cron, storage, RLS, auth sessions; report in `docs/DB_NOTES.md` plus SQL files (8) | Agent | Queued |
+| M4 | Bug fixes from the register, worst first, each with a test (7, phase 2) | Both agents | Queued |
+| M5 | Consistency audit with numbers at 390 and 1440; the circular home control, then the founder confirms the page (7, phase 3) | Agent | Queued |
+| M6 | Public platform area by area: home, search, listing, offers, messaging, stays, restaurants, roommates, feed and Circle, profile and account, help, showcase (7, phase 4) | Both agents | Queued |
+| M7 | Staff console: the restricted frame, desk tables on a phone, founder command centre proposal first (7, phase 5) | Agent | Queued |
+| M8 | Motion and performance from the M2 baseline, worst number first (7, phase 6) | Agent | Queued |
+| M9 | Final QA, the probes, the whole suite, a second audit by the agent that did not build it (7, phase 7) | Crossed over | Queued |
 
-## Founder answers, 7 November 2026 (new work, by owner)
-- Lead: the crash log. Scrubbed client and server errors written to Vallo's
-  own table (pending SQL for the founder to paste), native crashes from the
-  shell too, and an admin page that reads it. No Sentry.
-- Lead: the animated splash on native (the exact logo and wordmark).
-- Lead: the long rental rule at 5 months or more wherever the ID check for
-  rentals is decided.
-- Agent MSG: voice notes capped at 2 minutes and kept for ever.
-- Agent FE, in this order after the round 1 sweep:
-  1. THE FEED: a new, polished, unique Vallo look (looks only, every feature
-     kept), built so Vallo Circle can sit beside it.
-  2. Light mode refinement platform wide: cleaner, calmer, more refined.
-  3. The animated logo and wordmark in the web app, plus a motion pass in
-     more places (reduced motion always honoured).
-  4. Privacy choices screen (wide: sharing, visibility, contact, data, AI,
-     notifications) and the Community Promise page with its trust siblings.
-- Closed: D-01 leaked password protection (the founder turned it on).
+## File ownership while S1 to S6 run
 
-## Native (Lead)
-- N1 push in seconds: DONE (kick on enqueue live, 7 Nov).
-- N2 status bar per screen: DONE (screens hold their own glyphs; photo and
-  message viewers draw light glyphs over their dark ground).
-- N3 keyboard: DONE on the web (the step foot sits on the keys); Android
-  decided (Capacitor 8 SystemBars owns the keyboard inset, no adjustResize).
-- N4 Android back: DONE (step flows go back one step); predictive back in
-  the manifest for build 1.0.2.
-- N5 edge to edge: DECIDED (SystemBars), for build 1.0.2, check on device.
-- N6 deep links: DONE (threads, notifications, bookings added on both).
-- N7 haptics: DONE for tabs; saves, sends and money already had them.
-- N8 permissions in context: CHECKED, already right (camera, location and
-  microphone on tap; notifications at five good moments, never on start).
-- N9 resume refresh: DONE.
-- N10 startup and WebView performance: the live data is too thin (6 loads
-  in 14 days); measure a production build on a throttled budget phone
-  profile with round 1's build.
-- Native build queue (needs one planned 1.0.x build): see NATIVE_BUILD_QUEUE.md.
+INPUT: `lib/ui/toast.ts`, `components/ui/ToastHost.tsx`, every composer
+(`app/(app)/messages/[id]/ThreadView.tsx` and `components/app/messages/*`,
+the support composer, the feed composer), `components/ui/Field.tsx`,
+`NairaField.tsx`, the code fields under `app/(auth)`,
+`lib/native/keyboard.ts`.
 
-## Round 1: one feedback system, one sheet, smaller controls (IN PROGRESS)
-- DONE (lead): compact banner; 40 / 44 / 50px button ladder platform-wide;
-  smaller step-screen type; every sheet gets a close X by default (SW3);
-  the chat thread's outcomes on the banner, with Try again on a failed send.
-- RUNNING (Builder A): SW1 banner sweep, member side; SW2 retire `useToast`;
-  SW7 empty states to one glyph; SW15 the kept-copy price stamp.
-- RUNNING (Builder B): X-02 banner sweep, agent, host and admin; R-01 the call
-  channel name (the crash behind 7 of 9 recorded client errors); B-04
-  `cache()` on `getAgentContext`; B-03 rate limits on holds, inspections,
-  viewings, briefs; R-03 one Paystack scheduler; D-08 drift files.
-- WAITING ON THE FOUNDER (Supabase prompt): fast push (seconds, not up to 5
-  minutes), staff sign-in alerts only on a new device, voice notes and
-  reactions.
+SHEETS: `components/ui/Sheet.tsx`, the new `CountTabs.tsx` and
+`ActionSheet.tsx`, `app/(app)/messages/Inbox.tsx` and its swipe,
+`app/(app)/notifications`, `app/(app)/saved`,
+`components/app/listing/CardMenu.tsx`, `components/social/ActionSheet.tsx`,
+`components/social/profile/ProfileMenu.tsx`.
 
-### Carried over from Builder B (stopped 7 November to free its slot)
-- DONE by the lead: R-01 the call channels take their own names (the shape
-  behind 7 of 9 recorded crashes); B-04 `getAgentContext` cached per request.
-- R-03 DECIDED: keep BOTH reconciliation schedulers. The pg_cron path was
-  silently dead for three weeks in September (`lib/cron/freshness.ts`), and the
-  Vercel copy is the backup for the one job that recovers unconfirmed
-  payments. Fix the audit noise instead: write a run row only when the last
-  one is older than 15 minutes (Lead, backend).
-- For Agent FE: banner sweep on the rest of `app/agent/**` (PortfolioControls,
-  BroadcastPaste, DraftMatches, BookingsWorkspace, MandateForm, RevokeDoor,
-  CloseListingSheet, BulkBar, DuplicateListing), all of `app/host/**`,
-  `components/agent/**`, `components/host/**`, `components/workspace/**`, and
-  the four useActionState desks (RecoveryDesk, StandingDesk,
-  ReferenceEditors, StopsDesk) plus the queue page's claim and bulk outcome.
-- For the Lead: B-03 rate limits, D-08 migration drift files.
+Neither touches `app/admin`. The lead works only in files neither holds
+(docs, the bug register, SQL).
 
-## Round 2: the listing wizard, one question per screen
-- LW-01, LW-02: split the 4,733-line `ListingWizard.tsx` into steps as data
-  on `StepFrame` (the 17-screen flow in Survey B), keeping every gate: supply
-  door, SCUML mandate and EDD, charges at the door, photo rules, fee gate,
-  broadcast paste, draft resume.
-- LW-04, B-13: charges at the door and the mandate inside the wizard; one
-  `listing_publish_blockers` function behind the checklist and the desk.
-- R18 to R34: kind cards, connection cards, type tiles, location with the
-  privacy note, pin, room chips, price, charge cards with a live move-in
-  total, photos with the cover, description from the answers (AI with a
-  consent sheet and undo), Check your listing with Change.
+## Notes
 
-## Round 3: pages onto one frame, flows onto one stepper
-- SW4, X-01, AD-01: every ordinary page on `PageFrame` (settings first,
-  then money, bookings, workspaces, admin's four headers into one).
-- SW5: registrations, wallet send and withdraw, support new, checkout progress
-  onto `StepFrame`; SW6 one-choice questions onto `OptionCards`.
-- SW12 skeletons in the content's shape; SW16 no Back on root tabs; the bell on
-  every root; one Create trigger (the bottom bar and side nav keep their
-  structure, founder ruling).
-
-## Round 4: messages, voice, reactions, assistant, support
-- Voice notes (hold to record, slide to cancel, waveform), reactions on every
-  message and call record, Talk to a person inside the pinned assistant,
-  the support chat as an inner page (needs the pending migration).
-
-## Round 5: agent and host workspaces to the references
-- A-01, A-02, H-07 Getting started and Needs attention cards (Do it, Dismiss,
-  Snooze); A-04 What do you manage; A-11 month calendar with legend counts;
-  A-12 Activity inbox with counted tabs; X-05 one role switch, Exit agent
-  tools in every drawer; X-06 workspace pages kept for offline.
-
-## Round 6: admin desks and reporting
-- Business developer desk and social media manager desk on `staff_grants`
-  (Survey B "Missing desks"); AD-06, AD-07 reports routed to the right desk;
-  B-01, AD-02 every server action on `ActionResult`.
-
-## Round 7: duplicates, copy, speed, database hygiene
-- SW13 duplicates (three AI consent pages, two support chats, three help
-  searches, four money histories, two withdrawals, two stay templates).
-- SW11 hard-coded English into the dictionary; SW8 inline svg; SW9 raw sizes;
-  SW10 radii; SW14 hand-rolled dialogs.
-- B-05 search and listing reads in one wave; D-02 merge permissive policies on
-  hot tables; D-01 leaked password protection; R-04, R-05 idempotent alerts.
-- The free commercial-use map provider (founder ruling) and the full-screen
-  pin picker.
-- Vallo Circle, the signature feature (founder ruling on the name), built
-  last on the finished pieces.
+- 14 Nov: `staff_desks_only_2026-11-14.sql` verified applied on live: both
+  position holders hold only their desks, no admin role, and both have
+  acknowledged the staff handbook, so their desks are open.
+- The previous session's small-works agents landed nothing: no
+  `banner.quick`, no `CountTabs`, no shared `ActionSheet`, no paste
+  handlers in the tree at `4baa05fb`. S1 to S6 start from zero.
