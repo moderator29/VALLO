@@ -94,6 +94,7 @@ import { CallButtons } from "@/components/calls/CallButtons";
 import { CallHistoryRow } from "@/components/calls/CallHistoryRow";
 import type { CallPillWords } from "@/components/calls/call-pill-words";
 import { MediaViewer, type ViewerCopy, type ViewerItem } from "@/components/app/messages/MediaViewer";
+import { saveMedia } from "@/components/app/messages/media-actions";
 import { placeCall } from "@/components/calls/place-call";
 import { callMarkerView, type CallMarkerView } from "@/lib/calls/screen";
 import { deliveryStates, type Delivery } from "@/lib/messages/delivery";
@@ -123,6 +124,7 @@ import { deliveryStates, type Delivery } from "@/lib/messages/delivery";
 /* English only for now (Grade 1); the thread's dictionary has no words yet. */
 const SEND_FAILED_WORDS = "Message couldn't be sent. Check your connection and try again.";
 const COPIED_WORDS = { done: "Message copied", failed: "Couldn't copy that message. Try again." };
+const SAVED_PHOTO_WORDS = { done: "Photo saved", failed: "Couldn't save that photo. Try again." };
 
 /* GRADE 1 (P1.3): voice notes, reactions and the new-messages pill. English
    only for now, beside the other Grade 1 words above. */
@@ -662,6 +664,15 @@ export function ThreadView({
     } catch {
       banner.error(COPIED_WORDS.failed);
     }
+  };
+  const menuSavePhoto = async () => {
+    const target = actionMsg;
+    setActionMsg(null);
+    const url = target?.imageUrl;
+    if (!url) return;
+    const result = await saveMedia({ kind: "photo", id: target.id, src: url });
+    if (result === "failed") banner.error(SAVED_PHOTO_WORDS.failed);
+    else banner.success(SAVED_PHOTO_WORDS.done);
   };
   const menuDeleteForMe = async () => {
     const target = actionMsg;
@@ -2390,6 +2401,7 @@ export function ThreadView({
           }
           canDeleteEveryone={actionMsg.mine && !actionMsg.deleted}
           canForward={live && canForward(actionMsg)}
+          onSavePhoto={actionMsg.imageUrl && !actionMsg.deleted ? () => void menuSavePhoto() : undefined}
           onReply={menuReply}
           onForward={menuForward}
           onCopy={() => void menuCopy()}

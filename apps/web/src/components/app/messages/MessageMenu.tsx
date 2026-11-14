@@ -29,6 +29,7 @@ import { REACTION_EMOJI, REACTION_NAMES, type ReactionEmoji } from "@/lib/messag
 
 /* GRADE 1 (P1.3): English only for now; the menu's dictionary has no word for the row yet. */
 const REACT_WORDS = { label: "React to this message", yours: "{name}, your reaction. Tap to remove it" };
+const SAVE_PHOTO_WORDS = "Save photo";
 
 export type MessageMenuProps = {
   /** The menu's words (`experienceInbox.thread.menu`). */
@@ -37,6 +38,8 @@ export type MessageMenuProps = {
   canDeleteEveryone: boolean;
   /** Draws Forward. False for a photo, a deleted message or one still sending. */
   canForward?: boolean;
+  /** Saves the first photo in the message to the device. */
+  onSavePhoto?: () => void;
   onReply: () => void;
   onForward?: () => void;
   onCopy: () => void;
@@ -52,6 +55,7 @@ export function MessageMenu({
   canCopy,
   canDeleteEveryone,
   canForward = false,
+  onSavePhoto,
   onReply,
   onForward,
   onCopy,
@@ -104,6 +108,11 @@ export function MessageMenu({
         {canCopy ? (
           <button type="button" role="menuitem" className="nf-msg-menu__item" onClick={onCopy}>
             {words.copy}
+          </button>
+        ) : null}
+        {onSavePhoto ? (
+          <button type="button" role="menuitem" className="nf-msg-menu__item" onClick={onSavePhoto}>
+            {SAVE_PHOTO_WORDS}
           </button>
         ) : null}
         <button type="button" role="menuitem" className="nf-msg-menu__item" onClick={onDeleteForMe}>
