@@ -205,8 +205,8 @@ export function conversionPercent(part: number, views: number): number | null {
 export const CARD_VIEWS_FROM = 1;
 
 /**
- * The card's counts: views from the first, saves from the first. Never a
- * zero, nothing without figures. Views then saves, so the larger number
+ * The card's counts: views, saves and shares, each from its first. Never a
+ * zero, nothing without figures. Views, saves, shares, so the larger number
  * leads. `text` is the bare compact figure ("1.2k"): the card draws it beside
  * its glyph, and `full` is the sentence a screen reader hears. Pure; client safe.
  */
@@ -221,12 +221,13 @@ export function cardStatItems({
 }): StatItem[] | null {
   if (!stats) return null;
   const items: StatItem[] = [];
-  const bare = (key: "views" | "saves", n: number): StatItem => ({
+  const bare = (key: "views" | "saves" | "shares", n: number): StatItem => ({
     key,
     text: compactCount(n, locale),
     full: countPhrase(n, words[key], locale).full,
   });
   if (stats.views >= CARD_VIEWS_FROM) items.push(bare("views", stats.views));
   if (stats.saves >= 1) items.push(bare("saves", stats.saves));
+  if ((stats.shares ?? 0) >= 1) items.push(bare("shares", stats.shares ?? 0));
   return items.length > 0 ? items : null;
 }

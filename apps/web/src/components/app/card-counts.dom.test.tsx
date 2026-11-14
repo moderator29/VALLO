@@ -1,8 +1,9 @@
 /**
  * THE CARD'S SIGNAL LINE (founder, 14 November 2026), on the real search card
- * at 390 in Chromium: the rating in its capsule, then views and saves as bare
- * figures, under the facts as its own quiet line; the facts row keeps the
- * height it had (the line never wraps the facts). A reviewed listing shows
+ * at 390 in Chromium: one small star and the rating at the start, views, saves
+ * and shares as small glyphs with bare figures at the end, under the facts as
+ * its own quiet line; the facts row keeps the height it had (the line never
+ * wraps the facts). A reviewed listing shows
  * its average and review count; one nobody has reviewed shows the 2.5 every
  * listing starts at with "New", and a screen reader is told it is not yet
  * rated. Views and saves show from the first, never a zero; an example shows
@@ -31,7 +32,7 @@ const ENTRY = `
   const card = (id, listing, extra = {}) => <div id={id}><ListingCard listing={listing} locale="en" t={cardCopy} layout="row" brief {...extra} /></div>;
   mount(
     <div style={{ width: 358 }}>
-      {card("counts", { ...REAL, rating: 4.6, reviewCount: 12, stats: { views: 1234, saves: 24 } })}
+      {card("counts", { ...REAL, rating: 4.6, reviewCount: 12, stats: { views: 1234, saves: 24, shares: 7 } })}
       {card("plain", REAL)}
       {card("zero", { ...REAL, stats: { views: 0, saves: 0 } })}
       {card("saves", { ...REAL, stats: { views: 0, saves: 1 } })}
@@ -51,30 +52,32 @@ describe.skipIf(!hasBrowser && !process.env.CI)("the signal line on a card", () 
       const counts = (id: string) => page.locator(`#${id} [data-testid="card-counts"]`);
       await counts("counts").waitFor();
       const keys = (id: string) => counts(id).locator("[data-stat]").evaluateAll((els) => els.map((el) => el.getAttribute("data-stat")));
-      const seen = (id: string) => counts(id).locator('span[aria-hidden="true"]:not(.nf-stars)').allInnerTexts();
+      const seen = (id: string) => counts(id).locator('span[aria-hidden="true"]').allInnerTexts();
       const heard = (id: string) => counts(id).locator(".sr-only").allTextContents();
-      const stars = (id: string) => counts(id).locator(".nf-stars").getAttribute("data-stars");
+      /* One star, never a row of five, and small glyphs: 12px each. */
+      const glyphs = (id: string) => counts(id).locator("svg").evaluateAll((els) => els.map((el) => Math.round(el.getBoundingClientRect().width)));
 
       /* Reviewed: its own average, how many reviews, then the counts. */
-      expect(await keys("counts")).toEqual(["rating", "views", "saves"]);
-      expect(await seen("counts")).toEqual(["4.6", "(12)", "1.2k", "24"]);
-      expect((await heard("counts")).map((x) => x.trim())).toEqual(["Rated 4.6 out of 5, 12 reviews.", "1,234 views.", "24 saves."]);
-      expect(await stars("counts")).toBe("4.5");
+      expect(await keys("counts")).toEqual(["rating", "views", "saves", "shares"]);
+      expect(await seen("counts")).toEqual(["4.6", "(12)", "1.2k", "24", "7"]);
+      expect((await heard("counts")).map((x) => x.trim())).toEqual(["Rated 4.6 out of 5, 12 reviews.", "1,234 views.", "24 saves.", "7 shares."]);
+      expect(await glyphs("counts")).toEqual([12, 12, 12, 12]);
+      /* Two ends: the rating starts the row, the counts end it. */
+      const ends = await counts("counts").evaluate((el) => {
+        const row = el.getBoundingClientRect();
+        const rating = el.querySelector('[data-stat="rating"]')!.getBoundingClientRect();
+        const last = el.querySelector('[data-stat="shares"]')!.getBoundingClientRect();
+        return [Math.round(rating.left - row.left), Math.round(row.right - last.right)];
+      });
+      expect(ends).toEqual([0, 0]);
       expect(await counts("counts").locator('[data-stat="rating"]').getAttribute("data-rated")).toBe("true");
 
       /* Nobody has reviewed it: the 2.5 every listing starts at, said to be so. */
       expect(await keys("plain")).toEqual(["rating"]);
       expect(await seen("plain")).toEqual(["2.5", "New"]);
       expect((await heard("plain"))[0]).toContain("Not yet rated");
-      expect(await stars("plain")).toBe("2.5");
+      expect(await glyphs("plain")).toEqual([12]);
       expect(await counts("plain").locator('[data-stat="rating"]').getAttribute("data-rated")).toBe("false");
-      /* The lit part of the stars is exactly half the rail. */
-      const lit = await counts("plain").locator(".nf-stars").evaluate((el) => {
-        const all = el.getBoundingClientRect().width;
-        return Math.round((parseFloat(getComputedStyle(el, "::after").width) / all) * 100);
-      });
-      expect(lit).toBe(50);
-
       /* Never a zero; saves from the first; an example like any other. */
       expect(await keys("zero")).toEqual(["rating"]);
       expect(await keys("saves")).toEqual(["rating", "saves"]);

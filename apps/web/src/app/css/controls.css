@@ -1796,22 +1796,26 @@
   }
 
   /* ------------------------------------------------- card signal line */
-  /* The rating in its capsule, then views and saves as bare figures
-     (`components/app/listing/CardCounts.tsx`). */
+  /* One quiet row with two ends: the rating at the start (a small star, the
+     figure, the review count), the counts at the end as small muted glyphs
+     with bare figures (`components/app/listing/CardCounts.tsx`). */
   .nf-signal {
+    flex-wrap: nowrap;
     align-items: center;
+    justify-content: space-between;
     column-gap: var(--nf-space-sm);
-    row-gap: var(--nf-space-2xs);
     color: var(--nf-content-muted);
   }
   .nf-signal__rating {
     display: inline-flex;
     align-items: center;
     gap: var(--nf-space-2xs);
-    padding: var(--nf-space-3xs) var(--nf-space-xs);
-    border-radius: var(--nf-radius-pill);
-    background: var(--nf-surface-raised);
+    min-width: 0;
     white-space: nowrap;
+  }
+  .nf-signal__star {
+    flex: none;
+    color: var(--nf-rating);
   }
   .nf-signal__figure {
     font-weight: 600;
@@ -1820,14 +1824,19 @@
   .nf-signal__note {
     color: var(--nf-content-muted);
   }
+  .nf-signal__counts {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--nf-space-sm);
+    min-width: 0;
+    margin-inline-start: auto;
+  }
   .nf-signal__count {
     display: inline-flex;
     align-items: center;
     gap: var(--nf-space-2xs);
     white-space: nowrap;
-  }
-  .nf-signal__count > svg {
-    color: var(--nf-brand-primary);
+    color: var(--nf-content-muted);
   }
 
   /* ---------------------------------------------- listing page pulse */
