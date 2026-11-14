@@ -54,6 +54,23 @@ describe("the protected payment screens", () => {
     expect(words(journey("funding-no-expiry"))).toContain("No time limit was given");
   });
 
+  it("screen 3 shows the provider's own total when the payer bears the fee, and says what it includes", () => {
+    const text = words(journey("funding-fee"));
+    expect(journey("funding-fee")).toContain('data-testid="pp-funding-fee"');
+    expect(text).toContain("This total includes the protection fee of");
+    expect(text).toMatch(/182,850/);
+    /* With no fee on top, no such line is drawn. */
+    expect(journey("funding")).not.toContain('data-testid="pp-funding-fee"');
+  });
+
+  it("screen 2 says the total to transfer before anything opens, when the payer bears the fee", () => {
+    const buyer = { buyerPaysMinor: 182_850_00, moneyInFeeMinor: 2_850_00, sellerReceivesMinor: 180_000_00, payer: "buyer" as const };
+    const out = words(renderToStaticMarkup(<ReviewProtection deal={PREVIEW_DEALS.funding!} quote={buyer} agreementVersion={3} locale="en" onAgree={noop} />));
+    expect(out).toContain("Total to transfer");
+    expect(out).toMatch(/182,850/);
+    expect(out).not.toContain("paid by the lister");
+  });
+
   it("screen 4 waits and never says protected", () => {
     const text = words(journey("waiting"));
     expect(text).toContain("Transfer being confirmed");

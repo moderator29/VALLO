@@ -1811,7 +1811,7 @@ export const PROTECTED_ACTION_REFUSED = {
    nothing of it. */
 export const PROTECTED_IDENTITY_TITLE = "Confirm your identity";
 export const PROTECTED_IDENTITY_LEAD =
-  "Everyone who pays or is paid through a protected payment is checked once, by a third party, before their first one. It takes a moment and you will not be asked again.";
+  "Everyone who pays or is paid this way confirms their identity once, with a third party, before their first payment. It takes a moment and you will not be asked again.";
 export const PROTECTED_IDENTITY_KIND_LABEL = "Which number will you use";
 export const PROTECTED_IDENTITY_KINDS = { nin: "NIN", bvn: "BVN" } as const;
 export const PROTECTED_IDENTITY_NUMBER_LABEL = { nin: "Your NIN", bvn: "Your BVN" } as const;
@@ -1827,7 +1827,7 @@ export const PROTECTED_IDENTITY_RESULT = {
   needs_review: "This check needs a person to look at it. Contact support and we will help you finish it.",
   bad_input: "Enter the 11 digits of the number, and your date of birth as it is on the record.",
   no_email: "Add an email address to your account first, then come back to this step.",
-  under_age: "You must be 18 or older to use a protected payment.",
+  under_age: "You must be 18 or older to pay this way.",
   unavailable: "The check could not be run just now. Nothing was sent; try again in a moment.",
 } as const;
 export const PROTECTED_START_REFUSED = {
@@ -1839,6 +1839,11 @@ export const PROTECTED_START_REFUSED = {
 } as const;
 export const PROTECTED_START_PENDING =
   "Your payment is being set up. The transfer details will appear here as soon as they are ready; you do not need to start again.";
+/** The bank named on transfer details issued by the provider's test simulator. Never drawn with a live key. */
+export const PROTECTED_SANDBOX_BANK = "Test bank (sandbox)";
+export const PROTECTED_FUNDING_FEE_INCLUDED = "This total includes the protection fee of {fee}.";
+export const PROTECTED_IDENTITY_ALREADY_USED =
+  "That number is already linked to another Vallo account. Contact support and we will sort it out with you.";
 export const PROTECTED_SETUP_TITLE = "Protected payments";
 export const PROTECTED_SETUP_LEAD =
   "To be paid through a protected payment you confirm your identity once, and keep a bank account on Vallo for the payout.";

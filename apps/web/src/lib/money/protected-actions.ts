@@ -7,8 +7,8 @@
  *
  * FAIL CLOSED. Every action refuses, before reading anything, while the rail
  * is switched off (`escrowPayEnabled()`, `payments_escrowpay_on`, fail
- * closed) or the provider's API is undocumented (`DOCUMENTED` false). Both
- * are true today, so none of these can do anything on any deployment.
+ * closed). The switch is off today, so none of these can do anything on any
+ * deployment; what else stops money is in the adapter's README.
  *
  * NOTHING HERE MARKS MONEY MOVED. "Refresh status" and "I've made the
  * transfer" only ask for a read-back; funded, released and refunded are
@@ -23,7 +23,7 @@ import { recordAlert } from "../alerts";
 import { DOCUMENTED } from "../payments/providers/escrowpay/client";
 import { escrowPayEnabled } from "../payments/providers/escrowpay/switch";
 import { consume, subjectForUser } from "../security/rate-limit";
-import { PROTECTED_ACTION_REFUSED, PROTECTED_IDENTITY_RESULT, PROTECTED_PROBLEM_REASONS, PROTECTED_START_REFUSED } from "./copy";
+import { PROTECTED_ACTION_REFUSED, PROTECTED_IDENTITY_ALREADY_USED, PROTECTED_IDENTITY_RESULT, PROTECTED_PROBLEM_REASONS, PROTECTED_START_REFUSED } from "./copy";
 import { adminDb } from "./member-wallet";
 import { onboardMember } from "./protected-provider";
 import {
@@ -218,6 +218,10 @@ export async function verifyProtectedIdentity(input: IdentityInput): Promise<Act
   if (out.state === "needs_review") {
     await recordAlert({ kind: "protected_rail.identity_needs_review", severity: "warning", detail: { user_id: ready.userId, kind: parsed.data.kind } });
     return fail(PROTECTED_IDENTITY_RESULT.needs_review);
+  }
+  if (out.state === "already_used") {
+    await recordAlert({ kind: "protected_rail.identity_already_used", severity: "warning", detail: { user_id: ready.userId, kind: parsed.data.kind } });
+    return fail(PROTECTED_IDENTITY_ALREADY_USED);
   }
   if (out.state === "not_matched") return fail(PROTECTED_IDENTITY_RESULT.not_matched);
   if (out.state === "bad_input") return fail(PROTECTED_IDENTITY_RESULT.bad_input);

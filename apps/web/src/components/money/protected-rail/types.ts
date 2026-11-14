@@ -31,6 +31,8 @@ export type ProtectedDeal = {
     accountName: string;
     accountNumber: string;
     expiresAt: string | null;
+    /** The exact total to transfer, when the provider gave one: the amount plus its fee if the payer bears it. */
+    amountMinor?: number | null;
   } | null;
   stamps: JourneyStamps;
   /** When Vallo last read the provider's state, ISO, or null. */

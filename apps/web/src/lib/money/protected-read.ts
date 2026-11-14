@@ -105,13 +105,14 @@ function readFunding(row: RowLike): ProtectedDeal["funding"] {
   const raw = row.funding_instructions;
   if (!raw || typeof raw !== "object" || Array.isArray(raw)) return null;
   const f = raw as RowLike;
-  /* TODO(provider-docs): the instruction's own field names. Both spellings
-     Vallo's adapter may store are read; anything else draws no details. */
+  /* The keys `issueInstructions` stores (protected-rail.ts); anything else draws no details. */
   const bank = str(f.bank_name) ?? str(f.bank);
   const accountName = str(f.account_name);
   const accountNumber = str(f.account_number);
   if (!bank || !accountName || !accountNumber) return null;
-  return { bank, accountName, accountNumber, expiresAt: str(row.funding_expires_at) ?? str(f.expires_at) };
+  /* The total the provider said to transfer: the amount, plus its fee when the payer bears it. */
+  const total = num(f.amount_minor);
+  return { bank, accountName, accountNumber, expiresAt: str(row.funding_expires_at) ?? str(f.expires_at), amountMinor: total !== null && total > 0 ? total : null };
 }
 
 function dayOf(iso: string): string | null {

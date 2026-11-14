@@ -17,6 +17,8 @@ import { ESCROWPAY_PATHS, type EscrowPayCall } from "./client";
  *    6, "no unexpected automatic release countdown");
  *  - `payout_preference: "automatic"` with the lister's verified payout
  *    account: a release goes on to the lister's bank with no second step.
+ *    Only where the deployment is set to `manual` does a release wait in
+ *    Vallo's balance at the provider for staff to pay out.
  */
 
 export type IdentityKind = "nin" | "bvn";
@@ -65,6 +67,7 @@ export function createTransactionCall(input: {
   payerPartyId: string;
   beneficiaryPartyId: string;
   payoutAccountId: string;
+  payoutPreference: "automatic" | "manual";
   fundingDeadline: string;
   description: string;
   metadata: Record<string, string>;
@@ -82,7 +85,7 @@ export function createTransactionCall(input: {
       beneficiary: { party_type: "party", party_id: input.beneficiaryPartyId },
       release_policy: "manual_only",
       refund_policy: "manual_only",
-      payout_preference: "automatic",
+      payout_preference: input.payoutPreference,
       payout_account_id: input.payoutAccountId,
       funding_deadline: input.fundingDeadline,
       external_reference: input.reference,
@@ -115,6 +118,27 @@ export function paymentAccountCall(input: { reference: string; transactionId: st
     idempotencyKey: `${input.reference}:account:${input.attempt}`,
     body: { type: "transaction_temporary", expected_amount_minor: input.amountMinor, currency: "NGN", expires_at: input.expiresAt },
   };
+}
+
+/**
+ * CheckoutSessionCreate, with every field left to its default (bank
+ * transfer). Its answer carries `payment_instructions`: the payment account
+ * above with the account name and the exact total to transfer, which is the
+ * amount plus the provider's fee when the payer bears it. Vallo draws its
+ * own screen from those and never sends the member to the hosted page.
+ */
+export function checkoutSessionCall(input: { reference: string; transactionId: string; attempt: number }): EscrowPayCall {
+  return {
+    method: "POST",
+    path: ESCROWPAY_PATHS.checkoutSessions(input.transactionId),
+    idempotencyKey: `${input.reference}:checkout:${input.attempt}`,
+    body: {},
+  };
+}
+
+/** FeeEstimateRequest: the provider's own figure for the money-in fee, and who bears it. */
+export function feeEstimateCall(amountMinor: number): EscrowPayCall {
+  return { method: "POST", path: ESCROWPAY_PATHS.feeEstimates, body: { amount_minor: amountMinor, currency: "NGN", fee_type: "escrow_service" } };
 }
 
 /** TransactionExtend: a later funding deadline, for new transfer details after the first ones lapsed. */

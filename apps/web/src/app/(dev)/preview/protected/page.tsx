@@ -9,6 +9,7 @@
      ?screen=review                            screen 2, review the agreement
      ?screen=funding                           screen 3, transfer details and clock
      ?screen=funding-no-expiry                 screen 3 with no provider expiry
+     ?screen=funding-fee                       screen 3, the total includes the fee
      ?screen=waiting                           screen 4, the bank is confirming
      ?screen=expired                           the transfer details expired
      ?screen=protected                         screens 5 and 6, a stay
@@ -36,6 +37,7 @@ const SCREENS = [
   "review",
   "funding",
   "funding-no-expiry",
+  "funding-fee",
   "waiting",
   "expired",
   "protected",

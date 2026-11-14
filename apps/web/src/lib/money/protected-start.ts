@@ -8,9 +8,9 @@ import { escrowPayEnabled } from "../payments/providers/escrowpay/switch";
 import { PROTECTED_PAYEE_DEFAULT, PROTECTED_PAYER_DEFAULT, PROTECTED_PLACE_DEFAULT, PROTECTED_REFUND_TERMS_DEFAULT } from "./copy";
 import { readAgreementRail } from "./fund-view";
 import { adminDb } from "./member-wallet";
-import { protectedQuote, type ProtectedQuote } from "./protected-fees";
+import type { ProtectedQuote } from "./protected-fees";
 import { milestoneFor } from "./protected-journey";
-import { findParty, protectedRailDeps, protectedRailOpen } from "./protected-provider";
+import { estimateMoneyInFee, findParty, protectedRailDeps, protectedRailOpen } from "./protected-provider";
 import { approvedCategory, datesFor } from "./protected-read";
 import type { ProtectedDeal } from "@/components/money/protected-rail/types";
 
@@ -28,7 +28,12 @@ import type { ProtectedDeal } from "@/components/money/protected-rail/types";
  *  3. the agreement goes down the protected rail, and its category is
  *     approved and has a milestone;
  *  4. no protected payment is live on it already (the funding page draws
- *     that one instead), and a fee can be quoted for the amount.
+ *     that one instead), and the provider quotes its fee for the amount.
+ *
+ * THE FEE IS THE PROVIDER'S OWN FIGURE (`POST /fees/estimates`), never worked
+ * out here: its bands are progressive, and it says who bears the fee at
+ * funding. When the payer bears it, the total to transfer is the amount plus
+ * the fee, and the review screen says so before anything is opened.
  *
  * Read under the viewer's own session. The one provider call (is this payer
  * known?) is made with the server's key; its answer is only a yes or a no.
@@ -88,8 +93,13 @@ export async function readProtectedStart(agreementId: string): Promise<Protected
 
     const amountMinor = Number(ag.amount_minor);
     const version = Number(ag.terms_version);
-    const quote = Number.isSafeInteger(amountMinor) ? protectedQuote(amountMinor) : null;
-    if (!quote || !Number.isSafeInteger(version) || version < 1) return null;
+    if (!Number.isSafeInteger(amountMinor) || amountMinor <= 0 || !Number.isSafeInteger(version) || version < 1) return null;
+    const fee = await estimateMoneyInFee(deps, amountMinor);
+    if (!fee) return null;
+    const quote: ProtectedQuote =
+      fee.payer === "payer"
+        ? { buyerPaysMinor: amountMinor + fee.feeMinor, moneyInFeeMinor: fee.feeMinor, sellerReceivesMinor: amountMinor, payer: "buyer" }
+        : { buyerPaysMinor: amountMinor, moneyInFeeMinor: fee.feeMinor, sellerReceivesMinor: amountMinor - fee.feeMinor, payer: "seller" };
 
     const [listing, people, party] = await Promise.all([
       str(ag.listing_id) ? db.from("listings").select("title, area, city").eq("id", ag.listing_id as string).maybeSingle() : Promise.resolve({ data: null }),

@@ -10,7 +10,11 @@ import "server-only";
  *                             production host, not a second hostname). There
  *                             is still no default: unset means not configured.
  *   ESCROWPAY_API_KEY         the secret key, sent as `X-API-Key`. Its prefix
- *                             names its book: `ep_test_` or `ep_live_`.
+ *                             names its book. The dashboard issues
+ *                             `sk_test_...` and `sk_live_...` (seen on the
+ *                             sandbox, 14 November 2026); the provider's
+ *                             guide writes them `ep_test_sk_...` and
+ *                             `ep_live_sk_...`, so both spellings are read.
  *   ESCROWPAY_WEBHOOK_SECRET  the endpoint signing secret (`whsec_...`), shown
  *                             once when the endpoint is created in the
  *                             provider's dashboard. Distinct from the API key.
@@ -18,6 +22,17 @@ import "server-only";
  *                             optional, only during a rotation: the provider
  *                             signs with either secret for 24 hours.
  *   ESCROWPAY_ENVIRONMENT     "sandbox" (a test key) or "production" (a live key).
+ *   ESCROWPAY_PAYOUT_PREFERENCE
+ *                             optional. Unset or "automatic": a release goes
+ *                             straight on to the lister's bank, and Vallo's
+ *                             own balance at the provider never carries a
+ *                             member's money. "manual": a release lands in
+ *                             Vallo's balance at the provider and staff pay
+ *                             it out from the provider's dashboard. The
+ *                             provider refuses "automatic" on an account
+ *                             where it is switched off (seen on the sandbox),
+ *                             and then nothing opens. Any other value is not
+ *                             configured.
  *
  * The rules:
  *  - the key's book must be the one the marker names. A live key marked
@@ -38,12 +53,14 @@ export type EscrowPayConfig = {
   webhookSecret: string | null;
   webhookSecretPrevious: string | null;
   environment: EscrowPayEnvironment;
+  /** How a release reaches the lister: straight to their bank, or through staff. */
+  payoutPreference: "automatic" | "manual";
   /** Whether this configuration may open, release or refund a member's payment. */
   startsMoney: boolean;
 };
 
-const TEST_KEY = /^ep_test_/;
-const LIVE_KEY = /^ep_live_/;
+const TEST_KEY = /^(sk_test_|ep_test_)/;
+const LIVE_KEY = /^(sk_live_|ep_live_)/;
 
 export function escrowPayConfig(env: Readonly<Record<string, string | undefined>>): EscrowPayConfig | null {
   /* The host alone is stored; a pasted "/api/v1" is taken off, since every path carries it. */
@@ -68,6 +85,8 @@ export function escrowPayConfig(env: Readonly<Record<string, string | undefined>
   if (marker === "production" && !LIVE_KEY.test(apiKey)) return null;
   const productionDeployment = vercelEnv === "" || vercelEnv === "production";
   if (marker === "production" && !productionDeployment) return null;
+  const payout = (env.ESCROWPAY_PAYOUT_PREFERENCE ?? "").trim().toLowerCase() || "automatic";
+  if (payout !== "automatic" && payout !== "manual") return null;
   const secret = (env.ESCROWPAY_WEBHOOK_SECRET ?? "").trim();
   const previous = (env.ESCROWPAY_WEBHOOK_SECRET_PREVIOUS ?? "").trim();
   return {
@@ -76,6 +95,7 @@ export function escrowPayConfig(env: Readonly<Record<string, string | undefined>
     webhookSecret: secret || null,
     webhookSecretPrevious: previous || null,
     environment: marker,
+    payoutPreference: payout,
     startsMoney: !(marker === "sandbox" && vercelEnv === "production"),
   };
 }

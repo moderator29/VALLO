@@ -41,10 +41,29 @@ export const ESCROWPAY_EVENT_STATES: Readonly<Record<string, ArrangementStatus>>
 });
 
 /**
- * The transaction's own status word, as the sandbox returns it. Filled from
- * the sandbox run recorded in the adapter's README, never guessed.
+ * The transaction's own status word, each one seen on the provider's sandbox
+ * on 14 November 2026 (`docs/handoff/ESCROWPAY_INTEGRATION.md`, "The sandbox
+ * run"), never guessed:
+ *
+ *   draft            made, not yet payable. No Vallo state: the open is not finished.
+ *   pending_funding  activated, waiting for the transfer
+ *   funded           the whole amount is held (`funded_minor` is the amount)
+ *   released         the whole amount has been released
+ *   refunded         the whole amount has been refunded
+ *   cancelled        withdrawn before any money arrived
+ *
+ * `expired` was not reached on the sandbox (it needs the funding deadline to
+ * pass); it is the provider's own word in its webhook list
+ * (`transaction.expired`) and among the closed states its dashboard reads.
  */
-export const ESCROWPAY_STATUS_WORDS: Readonly<Record<string, ArrangementStatus>> = Object.freeze({});
+export const ESCROWPAY_STATUS_WORDS: Readonly<Record<string, ArrangementStatus>> = Object.freeze({
+  pending_funding: "awaiting_payment",
+  funded: "protected",
+  released: "released",
+  refunded: "refunded",
+  cancelled: "cancelled",
+  expired: "cancelled",
+});
 
 function lookup(table: Readonly<Record<string, ArrangementStatus>>, word: unknown): ArrangementStatus | null {
   if (typeof word !== "string") return null;

@@ -14,6 +14,8 @@ vi.mock("./release-gate", () => ({ releaseGate: async () => gate.answer }));
 const rail = await import("./protected-rail");
 
 const AMOUNT = 180_000_00;
+/* The provider's own fee on that amount, borne by the payer (as the sandbox quoted it). */
+const FEE = 2_850_00;
 const NOW = Date.parse("2026-11-14T10:00:00Z");
 
 const ROW = {
@@ -36,6 +38,7 @@ const CONFIG = {
   webhookSecret: "whsec_x",
   webhookSecretPrevious: null,
   environment: "sandbox" as const,
+  payoutPreference: "automatic" as const,
   startsMoney: true,
 };
 
@@ -47,10 +50,18 @@ function provider(over: Record<string, RailResult<unknown>> = {}) {
   const answers: Record<string, RailResult<unknown>> = {
     "GET /api/v1/parties?external_reference=payer&page_size=5": ok({ items: [{ id: "PAR_payer", status: "active" }] }),
     "GET /api/v1/parties?external_reference=lister&page_size=5": ok({ items: [{ id: "PAR_lister", status: "active" }] }),
-    "GET /api/v1/payout-accounts?party_id=PAR_lister&page_size=50": ok({ items: [{ id: "PAC_1", status: "verified", masked_account_number: "******6789" }] }),
-    "POST /api/v1/transactions": ok({ id: "TXN_1", status: "draft", version: 1, amount_minor: AMOUNT }),
+    "GET /api/v1/payout-accounts?party_id=PAR_lister&page_size=50": ok({
+      items: [{ id: "PAC_1", status: "verified", bank_code: "000013", account_number: "0123456789", masked_account_number: "******6789", resolved_account_name: "SIMULATED ACCOUNT 6789", payout_eligible: true }],
+    }),
+    "GET /api/v1/banks": ok({ environment: "test", banks: [{ bank_code: "000013", bank_name: "GTBANK PLC (Simulator)" }, { bank_code: "090175", bank_name: "Rubies MFB" }] }),
+    "POST /api/v1/transactions": ok({ id: "TXN_1", status: "draft", version: 1, amount_minor: AMOUNT, funded_minor: 0, released_minor: 0, refunded_minor: 0 }),
     "POST /api/v1/transactions/TXN_1/activate": ok({ id: "TXN_1", status: "pending_funding", version: 2 }),
-    "POST /api/v1/transactions/TXN_1/payment-accounts": ok({ id: "PA_1", bank_name: "Rubies MFB", account_name: "EscrowPay / Vallo", account_number: "0123456789", expires_at: "2026-11-16T10:00:00Z" }),
+    "POST /api/v1/transactions/TXN_1/payment-accounts": ok({ id: "PAM_1", status: "active", account_number: "0123456789", bank_code: "090175", expires_at: "2026-11-16T09:45:00+00:00" }),
+    "POST /api/v1/transactions/TXN_1/checkout-sessions": ok({
+      id: "CSN_1",
+      status: "open",
+      payment_instructions: { payment_account_id: "PAM_1", account_number: "0123456789", bank_code: "090175", account_name: "VALLO SPACES LTD", amount_minor: AMOUNT + FEE, expires_at: "2026-11-16T09:45:00+00:00" },
+    }),
     "POST /api/v1/transactions/TXN_1/releases": ok({ id: "REL_1", status: "processing", amount_minor: AMOUNT }),
     "POST /api/v1/transactions/TXN_1/refunds": ok({ id: "RFD_1", status: "processing", amount_minor: AMOUNT }),
     ...over,
@@ -75,7 +86,7 @@ function deps(
     deal_agreements: {
       select: { data: { renter_id: "payer", owner_id: "lister", named_payer_id: null, named_payer_by_renter_at: null, named_payer_accepted_at: null, listing_id: "l-1" } },
     },
-    bank_accounts: { select: { data: over.bank ?? [{ bank_code: "058", bank_name: "GTBank", account_number: "0123456789", is_default: true }] } },
+    bank_accounts: { select: { data: over.bank ?? [{ bank_code: "058", bank_name: "GTBank", account_number: "0123456789", resolved_account_name: "SIMULATED ACCOUNT 6789", is_default: true }] } },
     provider_arrangement_observe: {
       rpc: (call) => ({ data: typeof over.observe === "function" ? over.observe(call) : (over.observe ?? "changed") }),
     },
@@ -139,19 +150,33 @@ describe("opening a protected payment", () => {
       "POST /api/v1/transactions",
       "POST /api/v1/transactions/TXN_1/activate",
       "POST /api/v1/transactions/TXN_1/payment-accounts",
+      "POST /api/v1/transactions/TXN_1/checkout-sessions",
+      "GET /api/v1/banks",
     ]);
     const create = send.mock.calls[3]![1];
     expect(create.idempotencyKey).toBe("vallo-pp-1:create");
-    expect(create.body).toMatchObject({ amount_minor: AMOUNT, external_reference: "vallo-pp-1", payer: { party_id: "PAR_payer" }, beneficiary: { party_id: "PAR_lister" }, payout_account_id: "PAC_1", funding_mode: "exact", release_policy: "manual_only" });
+    expect(create.body).toMatchObject({ amount_minor: AMOUNT, external_reference: "vallo-pp-1", payer: { party_id: "PAR_payer" }, beneficiary: { party_id: "PAR_lister" }, payout_account_id: "PAC_1", payout_preference: "automatic", funding_mode: "exact", release_policy: "manual_only" });
     expect(send.mock.calls[4]![1].body).toEqual({ version: 1 });
     expect(send.mock.calls[5]![1].body).toMatchObject({ expected_amount_minor: AMOUNT, type: "transaction_temporary" });
+    expect(send.mock.calls[6]![1]).toMatchObject({ idempotencyKey: "vallo-pp-1:checkout:1", body: {} });
 
     const writes = db.of("provider_arrangements", "update").map((c) => c.values as Record<string, unknown>);
     expect(writes[0]).toEqual({ buyer_customer_id: "PAR_payer", seller_customer_id: "PAR_lister", environment: "sandbox" });
     expect(writes[1]).toEqual({ provider_arrangement_id: "TXN_1" });
-    expect(writes[2]).toMatchObject({
-      funding_instructions: { bank_name: "Rubies MFB", account_name: "EscrowPay / Vallo", account_number: "0123456789", attempt: 1 },
-      funding_expires_at: "2026-11-16T10:00:00Z",
+    /* The total the payer transfers is the provider's own: the amount plus its fee. */
+    expect(writes[2]).toEqual({
+      funding_instructions: {
+        bank_name: "Rubies MFB",
+        bank_code: "090175",
+        account_name: "VALLO SPACES LTD",
+        account_number: "0123456789",
+        amount_minor: AMOUNT + FEE,
+        expires_at: "2026-11-16T09:45:00+00:00",
+        payment_account_id: "PAM_1",
+        checkout_session_id: "CSN_1",
+        attempt: 1,
+      },
+      funding_expires_at: "2026-11-16T09:45:00+00:00",
     });
     expect(observed()).toHaveLength(1);
     expect(observed()[0]).toMatchObject({ p_to_status: "awaiting_payment", p_source: "provider_response", p_provider_arrangement_id: "TXN_1", p_provider_amount_minor: AMOUNT });
@@ -213,11 +238,47 @@ describe("opening a protected payment", () => {
     expect(observed()[0]).toMatchObject({ p_to_status: "unknown", p_provider_arrangement_id: "TXN_1" });
   });
 
-  it("never stores transfer details it could not read in full", async () => {
-    const send = provider({ "POST /api/v1/transactions/TXN_1/payment-accounts": ok({ id: "PA_1", bank_name: "Rubies MFB", account_number: "****6789" }) });
+  it.each([
+    ["has no account name", { payment_account_id: "PAM_1", account_number: "0123456789", bank_code: "090175", amount_minor: AMOUNT + FEE }],
+    ["asks for less than the amount", { payment_account_id: "PAM_1", account_number: "0123456789", bank_code: "090175", account_name: "VALLO SPACES LTD", amount_minor: AMOUNT - 1 }],
+  ])("never stores transfer details when the session %s", async (_name, instructions) => {
+    const send = provider({ "POST /api/v1/transactions/TXN_1/checkout-sessions": ok({ id: "CSN_1", payment_instructions: instructions }) });
     const { d, db } = deps({ row: PREPARING, send });
     expect(await rail.openProtectedPayment(d, OPEN)).toMatchObject({ outcome: "unknown" });
     expect(db.of("provider_arrangements", "update").some((c) => "funding_instructions" in (c.values as object))).toBe(false);
+  });
+
+  it("names the sandbox's own bank only on a test key; a live account at a bank on no list is never shown", async () => {
+    const offList = { "GET /api/v1/banks": ok({ banks: [{ bank_code: "000013", bank_name: "GTBANK PLC" }] }) };
+    const sandbox = deps({ row: PREPARING, send: provider(offList) });
+    expect(await rail.openProtectedPayment(sandbox.d, OPEN)).toMatchObject({ outcome: "opened" });
+    const stored = sandbox.db.of("provider_arrangements", "update").map((c) => c.values as Record<string, Record<string, unknown>>)[2]!;
+    expect(stored.funding_instructions!.bank_name).toBe("Test bank (sandbox)");
+    const live = deps({ row: PREPARING, send: provider(offList), config: { ...CONFIG, environment: "production" as never } });
+    expect(await rail.openProtectedPayment(live.d, OPEN)).toMatchObject({ outcome: "unknown" });
+  });
+
+  it("on a live key, a payout account whose holder is not the one Vallo's own enquiry found is never used", async () => {
+    const other = [{ bank_code: "058", bank_name: "GTBank", account_number: "0123456789", resolved_account_name: "ADA NGOZI OBI", is_default: true }];
+    const made = { "POST /api/v1/payout-accounts": ok({ id: "PAC_2", status: "verified", account_number: "0123456789", resolved_account_name: "SOMEBODY ELSE ENTIRELY", payout_eligible: true }) };
+    const { d, db, alert } = deps({ bank: other, send: provider(made), config: { ...CONFIG, environment: "production" as never } });
+    expect(await rail.openProtectedPayment(d, OPEN)).toEqual({ outcome: "refused", reason: "lister_not_ready" });
+    expect(alert).toHaveBeenCalledWith("protected_rail.payout_name_mismatch", expect.anything());
+    expect(db.of("protected_payment_open", "rpc")).toHaveLength(0);
+  });
+
+  it("an account with automatic payout switched off opens nothing, and staff are told what to turn on", async () => {
+    const refused: RailResult<unknown> = { ok: false, kind: "refused", httpStatus: 422, detail: '{"detail":{"code":"policy_violation","message":"automatic_payout_disabled"}}', retryAfterSeconds: null, code: "policy_violation" } as never;
+    const { d, observed, alert } = deps({ row: PREPARING, send: provider({ "POST /api/v1/transactions": refused }) });
+    expect(await rail.openProtectedPayment(d, OPEN)).toEqual({ outcome: "failed", arrangementId: "arr-1" });
+    expect(observed()[0]).toMatchObject({ p_to_status: "failed", p_source: "provider_response" });
+    expect(alert).toHaveBeenCalledWith("protected_rail.automatic_payout_disabled", expect.anything());
+  });
+
+  it("asks for a manual payout only where the deployment is set to it", async () => {
+    const { d, send } = deps({ row: PREPARING, config: { ...CONFIG, payoutPreference: "manual" as never } });
+    await rail.openProtectedPayment(d, OPEN);
+    expect(send.mock.calls[3]![1].body).toMatchObject({ payout_preference: "manual", payout_account_id: "PAC_1" });
   });
 });
 
@@ -227,6 +288,26 @@ describe("reading back", () => {
     const { d, observed } = deps({ send });
     expect(await rail.refreshProtectedPayment(d, { arrangementId: "arr-1", actorUserId: "payer" })).toEqual({ outcome: "read", status: "protected", moved: false });
     expect(observed()).toHaveLength(0);
+  });
+
+  it.each([
+    ["funded", "awaiting_payment", "protected"],
+    ["released", "release_requested", "released"],
+    ["refunded", "refund_requested", "refunded"],
+    ["cancelled", "awaiting_payment", "cancelled"],
+  ])("the provider's word %s moves a %s payment to %s, with its amount for the database to check", async (word, from, to) => {
+    const whole = { funded_minor: AMOUNT, released_minor: word === "released" ? AMOUNT : 0, refunded_minor: word === "refunded" ? AMOUNT : 0 };
+    const send = provider({ "GET /api/v1/transactions/TXN_1": ok({ id: "TXN_1", status: word, version: 4, amount_minor: AMOUNT, ...whole }) });
+    const { d, observed } = deps({ row: { ...ROW, status: from, funding_instructions: { attempt: 1 } }, send });
+    expect(await rail.refreshProtectedPayment(d, { arrangementId: "arr-1", actorUserId: "payer" })).toEqual({ outcome: "read", status: to, moved: true });
+    expect(observed()[0]).toMatchObject({ p_to_status: to, p_source: "provider_readback", p_provider_amount_minor: AMOUNT, p_provider_arrangement_id: "TXN_1" });
+  });
+
+  it("a part released or refunded is never read as the whole", async () => {
+    const send = provider({ "GET /api/v1/transactions/TXN_1": ok({ id: "TXN_1", status: "released", version: 4, amount_minor: AMOUNT, funded_minor: AMOUNT, released_minor: AMOUNT - 100 }) });
+    const { d, observed } = deps({ row: { ...ROW, status: "release_requested" }, send });
+    await rail.refreshProtectedPayment(d, { arrangementId: "arr-1", actorUserId: "payer" });
+    expect(observed()[0]).toMatchObject({ p_to_status: "requires_review" });
   });
 
   it("finds a transaction whose create was never answered by Vallo's own reference, and keeps its id", async () => {
@@ -242,7 +323,13 @@ describe("reading back", () => {
     const send = provider({ "GET /api/v1/transactions/TXN_1": ok({ id: "TXN_1", status: "draft", version: 1, amount_minor: AMOUNT }) });
     const { d, observed, sent } = deps({ row: { ...ROW, status: "unknown" }, send });
     expect(await rail.refreshProtectedPayment(d, { arrangementId: "arr-1", actorUserId: "payer" })).toEqual({ outcome: "read", status: "awaiting_payment", moved: true });
-    expect(sent()).toEqual(["GET /api/v1/transactions/TXN_1", "POST /api/v1/transactions/TXN_1/activate", "POST /api/v1/transactions/TXN_1/payment-accounts"]);
+    expect(sent()).toEqual([
+      "GET /api/v1/transactions/TXN_1",
+      "POST /api/v1/transactions/TXN_1/activate",
+      "POST /api/v1/transactions/TXN_1/payment-accounts",
+      "POST /api/v1/transactions/TXN_1/checkout-sessions",
+      "GET /api/v1/banks",
+    ]);
     expect(observed()[0]).toMatchObject({ p_to_status: "awaiting_payment", p_source: "provider_readback" });
   });
 
@@ -424,6 +511,27 @@ describe("new transfer details", () => {
     expect(await rail.askNewTransferDetails(live.d, { arrangementId: "arr-1", actorUserId: "payer" })).toEqual({ outcome: "refused", reason: "not_expired" });
     expect(live.send).not.toHaveBeenCalled();
     expect(await rail.askNewTransferDetails(deps({ row: EXPIRED }).d, { arrangementId: "arr-1", actorUserId: "lister" })).toMatchObject({ reason: "not_found" });
+  });
+
+  it("extend the deadline and issue a second set under a new request, never the first again", async () => {
+    const send = provider({
+      "GET /api/v1/transactions/TXN_1": ok({ id: "TXN_1", status: "pending_funding", version: 2, amount_minor: AMOUNT }),
+      "POST /api/v1/transactions/TXN_1/extend": ok({ id: "TXN_1", status: "pending_funding", version: 3, amount_minor: AMOUNT }),
+    });
+    const { d, db, sent } = deps({ row: EXPIRED, send });
+    expect(await rail.askNewTransferDetails(d, { arrangementId: "arr-1", actorUserId: "payer" })).toEqual({ outcome: "submitted" });
+    expect(sent()).toEqual([
+      "GET /api/v1/transactions/TXN_1",
+      "POST /api/v1/transactions/TXN_1/extend",
+      "POST /api/v1/transactions/TXN_1/payment-accounts",
+      "POST /api/v1/transactions/TXN_1/checkout-sessions",
+      "GET /api/v1/banks",
+    ]);
+    expect(send.mock.calls[1]![1]).toMatchObject({ idempotencyKey: "vallo-pp-1:extend:2", body: { version: 2 } });
+    expect(send.mock.calls[2]![1].idempotencyKey).toBe("vallo-pp-1:account:2");
+    expect(send.mock.calls[3]![1].idempotencyKey).toBe("vallo-pp-1:checkout:2");
+    const stored = db.of("provider_arrangements", "update").map((c) => c.values as Record<string, Record<string, unknown>>)[0]!;
+    expect(stored.funding_instructions!.attempt).toBe(2);
   });
 
   it("never reissue for a transaction whose state the provider has not confirmed as waiting", async () => {

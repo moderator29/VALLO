@@ -2,9 +2,11 @@ import "server-only";
 
 import { ESCROWPAY_PATHS } from "../payments/providers/escrowpay/client";
 import { normaliseEscrowPayEvent, normaliseEscrowPayStatus } from "../payments/providers/escrowpay/normaliser";
-import { readPaymentAccount, readTransaction, readTransactionList, type ProviderTransaction } from "../payments/providers/escrowpay/read";
+import { failureCode } from "../payments/providers/escrowpay/errors";
+import { readBanks, readPaymentAccountId, readPaymentInstructions, readTransaction, readTransactionList, type ProviderTransaction } from "../payments/providers/escrowpay/read";
 import {
   activateTransactionCall,
+  checkoutSessionCall,
   createTransactionCall,
   extendTransactionCall,
   paymentAccountCall,
@@ -13,6 +15,7 @@ import {
 } from "../payments/providers/escrowpay/requests";
 import type { EscrowPayWebhook } from "../payments/providers/escrowpay/webhooks";
 import type { ArrangementStatus } from "./arrangement-states";
+import { PROTECTED_SANDBOX_BANK } from "./copy";
 import type { Db } from "./member-wallet";
 import { ensurePayoutAccount, findParty, provablyNothing, protectedRailOpen, providerReachable, type ProtectedRailDeps } from "./protected-provider";
 import { releaseGate } from "./release-gate";
@@ -25,9 +28,13 @@ export { protectedRailDeps, protectedRailOpen, providerReachable, type Protected
  * How one payment runs at the provider (its Merchant API, docs.escrowpay.app):
  *
  *   payer and lister are PARTIES  ->  a TRANSACTION is made as a draft and
- *   activated  ->  a PAYMENT ACCOUNT is issued for it (the transfer details)
- *   ->  the bank reports it FUNDED  ->  Vallo instructs a RELEASE (or a
- *   REFUND)  ->  the provider reports it completed.
+ *   activated  ->  a PAYMENT ACCOUNT is issued for it and a CHECKOUT SESSION
+ *   says what to transfer to it (the transfer details)  ->  the bank reports
+ *   it FUNDED  ->  Vallo instructs a RELEASE (or a REFUND)  ->  the provider
+ *   reports it completed.
+ *
+ * Every step below was run against the provider's sandbox on 14 November
+ * 2026 (`docs/handoff/ESCROWPAY_INTEGRATION.md`, "The sandbox run").
  *
  * The rules that cannot bend, each held here and again in the database:
  *  - funded, released and refunded are recorded ONLY from the provider's
@@ -153,11 +160,29 @@ function readReport(tx: ProviderTransaction, row: Row): { status: ArrangementSta
 
 type Issued = "issued" | "refused" | "unknown";
 
+/** The bank's name for the provider's code, from the provider's own list. Null when it is not on it. */
+async function bankNameFor(deps: ProtectedRailDeps, bankCode: string): Promise<string | null> {
+  const listed = await deps.send(deps.config, { method: "GET", path: ESCROWPAY_PATHS.banks });
+  const named = listed.ok ? readBanks(listed.value).find((b) => b.code === bankCode)?.name : undefined;
+  if (named) return named;
+  /* The sandbox simulator's accounts sit at a code that is on no list. A live one always is. */
+  return deps.config?.environment === "sandbox" ? PROTECTED_SANDBOX_BANK : null;
+}
+
 /**
- * Make the transaction payable and hand out transfer details for it: the
- * draft is activated, a payment account is made for this one transaction,
- * and its details are stored on the arrangement. `attempt` numbers the
- * details issued, so a second set is a second request, never the first again.
+ * Make the transaction payable and hand out transfer details for it:
+ *
+ *  1. the draft is activated;
+ *  2. a payment account is made for this one transaction, good for the
+ *     whole funding window (a checkout session on its own makes one that
+ *     lapses in half an hour);
+ *  3. a checkout session is opened, whose `payment_instructions` are that
+ *     account with its name and the exact total to transfer: the amount,
+ *     plus the provider's fee when the payer bears it.
+ *
+ * Nothing is stored unless the bank, the account name, the number and a
+ * total of at least the amount are all there. `attempt` numbers the details
+ * issued, so a second set is a second request, never the first again.
  */
 async function issueInstructions(deps: ProtectedRailDeps, row: Row, tx: ProviderTransaction, attempt: number): Promise<Issued> {
   if (tx.status === "draft") {
@@ -165,18 +190,36 @@ async function issueInstructions(deps: ProtectedRailDeps, row: Row, tx: Provider
     const activated = await deps.send(deps.config, activateTransactionCall({ reference: row.reference, transactionId: tx.id, version: tx.version }));
     if (!activated.ok) return provablyNothing(activated) ? "refused" : "unknown";
   }
-  const expiresAt = new Date(deps.now() + PROTECTED_FUNDING_WINDOW_HOURS * 3_600_000).toISOString();
-  const made = await deps.send(
+  /* A little inside the transaction's own funding deadline, which was set a moment earlier. */
+  const expiresAt = new Date(deps.now() + PROTECTED_FUNDING_WINDOW_HOURS * 3_600_000 - 15 * 60_000).toISOString();
+  const account = await deps.send(
     deps.config,
     paymentAccountCall({ reference: row.reference, transactionId: tx.id, amountMinor: row.amount_minor, expiresAt, attempt }),
   );
-  if (!made.ok) return provablyNothing(made) ? "refused" : "unknown";
-  const details = readPaymentAccount(made.value);
-  if (!details) return "unknown";
+  if (!account.ok) return provablyNothing(account) ? "refused" : "unknown";
+  if (!readPaymentAccountId(account.value)) return "unknown";
+
+  const session = await deps.send(deps.config, checkoutSessionCall({ reference: row.reference, transactionId: tx.id, attempt }));
+  if (!session.ok) return provablyNothing(session) ? "refused" : "unknown";
+  const details = readPaymentInstructions(session.value, deps.config?.environment === "sandbox");
+  /* A total below the amount would leave the payment short: never shown. */
+  if (!details || details.amountMinor < row.amount_minor) return "unknown";
+  const bank = await bankNameFor(deps, details.bankCode);
+  if (!bank) return "unknown";
   const stored = await stamp(deps.db, row.id, {
-    funding_instructions: { ...details, attempt },
+    funding_instructions: {
+      bank_name: bank,
+      bank_code: details.bankCode,
+      account_name: details.accountName,
+      account_number: details.accountNumber,
+      amount_minor: details.amountMinor,
+      expires_at: details.expiresAt,
+      payment_account_id: details.paymentAccountId,
+      checkout_session_id: details.checkoutSessionId,
+      attempt,
+    },
     /* A countdown is drawn only from the provider's own expiry (spec screen 3). */
-    funding_expires_at: details.expires_at,
+    funding_expires_at: details.expiresAt,
   });
   return stored ? "issued" : "unknown";
 }
@@ -267,15 +310,22 @@ export async function openProtectedPayment(
       payerPartyId: payer.partyId,
       beneficiaryPartyId: lister.partyId,
       payoutAccountId: payout.payoutAccountId,
+      payoutPreference: deps.config?.payoutPreference ?? "automatic",
       fundingDeadline: new Date(deps.now() + PROTECTED_FUNDING_WINDOW_HOURS * 3_600_000).toISOString(),
-      description: `Vallo protected payment ${row.reference}`,
+      description: `Vallo payment ${row.reference}`,
       metadata: { vallo_arrangement_id: row.id, vallo_agreement_id: row.agreement_id },
     }),
   );
   if (!created.ok) {
     if (provablyNothing(created)) {
       /* The provider never made it: closed as failed, from the provider's own refusal. */
-      await observe(deps, row, "failed", "provider_response", { why: created.kind });
+      const code = failureCode(created);
+      await observe(deps, row, "failed", "provider_response", { why: created.kind, code });
+      /* Seen on the sandbox: an account whose automatic payout is switched off
+         refuses every transaction that asks for one. Staff are told what to turn on. */
+      if (code === "policy_violation" && created.detail.includes("automatic_payout_disabled")) {
+        await deps.alert("protected_rail.automatic_payout_disabled", { arrangement_id: row.id, reference: row.reference });
+      }
       return { outcome: "failed", arrangementId: row.id };
     }
     await observe(deps, row, "unknown", "vallo", { why: created.kind });

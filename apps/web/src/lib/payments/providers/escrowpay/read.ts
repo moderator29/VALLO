@@ -4,13 +4,16 @@ import { envelopeData } from "./client";
 
 /**
  * THE PROVIDER'S ANSWERS, READ. The public OpenAPI types no response body
- * (every 2xx is "any"), so each reader takes only the fields Vallo needs,
- * checks each one, and answers null for a record it cannot read. A null is
- * never a state: the caller records "unknown" and a person or the read-back
- * resolves it.
+ * (every 2xx is "any"), so every field name here was taken from the
+ * provider's sandbox itself on 14 November 2026 (the run is recorded in
+ * `docs/handoff/ESCROWPAY_INTEGRATION.md`). Each reader takes only the fields
+ * Vallo needs, checks each one, and answers null for a record it cannot
+ * read. A null is never a state: the caller records "unknown" and a person
+ * or the read-back resolves it.
  *
  * Every success is the envelope `{ success, message, data }`; a list is
- * `data.items`. Ids carry the provider's prefixes (`PAR_`, `PAC_`, `TXN_`).
+ * `data.items` (the bank list is `data.banks`). Ids carry the provider's
+ * prefixes (`PAR_`, `PAC_`, `TXN_`, `PAM_`, `CSN_`).
  */
 type Json = Record<string, unknown>;
 
@@ -20,7 +23,7 @@ const int = (value: unknown): number | null => (typeof value === "number" && Num
 
 function items(value: unknown): Json[] {
   const data = envelopeData(value);
-  const list = Array.isArray(data) ? data : obj(data)?.items;
+  const list = Array.isArray(data) ? data : (obj(data)?.items ?? obj(data)?.banks);
   return Array.isArray(list) ? list.map(obj).filter((x): x is Json => x !== null) : [];
 }
 
@@ -60,7 +63,9 @@ export type ProviderPayoutAccount = {
   bankCode: string | null;
   /** The last digits the provider shows, for matching against the lister's own account. */
   accountTail: string | null;
+  /** The name the provider's own enquiry found on the account. */
   accountName: string | null;
+  payoutEligible: boolean | null;
 };
 
 function payoutAccountOf(record: Json | null): ProviderPayoutAccount | null {
@@ -73,7 +78,8 @@ function payoutAccountOf(record: Json | null): ProviderPayoutAccount | null {
     status: str(record.status)?.toLowerCase() ?? null,
     bankCode: str(record.bank_code),
     accountTail: digits.length >= 4 ? digits.slice(-4) : null,
-    accountName: str(record.account_name) ?? str(record.resolved_account_name),
+    accountName: str(record.resolved_account_name) ?? str(record.account_name),
+    payoutEligible: typeof record.payout_eligible === "boolean" ? record.payout_eligible : null,
   };
 }
 
@@ -134,22 +140,50 @@ export function readTransactionList(value: unknown): ProviderTransaction[] {
   return items(value).map(transactionOf).filter((t): t is ProviderTransaction => t !== null);
 }
 
-/** The transfer details Vallo shows the payer, exactly the keys `protected-read.ts` draws. */
-export type FundingInstructions = {
-  bank_name: string;
-  account_name: string;
-  account_number: string;
-  expires_at: string | null;
-  payment_account_id: string;
+/** The id of a payment account just made for a transaction (`PAM_...`). */
+export function readPaymentAccountId(value: unknown): string | null {
+  const id = str(obj(envelopeData(value))?.id);
+  return id && id.startsWith("PAM_") ? id : null;
+}
+
+/** What a checkout session tells the payer to do: where to transfer, and exactly how much. */
+export type PaymentInstructions = {
+  checkoutSessionId: string;
+  paymentAccountId: string;
+  bankCode: string;
+  accountName: string;
+  accountNumber: string;
+  /** The total to transfer, in kobo: the amount, plus the provider's fee when the payer bears it. */
+  amountMinor: number;
+  expiresAt: string | null;
 };
 
-/** A payment account made for one transaction. Null unless the bank, the name and the number are all there. */
-export function readPaymentAccount(value: unknown): FundingInstructions | null {
-  const record = obj(envelopeData(value));
-  const id = str(record?.id);
-  const bank = str(record?.bank_name);
-  const name = str(record?.account_name);
-  const number = str(record?.account_number);
-  if (!record || !id || !bank || !name || !number || !/^\d{6,32}$/.test(number)) return null;
-  return { bank_name: bank, account_name: name, account_number: number, expires_at: str(record.expires_at), payment_account_id: id };
+/**
+ * A checkout session's `payment_instructions`. Null unless every field the
+ * payer needs is there. A live account number is digits only; the sandbox
+ * simulator's is letters and digits, read only when `sandbox` is true.
+ */
+export function readPaymentInstructions(value: unknown, sandbox: boolean): PaymentInstructions | null {
+  const session = obj(envelopeData(value));
+  const pi = obj(session?.payment_instructions);
+  const sessionId = str(session?.id);
+  const accountId = str(pi?.payment_account_id);
+  const bankCode = str(pi?.bank_code);
+  const name = str(pi?.account_name);
+  const number = str(pi?.account_number);
+  const amount = int(pi?.amount_minor);
+  if (!pi || !sessionId || !accountId || !bankCode || !name || !number || amount === null || amount <= 0) return null;
+  if (!(sandbox ? /^[0-9A-Za-z]{6,32}$/ : /^\d{6,32}$/).test(number)) return null;
+  return { checkoutSessionId: sessionId, paymentAccountId: accountId, bankCode, accountName: name, accountNumber: number, amountMinor: amount, expiresAt: str(pi.expires_at) };
+}
+
+/** The provider's own figure for the money-in fee on an amount, and who bears it at funding. */
+export type FeeEstimate = { feeMinor: number; payer: "payer" | "business" };
+
+export function readFeeEstimate(value: unknown): FeeEstimate | null {
+  const data = obj(envelopeData(value));
+  const fee = int(data?.amount_minor);
+  const payer = str(data?.payer);
+  if (fee === null || fee < 0 || (payer !== "payer" && payer !== "business")) return null;
+  return { feeMinor: fee, payer };
 }

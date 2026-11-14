@@ -15,6 +15,7 @@ import {
   PROTECTED_REVIEW_ROWS,
   PROTECTED_REVIEW_TITLE,
   PROTECTED_ROW_FEE_LISTER_PAYS,
+  PROTECTED_ROW_TOTAL,
   protectedReviewLead,
 } from "@/lib/money/copy";
 import { THIRD_PARTIES_LINE } from "@/lib/money/protected-wording";
@@ -61,6 +62,8 @@ export function ReviewProtection({
           ? `${money(quote.moneyInFeeMinor, locale)}, ${PROTECTED_ROW_FEE_LISTER_PAYS.toLowerCase()}`
           : money(quote.moneyInFeeMinor, locale),
     },
+    /* The payer bears the fee: the total they will be asked to transfer is said here, before anything opens. */
+    ...(quote.payer === "buyer" ? [{ label: PROTECTED_ROW_TOTAL, value: money(quote.buyerPaysMinor, locale), strong: true }] : []),
   ];
 
   return (

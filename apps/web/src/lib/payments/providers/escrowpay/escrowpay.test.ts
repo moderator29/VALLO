@@ -47,6 +47,7 @@ describe("configuration", () => {
       webhookSecret: "whsec_test",
       webhookSecretPrevious: null,
       environment: "sandbox",
+      payoutPreference: "automatic",
       startsMoney: true,
     };
     expect(escrowPayConfig(SANDBOX)).toEqual(expected);
@@ -58,6 +59,18 @@ describe("configuration", () => {
     expect(escrowPayConfig({ ...SANDBOX, ESCROWPAY_API_BASE_URL: "https://u:p@api.example.test" })).toBeNull();
     expect(escrowPayConfig({ ...SANDBOX, ESCROWPAY_ENVIRONMENT: "" })).toBeNull();
     expect(escrowPayConfig({ ...SANDBOX, ESCROWPAY_ENVIRONMENT: "live" })).toBeNull();
+  });
+
+  it("reads the key prefixes the dashboard really issues, and the ones the guide writes", () => {
+    expect(escrowPayConfig({ ...SANDBOX, ESCROWPAY_API_KEY: "sk_test_0000.abc" })?.environment).toBe("sandbox");
+    expect(escrowPayConfig({ ...LIVE, ESCROWPAY_API_KEY: "sk_live_0000.abc", VERCEL_ENV: "production" })?.environment).toBe("production");
+    expect(escrowPayConfig({ ...SANDBOX, ESCROWPAY_API_KEY: "sk_live_0000.abc" })).toBeNull();
+  });
+
+  it("pays out automatically unless the deployment says manual, and refuses any other word", () => {
+    expect(escrowPayConfig({ ...SANDBOX, ESCROWPAY_PAYOUT_PREFERENCE: "manual" })?.payoutPreference).toBe("manual");
+    expect(escrowPayConfig({ ...SANDBOX, ESCROWPAY_PAYOUT_PREFERENCE: " Automatic " })?.payoutPreference).toBe("automatic");
+    expect(escrowPayConfig({ ...SANDBOX, ESCROWPAY_PAYOUT_PREFERENCE: "retain_in_wallet" })).toBeNull();
   });
 
   it("refuses a key whose book is not the one the marker names", () => {
@@ -83,13 +96,11 @@ describe("configuration", () => {
 });
 
 describe("the client", () => {
-  it("answers not_configured before any network call while the adapter is unverified", async () => {
+  it("is verified against the sandbox, and still sends nothing without a configuration", async () => {
+    expect(DOCUMENTED).toBe(true);
     const fetchImpl = vi.fn();
-    const out = await escrowPayRequest(escrowPayConfig(SANDBOX), { method: "GET", path: ESCROWPAY_PATHS.banks }, fetchImpl as unknown as typeof fetch);
-    if (!DOCUMENTED) {
-      expect(out).toMatchObject({ ok: false, kind: "not_configured" });
-      expect(fetchImpl).not.toHaveBeenCalled();
-    }
+    expect(await escrowPayRequest(null, { method: "GET", path: ESCROWPAY_PATHS.banks }, fetchImpl as unknown as typeof fetch)).toMatchObject({ ok: false, kind: "not_configured" });
+    expect(fetchImpl).not.toHaveBeenCalled();
   });
 
   it("sends nothing without a configuration", async () => {
@@ -174,6 +185,7 @@ describe("the requests Vallo sends", () => {
       payerPartyId: "PAR_a",
       beneficiaryPartyId: "PAR_b",
       payoutAccountId: "PAC_b",
+      payoutPreference: "automatic",
       fundingDeadline: "2026-11-16T10:00:00.000Z",
       description: "d",
       metadata: {},
@@ -233,11 +245,62 @@ describe("the provider's answers", () => {
     expect(read.readTransaction(null)).toBeNull();
   });
 
-  it("draws transfer details only when the bank, the name and a numeric account are all there", () => {
-    const full = { id: "PA_1", bank_name: "Rubies MFB", account_name: "Vallo / A B", account_number: "0123456789", expires_at: "2026-11-16T10:00:00Z" };
-    expect(read.readPaymentAccount({ data: full })).toEqual({ bank_name: "Rubies MFB", account_name: "Vallo / A B", account_number: "0123456789", expires_at: "2026-11-16T10:00:00Z", payment_account_id: "PA_1" });
-    expect(read.readPaymentAccount({ data: { ...full, account_number: "****6789" } })).toBeNull();
-    expect(read.readPaymentAccount({ data: { ...full, bank_name: "" } })).toBeNull();
+  /* The checkout session exactly as the sandbox answered it on 14 November 2026 (ids shortened). */
+  const SESSION = {
+    success: true,
+    message: "Checkout session created.",
+    data: {
+      id: "CSN_1dd4",
+      transaction_id: "TXN_7749",
+      status: "open",
+      amount_minor: 18_000_000,
+      hosted_url: "https://business.example.test/checkout/tok",
+      payment_instructions: {
+        payment_account_id: "PAM_01f2",
+        account_number: "9b9e9059a0",
+        masked_account_number: "****59a0",
+        bank_code: "000",
+        account_name: "VALLO SPACES LTD",
+        amount_minor: 18_285_000,
+        currency: "NGN",
+        expires_at: "2026-11-16T20:16:05+00:00",
+        provider: "simulator",
+      },
+    },
+  };
+
+  it("reads the transfer details from a checkout session: the account, its name, and the total with the fee", () => {
+    expect(read.readPaymentInstructions(SESSION, true)).toEqual({
+      checkoutSessionId: "CSN_1dd4",
+      paymentAccountId: "PAM_01f2",
+      bankCode: "000",
+      accountName: "VALLO SPACES LTD",
+      accountNumber: "9b9e9059a0",
+      amountMinor: 18_285_000,
+      expiresAt: "2026-11-16T20:16:05+00:00",
+    });
+  });
+
+  it("takes only a numeric account number from a live session, and nothing from a session missing a part", () => {
+    expect(read.readPaymentInstructions(SESSION, false)).toBeNull();
+    const live = { data: { ...SESSION.data, payment_instructions: { ...SESSION.data.payment_instructions, account_number: "0123456789" } } };
+    expect(read.readPaymentInstructions(live, false)?.accountNumber).toBe("0123456789");
+    for (const missing of ["account_name", "bank_code", "amount_minor", "payment_account_id"]) {
+      const pi = { ...SESSION.data.payment_instructions, [missing]: null };
+      expect(read.readPaymentInstructions({ data: { ...SESSION.data, payment_instructions: pi } }, true)).toBeNull();
+    }
+    expect(read.readPaymentInstructions({ data: { id: "CSN_1" } }, true)).toBeNull();
+  });
+
+  it("reads a payment account's id, the bank list, a payout account and the fee estimate as the sandbox gives them", () => {
+    expect(read.readPaymentAccountId({ data: { id: "PAM_01f2", status: "active" } })).toBe("PAM_01f2");
+    expect(read.readPaymentAccountId({ data: { id: "nope" } })).toBeNull();
+    expect(read.readBanks({ data: { environment: "test", banks: [{ bank_code: "000013", bank_name: "GTBANK PLC (Simulator)" }, { bank_code: "" }] } })).toEqual([{ code: "000013", name: "GTBANK PLC (Simulator)" }]);
+    expect(
+      read.readPayoutAccount({ data: { id: "PAC_3028", status: "verified", bank_code: "000013", account_number: "0123456789", masked_account_number: "******6789", resolved_account_name: "ADA OBI", payout_eligible: true } }),
+    ).toEqual({ id: "PAC_3028", status: "verified", bankCode: "000013", accountTail: "6789", accountName: "ADA OBI", payoutEligible: true });
+    expect(read.readFeeEstimate({ data: { amount_minor: 285_000, fee_type: "escrow_service", payer: "payer" } })).toEqual({ feeMinor: 285_000, payer: "payer" });
+    expect(read.readFeeEstimate({ data: { amount_minor: 285_000, payer: "someone" } })).toBeNull();
   });
 
   it("finds a member's party in a list, and reads the onboarding result the OpenAPI types", () => {
@@ -250,8 +313,18 @@ describe("the provider's answers", () => {
 });
 
 describe("status words and events", () => {
+  it("maps the transaction status words the sandbox showed, and leaves a draft unmapped", () => {
+    expect(normaliseEscrowPayStatus("pending_funding")).toBe("awaiting_payment");
+    expect(normaliseEscrowPayStatus("funded")).toBe("protected");
+    expect(normaliseEscrowPayStatus("released")).toBe("released");
+    expect(normaliseEscrowPayStatus("refunded")).toBe("refunded");
+    expect(normaliseEscrowPayStatus("cancelled")).toBe("cancelled");
+    expect(normaliseEscrowPayStatus("draft")).toBeNull();
+    expect(normaliseEscrowPayStatus("completed")).toBeNull();
+  });
+
   it("never turns an unknown word into funded or released", () => {
-    for (const word of ["RELEASED!", "held", "success", "paid", "", null, 7]) {
+    for (const word of ["RELEASED!", "held", "success", "paid", "in_progress", "", null, 7]) {
       expect(normaliseEscrowPayStatus(word)).toBeNull();
       expect(normaliseEscrowPayEvent(word)).toBeNull();
     }
@@ -357,6 +430,7 @@ const ALLOWED_IMPORTERS = new Set([
   "lib/money/protected-provider.ts",
   "lib/money/protected-provider.test.ts",
   "lib/money/protected-identity-actions.ts",
+  "lib/money/protected-start.ts",
   /* The server read and actions behind the screens (server-only). */
   "lib/money/protected-read.ts",
   "lib/money/protected-actions.ts",

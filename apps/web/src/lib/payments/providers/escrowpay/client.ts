@@ -20,12 +20,15 @@ import { failureFromHttp, notConfigured } from "./errors";
  *  - success is an envelope `{ success, message, data }`; a refusal is
  *    `{ detail: { code, message } }`.
  *
- * `DOCUMENTED` gates every send. It is true only once the request bodies in
- * `requests.ts` and the readers in `read.ts` have been checked against the
- * provider's sandbox (the OpenAPI types no response), so no environment
- * variable, however it is set, can make this send before then.
+ * `DOCUMENTED` gates every send. It became true on 14 November 2026, when
+ * the request bodies in `requests.ts` and the readers in `read.ts` were run
+ * against the provider's sandbox with Vallo's own test key (the OpenAPI types
+ * no response): identity checks, the payout account, a transaction created,
+ * activated, funded through the test checkout, released, and another
+ * refunded. The run is recorded in `docs/handoff/ESCROWPAY_INTEGRATION.md`.
+ * What still stops money is listed in this folder's README.
  */
-export const DOCUMENTED = false as boolean;
+export const DOCUMENTED = true as boolean;
 
 const V1 = "/api/v1";
 const id = (value: string) => encodeURIComponent(value);
@@ -46,7 +49,8 @@ export const ESCROWPAY_PATHS = {
   cancel: (transactionId: string) => `${V1}/transactions/${id(transactionId)}/cancel`,
   extend: (transactionId: string) => `${V1}/transactions/${id(transactionId)}/extend`,
   paymentAccounts: (transactionId: string) => `${V1}/transactions/${id(transactionId)}/payment-accounts`,
-  paymentAccountsOf: (transactionId: string) => `${V1}/payment-accounts?transaction_id=${id(transactionId)}&page_size=20`,
+  checkoutSessions: (transactionId: string) => `${V1}/transactions/${id(transactionId)}/checkout-sessions`,
+  feeEstimates: `${V1}/fees/estimates`,
   release: (transactionId: string) => `${V1}/transactions/${id(transactionId)}/releases`,
   releasesOf: (transactionId: string) => `${V1}/releases?transaction_id=${id(transactionId)}&page_size=20`,
   refund: (transactionId: string) => `${V1}/transactions/${id(transactionId)}/refunds`,
@@ -72,13 +76,13 @@ export async function escrowPayRequest(
   call: EscrowPayCall,
   fetchImpl: typeof fetch = fetch,
 ): Promise<RailResult<unknown>> {
-  if (!DOCUMENTED) return notConfigured("The provider's API is not verified against its sandbox yet; nothing was sent.");
+  if (!DOCUMENTED) return notConfigured("The provider's API is not verified against its sandbox; nothing was sent.");
   return sendEscrowPay(config, call, fetchImpl);
 }
 
 /**
  * The send itself, with no gate. Only `escrowPayRequest` and the sandbox
- * check (`scripts/escrowpay-sandbox.mts`) call it.
+ * test (`sandbox.e2e.test.ts`) call it.
  */
 export async function sendEscrowPay(
   config: EscrowPayConfig | null,

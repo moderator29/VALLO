@@ -40,6 +40,8 @@ function at(status: ArrangementStatus, over: Partial<ProtectedDeal> = {}): Prote
 export const PREVIEW_DEALS: Record<string, ProtectedDeal> = {
   funding: at("awaiting_payment"),
   "funding-no-expiry": at("awaiting_payment", { funding: { ...base.funding!, expiresAt: null } }),
+  /* The payer bears the provider's fee: the total to transfer is the amount plus it. */
+  "funding-fee": at("awaiting_payment", { funding: { ...base.funding!, amountMinor: base.amountMinor + 285_000 } }),
   waiting: at("awaiting_payment", { transferReported: true }),
   expired: at("awaiting_payment", { funding: { ...base.funding!, expiresAt: "2026-11-10T09:00:00Z" } }),
   protected: at("protected", { stamps: funded }),
