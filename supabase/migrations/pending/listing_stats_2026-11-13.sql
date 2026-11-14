@@ -701,7 +701,7 @@ begin
     select l.id, a.user_id into v_l, v_lister
       from public.listings l join public.agents a on a.id = l.agent_id
      where l.status = 'PUBLISHED'
-     order by l.id limit 1;
+     order by l.is_demo, l.id limit 1;
     select u.id into v_viewer from auth.users u
      where u.id is distinct from v_lister
        and not private.listing_stats_internal(u.id)
@@ -710,8 +710,17 @@ begin
     if v_l is null or v_viewer is null then
       raise exception 'probe_fixture_missing';
     end if;
-    -- Fixture: only a real (non-example) listing is counted.
-    update public.listings set is_demo = false where id = v_l;
+    /* Fixture: only a real (non-example) listing is counted, so a real one is
+       preferred above. Where every published listing is an example, the
+       listing guards (the SCUML 17 mandate gate among them) rightly refuse to
+       make one real, and that is a missing fixture, not a fault in the stats:
+       the first run against live on 14 November failed here and rolled the
+       whole file back. */
+    begin
+      update public.listings set is_demo = false where id = v_l and is_demo;
+    exception when others then
+      raise exception 'probe_fixture_missing';
+    end;
 
     select coalesce((select opens from public.listing_daily_stats where listing_id = v_l and day = v_today), 0) into v_opens0;
     select coalesce((select views from public.listing_counters where listing_id = v_l), 0) into v_views0;
@@ -783,12 +792,25 @@ begin
     raise exception 'probe_passed';
   exception when others then
     if sqlerrm = 'probe_passed' then
+      perform set_config('vallo.listing_stats_probe', 'passed (rolled back)', false);
       raise notice 'listing stats probe passed (rolled back)';
     elsif sqlerrm = 'probe_fixture_missing' then
-      raise notice 'listing stats probe skipped: no published listing or no eligible member to test with';
+      perform set_config('vallo.listing_stats_probe',
+        'skipped: no real published listing or no eligible member to test with', false);
+      raise notice 'listing stats probe skipped: no real published listing or no eligible member to test with';
     else
       raise exception 'listing stats probe failed: %', sqlerrm;
     end if;
   end;
 end
 $readback$;
+
+/* What the editor shows when the file has run: the objects are in, and whether
+   the behaviour probe ran or had nothing real to run on. */
+select to_regclass('public.listing_counters') is not null as counters_table,
+       (select count(*) from pg_trigger
+         where not tgisinternal
+           and tgname in ('listing_daily_stats_lifetime_views', 'saved_items_listing_stats',
+                          'conversations_listing_stats', 'inspection_requests_listing_stats')) as triggers_of_4,
+       (select count(*) from public.listing_counters) as listings_with_counts,
+       current_setting('vallo.listing_stats_probe', true) as behaviour_probe;
