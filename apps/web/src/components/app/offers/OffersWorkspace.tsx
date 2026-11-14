@@ -349,17 +349,12 @@ export function OffersWorkspace({ made, received, initialTab, nowMs }: OffersWor
                   href: dealRoomHref(menuRow.id),
                   "data-testid": "offer-menu-deal-room",
                 },
-                ...(menuRow.conversationId
-                  ? [
-                      {
-                        key: "message",
-                        label: "Message",
-                        icon: "chat-bubble" as const,
-                        href: `/messages/${menuRow.conversationId}`,
-                        "data-testid": "offer-menu-message",
-                      },
-                    ]
-                  : []),
+                /* NO "Message" HERE. The conversation id belongs to the deal
+                   room (`DealRoom.conversationId`), not to a row in this
+                   list, so a message action on this sheet would either need a
+                   read this screen does not make or a guessed address. The
+                   deal room above is one tap from the thread, and a quick
+                   action that cannot act is worse than one that is absent. */
               ] as QuickAction[])
             : []
         }
