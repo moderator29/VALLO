@@ -195,7 +195,7 @@ export function CodeSignInForm({ mode, t, next }: { mode: Mode; t: Dictionary; n
 
       <p className="nf-auth__links">
         <Link href={next ? `/sign-in?next=${encodeURIComponent(next)}` : "/sign-in"} className="nf-tap nf-auth__aside">
-          <UiIcon name="arrow-left" size={16} />
+          <UiIcon name="chevron-left" size={16} />
           {t.publicDoors.emailCode.usePassword}
         </Link>
       </p>
