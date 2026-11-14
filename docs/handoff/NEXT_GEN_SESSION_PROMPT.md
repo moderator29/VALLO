@@ -79,13 +79,13 @@ screenshots of finished screens. Do not stop the whole queue on a question.
 
 1. Read the three files.
 2. Run `git status`, `git log --oneline -20`, `git fetch origin main` and
-   compare the branch with `main`. If the handoff's push to `main` did not
-   happen and the founder's last message still asks for it, run the gates in
-   handoff section 4 and do it; otherwise leave `main` alone.
-3. Check whether the founder ran
-   `supabase/migrations/pending/staff_desks_only_2026-11-14.sql` (a read-only
-   query: do the two position holders still hold the `admin` role?). If not,
-   send it to him again with one line on what it does.
+   compare the branch with `main`. `main` was pushed on 14 November at
+   `4baa05fb4`; everything after it is on the branch only. Leave `main` alone
+   until the founder's own message says to push it.
+3. The founder ran `staff_desks_only_2026-11-14.sql` on 14 November (verified
+   on live: neither position holder has the `admin` role, and the Business
+   Development grant holds `kyc_review`). Neither had acknowledged the staff
+   handbook then; check, because their desks stay shut until they do.
 4. Put the queue with its eight stages into `docs/handoff/WORK_QUEUE.md`,
    small works first.
 5. Start two agents on the first two unfinished items, with prompts that
