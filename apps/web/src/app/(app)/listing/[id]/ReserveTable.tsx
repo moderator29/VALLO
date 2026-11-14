@@ -413,7 +413,7 @@ export function ReserveTable({
         <label className="nf-label" htmlFor={noteId}>
           {w.note}
         </label>
-        <textarea
+        <textarea autoCapitalize="sentences" enterKeyHint="enter"
           id={noteId}
           name="note"
           rows={2}

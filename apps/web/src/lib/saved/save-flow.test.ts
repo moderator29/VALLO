@@ -36,8 +36,9 @@ vi.mock("../offline/send-or-keep", () => ({
   }),
 }));
 vi.mock("../offline/tap-failed", () => ({ tapFailedOffline: () => false }));
+vi.mock("./save-education", () => ({ triggerSaveEducation: vi.fn() }));
 
-import { currentToast, dismissToast } from "../ui/toast";
+import { currentQuick, currentToast, dismissQuick, dismissToast } from "../ui/toast";
 import { resetSessionSaves, savedChangeVersion, savesInFlight, tapSave, whenSavesSettle } from "./save-flow";
 
 const LISTING = "00000000-0000-4000-8000-0000000000aa";
@@ -56,15 +57,19 @@ beforeEach(() => {
 afterEach(() => {
   dismissToast();
   dismissToast();
+  dismissQuick();
 });
 
 describe("a save, answered on the tap", () => {
-  it("flips and raises the banner before the server answers, sending the state wanted", () => {
+  it("flips and raises the quick pill before the server answers, sending the state wanted", () => {
     const applied: boolean[] = [];
     void tap(true, (v) => applied.push(v));
     expect(applied).toEqual([true]);
-    expect(currentToast()?.message).toBe("Saved. It is in Saved.");
-    expect(currentToast()?.action?.label).toBe("Undo");
+    /* The pill says it (founder, 14 November 2026). It carries no Undo: the
+       heart is the undo, and the top banner is left alone. */
+    expect(currentQuick()?.message).toBe("Saved. It is in Saved.");
+    expect(currentQuick()).not.toHaveProperty("action");
+    expect(currentToast()).toBeNull();
     expect(state.calls).toEqual([{ listingId: LISTING, want: true }]);
     expect(state.answers).toHaveLength(1);
     expect(savesInFlight()).toBe(true);
@@ -91,26 +96,28 @@ describe("a save, answered on the tap", () => {
     state.answers[1]!({ ok: true, data: { mode: "db", listingId: LISTING, saved: false } });
     await Promise.all([first, second]);
     expect(applied).toEqual([true, false]);
-    expect(currentToast()?.message).toBe("Removed from Saved.");
+    expect(currentQuick()?.message).toBe("Removed from Saved.");
+    expect(currentToast()).toBeNull();
   });
 
   it("turns a signed-out save into a device save, changing the words in place", async () => {
     const applied: boolean[] = [];
     const done = tap(true, (v) => applied.push(v));
-    const id = currentToast()?.id;
+    const id = currentQuick()?.id;
     state.answers[0]!({ ok: false, error: "Sign in to save this." });
     await done;
     expect(applied).toEqual([true]);
     expect(state.local).toEqual([`+${LISTING}`]);
-    expect(currentToast()?.id).toBe(id);
-    expect(currentToast()?.message).toBe("Saved on this device. It is in Saved.");
+    expect(currentQuick()?.id).toBe(id);
+    expect(currentQuick()?.message).toBe("Saved on this device. It is in Saved.");
+    expect(currentToast()).toBeNull();
   });
 
   it("keeps a catalogue id on the device without asking the server", async () => {
     await tap(true, () => undefined, "lagos-yaba-12");
     expect(state.calls).toEqual([]);
     expect(state.local).toEqual(["+lagos-yaba-12"]);
-    expect(currentToast()?.message).toBe("Saved on this device. It is in Saved.");
+    expect(currentQuick()?.message).toBe("Saved on this device. It is in Saved.");
   });
 
   it("counts every answer so /saved knows to refresh, and says when the writes have landed", async () => {

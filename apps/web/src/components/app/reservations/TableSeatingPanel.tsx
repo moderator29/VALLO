@@ -199,7 +199,7 @@ export function TableSeatingPanel({ table }: { table: ReservationView }) {
               </button>
             ))}
           </span>
-          <textarea
+          <textarea autoCapitalize="sentences" enterKeyHint="enter"
             className="nf-field w-full"
             rows={3}
             maxLength={2000}

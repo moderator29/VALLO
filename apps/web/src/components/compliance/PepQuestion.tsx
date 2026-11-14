@@ -104,7 +104,7 @@ export function PepQuestion({
             <label htmlFor={`${id}-role`} className="nf-label block">
               {copy.role}
             </label>
-            <input
+            <input type="text" autoComplete="organization-title" autoCapitalize="sentences"
               id={`${id}-role`}
               name="role"
               maxLength={200}

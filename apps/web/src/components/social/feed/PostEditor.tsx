@@ -70,7 +70,7 @@ export function PostEditor({
         if (changed && !pending) save();
       }}
     >
-      <textarea
+      <textarea autoCapitalize="sentences" enterKeyHint="enter"
         className="nf-field min-h-[92px] w-full resize-y text-[length:var(--nf-text-body)] leading-[1.5]"
         value={body}
         maxLength={POST_MAX}

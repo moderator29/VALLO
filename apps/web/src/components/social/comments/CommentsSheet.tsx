@@ -320,7 +320,7 @@ export function CommentsSheet({
             </p>
           ) : null}
           <div className="nf-comments__row">
-            <textarea
+            <textarea autoCapitalize="sentences" enterKeyHint="enter"
               ref={inputRef}
               className="nf-field nf-comments__field"
               rows={1}

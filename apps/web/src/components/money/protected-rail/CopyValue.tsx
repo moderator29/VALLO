@@ -7,13 +7,13 @@ import { banner } from "@/lib/ui/toast";
  * A value the payer types into their bank app, with one tap to copy it
  * (spec screen 3: "transfer details easy to copy on small Android devices").
  * The value is in tabular figures and spaced for reading aloud; the copy
- * button is a 44px target. Confirms with the banner, never inline.
+ * button is a 44px target. Confirms with the quick pill, never inline.
  */
 export function CopyValue({ value, label, copied, testId }: { value: string; label: string; copied: string; testId?: string }) {
   const copy = async () => {
     try {
       await navigator.clipboard.writeText(value);
-      banner.success(copied);
+      banner.quick(copied);
     } catch {
       /* A browser that refuses the clipboard leaves the value selectable. */
     }

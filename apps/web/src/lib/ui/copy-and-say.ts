@@ -13,15 +13,16 @@ export const COPY_WORDS = {
 } as const;
 
 /**
- * Copy and say so in the one top banner ("Link copied", "Code copied",
- * "Copied" or the caller's own line). The whole action of `CopyButton`, apart
+ * Copy and say so ("Link copied", "Code copied", "Copied" or the caller's own
+ * line) in the quick pill at the bottom of the screen (founder, 14 November
+ * 2026); a copy that failed stays on the top banner, where an error belongs. The whole action of `CopyButton`, apart
  * from its glyph, so it can be tested without a DOM.
  */
 export async function copyAndSay(text: string, kind: CopyKind = "text", message?: string): Promise<boolean> {
   const done = await copyText(text);
   if (done) {
     feedback("select");
-    banner.success(message ?? COPY_WORDS[kind]);
+    banner.quick(message ?? COPY_WORDS[kind]);
   } else {
     banner.error(COPY_WORDS.failed);
   }

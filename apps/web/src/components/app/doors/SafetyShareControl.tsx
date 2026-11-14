@@ -169,8 +169,8 @@ export function SafetyShareControl({
                   ?.writeText(`${phase.text} ${phase.url}`)
                   .then(() => {
                     setPhase({ ...phase, copied: true });
-                    /* Said by the one banner at the top of the screen (founder, 7 November 2026). */
-                    banner.success(copy.copied);
+                    /* Said by the quick pill at the bottom of the screen (founder, 14 November 2026). */
+                    banner.quick(copy.copied);
                   })
                   .catch(() => undefined);
               }}

@@ -122,7 +122,7 @@ function FollowupRow({
           </label>
           <label className="block">
             <span className="nf-label">{copy.noteLabel}</span>
-            <textarea
+            <textarea autoCapitalize="sentences" enterKeyHint="enter"
               className="nf-field"
               rows={2}
               maxLength={FOLLOWUP_NOTE_MAX}

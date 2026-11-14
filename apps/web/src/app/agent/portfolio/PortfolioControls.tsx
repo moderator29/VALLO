@@ -161,7 +161,7 @@ export function PitchForm({ invitationId, copy }: { invitationId: string; copy: 
       <label htmlFor={fieldId} className="nf-label">
         {copy.pitchLabel}
       </label>
-      <textarea
+      <textarea autoCapitalize="sentences" enterKeyHint="enter"
         id={fieldId}
         className="nf-field min-h-24"
         maxLength={600}

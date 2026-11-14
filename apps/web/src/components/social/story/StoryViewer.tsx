@@ -219,7 +219,7 @@ export function StoryViewer({
       return;
     }
     void navigator.clipboard?.writeText(url);
-    banner.success(POST_COPY.copied);
+    banner.quick(POST_COPY.copied);
   };
 
   const onPerson = (action: "mute" | "block") => {

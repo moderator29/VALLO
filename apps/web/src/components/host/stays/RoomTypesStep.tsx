@@ -177,7 +177,7 @@ export function RoomTypesStep({
       ) : (
         <>
           <StaysPlate label={hw.steps.roomTypeName} htmlFor="stays-room-name">
-            <input
+            <input type="text" autoComplete="off" autoCapitalize="words"
               id="stays-room-name"
               className="nf-field nf-field--glass nf-stays-input"
               value={name}

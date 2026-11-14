@@ -3,6 +3,7 @@
 import { useLayoutEffect, useRef } from "react";
 import { Field } from "@/components/ui/Field";
 import { caretAfter, readNairaTyping, significantBefore } from "@/lib/ui/naira-input";
+import { cleanPastedFigure } from "@/lib/paste/paste";
 
 /**
  * A naira amount (details pass, 30 September 2026): "₦" fixed at the front,
@@ -10,7 +11,7 @@ import { caretAfter, readNairaTyping, significantBefore } from "@/lib/ui/naira-i
  * caret kept after the digit the person just typed. The caller holds and
  * sends the plain figure ("1500000"); `name` posts that plain figure from a
  * hidden input, so a server action reading FormData gets exactly what every
- * money parser expects.
+ * money parser expects. A pasted amount is cleaned as it lands.
  */
 export function NairaField({
   label,
@@ -86,6 +87,17 @@ export function NairaField({
               const raw = event.target.value;
               caret.current = significantBefore(raw, event.target.selectionStart ?? raw.length);
               onValueChange(readNairaTyping(raw, allowKobo).value);
+            }}
+            /* A pasted amount ("₦1,250,000.00", "NGN 1 250 000", "1.25m") is
+               the figure, whole: its sign and commas go and it replaces what
+               the field held (14 November 2026). Plain digits are left to the
+               browser's own paste. */
+            onPaste={(event) => {
+              const figure = cleanPastedFigure(event.clipboardData?.getData("text/plain") ?? "", allowKobo);
+              if (figure === null) return;
+              event.preventDefault();
+              caret.current = null;
+              onValueChange(readNairaTyping(figure, allowKobo).value);
             }}
           />
           {name ? <input type="hidden" name={name} value={value} /> : null}

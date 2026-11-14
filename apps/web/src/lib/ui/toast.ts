@@ -13,6 +13,7 @@
  *   banner.error("Message couldn't be sent. Check your connection and try again.", { retry })
  *   banner.info("Saved on your device. Price and availability may have changed.")
  *   banner.warning("Your session ends in 2 minutes")
+ *   banner.quick("Message copied")     the small pill at the bottom, see below
  *
  * THE QUEUE, AND WHY IT REPLACES. The newest message replaces the one on
  * screen, with two exceptions so nothing important is lost: the same message
@@ -300,6 +301,102 @@ export function currentToast(): ToastItem | null {
   return current;
 }
 
+/*
+ * THE QUICK PILL (the founder, 14 November 2026, with WhatsApp's "Message
+ * copied" as the reference: "built clean sharp and goes back by itself").
+ *
+ * The second, lighter voice of the same system, for the small things a person
+ * just did and does not need to read twice: copied, saved, removed. A compact
+ * pill with a tick, at the BOTTOM of the screen above the composer or the
+ * dock, drawn by the same `ToastHost`. It has its own slot, so it never takes
+ * down a banner that matters (an error at the top stays while "Link copied"
+ * comes and goes underneath), and there is one pill at a time.
+ *
+ *   banner.quick("Message copied")
+ *
+ * WHAT IT MAY NOT CARRY: an error, a warning, an undo or a retry. A pill is
+ * gone before it could be pressed; anything that needs reading or acting on
+ * is `banner.error` or a banner with an action, at the top.
+ *
+ * THE CLOCK. In on `--nf-duration-fast` (160ms), held `holdMs`, out in
+ * `exitMs` (his number, 0.4 seconds). The whole pill on screen for 0.4
+ * seconds could not be read, so 0.4 is the leaving and 1.4 the staying. The
+ * same words again restart the clock in place, with no second entrance.
+ */
+export type QuickItem = {
+  id: number;
+  message: string;
+  /** When it went up (or was said again), for the hold. */
+  shownAt: number;
+  "data-testid"?: string;
+};
+
+export const QUICK_TIMING = {
+  /** The token the entrance runs on. */
+  enterToken: "--nf-duration-fast",
+  /** How long it stays before it starts to leave. */
+  holdMs: 1400,
+  /** How long the leaving takes. */
+  exitMs: 400,
+} as const;
+
+type QuickListener = (item: QuickItem | null) => void;
+
+let quick: QuickItem | null = null;
+const quickListeners = new Set<QuickListener>();
+
+function emitQuick() {
+  for (const listener of quickListeners) listener(quick);
+}
+
+/** Say a small confirmation in the pill. Returns its id. */
+export function showQuick(message: string, options: { "data-testid"?: string } = {}): number {
+  if (quick && quick.message === message) {
+    quick = { ...quick, shownAt: now() };
+    emitQuick();
+    return quick.id;
+  }
+  quick = {
+    id: nextId++,
+    message,
+    shownAt: now(),
+    ...(options["data-testid"] ? { "data-testid": options["data-testid"] } : {}),
+  };
+  emitQuick();
+  return quick.id;
+}
+
+/** Take the pill down. With an id, only if it is still the one showing. */
+export function dismissQuick(id?: number): void {
+  if (!quick) return;
+  if (id !== undefined && quick.id !== id) return;
+  quick = null;
+  emitQuick();
+}
+
+/**
+ * Change what the pill on screen says without a second entrance (the same id,
+ * and the hold starts again so the new words can be read): "Saved" turns out
+ * to be "Saved on this device". False when that pill is no longer showing.
+ */
+export function updateQuick(id: number, message: string): boolean {
+  if (!quick || quick.id !== id) return false;
+  quick = { ...quick, message, shownAt: now() };
+  emitQuick();
+  return true;
+}
+
+export function subscribeQuick(listener: QuickListener): () => void {
+  quickListeners.add(listener);
+  return () => {
+    quickListeners.delete(listener);
+  };
+}
+
+export function currentQuick(): QuickItem | null {
+  return quick;
+}
+
 type Toned = (message: string, options?: Omit<ToastOptions, "tone">) => number;
 
 type ToastFn = ((message: string, options?: ToastOptions) => number) & {
@@ -307,6 +404,8 @@ type ToastFn = ((message: string, options?: ToastOptions) => number) & {
   info: Toned;
   warning: Toned;
   error: Toned;
+  /** The quick pill at the bottom: "Message copied". Never an error, an undo or a retry. */
+  quick: typeof showQuick;
   dismiss: typeof dismissToast;
 };
 
@@ -317,6 +416,7 @@ export const toast: ToastFn = Object.assign(
     info: ((message, options) => show(message, { ...options, tone: "info" })) as Toned,
     warning: ((message, options) => show(message, { ...options, tone: "warning" })) as Toned,
     error: ((message, options) => show(message, { ...options, tone: "error" })) as Toned,
+    quick: showQuick,
     dismiss: dismissToast,
   },
 );

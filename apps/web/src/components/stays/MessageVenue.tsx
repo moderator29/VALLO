@@ -89,7 +89,7 @@ export function MessageVenue({
         >
           <label className="grid gap-3xs">
             <span className="nf-label">Your first message to {venueName}</span>
-            <textarea
+            <textarea autoCapitalize="sentences" enterKeyHint="enter"
               ref={field}
               name="body"
               required

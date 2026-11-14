@@ -78,7 +78,7 @@ export function ReceiptCodePanel({
                 }
                 try {
                   await navigator.clipboard.writeText(link);
-                  banner.success(copy.copied);
+                  banner.quick(copy.copied);
                 } catch {
                   banner.error(copy.failed);
                 }
@@ -92,7 +92,7 @@ export function ReceiptCodePanel({
               onClick={async () => {
                 try {
                   await navigator.clipboard.writeText(link);
-                  banner.success(copy.copied);
+                  banner.quick(copy.copied);
                 } catch {
                   banner.error(copy.failed);
                 }

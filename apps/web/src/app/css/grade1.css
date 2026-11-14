@@ -245,6 +245,123 @@
 }
 
 /*
+ * THE QUICK PILL (`banner.quick`, `ToastHost`; the founder, 14 November 2026,
+ * with WhatsApp's "Message copied" as the reference). A tick and a few words
+ * at the BOTTOM: above the home indicator, above the dock where there is one,
+ * above the composer in a thread (`data-composer-up` on the root, raised by the
+ * composer that is on screen). The page's own elevated surface in both themes,
+ * so the tick reads in either. Nothing in it can be pressed, so it takes no
+ * pointer and has no close.
+ *
+ * In on `fast` (160ms), held 1.4 seconds by the host, out in 0.4 seconds (the
+ * founder's number: `slow` plus 20ms). Both are tokens, so reduced motion and
+ * the Motion setting collapse them, and the two rules at the end take the
+ * slide away so it only appears and goes.
+ */
+.nf-quick-host {
+  position: fixed;
+  inset-inline: 0;
+  bottom: calc(env(safe-area-inset-bottom, 0px) + var(--nf-space-lg));
+  z-index: var(--nf-z-toast);
+  display: grid;
+  justify-items: center;
+  padding-inline: var(--nf-space-md);
+  pointer-events: none;
+}
+:root[data-docked] .nf-quick-host {
+  bottom: calc(var(--nf-tabbar-clearance) + var(--nf-space-xs));
+}
+@media (min-width: 64rem) {
+  :root[data-docked] .nf-quick-host,
+  .nf-quick-host {
+    bottom: var(--nf-space-xl);
+  }
+}
+/* The keyboard is up: the home indicator is not at the bottom of the view any
+   more. Inside the app the web view itself ends at the keys; in a browser the
+   page still runs under them, so the pill is lifted by the keyboard's height
+   (`--nf-keyboard-inset`, 0 whenever it is closed). */
+:root[data-keyboard="open"] .nf-quick-host {
+  bottom: var(--nf-space-sm);
+}
+:root[data-keyboard="open"]:not([data-native], [data-composer-up]) .nf-quick-host {
+  bottom: calc(var(--nf-keyboard-inset, 0px) + var(--nf-space-sm));
+}
+/* After the dock's, the desktop's and the keyboard's rules, so a composer wins
+   over all three: just above its top edge, wherever that is
+   (`lib/ui/composer-clearance.ts` measures it; 4.5rem until it has). */
+:root[data-composer-up] .nf-quick-host {
+  bottom: calc(var(--nf-composer-clearance, 4.5rem) + var(--nf-space-xs));
+}
+.nf-quick {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--nf-space-xs);
+  max-inline-size: min(22rem, 100%);
+  padding: var(--nf-space-xs) var(--nf-space-md) var(--nf-space-xs) var(--nf-space-sm);
+  border-radius: var(--nf-radius-lg);
+  border: var(--nf-border-width) solid var(--nf-border-default);
+  background: var(--nf-surface-elevated);
+  color: var(--nf-content-primary);
+  box-shadow: var(--nf-elevation-floating);
+  animation: nf-quick-in var(--nf-duration-fast) var(--nf-ease-entrance) both;
+  transition:
+    opacity calc(var(--nf-duration-slow) + 20ms) var(--nf-ease-exit),
+    transform calc(var(--nf-duration-slow) + 20ms) var(--nf-ease-exit);
+}
+@supports ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
+  :root:not([data-save-data="on"]) .nf-quick {
+    background: color-mix(in oklab, var(--nf-surface-elevated) 90%, transparent);
+    -webkit-backdrop-filter: blur(var(--nf-glass-blur));
+    backdrop-filter: blur(var(--nf-glass-blur));
+  }
+}
+.nf-quick[data-leaving] {
+  opacity: 0;
+  transform: translate3d(0, 0.5rem, 0);
+}
+@keyframes nf-quick-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 0.5rem, 0) scale(0.97);
+  }
+}
+/* The tick in its ring, in the success ink. */
+.nf-quick__mark {
+  flex-shrink: 0;
+  display: inline-grid;
+  place-items: center;
+  inline-size: 1.25rem;
+  block-size: 1.25rem;
+  border-radius: var(--nf-radius-circle);
+  border: 1.5px solid var(--nf-state-success);
+  color: var(--nf-state-success);
+}
+.nf-quick__text {
+  min-inline-size: 0;
+  font-size: var(--nf-text-body-sm);
+  font-weight: 600;
+  line-height: 1.35;
+  overflow-wrap: break-word;
+}
+@media (prefers-reduced-motion: reduce) {
+  .nf-quick {
+    animation: none;
+    transition: none;
+  }
+  .nf-quick[data-leaving] {
+    transform: none;
+  }
+}
+:root[data-reduce-motion="1"] .nf-quick {
+  animation: none;
+  transition: none;
+}
+:root[data-reduce-motion="1"] .nf-quick[data-leaving] {
+  transform: none;
+}
+
+/*
  * THE STEP FRAME (`components/ui/StepFrame.tsx`). One question per screen:
  * a top bar, a thin progress bar, an eyebrow, a big title, the question, and
  * a sticky bottom bar above the home indicator and the keyboard.

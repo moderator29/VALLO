@@ -1,0 +1,22 @@
+/* The Paste control beside a one-time code field. Tokens only. */
+@layer components {
+  .nf-paste-code {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--nf-space-2xs);
+    min-block-size: 2.75rem;
+    padding-inline: var(--nf-space-sm);
+    border-radius: var(--nf-radius-control);
+    font-size: var(--nf-text-body-sm);
+    font-weight: 600;
+    color: var(--nf-brand-primary);
+  }
+  .nf-paste-code:focus-visible {
+    outline: 2px solid var(--nf-brand-primary);
+    outline-offset: 2px;
+  }
+  .nf-paste-code__row {
+    display: flex;
+    justify-content: flex-end;
+  }
+}

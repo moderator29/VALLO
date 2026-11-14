@@ -126,7 +126,7 @@ export function ReportSheet({
 
             <label className="mt-md block">
               <span className="nf-overline">{words.detailLabel}</span>
-              <textarea
+              <textarea autoCapitalize="sentences" enterKeyHint="enter"
                 className="nf-field mt-xs min-h-[88px] w-full resize-y text-[length:var(--nf-text-body-sm)] leading-[1.5]"
                 value={detail}
                 maxLength={600}

@@ -269,7 +269,7 @@ export function ReplyBox({ rootId, parentId, question }: { rootId: string; paren
       <label htmlFor={`reply-${parentId}`} className="nf-circle-section__title">
         {label}
       </label>
-      <textarea
+      <textarea autoCapitalize="sentences" enterKeyHint="enter"
         id={`reply-${parentId}`}
         value={body}
         maxLength={4000}
@@ -403,7 +403,7 @@ export function VouchButton({
   }
   return (
     <div className="flex flex-col gap-xs" data-testid="circle-vouch-form">
-      <textarea
+      <textarea autoCapitalize="sentences" enterKeyHint="enter"
         className="nf-field min-h-[3rem]"
         maxLength={280}
         placeholder={CIRCLE_COPY.vouch.notePlaceholder}
@@ -527,11 +527,11 @@ export function CommunitySettingsForm({
     >
       <label className="block">
         <span className="nf-label">{words.nameLabel}</span>
-        <input className="nf-field mt-2xs w-full" maxLength={60} value={n} onChange={(e) => setN(e.target.value)} required />
+        <input type="text" autoComplete="off" autoCapitalize="words" className="nf-field mt-2xs w-full" maxLength={60} value={n} onChange={(e) => setN(e.target.value)} required />
       </label>
       <label className="block">
         <span className="nf-label">{words.descriptionLabel}</span>
-        <textarea className="nf-field mt-2xs min-h-[4rem] w-full" maxLength={500} value={d} onChange={(e) => setD(e.target.value)} />
+        <textarea autoCapitalize="sentences" enterKeyHint="enter" className="nf-field mt-2xs min-h-[4rem] w-full" maxLength={500} value={d} onChange={(e) => setD(e.target.value)} />
       </label>
       {isOwner && (
         <fieldset className="block">
@@ -553,7 +553,7 @@ export function CommunitySettingsForm({
       )}
       <label className="block">
         <span className="nf-label">{words.rulesLabel}</span>
-        <textarea
+        <textarea autoCapitalize="sentences" enterKeyHint="enter"
           className="nf-field mt-2xs min-h-[6rem] w-full"
           maxLength={2200}
           value={r}

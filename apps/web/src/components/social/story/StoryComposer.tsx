@@ -308,7 +308,7 @@ export function StoryComposer({
         </button>
         <div className="nf-story-compose__wash" aria-hidden="true" />
         <div className="nf-story-compose__card">
-          <textarea
+          <textarea autoCapitalize="sentences" enterKeyHint="enter"
             className="nf-story-compose__headline"
             rows={2}
             value={headline}
@@ -317,7 +317,7 @@ export function StoryComposer({
             aria-label="Headline"
             onChange={(event) => setHeadline(event.target.value)}
           />
-          <textarea
+          <textarea autoCapitalize="sentences" enterKeyHint="enter"
             className="nf-story-compose__standfirst"
             rows={2}
             value={standfirst}
@@ -328,7 +328,7 @@ export function StoryComposer({
           />
           <label className="nf-story-compose__place">
             <UiIcon name="location" size={12} />
-            <input
+            <input type="text" autoComplete="off" autoCapitalize="words" enterKeyHint="done"
               value={place}
               maxLength={STORY_PLACE_MAX}
               placeholder={STORY_COPY.placePlaceholder}

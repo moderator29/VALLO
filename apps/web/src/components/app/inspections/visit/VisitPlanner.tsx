@@ -341,7 +341,7 @@ export function VisitPlanner({
           <label htmlFor="visit-note" className="nf-visit__heading">
             {copy.note.heading} <span className="nf-visit__heading-aside">{copy.note.optional}</span>
           </label>
-          <textarea
+          <textarea autoCapitalize="sentences" enterKeyHint="enter"
             id="visit-note"
             className="nf-field nf-visit-note"
             value={note}

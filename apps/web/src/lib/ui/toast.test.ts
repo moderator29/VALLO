@@ -3,14 +3,19 @@ import {
   BANNER_CARRY_MS,
   BANNER_TIMING,
   banner,
+  currentQuick,
   currentToast,
+  dismissQuick,
   dismissToast,
   dwellFor,
   ERROR_HOLD_MS,
   noteRouteChange,
+  QUICK_TIMING,
+  subscribeQuick,
   subscribeToast,
   swipeDismisses,
   toast,
+  updateQuick,
   updateToast,
 } from "./toast";
 
@@ -180,5 +185,75 @@ describe("the one toast", () => {
     banner.success("Two");
     expect(updateToast(old, { message: "Changed" })).toBe(false);
     expect(currentToast()?.message).toBe("Two");
+  });
+});
+
+/* THE QUICK PILL (founder, 14 November 2026: "built clean sharp and goes back
+   by itself within 0.4 seconds"). A second, lighter voice in the same store. */
+describe("the quick pill", () => {
+  afterEach(() => {
+    vi.useRealTimers();
+    dismissQuick();
+    dismissToast();
+    dismissToast();
+  });
+
+  it("is one at a time: the newest words replace the last", () => {
+    const seen: (string | null)[] = [];
+    const off = subscribeQuick((item) => seen.push(item?.message ?? null));
+    banner.quick("Message copied");
+    banner.quick("Link copied");
+    expect(currentQuick()?.message).toBe("Link copied");
+    dismissQuick();
+    expect(currentQuick()).toBeNull();
+    off();
+    expect(seen).toEqual(["Message copied", "Link copied", null]);
+  });
+
+  it("restarts the clock for the same words without a second entrance", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(1_000);
+    const id = banner.quick("Link copied");
+    const first = currentQuick()?.shownAt;
+    vi.setSystemTime(1_600);
+    expect(banner.quick("Link copied")).toBe(id);
+    expect(currentQuick()?.id).toBe(id);
+    expect(currentQuick()?.shownAt).toBeGreaterThan(first ?? 0);
+  });
+
+  it("never carries a tone, an action, an undo or a retry", () => {
+    banner.quick("Saved. It is in Saved.");
+    const item = currentQuick() as Record<string, unknown>;
+    expect(Object.keys(item).sort()).toEqual(["id", "message", "shownAt"]);
+    /* The call takes words and a test id, and nothing an error would need. */
+    expect(banner.quick.length).toBe(1);
+  });
+
+  it("leaves the top banner alone, and the banner leaves the pill alone", () => {
+    banner.error("Could not save");
+    banner.quick("Link copied");
+    expect(currentToast()?.message).toBe("Could not save");
+    expect(currentToast()?.tone).toBe("error");
+    dismissToast();
+    expect(currentQuick()?.message).toBe("Link copied");
+  });
+
+  it("changes its words in place, and only while that pill is the one showing", () => {
+    const id = banner.quick("Saved. It is in Saved.");
+    expect(updateQuick(id, "Saved on this device. It is in Saved.")).toBe(true);
+    expect(currentQuick()?.id).toBe(id);
+    expect(currentQuick()?.message).toBe("Saved on this device. It is in Saved.");
+    const next = banner.quick("Link copied");
+    expect(updateQuick(id, "Changed")).toBe(false);
+    expect(currentQuick()?.message).toBe("Link copied");
+    /* A dismissal for an older pill does not take the newer one down. */
+    dismissQuick(id);
+    expect(currentQuick()?.id).toBe(next);
+    dismissQuick(next);
+    expect(currentQuick()).toBeNull();
+  });
+
+  it("is in on the fast token, held about 1.4 seconds and out in 400 ms", () => {
+    expect(QUICK_TIMING).toEqual({ enterToken: "--nf-duration-fast", holdMs: 1400, exitMs: 400 });
   });
 });

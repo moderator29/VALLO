@@ -47,7 +47,7 @@ export function RiskOverrideForm({ copy }: { copy: Dictionary["complianceRisk"][
         <label htmlFor="risk-reason" className="nf-label block">
           {copy.reason}
         </label>
-        <textarea
+        <textarea autoCapitalize="sentences" enterKeyHint="enter"
           id="risk-reason"
           name="reason"
           required

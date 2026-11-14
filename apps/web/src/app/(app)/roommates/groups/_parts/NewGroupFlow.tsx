@@ -151,7 +151,7 @@ export function NewGroupFlow({ live, schools, prefill }: { live: boolean; school
           </div>
           <div className="nf-rmb-field">
             <label htmlFor="rm-ng-intro">{C.intro}</label>
-            <textarea id="rm-ng-intro" value={d.intro} maxLength={LIMITS.groupIntroMax} placeholder={C.introPlaceholder} onChange={(e) => set({ intro: e.target.value })} />
+            <textarea autoCapitalize="sentences" enterKeyHint="enter" id="rm-ng-intro" value={d.intro} maxLength={LIMITS.groupIntroMax} placeholder={C.introPlaceholder} onChange={(e) => set({ intro: e.target.value })} />
             <span className="nf-rmb-field__hint nf-numeric">{`${d.intro.length} / ${LIMITS.groupIntroMax}`}</span>
           </div>
         </div>
@@ -210,7 +210,7 @@ export function NewGroupFlow({ live, schools, prefill }: { live: boolean; school
           </div>
           <div className="nf-rmb-field">
             <label htmlFor="rm-ng-areas">{C.areas}</label>
-            <input id="rm-ng-areas" value={d.areas} placeholder={C.areasPlaceholder} onChange={(e) => set({ areas: e.target.value })} />
+            <input type="text" autoComplete="off" autoCapitalize="words" id="rm-ng-areas" value={d.areas} placeholder={C.areasPlaceholder} onChange={(e) => set({ areas: e.target.value })} />
           </div>
           <div className="nf-rmb-field">
             <label htmlFor="rm-ng-school">{C.school}</label>

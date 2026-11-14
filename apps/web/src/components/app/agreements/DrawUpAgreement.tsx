@@ -58,7 +58,7 @@ export function DrawUpAgreement({ inspectionId, minDate }: { inspectionId: strin
       </label>
       <label className="block">
         <span className="nf-label">Anything both of you should agree in writing (optional)</span>
-        <textarea className="nf-field mt-2xs min-h-[4.5rem] w-full" maxLength={2000} value={notes} onChange={(e) => setNotes(e.target.value)} />
+        <textarea autoCapitalize="sentences" enterKeyHint="enter" className="nf-field mt-2xs min-h-[4.5rem] w-full" maxLength={2000} value={notes} onChange={(e) => setNotes(e.target.value)} />
       </label>
       <Button type="submit" variant="primary" full disabled={pending}>
         {pending ? "Drawing up the agreement" : "Draw up the agreement"}

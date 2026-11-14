@@ -180,7 +180,7 @@ export function ProfileEditor({
         <label htmlFor={bioId} className="nf-label mt-sm">
           Bio
         </label>
-        <textarea
+        <textarea autoCapitalize="sentences" enterKeyHint="enter"
           id={bioId}
           name="bio"
           value={bio}

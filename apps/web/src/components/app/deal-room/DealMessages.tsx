@@ -6,6 +6,9 @@ import { Button } from "@/components/ui/Button";
 import { Panel } from "@/components/ui/Panel";
 import { State } from "@/components/ui/State";
 import { banner } from "@/lib/ui/toast";
+import { useComposerClearance } from "@/lib/ui/composer-clearance";
+import { composerEnterKeyHint, enterSends } from "@/lib/ui/field-keyboard";
+import { isTouchKeyboard, useTouchKeyboard } from "@/lib/ui/use-touch-keyboard";
 import { sendMessage } from "@/lib/messages/actions";
 import { formatDay, formatWhen } from "@/lib/offers/format";
 import type { DealThreadMessage } from "@/lib/offers/thread";
@@ -22,6 +25,10 @@ export function DealMessages({ conversationId, messages, counterpartyName, live 
   const [text, setText] = useState("");
   const [busy, setBusy] = useState(false);
   const tap = useRef<string>("");
+  /* The quick pill sits just above this bar, however tall the typing makes it. */
+  const composerRef = useRef<HTMLFormElement | null>(null);
+  useComposerClearance(composerRef, live);
+  const touchKeyboard = useTouchKeyboard();
 
   const send = async () => {
     const body = text.trim();
@@ -90,6 +97,7 @@ export function DealMessages({ conversationId, messages, counterpartyName, live 
          * actions rather than drawing a bare arrow.
          */
         <form
+          ref={composerRef}
           className="nf-composer"
           onSubmit={(e) => {
             e.preventDefault();
@@ -107,10 +115,20 @@ export function DealMessages({ conversationId, messages, counterpartyName, live 
               value={text}
               maxLength={4000}
               placeholder={`Message ${counterpartyName}`}
-              enterKeyHint="send"
+              autoComplete="off"
+              autoCapitalize="sentences"
+              enterKeyHint={composerEnterKeyHint(touchKeyboard)}
               onChange={(e) => {
                 setText(e.target.value);
                 grow(e.target);
+              }}
+              /* The thread's own rule: Enter sends on a computer, makes a new
+                 line on a phone, where the button sends. */
+              onKeyDown={(e) => {
+                if (enterSends({ key: e.key, shiftKey: e.shiftKey, isComposing: e.nativeEvent.isComposing }, isTouchKeyboard())) {
+                  e.preventDefault();
+                  if (text.trim().length > 0 && !busy) void send();
+                }
               }}
             />
             <div className="nf-composer__row">

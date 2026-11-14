@@ -134,7 +134,7 @@ export function ShareToFeedSheet({ open, onClose, listingId }: { open: boolean; 
               November 2026): the same order the post takes in the feed. */}
           <label className="nf-lsp__note">
             <span className="nf-body font-semibold">{SHARE_WORDS.noteLabel}</span>
-            <textarea
+            <textarea autoCapitalize="sentences" enterKeyHint="enter"
               value={note}
               onChange={(event) => setNote(event.target.value)}
               placeholder={SHARE_WORDS.notePlaceholder}

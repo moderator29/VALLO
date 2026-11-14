@@ -1,5 +1,7 @@
 "use client";
 
+import { PasteCodeButton } from "@/components/ui/PasteCodeButton";
+import { setFieldValue } from "@/lib/paste/field-paste";
 import type { AccountCopy } from "@/components/app/account/settings-copy";
 import { useActionState, useEffect, useId, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -497,7 +499,7 @@ function DeleteDrawer({
               <label htmlFor={noteId} className="nf-label mb-2xs mt-md block">
                 {copy.reasonNoteLabel}
               </label>
-              <textarea
+              <textarea autoCapitalize="sentences" enterKeyHint="enter"
                 id={noteId}
                 rows={3}
                 maxLength={DELETION_NOTE_MAX}
@@ -575,6 +577,16 @@ function DeleteDrawer({
                     className="nf-field"
                     data-testid="delete-code"
                   />
+                  {/* Paste the emailed code in one tap (14 November 2026). */}
+                  <div className="nf-paste-code__row">
+                    <PasteCodeButton
+                      length={6}
+                      onCode={(pasted) => {
+                        const field = document.getElementById(proofId);
+                        if (field instanceof HTMLInputElement) setFieldValue(field, pasted);
+                      }}
+                    />
+                  </div>
                 </>
               )}
 

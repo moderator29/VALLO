@@ -213,7 +213,7 @@ export function ReportSheetPanel({
                         Optional, and it helps. Dates, amounts and account numbers are
                         exactly the detail that makes a report actionable.
                       </p>
-                      <textarea
+                      <textarea autoCapitalize="sentences" enterKeyHint="enter"
                         id={`${uid}-details`}
                         name="details"
                         rows={4}

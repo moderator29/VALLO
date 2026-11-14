@@ -4,14 +4,20 @@ import { useEffect, useRef, useState, useSyncExternalStore, type PointerEvent } 
 import { usePathname } from "next/navigation";
 import { UiIcon, type UiIconName } from "@/design-system/icons/UiIcon";
 import { useRootFlag } from "@/lib/ui/root-flag";
+import { prefersCalm } from "@/lib/ui/calm";
 import {
   BANNER_TIMING,
+  QUICK_TIMING,
   bannerExitMs,
+  currentQuick,
   currentToast,
+  dismissQuick,
   dismissToast,
   noteRouteChange,
+  subscribeQuick,
   subscribeToast,
   swipeDismisses,
+  type QuickItem,
   type ToastItem,
 } from "@/lib/ui/toast";
 
@@ -46,6 +52,15 @@ export const exitMs = bannerExitMs;
 
 function useToastItem(): ToastItem | null {
   return useSyncExternalStore(subscribeToast, currentToast, () => null);
+}
+
+function useQuickItem(): QuickItem | null {
+  return useSyncExternalStore(subscribeQuick, currentQuick, () => null);
+}
+
+/** How long a leaving pill stays mounted: its 0.4 seconds, or nothing where motion is turned down. */
+export function quickExitMs(): number {
+  return prefersCalm() ? 0 : QUICK_TIMING.exitMs;
 }
 
 /* A SINGLETON, even if it is mounted twice. In the app it is mounted once in
@@ -100,9 +115,65 @@ export function ToastHost() {
     // eslint-disable-next-line react-hooks/exhaustive-deps -- `shown` is read, the change that matters is `item`
   }, [item]);
 
+  /* THE QUICK PILL (`banner.quick`): its own slot at the bottom, kept through
+     its 0.4 second exit the same way. */
+  const quick = useQuickItem();
+  const [shownQuick, setShownQuick] = useState<QuickItem | null>(null);
+  const [quickLeaving, setQuickLeaving] = useState(false);
+  useEffect(() => {
+    if (quick) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- the exit keeps the last pill on screen
+      setShownQuick(quick);
+      setQuickLeaving(false);
+      return;
+    }
+    if (!shownQuick) return;
+    setQuickLeaving(true);
+    const t = window.setTimeout(() => {
+      setShownQuick(null);
+      setQuickLeaving(false);
+    }, quickExitMs());
+    return () => window.clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- `shownQuick` is read, the change that matters is `quick`
+  }, [quick]);
+
   /* A second host (a test harness one beside the app's) draws nothing. */
   if (!primary) return null;
 
+  return (
+    <>
+      <BannerLanes shown={shown} leaving={leaving} />
+      <div className="nf-quick-host">
+        <div aria-live="polite" aria-atomic="true" className="nf-toast-host__lane">
+          {shownQuick ? <QuickPill key={shownQuick.id} item={shownQuick} leaving={quickLeaving} /> : null}
+        </div>
+      </div>
+    </>
+  );
+}
+
+/**
+ * THE QUICK PILL: a tick and a few words, above the composer or the dock. No
+ * close, no action, nothing to press: it is said, held for `holdMs`, and
+ * leaves by itself. The same words said again restart the hold in place.
+ */
+function QuickPill({ item, leaving }: { item: QuickItem; leaving: boolean }) {
+  useEffect(() => {
+    const t = window.setTimeout(() => dismissQuick(item.id), QUICK_TIMING.holdMs);
+    return () => window.clearTimeout(t);
+  }, [item.id, item.shownAt]);
+
+  return (
+    <div role="status" className="nf-quick" data-leaving={leaving || undefined} data-testid={item["data-testid"] ?? "quick-pill"}>
+      <span className="nf-quick__mark" aria-hidden="true">
+        <UiIcon name="check" size={14} />
+      </span>
+      <span className="nf-quick__text">{item.message}</span>
+    </div>
+  );
+}
+
+function BannerLanes({ shown, leaving }: { shown: ToastItem | null; leaving: boolean }) {
   return (
     /* No name and no role: an empty landmark on every page is noise, and the
        two live lanes inside do the announcing (axe: aria-prohibited-attr). */

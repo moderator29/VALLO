@@ -53,7 +53,7 @@ export function EddReviewCard({ view, copy }: { view: EddCardView; copy: Copy })
             <label htmlFor={`${id}-sof`} className="nf-label block">
               {copy.sourceOfFunds}
             </label>
-            <textarea
+            <textarea autoCapitalize="sentences" enterKeyHint="enter"
               id={`${id}-sof`}
               name="sourceOfFunds"
               required
@@ -82,7 +82,7 @@ export function EddReviewCard({ view, copy }: { view: EddCardView; copy: Copy })
             <label htmlFor={`${id}-note`} className="nf-label block">
               {copy.note}
             </label>
-            <input id={`${id}-note`} name="note" maxLength={1000} className="nf-field mt-xs min-h-[44px] w-full" />
+            <input type="text" autoComplete="off" autoCapitalize="sentences" id={`${id}-note`} name="note" maxLength={1000} className="nf-field mt-xs min-h-[44px] w-full" />
           </div>
           {/* The decision stays one thumb away on a phone while the source of
               funds above it is read (the console's decision bar). */}

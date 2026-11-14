@@ -251,7 +251,7 @@ export function PostFlow({
       >
         <div className="nf-circle-field">
           <label htmlFor="circle-title" className="sr-only">Title</label>
-          <input
+          <input type="text" autoComplete="off" autoCapitalize="sentences"
             id="circle-title"
             value={draft.title}
             maxLength={LIMITS.titleMax}
@@ -286,7 +286,7 @@ export function PostFlow({
       >
         <div className="nf-circle-field">
           <label htmlFor="circle-body" className="sr-only">Details</label>
-          <textarea id="circle-body" value={draft.body} maxLength={LIMITS.bodyMax} onChange={(e) => update({ body: e.target.value })} />
+          <textarea autoCapitalize="sentences" enterKeyHint="enter" id="circle-body" value={draft.body} maxLength={LIMITS.bodyMax} onChange={(e) => update({ body: e.target.value })} />
         </div>
       </StepFrame>
     );

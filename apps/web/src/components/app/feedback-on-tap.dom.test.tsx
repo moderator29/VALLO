@@ -38,7 +38,7 @@ const HEART_ENTRY = `
 
 /**
  * Click `selector` and time, from inside the page, the moment the control's
- * `aria-pressed` flips and the moment a banner is drawn at opacity 0.5 or more.
+ * `aria-pressed` flips and the moment a banner is drawn at opacity 0.5 or more (the top banner, or the quick pill a save now speaks through).
  */
 async function timeTap(page: Page, selector: string, words = "") {
   return page.evaluate(
@@ -54,7 +54,7 @@ async function timeTap(page: Page, selector: string, words = "") {
         const tick = () => {
           const at = performance.now() - t0;
           if (flip === null && control.getAttribute("aria-pressed") !== before) flip = at;
-          const found = document.querySelector(".nf-toast:not([data-leaving])") as HTMLElement | null;
+          const found = document.querySelector(".nf-toast:not([data-leaving]), .nf-quick:not([data-leaving])") as HTMLElement | null;
           const card = found && (found.textContent ?? "").includes(expected) ? found : null;
           if (card && mounted === null) {
             mounted = at;
@@ -72,7 +72,7 @@ async function timeTap(page: Page, selector: string, words = "") {
 }
 
 describe.skipIf(!hasBrowser && !process.env.CI)("feedback on the tap", () => {
-  it("a heart flips and its banner is up within 100ms while the server has not answered", async () => {
+  it("a heart flips and its quick pill is up within 100ms while the server has not answered", async () => {
     /* No staged `toggleSave`: the harness answers with a promise that never settles. */
     const { page, close } = await mountInBrowser({ entry: HEART_ENTRY, css: CSS });
     try {
@@ -132,7 +132,7 @@ describe.skipIf(!hasBrowser && !process.env.CI)("feedback on the tap", () => {
     }
   });
 
-  it("a signed-out save becomes a device save and the banner's words change in place", async () => {
+  it("a signed-out save becomes a device save and the pill's words change in place", async () => {
     const { page, close } = await mountInBrowser({
       entry: HEART_ENTRY,
       css: CSS,
@@ -144,12 +144,13 @@ describe.skipIf(!hasBrowser && !process.env.CI)("feedback on the tap", () => {
       const heart = page.locator("[data-testid=card-save]");
       const t = await timeTap(page, "[data-testid=card-save]");
       expect(t.visible!).toBeLessThan(100);
-      const id = await page.evaluate(() => document.querySelector(".nf-toast")?.outerHTML.length);
+      const id = await page.evaluate(() => document.querySelector(".nf-quick")?.outerHTML.length);
       await page.getByText("Saved on this device. It is in Saved.").waitFor();
       /* Kept on: the device owns it now. */
       expect(await heart.getAttribute("aria-pressed")).toBe("true");
-      /* One banner, no second entrance and no error. */
-      expect(await page.locator(".nf-toast").count()).toBe(1);
+      /* One pill, no second entrance, nothing on the top banner and no error. */
+      expect(await page.locator(".nf-quick").count()).toBe(1);
+      expect(await page.locator(".nf-toast").count()).toBe(0);
       expect(await page.getByRole("alert").count()).toBe(0);
       expect(id).toBeGreaterThan(0);
     } finally {

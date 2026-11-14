@@ -147,7 +147,7 @@ export function PlaceStep({
       </StaysTiles>
 
       <StaysPlate label={hw.steps.placeName} htmlFor="stays-place-name">
-        <input
+        <input type="text" autoComplete="organization" autoCapitalize="words"
           id="stays-place-name"
           className="nf-field nf-field--glass nf-stays-input"
           value={name}

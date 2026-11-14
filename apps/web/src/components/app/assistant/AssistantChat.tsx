@@ -3,6 +3,7 @@
 import { ChatWatermark } from "@/components/app/messages/ChatWatermark";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useOverlay } from "@/lib/ui/use-overlay";
+import { banner } from "@/lib/ui/toast";
 import Image from "next/image";
 import Link from "next/link";
 import { LogoMark, LogoWordmark, wordmarkWidth } from "@/design-system/brand/Logo";
@@ -896,6 +897,7 @@ export function AssistantChat({
                                 ?.writeText(m.text)
                                 .then(() => {
                                   setCopiedId(m.id);
+                                  banner.quick(answerWords.copied);
                                   window.setTimeout(() => setCopiedId((id) => (id === m.id ? null : id)), 1600);
                                 })
                                 .catch(() => undefined);

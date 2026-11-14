@@ -101,7 +101,7 @@ export function ReplyActions({
           <label htmlFor={noteId} className="nf-label">
             {copy.noteLabel}
           </label>
-          <textarea id={noteId} name="note" maxLength={400} rows={3} className="nf-field" />
+          <textarea autoCapitalize="sentences" enterKeyHint="enter" id={noteId} name="note" maxLength={400} rows={3} className="nf-field" />
           <p className="nf-caption text-[var(--nf-content-muted)]">{copy.noteHint}</p>
           <Button type="submit" variant="dangerQuiet" size="md" full loading={answering} disabled={busy} data-testid="landlord-dispute-send">
             {copy.notAgreed}

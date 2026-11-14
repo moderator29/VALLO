@@ -485,7 +485,7 @@ export function BoardComposer({ groupId }: { groupId: string }) {
       <label htmlFor="rm-board-body" className="sr-only">
         {B.placeholder}
       </label>
-      <textarea id="rm-board-body" value={body} maxLength={LIMITS.postMax} placeholder={B.placeholder} onChange={(e) => setBody(e.target.value)} />
+      <textarea autoCapitalize="sentences" enterKeyHint="enter" id="rm-board-body" value={body} maxLength={LIMITS.postMax} placeholder={B.placeholder} onChange={(e) => setBody(e.target.value)} />
       <div className="flex items-center justify-between gap-sm">
         <span className="nf-rmb-field__hint nf-numeric">{body.length > LIMITS.postMax - 100 ? `${LIMITS.postMax - body.length}` : ""}</span>
         <Button type="submit" variant="primary" size="sm" trailingIcon="send" loading={pending} disabled={!body.trim()}>
@@ -555,7 +555,7 @@ export function AddExpense({ groupId, members }: { groupId: string; members: Per
         <div className="grid gap-md">
           <div className="nf-rmb-field">
             <label htmlFor="rm-cost-title">{C.titleField}</label>
-            <input
+            <input type="text" autoComplete="off" autoCapitalize="sentences"
               id="rm-cost-title"
               value={title}
               maxLength={80}

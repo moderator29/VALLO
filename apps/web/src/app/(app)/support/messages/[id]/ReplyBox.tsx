@@ -7,13 +7,18 @@ import { Button } from "@/components/ui/Button";
 import { TextArea } from "@/components/ui/Field";
 import { OfflineNote, useOnline } from "@/components/support/OfflineNote";
 import { PhotoField } from "@/components/support/PhotoField";
-import { uploadTicketPhoto, type PreparedPhoto } from "@/components/support/photo";
+import { preparePhoto, uploadTicketPhoto, type PreparedPhoto } from "@/components/support/photo";
+import { PasteTray } from "@/components/app/messages/PasteTray";
+import { usePaste } from "@/components/app/messages/use-paste";
+import { PASTE_WORDS, fillCount } from "@/components/app/messages/paste-words";
 import { replyToMyTicket } from "@/lib/support/ticket-reply";
 import type { Dictionary } from "@vallo/i18n/core";
 import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 const draftKey = (ticketId: string) => `nf_support_reply_${ticketId}`;
+/** The longest reply the ticket takes, typed and pasted together. */
+const REPLY_LIMIT = 4000;
 
 /**
  * The member's reply on their own ticket, with an optional photo.
@@ -36,7 +41,7 @@ export function ReplyBox({ ticketId, copy }: { ticketId: string; copy: Dictionar
   useEffect(() => {
     try {
       const stored = window.localStorage.getItem(draftKey(ticketId));
-      if (stored) setBody(stored.slice(0, 4000));
+      if (stored) setBody(stored.slice(0, REPLY_LIMIT));
     } catch {
       // No stored draft.
     }
@@ -52,10 +57,32 @@ export function ReplyBox({ ticketId, copy }: { ticketId: string; copy: Dictionar
     }
   };
 
+  /* PASTE (14 November 2026). A pasted screenshot goes through
+     `preparePhoto`, the door a picked one uses (same type and size checks, the
+     same re-encode); a long pasted text or a lone link is held as a chip and
+     is part of the reply's text, inside the reply's own 4,000 characters. */
+  const paste = usePaste({
+    limit: REPLY_LIMIT,
+    imageRoom: photo ? 0 : 1,
+    onImages: (files) => {
+      const file = files[0];
+      if (!file) return;
+      void preparePhoto(file).then((prepared) => {
+        if ("error" in prepared) banner.error(prepared.error);
+        else setPhoto(prepared);
+      });
+    },
+  });
+
   const submit = (event: React.FormEvent) => {
     event.preventDefault();
-    if (!body.trim() && !photo) {
+    const composed = paste.split(body);
+    if (!composed.body.trim() && !photo) {
       setError(copy.empty);
+      return;
+    }
+    if (composed.over > 0) {
+      setError(fillCount(PASTE_WORDS.tooLong, composed.over));
       return;
     }
     if (!online) {
@@ -65,7 +92,7 @@ export function ReplyBox({ ticketId, copy }: { ticketId: string; copy: Dictionar
     setError(undefined);
     start(async () => {
       try {
-        const result = await replyToMyTicket({ ticketId, body, withPhoto: Boolean(photo) });
+        const result = await replyToMyTicket({ ticketId, body: composed.body, withPhoto: Boolean(photo) });
         if (!result.ok) {
           banner.error(result.error);
           return;
@@ -81,6 +108,7 @@ export function ReplyBox({ ticketId, copy }: { ticketId: string; copy: Dictionar
           setPhoto(null);
         }
         keep("");
+        paste.clear();
         if (!photoFailed) banner.success(copy.sent);
         router.refresh();
       } catch (error) {
@@ -95,11 +123,13 @@ export function ReplyBox({ ticketId, copy }: { ticketId: string; copy: Dictionar
         label={copy.label}
         value={body}
         onChange={(e) => keep(e.target.value)}
+        onPaste={paste.onPaste}
         rows={3}
-        maxLength={4000}
+        maxLength={REPLY_LIMIT}
         error={error}
         placeholder={copy.placeholder}
       />
+      <PasteTray paste={paste} over={paste.held ? paste.split(body).over : 0} />
       {photo && <PhotoField value={photo} onChange={setPhoto} disabled={pending} />}
       <OfflineNote what={copy.offlineWhat} />
       <div className="flex flex-wrap items-center justify-between gap-row">

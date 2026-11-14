@@ -26,7 +26,7 @@ export function AccessStep({ ctx }: { ctx: StepCtx }) {
         <span className="block">{W.panelBody}</span>
       </Note>
       <Field label={W.estateName} error={errors.estateName}>
-        <input
+        <input type="text" autoComplete="off" autoCapitalize="words"
           className="nf-field"
           value={values.estateName}
           maxLength={MAX_ESTATE_NAME}
@@ -35,7 +35,7 @@ export function AccessStep({ ctx }: { ctx: StepCtx }) {
         />
       </Field>
       <Field label={W.gateDirections} hint={W.gateDirectionsHint} error={errors.gateDirections}>
-        <textarea
+        <textarea autoCapitalize="sentences" enterKeyHint="enter"
           className="nf-field min-h-[84px] resize-y"
           value={values.gateDirections}
           maxLength={MAX_GATE_DIRECTIONS}
@@ -54,7 +54,7 @@ export function AccessStep({ ctx }: { ctx: StepCtx }) {
         />
       </Field>
       <Field label={W.accessCode} error={errors.accessCode}>
-        <input
+        <input type="text" autoComplete="off" autoCapitalize="characters" autoCorrect="off" spellCheck={false}
           className="nf-field"
           value={values.accessCode}
           maxLength={MAX_ACCESS_CODE}

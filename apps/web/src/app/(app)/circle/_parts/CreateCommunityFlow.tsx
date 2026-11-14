@@ -88,11 +88,11 @@ export function CreateCommunityFlow({ prefill }: { prefill?: { name: string; cat
         <div className="grid gap-md">
           <div className="nf-circle-field">
             <label htmlFor="cc-name">Name</label>
-            <input id="cc-name" value={draft.name} maxLength={LIMITS.nameMax} placeholder="Landlords in Lekki" onChange={(e) => update({ name: e.target.value })} />
+            <input type="text" autoComplete="off" autoCapitalize="words" id="cc-name" value={draft.name} maxLength={LIMITS.nameMax} placeholder="Landlords in Lekki" onChange={(e) => update({ name: e.target.value })} />
           </div>
           <div className="nf-circle-field">
             <label htmlFor="cc-desc">What is it for?</label>
-            <textarea id="cc-desc" value={draft.description} maxLength={LIMITS.descriptionMax} onChange={(e) => update({ description: e.target.value })} />
+            <textarea autoCapitalize="sentences" enterKeyHint="enter" id="cc-desc" value={draft.description} maxLength={LIMITS.descriptionMax} onChange={(e) => update({ description: e.target.value })} />
             <span className="nf-circle-field__hint">{`${draft.description.length} of ${LIMITS.descriptionMax}`}</span>
           </div>
         </div>
@@ -136,7 +136,7 @@ export function CreateCommunityFlow({ prefill }: { prefill?: { name: string; cat
         primary={{ label: "Preview", onClick: forward, testId: "circle-flow-next" }} secondary={{ label: "Skip", onClick: forward }}>
         <div className="nf-circle-field">
           <label htmlFor="cc-rules" className="sr-only">Rules</label>
-          <textarea id="cc-rules" value={draft.rules} placeholder={"Be kind.\nNo adverts.\nNever share a phone number in a post."} onChange={(e) => update({ rules: e.target.value })} />
+          <textarea autoCapitalize="sentences" enterKeyHint="enter" id="cc-rules" value={draft.rules} placeholder={"Be kind.\nNo adverts.\nNever share a phone number in a post."} onChange={(e) => update({ rules: e.target.value })} />
         </div>
       </StepFrame>
     );

@@ -26,7 +26,7 @@ export function LocationStep({ ctx, states }: { ctx: StepCtx; states: { code: st
         </select>
       </Field>
       <Field fromMessage={mark("city")} label={copy.location.cityLabel} error={errors.city}>
-        <input
+        <input type="text" autoComplete="address-level2" autoCapitalize="words"
           className="nf-field"
           value={values.city}
           onChange={(e) => set("city", e.target.value)}
@@ -34,7 +34,7 @@ export function LocationStep({ ctx, states }: { ctx: StepCtx; states: { code: st
         />
       </Field>
       <Field fromMessage={mark("area")} label={copy.location.areaLabel} error={errors.area} hint={copy.location.areaHint}>
-        <input
+        <input type="text" autoComplete="off" autoCapitalize="words"
           className="nf-field"
           value={values.area}
           onChange={(e) => set("area", e.target.value)}
@@ -42,7 +42,7 @@ export function LocationStep({ ctx, states }: { ctx: StepCtx; states: { code: st
         />
       </Field>
       <Field label={copy.location.addressLabel} hint={copy.location.addressHint} error={errors.address}>
-        <input
+        <input type="text" autoComplete="street-address" autoCapitalize="words"
           className="nf-field"
           value={values.address}
           onChange={(e) => set("address", e.target.value)}
@@ -50,7 +50,7 @@ export function LocationStep({ ctx, states }: { ctx: StepCtx; states: { code: st
         />
       </Field>
       <Field label={copy.location.landmarkLabel} hint={copy.location.landmarkHint} error={errors.landmark}>
-        <input
+        <input type="text" autoComplete="off" autoCapitalize="words"
           className="nf-field"
           value={values.landmark}
           onChange={(e) => set("landmark", e.target.value)}

@@ -93,8 +93,8 @@ export function ExternalLinkSheet({
       done = copyByExecCommand(href);
     }
     setCopied(done);
-    /* The button keeps its tick; the banner says it (founder, 7 November 2026). */
-    if (done) banner("Link copied", { tone: "success" });
+    /* The button keeps its tick; the quick pill says it (founder, 14 November 2026). */
+    if (done) banner.quick("Link copied");
   }
 
   return (

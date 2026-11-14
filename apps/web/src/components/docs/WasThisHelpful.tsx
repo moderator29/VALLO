@@ -54,7 +54,7 @@ export function WasThisHelpful({ path, title }: { path: string; title: string })
           <label htmlFor="dk-helpful-note" className="nf-dk-helpful__q">
             What was missing or wrong?
           </label>
-          <textarea
+          <textarea autoCapitalize="sentences" enterKeyHint="enter"
             id="dk-helpful-note"
             className="nf-field"
             value={note}

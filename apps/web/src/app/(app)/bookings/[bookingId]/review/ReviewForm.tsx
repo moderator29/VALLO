@@ -219,7 +219,7 @@ export function ReviewForm({
         >
           {w.bodyLabel}
         </label>
-        <textarea
+        <textarea autoCapitalize="sentences" enterKeyHint="enter"
           id="review-body"
           name="body"
           rows={6}

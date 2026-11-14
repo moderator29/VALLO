@@ -248,15 +248,18 @@ export function ListingActions({
     } catch {
       copied = copyByExecCommand(url);
     }
-    if (copied) counted();
-    banner(
-      copied
-        ? t.frontDoor.share.copied
-        : doorable
-          ? `${t.frontDoor.share.copyFallback}: ${url}`
-          : "Copy the link from your browser's address bar",
-      { tone: copied ? "success" : "info", "data-testid": "listing-action-message" },
-    );
+    /* A copy that worked is said by the quick pill at the bottom of the
+       screen (founder, 14 November 2026); one that did not carries the link
+       itself, so it stays on the banner where it can be read and selected. */
+    if (copied) {
+      counted();
+      banner.quick(t.frontDoor.share.copied, { "data-testid": "listing-action-message" });
+      return;
+    }
+    banner(doorable ? `${t.frontDoor.share.copyFallback}: ${url}` : "Copy the link from your browser's address bar", {
+      tone: "info",
+      "data-testid": "listing-action-message",
+    });
   }
 
   return (

@@ -41,6 +41,8 @@ import {
 import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
 import { banner } from "@/lib/ui/toast";
+import { PasteTray } from "@/components/app/messages/PasteTray";
+import { usePaste } from "@/components/app/messages/use-paste";
 
 /**
  * Writing something.
@@ -167,8 +169,10 @@ export function Composer({
      is closed by a stray drag or Back does not throw a half-written post
      away. Otherwise they are this component's own. */
   const [ownBody, setOwnBody] = useState("");
-  const body = draft ?? ownBody;
-  const setBody = (next: string) => (onDraftChange ? onDraftChange(next) : setOwnBody(next));
+  /* What is in the field. `body`, below, is the post's whole text: the field
+     and anything pasted and held above it (14 November 2026). */
+  const typed = draft ?? ownBody;
+  const setTyped = (next: string) => (onDraftChange ? onDraftChange(next) : setOwnBody(next));
   const [error, setError] = useState<string | null>(null);
   /* A refusal is said by the one banner at the top of the screen (founder,
      7 November 2026, "THE BANNER EVERYWHERE"); only a post whose picture was
@@ -181,6 +185,22 @@ export function Composer({
   const OUTBOX = useClientCopy().platform.outbox;
   const [held, setHeld] = useState(false);
   const [pictures, setPictures] = useState<Picture[]>([]);
+  /* PASTE (14 November 2026). A pasted picture goes through `choose`, the
+     door a picked one uses, so it meets the same type, size and count checks.
+     A long pasted text or a lone web address is held as a chip above the
+     field and is part of the post's text: `body` is the field and the chips
+     together, so the length limit and every check on the server read it as
+     typed words. */
+  const paste = usePaste({
+    limit: POST_MAX,
+    onImages: (files) => void choose(files),
+    imageRoom: Math.max(0, POST_MEDIA_MAX - pictures.length),
+  });
+  const body = paste.held ? paste.split(typed).body : typed;
+  const setBody = (next: string) => {
+    setTyped(next);
+    if (next === "") paste.clear();
+  };
   /* The post that landed without its pictures. While this is set, the retry is
      on screen and it sends the same pictures to that same post. */
   const [strandedPost, setStrandedPost] = useState<string | null>(null);
@@ -203,7 +223,7 @@ export function Composer({
 
   const isReply = Boolean(parentId);
   const left = POST_MAX - body.length;
-  const canSend = body.trim().length > 0 && !pending && !strandedPost;
+  const canSend = body.trim().length > 0 && left >= 0 && !pending && !strandedPost;
 
   if (!signedIn) {
     return (
@@ -585,7 +605,7 @@ export function Composer({
         </div>
       ) : null}
 
-      <textarea
+      <textarea autoCapitalize="sentences" enterKeyHint="enter"
         data-compose-part=""
         ref={fieldRef}
         /* A reply is a line or two, so its box starts at two lines and
@@ -595,13 +615,16 @@ export function Composer({
             ? "nf-compose-page__field"
             : `nf-field ${isReply ? "min-h-[64px]" : "min-h-[92px]"} w-full resize-y text-[length:var(--nf-text-body)] leading-[1.5]`
         }
-        value={body}
+        value={typed}
         maxLength={POST_MAX}
         autoFocus={autoFocus}
         placeholder={isReply ? (page ? "Post your reply" : "Write your reply") : KIND_PLACEHOLDER[kind]}
-        onChange={(event) => setBody(event.target.value)}
+        onChange={(event) => setTyped(event.target.value)}
+        onPaste={paste.onPaste}
         aria-label={isReply ? "Your reply" : KIND_LABEL[kind]}
       />
+
+      <PasteTray paste={paste} over={Math.max(0, -left)} />
 
       {listing ? <PickedListing option={listing} onRemove={() => setListing(null)} disabled={pending} /> : null}
 

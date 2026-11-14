@@ -163,7 +163,7 @@ export function ShowMePanel({
             </button>
           ))}
           <div className="flex w-full gap-xs">
-            <input
+            <input type="text" autoComplete="off" autoCapitalize="sentences" enterKeyHint="done"
               className="nf-field min-w-0 flex-1"
               value={other}
               maxLength={120}

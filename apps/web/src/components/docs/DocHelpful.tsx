@@ -63,7 +63,7 @@ export function DocHelpful({ page }: { page: string }) {
             <label htmlFor={`${id}-note`} className="nf-doc-helpful__label">
               What was missing? (optional)
             </label>
-            <textarea
+            <textarea autoCapitalize="sentences" enterKeyHint="enter"
               id={`${id}-note`}
               className="nf-field"
               rows={3}

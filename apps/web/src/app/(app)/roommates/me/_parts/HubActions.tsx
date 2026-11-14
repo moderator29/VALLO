@@ -357,7 +357,7 @@ function ShareToFeed({ id }: { id: string }) {
       >
         <div className="nf-rmb-field">
           <label htmlFor={`rm-share-${id}`}>{X.shareFeedField}</label>
-          <textarea id={`rm-share-${id}`} value={body} maxLength={2000} placeholder={X.shareFeedPlaceholder} onChange={(e) => setBody(e.target.value)} />
+          <textarea autoCapitalize="sentences" enterKeyHint="enter" id={`rm-share-${id}`} value={body} maxLength={2000} placeholder={X.shareFeedPlaceholder} onChange={(e) => setBody(e.target.value)} />
         </div>
       </Sheet>
     </>

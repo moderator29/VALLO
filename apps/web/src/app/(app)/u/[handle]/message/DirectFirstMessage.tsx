@@ -1,9 +1,10 @@
 "use client";
 
 import { banner } from "@/lib/ui/toast";
+import { useComposerClearance } from "@/lib/ui/composer-clearance";
 import { PhoneGateLink } from "@/components/app/PhoneGateLink";
 import { isPhoneGate } from "@/lib/actions/envelope";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { BackControl } from "@/components/ui/BackControl";
 import { UiIcon } from "@/design-system/icons/UiIcon";
@@ -35,6 +36,9 @@ export function DirectFirstMessage({
   const [body, setBody] = useState("");
   const [phoneGate, setPhoneGate] = useState(false);
   const [pending, start] = useSafeTransition();
+  /* The quick pill sits just above this bar. */
+  const composerRef = useRef<HTMLFormElement | null>(null);
+  useComposerClearance(composerRef);
 
   const send = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -93,7 +97,7 @@ export function DirectFirstMessage({
         disc and its 16px field with no new rule of its own. It still sends
         one message with one control, because that is all this screen does.
       */}
-      <form onSubmit={send} className="nf-composer nf-direct__composer" data-composer="">
+      <form ref={composerRef} onSubmit={send} className="nf-composer nf-direct__composer" data-composer="">
         <div className="nf-composer__box">
           <label htmlFor="direct-body" className="sr-only">
             {copy.placeholder}
@@ -108,6 +112,7 @@ export function DirectFirstMessage({
             onChange={(event) => setBody(event.target.value)}
             placeholder={copy.placeholder}
             autoComplete="off"
+            autoCapitalize="sentences"
             enterKeyHint="send"
             autoFocus
             className="nf-composer__field"

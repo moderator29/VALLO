@@ -1,0 +1,129 @@
+/*
+ * THE PASTE TRAY: what was pasted, held above the field (founder, 14 November
+ * 2026). A row of compact chips that scrolls sideways when there are several,
+ * so the field under it stays one clean line. Tokens only.
+ */
+@layer components {
+  .nf-paste {
+    display: flex;
+    gap: var(--nf-space-xs);
+    padding: var(--nf-space-2xs) var(--nf-space-md) var(--nf-space-xs);
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+  }
+  .nf-paste::-webkit-scrollbar {
+    display: none;
+  }
+  .nf-paste__chip {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: start;
+    flex: 0 0 auto;
+    inline-size: min(17rem, 78vw);
+    border: var(--nf-border-width) solid var(--nf-border-default);
+    border-radius: var(--nf-radius-lg);
+    background: var(--nf-surface-elevated);
+    color: var(--nf-content-primary);
+  }
+  .nf-paste__chip[data-over] {
+    border-color: var(--nf-state-error);
+  }
+  .nf-paste__body {
+    display: grid;
+    gap: var(--nf-space-3xs);
+    min-inline-size: 0;
+    min-block-size: 2.75rem;
+    padding: var(--nf-space-xs) 0 var(--nf-space-xs) var(--nf-space-sm);
+    border-radius: var(--nf-radius-lg);
+    text-align: start;
+    color: inherit;
+  }
+  .nf-paste__tag {
+    font-size: var(--nf-text-overline);
+    font-weight: 700;
+    letter-spacing: var(--nf-tracking-overline);
+    color: var(--nf-brand-primary);
+  }
+  .nf-paste__lines {
+    display: -webkit-box;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    font-size: var(--nf-text-body-sm);
+    line-height: 1.35;
+    white-space: pre-line;
+    /* A pasted address is one unbroken run: it breaks inside the chip (the
+       chip's body has `min-inline-size: 0`, which is what lets it). */
+    overflow-wrap: break-word;
+  }
+  .nf-paste__lines--strong {
+    font-weight: 600;
+  }
+  .nf-paste__meta {
+    overflow: hidden;
+    font-size: var(--nf-text-caption);
+    color: var(--nf-content-muted);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .nf-paste__chip[data-over] .nf-paste__meta {
+    color: var(--nf-state-error);
+  }
+  .nf-paste__close {
+    display: grid;
+    place-items: center;
+    inline-size: 2.75rem;
+    block-size: 2.75rem;
+    border-radius: var(--nf-radius-lg);
+    color: var(--nf-content-secondary);
+  }
+  .nf-paste__close-disc {
+    display: grid;
+    place-items: center;
+    inline-size: 1.5rem;
+    block-size: 1.5rem;
+    border-radius: var(--nf-radius-circle);
+    background: var(--nf-surface-inset);
+  }
+  .nf-paste__body:focus-visible,
+  .nf-paste__close:focus-visible {
+    outline: 2px solid var(--nf-brand-primary);
+    outline-offset: -2px;
+  }
+
+  /* Several pasted photos, held as tiles, each with its own way out. */
+  .nf-paste__photos {
+    display: flex;
+    gap: var(--nf-space-xs);
+    padding: var(--nf-space-2xs) var(--nf-space-md) var(--nf-space-xs);
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .nf-paste__photos::-webkit-scrollbar {
+    display: none;
+  }
+  .nf-paste__photo {
+    position: relative;
+    flex: 0 0 auto;
+    inline-size: 4.5rem;
+    block-size: 4.5rem;
+  }
+  .nf-paste__photo img {
+    inline-size: 100%;
+    block-size: 100%;
+    border: var(--nf-border-width) solid var(--nf-border-default);
+    border-radius: var(--nf-radius-md);
+    object-fit: cover;
+  }
+  .nf-paste__photo .nf-paste__close {
+    position: absolute;
+    inset-block-start: calc(var(--nf-space-xs) * -1);
+    inset-inline-end: calc(var(--nf-space-xs) * -1);
+  }
+  .nf-paste__photo .nf-paste__close-disc {
+    border: var(--nf-border-width) solid var(--nf-border-default);
+    background: var(--nf-surface-elevated);
+  }
+}

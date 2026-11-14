@@ -166,7 +166,7 @@ export function ContactForm({
 
       <label className="block">
         <span className="nf-overline mb-inline block">Message</span>
-        <textarea
+        <textarea autoCapitalize="sentences" enterKeyHint="enter"
           name="message"
           rows={5}
           className="nf-field resize-y"

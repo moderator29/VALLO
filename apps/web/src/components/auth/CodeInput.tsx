@@ -3,6 +3,8 @@ import "@/app/css/auth.css";
 
 import { useState } from "react";
 import { FieldProblem } from "@/components/ui/FieldProblem";
+import { PasteCodeButton } from "@/components/ui/PasteCodeButton";
+import { pastedCode } from "@/lib/paste/paste";
 
 /**
  * THE CODE FIELD, DRAWN AS CELLS (30 September).
@@ -26,6 +28,11 @@ import { FieldProblem } from "@/components/ui/FieldProblem";
  * capitalisation or correction, and the error wired through aria-invalid and
  * aria-describedby. The value is never truncated: a surplus is the form's to
  * say, not this component's to hide.
+ *
+ * PASTE (14 November 2026). A Paste button under the cells fills them from
+ * the clipboard in one tap, and a paste into the field itself is read the
+ * same way, so "Your code is 482 913" lands as 482913. The form submits when
+ * the code is complete, exactly as it does when the code is typed.
  */
 export function CodeInput({
   id,
@@ -105,12 +112,23 @@ export function CodeInput({
           placeholder={placeholder}
           value={value}
           onChange={(event) => onChange(event.target.value)}
+          onPaste={(event) => {
+            const text = event.clipboardData?.getData("text/plain") ?? "";
+            const found = pastedCode(text, length);
+            /* Already just the digits: the browser's own paste is left alone. */
+            if (!found || found === text) return;
+            event.preventDefault();
+            onChange(found);
+          }}
           onFocus={() => setFocused(true)}
           onBlur={() => setFocused(false)}
           aria-invalid={error ? true : undefined}
           aria-describedby={error ? errorId : undefined}
           className="nf-code__input nf-numeric"
         />
+      </div>
+      <div className="nf-paste-code__row">
+        <PasteCodeButton length={length} onCode={onChange} />
       </div>
       {/* The words go to the one banner; the field keeps its red edge (founder, 7 November 2026). */}
       <FieldProblem id={errorId} message={error} when={wrongCount} />

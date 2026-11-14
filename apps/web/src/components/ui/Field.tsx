@@ -11,6 +11,9 @@ import type {
 import { UiIcon, type UiIconName } from "@/design-system/icons/UiIcon";
 import { counterFor } from "@/lib/ui/small-rules";
 import { FieldProblem } from "@/components/ui/FieldProblem";
+import { PasteCodeButton } from "@/components/ui/PasteCodeButton";
+import { cleanKindFor, cleanOnPaste, setFieldValue } from "@/lib/paste/field-paste";
+import { PROSE_KEYBOARD, keyboardFor } from "@/lib/ui/field-keyboard";
 
 /**
  * Form fields.
@@ -380,18 +383,24 @@ export function TextField({
   const controlled = rest.value !== undefined;
   const filled = controlled ? String(rest.value ?? "").length > 0 : typedInto;
   /*
-   * THE PHONE KEYBOARD, SET FOR WHAT IS TYPED (13 November 2026). An address
-   * is never capitalised, corrected or spell-checked and gets the @ keyboard;
-   * a search field's return key says Search. Defaults only: anything the call
-   * site passes wins, because it is spread after.
+   * THE PHONE KEYBOARD, SET FOR WHAT IS TYPED (13 November 2026; the whole
+   * table on 14 November, `lib/ui/field-keyboard.ts`). An email is never
+   * capitalised, corrected or spell-checked and gets the @ keyboard; a phone
+   * number the phone pad; a code the number pad; a name a capital on each
+   * word; a search field a Search key. Read from what the field already says
+   * (its type, its autocomplete token, its keyboard). Defaults only: anything
+   * the call site passes wins, because it is spread after.
    */
-  const keyboard =
-    rest.type === "email"
-      ? ({ inputMode: "email", autoCapitalize: "none", autoCorrect: "off", spellCheck: false } as const)
-      : rest.type === "search"
-        ? ({ inputMode: "search", enterKeyHint: "search" } as const)
-        : {};
+  const keyboard = keyboardFor({ type: rest.type, autoComplete: rest.autoComplete, inputMode: rest.inputMode, name: rest.name });
   const showClear = Boolean(clearable) && filled && !rest.disabled && !rest.readOnly;
+  /*
+   * PASTE (14 November 2026). A phone or email field cleans what is pasted
+   * into it ("+234 (803) 123-4567" lands as +2348031234567); a one-time code
+   * field gets a Paste button that fills it from the clipboard in one tap.
+   * Typing is never touched, and a call site's own `onPaste` still runs.
+   */
+  const cleanKind = cleanKindFor(rest);
+  const isCode = rest.autoComplete === "one-time-code" && !rest.disabled && !rest.readOnly;
 
   const clear = () => {
     /*
@@ -424,6 +433,7 @@ export function TextField({
       className={className}
     >
       {(control) => (
+        <>
         <div className="relative">
           {leadingIcon ? (
             <span className={`${SLOT} left-3.5`}>
@@ -459,6 +469,10 @@ export function TextField({
               checked.onBlurValue(event.target.value);
               onBlur?.(event);
             }}
+            onPaste={(event) => {
+              rest.onPaste?.(event);
+              if (!event.defaultPrevented && cleanKind) cleanOnPaste(event, cleanKind);
+            }}
           />
 
           {showClear ? (
@@ -476,6 +490,19 @@ export function TextField({
             <span className={`${SLOT} right-3.5`}>{trailing}</span>
           ) : null}
         </div>
+        {isCode ? (
+          <div className="nf-paste-code__row">
+            <PasteCodeButton
+              length={rest.maxLength && rest.maxLength > 0 ? rest.maxLength : 6}
+              onCode={(code) => {
+                if (!ref.current) return;
+                setFieldValue(ref.current, code);
+                ref.current.focus();
+              }}
+            />
+          </div>
+        ) : null}
+        </>
       )}
     </Field>
   );
@@ -632,6 +659,9 @@ export function TextArea({
     >
       {(control) => (
         <textarea
+          /* A box for prose: sentences start with a capital and the return
+             key makes a new line. Defaults; the call site's own win. */
+          {...PROSE_KEYBOARD}
           {...rest}
           {...control}
           rows={rows}
