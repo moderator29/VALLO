@@ -63,7 +63,7 @@ export default async function SocialMediaPage({ searchParams }: { searchParams: 
         <Panel>
           <p className="nf-body text-[var(--nf-content-secondary)]">
             {access.state === "step-up"
-              ? "Confirm your security key to use the console."
+              ? "Confirm it is you to use the console."
               : access.state === "signed-out"
                 ? "Sign in with your operations account to continue."
                 : access.state === "unconfigured"

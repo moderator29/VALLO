@@ -58,7 +58,7 @@ export type JobDescription = {
 const ALWAYS_EXPECTED = [
   "Decide only on the evidence in the console, write every reason in plain words the member can read, and never decide a case in which you have any interest.",
   "Keep personal data inside the console. Never copy, screenshot, export or share it except through the console's own export, and only for the purpose your role names.",
-  "Protect your account: a strong password that you use nowhere else, your security key or passkey, and no shared devices.",
+  "Protect your account: a strong password that you use nowhere else, because it is what opens the console, and no shared devices.",
 ];
 
 export const JOB_DESCRIPTIONS: Record<StaffPosition, JobDescription> = {
@@ -308,14 +308,18 @@ export const JOB_DESCRIPTIONS: Record<StaffPosition, JobDescription> = {
   business_development_executive: {
     title: "Business Development Director",
     summary:
-      "Brings in the landlords, agents, hotels and restaurants Vallo lists, and reviews their listings before they go live.",
+      "Brings in the landlords, agents, hotels and restaurants Vallo lists, and reviews their listings and identity checks before they go live.",
     reportsTo: "COO",
-    scopes: ["business_development", "listing_approval"],
+    /* `kyc_review` added 14 November 2026 (the founder: the Business
+       Development Director reviews members' identity checks as well as their
+       listings, and holds no admin role). */
+    scopes: ["business_development", "listing_approval", "kyc_review"],
     responsibilities: [
       "Find and approach property owners, agents, hotels, shortlet hosts and restaurants, and bring them onto Vallo.",
       "Keep every prospect and partnership in one place: who they are, what stage they are at, what was last said, and the next follow-up date.",
       "Review submitted listings in your pipeline: photographs, description, price, fees and the mandate or ownership evidence behind them.",
       "Approve, publish, send back for changes, or reject a listing, always with a reason the lister will read.",
+      "Review identity checks on the KYC desk: the document, the selfie and the name against the account, then approve or refuse with a reason the member will read.",
       "Where the evidence supports it, restrict a member on a property case; write the reason and attach the evidence, because this decision is read back later.",
       "Report on your pipeline weekly: who you are talking to, what is close, and what is stuck.",
     ],

@@ -181,29 +181,29 @@ export function StaffHome({ staff }: { staff: StaffAccess }) {
           the audit log with your name.
         </p>
         {staff.handbookAcknowledged ? (
-          <ul className="mt-block grid gap-xs">
+          <ul className="nf-your-desks mt-block list-none p-0" data-testid="staff-home-desks">
+            {staff.scopes.map((scope) => (
+              <li key={scope}>
+                <Link href={STAFF_DESK[scope]} className="nf-your-desks__desk">
+                  <span className="nf-your-desks__name">{STAFF_SCOPE_LABEL[scope]}</span>
+                  <span className="nf-your-desks__what">Open this desk</span>
+                </Link>
+              </li>
+            ))}
             <li>
-              <Link href="/admin/my-desk" className="font-semibold text-[var(--nf-content-link)] hover:underline">
-                Open My desk
+              <Link href="/admin/my-desk" className="nf-your-desks__desk">
+                <span className="nf-your-desks__name">My desk</span>
+                <span className="nf-your-desks__what">Your tasks, announcements and weekly report</span>
               </Link>
             </li>
             {staff.position && POSITION_GUIDE[staff.position] ? (
               <li>
-                <Link
-                  href={`/admin/manual/${POSITION_GUIDE[staff.position]}`}
-                  className="font-semibold text-[var(--nf-content-link)] hover:underline"
-                >
-                  Read the step by step guide for your position
+                <Link href={`/admin/manual/${POSITION_GUIDE[staff.position]}`} className="nf-your-desks__desk">
+                  <span className="nf-your-desks__name">How to do this job on the console</span>
+                  <span className="nf-your-desks__what">The step by step guide written for your position</span>
                 </Link>
               </li>
             ) : null}
-            {staff.scopes.map((scope) => (
-              <li key={scope}>
-                <Link href={STAFF_DESK[scope]} className="font-semibold text-[var(--nf-content-link)] hover:underline">
-                  Open {STAFF_SCOPE_LABEL[scope]}
-                </Link>
-              </li>
-            ))}
           </ul>
         ) : (
           <p className="nf-body mt-block">

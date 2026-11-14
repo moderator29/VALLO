@@ -31,7 +31,7 @@ export const MY_DESK: ManualBody = {
         <>
           <ol role="list">
             <li>
-              Sign in and prove your security key as usual. If you are a staff member, acknowledge the{" "}
+              Sign in and confirm your password when the console asks. If you are a staff member, acknowledge the{" "}
               <Link href="/admin/handbook" className={A}>
                 staff handbook
               </Link>{" "}

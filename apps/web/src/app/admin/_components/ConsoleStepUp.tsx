@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { Button, ButtonLink } from "@/components/ui/Button";
 import { TextField } from "@/components/ui/Field";
-import { beginConsoleStepUp, finishConsoleStepUp } from "@/lib/security/console-step-up";
+import { beginConsoleStepUp, confirmConsoleWithPassword, finishConsoleStepUp } from "@/lib/security/console-step-up";
+import type { ConsoleDoor } from "@/lib/security/console-door";
 import { beginEnrol, finishEnrol, sendFallbackCode } from "@/lib/security/money-step-up-actions";
 import { assertPlatformKey, createPlatformKey } from "@/lib/security/webauthn-client";
 import { useSafeTransition } from "@/lib/ui/use-safe-transition";
@@ -12,20 +13,152 @@ import { tapFailedOffline } from "@/lib/offline/tap-failed";
 import { banner } from "@/lib/ui/toast";
 
 /**
- * THE CONSOLE'S SECOND FACTOR, AS STAFF SEE IT.
+ * THE CONSOLE'S DOOR, AS STAFF SEE IT.
  *
- * Every admin and staff member confirms it is them with their security key
- * (the passkey on their phone or computer) before any desk opens, once per
- * sign-in and again after twelve hours. Somebody without a key is sent to set
- * one up first; there is no password-only way in.
- *
- * C14 (30 September 2026): somebody with no key that may open the console
- * (none enrolled, or every one revoked for the console after a lost phone)
- * enrols a new one right here, on the first-key proof the settings page uses
- * for a staff account: the emailed code, and the password for an account
- * with one (`beginEnrol`). Then the console asks for the new key at once.
+ * Before any desk opens, once per sign-in and again after twelve hours, the
+ * person confirms it is them. An admin or a staff member types their own
+ * Vallo account password (the founder's ruling of 14 November 2026; an
+ * account with no password is emailed a code). A super admin confirms with
+ * their security key, the passkey on their phone or computer, and somebody
+ * with no key that opens the console sets one up here first (C14, 30
+ * September 2026). Which door a person gets is decided on the server
+ * (`lib/security/console-door.ts`) and enforced there again.
  */
-export function ConsoleStepUp({ name }: { name: string }) {
+export function ConsoleStepUp({ name, door = "key" }: { name: string; door?: ConsoleDoor }) {
+  if (door === "key") return <KeyDoor name={name} />;
+  return <PasswordDoor name={name} byCode={door === "email-code"} />;
+}
+
+function Frame({ name, children }: { name: string; children: ReactNode }) {
+  return (
+    /* In the page gutter: rendered straight from the admin layout, the card
+       ran flush to both edges of a phone. The safe area covers a notch. */
+    <div className="nf-safe-top px-gutter pb-block">
+      <section className="nf-console nf-panel nf-panel--card mx-auto mt-block max-w-lg p-card" data-testid="console-step-up">
+        <p className="nf-caption text-[var(--nf-content-secondary)]">Vallo console</p>
+        <h1 className="nf-h2 mt-inline">Confirm it is you, {name}</h1>
+        {children}
+      </section>
+    </div>
+  );
+}
+
+function PasswordDoor({ name, byCode }: { name: string; byCode: boolean }) {
+  const [password, setPassword] = useState("");
+  const [code, setCode] = useState("");
+  const [codeSent, setCodeSent] = useState(false);
+  const [refused, setRefused] = useState<string | null>(null);
+  const [pending, start] = useSafeTransition();
+  const router = useRouter();
+
+  const open = (): void =>
+    start(async () => {
+      try {
+        setRefused(null);
+        const done = await confirmConsoleWithPassword(byCode ? { code: code.trim() } : { password });
+        if (done.ok) {
+          router.refresh();
+          return;
+        }
+        setRefused(
+          done.error === "too_many"
+            ? "Too many tries. Wait fifteen minutes, then try again."
+            : done.error === "rejected"
+              ? byCode
+                ? "That code was not accepted. Check it, or ask for a new one."
+                : "That password was not accepted. Check it and try again."
+              : done.error === "key_only"
+                ? "Your account opens the console with its security key. Refresh this page."
+                : "That did not go through. Try again in a moment.",
+        );
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
+      }
+    });
+
+  const sendCode = (): void =>
+    start(async () => {
+      try {
+        const sent = await sendFallbackCode().catch(() => ({ ok: false as const, error: "failed" }));
+        if (sent.ok) setCodeSent(true);
+        else banner.error("The code did not send. Try again in a moment.", { retry: sendCode });
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
+      }
+    });
+
+  return (
+    <Frame name={name}>
+      <p className="nf-body mt-inline">
+        {byCode
+          ? "Your account has no password, so we email you a code to open the console. You are asked once each time you sign in, and again after twelve hours."
+          : "Enter your Vallo account password to open the console. It is the same password you sign in with. You are asked once each time you sign in, and again after twelve hours."}
+      </p>
+      <form
+        className="mt-block grid gap-sm"
+        data-testid="console-password-door"
+        onSubmit={(event) => {
+          event.preventDefault();
+          if (byCode && !codeSent) sendCode();
+          else open();
+        }}
+      >
+        {byCode ? (
+          codeSent ? (
+            <TextField
+              label="The code we emailed you"
+              inputMode="numeric"
+              enterKeyHint="go"
+              autoComplete="one-time-code"
+              value={code}
+              onChange={(event) => setCode(event.target.value)}
+              disabled={pending}
+            />
+          ) : null
+        ) : (
+          <TextField
+            label="Your password"
+            type="password"
+            autoComplete="current-password"
+            enterKeyHint="go"
+            value={password}
+            onChange={(event) => setPassword(event.target.value)}
+            disabled={pending}
+          />
+        )}
+        {refused ? (
+          <p className="nf-body text-[var(--nf-state-error)]" role="alert" data-testid="console-door-refused">
+            {refused}
+          </p>
+        ) : null}
+        <div className="flex flex-wrap items-center gap-sm">
+          {byCode && !codeSent ? (
+            <Button type="submit" variant="primary" size="md" loading={pending} disabled={pending}>
+              Email me a code
+            </Button>
+          ) : (
+            <Button
+              type="submit"
+              variant="primary"
+              size="md"
+              loading={pending}
+              disabled={pending || (byCode ? code.trim().length === 0 : password.length === 0)}
+            >
+              Open the console
+            </Button>
+          )}
+          {byCode ? null : (
+            <ButtonLink href="/forgot-password" variant="quiet" size="md">
+              Forgot your password?
+            </ButtonLink>
+          )}
+        </div>
+      </form>
+    </Frame>
+  );
+}
+
+function KeyDoor({ name }: { name: string }) {
   const [needsKey, setNeedsKey] = useState<null | "password" | "email-code">(null);
   const [password, setPassword] = useState("");
   const [code, setCode] = useState("");
@@ -111,12 +244,7 @@ export function ConsoleStepUp({ name }: { name: string }) {
     });
 
   return (
-    /* In the page gutter: rendered straight from the admin layout, the card
-       ran flush to both edges of a phone. The safe area covers a notch. */
-    <div className="nf-safe-top px-gutter pb-block">
-      <section className="nf-console nf-panel nf-panel--card mx-auto mt-block max-w-lg p-card" data-testid="console-step-up">
-        <p className="nf-caption text-[var(--nf-content-secondary)]">Vallo console</p>
-        <h1 className="nf-h2 mt-inline">Confirm it is you, {name}</h1>
+    <Frame name={name}>
         <p className="nf-body mt-inline">
           The console opens only after you confirm with your security key, once each time you sign in and again after
           twelve hours. A password on its own never opens it.
@@ -199,7 +327,6 @@ export function ConsoleStepUp({ name }: { name: string }) {
             ) : null}
           </div>
         )}
-      </section>
-    </div>
+    </Frame>
   );
 }

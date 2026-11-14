@@ -3100,7 +3100,10 @@
   }
   .nf-your-desks__desk {
     display: grid;
+    align-content: start;
     gap: 2px;
+    /* Every card in a row is as tall as the tallest. */
+    height: 100%;
     min-height: 2.75rem;
     padding: var(--nf-space-sm);
     border: var(--nf-border-width) solid var(--nf-btn-glass-edge);

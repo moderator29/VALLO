@@ -72,7 +72,7 @@ export const ACCESS: ManualBody = {
   glance: [
     "Only the founder's super admin account gives or ends staff access. You cannot give access to anybody, yourself included.",
     "Your desks stay locked until you acknowledge the current staff handbook, and lock again whenever it changes until you acknowledge the new one.",
-    "Every sign-in proves your security key before the console opens. One proof lasts twelve hours on that session.",
+    "The console asks for your account password each time you sign in, before any desk opens. One confirmation lasts twelve hours on that session. A super admin confirms with a security key instead.",
     "An access area opens its own desks and nothing else. The database refuses the rest even if a page were to open.",
   ],
   sections: [
@@ -88,11 +88,12 @@ export const ACCESS: ManualBody = {
               cannot use it.
             </li>
             <li>
-              <strong>Prove your security key.</strong> The passkey on your phone or computer, set up at Settings, Privacy.
-              The console asks once per sign-in session and again after twelve hours. A password alone opens nothing: the
-              database treats your access as held only while your session carries a live proof. The first key on a staff
-              account takes your password and a code sent to your email; adding another key, or removing one, takes a key
-              you already have.
+              <strong>Confirm it is you.</strong> The console asks for your Vallo account password, the one you sign in
+              with, once per sign-in session and again after twelve hours. An account with no password is emailed a
+              code. A signed-in device alone opens nothing: the database treats your access as held only while your
+              session carries a live confirmation. Five wrong tries lock the door for fifteen minutes. A super admin,
+              who can give and end other people&apos;s access, confirms with a security key (the passkey on their phone
+              or computer) instead of a password.
             </li>
             <li>
               <strong>Acknowledge the staff handbook.</strong> Until you do, you can read the handbook and your role and
@@ -113,7 +114,7 @@ export const ACCESS: ManualBody = {
             workspace: your tasks, announcements and a summary of what needs you. Every desk asks the
             database again when it opens, so a typed address to any other desk gets the same refusal.
           </p>
-          <ScreenshotSlot desk="the staff frame and the security key screen" />
+          <ScreenshotSlot desk="the staff frame and the confirmation screen" />
         </>
       ),
     },

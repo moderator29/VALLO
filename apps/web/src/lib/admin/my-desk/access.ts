@@ -70,7 +70,7 @@ export function doorWords(state: Exclude<DeskDoor["state"], "ok">): string {
     case "signed-out":
       return "Sign in with your operations account to continue.";
     case "step-up":
-      return "Confirm your security key to use the console.";
+      return "Confirm it is you to use the console.";
     case "handbook":
       return "Read and acknowledge the staff handbook to open your desk.";
     default:

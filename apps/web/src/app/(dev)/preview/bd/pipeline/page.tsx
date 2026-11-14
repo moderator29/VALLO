@@ -1,7 +1,10 @@
 import "@/app/css/admin.css";
 import { getDictionary } from "@vallo/i18n";
 import { getLocale } from "@/lib/locale";
+import { ConsoleStepUp } from "@/app/admin/_components/ConsoleStepUp";
 import { DesktopNote } from "@/app/admin/_components/DesktopNote";
+import { StaffFrame, StaffHome } from "@/app/admin/_components/StaffFrame";
+import type { StaffAccess } from "@/lib/admin/guard";
 import { PageHead, Panel } from "@/app/admin/_components/panels";
 import { YourDesks } from "@/app/admin/_components/YourDesks";
 import { ProspectBoard } from "@/app/admin/business-development/ProspectBoard";
@@ -17,6 +20,8 @@ import { ConsoleFrame } from "../ConsoleFrame";
  *
  *   /preview/bd/pipeline            the table with rows
  *   /preview/bd/pipeline?empty=1    the empty pipeline
+ *   /preview/bd/pipeline?view=door  the console's password door
+ *   /preview/bd/pipeline?view=staff the short console a staff member sees
  */
 export const dynamic = "force-dynamic";
 
@@ -62,8 +67,27 @@ const ACTIVITY: BdActivity[] = [
   { id: "a5", prospectId: "p3", kind: "follow_up", body: "Sent the restaurant guide.", outcome: null, actorId: null, createdAt: "2026-11-10T14:00:00Z" },
 ];
 
-export default async function PreviewPipeline({ searchParams }: { searchParams: Promise<{ empty?: string }> }) {
-  const { empty } = await searchParams;
+const STAFF: StaffAccess = {
+  isAdmin: false,
+  isSuperAdmin: false,
+  scopes: ["business_development", "listing_approval", "kyc_review"],
+  position: "business_development_executive",
+  handbookVersion: "preview",
+  handbookAcknowledged: true,
+  consoleVerified: true,
+};
+
+export default async function PreviewPipeline({ searchParams }: { searchParams: Promise<{ empty?: string; view?: string }> }) {
+  const { empty, view } = await searchParams;
+  if (view === "door") return <ConsoleStepUp name="Sophia" door="password" />;
+  if (view === "staff") {
+    return (
+      <StaffFrame staff={STAFF} name="Sophia Duru">
+        <DesktopNote />
+        <StaffHome staff={STAFF} />
+      </StaffFrame>
+    );
+  }
   const t = getDictionary(await getLocale());
   return (
     <ConsoleFrame t={t}>

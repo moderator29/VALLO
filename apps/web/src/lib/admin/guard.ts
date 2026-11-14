@@ -199,7 +199,7 @@ export const ADMIN_UNCONFIGURED_MESSAGE =
 export const ADMIN_SIGNED_OUT_MESSAGE = "Sign in with your operations account to continue.";
 
 export const ADMIN_STEP_UP_MESSAGE =
-  "Confirm it is you with your security key to open the console. Nothing was changed.";
+  "Confirm it is you to open the console. Nothing was changed.";
 
 export const ADMIN_FORBIDDEN_MESSAGE =
   "This area is for the Vallo operations team. Your account does not carry that role.";

@@ -13,7 +13,7 @@ export function deskRefusal(state: DeskRefusalState): string {
     case "signed-out":
       return "Sign in with your operations account to continue.";
     case "step-up":
-      return "Confirm it is you with your security key to open the console. Nothing was changed.";
+      return "Confirm it is you to open the console. Nothing was changed.";
     default:
       return "This area is for the Vallo operations team. Your account does not carry that role.";
   }

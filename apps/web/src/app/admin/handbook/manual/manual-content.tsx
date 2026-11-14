@@ -77,7 +77,7 @@ const DESKS_AND_ACCESS: ManualPage = {
   ],
   glance: [
     "You see and act on only the desks named in your access. The database refuses the rest.",
-    "A desk unlocks when you have acknowledged the current handbook and proved your security key in this session.",
+    "A desk unlocks when you have acknowledged the current handbook and confirmed it is you in this session, with your account password.",
     "Every decision is written to the audit log with your name, the time, the record and what changed. Nobody can edit the log.",
     "Only the super admin can grant or change access. You cannot grant it, including to yourself.",
   ],
@@ -91,7 +91,7 @@ const DESKS_AND_ACCESS: ManualPage = {
             Read and acknowledge the <Link href="/admin/handbook" className={A}>staff handbook</Link>. It is versioned: when
             it changes you are asked again before you can act.
           </li>
-          <li>Prove your security key when the console asks. The key is asked again at the start of each session.</li>
+          <li>Enter your account password when the console asks. It is asked again at the start of each session, and after twelve hours.</li>
           <li>Open a desk your access names. A desk you cannot open is closed; it does not exist as far as your account goes.</li>
         </ol>
       ),
@@ -533,7 +533,7 @@ const SUPPORT: ManualPage = {
   updated: UPDATED,
   desks: [{ href: "/admin/support", label: "Support" }],
   glance: [
-    "The door is the support scope, with the handbook acknowledged and your security key proved this session.",
+    "The door is the support scope, with the handbook acknowledged and your password confirmed this session.",
     "A reply is a staff message, and the database tells the member.",
     "A ticket about being asked to pay outside Vallo, or one escalated to money or safety, runs on a four hour promise. The rest run on a day.",
     "A ticket escalated to another desk can be opened by that desk through its link. They see that ticket and no queue.",
@@ -595,7 +595,7 @@ const OFFERS: ManualPage = {
   updated: UPDATED,
   desks: [{ href: "/admin/offers", label: "Offers and Deals" }],
   glance: [
-    "It sits behind the same staff scope and the same security key as the agreements desk.",
+    "It sits behind the same staff scope and the same confirmation as the agreements desk.",
     "Every figure shows its definition. There is no total of money, because Vallo does not receive the purchase price.",
     "Staff read terms, versions, activity and document states. They never see a buyer's identity data, a document's contents or private messages.",
     "Staff can add a note, flag or resolve a dispute, and cancel a deal. They cannot change a figure, a version or who agreed to what.",
@@ -663,7 +663,7 @@ const OFFERS: ManualPage = {
             <li>Cancel a deal, where you are allowed to.</li>
           </ul>
           <p>
-            The console asks for your security key before accepting any of them. There is no control to change an amount,
+            The console asks you to confirm it is you before accepting any of them. There is no control to change an amount,
             a version, or who agreed to what, on purpose: the record of what the two sides agreed must stay exactly as they
             agreed it.
           </p>

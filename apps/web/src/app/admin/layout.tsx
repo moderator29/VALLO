@@ -23,6 +23,7 @@ import { getOpenChargebackCount } from "@/lib/admin/reads/chargebacks";
 import { getShellIdentity } from "@/lib/app/shell-queries";
 import { AccessScreen } from "./_components/AccessScreen";
 import { ConsoleStepUp } from "./_components/ConsoleStepUp";
+import { consoleDoorFor } from "@/lib/security/console-door";
 import { DesktopNote } from "./_components/DesktopNote";
 import { notFound } from "next/navigation";
 import { AdminFrame } from "./_components/AdminFrame";
@@ -73,7 +74,7 @@ export default async function AdminLayout({ children }: { children: ReactNode })
     if (door.state === "step-up") {
       const shell = await getShellIdentity();
       const who = shell.userName && shell.userName !== "Guest" ? shell.userName : "there";
-      return <ConsoleStepUp name={who} />;
+      return <ConsoleStepUp name={who} door={consoleDoorFor(door.staff, door.user)} />;
     }
     /* A signed-in account that is not staff gets the site's ordinary 404:
        nothing here confirms that a console exists. */

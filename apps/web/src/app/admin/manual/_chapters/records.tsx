@@ -19,7 +19,7 @@ const WRITTEN: DocTableRow[] = [
   { id: "views", icon: "eye", cells: { what: "Opening sensitive records", detail: "A person's file, an identity document, a check's files, saved payment methods.", logged: { yes: true } } },
   { id: "claims", icon: "user-check", cells: { what: "Taking and handing back items", detail: "Each take and each release on the queue.", logged: { yes: true } } },
   { id: "exports", icon: "archive", cells: { what: "Every export", detail: "The money history, the audit log and team oversight exports are each written down when they are downloaded.", logged: { yes: true } } },
-  { id: "signin", icon: "log-out", cells: { what: "Every staff sign-in and every security key proof", detail: "The network and a fingerprint of the browser or app. A device not seen on your account in 60 days tells you and every super admin, at most once a day.", logged: { yes: true } } },
+  { id: "signin", icon: "log-out", cells: { what: "Every staff sign-in and every confirmation at the console door", detail: "The network and a fingerprint of the browser or app. A device not seen on your account in 60 days tells you and every super admin, at most once a day.", logged: { yes: true } } },
   { id: "handbook", icon: "file-text", cells: { what: "Acknowledging the handbook", detail: "Which version, and when.", logged: { yes: true } } },
   { id: "notes", icon: "pencil", cells: { what: "Internal notes", detail: "Kept on the record, append-only. A note restricted to an access area is shown only to the people who hold it and to admins.", logged: { yes: true, note: "Kept on the record" } } },
 ];

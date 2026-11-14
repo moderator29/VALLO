@@ -26,7 +26,7 @@ async function staff(): Promise<{ db: Db; userId: string } | { error: string }> 
   const access = await requireConsole();
   if (access.state === "unconfigured") return { error: NOT_OPEN };
   if (access.state === "signed-out") return { error: "Sign in to continue." };
-  if (access.state === "step-up") return { error: "Confirm your security key to use the console." };
+  if (access.state === "step-up") return { error: "Confirm it is you to use the console." };
   if (access.state !== "console") return { error: "This is for Vallo staff." };
   return { db: access.supabase as unknown as Db, userId: access.user.id };
 }

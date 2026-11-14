@@ -119,7 +119,7 @@ export const ESCALATION: ManualBody = {
               <strong>Your account may be compromised:</strong> tell the founder at once.
             </li>
             <li>
-              <strong>You lost your security key:</strong> tell a super admin by phone or in person, never by email alone,
+              <strong>You are a super admin and lost your security key:</strong> tell a super admin by phone or in person, never by email alone,
               because an email is exactly what somebody holding your lost phone could send. A second super admin confirms
               it is you and revokes the old key for the console. You then set up a key on your new device.
             </li>

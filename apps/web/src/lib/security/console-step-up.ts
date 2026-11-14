@@ -1,12 +1,26 @@
 "use server";
 
 /**
- * THE SECOND FACTOR FOR THE CONSOLE (29 September 2026).
+ * THE CONSOLE'S DOOR (29 September 2026; the founder's ruling of 14 November
+ * 2026 below).
  *
- * Every admin, super admin and staff member proves possession of a security
- * key (the same platform passkey the lock on money uses, enrolled at
- * /settings/privacy) before any desk opens, once per sign-in session and
- * again after twelve hours. A stolen password alone no longer opens anything.
+ * Nobody opens a desk on a signed-in session alone. Before any desk opens,
+ * once per sign-in session and again after twelve hours, the person confirms
+ * it is them:
+ *
+ *  - an ADMIN or a STAFF MEMBER re-enters their own Vallo account password
+ *    (an emailed code for an account that signed up with Google or Apple and
+ *    has no password). The founder's ruling, 14 November 2026: a security key
+ *    tied to one device locked staff out of the console on their second
+ *    device, so the staff door is the account password. What it stops is an
+ *    unlocked, signed-in device being used by somebody else; it is not a
+ *    second factor, and a stolen password does open this door.
+ *  - a SUPER ADMIN, who can grant and revoke every other person's access,
+ *    still proves a security key (the platform passkey the lock on money
+ *    uses, enrolled at /settings/privacy). The password door refuses them.
+ *
+ * The lock on money is separate and unchanged: a payout or a refund still
+ * asks for its own proof (`money-step-up-actions.ts`).
  *
  * THE DATABASE ENFORCES IT, not this file. The proof is recorded in
  * public.console_step_ups against the session id in the caller's JWT, and
@@ -22,8 +36,16 @@ import { z } from "zod";
 import { fail, ok, type ActionResult } from "../actions/envelope";
 import { resolveSession } from "../actions/session";
 import { consume, subjectForUser } from "./rate-limit";
-import { admin, ceremonyOrigin, listConsoleCredentialIds, mintChallenge, takeChallenge } from "./money-step-up";
-import { reauthMethodFor, type ReauthMethod } from "../account-deletion/reauthenticate";
+import {
+  admin,
+  ceremonyOrigin,
+  isStaffAccount,
+  listConsoleCredentialIds,
+  mintChallenge,
+  spendEmailCodeMarker,
+  takeChallenge,
+} from "./money-step-up";
+import { reauthenticate, reauthMethodFor, type ReauthMethod } from "../account-deletion/reauthenticate";
 import { b64urlToBuffer, verifyAssertion, type Alg } from "./webauthn";
 
 /** How long one proof opens the console for, on this session. */
@@ -122,20 +144,105 @@ export async function finishConsoleStepUp(input: unknown): Promise<ActionResult<
     .from("money_credentials")
     .update({ sign_count: verdict.signCount, last_used_at: new Date().toISOString() })
     .eq("id", row.id);
+  return (await openConsole(loose, userId, now.sessionId, { method: "key", credentialId: parsed.data.credentialId }))
+    ? ok(null)
+    : fail("failed");
+}
+
+/**
+ * Write the proof that opens the console for THIS session for twelve hours,
+ * and the audit line that says how it was proved. The database reads the row
+ * (`private.console_step_up_ok`); nothing else opens a desk.
+ */
+async function openConsole(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  loose: any,
+  userId: string,
+  sessionId: string,
+  proof: { method: "key"; credentialId: string } | { method: "password" | "email_code" },
+): Promise<boolean> {
   const expires = new Date(Date.now() + STEP_UP_HOURS * 3_600_000).toISOString();
   /* This person's lapsed proofs go as the new one is written. */
   await loose.from("console_step_ups").delete().eq("user_id", userId).lt("expires_at", new Date().toISOString());
   const { error } = await loose.from("console_step_ups").upsert(
-    { user_id: userId, session_id: now.sessionId, credential_id: parsed.data.credentialId, verified_at: new Date().toISOString(), expires_at: expires },
+    {
+      user_id: userId,
+      session_id: sessionId,
+      credential_id: proof.method === "key" ? proof.credentialId : null,
+      verified_at: new Date().toISOString(),
+      expires_at: expires,
+    },
     { onConflict: "user_id,session_id" },
   );
-  if (error) return fail("failed");
+  if (error) return false;
   await loose.from("audit_log").insert({
     actor_id: userId,
     action: "console.step_up",
     entity_type: "user",
     entity_id: userId,
-    metadata: { expires_at: expires },
+    metadata: { expires_at: expires, method: proof.method },
   });
-  return ok(null);
+  return true;
+}
+
+const passwordProofSchema = z.object({
+  password: z.string().min(1).max(200).optional(),
+  code: z
+    .string()
+    .trim()
+    .regex(/^\d{6,10}$/)
+    .optional(),
+});
+
+/** Why the password door stayed shut: a wrong proof, too many tries, a super admin, or our fault. */
+export type ConsolePasswordError = "rejected" | "too_many" | "key_only" | "failed";
+
+/**
+ * THE STAFF DOOR: the person's own account password (or, for an account with
+ * no password, a code emailed by `sendFallbackCode`). Five tries in fifteen
+ * minutes, counted before the password is looked at, so the console is not a
+ * faster way to guess one than sign-in. A super admin is refused here and
+ * uses their key.
+ */
+export async function confirmConsoleWithPassword(input: unknown): Promise<ActionResult<null>> {
+  const parsed = passwordProofSchema.safeParse(input);
+  if (!parsed.success) return fail("rejected" satisfies ConsolePasswordError);
+  const now = await current();
+  const a = admin();
+  if (!now || !a) return fail("failed" satisfies ConsolePasswordError);
+  const user = now.session.user;
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const loose = a as any;
+  const { data: roles, error: rolesError } = await loose.from("user_roles").select("role").eq("user_id", user.id);
+  /* A role that cannot be read is not proof that somebody is not a super admin. */
+  if (rolesError) return fail("failed" satisfies ConsolePasswordError);
+  if (((roles ?? []) as { role: string }[]).some((r) => r.role === "super_admin")) {
+    return fail("key_only" satisfies ConsolePasswordError);
+  }
+  /* Nobody but staff has a console to open. */
+  if (!(await isStaffAccount(a, user.id))) return fail("rejected" satisfies ConsolePasswordError);
+
+  const paced = await consume({ bucket: "console_password", subject: subjectForUser(user.id), limit: 5, windowSeconds: 900 });
+  /* A limiter that could not count is not a limit: closed, for guesses. */
+  if (!paced.allowed) return fail("too_many" satisfies ConsolePasswordError);
+  if (paced.degraded) return fail("failed" satisfies ConsolePasswordError);
+
+  const method = reauthMethodFor(user);
+  let proved = false;
+  if (method === "password") {
+    const password = parsed.data.password ?? "";
+    if (password.length === 0) return fail("rejected" satisfies ConsolePasswordError);
+    proved = await reauthenticate(user, { password });
+  } else {
+    const code = parsed.data.code ?? "";
+    if (code.length === 0) return fail("rejected" satisfies ConsolePasswordError);
+    /* Only a code this account asked the lock to send (`sendFallbackCode`). */
+    proved = await spendEmailCodeMarker(a, user.id, () => reauthenticate(user, { emailCode: code }));
+  }
+  if (!proved) return fail("rejected" satisfies ConsolePasswordError);
+
+  return (await openConsole(loose, user.id, now.sessionId, { method: method === "password" ? "password" : "email_code" }))
+    ? ok(null)
+    : fail("failed" satisfies ConsolePasswordError);
 }

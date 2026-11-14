@@ -11,6 +11,10 @@ import { staffAccessGranted } from "../email/staff-messages";
  * November 2026 that is the pending file (step 2 of the staff roles) that
  * repeats every earlier position and adds Marketing Manager, Content Manager,
  * Technical Administrator and Customer Support Lead, so it is the whole list.
+ * The scope bundles were restated whole on 14 November 2026, when the
+ * Business Development position gained `kyc_review`
+ * (`staff_desks_only_2026-11-14.sql`), so the bundles are read from there and
+ * the titles from step 2.
  */
 const MIGRATION = fileURLToPath(
   new URL(
@@ -19,9 +23,13 @@ const MIGRATION = fileURLToPath(
   ),
 );
 const sql = readFileSync(MIGRATION, "utf8");
+const bundleSql = readFileSync(
+  fileURLToPath(new URL("../../../../../supabase/migrations/pending/staff_desks_only_2026-11-14.sql", import.meta.url)),
+  "utf8",
+);
 
 function sqlBundles(): Map<string, string[]> {
-  const body = sql.slice(sql.indexOf("function private.staff_position_scopes"));
+  const body = bundleSql.slice(bundleSql.indexOf("function private.staff_position_scopes"));
   const bundles = new Map<string, string[]>();
   for (const m of body.matchAll(/when '([a-z_]+)' then array\[([^\]]*)\]/g)) {
     const key = m[1]!;

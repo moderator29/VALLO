@@ -133,8 +133,8 @@ export const DECISIONS: ManualBody = {
               wrong one.
             </li>
           </ul>
-          <DocCallout tone="note" title="The security key is the only step-up">
-            The console asks for your security key when it opens and again after twelve hours. No desk asks for it again
+          <DocCallout tone="note" title="One confirmation when the console opens">
+            The console asks for your account password when it opens and again after twelve hours. No desk asks for it again
             before a single decision. Destroying records past retention asks you to type a confirmation phrase instead.
           </DocCallout>
         </>

@@ -43,15 +43,15 @@ export const SOCIAL_MEDIA: ManualBody = {
             steps={[
               { icon: "user", title: "Sign in", outcome: "With your own Vallo account, the one that was given staff access." },
               { icon: "grid", title: "Open the console", outcome: "The console is the Vallo address followed by /admin.", href: "/admin" },
-              { icon: "key", title: "Confirm with your security key", outcome: "Once each time you sign in, and again after twelve hours." },
+              { icon: "key", title: "Enter your account password", outcome: "The console asks once each time you sign in, and again after twelve hours." },
               { icon: "document", title: "Read the handbook", outcome: "Acknowledge it once; a new version asks again.", href: "/admin/handbook" },
               { icon: "camera", title: "Open Social media", outcome: "It opens on this week's calendar.", href: "/admin/social-media" },
             ]}
           />
-          <DocCallout tone="note" title="If your security key does not answer">
-            Your key is the Face ID, fingerprint or screen lock of the device where you set it up. On another device,
-            press Confirm and choose the option to use a phone or tablet, then scan the code with the phone that holds
-            the key. If the device is lost, ask a super admin to clear the key on the Staff desk.
+          <DocCallout tone="note" title="If the console will not take your password">
+            It is your own Vallo account password, the one you sign in with. Five wrong tries lock the door for fifteen
+            minutes. If you have forgotten it, use Forgot your password on that screen, set a new one, and sign in
+            again.
           </DocCallout>
         </>
       ),

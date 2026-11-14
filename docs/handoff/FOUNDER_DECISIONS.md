@@ -81,3 +81,37 @@ Confirmed this round:
   matched the code on all three; nothing needed changing.
 - The staff manual should be downloadable to a phone: not yet built, next
   round.
+
+## 14 November 2026: the console's door, and staff see their own desks
+
+The Business Development Director signed in nine times on 13 November and
+never got inside the console: her security key lived on her iPhone and the
+console on her Windows computer had no key to answer with. The founder ruled
+on the same day.
+
+Confirmed this round:
+- The console's door for an admin and for a staff member is their own Vallo
+  account password, asked once per sign-in session and again after twelve
+  hours (an emailed code for an account with no password). No security key.
+  Five wrong tries lock the door for fifteen minutes. The lead advised that
+  this is not a second factor (a stolen password opens the console) and
+  offered password plus an emailed code instead; the founder chose password
+  only.
+- A super admin keeps the security key. This is the lead's reading, not the
+  founder's words: a super admin can give and end everybody else's access,
+  the founder's own account is exempt from the door, and the only other
+  super admin already uses a key. One line in
+  `lib/security/console-door.ts` and one refusal in
+  `lib/security/console-step-up.ts` change it if the founder wants password
+  there too.
+- The lock on money (a payout, a refund) is separate and unchanged.
+- A person with a named position holds that position's desks and no admin
+  role. The Business Development Director and the Social Media Manager were
+  both given `admin` on 12 November; it is removed by
+  `supabase/migrations/pending/staff_desks_only_2026-11-14.sql` (the founder
+  runs it). The staff position is unchanged, and each must acknowledge the
+  staff handbook before their desks open.
+- The Business Development Director also reviews identity checks: the
+  position's bundle gains `kyc_review` (the same file, and
+  `lib/admin/staff-positions.ts`).
+- The prospect pipeline is kept in the console, not in Zoho.

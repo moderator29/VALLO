@@ -16,7 +16,7 @@ vi.mock("@/lib/admin/my-desk/access", () => ({
       : state === "handbook"
         ? "Read and acknowledge the staff handbook to open your desk."
         : state === "step-up"
-          ? "Confirm your security key to use the console."
+          ? "Confirm it is you to use the console."
           : "My Desk is for Vallo staff.",
 }));
 vi.mock("@/lib/admin/guard", () => ({
@@ -73,7 +73,7 @@ describe("a refused caller", () => {
   it.each([
     ["signed-out", /Sign in/],
     ["not-admin", /for Vallo staff/],
-    ["step-up", /security key/],
+    ["step-up", /Confirm it is you/],
     ["handbook", /acknowledge the staff handbook/],
   ])("%s reads one sentence and nothing is read", async (state, pattern) => {
     door.value = { state };

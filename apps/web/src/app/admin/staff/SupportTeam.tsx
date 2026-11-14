@@ -39,7 +39,7 @@ export function SupportTeam({ members }: { members: SupportMember[] }) {
       {people.length === 0 ? (
         <p className="nf-body-sm text-[var(--nf-content-secondary)]">
           Nobody holds the support desk yet besides the admins. Add the first person above: they are told by email and in
-          the app, and the desk opens for them once they acknowledge the handbook and prove their security key.
+          the app, and the desk opens for them once they acknowledge the handbook and confirm their account password.
         </p>
       ) : (
         <ul className="grid gap-xs">

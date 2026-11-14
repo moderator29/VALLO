@@ -16,9 +16,9 @@ export const BUSINESS_DEVELOPMENT: ManualBody = {
   intro: (
     <p>
       This chapter is for the Business Development Director. You bring in the landlords, agents, hotels, shortlet hosts
-      and restaurants Vallo lists, and you review their listings before they go live. Your work lives on two desks:
-      Business development, where every prospect is kept, and Listings, where a submitted listing is approved, sent back
-      or rejected. You report to the COO.
+      and restaurants Vallo lists, and you review their listings and identity checks before they go live. Your work
+      lives on three desks: Business development, where every prospect is kept; Listings, where a submitted listing is
+      approved, sent back or rejected; and KYC, where a member&apos;s identity check is reviewed. You report to the COO.
     </p>
   ),
   glance: [
@@ -45,16 +45,15 @@ export const BUSINESS_DEVELOPMENT: ManualBody = {
             steps={[
               { icon: "user", title: "Sign in", outcome: "With your own Vallo account, the one that was given staff access." },
               { icon: "grid", title: "Open the console", outcome: "The console is the Vallo address followed by /admin.", href: "/admin" },
-              { icon: "key", title: "Confirm with your security key", outcome: "Once each time you sign in, and again after twelve hours." },
+              { icon: "key", title: "Enter your account password", outcome: "The console asks once each time you sign in, and again after twelve hours." },
               { icon: "document", title: "Read the handbook", outcome: "Acknowledge it once; a new version asks again.", href: "/admin/handbook" },
               { icon: "hand-coins", title: "Open Business development", outcome: "Your pipeline and the count of listings waiting on you.", href: "/admin/business-development" },
             ]}
           />
-          <DocCallout tone="note" title="If your security key does not answer">
-            Your key is the Face ID, fingerprint or screen lock of the device where you set it up. If that was your phone
-            and you are on a computer, either open the console on the phone, or press Confirm on the computer and choose
-            the option to use a phone or tablet, then scan the code with that phone. If the device is lost, ask a super
-            admin to clear the key on the Staff desk so you can set up a new one.
+          <DocCallout tone="note" title="If the console will not take your password">
+            It is your own Vallo account password, the one you sign in with. Five wrong tries lock the door for fifteen
+            minutes. If you have forgotten it, use Forgot your password on that screen, set a new one, and sign in
+            again.
           </DocCallout>
           <p>
             Where the desks are: on the console&apos;s first page, under Your desks. In the menu, Business development is in the
@@ -62,7 +61,7 @@ export const BUSINESS_DEVELOPMENT: ManualBody = {
             <Link href="/admin/listings" className={A}>
               Listings
             </Link>{" "}
-            is in the same group under Listing verification.
+            and KYC are in the same group under Listing verification.
           </p>
         </>
       ),
@@ -235,6 +234,15 @@ export const BUSINESS_DEVELOPMENT: ManualBody = {
             </Link>
             . You never review a listing of your own or of a business you have a personal interest in: pass it to
             another reviewer.
+          </p>
+          <p>
+            Your third desk is{" "}
+            <Link href="/admin/kyc" className={A}>
+              KYC
+            </Link>
+            , where you review a member&apos;s identity check: the document, the selfie and the name against the
+            account. Approve it, or refuse it with a reason the member reads. What you see there is private to the
+            member: never copy, photograph or forward it, and never discuss it outside the desk.
           </p>
         </>
       ),

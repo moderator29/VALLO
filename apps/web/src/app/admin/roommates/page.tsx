@@ -77,7 +77,7 @@ export default async function AdminRoommatesPage({ searchParams }: { searchParam
         <PageHead title="Roommates" />
         <div className="nf-panel nf-panel--card nf-admin-card p-lg">
           <p className="text-[length:var(--nf-text-body-sm)] leading-relaxed text-[var(--nf-content-muted)]">
-            {access.state === "step-up" ? "Confirm your security key to use the console." : access.state === "signed-out" ? "Sign in with your operations account to continue." : "This desk is for Vallo staff."}
+            {access.state === "step-up" ? "Confirm it is you to use the console." : access.state === "signed-out" ? "Sign in with your operations account to continue." : "This desk is for Vallo staff."}
           </p>
         </div>
       </div>
