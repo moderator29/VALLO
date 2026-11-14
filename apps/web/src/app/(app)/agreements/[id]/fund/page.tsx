@@ -4,6 +4,8 @@ import { getLocale } from "@/lib/locale";
 import { PageFrame } from "@/components/app/PageFrame";
 import { FUND_TITLE, PROTECTED_PAGE_TITLE } from "@/lib/money/copy";
 import { readProtectedDeal } from "@/lib/money/protected-read";
+import { readProtectedStart } from "@/lib/money/protected-start";
+import { ProtectedStart } from "@/components/money/protected-rail/ProtectedStart";
 import { ProtectedAgreementView, isFundingStage, protectedStageOf } from "@/components/money/protected-rail/ProtectedAgreementView";
 
 /**
@@ -28,6 +30,22 @@ export default async function FundPaymentPage({ params }: { params: Promise<{ id
      else while the switch is off. */
   const now = requestTime();
   const protectedDeal = await readProtectedDeal(id, now);
+  /* THE START (14 November 2026): no live protected payment on this
+     agreement yet (none at all, or the last one failed or was cancelled),
+     and the viewer is the one who pays. The read answers only while the rail
+     may start money for a member; otherwise the page behaves as it did. */
+  const closed = protectedDeal ? protectedDeal.deal.status === "failed" || protectedDeal.deal.status === "cancelled" : true;
+  const start = closed ? await readProtectedStart(id) : null;
+  if (start) {
+    const locale = await getLocale();
+    return (
+      <PageFrame title={PROTECTED_PAGE_TITLE} fallback={`/agreements/${id}`} width="narrow">
+        <div className="px-md pb-2xl">
+          <ProtectedStart start={start} locale={locale} />
+        </div>
+      </PageFrame>
+    );
+  }
   if (protectedDeal) {
     if (protectedDeal.role === "payer" && !isFundingStage(protectedStageOf(protectedDeal, now))) redirect(`/agreements/${id}/held`);
     const locale = await getLocale();

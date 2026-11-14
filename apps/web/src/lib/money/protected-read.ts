@@ -120,7 +120,7 @@ function dayOf(iso: string): string | null {
   return new Intl.DateTimeFormat("en-NG", { day: "numeric", month: "long", timeZone: "Africa/Lagos" }).format(at);
 }
 
-function datesFor(kind: string, terms: RowLike | null): string | null {
+export function datesFor(kind: string, terms: RowLike | null): string | null {
   if (!terms) return null;
   if (kind === "stay") {
     const from = str(terms.check_in);

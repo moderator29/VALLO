@@ -20,12 +20,16 @@
      ?screen=release-delayed  refund-delayed   the bank has not confirmed yet
      ?screen=lister-payout  lister-review      the lister's side of a problem
      ?screen=receipt                           the protected receipt, with help
-     ?screen=problem                           raising a problem (the sheet) */
+     ?screen=problem                           raising a problem (the sheet)
+   The start of a payment (14 November):
+     ?screen=identity                          the one identity check
+     ?screen=setup                             a lister's readiness card */
 import { getLocale } from "@/lib/locale";
 import { ListerProtectedView } from "@/components/money/protected-rail/ListerProtectedView";
 import { ProtectedReceipt } from "@/components/money/protected-rail/ProtectedReceipt";
+import { ProtectedSetup } from "@/components/money/protected-rail/ProtectedSetup";
 import { PREVIEW_DEALS, PREVIEW_NOW } from "./fixtures";
-import { PreviewProtected } from "./PreviewProtected";
+import { PreviewIdentity, PreviewProtected } from "./PreviewProtected";
 
 const SCREENS = [
   "choose",
@@ -54,6 +58,8 @@ const SCREENS = [
   "lister-review",
   "receipt",
   "problem",
+  "identity",
+  "setup",
 ] as const;
 
 export default async function Page({ searchParams }: { searchParams: Promise<{ screen?: string; offer?: string }> }) {
@@ -83,6 +89,10 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ s
           <PreviewProtected screen="journey" deal={PREVIEW_DEALS.receipt!} now={now} locale={locale} />
           <ProtectedReceipt deal={PREVIEW_DEALS.receipt!} now={now} locale={locale} paymentHref="/preview/protected?screen=receipt" />
         </div>
+      ) : screen === "identity" ? (
+        <PreviewIdentity />
+      ) : screen === "setup" ? (
+        <ProtectedSetup setup={{ identity: "needed", payoutAccount: "missing" }} />
       ) : screen === "problem" ? (
         <PreviewProtected screen="problem" deal={PREVIEW_DEALS.protected!} now={now} locale={locale} />
       ) : (

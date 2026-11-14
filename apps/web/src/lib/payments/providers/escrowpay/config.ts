@@ -4,19 +4,31 @@ import "server-only";
  * THE PROTECTED PAYMENT PROVIDER'S CONFIGURATION (BUILD section 5, phase 2).
  *
  * Read from the environment, never from the database and never from code:
- *   ESCROWPAY_API_BASE_URL    the API host. TODO(provider-docs): the sandbox
- *                             and production URLs are not documented to us yet,
- *                             so there is deliberately no default. Unset means
- *                             not configured.
- *   ESCROWPAY_API_KEY         the API key.
- *   ESCROWPAY_WEBHOOK_SECRET  the webhook signing secret. TODO(provider-docs):
- *                             whether it is distinct from the API key.
- *   ESCROWPAY_ENVIRONMENT     "sandbox" or "production".
+ *   ESCROWPAY_API_BASE_URL    the Merchant API host. The provider has ONE host
+ *                             for both books (docs.escrowpay.app, "Getting
+ *                             started": sandbox is a test key on the
+ *                             production host, not a second hostname). There
+ *                             is still no default: unset means not configured.
+ *   ESCROWPAY_API_KEY         the secret key, sent as `X-API-Key`. Its prefix
+ *                             names its book: `ep_test_` or `ep_live_`.
+ *   ESCROWPAY_WEBHOOK_SECRET  the endpoint signing secret (`whsec_...`), shown
+ *                             once when the endpoint is created in the
+ *                             provider's dashboard. Distinct from the API key.
+ *   ESCROWPAY_WEBHOOK_SECRET_PREVIOUS
+ *                             optional, only during a rotation: the provider
+ *                             signs with either secret for 24 hours.
+ *   ESCROWPAY_ENVIRONMENT     "sandbox" (a test key) or "production" (a live key).
  *
- * The rule: production credentials are used
- * only when the deployment itself is production (`VERCEL_ENV` production or
- * unset, as on a local machine). A preview or development deployment with a
- * production environment marker is refused outright, never downgraded.
+ * The rules:
+ *  - the key's book must be the one the marker names. A live key marked
+ *    sandbox, or a test key marked production, is not configured at all;
+ *  - production credentials are used only when the deployment itself is
+ *    production (`VERCEL_ENV` production or unset, as on a local machine). A
+ *    preview or development deployment with a production marker is refused
+ *    outright, never downgraded;
+ *  - a test key on the production deployment may record and read, and may
+ *    never START a payment (`startsMoney` false): a member must never be
+ *    handed the sandbox's made-up account number as if it were the bank's.
  */
 export type EscrowPayEnvironment = "sandbox" | "production";
 
@@ -24,11 +36,21 @@ export type EscrowPayConfig = {
   baseUrl: string;
   apiKey: string;
   webhookSecret: string | null;
+  webhookSecretPrevious: string | null;
   environment: EscrowPayEnvironment;
+  /** Whether this configuration may open, release or refund a member's payment. */
+  startsMoney: boolean;
 };
 
+const TEST_KEY = /^ep_test_/;
+const LIVE_KEY = /^ep_live_/;
+
 export function escrowPayConfig(env: Readonly<Record<string, string | undefined>>): EscrowPayConfig | null {
-  const baseUrl = (env.ESCROWPAY_API_BASE_URL ?? "").trim().replace(/\/+$/, "");
+  /* The host alone is stored; a pasted "/api/v1" is taken off, since every path carries it. */
+  const baseUrl = (env.ESCROWPAY_API_BASE_URL ?? "")
+    .trim()
+    .replace(/\/+$/, "")
+    .replace(/\/api\/v1$/, "");
   const apiKey = (env.ESCROWPAY_API_KEY ?? "").trim();
   const marker = (env.ESCROWPAY_ENVIRONMENT ?? "").trim().toLowerCase();
   const vercelEnv = (env.VERCEL_ENV ?? "").trim();
@@ -42,8 +64,18 @@ export function escrowPayConfig(env: Readonly<Record<string, string | undefined>
   }
   if (url.protocol !== "https:" || url.username || url.password) return null;
   if (marker !== "sandbox" && marker !== "production") return null;
+  if (marker === "sandbox" && !TEST_KEY.test(apiKey)) return null;
+  if (marker === "production" && !LIVE_KEY.test(apiKey)) return null;
   const productionDeployment = vercelEnv === "" || vercelEnv === "production";
   if (marker === "production" && !productionDeployment) return null;
   const secret = (env.ESCROWPAY_WEBHOOK_SECRET ?? "").trim();
-  return { baseUrl, apiKey, webhookSecret: secret || null, environment: marker };
+  const previous = (env.ESCROWPAY_WEBHOOK_SECRET_PREVIOUS ?? "").trim();
+  return {
+    baseUrl,
+    apiKey,
+    webhookSecret: secret || null,
+    webhookSecretPrevious: previous || null,
+    environment: marker,
+    startsMoney: !(marker === "sandbox" && vercelEnv === "production"),
+  };
 }

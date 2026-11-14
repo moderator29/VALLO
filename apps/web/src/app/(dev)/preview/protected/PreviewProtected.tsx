@@ -9,6 +9,12 @@ import { ProtectedPayment } from "@/components/money/protected-rail/ProtectedPay
 import { protectedQuote } from "@/lib/money/protected-fees";
 import type { ProtectedDeal } from "@/components/money/protected-rail/types";
 import { ProblemSheet } from "@/components/money/protected-rail/ProtectedPaymentLive";
+import { IdentityCheck } from "@/components/money/protected-rail/IdentityCheck";
+
+/** The identity check as it is drawn. Its one action is the real one, which refuses while the rail is off. */
+export function PreviewIdentity() {
+  return <IdentityCheck onVerified={() => banner.success("Preview: the check passed.")} />;
+}
 
 /** The real screens with recorded answers: every action says, in the banner, that the preview called nothing. */
 export function PreviewProtected({

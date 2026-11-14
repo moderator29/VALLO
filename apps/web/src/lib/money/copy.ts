@@ -1805,6 +1805,53 @@ export const PROTECTED_ACTION_REFUSED = {
   unavailable: "That could not be done just now. Nothing has moved; try again in a moment.",
 } as const;
 
+/* The identity step and the start of a protected payment. The holder of the
+   money requires every payer and every lister to be checked once, against
+   their NIN or BVN and date of birth; Vallo passes the number on and keeps
+   nothing of it. */
+export const PROTECTED_IDENTITY_TITLE = "Confirm your identity";
+export const PROTECTED_IDENTITY_LEAD =
+  "Everyone who pays or is paid through a protected payment is checked once, by a third party, before their first one. It takes a moment and you will not be asked again.";
+export const PROTECTED_IDENTITY_KIND_LABEL = "Which number will you use";
+export const PROTECTED_IDENTITY_KINDS = { nin: "NIN", bvn: "BVN" } as const;
+export const PROTECTED_IDENTITY_NUMBER_LABEL = { nin: "Your NIN", bvn: "Your BVN" } as const;
+export const PROTECTED_IDENTITY_NUMBER_HINT = "11 digits. Vallo does not keep this number: it goes to the check and nowhere else.";
+export const PROTECTED_IDENTITY_DOB_LABEL = "Date of birth";
+export const PROTECTED_IDENTITY_DOB_HINT = "As it is on your NIN or BVN record.";
+export const PROTECTED_IDENTITY_CONSENT =
+  "I agree to this identity check. My number and date of birth are sent to the checking partner for this purpose only.";
+export const PROTECTED_IDENTITY_CTA = "Check and continue";
+export const PROTECTED_IDENTITY_DONE = "Your identity is confirmed. You will not be asked again.";
+export const PROTECTED_IDENTITY_RESULT = {
+  not_matched: "Those details did not match the record. Check the number and the date of birth, then try again.",
+  needs_review: "This check needs a person to look at it. Contact support and we will help you finish it.",
+  bad_input: "Enter the 11 digits of the number, and your date of birth as it is on the record.",
+  no_email: "Add an email address to your account first, then come back to this step.",
+  under_age: "You must be 18 or older to use a protected payment.",
+  unavailable: "The check could not be run just now. Nothing was sent; try again in a moment.",
+} as const;
+export const PROTECTED_START_REFUSED = {
+  lister_not_ready:
+    "The lister has not finished setting up to receive protected payments yet. They can do it on Vallo under Settings, then Payments. Nothing has been sent.",
+  agreement_changed: "The agreement changed after you opened this page. Read the current version, then continue.",
+  card_payment_started: "A card payment has already been started for this agreement.",
+  not_offered: "Protected payment is not available for this agreement.",
+} as const;
+export const PROTECTED_START_PENDING =
+  "Your payment is being set up. The transfer details will appear here as soon as they are ready; you do not need to start again.";
+export const PROTECTED_SETUP_TITLE = "Protected payments";
+export const PROTECTED_SETUP_LEAD =
+  "To be paid through a protected payment you confirm your identity once, and keep a bank account on Vallo for the payout.";
+export const PROTECTED_SETUP_ROWS = {
+  identity: "Identity check",
+  identity_done: "Confirmed",
+  identity_needed: "Not done yet",
+  payout: "Payout account",
+  payout_ready: "On your account",
+  payout_missing: "Add a bank account under Payouts",
+  unknown: "Could not be read just now",
+} as const;
+
 /** The plain statement the trust page and the payment step lean on. It names no date. */
 export const PROTECTED_NOT_OPEN =
   "Protected payment is not open on Vallo yet. This page explains how it will work, so you know what to expect before it opens; nothing on Vallo is paid this way today.";

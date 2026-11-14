@@ -23,11 +23,13 @@ import { recordAlert } from "../alerts";
 import { DOCUMENTED } from "../payments/providers/escrowpay/client";
 import { escrowPayEnabled } from "../payments/providers/escrowpay/switch";
 import { consume, subjectForUser } from "../security/rate-limit";
-import { PROTECTED_ACTION_REFUSED, PROTECTED_PROBLEM_REASONS } from "./copy";
+import { PROTECTED_ACTION_REFUSED, PROTECTED_IDENTITY_RESULT, PROTECTED_PROBLEM_REASONS, PROTECTED_START_REFUSED } from "./copy";
 import { adminDb } from "./member-wallet";
+import { onboardMember } from "./protected-provider";
 import {
   askNewTransferDetails,
   confirmProtectedMilestone,
+  openProtectedPayment,
   protectedRailDeps,
   raiseProtectedDispute,
   refreshProtectedPayment,
@@ -47,19 +49,24 @@ const Problem = Target.extend({ reason: z.enum(REASONS), statement: z.string().t
 const LIMITS = {
   read: { bucket: "protected_payment_read", limit: 12, windowSeconds: 300 },
   act: { bucket: "protected_payment_act", limit: 6, windowSeconds: 600 },
+  /* Each try is a real lookup against a person's record: a handful a day. */
+  identity: { bucket: "protected_identity_check", limit: 5, windowSeconds: 86_400 },
 } as const;
 
-type Ready = { userId: string; deps: ProtectedRailDeps };
+type Ready = { userId: string; email: string | null; deps: ProtectedRailDeps };
+
+/** Whether the rail is on at all: verified against the provider, and the founder's switch on. Fails closed. */
+async function railOn(): Promise<boolean> {
+  try {
+    return DOCUMENTED && (await escrowPayEnabled());
+  } catch {
+    return false;
+  }
+}
 
 /** The gate every action passes first, in this order: rail, input, session, limit. */
 async function gate(kind: keyof typeof LIMITS): Promise<Ready | string> {
-  let on = false;
-  try {
-    on = DOCUMENTED && (await escrowPayEnabled());
-  } catch {
-    on = false;
-  }
-  if (!on) return PROTECTED_ACTION_REFUSED.rail_off;
+  if (!(await railOn())) return PROTECTED_ACTION_REFUSED.rail_off;
   const session = await resolveSession();
   if (session.state === "unconfigured") return NOT_CONFIGURED_MESSAGE;
   if (session.state === "signed-out") return SIGNED_OUT_MESSAGE;
@@ -70,7 +77,7 @@ async function gate(kind: keyof typeof LIMITS): Promise<Ready | string> {
   const deps = protectedRailDeps(db, async (alertKind, detail) => {
     await recordAlert({ kind: alertKind, severity: "critical", detail });
   });
-  return { userId: session.user.id, deps };
+  return { userId: session.user.id, email: session.user.email ?? null, deps };
 }
 
 function refresh(agreementId: string) {
@@ -157,4 +164,99 @@ export async function newProtectedDetails(input: TargetInput): Promise<ActionRes
   const out = await askNewTransferDetails(ready.deps, { arrangementId: parsed.data.arrangementId, actorUserId: ready.userId });
   refresh(parsed.data.agreementId);
   return actResult(out);
+}
+
+/* --------------------------------------------- identity, and the open */
+
+const Identity = z.object({
+  kind: z.enum(["nin", "bvn"]),
+  /* A NIN and a BVN are both eleven digits. */
+  identifier: z.string().trim().regex(/^\d{11}$/),
+  dateOfBirth: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  consent: z.literal(true),
+});
+type IdentityInput = z.input<typeof Identity>;
+
+/** Whole years between a date of birth and today in Lagos; null for a date that is not one. */
+function ageOn(dateOfBirth: string, now: number): number | null {
+  const born = Date.parse(`${dateOfBirth}T00:00:00Z`);
+  if (!Number.isFinite(born) || new Date(born).toISOString().slice(0, 10) !== dateOfBirth) return null;
+  const today = new Date(now).toLocaleDateString("en-CA", { timeZone: "Africa/Lagos" });
+  const years = Number(today.slice(0, 4)) - Number(dateOfBirth.slice(0, 4));
+  return today.slice(5) < dateOfBirth.slice(5) ? years - 1 : years;
+}
+
+/**
+ * The member's one identity check, asked for by the holder of the money
+ * before a first protected payment. The number and the date of birth go
+ * straight to the check and are kept nowhere: not in a row, a log or an
+ * alert. The member consents on the screen, in their own tap.
+ */
+export async function verifyProtectedIdentity(input: IdentityInput): Promise<ActionResult<{ verified: true }>> {
+  if (!(await railOn())) return fail(PROTECTED_ACTION_REFUSED.rail_off);
+  /* Read before the limit is counted: a mistyped number is not one of the day's tries. */
+  const parsed = Identity.safeParse(input);
+  if (!parsed.success) return fail(PROTECTED_IDENTITY_RESULT.bad_input);
+  const age = ageOn(parsed.data.dateOfBirth, Date.now());
+  if (age === null || age > 120) return fail(PROTECTED_IDENTITY_RESULT.bad_input);
+  if (age < 18) return fail(PROTECTED_IDENTITY_RESULT.under_age);
+  const ready = await gate("identity");
+  if (typeof ready === "string") return fail(ready);
+  if (!ready.email) return fail(PROTECTED_IDENTITY_RESULT.no_email);
+  const locked = await passcodeMoneyRefusal(ready.userId);
+  if (locked) return fail(locked);
+  const out = await onboardMember(ready.deps, {
+    userId: ready.userId,
+    kind: parsed.data.kind,
+    identifier: parsed.data.identifier,
+    dateOfBirth: parsed.data.dateOfBirth,
+    email: ready.email,
+    name: null,
+    phone: null,
+  });
+  if (out.state === "verified") return ok({ verified: true });
+  if (out.state === "needs_review") {
+    await recordAlert({ kind: "protected_rail.identity_needs_review", severity: "warning", detail: { user_id: ready.userId, kind: parsed.data.kind } });
+    return fail(PROTECTED_IDENTITY_RESULT.needs_review);
+  }
+  if (out.state === "not_matched") return fail(PROTECTED_IDENTITY_RESULT.not_matched);
+  if (out.state === "bad_input") return fail(PROTECTED_IDENTITY_RESULT.bad_input);
+  return fail(PROTECTED_IDENTITY_RESULT.unavailable);
+}
+
+const Start = z.object({ agreementId: z.string().uuid(), acceptedVersion: z.number().int().min(1) });
+
+export type StartProtectedResult =
+  /** The payment is open: the funding page now shows the transfer details. */
+  | { state: "opened" }
+  /** Made, and still being set up with the provider: the funding page follows it. */
+  | { state: "pending" }
+  /** The payer has not been checked yet: the identity step comes first. */
+  | { state: "identity" };
+
+/**
+ * "Agree and continue" (spec screen 2): opens the protected payment on the
+ * exact agreement version the payer was shown. Opens nothing for a payer
+ * whose identity the provider has not checked, and says so.
+ */
+export async function startProtected(input: z.input<typeof Start>): Promise<ActionResult<StartProtectedResult>> {
+  const ready = await gate("act");
+  if (typeof ready === "string") return fail(ready);
+  const parsed = Start.safeParse(input);
+  if (!parsed.success) return fail(PROTECTED_ACTION_REFUSED.bad_input);
+  const locked = await passcodeMoneyRefusal(ready.userId);
+  if (locked) return fail(locked);
+  const out = await openProtectedPayment(ready.deps, { ...parsed.data, actorUserId: ready.userId });
+  refresh(parsed.data.agreementId);
+  if (out.outcome === "opened" || out.outcome === "existing") return ok({ state: "opened" });
+  if (out.outcome === "unknown") return ok({ state: "pending" });
+  if (out.outcome === "failed") return fail(PROTECTED_ACTION_REFUSED.unavailable);
+  if (out.reason === "payer_identity_required") return ok({ state: "identity" });
+  if (out.reason === "lister_not_ready") return fail(PROTECTED_START_REFUSED.lister_not_ready);
+  if (out.reason === "agreement_changed") return fail(PROTECTED_START_REFUSED.agreement_changed);
+  if (out.reason === "card_payment_started") return fail(PROTECTED_START_REFUSED.card_payment_started);
+  if (out.reason === "category_not_approved" || out.reason === "not_offered" || out.reason === "not_escrow" || out.reason === "not_payable") {
+    return fail(PROTECTED_START_REFUSED.not_offered);
+  }
+  return fail(refusal(out.reason));
 }
