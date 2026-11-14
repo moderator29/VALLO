@@ -99,6 +99,24 @@ export function convertNgnMinor(ngnMinor: number, currency: DisplayCurrency, ngn
   return Number.isSafeInteger(asNumber) ? asNumber : null;
 }
 
+/**
+ * The other direction, for ONE thing only: a reader's own search budget typed
+ * in their currency (`budget.ts`). The other currency's minor units to kobo,
+ * half to even. It is never a price: nothing a lister sets, nothing anybody
+ * is charged, and it is never stored; the search keeps the naira it becomes.
+ * Null when the input is not a safe integer or the rate cannot be read.
+ */
+export function convertToNgnMinor(minor: number, currency: DisplayCurrency, ngnPerUnit: string): number | null {
+  if (!Number.isSafeInteger(minor)) return null;
+  if (currency === "NGN") return minor;
+  const rate = parseRate(ngnPerUnit);
+  if (rate === null) return null;
+  const decimals = 10n ** BigInt(CURRENCY_META[currency].decimals);
+  const out = roundHalfEven(BigInt(minor) * 100n * rate, decimals * RATE_SCALE);
+  const asNumber = Number(out);
+  return Number.isSafeInteger(asNumber) ? asNumber : null;
+}
+
 export type RateVerdict = { usable: true } | { usable: false; why: "missing" | "malformed" | "stale" | "future" };
 
 /** Whether a stored rate may be shown at `now`. */

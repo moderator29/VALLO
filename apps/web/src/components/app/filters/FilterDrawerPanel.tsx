@@ -8,6 +8,7 @@ import { UiIcon, type UiIconName } from "@/design-system/icons/UiIcon";
 import { IconTiles } from "./IconTiles";
 import { RadioPills } from "./RadioPills";
 import { PriceSpread } from "./PriceSpread";
+import { BudgetInCurrency } from "@/components/currency/BudgetInCurrency";
 import { liveMatchCount, seeHomesLabel } from "./filter-count";
 import { priceFigures } from "@/lib/search/price-histogram";
 import type { Icon3DName } from "@/components/ui/icon-3d";
@@ -826,6 +827,16 @@ export function FilterDrawerPanel({
               {sliderMax >= scale.ceiling && (
                 <p className="nf-filters__hint mt-inline-tight">{copy.noUpperLimit}</p>
               )}
+              {/* Currency tool 2: the same budget typed in the reader's currency.
+                  It writes the naira fields above and draws nothing without a
+                  fresh rate (see BudgetInCurrency). */}
+              <BudgetInCurrency
+                minNaira={draft.minNaira}
+                maxNaira={draft.maxNaira}
+                locale={locale}
+                placeholders={{ min: sv?.minBudget, max: sv?.maxBudget }}
+                onChange={(next) => setDraft((current) => ({ ...current, ...next }))}
+              />
               {cashMarket && (
                 <>
                   <p className="nf-filters__hint mt-inline-tight" data-testid="filter-cash-basis">

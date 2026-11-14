@@ -50,6 +50,12 @@ const ADOPTERS: ReadonlySet<string> = new Set([
   "components/app/stays/StayStackCard.tsx",
   "components/app/search/MapCanvas.tsx",
   "components/app/search/MapDock.tsx",
+  /* Currency tool 2 (14 November 2026): the filter sheet's budget, typed in
+     the reader's currency and turned into the naira the search filters on.
+     A reader's own budget, never a price; see lib/currency/budget.ts. */
+  "components/app/filters/FilterDrawerPanel.tsx",
+  /* The harness page that draws that sheet with a fixture rate. No price on it. */
+  "app/(dev)/preview/fixes/filters-budget/page.tsx",
 ]);
 
 /** Paths that are money surfaces. A match here can never import the guide. */

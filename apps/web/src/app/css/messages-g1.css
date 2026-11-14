@@ -647,48 +647,6 @@
   }
 }
 
-/* --------------------------------- the message menu (outside any layer) */
-
-/* The reaction row at the top: eight round choices across the menu, the
-   reader's own on the brand tint. The menu widens to carry them. */
-.nf-msg-menu:has(.nf-msg-menu__reactions) {
-  width: min(23.5rem, calc(100vw - 2 * var(--nf-space-sm)));
-}
-.nf-msg-menu__reactions {
-  display: grid;
-  grid-template-columns: repeat(8, minmax(0, 1fr));
-  margin-block-end: var(--nf-space-2xs);
-  padding-block-end: var(--nf-space-2xs);
-}
-.nf-msg-menu__emoji {
-  display: grid;
-  place-items: center;
-  min-block-size: 2.75rem;
-  border: 0;
-  border-radius: var(--nf-radius-circle);
-  background: transparent;
-  font-size: 1.375rem;
-  line-height: 1;
-  cursor: pointer;
-  transition: scale var(--nf-duration-press) var(--nf-ease-press);
-}
-.nf-msg-menu__emoji:hover,
-.nf-msg-menu__emoji:focus-visible {
-  background: var(--nf-surface-inset);
-}
-.nf-msg-menu__emoji:active {
-  scale: 1.2;
-}
-.nf-msg-menu__emoji[data-mine] {
-  background: var(--nf-brand-tint-1);
-  box-shadow: inset 0 0 0 var(--nf-border-width) var(--nf-brand-edge-strong);
-}
-@media (prefers-reduced-motion: reduce) {
-  .nf-msg-menu__emoji {
-    transition: none;
-  }
-}
-
 /* The reply bar (threads.css draws it outside any layer, so this is too). */
 /* Over the composer: who is being answered, then what they
    said (or what it was: a photo, a voice note) on one line. */

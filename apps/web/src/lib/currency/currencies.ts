@@ -22,6 +22,11 @@
  *      currency. Nothing here writes a price; there is no foreign-currency
  *      price field anywhere, and there must never be one.
  *
+ * THE ONE FIELD THAT TAKES ANOTHER CURRENCY is a reader's own search budget
+ * (`budget.ts`, the filter sheet). It is not a price: it becomes naira the
+ * moment it is typed, the search filters on that naira, and the typed figure
+ * is never stored or sent. Rule 3 is untouched by it.
+ *
  * WHY, IN LAW. Domestic prices in Nigeria are quoted and settled in naira:
  * the Central Bank of Nigeria Act 2007 (section 20) makes the naira the legal
  * tender in Nigeria, and the Central Bank has directed more than once that
