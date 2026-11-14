@@ -203,3 +203,61 @@ the permissive-policy merges on `listings`, `accommodations`, `businesses`
 with EXPLAIN before and after, delivered as a draft SQL file; whether the
 Vercel reconcile cron should fold into pg_cron's; instance size judgement
 last, with evidence and a price only if the data forces it.
+
+### The hot functions, measured as a real member (14 November 2026)
+
+The statement table's means span the 13 November crisis AND the fixes, so
+they overstate everything. These are measured now, inside a rolled-back
+transaction, as `authenticated` with a real member's claims, which is what a
+signed-in page load actually does.
+
+| Function | Historical mean | Measured today | Buffers | What it is |
+|---|---|---|---|---|
+| `shell_context()` | 538.7 ms | **28.1 ms** | 2,010 | The signed-in shell, every page |
+| `my_unread_counts()` | 110.7 ms | **46.1 ms** | 818 | The bell and the inbox badge |
+| `passcode_status()` | 84.9 ms | **17.6 ms** | 289 | The lock state |
+| `my_invite_step()` | 229.0 ms | **14.9 ms** | 945 | The invite card |
+
+**The work done on 13 and 14 November was worth it**: `shell_context` is 19
+times faster than its historical mean, `my_invite_step` 15 times. Nothing
+here is a crisis any more.
+
+What is left to say honestly: those four together are about 107 ms of
+database time and about 4,000 buffer touches on a signed-in page load, and
+they are four separate round trips. The next lever is fewer round trips, not
+faster functions, and that is an application change (one read that answers
+the shell, the counts, the lock and the invite step together), not a database
+one. `my_unread_counts` is now the worst of the four and is the one to look
+at first if a single number must be improved.
+
+### Policy evaluation is NOT the bottleneck today (measured, 14 November)
+
+Survey B's D-02 assumed the 398 multiple-permissive-policy warnings were
+costing the hot read path. Measured on `listings` as `anon`, warm: 0.47 ms
+execution for the catalogue query. The first run read 9.18 ms, which is a
+cold cache, not policy cost. By comparison the same query with RLS bypassed
+is 1.43 ms cold.
+
+What IS measurable and repeatable is **planning time of 3 to 5 ms** on every
+`listings` query, touching about 800 buffers to plan. The cause is the
+table's shape: 39 indexes, 66 constraints, 105 columns and 31 triggers. A
+merge of the permissive policies is therefore a lower priority than the
+survey assumed, and it is written as a draft rather than a pending file
+because it is security on the hottest table.
+
+A separate check found **no redundant indexes anywhere in `public`**: not one
+index is a prefix of another. The indexing is disciplined, so the 374
+"unused" indexes are purpose-built and simply have no traffic at 30
+profiles. Do not drop them before launch traffic; dropping them is also how
+the planning cost above would come down, which is a trade to make with real
+data, not now.
+
+### Storage is not a cost lever (measured, 14 November)
+
+23 buckets, 35 objects, **15 MB in all**. The largest is `agent-documents`
+at 6.8 MB. Image transformations do not go through Supabase at all: the app
+serves through Next's optimiser, so the egress question belongs to image
+delivery in the performance report, not here. The one-day optimised-image
+cache floor is a deliberate moderation choice (a photograph taken down must
+stop being served within a day) and is correctly documented in
+`apps/web/next.config.ts`. Leave it.
