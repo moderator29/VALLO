@@ -11,6 +11,7 @@ import { loadNotificationPage } from "@/lib/notify/inbox";
 import { Reveal } from "@/components/site/Reveal";
 import { toNotificationItem, type NotificationItem } from "@/lib/notify/links";
 import { LiveNotifications } from "./LiveNotifications";
+import { PullToRefresh } from "@/components/ui/PullToRefresh";
 import { loadUnreadCounts } from "@/lib/messages/unread";
 import { sectionClock } from "@/lib/notify/sections";
 import { withNext } from "@/lib/auth/next-link";
@@ -75,7 +76,9 @@ export default async function NotificationsPage() {
     /* The header belongs to the client component here, because the mark-all
        control has to sit in it and only that component knows what is unread. */
     return (
-      <div className="mx-auto max-w-2xl">
+      /* Pull down to refresh: rows that arrived while the live connection was
+         down are taken up by the list (`adoptFresh`). */
+      <PullToRefresh className="mx-auto max-w-2xl">
         <LiveNotifications
           initial={initial}
           initialMore={page.more}
@@ -85,7 +88,7 @@ export default async function NotificationsPage() {
           copy={copy}
           locale={locale}
         />
-      </div>
+      </PullToRefresh>
     );
   }
 

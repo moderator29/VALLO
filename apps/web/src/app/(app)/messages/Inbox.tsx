@@ -1,6 +1,8 @@
 "use client";
 
-import { refreshUnreadConversations } from "@/lib/messages/unread-live";
+import { refreshUnreadConversations, useUnreadConversations } from "@/lib/messages/unread-live";
+import { NewPill } from "@/components/ui/NewPill";
+import { newSince, settleBaseline } from "@/lib/ui/small-rules";
 import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { useClientCopy } from "@/lib/i18n/client-copy";
@@ -454,6 +456,29 @@ export function Inbox({
   assistantOn?: boolean;
 }) {
   const router = useRouter();
+  /*
+   * THE "NEW MESSAGES" PILL. The rows are the server's and do not move by
+   * themselves; the live unread-conversations figure (the one store the rail
+   * already reads, one channel, no timer) does. When it goes past the figure
+   * these rows were drawn against, a conversation has a message the list does
+   * not show yet: the pill says so, and a tap reads the inbox again and goes
+   * to the top. The baseline follows the figure down (a thread read here or
+   * elsewhere) and is taken again whenever fresh rows arrive. Compared during
+   * render, so there is no frame with a stale answer. A second message in a
+   * conversation that is already unread does not move the figure, so it does
+   * not raise the pill.
+   */
+  const liveUnread = useUnreadConversations(meId !== null);
+  const [baseline, setBaseline] = useState<number | null>(null);
+  const [drawnRows, setDrawnRows] = useState(rows);
+  if (drawnRows !== rows) {
+    setDrawnRows(rows);
+    setBaseline(liveUnread);
+  } else {
+    const settled = settleBaseline(baseline, liveUnread);
+    if (settled !== baseline) setBaseline(settled);
+  }
+  const newConversations = newSince(baseline, liveUnread);
   const [side, setSide] = useState<Side>(initialSide);
   const [view, setView] = useState<View>("recent");
   const [archiving, startArchiving] = useSafeTransition();
@@ -704,6 +729,16 @@ export function Inbox({
 
   return (
     <div>
+      {/* English only for now; the inbox dictionary has no words for the pill yet. */}
+      <NewPill
+        count={newConversations}
+        label="New messages"
+        onGo={() => {
+          setBaseline(liveUnread);
+          router.refresh();
+        }}
+        data-testid="inbox-new-pill"
+      />
       {/* ------------------------------------------------------- heading */}
       {/* The back control belongs to the page, per the platform's header
           contract, and the compose button rides the same row on the right. */}

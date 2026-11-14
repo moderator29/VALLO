@@ -224,6 +224,54 @@
     pointer-events: none;
   }
 
+  /* ------------------------------------------------------ THE NEW PILL
+   * `components/ui/NewPill.tsx`: under the app header, centred, over the
+   * list it speaks for. Opacity and transform only. On the wide layout the
+   * member header is not drawn, so it sits a step from the top edge. */
+  .nf-new-pill {
+    position: fixed;
+    left: 50%;
+    top: calc(env(safe-area-inset-top, 0px) + var(--nf-header-height-sm) + 0.5rem);
+    z-index: var(--nf-z-sticky);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    min-block-size: 2.75rem;
+    padding-inline: 0.875rem 1rem;
+    /* A rounded rectangle like every other control (the shape rule in
+       scripts/check-css-tokens.mjs); "pill" is its name, not its radius. */
+    border-radius: var(--nf-radius-control);
+    border: 1px solid var(--nf-brand-edge);
+    background: var(--nf-surface-elevated);
+    box-shadow: var(--nf-float-shadow);
+    color: var(--nf-content-primary);
+    font-size: var(--nf-text-caption);
+    font-weight: 600;
+    white-space: nowrap;
+    translate: -50% 0;
+    transition:
+      opacity var(--nf-duration-base) var(--nf-ease-standard),
+      transform var(--nf-duration-base) var(--nf-ease-spring),
+      scale var(--nf-duration-press) var(--nf-ease-press);
+  }
+  @media (min-width: 64rem) {
+    .nf-new-pill {
+      top: 1rem;
+    }
+  }
+  .nf-new-pill[data-hidden] {
+    opacity: 0;
+    transform: translate3d(0, -0.75rem, 0);
+    pointer-events: none;
+  }
+  .nf-new-pill:active {
+    scale: var(--nf-press-scale);
+  }
+  .nf-new-pill:focus-visible {
+    outline: 2px solid var(--nf-focus-ring);
+    outline-offset: 2px;
+  }
+
   /* --------------------------------------------------- PULL TO REFRESH */
 
   .nf-ptr {

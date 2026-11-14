@@ -246,3 +246,16 @@ export function groupByObject<T extends { id: string; href: string | null; title
   }
   return out;
 }
+
+/**
+ * Rows a fresh server read holds that the list on screen does not: put first
+ * (the read is newest first, and a row the list never saw arrived after it
+ * was drawn). A row the reader removed here (`gone`) is not brought back by a
+ * read that was already on its way, and rows already on screen keep the state
+ * this screen gave them. Answers the same array when there is nothing to add.
+ */
+export function adoptFresh<T extends { id: string }>(shown: T[], fresh: readonly T[], gone: ReadonlySet<string>): T[] {
+  const seen = new Set(shown.map((row) => row.id));
+  const added = fresh.filter((row) => !seen.has(row.id) && !gone.has(row.id));
+  return added.length === 0 ? shown : [...added, ...shown];
+}

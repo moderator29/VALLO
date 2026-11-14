@@ -30,6 +30,7 @@ import { PeopleRail, WhoToFollow } from "@/components/social/follow/WhoToFollow"
 import { readFollowSuggestions } from "@/lib/social/follow-suggestions";
 import { SocialPaused } from "@/components/social/SocialPaused";
 import { isSocialEnabled } from "@/lib/social/flag";
+import { PullToRefresh } from "@/components/ui/PullToRefresh";
 
 export const metadata: Metadata = { title: "Around" };
 
@@ -195,6 +196,9 @@ export default async function AroundPage({
   const words = t.feedV2.feed;
 
   return (
+    /* Pull down to refresh, as on the other tabs: the page is read again and
+       the feed takes the fresh first page in place (`Feed`). */
+    <PullToRefresh>
     <div
       /* `nf-fv2-page`: a column on a phone with the image's 16px gutter, and
          on a desktop the 600px feed beside a rail of people to follow
@@ -360,5 +364,6 @@ export default async function AroundPage({
           composer opens on arrival, in one tap from the dock. */}
       <AroundFab currentAreaId={activeArea} compose={params.compose === "1"} you={you} />
     </div>
+    </PullToRefresh>
   );
 }

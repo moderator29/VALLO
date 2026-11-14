@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { FAMILY_ORDER, familyOf, figureIn, glyphOf, groupByObject, objectKeyOf, objectOf } from "./family";
+import { FAMILY_ORDER, familyOf, figureIn, glyphOf, groupByObject, objectKeyOf, objectOf, adoptFresh } from "./family";
 import { familyOf as pushFamilyOf } from "@/lib/push/family";
 
 /*
@@ -123,5 +123,24 @@ describe("the families are the lock screen's", () => {
     expect(glyphOf({ kind: "system", title: "New sign-in to your staff account", href: "/settings/devices/alert/d1" })).toBe("shield-lock");
     expect(glyphOf({ kind: "system", title: "Your verification is approved", href: "/verification" })).toBe("verified");
     expect(glyphOf({ kind: "message", title: "Missed voice call from Ada", href: "/messages/x" })).toBe("phone-missed");
+  });
+});
+
+describe("a fresh server read adds what the list missed", () => {
+  const row = (id: string, read = false) => ({ id, read });
+  it("puts rows the list never saw first, and keeps the rows on screen as they are", () => {
+    const shown = [row("b", true), row("c")];
+    const next = adoptFresh(shown, [row("a"), row("b"), row("c")], new Set());
+    expect(next.map((n) => n.id)).toEqual(["a", "b", "c"]);
+    /* The row marked read here is not put back to the read's older answer. */
+    expect(next[1]).toBe(shown[0]);
+  });
+  it("answers the same list when there is nothing to add", () => {
+    const shown = [row("a"), row("b")];
+    expect(adoptFresh(shown, [row("a"), row("b")], new Set())).toBe(shown);
+  });
+  it("never brings back a row this screen archived", () => {
+    const shown = [row("b")];
+    expect(adoptFresh(shown, [row("a"), row("b")], new Set(["a"]))).toBe(shown);
   });
 });

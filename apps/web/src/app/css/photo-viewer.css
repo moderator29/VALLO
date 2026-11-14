@@ -35,13 +35,32 @@
     opacity: var(--nf-viewer-fade, 1);
   }
   .nf-photo-viewer__track {
-    /* Sideways is the browser's snap scroll and a pinch still zooms; a
-       vertical drag is left to the viewer's own dismiss gesture. */
-    touch-action: pan-x pinch-zoom;
+    /* Sideways is the browser's snap scroll; a pinch and a vertical drag are
+       the viewer's own (its zoom and its dismiss gesture). The browser's
+       pinch is not asked for: the native shell's web view has none, and the
+       photograph carries its own zoom (`nf-photo-viewer__zoom`). */
+    touch-action: pan-x;
     transform: translate3d(0, var(--nf-viewer-drag, 0px), 0) scale(var(--nf-viewer-scale, 1));
     transition: transform var(--nf-duration-base) var(--nf-ease-standard);
   }
   .nf-photo-viewer[data-dragging] .nf-photo-viewer__track {
+    transition: none;
+  }
+  /* The photograph's own zoom: it follows the fingers with no easing, and
+     settles (a double tap, a release past an edge) on the standard curve. */
+  .nf-photo-viewer__zoom {
+    transform-origin: center;
+    transition: transform var(--nf-duration-base) var(--nf-ease-standard);
+  }
+  .nf-photo-viewer[data-gesturing] .nf-photo-viewer__zoom {
+    transition: none;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .nf-photo-viewer__zoom {
+      transition: none;
+    }
+  }
+  :root:is([data-motion="calm"], [data-motion="off"]) .nf-photo-viewer__zoom {
     transition: none;
   }
 

@@ -20,6 +20,32 @@ export function shouldOfferTop(input: {
   return scrollingUp && pageHeight >= viewport * 4 && scrollY > viewport * 2;
 }
 
+/**
+ * A second tap on the tab that is already open takes its screen back to the
+ * top, the way a phone's own tab bar does. Only when the address is exactly
+ * the tab's (one level down, the tap goes back to the tab's own screen) and
+ * the page has actually been scrolled; at the top the tap is left alone.
+ */
+export function retapGoesTop(href: string, pathname: string, scrollY: number): boolean {
+  return href === pathname && scrollY > 4;
+}
+
+/**
+ * The "new" pill over a list. `baseline` is the figure the list on screen was
+ * drawn against, `figure` the live one (null while unknown). The pill shows
+ * only when the live figure has gone past the baseline, and says by how much.
+ */
+export function newSince(baseline: number | null, figure: number | null): number {
+  if (baseline === null || figure === null) return 0;
+  return Math.max(0, figure - baseline);
+}
+
+/** The baseline follows the figure down (something was read elsewhere), never up. */
+export function settleBaseline(baseline: number | null, figure: number | null): number | null {
+  if (figure === null) return baseline;
+  return baseline === null ? figure : Math.min(baseline, figure);
+}
+
 /** The pull that arms a refresh, and the furthest the disc comes down. */
 export const PULL_THRESHOLD_PX = 64;
 export const PULL_MAX_PX = 96;

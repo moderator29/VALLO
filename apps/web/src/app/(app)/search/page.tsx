@@ -78,6 +78,8 @@ import { looksCheckable } from "@/lib/doors/agent-check";
 import "@/app/css/catalogue.css";
 import "@/app/css/list-views.css";
 import { GuideScope } from "@/components/currency/GuideScope";
+import { Fragment } from "react";
+import { PullToRefresh } from "@/components/ui/PullToRefresh";
 
 export const metadata: Metadata = {
   title: "Search",
@@ -543,7 +545,13 @@ export default async function SearchPage({
     return [{ city, ...at, count: floor.count, price: formatMoney(floor.minMinor, locale, floor.currency) }];
   });
 
+  /* Pull down to refresh the results, as on the other tabs. Not in the map
+     view: a downward drag there is the map's own, and the map on the wide
+     layout marks its box `data-no-pull` for the same reason. */
+  const Pull = query.view === "map" ? Fragment : PullToRefresh;
+
   return (
+    <Pull>
     <GuideScope copy={t.experienceSettings.preferences}>
       {/* A6: the funnel's "first search", once a search has something in it. */}
       {Object.keys(raw).length > 0 && <FunnelBeacon step="first_search" />}
@@ -880,7 +888,7 @@ export default async function SearchPage({
               </div>
             )}
             </div>
-            <aside className="nf-search-aside nf-panel nf-panel--card p-0" aria-label={t.searchV2.map.aside}>
+            <aside className="nf-search-aside nf-panel nf-panel--card p-0" aria-label={t.searchV2.map.aside} data-no-pull="">
               <WideOnly>
                 <RealMap listHref={toShelfViewHref(query, "list")} active={query.q?.trim()} listings={listings} pins={mapPins} fill />
               </WideOnly>
@@ -907,5 +915,6 @@ export default async function SearchPage({
         />
       )}
     </GuideScope>
+    </Pull>
   );
 }

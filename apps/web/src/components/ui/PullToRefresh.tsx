@@ -18,6 +18,8 @@ import { PULL_THRESHOLD_PX, pullDistance } from "@/lib/ui/small-rules";
  *
  *   - Touch only, and only when the page is at the very top, the pull is
  *     mostly downward, and no sheet holds the scroll (the body is not locked).
+ *   - A touch that starts inside `[data-no-pull]` is left alone: a map, or
+ *     anything else that takes a downward drag for itself, marks its own box.
  *   - The browser's own pull (Chrome's reload) is switched off while this is
  *     mounted (`overscroll-behavior-y: contain` on the root), so one gesture
  *     never means two things.
@@ -66,6 +68,7 @@ export function PullToRefresh({
       if (busy || event.touches.length !== 1 || window.scrollY > 0 || locked()) return;
       const el = rootRef.current;
       if (!el || !el.contains(event.target as Node)) return;
+      if (event.target instanceof Element && event.target.closest("[data-no-pull]")) return;
       startY = event.touches[0]!.clientY;
       startX = event.touches[0]!.clientX;
       tracking = false;

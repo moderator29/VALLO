@@ -5,6 +5,8 @@ import { usePathname, useRouter } from "next/navigation";
 import { useEffect, type ComponentProps } from "react";
 import { HOLD_MAX_MS, shouldHold, waitForArrival } from "@/lib/nav/tab-warm";
 import { feedback } from "@/lib/ui/feedback";
+import { prefersCalm } from "@/lib/ui/calm";
+import { retapGoesTop } from "@/lib/ui/small-rules";
 
 /**
  * A DOCK TAB THAT KEEPS THE CURRENT SCREEN UP UNTIL THE NEXT ONE IS READY (13
@@ -27,6 +29,11 @@ import { feedback } from "@/lib/ui/feedback";
  * timing cannot be read, or holds keep running out on a slow link
  * (`shouldHold`), the tap navigates at once exactly as a plain link does. In
  * development nothing is prefetched, so nothing is held.
+ *
+ * A TAP ON THE TAB ALREADY OPEN GOES TO THE TOP (14 November 2026). On the
+ * tab's own screen, scrolled down, the tap scrolls the page back to the top
+ * and nothing is fetched (`retapGoesTop`); at the top it is the plain link it
+ * always was. The page scrolls on the window on every tab, so one call does it.
  */
 
 /* `router.prefetch`'s option for the whole page, typed from `useRouter`. */
@@ -45,7 +52,7 @@ export function HoldTabLink(props: ComponentProps<typeof Link>) {
   const router = useRouter();
   const pathname = usePathname();
   const href = typeof props.href === "string" ? props.href : null;
-  const { onNavigate } = props;
+  const { onNavigate, onClick } = props;
 
   /* Arriving anywhere ends whatever hold was running. */
   useEffect(() => releaseHold, [pathname]);
@@ -53,6 +60,19 @@ export function HoldTabLink(props: ComponentProps<typeof Link>) {
   return (
     <Link
       {...props}
+      onClick={(event) => {
+        onClick?.(event);
+        if (event.defaultPrevented || !href) return;
+        /* A plain tap only: a modified click is the browser's (a new tab). */
+        if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return;
+        /* The tab already open, scrolled down: back to the top, and the link
+           does not navigate (a prevented click stops it before `onNavigate`). */
+        if (retapGoesTop(href, pathname, window.scrollY)) {
+          event.preventDefault();
+          releaseHold();
+          window.scrollTo({ top: 0, behavior: prefersCalm() ? "auto" : "smooth" });
+        }
+      }}
       onNavigate={(event) => {
         let prevented = false;
         onNavigate?.({

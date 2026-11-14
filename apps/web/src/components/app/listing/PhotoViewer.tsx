@@ -24,6 +24,17 @@ import { useClientMount } from "@/lib/ui/client-mount";
 import { useMotionGate } from "@/components/motion/useMotionGate";
 import "@/app/css/catalogue.css";
 import { SafeVideo } from "@/components/app/media/SafeVideo";
+import {
+  MAX_SCALE,
+  REST,
+  clamp,
+  doubleTap,
+  legal,
+  zoomAbout,
+  type Point,
+  type Size,
+  type Zoom,
+} from "@/components/app/messages/media-gesture";
 
 /**
  * The listing lightbox.
@@ -188,6 +199,69 @@ function Lightbox({
   const [active, setActive] = useState(startIndex);
   const [broken, setBroken] = useState<Record<number, true>>({});
 
+  /*
+   * PINCH, PAN AND DOUBLE TAP ARE THE VIEWER'S OWN (14 November 2026).
+   *
+   * The track used to be `touch-action: pan-x pinch-zoom` and left the zoom to
+   * the browser. Inside the app that zoom does not exist: the native shell's
+   * web view has zooming off on both platforms (Capacitor's `zoomEnabled`
+   * defaults to false, and turning it on would let every screen be pinched).
+   * So the photograph on screen carries its own zoom, with the arithmetic the
+   * chat's viewer already uses (`messages/media-gesture.ts`): two fingers
+   * pinch about their midpoint, one finger pans while zoomed and never past
+   * the photograph's edges, a double tap zooms in about the tap and back out.
+   * A video slide and a missing photograph do not zoom.
+   *
+   * The zoom belongs to the slide it was made on: swiping or arrowing to
+   * another photograph shows that one at rest, by comparison, with no effect
+   * to correct it. While zoomed or pinching the track holds still (it cannot
+   * scroll sideways under the fingers) and the swipe down does not dismiss.
+   */
+  const [zoomed, setZoomed] = useState<{ at: number; zoom: Zoom }>({ at: startIndex, zoom: REST });
+  const zoom = zoomed.at === active ? zoomed.zoom : REST;
+  const zoomRef = useRef<Zoom>(REST);
+  useEffect(() => {
+    zoomRef.current = zoom;
+  });
+  const [gesturing, setGesturing] = useState(false);
+  const pinch = useRef<{ start: Zoom; mid: Point; dist: number } | null>(null);
+  const pan = useRef<{ start: Zoom; x: number; y: number } | null>(null);
+  /* The finger that is down (for telling a tap from a drag) and the last tap. */
+  const down = useRef<{ x: number; y: number; t: number } | null>(null);
+  const lastTap = useRef<{ x: number; y: number; t: number } | null>(null);
+  const slideAt = useCallback(() => {
+    const el = track.current;
+    return el && el.clientWidth > 0 ? Math.round(el.scrollLeft / el.clientWidth) : startIndex;
+  }, [startIndex]);
+  /* The photograph on screen, or null when the slide is a video or a placeholder. */
+  const zoomTarget = useCallback((): HTMLElement | null => {
+    const pane = track.current?.children[slideAt()];
+    return pane instanceof HTMLElement ? pane.querySelector<HTMLElement>("[data-zoomable]") : null;
+  }, [slideAt]);
+  const stageSize = useCallback((): Size => {
+    const el = surface.current;
+    return { width: el?.clientWidth ?? 0, height: el?.clientHeight ?? 0 };
+  }, []);
+  const naturalSize = useCallback((): Size | null => {
+    const img = zoomTarget()?.querySelector("img");
+    return img && img.naturalWidth > 0 && img.naturalHeight > 0
+      ? { width: img.naturalWidth, height: img.naturalHeight }
+      : null;
+  }, [zoomTarget]);
+  /* A screen point measured from the stage's centre, which is what the arithmetic takes. */
+  const centred = useCallback((clientX: number, clientY: number): Point => {
+    const rect = surface.current?.getBoundingClientRect();
+    if (!rect) return { x: 0, y: 0 };
+    return { x: clientX - rect.left - rect.width / 2, y: clientY - rect.top - rect.height / 2 };
+  }, []);
+  const setZoom = useCallback(
+    (next: Zoom) => {
+      zoomRef.current = next;
+      setZoomed({ at: slideAt(), zoom: next });
+    },
+    [slideAt],
+  );
+
 
   /*
    * The surface mounts at its closed state and flips open on the next frame, so
@@ -339,13 +413,15 @@ function Lightbox({
      from there (above). */
   const dragAt = useRef(0);
   const close = useCallback(() => {
+    /* The photograph goes back to rest first, so it folds from its own frame. */
+    if (zoomRef.current.scale > 1) setZoom(REST);
     if (morph && foldBack) {
       const dy = dragAt.current;
       fold(closeNow, dy > 0 ? dragPose(dy) : undefined);
       return;
     }
     closeNow();
-  }, [fold, morph, foldBack, closeNow]);
+  }, [fold, morph, foldBack, closeNow, setZoom]);
   useOverlay({ open: mounted, onClose: close, panelRef: surface, autoFocus: false });
   /* N2: the ground is near black in both themes, so the clock and battery
      are drawn light over it while it is open. */
@@ -354,9 +430,9 @@ function Lightbox({
   /*
    * SWIPE DOWN TO DISMISS, the gesture every phone photo viewer teaches.
    *
-   * The track is `touch-action: pan-x pinch-zoom`, so a sideways swipe is still
-   * the browser's own snap scroll and a pinch still zooms, while a vertical drag
-   * is left to this handler instead of doing nothing. The photograph follows
+   * The track is `touch-action: pan-x`, so a sideways swipe is still the
+   * browser's own snap scroll, while a pinch and a vertical drag are left to
+   * these handlers instead of doing nothing. The photograph follows
    * the finger and the ground fades with the distance; past a quarter of the
    * way (or on a quick flick) it closes, otherwise it springs back. Only
    * `transform` and `opacity` move. Under reduced motion nothing follows the
@@ -373,6 +449,32 @@ function Lightbox({
     reduced.current = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false;
   }, []);
   const onTouchStart = useCallback((event: ReactTouchEvent) => {
+    /* Two fingers on a photograph: a pinch, about the fingers' midpoint. */
+    if (event.touches.length === 2 && zoomTarget()) {
+      const a = event.touches[0]!;
+      const b = event.touches[1]!;
+      pinch.current = {
+        start: zoomRef.current,
+        mid: centred((a.clientX + b.clientX) / 2, (a.clientY + b.clientY) / 2),
+        dist: Math.max(1, Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY)),
+      };
+      pan.current = null;
+      gesture.current = null;
+      down.current = null;
+      setDrag(0);
+      setGesturing(true);
+      return;
+    }
+    const first = event.touches[0];
+    down.current =
+      event.touches.length === 1 && first ? { x: first.clientX, y: first.clientY, t: performance.now() } : null;
+    /* Zoomed in, one finger moves the photograph about; it never dismisses. */
+    if (event.touches.length === 1 && first && zoomRef.current.scale > 1) {
+      pan.current = { start: zoomRef.current, x: first.clientX, y: first.clientY };
+      gesture.current = null;
+      setGesturing(true);
+      return;
+    }
     /* Pinched in, a vertical drag is the reader panning the enlarged photo,
        never a dismissal. */
     if (event.touches.length !== 1 || (window.visualViewport?.scale ?? 1) > 1.01) {
@@ -381,8 +483,32 @@ function Lightbox({
     }
     const t = event.touches[0]!;
     gesture.current = { x: t.clientX, y: t.clientY, t: performance.now(), axis: null };
-  }, []);
+  }, [centred, zoomTarget]);
   const onTouchMove = useCallback((event: ReactTouchEvent) => {
+    const p = pinch.current;
+    if (p) {
+      const a = event.touches[0];
+      const b = event.touches[1];
+      if (!a || !b) return;
+      const dist = Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY);
+      const mid = centred((a.clientX + b.clientX) / 2, (a.clientY + b.clientY) / 2);
+      const scale = clamp(p.start.scale * (dist / p.dist), 1, MAX_SCALE);
+      setZoom(legal(zoomAbout(p.start, scale, p.mid, mid), stageSize(), naturalSize()));
+      return;
+    }
+    const held = pan.current;
+    if (held) {
+      const finger = event.touches[0];
+      if (!finger || event.touches.length !== 1) return;
+      setZoom(
+        legal(
+          { ...held.start, x: held.start.x + finger.clientX - held.x, y: held.start.y + finger.clientY - held.y },
+          stageSize(),
+          naturalSize(),
+        ),
+      );
+      return;
+    }
     const g = gesture.current;
     const t = event.touches[0];
     if (!g || !t || event.touches.length !== 1) return;
@@ -391,9 +517,46 @@ function Lightbox({
     if (g.axis === null && Math.hypot(dx, dy) > 8) g.axis = Math.abs(dy) > Math.abs(dx) ? "y" : "x";
     if (g.axis !== "y") return;
     if (!reduced.current) setDrag(Math.max(0, dy));
-  }, []);
+  }, [centred, naturalSize, setZoom, stageSize]);
   const onTouchEnd = useCallback(
     (event: ReactTouchEvent) => {
+      if (pinch.current) {
+        /* Still two fingers down: the pinch goes on. */
+        if (event.touches.length >= 2) return;
+        pinch.current = null;
+        const left = event.touches[0];
+        /* One finger stays on a zoomed photograph: it carries on as a pan. */
+        if (left && zoomRef.current.scale > 1) {
+          pan.current = { start: zoomRef.current, x: left.clientX, y: left.clientY };
+        } else if (event.touches.length === 0) {
+          setGesturing(false);
+        }
+        return;
+      }
+      if (event.touches.length === 0) setGesturing(false);
+      /* A quick touch that did not move is a tap; two of them close together,
+         on a photograph, zoom in about the spot or back out. */
+      const start = down.current;
+      const lifted = event.changedTouches[0];
+      down.current = null;
+      if (start && lifted && event.touches.length === 0) {
+        const now = performance.now();
+        const still = Math.hypot(lifted.clientX - start.x, lifted.clientY - start.y) < 10 && now - start.t < 300;
+        const before = lastTap.current;
+        const onPhoto = event.target instanceof Node && Boolean(zoomTarget()?.contains(event.target));
+        if (still && onPhoto && before && now - before.t < 300 && Math.hypot(lifted.clientX - before.x, lifted.clientY - before.y) < 30) {
+          lastTap.current = null;
+          pan.current = null;
+          gesture.current = null;
+          setZoom(doubleTap(zoomRef.current, centred(lifted.clientX, lifted.clientY), stageSize(), naturalSize()));
+          return;
+        }
+        lastTap.current = still && onPhoto ? { x: lifted.clientX, y: lifted.clientY, t: now } : null;
+      }
+      if (pan.current) {
+        if (event.touches.length === 0) pan.current = null;
+        return;
+      }
       const g = gesture.current;
       gesture.current = null;
       if (!g || g.axis !== "y") return;
@@ -407,7 +570,7 @@ function Lightbox({
       }
       setDrag(0);
     },
-    [close],
+    [centred, close, naturalSize, setZoom, stageSize, zoomTarget],
   );
 
   /* First focus, with `preventScroll`: the viewer covers the page it opened
@@ -495,6 +658,8 @@ function Lightbox({
       data-theme="dark"
       data-open={entered}
       data-dragging={drag > 0 ? "" : undefined}
+      data-zoomed={zoom.scale > 1 ? "" : undefined}
+      data-gesturing={gesturing ? "" : undefined}
       onTouchStart={onTouchStart}
       onTouchMove={onTouchMove}
       onTouchEnd={onTouchEnd}
@@ -523,6 +688,8 @@ function Lightbox({
         ref={track}
         onScroll={onScroll}
         className="nf-scroll-x nf-photo-viewer__track flex h-full w-full snap-x snap-mandatory"
+        /* Zoomed or pinching, the track holds still: every move is the photograph's. */
+        style={gesturing || zoom.scale > 1 ? { overflowX: "hidden", touchAction: "none" } : undefined}
       >
         {items.map((item, i) => (
           <div
@@ -553,14 +720,24 @@ function Lightbox({
             ) : broken[i] ? (
               <PhotoFrame hue={hue} index={i} kind={kind} />
             ) : (
-              <Image
-                src={item.src}
-                alt={`${title}, photo ${i + 1} of ${items.length}`}
-                fill
-                sizes="100vw"
-                onError={() => setBroken((prev) => ({ ...prev, [i]: true }))}
-                className="object-contain"
-              />
+              <div
+                data-zoomable=""
+                className="nf-photo-viewer__zoom absolute inset-0"
+                style={
+                  i === active && zoom.scale > 1
+                    ? { transform: `translate3d(${zoom.x}px, ${zoom.y}px, 0) scale(${zoom.scale})` }
+                    : undefined
+                }
+              >
+                <Image
+                  src={item.src}
+                  alt={`${title}, photo ${i + 1} of ${items.length}`}
+                  fill
+                  sizes="100vw"
+                  onError={() => setBroken((prev) => ({ ...prev, [i]: true }))}
+                  className="object-contain"
+                />
+              </div>
             )}
           </div>
         ))}

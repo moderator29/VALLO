@@ -31,6 +31,7 @@ import {
   FAMILY_GLYPH,
   FAMILY_ORDER,
   FAMILY_TONE,
+  adoptFresh,
   familyOf,
   figureIn,
   glyphOf,
@@ -40,6 +41,11 @@ import {
 } from "./family";
 import { useNotificationFaces } from "./use-notification-faces";
 import { RemoteImage } from "@/components/ui/RemoteImage";
+import { NewPill, NEW_PILL_TOP_PX } from "@/components/ui/NewPill";
+
+/* English only for now; the notifications dictionary has no words for the pill
+   yet. It carries no count, so there is no plural to get wrong in any language. */
+const NEW_PILL_WORDS = "New notifications";
 
 /**
  * The notification centre (north star 16.3 and 16.4).
@@ -124,11 +130,33 @@ export function LiveNotifications({
   const [loadingOlder, setLoadingOlder] = useState(false);
   const [family, setFamily] = useState<NotificationFamily | "all">("all");
 
+  /* Rows this screen archived, so a server read that was already on its way
+     cannot bring one back (`adoptFresh`). */
+  const [gone, setGone] = useState<ReadonlySet<string>>(() => new Set());
+  /*
+   * A FRESH SERVER READ ADDS WHAT THE LIST MISSED. `initial` is a new array
+   * each time the page is read again (a pull to refresh, or the refresh after
+   * a row is marked read). Rows the live connection never delivered, because
+   * it was down or the app was in the background, are taken up here; nothing
+   * already on screen is replaced. Compared during render, not corrected in an
+   * effect, so there is no frame with the old list.
+   */
+  const [seed, setSeed] = useState(initial);
+  if (seed !== initial) {
+    setSeed(initial);
+    setItems((prev) => adoptFresh(prev, initial, gone));
+  }
+
+  /* Rows that arrived live while the reader was down the list: the pill at the
+     top says so and takes them there. At the top they are simply seen. */
+  const [arrived, setArrived] = useState(0);
   useNotificationsRealtime(userId, (row: LiveNotificationRow) => {
+    if (items.some((n) => n.id === row.id)) return;
     setItems((prev) => {
       if (prev.some((n) => n.id === row.id)) return prev;
       return [toNotificationItem(row), ...prev];
     });
+    if (window.scrollY > NEW_PILL_TOP_PX) setArrived((n) => n + 1);
   });
 
   /*
@@ -182,6 +210,7 @@ export function LiveNotifications({
     (id: string) => {
       const before = items;
       setItems((prev) => prev.filter((n) => n.id !== id));
+      setGone((prev) => new Set(prev).add(id));
       banner.success(c.archived);
       void archiveNotifications({ ids: [id] }).then((result) => {
         if (result.ok) {
@@ -189,6 +218,11 @@ export function LiveNotifications({
           return;
         }
         setItems(before);
+        setGone((prev) => {
+          const next = new Set(prev);
+          next.delete(id);
+          return next;
+        });
         banner.error(result.error, { "data-testid": "notifications-problem" });
       });
     },
@@ -197,7 +231,9 @@ export function LiveNotifications({
 
   const archiveAll = useCallback(() => {
     const before = items;
+    const goneBefore = gone;
     setItems([]);
+    setGone(new Set([...gone, ...before.map((n) => n.id)]));
     banner.success(c.archivedAll);
     void archiveAllNotifications().then((result) => {
       if (result.ok) {
@@ -205,9 +241,10 @@ export function LiveNotifications({
         return;
       }
       setItems(before);
+      setGone(goneBefore);
       banner.error(result.error, { "data-testid": "notifications-problem" });
     });
-  }, [items, router, c.archivedAll]);
+  }, [items, gone, router, c.archivedAll]);
 
   /* Older rows, a page at a time, after the last row on screen. */
   const showOlder = useCallback(() => {
@@ -356,6 +393,12 @@ export function LiveNotifications({
     <div>
       {header}
       {chips}
+      <NewPill
+        count={arrived}
+        label={NEW_PILL_WORDS}
+        onTop={() => setArrived(0)}
+        data-testid="notifications-new-pill"
+      />
 
       {shown.length === 0 ? (
         <EmptyState
