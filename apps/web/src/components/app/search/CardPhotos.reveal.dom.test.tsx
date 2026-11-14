@@ -44,7 +44,12 @@ describe.skipIf(!hasBrowser && !process.env.CI)("a card photograph settling in",
         const el = document.querySelector("img[data-reveal]");
         return el instanceof HTMLElement && el.dataset.shown === "true";
       });
-      expect(await img.evaluate((el) => parseFloat(getComputedStyle(el).opacity))).toBeGreaterThan(0.9);
+      /* Mid-fade it is genuinely part way there (this caught it at 0.52),
+         so wait for the transition to settle rather than race it. */
+      await page.waitForFunction(() => {
+        const el = document.querySelector("img[data-reveal]");
+        return el instanceof HTMLElement && parseFloat(getComputedStyle(el).opacity) > 0.99;
+      });
       /* Opacity only: the reveal may never move the layout (motion system
          principle 6, and the list's CLS is 0 today). */
       const transition = await img.evaluate((el) => getComputedStyle(el).transitionProperty);
