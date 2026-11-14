@@ -59,6 +59,8 @@ import {
   ratePeriodFor,
   submitRequirements,
 } from "@/lib/agent/listings-model";
+import { mediaFrom as pastedMediaFrom } from "@/lib/paste/parse";
+import { PASTE_WORDS } from "@/lib/paste/words";
 import { UiIcon } from "@/design-system/icons/UiIcon";
 import type { ViewerCopy } from "@/components/app/messages/MediaViewer";
 import { RemoteImage } from "@/components/ui/RemoteImage";
@@ -1972,7 +1974,43 @@ export function ListingWizard({
       {...(secondary ? { secondary } : {})}
       {...(hasNotice ? { notice: notices } : {})}
     >
-      <div className="nf-lw-wizard grid grid-cols-1 gap-md" data-step={current.id}>
+      <div
+        className="nf-lw-wizard grid grid-cols-1 gap-md"
+        data-step={current.id}
+        /**
+         * A PASTED PHOTO IS A PICKED PHOTO (founder, 14 November 2026).
+         * Pictures and videos on the clipboard go through `onFiles`, the SAME
+         * door the picker uses, so every rule (three minimum, the fifteen-item
+         * ceiling, the long edge, the metadata strip, the server's own count)
+         * is the one a tap meets. Several pasted at once become several. A
+         * file that is neither picture nor video is refused with words.
+         *
+         * On the step that takes media only, so a paste into a text field
+         * elsewhere in the wizard is still an ordinary paste.
+         *
+         * Vallo is never told which app a paste came from; iOS draws that
+         * banner itself when an app reads the clipboard.
+         */
+        onPaste={
+          current.id === "photos"
+            ? (event) => {
+                const data = event.clipboardData;
+                if (!data) return;
+                const media = pastedMediaFrom(data.items);
+                if (media.files.length === 0 && media.refused === 0) return;
+                event.preventDefault();
+                if (media.files.length > 0) void onFiles(media.files);
+                if (media.refused > 0) {
+                  setPhotoNotice(
+                    media.refused === 1
+                      ? PASTE_WORDS.refusedFile
+                      : PASTE_WORDS.refusedFiles.replace("{n}", String(media.refused)),
+                  );
+                }
+              }
+            : undefined
+        }
+      >
         <FocusKeeper frameTestId="listing-steps" />
         {/* Photos and videos in the one picker (founder, 12 October). Always in
             the frame, so the photo step and the check page share one input. */}

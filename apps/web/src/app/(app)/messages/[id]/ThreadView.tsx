@@ -3,7 +3,7 @@
 import { uploadToStorage, withTimeout, type UploadInput, type UploadResult } from "@/lib/media/upload";
 import { initial } from "@/lib/text/initial";
 import Link from "next/link";
-import { Fragment, useCallback, useEffect, useRef, useState } from "react";
+import { Fragment, useCallback, useEffect, useRef, useState, type ClipboardEvent as ReactClipboardEvent } from "react";
 import { adoptBubble, arrivalClass, attachCard, bubbleKey, mergeEcho } from "./thread-arrival";
 import { resolveLiveCard } from "./card-actions";
 import type { Dictionary, Locale } from "@vallo/i18n/core";
@@ -87,6 +87,10 @@ import type { ChargeOffer } from "@/lib/messages/charge-offer";
 import { DayDivider, UNREAD_DIVIDER_ID, UnreadDivider } from "@/components/app/messages/ThreadDividers";
 import { QuotedReply, type QuotedMessage } from "@/components/app/messages/QuotedReply";
 import { AttachmentRow } from "@/components/app/messages/AttachmentRow";
+import { PasteChip } from "@/components/app/messages/PasteChip";
+import { PASTE_WORDS } from "@/lib/paste/words";
+import { overBy, readPaste } from "@/lib/paste/parse";
+import { MAX_MESSAGE_LENGTH } from "@/lib/messages/schema";
 import { VoiceNote, type VoiceNoteData } from "@/components/app/messages/VoiceNote";
 import { dayHeading, dayStarts } from "@/components/app/threads/day";
 import { useInboxPart } from "@/components/app/threads/use-inbox-copy";
@@ -125,6 +129,8 @@ import { deliveryStates, type Delivery } from "@/lib/messages/delivery";
 const SEND_FAILED_WORDS = "Message couldn't be sent. Check your connection and try again.";
 const COPIED_WORDS = { done: "Message copied", failed: "Couldn't copy that message. Try again." };
 const SAVED_PHOTO_WORDS = { done: "Photo saved", failed: "Couldn't save that photo. Try again." };
+/* A thread sends one picture per message, so a paste of several holds the first. */
+const THREAD_PASTE_WORDS = { onePhoto: "One picture at a time in a chat. The first one is attached." };
 
 /* GRADE 1 (P1.3): voice notes, reactions and the new-messages pill. English
    only for now, beside the other Grade 1 words above. */
@@ -742,6 +748,15 @@ export function ThreadView({
   const [ceremony, setCeremony] = useState(false);
   const [draft, setDraft] = useState("");
   const [pendingFile, setPendingFile] = useState<{ file: File; url: string } | null>(null);
+  /* A paste too big for the field, held as a chip above it (founder, 14
+     November 2026). The field stays empty and usable; Send sends the held
+     text as the message body. A link chip holds one address and fetches
+     NOTHING (see `linkify.ts` for why). */
+  const [pasted, setPasted] = useState<
+    | { kind: "text"; text: string }
+    | { kind: "link"; href: string; host: string; path: string; vallo: "listing" | "stay" | "restaurant" | "profile" | "post" | null }
+    | null
+  >(null);
   const [educationOpen, setEducationOpen] = useState(false);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [inspected, setInspected] = useState(inspectedInitial);
@@ -1328,11 +1343,19 @@ export function ThreadView({
   );
 
   const send = useCallback(() => {
-    const body = draft.trim();
+    /* A paste held as a chip is part of this message: the typed words first,
+       then what was pasted. Over the message's own limit nothing is sent and
+       the chip's own line already says by how much (founder, 14 November
+       2026). */
+    const held = pasted ? (pasted.kind === "text" ? pasted.text : pasted.href) : "";
+    const typed = draft.trim();
+    const body = [typed, held].filter(Boolean).join(typed && held ? "\n" : "");
     const picked = pendingFile;
     if (!body && !picked) return;
+    if (body.length > MAX_MESSAGE_LENGTH) return;
 
     setDraft("");
+    setPasted(null);
     setPendingFile(null);
     if (fileRef.current) fileRef.current.value = "";
     /* Whatever the reader was looking at, their own send brings them down to it. */
@@ -1402,7 +1425,7 @@ export function ThreadView({
       setReplyTo(null);
       void runTextSend(tempId, body, replyToId);
     }
-  }, [draft, pendingFile, live, runTextSend, runImageSend]);
+  }, [draft, pasted, pendingFile, live, runTextSend, runImageSend]);
 
   const retry = useCallback(
     (tempId: string) => {
@@ -1428,6 +1451,64 @@ export function ThreadView({
     const url = URL.createObjectURL(file);
     objectUrls.current.push(url);
     setPendingFile({ file, url });
+  };
+
+  /**
+   * A PASTE IN THE COMPOSER (founder, 14 November 2026).
+   *
+   * A pasted picture goes through the SAME door a picked one does
+   * (`pickImage`): the same checks, the same preview chip, the same limit of
+   * one at a time in a thread, so a paste can never attach something a tap
+   * could not. A file that is neither picture nor video is refused with
+   * words. A wall of words or one address is held as a chip above the field.
+   * Everything shorter falls through to the browser's own paste, exactly as
+   * it always did.
+   *
+   * Vallo is never told WHICH APP the paste came from; iOS draws that banner
+   * itself when an app reads the clipboard. Nothing here pretends to know.
+   */
+  /**
+   * Tap the chip to read and edit what was pasted: the text moves into the
+   * field (after whatever is already there), where the person edits it as
+   * their own words. The chip has done its job and goes.
+   */
+  const openPasted = () => {
+    if (!pasted || pasted.kind !== "text") return;
+    onDraftChange(draft ? `${draft}\n${pasted.text}` : pasted.text);
+    setPasted(null);
+  };
+
+  const onPaste = (event: ReactClipboardEvent<HTMLTextAreaElement>) => {
+    const data = event.clipboardData;
+    if (!data) return;
+    const paste = readPaste(data, window.location.origin);
+    if (paste.kind === "files") {
+      event.preventDefault();
+      if (paste.files.length > 0) pickImage(paste.files[0]);
+      if (paste.refused > 0) {
+        banner.error(
+          paste.refused === 1
+            ? PASTE_WORDS.refusedFile
+            : PASTE_WORDS.refusedFiles.replace("{n}", String(paste.refused)),
+        );
+      } else if (paste.files.length > 1) {
+        /* A thread sends one picture per message, so the rest are not
+           silently dropped: the person is told which one is held. */
+        banner.info(THREAD_PASTE_WORDS.onePhoto);
+      }
+      return;
+    }
+    if (paste.kind === "long-text") {
+      event.preventDefault();
+      setPasted({ kind: "text", text: paste.text });
+      return;
+    }
+    if (paste.kind === "link") {
+      event.preventDefault();
+      setPasted({ kind: "link", href: paste.href, host: paste.host, path: paste.path, vallo: paste.vallo?.thing ?? null });
+      return;
+    }
+    /* Short text: the browser's own paste, into the field, as before. */
   };
 
   const handleConfirmInspection = useCallback(async () => {
@@ -2273,6 +2354,19 @@ export function ThreadView({
           </Button>
         </div>
       )}
+      {pasted && (
+        <PasteChip
+          kind={pasted.kind === "text" ? "text" : "link"}
+          {...(pasted.kind === "text"
+            ? { text: pasted.text, overBy: overBy(pasted.text, MAX_MESSAGE_LENGTH), onOpen: () => openPasted() }
+            : { host: pasted.host, path: pasted.path, vallo: pasted.vallo })}
+          onRemove={() => setPasted(null)}
+          words={{
+            ...PASTE_WORDS,
+            remove: pasted.kind === "text" ? PASTE_WORDS.remove : PASTE_WORDS.removeLink,
+          }}
+        />
+      )}
       {replyTo && (
         <div className="nf-composer__reply" data-testid="composer-reply">
           {(() => {
@@ -2369,6 +2463,7 @@ export function ThreadView({
                 e.currentTarget.style.height = "auto";
               }
             }}
+            onPaste={onPaste}
             placeholder={view.placeholder}
             autoComplete="off"
             enterKeyHint="send"
@@ -2386,7 +2481,7 @@ export function ThreadView({
             </button>
             {/* GRADE 1 (P1.3, R58): the microphone while there is nothing to
                 send, Send the moment there is (`ComposerVoice`). */}
-            <ComposerVoice ready={Boolean(draft.trim() || pendingFile)} sendLabel={view.send} onVoice={sendVoice} />
+            <ComposerVoice ready={Boolean(draft.trim() || pasted || pendingFile)} sendLabel={view.send} onVoice={sendVoice} />
           </div>
         </div>
       </form>

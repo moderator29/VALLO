@@ -3,6 +3,7 @@ import { formatMoney, type Dictionary, type Locale } from "@vallo/i18n/core";
 import { SORTS } from "@/lib/listings/search-params";
 import { ViewToggle } from "@/components/app/filters/ViewToggle";
 import { ShelfChipRow, type SheetChip } from "./ShelfChipRow";
+import { PastedListingLink } from "./PastedListingLink";
 import { quickChips } from "./quick-chips";
 import { UiIcon } from "@/design-system/icons/UiIcon";
 import { FilterDrawer } from "@/components/app/filters/FilterDrawer";
@@ -151,6 +152,9 @@ export function ShelfBar({
             <UiIcon name="arrow-right" size={ICON.inline} />
           </button>
           <PillOrigin path="/search" />
+          {/* A pasted Vallo address opens that thing instead of searching for
+              its text (founder, 14 November 2026). */}
+          <PastedListingLink inputId="shelf-q" />
         </PillLanding>
         <FilterDrawer
           query={query}

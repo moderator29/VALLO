@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/Button";
-import { useEffect, useLayoutEffect, useRef, useState, type RefObject } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, type ClipboardEvent as ReactClipboardEvent, type RefObject } from "react";
 import { animate, stagger } from "framer-motion";
 import { motionQuiet } from "@/lib/motion/gate";
 import { EASE_LAND } from "@/components/ui/ported-motion";
@@ -14,6 +14,9 @@ import { initial as initialOf } from "@/lib/text/initial";
 import "./feed-v2.css";
 import { Segmented } from "@/components/ui/Segmented";
 import { reencodePhoto } from "@/components/social/profile/reencode";
+import { PasteChip } from "@/components/app/messages/PasteChip";
+import { PASTE_WORDS } from "@/lib/paste/words";
+import { overBy, readPaste } from "@/lib/paste/parse";
 import { uploadToStorage, withTimeout } from "@/lib/media/upload";
 import { loadBrowserClient } from "@/lib/supabase/load-client";
 import { attachPostMedia, dropPost, replyToPost } from "@/lib/social/posts-actions";
@@ -170,6 +173,14 @@ export function Composer({
   const body = draft ?? ownBody;
   const setBody = (next: string) => (onDraftChange ? onDraftChange(next) : setOwnBody(next));
   const [error, setError] = useState<string | null>(null);
+  /* A paste too big for the field, held as a chip above it (founder, 14
+     November 2026). A post has its own length ring, so the chip says by how
+     much a wall of words is over POST_MAX before Publish refuses it. */
+  const [pasted, setPasted] = useState<
+    | { kind: "text"; text: string }
+    | { kind: "link"; href: string; host: string; path: string; vallo: "listing" | "stay" | "restaurant" | "profile" | "post" | null }
+    | null
+  >(null);
   /* A refusal is said by the one banner at the top of the screen (founder,
      7 November 2026, "THE BANNER EVERYWHERE"); only a post whose picture was
      lost keeps its recovery panel here, with its two ways on. */
@@ -202,8 +213,14 @@ export function Composer({
   }, [opening]);
 
   const isReply = Boolean(parentId);
-  const left = POST_MAX - body.length;
-  const canSend = body.trim().length > 0 && !pending && !strandedPost;
+  /* A paste held as a chip is part of this post: the typed words first, then
+     what was pasted (founder, 14 November 2026). The ring and the limit read
+     the whole thing, so nothing is sent that the post's own length refuses. */
+  const pastedBody = pasted ? (pasted.kind === "text" ? pasted.text : pasted.href) : "";
+  const typed = body.trim();
+  const whole = [typed, pastedBody].filter(Boolean).join(typed && pastedBody ? "\n" : "");
+  const left = POST_MAX - whole.length;
+  const canSend = whole.length > 0 && whole.length <= POST_MAX && !pending && !strandedPost;
 
   if (!signedIn) {
     return (
@@ -310,6 +327,53 @@ export function Composer({
     setPictures((all) => [...all, ...prepared]);
   }
 
+  /**
+   * A PASTE IN THE POST COMPOSER (founder, 14 November 2026).
+   *
+   * Pasted pictures go through `choose`, the SAME door the file picker uses,
+   * so every check, limit and refusal is the one a picked file meets; a post
+   * takes several, so several pasted at once become several. A file that is
+   * neither picture nor video is refused with words. A wall of words or one
+   * address is held as a chip above the field. Shorter pastes fall through
+   * to the browser's own paste.
+   *
+   * Vallo is never told which app a paste came from; iOS draws that banner.
+   */
+  function onPaste(event: ReactClipboardEvent<HTMLTextAreaElement>) {
+    const data = event.clipboardData;
+    if (!data) return;
+    const paste = readPaste(data, window.location.origin);
+    if (paste.kind === "files") {
+      event.preventDefault();
+      if (paste.files.length > 0) void choose(paste.files);
+      if (paste.refused > 0) {
+        setError(
+          paste.refused === 1
+            ? PASTE_WORDS.refusedFile
+            : PASTE_WORDS.refusedFiles.replace("{n}", String(paste.refused)),
+        );
+      }
+      return;
+    }
+    if (paste.kind === "long-text") {
+      event.preventDefault();
+      setPasted({ kind: "text", text: paste.text });
+      return;
+    }
+    if (paste.kind === "link") {
+      event.preventDefault();
+      setPasted({ kind: "link", href: paste.href, host: paste.host, path: paste.path, vallo: paste.vallo?.thing ?? null });
+      return;
+    }
+  }
+
+  /** Tap the chip: the held text moves into the field to read and edit. */
+  function openPasted() {
+    if (!pasted || pasted.kind !== "text") return;
+    setBody(body ? `${body}\n${pasted.text}` : pasted.text);
+    setPasted(null);
+  }
+
   function drop(key: string) {
     setPictures((all) => {
       const going = all.find((picture) => picture.key === key);
@@ -389,6 +453,12 @@ export function Composer({
 
   const send = () => {
     setError(null);
+    /* The chip's words travel with the post, and the chip goes with them. */
+    const pastedNow = pasted ? (pasted.kind === "text" ? pasted.text : pasted.href) : "";
+    const typedNow = body.trim();
+    const body2 = [typedNow, pastedNow].filter(Boolean).join(typedNow && pastedNow ? "\n" : "");
+    if (body2.length === 0 || body2.length > POST_MAX) return;
+    setPasted(null);
     startTransition(async () => {
       try {
         /* V-40: a new post with no signal and no pictures is kept and posted
@@ -396,14 +466,14 @@ export function Composer({
         let result: Awaited<ReturnType<typeof dropPost>>;
         try {
           if (parentId) {
-            result = await withTimeout(replyToPost({ parentId, body }), 30_000);
+            result = await withTimeout(replyToPost({ parentId, body: body2 }), 30_000);
           } else if (listing) {
             /* A featured listing needs the connection to be checked as live,
                so it is sent now rather than kept for later. */
-            const fields = { ...(areaId ? { areaId } : {}), kind, body, listingId: listing.id };
+            const fields = { ...(areaId ? { areaId } : {}), kind, body: body2, listingId: listing.id };
             result = await withTimeout(dropPost(fields), 30_000);
           } else if (pictures.length === 0) {
-            const fields: { kind: "GIST" | "ASK"; body: string; areaId?: string } = areaId ? { areaId, kind, body } : { kind, body };
+            const fields: { kind: "GIST" | "ASK"; body: string; areaId?: string } = areaId ? { areaId, kind, body: body2 } : { kind, body: body2 };
             const done = await sendOrKeep("drop_post", fields, (tapKey) => dropPost({ ...fields, tapKey }));
             if (done.state === "kept") {
               setBody("");
@@ -418,7 +488,7 @@ export function Composer({
             }
             result = done.result;
           } else {
-            result = await withTimeout(dropPost(areaId ? { areaId, kind, body } : { kind, body }), 30_000);
+            result = await withTimeout(dropPost(areaId ? { areaId, kind, body: body2 } : { kind, body: body2 }), 30_000);
           }
 
         } catch {
@@ -600,8 +670,23 @@ export function Composer({
         autoFocus={autoFocus}
         placeholder={isReply ? (page ? "Post your reply" : "Write your reply") : KIND_PLACEHOLDER[kind]}
         onChange={(event) => setBody(event.target.value)}
+        onPaste={onPaste}
         aria-label={isReply ? "Your reply" : KIND_LABEL[kind]}
       />
+
+      {pasted ? (
+        <PasteChip
+          kind={pasted.kind === "text" ? "text" : "link"}
+          {...(pasted.kind === "text"
+            ? { text: pasted.text, overBy: overBy(pasted.text, POST_MAX), onOpen: openPasted }
+            : { host: pasted.host, path: pasted.path, vallo: pasted.vallo })}
+          onRemove={() => setPasted(null)}
+          words={{
+            ...PASTE_WORDS,
+            remove: pasted.kind === "text" ? PASTE_WORDS.remove : PASTE_WORDS.removeLink,
+          }}
+        />
+      ) : null}
 
       {listing ? <PickedListing option={listing} onRemove={() => setListing(null)} disabled={pending} /> : null}
 

@@ -2095,3 +2095,92 @@
     }
   }
 }
+
+/*
+ * THE PASTE CHIP (founder, 14 November 2026, from the Claude composer: a
+ * type tag, two lines of the pasted text, and a close button, while the
+ * field stays empty). A chip is a CONTROL, so it keeps the control radius,
+ * never the confirmation pill's capsule: the two must stay apart at a
+ * glance, because one is news that leaves by itself and the other is a thing
+ * you can open or drop. One row above the composer, as the reply strip is.
+ */
+.nf-paste {
+  display: flex;
+  align-items: stretch;
+  gap: var(--nf-space-2xs);
+  margin-inline: var(--nf-space-md);
+  margin-block-end: var(--nf-space-2xs);
+  border: var(--nf-border-width) solid var(--nf-border-subtle);
+  border-radius: var(--nf-radius-control);
+  background: var(--nf-surface-inset);
+  overflow: hidden;
+}
+.nf-paste__face {
+  display: flex;
+  align-items: center;
+  gap: var(--nf-space-xs);
+  flex: 1;
+  min-inline-size: 0;
+  padding: var(--nf-space-xs) var(--nf-space-sm);
+  text-align: start;
+  color: var(--nf-content-primary);
+}
+.nf-paste__face--still {
+  cursor: default;
+}
+.nf-paste__tag {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--nf-space-3xs);
+  flex-shrink: 0;
+  padding-inline: var(--nf-space-2xs);
+  min-block-size: 1.25rem;
+  border-radius: var(--nf-radius-xs);
+  background: var(--nf-surface-secondary);
+  color: var(--nf-content-secondary);
+  font-size: var(--nf-text-overline);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+.nf-paste__text {
+  display: grid;
+  gap: var(--nf-space-3xs);
+  min-inline-size: 0;
+}
+/* Two lines of the paste, then nothing: the chip is a handle, not a reader. */
+.nf-paste__lines {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  font-size: var(--nf-text-body-sm);
+  line-height: 1.3;
+  overflow-wrap: break-word;
+}
+.nf-paste__detail {
+  font-size: var(--nf-text-caption);
+  color: var(--nf-content-muted);
+}
+/* Over the message's own limit: the detail line says by how much, in the
+   error ink, so the person cuts before Send rather than meeting a refusal.
+   Not `--nf-state-warning`: in this palette that token is cyan, which reads
+   as information beside the quiet grey, not as something to act on. */
+.nf-paste[data-over] .nf-paste__detail {
+  color: var(--nf-state-error);
+}
+.nf-paste__drop {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  inline-size: 2.75rem;
+  color: var(--nf-content-muted);
+  border-inline-start: var(--nf-border-width) solid var(--nf-border-subtle);
+}
+.nf-paste__drop:active {
+  background: var(--nf-surface-secondary);
+}
+.nf-paste__face:focus-visible,
+.nf-paste__drop:focus-visible {
+  outline: 2px solid var(--nf-focus-ring);
+  outline-offset: -2px;
+}

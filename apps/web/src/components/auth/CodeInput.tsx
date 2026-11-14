@@ -3,6 +3,8 @@ import "@/app/css/auth.css";
 
 import { useState } from "react";
 import { FieldProblem } from "@/components/ui/FieldProblem";
+import { UiIcon } from "@/design-system/icons/UiIcon";
+import { cleanCode } from "@/lib/paste/parse";
 
 /**
  * THE CODE FIELD, DRAWN AS CELLS (30 September).
@@ -26,6 +28,18 @@ import { FieldProblem } from "@/components/ui/FieldProblem";
  * capitalisation or correction, and the error wired through aria-invalid and
  * aria-describedby. The value is never truncated: a surplus is the form's to
  * say, not this component's to hide.
+ *
+ * PASTE IN ONE TAP (founder, 14 November 2026). Beside the cells sits a
+ * Paste button that reads the clipboard and fills every cell at once, taking
+ * only the digits, so a code copied as "Your code is 492018" or "492-018"
+ * lands as the number. The caller's `onChange` is what submits on the last
+ * digit, so a pasted code submits exactly as a typed one does. A clipboard
+ * the browser refuses to read leaves the field untouched and says nothing:
+ * the keyboard's own suggestion and typing both still work.
+ *
+ * On iOS, reading the clipboard makes the SYSTEM draw its own "pasted from"
+ * banner. That is iOS, not Vallo: no app is told which app a paste came
+ * from, and nothing here claims to know.
  */
 export function CodeInput({
   id,
@@ -38,6 +52,7 @@ export function CodeInput({
   wrongCount,
   placeholder,
   cellsLabel,
+  pasteLabel = "Paste",
 }: {
   id: string;
   name: string;
@@ -51,6 +66,8 @@ export function CodeInput({
   placeholder: string;
   /** "Six digit code", kept for the cells' tooltip-free description. */
   cellsLabel: string;
+  /** The paste button's word. English only, as all new copy is. */
+  pasteLabel?: string;
 }) {
   const [focused, setFocused] = useState(false);
   const errorId = `${id}-error`;
@@ -112,6 +129,28 @@ export function CodeInput({
           className="nf-code__input nf-numeric"
         />
       </div>
+      {typeof navigator !== "undefined" && navigator.clipboard?.readText ? (
+        <button
+          type="button"
+          className="nf-code__paste"
+          data-testid="code-paste"
+          onClick={() => {
+            void navigator.clipboard
+              .readText()
+              .then((text) => {
+                const digits = cleanCode(text, length);
+                if (digits.length > 0) onChange(digits);
+              })
+              .catch(() => {
+                /* A browser that refuses the clipboard changes nothing: the
+                   person types, or uses the keyboard's own suggestion. */
+              });
+          }}
+        >
+          <UiIcon name="clipboard-list" size={14} />
+          {pasteLabel}
+        </button>
+      ) : null}
       {/* The words go to the one banner; the field keeps its red edge (founder, 7 November 2026). */}
       <FieldProblem id={errorId} message={error} when={wrongCount} />
     </div>
