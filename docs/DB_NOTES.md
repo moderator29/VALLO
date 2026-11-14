@@ -126,3 +126,80 @@ drop table if exists public.renter_passports;
 ```
 
    Then regenerate `database.types.ts`. `public.record_vnin_check` stays: it is still called.
+
+## THE SUPABASE AUDIT (begun 14 November 2026, reads only; the deliverable the follow-up brief asks for)
+
+Everything below was read from live on 14 November 2026. Changes are never
+made from a session: each is a SQL file in `supabase/migrations/pending` the
+founder runs. This section grows as the audit proceeds.
+
+### The instance today
+
+Nano compute, eu-west-1, database about 132 MB, 30 profiles, 774 applied
+migrations. The 13 November disk IO exhaustion (statement timeouts 14:00 to
+22:22 UTC, every pg_cron failure in that window is "job startup timeout") has
+not recurred since the Nano relief files ran. 45 active pg_cron jobs, all
+green since.
+
+### Advisor counts (14 November, after the 13 to 14 November fixes)
+
+| Advisor | Level | Count | Movement since 7 Nov |
+|---|---|---|---|
+| multiple_permissive_policies | WARN | 398 | 393 before; hosts were merged but `accommodations` (20), `businesses` (20), `listings` (20), `listing_access` (16), `inspection_requests` (15) still lead. THE hot-path cost on a Nano: every search row evaluates every permissive policy |
+| unused_index | INFO | 374 on 196 tables | 347 before; meaningless at 30 profiles, re-read at launch traffic. Do not drop yet |
+| unindexed_foreign_keys | INFO | 90 | 20 before; the roommates, circle and moderation waves landed unindexed FK columns. Most are audit columns (`*_by`); index only those with join traffic |
+| anon-executable definer functions | WARN | 40 | 29 before; the new ones are roommates and circle public reads. `record_funnel_event` is still the one anon WRITE (survey B-16) |
+| authenticated-executable definer functions | WARN | 464 | RPC-first design, expected; inventory for private-only helpers stands |
+| rls_enabled_no_policy | INFO | 122 | Deny-all server-only tables, deliberate |
+| auth_leaked_password_protection | WARN | GONE | Was 1; no longer reported |
+
+### The top statements (pg_stat_statements since the 13 Nov 10:09 reset; the window spans the crisis and the fixes, so re-read after a clean day)
+
+| Statement | Calls | Total | Mean |
+|---|---|---|---|
+| realtime WAL reader (`list_changes`) | 71,081 | 756 s | 10.6 ms |
+| `shell_context()` | 670 | 373 s | 557 ms (includes pre-fix calls; the security definer rewrite ran 14 Nov; REMEASURE) |
+| listings catalogue selects (three shapes) | about 1,900 | 404 s | 120 to 258 ms (the app-side catalogue cache landed 14 Nov; REMEASURE) |
+| `my_unread_counts()` | 1,001 | 119 s | 118 ms |
+| realtime subscription catalogue poll | 480 | 128 s | 267 ms |
+| `my_invite_step()` | 321 | 77 s | 239 ms |
+| `ai_assistant_state()` | 323 | 61 s | 188 ms |
+| `passcode_status()` | 908 | 81 s | 89 ms |
+
+### Realtime
+
+The `supabase_realtime` publication holds exactly five tables
+(`calls`, `call_participants`, `messages`, `message_reactions`,
+`notifications`) and the app subscribes to all five: nothing is published for
+nobody. The WAL reader is still the heaviest statement by total time; the
+next lever is fewer concurrent channels, not the publication. Note
+`lib/messages/unread-live.ts` subscribes to ALL message changes unfiltered
+(RLS trims per subscriber, the WAL work does not shrink).
+
+### Storage
+
+23 buckets. Size, public flags, transformation use and whether photos are
+served at drawn size: still to read (M3).
+
+### Found and fixed on 14 November
+
+- The alert fold measured its window against `created_at` so daily faults
+  piled up open rows (29 for store readiness): fixed in code (`17bde0ab`),
+  pile cleared by `alerts_cleanup_2026-11-14.sql` (pending).
+- Scoped staff were refused by `private.is_staff()` database guards the
+  moment the admin role came off them: `scoped_staff_listing_doors_2026-11-14.sql`
+  (pending) opens the two listings-desk functions to the `listing_approval`
+  scope. Money, STR, referral and person-file doors stay admin-only.
+- The incoming-calls realtime channel recursed to a stack overflow when its
+  socket dropped (69 live crash rows): fixed in code (`1094b98f`).
+
+### Still to audit (M3)
+
+Query plans as the calling role on the hot functions after a clean day of
+stats; the one live-only migration version (774 live vs 773 files); cron
+schedules one by one (several hourly purges could be daily); storage and
+egress; auth sessions left by `reauthenticate` and the console password door;
+the permissive-policy merges on `listings`, `accommodations`, `businesses`
+with EXPLAIN before and after, delivered as a draft SQL file; whether the
+Vercel reconcile cron should fold into pg_cron's; instance size judgement
+last, with evidence and a price only if the data forces it.
