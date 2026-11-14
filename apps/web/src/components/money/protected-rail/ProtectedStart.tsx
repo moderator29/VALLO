@@ -3,9 +3,10 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import type { Locale } from "@vallo/i18n/core";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 import { banner } from "@/lib/ui/toast";
 import { startProtected } from "@/lib/money/protected-actions";
-import { PROTECTED_ACTION_REFUSED, PROTECTED_IDENTITY_DONE, PROTECTED_START_PENDING } from "@/lib/money/copy";
+import { PROTECTED_IDENTITY_DONE, PROTECTED_START_PENDING } from "@/lib/money/copy";
 import type { ProtectedStartRead } from "@/lib/money/protected-start";
 import { IdentityCheck } from "./IdentityCheck";
 import { ReviewProtection } from "./ReviewProtection";
@@ -37,8 +38,9 @@ export function ProtectedStart({ start, locale }: { start: ProtectedStartRead; l
         }
         if (out.data.state === "pending") banner.info(PROTECTED_START_PENDING);
         router.refresh();
-      } catch {
-        banner.error(PROTECTED_ACTION_REFUSED.unavailable);
+      } catch (error) {
+        /* A lost signal is said in the banner; a real fault still reaches the error boundary. */
+        if (!tapFailedOffline(error)) throw error;
       }
     });
   };

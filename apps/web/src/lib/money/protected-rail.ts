@@ -156,6 +156,15 @@ function readReport(tx: ProviderTransaction, row: Row): { status: ArrangementSta
   return { status, amountMinor: tx.amountMinor, id: tx.id, word: tx.status };
 }
 
+/**
+ * The states Vallo records ON TOP of money the provider holds: an instruction
+ * in flight, its own dispute, a payment with a person. While any of them
+ * stands, the provider saying "still held" is no news and undoes nothing:
+ * the record leaves them only on the provider's report of an outcome, its
+ * refusal where the instruction is given, or a person's decision.
+ */
+const ON_TOP_OF_HELD: ReadonlySet<ArrangementStatus> = new Set(["release_requested", "refund_requested", "disputed", "requires_review"]);
+
 /* ------------------------------------------------- transfer details */
 
 type Issued = "issued" | "refused" | "unknown";
@@ -184,11 +193,13 @@ async function bankNameFor(deps: ProtectedRailDeps, bankCode: string): Promise<s
  * total of at least the amount are all there. `attempt` numbers the details
  * issued, so a second set is a second request, never the first again.
  */
-async function issueInstructions(deps: ProtectedRailDeps, row: Row, tx: ProviderTransaction, attempt: number): Promise<Issued> {
+async function issueInstructions(deps: ProtectedRailDeps, row: Row, tx: ProviderTransaction, attempt: number, seen?: { state: string | null }): Promise<Issued> {
   if (tx.status === "draft") {
     if (tx.version === null) return "unknown";
     const activated = await deps.send(deps.config, activateTransactionCall({ reference: row.reference, transactionId: tx.id, version: tx.version }));
     if (!activated.ok) return provablyNothing(activated) ? "refused" : "unknown";
+    /* The provider's word for the transaction now that it is payable, for the record. */
+    if (seen) seen.state = readTransaction(activated.value)?.status ?? null;
   }
   /* A little inside the transaction's own funding deadline, which was set a moment earlier. */
   const expiresAt = new Date(deps.now() + PROTECTED_FUNDING_WINDOW_HOURS * 3_600_000 - 15 * 60_000).toISOString();
@@ -341,14 +352,15 @@ export async function openProtectedPayment(
   /* The provider's id is kept before anything else is asked of it. */
   await stamp(deps.db, row.id, { provider_arrangement_id: tx.id });
 
-  const issued = await issueInstructions(deps, { ...row, provider_arrangement_id: tx.id }, tx, 1);
+  const seen = { state: tx.status };
+  const issued = await issueInstructions(deps, { ...row, provider_arrangement_id: tx.id }, tx, 1, seen);
   if (issued !== "issued") {
     /* Made at the provider, not yet payable: the read-back finishes it. */
     await observe(deps, row, "unknown", "vallo", { instructions: issued }, { id: tx.id });
     await deps.alert("protected_rail.instructions_pending", { arrangement_id: row.id, reference: row.reference, why: issued });
     return { outcome: "unknown", arrangementId: row.id };
   }
-  const verdict = await observe(deps, row, "awaiting_payment", "provider_response", {}, { state: tx.status, amountMinor: tx.amountMinor, id: tx.id });
+  const verdict = await observe(deps, row, "awaiting_payment", "provider_response", {}, { state: seen.state, amountMinor: tx.amountMinor, id: tx.id });
   if (verdict === "changed" || verdict === "same") return { outcome: "opened", arrangementId: row.id, status: "awaiting_payment" };
   return { outcome: "unknown", arrangementId: row.id };
 }
@@ -383,14 +395,16 @@ export async function readBack(deps: ProtectedRailDeps, row: Row, source: "provi
   /* An open that stopped half way: made at the provider, no transfer details yet. */
   const unfinished = (row.status === "preparing" || row.status === "unknown") && row.funding_instructions === null;
   if (unfinished && (tx.status === "draft" || normaliseEscrowPayStatus(tx.status) === "awaiting_payment") && (await protectedRailOpen(deps))) {
-    const issued = await issueInstructions(deps, known, tx, attemptOf(row) + 1);
+    const seen = { state: tx.status };
+    const issued = await issueInstructions(deps, known, tx, attemptOf(row) + 1, seen);
     if (issued !== "issued") return { outcome: "read", status: row.status, moved: false };
-    const verdict = await observe(deps, known, "awaiting_payment", source, { resumed: true }, { state: tx.status, amountMinor: tx.amountMinor, id: tx.id });
+    const verdict = await observe(deps, known, "awaiting_payment", source, { resumed: true }, { state: seen.state, amountMinor: tx.amountMinor, id: tx.id });
     return { outcome: "read", status: verdict === "changed" ? "awaiting_payment" : row.status, moved: verdict === "changed" };
   }
 
   const report = readReport(tx, row);
   if (!report.status) return { outcome: "read", status: row.status, moved: false };
+  if (report.status === "protected" && ON_TOP_OF_HELD.has(row.status)) return { outcome: "read", status: row.status, moved: false };
   const verdict = await observe(deps, known, report.status, source, {}, { state: report.word, amountMinor: report.amountMinor, id: report.id });
   return { outcome: "read", status: verdict === "changed" ? report.status : row.status, moved: verdict === "changed" };
 }
@@ -630,6 +644,8 @@ export async function applyProtectedWebhook(deps: ProtectedRailDeps, event: Escr
     return "unmapped";
   }
   let to = mapped as ArrangementStatus;
+  /* A late or repeated "funded" for money Vallo already knows is held. */
+  if (to === "protected" && ON_TOP_OF_HELD.has(row.status)) return "same";
   const detail: Record<string, unknown> = { event: event.event, object_id: event.objectId };
   const whole = to === "released" || to === "refunded";
   if (whole && event.amountMinor !== null && event.amountMinor !== row.amount_minor) {

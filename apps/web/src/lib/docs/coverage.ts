@@ -126,7 +126,7 @@ export const COVERAGE: readonly CoverageGroup[] = [
   { doc: M("identity-and-applications"), routes: ["/admin/kyc", "/admin/kyc/guide", "/admin/agents", "/admin/businesses", "/admin/review-calls", "/admin/review-calls/[id]", "/admin/account-recovery"] },
   { doc: M("listings-and-supply"), routes: ["/admin/listings", "/admin/listings/[id]", "/admin/examples", "/admin/supply", "/admin/people", "/admin/people/[id]", "/admin/stops", "/admin/reference"] },
   { doc: M("agreements-and-bookings"), routes: ["/admin/agreements", "/admin/agreements/settings", "/admin/bookings", "/admin/bookings/[bookingId]", "/admin/bookings/reservations", "/admin/bookings/visits"] },
-  { doc: M("money-and-fees"), routes: ["/admin/money", "/admin/payments", "/admin/chargebacks", "/admin/chargebacks/[chargebackId]", "/admin/fees", "/admin/restaurant-fees", "/admin/referrals", "/admin/arrangements"] },
+  { doc: M("money-and-fees"), routes: ["/admin/money", "/admin/payments", "/admin/chargebacks", "/admin/chargebacks/[chargebackId]", "/admin/fees", "/admin/restaurant-fees", "/admin/referrals", "/admin/arrangements", "/admin/arrangements/[id]"] },
   { doc: M("cases-and-safety"), routes: ["/admin/trust", "/admin/cases", "/admin/cases/[id]", "/admin/alerts", "/admin/appeals", "/admin/standing", "/admin/weight-withheld", "/admin/blocked-terms", "/admin/circle", "/admin/social", "/admin/roommates", "/admin/account-deletions"] },
   { doc: M("support-desk"), routes: ["/admin/support", "/admin/support-lead", "/admin/doc-feedback"] },
   { doc: M("offers-and-deals-desk"), routes: ["/admin/offers", "/admin/offers/[id]"] },

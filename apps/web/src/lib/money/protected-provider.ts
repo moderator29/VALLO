@@ -176,8 +176,11 @@ async function valloPayoutAccount(db: Db, userId: string): Promise<ValloAccount 
  * name enquiry used (the card provider's, mostly the three-digit CBN code);
  * the protected-pay provider takes only the six-digit interbank code
  * ("Unknown bank_code" for anything else, seen on the sandbox). This table
- * joins the two for the banks members actually hold accounts at. It is not
- * trusted on its own: the code must be on the provider's own bank list, and
+ * joins the two for the banks members actually hold accounts at. The six
+ * the sandbox's bank list carries (Sterling, UBA, GTBank, Access, Zenith,
+ * First Bank) were checked against it on 14 November 2026; the rest are the
+ * published interbank codes and are to be checked against the provider's
+ * live list before go-live. It is not trusted on its own: the code must be on the provider's own bank list, and
  * on a live account the name the provider's enquiry finds must be the name
  * Vallo's enquiry found, or no payout account is used.
  */

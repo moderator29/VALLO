@@ -179,7 +179,8 @@ describe("opening a protected payment", () => {
       funding_expires_at: "2026-11-16T09:45:00+00:00",
     });
     expect(observed()).toHaveLength(1);
-    expect(observed()[0]).toMatchObject({ p_to_status: "awaiting_payment", p_source: "provider_response", p_provider_arrangement_id: "TXN_1", p_provider_amount_minor: AMOUNT });
+    /* The provider's own word once the transaction is payable, not the draft it was a moment before. */
+    expect(observed()[0]).toMatchObject({ p_to_status: "awaiting_payment", p_source: "provider_response", p_provider_state: "pending_funding", p_provider_arrangement_id: "TXN_1", p_provider_amount_minor: AMOUNT });
   });
 
   it("opens nothing for a payer the provider does not know: the identity check comes first", async () => {
@@ -301,6 +302,13 @@ describe("reading back", () => {
     const { d, observed } = deps({ row: { ...ROW, status: from, funding_instructions: { attempt: 1 } }, send });
     expect(await rail.refreshProtectedPayment(d, { arrangementId: "arr-1", actorUserId: "payer" })).toEqual({ outcome: "read", status: to, moved: true });
     expect(observed()[0]).toMatchObject({ p_to_status: to, p_source: "provider_readback", p_provider_amount_minor: AMOUNT, p_provider_arrangement_id: "TXN_1" });
+  });
+
+  it.each(["release_requested", "refund_requested", "disputed", "requires_review"])("on a %s payment, the provider saying 'still held' undoes nothing and writes nothing", async (status) => {
+    const send = provider({ "GET /api/v1/transactions/TXN_1": ok({ id: "TXN_1", status: "funded", version: 3, amount_minor: AMOUNT, funded_minor: AMOUNT }) });
+    const { d, observed } = deps({ row: { ...ROW, status }, send });
+    expect(await rail.refreshProtectedPayment(d, { arrangementId: "arr-1", actorUserId: "payer" })).toEqual({ outcome: "read", status, moved: false });
+    expect(observed()).toHaveLength(0);
   });
 
   it("a part released or refunded is never read as the whole", async () => {
@@ -478,6 +486,12 @@ describe("the webhook", () => {
     await rail.applyProtectedWebhook(d, event({ event: "release.completed", object: "release", objectId: "REL_1", amountMinor: AMOUNT - 1 }));
     expect(observed()[0]).toMatchObject({ p_to_status: "requires_review" });
     expect(alert).toHaveBeenCalledWith("protected_rail.partial_settlement", expect.anything());
+  });
+
+  it("a late or repeated 'funded' for a payment already disputed changes nothing", async () => {
+    const { d, observed } = deps({ row: { ...ROW, status: "disputed" } });
+    expect(await rail.applyProtectedWebhook(d, event({}))).toBe("same");
+    expect(observed()).toHaveLength(0);
   });
 
   it("an event Vallo does not act on moves nothing and reads nothing", async () => {

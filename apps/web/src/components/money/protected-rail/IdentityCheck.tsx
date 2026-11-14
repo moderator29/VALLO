@@ -6,8 +6,8 @@ import { Checkbox } from "@/components/ui/Check";
 import { TextField } from "@/components/ui/Field";
 import { Segmented } from "@/components/ui/Segmented";
 import { verifyProtectedIdentity } from "@/lib/money/protected-actions";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 import {
-  PROTECTED_ACTION_REFUSED,
   PROTECTED_IDENTITY_CONSENT,
   PROTECTED_IDENTITY_CTA,
   PROTECTED_IDENTITY_DOB_HINT,
@@ -17,7 +17,6 @@ import {
   PROTECTED_IDENTITY_LEAD,
   PROTECTED_IDENTITY_NUMBER_HINT,
   PROTECTED_IDENTITY_NUMBER_LABEL,
-  PROTECTED_IDENTITY_RESULT,
   PROTECTED_IDENTITY_TITLE,
 } from "@/lib/money/copy";
 import { THIRD_PARTIES_LINE } from "@/lib/money/protected-wording";
@@ -47,17 +46,17 @@ export function IdentityCheck({ onVerified }: { onVerified: () => void }) {
     if (!ready || pending) return;
     setProblem(null);
     start(async () => {
-      let message: string | null = null;
       try {
         const out = await verifyProtectedIdentity({ kind, identifier, dateOfBirth, consent: true });
-        if (!out.ok) message = out.error;
-      } catch {
-        message = PROTECTED_ACTION_REFUSED.unavailable;
+        /* The number never outlives the request it was typed for. */
+        setIdentifier("");
+        if (out.ok) onVerified();
+        else setProblem(out.error);
+      } catch (error) {
+        setIdentifier("");
+        /* A lost signal is said in the banner; a real fault still reaches the error boundary. */
+        if (!tapFailedOffline(error)) throw error;
       }
-      /* The number never outlives the request it was typed for. */
-      setIdentifier("");
-      if (message) setProblem(message);
-      else onVerified();
     });
   };
 
@@ -105,9 +104,6 @@ export function IdentityCheck({ onVerified }: { onVerified: () => void }) {
           {PROTECTED_IDENTITY_CTA}
         </Button>
       </div>
-      <span hidden data-testid="pp-identity-fallback">
-        {PROTECTED_IDENTITY_RESULT.unavailable}
-      </span>
     </form>
   );
 }

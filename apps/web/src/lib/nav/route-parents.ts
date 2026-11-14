@@ -541,6 +541,7 @@ export const ROUTE_PARENTS: Readonly<Record<string, ParentRoute>> = {
   "/admin/chargebacks": "/admin",
   /* Protected payments: the read-only arrangement operations desk (BUILD 7.11). */
   "/admin/arrangements": "/admin",
+  "/admin/arrangements/[id]": "/admin/arrangements",
   "/admin/chargebacks/[chargebackId]": "/admin/chargebacks",
   "/admin/people": "/admin",
   /*

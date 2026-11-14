@@ -111,6 +111,13 @@ Four things the sandbox showed that no document said, each now handled:
    on top of the amount: a payout of the full released amount is refused for
    want of balance.
 
+After that run a re-audit changed two things in the read-back, both held
+by tests on stand-in answers and not yet re-run against the sandbox (the
+test key was discarded): while a release or refund is in flight, or a
+payment is disputed or with a person, the provider saying "still held"
+changes nothing; and the provider's state recorded at the open is its word
+after activation, not the draft before it.
+
 Not reached on the sandbox: a real webhook delivery (no endpoint is
 registered yet; the signature check is tested against the documented scheme
 with real HMACs), the `expired` state, and the automatic payout itself.
@@ -130,7 +137,9 @@ with real HMACs), the `expired` state, and the automatic payout itself.
 | Identity and start actions | `lib/money/protected-actions.ts` | Tested |
 | Start screen (review, identity, open) on the funding page | `components/money/protected-rail/ProtectedStart.tsx`, `IdentityCheck.tsx` | Seen in a browser at phone width through `/preview/protected?screen=identity` |
 | Lister readiness card on Settings, Payments | `ProtectedSetup.tsx` | Seen in a browser through `/preview/protected?screen=setup` |
-| Webhook route | `app/api/escrowpay/webhook/route.ts` | On the real signature |
+| Webhook route | `app/api/escrowpay/webhook/route.ts` | On the real signature; 18 tests post signed deliveries through the handler itself |
+| The dispute desk: one payment's record, its trail with both statements, and the two decisions (refund the payer, release to the lister) | `app/admin/arrangements/[id]`, `ArrangementRecord.tsx`, `lib/admin/arrangement-actions.ts` | Tested; seen and driven in a browser through `/preview/protected/staff`. Finance door, a reason of 20 characters, the audit line written before the instruction |
+| The choice between the protected transfer and card | `components/money/pay-choice/PayChoiceCard.tsx` on the agreement page (already live in its switched-off form) | Leads to the funding page, which now starts the payment |
 
 The live database needed nothing new: the arrangement table, its lifecycle
 functions and the webhook event store were applied on 10 November.
@@ -146,15 +155,16 @@ functions and the webhook event store were applied on 10 November.
    the event's fields as `webhooks.ts` reads them). Until then a missed or
    misread event is caught by the read-back, which runs on the status words
    above.
-3. **Staff buttons.** `instructProtectedRefund` and `instructDisputeRelease`
-   run on the server (the refund against the sandbox); the arrangements desk
-   has no button for them yet.
-4. **The pay choice screen** (`ChooseHowToPay`) is not mounted on a member
-   page; the funding page goes straight to the review.
-5. **A named payer who is not the viewer** is told nothing: the tenant sees
+3. **An expired set of transfer details** has not been lived through on
+   the sandbox (it needs the 48 hour window to pass). Asking for new details
+   extends the deadline and issues a second account under a new request; the
+   extend call and the second account are on stand-in answers only.
+4. **A named payer who is not the viewer** is told nothing: the tenant sees
    the review, and the open is refused until that payer has done the check.
-6. **The bank code table** (`INTERBANK_CODE`) covers the banks most accounts
-   are held at. It is never trusted alone (the code must be on the provider's
+5. **The bank code table** (`INTERBANK_CODE`) covers the banks most accounts
+   are held at. Six of its codes were checked against the sandbox's bank
+   list; the rest are the published interbank codes and should be checked
+   against the provider's live list before go-live. It is never trusted alone (the code must be on the provider's
    list, and on a live account the holder's name must match Vallo's own
    enquiry), but a lister at a bank outside it is told the bank is not
    supported until it is added.
@@ -182,7 +192,10 @@ functions and the webhook event store were applied on 10 November.
    compliance design").
 4. **The identity fee** (₦80 per successful live check) and **the payout
    fee** are charged to the business by default.
-5. **Two switches, both off today:** `payments_protected_pay_on` (whether the
+5. **Who may decide a dispute.** One member of staff holding the finance
+   scope can instruct a refund or a release, with a written reason and an
+   audit line. If a second person should approve, that is not built.
+6. **Two switches, both off today:** `payments_protected_pay_on` (whether the
    protected rail is offered at all) and `payments_escrowpay_on` (whether
    this provider may be asked). Both must be on, and a category approved in
    `protected_payment_categories`, before a member sees anything.
