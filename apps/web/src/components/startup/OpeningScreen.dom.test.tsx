@@ -185,18 +185,24 @@ describe.skipIf(!hasBrowser && !process.env.CI)("the opening screen, in a browse
   });
 
   /*
-   * ONE OPENING IN THE APP (13 November 2026). A 1.0.2 binary draws its own
-   * opening natively; this layer must never draw over the page after it. An
-   * older binary has none, and this layer is still its opening.
+   * THIS LAYER IS THE OPENING IN THE APP TOO (the founder, 14 November 2026).
+   * A 1.0.2 binary draws its own opening natively, and he wants this one, so
+   * it plays there as well: hidden while the binary's own mark is still on
+   * screen, drawn once the splash is down and that mark has landed. An older
+   * binary has none, and this layer is its opening as before.
    */
-  it("inside a 1.0.2 binary, the layer is never drawn: off before the first frame and still off after every wait", async () => {
+  it("inside a 1.0.2 binary, the layer waits for the binary's own mark to land, then plays", async () => {
     const { page, close } = await installed({ hydrate: 50, shell: "1.0.2" });
     await page.waitForSelector("#nf-open svg", { state: "attached" });
-    expect(await page.evaluate(() => document.documentElement.dataset.open)).toBe("off");
+    /* The platform script marks the shell before this one runs in the app. */
+    await page.evaluate(() => document.documentElement.setAttribute("data-native", "true"));
+    /* Before the splash is down and the binary's mark has landed: not drawn. */
+    expect(await page.evaluate(() => document.documentElement.dataset.open)).toBeUndefined();
     expect((await state(page)).display).toBe("none");
     await page.evaluate(() => window.dispatchEvent(new Event("nf:splash-down")));
-    await page.waitForTimeout(800);
-    expect((await state(page)).display).toBe("none");
+    await page.waitForFunction(() => document.documentElement.dataset.open === "on", null, { timeout: 3000 });
+    expect(await page.evaluate(() => performance.now())).toBeGreaterThanOrEqual(1400);
+    expect((await state(page)).display).toBe("block");
     await close();
   });
 

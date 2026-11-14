@@ -16,12 +16,18 @@
  *          could be kept, so it would replay on every load).
  *   leave  the 320ms crossfade into the page.
  *
- * NOT IN AN APP THAT DRAWS ITS OWN (13 November 2026). A 1.0.2 or later
- * binary plays the drawn opening natively (`LaunchMark`), so this layer is
- * turned off there before the first frame: one opening, never two. It is
- * known by `ValloShell.handoff` in `Capacitor.PluginHeaders`, which the
- * bridge injects at document start. What follows applies only to an older
- * binary, which has no opening of its own.
+ * THIS IS THE ONE OPENING, IN THE APP TOO (the founder, 14 November 2026,
+ * with two screenshots: "the only app opening should be the image 2 own, I
+ * don't like the image 1"). Image 2 is this layer: the mark beside the
+ * wordmark on the lit ground. Image 1 is the opening the 1.0.2 binary draws
+ * itself (`LaunchMark`: the mark above the wordmark, with a version line).
+ * On 13 November this layer was switched OFF inside such a binary so there
+ * would be one opening and not two; that left the app with only the one he
+ * does not want. So it plays there again, and it is timed to begin as the
+ * binary's own mark leaves (`OPEN_AFTER_NATIVE_MS`), never underneath it.
+ * The binary's opening cannot be taken out of an app that is already
+ * installed; the next build draws nothing of its own and says so by
+ * registering `ValloShell.pageOpens`, and there this layer starts at once.
  *
  * ON THE NATIVE SHELL (founder, 10 November 2026: the centred logo, slower).
  * The opening plays there too, but it must NOT begin while the Capacitor
@@ -91,6 +97,22 @@ export const OPEN_NATIVE_WAIT_MS = 6000;
 export const OPEN_NATIVE_PLUGIN = "ValloShell";
 export const OPEN_NATIVE_METHOD = "handoff";
 
+/**
+ * The method a later binary registers when it draws NO opening of its own
+ * (only the launch ground) and leaves the opening to this page.
+ */
+export const OPEN_NATIVE_PAGE_METHOD = "pageOpens";
+
+/**
+ * In a binary that still draws its own opening, this layer is not lit before
+ * this long on the page's own clock: the binary's mark has landed at 1,400ms
+ * (`LaunchMark.sequenceEnd`) and fades over the next 220ms, so this drawing
+ * begins as that one leaves. The page's clock starts a little after the
+ * binary's, so this errs towards a short overlap inside the fade, never a gap
+ * in which the page would show before its opening.
+ */
+export const OPEN_AFTER_NATIVE_MS = 1400;
+
 /** sessionStorage key marking this session's opening as shown. */
 export const OPEN_SESSION_KEY = "nf_open";
 
@@ -103,24 +125,20 @@ export const OPEN_SCRIPT =
      still decide how the layer is TIMED below (the shell waits for its splash),
      but no surface is refused the opening now. A cold open in this browser
      session is still the only one that plays: the warm check is next. */
-  /* ONE OPENING IN THE APP (13 November 2026, the founder: "two openings, and
-     not even consistently"). A 1.0.2 or later binary draws its own opening
-     over the launch ground (`LaunchMark` in ValloShell.swift and
-     LaunchMark.java: the ring, the towers, the letters, the version line)
-     and hands over to the page. This layer then played AGAIN on top of the
-     page once the splash plugin said it was down, so a cold start showed
-     two. Whether it read as two depended on a race nobody chose: on a slow
-     first launch the native mark left at its 1.95s ceiling, the page showed,
-     and this one arrived over it seconds later; on a fast, cached launch this
-     one began beneath the native mark and the two blurred into one. So where
-     the binary carries that opening, this one stays off. The binary says so
-     itself, at document start, before this script runs: Capacitor injects
-     every registered plugin's header (`window.Capacitor.PluginHeaders`), and
-     only a binary with the drawn opening registers `ValloShell` with a
-     `handoff` method. An older binary has none, and there this layer is
-     still the one opening, timed after the splash as below. */
-  "if(nat){var own=false;try{var H=W.Capacitor&&W.Capacitor.PluginHeaders;if(H&&H.length)for(var i=0;i<H.length;i++){var h=H[i];if(h&&h.name==='" + OPEN_NATIVE_PLUGIN + "'&&h.methods)for(var j=0;j<h.methods.length;j++)if(h.methods[j]&&h.methods[j].name==='" + OPEN_NATIVE_METHOD + "')own=true}}catch(e){}" +
-  "if(own){r.setAttribute('data-open','off');return}}" +
+  /* THE BINARY'S OWN OPENING, AND THIS ONE AFTER IT (14 November 2026). A
+     1.0.2 binary draws its own opening over the launch ground (`LaunchMark`
+     in ValloShell.swift and LaunchMark.java) and hands over to the page. The
+     founder wants this layer as the opening and not that one, and an
+     installed binary cannot be changed from here, so this layer plays as
+     that one leaves: `floor` holds it until the binary's mark has landed.
+     The binary says which it is at document start, before this script runs:
+     Capacitor injects every registered plugin's header
+     (`window.Capacitor.PluginHeaders`). `ValloShell.handoff` alone is a
+     binary that draws its own; with `ValloShell.pageOpens` beside it the
+     binary draws nothing and this layer starts with no floor; neither is an
+     older binary, timed after the splash as it always was. */
+  "var floor=0;if(nat){var own=false,page=false;try{var H=W.Capacitor&&W.Capacitor.PluginHeaders;if(H&&H.length)for(var i=0;i<H.length;i++){var h=H[i];if(h&&h.name==='" + OPEN_NATIVE_PLUGIN + "'&&h.methods)for(var j=0;j<h.methods.length;j++){var n=h.methods[j]&&h.methods[j].name;if(n==='" + OPEN_NATIVE_METHOD + "')own=true;if(n==='" + OPEN_NATIVE_PAGE_METHOD + "')page=true}}}catch(e){}" +
+  "if(own&&!page)floor=" + OPEN_AFTER_NATIVE_MS + "}" +
   "var warm=true;try{warm=!!sessionStorage.getItem('" + OPEN_SESSION_KEY + "');if(!warm)sessionStorage.setItem('" + OPEN_SESSION_KEY + "','1')}catch(e){}" +
   "if(warm){r.setAttribute('data-open','off');return}" +
   /* LIT ONCE, NEVER AFTER IT HAS GONE, AND TIMED FROM WHEN IT IS SHOWN (13
@@ -139,7 +157,9 @@ export const OPEN_SCRIPT =
      happened. */
   "var lit=0,gone=0;function light(){if(lit||gone)return;lit=1;r.setAttribute('data-open','on');setTimeout(function(){if(!gone)leave()}," + (OPEN_CAP_MS + OPEN_HARD_GRACE_MS) + ");if(D.readyState==='loading')D.addEventListener('DOMContentLoaded',arm,{once:true});else arm()}" +
   /* The shell waits for the splash to be down; the website lights up at once. */
-  "if(nat){if(W.__nfSplashDown)light();else{try{W.addEventListener('nf:splash-down',light,{once:true})}catch(e){}setTimeout(light," + OPEN_NATIVE_WAIT_MS + ")}}else light();" +
+  /* Not before the binary's own mark has landed (`floor`, zero elsewhere). */
+  "function after(){var w=0;try{w=floor-performance.now()}catch(e){}if(w>0)setTimeout(light,w);else light()}" +
+  "if(nat){if(W.__nfSplashDown)after();else{try{W.addEventListener('nf:splash-down',after,{once:true})}catch(e){}setTimeout(light," + OPEN_NATIVE_WAIT_MS + ")}}else light();" +
   "var still=false;try{still=W.matchMedia('(prefers-reduced-motion: reduce)').matches}catch(e){}" +
   "var mo=r.getAttribute('data-motion');if(mo==='calm'||mo==='off')still=true;" +
   "var min=still?" + OPEN_MIN_STILL_MS + ":" + OPEN_MIN_MS + ",cap=" + OPEN_CAP_MS + ",t0=0;" +
