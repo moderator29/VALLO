@@ -10,6 +10,7 @@ import {
 } from "@/lib/security/csp";
 import { safeReturnPath } from "@/lib/security/return-path";
 import { isShellUserAgent, SHELL_START } from "@/lib/native/shell";
+import { FRONT_DOOR_HEADER } from "@/lib/site/front-door";
 import { forwardedAgentHeaders } from "./lib/supabase/agent";
 import { serverCookiesSecure, withAuthCookiePolicy } from "./lib/supabase/cookie-policy";
 import { consume, ipFromHeaders, subjectForIp } from "@/lib/security/rate-limit";
@@ -591,6 +592,8 @@ export async function proxy(request: NextRequest) {
    */
   request.headers.delete(URL_LOCALE_HEADER);
   request.headers.delete(URL_PATH_HEADER);
+  /* The front door stamp is the proxy's to set, never the client's. */
+  request.headers.delete(FRONT_DOOR_HEADER);
   const addressed = splitLocalePrefix(request.nextUrl.pathname);
   const urlLocale = addressed.locale;
   const pathname = addressed.path;
@@ -778,6 +781,46 @@ export async function proxy(request: NextRequest) {
       params: searchParamsRecord(request.nextUrl.searchParams),
     });
     if (firstRun) return finish(NextResponse.redirect(new URL(firstRun, request.url), 307));
+  }
+
+  /*
+   * THE FRONT DOOR (the founder, 14 November 2026: "Haven't you remove
+   * landing page from website and make it our Home Screen of VALLO
+   * unsigned"). The three ways are named and reasoned in
+   * `lib/site/front-door.ts`:
+   *
+   *   signed in                 -> `/home`, a real redirect: `/home` is an
+   *                                address with its own state.
+   *   signed out, catalogue on  -> a REWRITE to `/search`, not a redirect,
+   *                                so the browser keeps `/` and `/search`
+   *                                stays the one implementation of that
+   *                                screen. The page is told it is the front
+   *                                door and draws the site footer and the
+   *                                home page's structured data.
+   *   signed out, catalogue off -> fall through to the landing page, because
+   *                                a stranger may not be shown the catalogue
+   *                                at all then.
+   *
+   * IT IS DECIDED ON THE COOKIE, NOT ON A VERIFIED SESSION, and deliberately
+   * so: this sits above the Supabase block, which returns early when auth is
+   * not configured, and a front door that stops working the moment auth is
+   * unreachable is the wrong failure. The landing page's own header already
+   * decided "signed in" exactly this way, by cookie name alone, "so the
+   * header never waits on auth". A stale cookie lands on `/home`, which
+   * sends it to sign in, which is where a stale session belongs.
+   *
+   * The native shell never reaches here: it was sent to `SHELL_START` above.
+   */
+  if (pathname === "/" && request.method === "GET" && isDocumentRequest(request)) {
+    if (carriesSessionCookie(request)) {
+      return withSecurityPolicy(NextResponse.redirect(new URL("/home", request.url), 307), nonce);
+    }
+    if (publicCatalogueEnabled()) {
+      const discovery = request.nextUrl.clone();
+      discovery.pathname = "/search";
+      request.headers.set(FRONT_DOOR_HEADER, "1");
+      return withSecurityPolicy(NextResponse.rewrite(discovery, { request }), nonce);
+    }
   }
 
   let response = forward();
