@@ -10,6 +10,8 @@ import { aiConsentForViewer } from "@/lib/ai/consent-server";
 import { loadMyReports } from "@/lib/reports/my-reports";
 import { loadMyTickets } from "@/lib/support/my-tickets";
 import { FAQS, POPULAR_QUESTIONS, TRUST_LINKS } from "@/lib/support/help-articles";
+import { buildSupportEntries } from "@/lib/support/search-entries";
+import type { HelpArticle } from "@/lib/support/help-search";
 import { popularArticles } from "@/lib/support/help-search";
 import { RESPONSE_COMMITMENTS } from "@/lib/trust/standards";
 import type { UiIconName } from "@/design-system/icons/UiIcon";
@@ -40,6 +42,27 @@ const TRUST_ICON: Record<string, UiIconName> = {
  * run when the gate is open, and they send the person to sign in or to the
  * public contact form.
  */
+/**
+ * EVERY ANSWER THE CENTRE HOLDS, as rows the palette can search.
+ *
+ * The in-app search used to cover the 64 help answers alone, while the
+ * public `/help` searched help, docs chapters, guides and the legal pages
+ * through `buildSupportEntries`. A signed-in member looking for "what does
+ * the inspection report do" therefore found LESS than a stranger, which is
+ * the opposite of the right way round (measured 14 November 2026).
+ *
+ * A help answer keeps its in-place disclosure, because it is short enough
+ * to read inside the row. Everything else carries its `href` and the row
+ * becomes a door to the chapter, the guide or the page.
+ */
+function helpRows(): HelpArticle[] {
+  return buildSupportEntries().map((entry) =>
+    entry.section === "help"
+      ? { category: entry.trail, q: entry.title, a: entry.text }
+      : { category: entry.trail, q: entry.title, a: entry.text, href: entry.href },
+  );
+}
+
 export default async function SupportPage() {
   const locale = await getLocale();
   /* The client islands get their words from here, never from a client
@@ -78,7 +101,7 @@ export default async function SupportPage() {
 
         <MessagesGroup tickets={tickets} signedIn={signedIn} copy={home} locale={locale} />
 
-        <SupportSearch articles={FAQS} popular={popular} supportCopy={inboxWords.support} />
+        <SupportSearch articles={helpRows()} popular={popular} supportCopy={inboxWords.support} />
 
         <MyReports list={reports} locale={locale} />
 

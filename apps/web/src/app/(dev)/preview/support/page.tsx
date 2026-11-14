@@ -13,6 +13,8 @@ import { TicketListView } from "@/app/(app)/support/messages/ListView";
 import { TicketThreadView } from "@/app/(app)/support/messages/[id]/ThreadView";
 import { FiledView, NewQueryForm } from "@/app/(app)/support/new/NewQueryForm";
 import { SupportSearch } from "@/app/(app)/support/SupportSearch";
+import { buildSupportEntries } from "@/lib/support/search-entries";
+import type { HelpArticle } from "@/lib/support/help-search";
 import { FAQS, POPULAR_QUESTIONS } from "@/lib/support/help-articles";
 import { popularArticles } from "@/lib/support/help-search";
 import {
@@ -95,7 +97,16 @@ function render(screen: Screen) {
             copy={getDictionary(locale).experienceInbox.support.home}
           />
           <MessagesGroup tickets={MY_TICKETS} signedIn copy={getDictionary(locale).experienceInbox.support.home} locale={locale} />
-          <SupportSearch articles={FAQS} popular={popularArticles(FAQS, POPULAR_QUESTIONS)} />
+          {/* The whole centre, as the real page passes it: help answers open
+              in place, a chapter, a guide or a legal page is a door. */}
+          <SupportSearch
+            articles={buildSupportEntries().map((entry): HelpArticle =>
+              entry.section === "help"
+                ? { category: entry.trail, q: entry.title, a: entry.text }
+                : { category: entry.trail, q: entry.title, a: entry.text, href: entry.href },
+            )}
+            popular={popularArticles(FAQS, POPULAR_QUESTIONS)}
+          />
         </div>
       );
     case "inbox":

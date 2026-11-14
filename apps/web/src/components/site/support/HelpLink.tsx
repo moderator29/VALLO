@@ -17,6 +17,10 @@ const HELP_LINKS = {
   cancellation: { href: "/cancellations", label: "How cancellation and refunds work" },
   verification: { href: "/docs/badges-and-verification", label: "How verification works" },
   payouts: { href: "/docs/paying-on-vallo#for-listers", label: "How payouts work" },
+  /* The offer journey is the least understood thing on the platform: a buyer
+     who has just sent one has no idea what the seller can do next, and the
+     chapter answers exactly that (14 November 2026, the help centre pass). */
+  offers: { href: "/docs/how-offers-work", label: "How offers work" },
   help: { href: "/help", label: "Open the help centre" },
 } as const;
 
