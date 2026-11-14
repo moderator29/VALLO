@@ -130,11 +130,13 @@ export function TurnOffPasscode({
           {copy.turnOffWithKey}
         </button>
       ) : null}
-      <PasscodeDots length={length} filled={code.length} shake={shake} label={copy.digitsEntered.replace("{count}", String(code.length)).replace("{total}", String(length))} />
-      <p className="nf-passcode__message" role="status" aria-live="polite" data-testid="passcode-off-message">
-        {message ?? ""}
-      </p>
-      <Keypad onDigit={onDigit} onDelete={() => setCode((c) => c.slice(0, -1))} disabled={busy} label={copy.keypadLabel} deleteLabel={copy.deleteKey} />
+      <div className="nf-passcode nf-passcode--inline">
+        <PasscodeDots length={length} filled={code.length} shake={shake} label={copy.digitsEntered.replace("{count}", String(code.length)).replace("{total}", String(length))} />
+        <p className="nf-passcode__message" role="status" aria-live="polite" data-testid="passcode-off-message">
+          {message ?? ""}
+        </p>
+        <Keypad onDigit={onDigit} onDelete={() => setCode((c) => c.slice(0, -1))} disabled={busy} label={copy.keypadLabel} deleteLabel={copy.deleteKey} />
+      </div>
       <button
         type="button"
         className="nf-passcode__link"
