@@ -58,6 +58,56 @@ Neither touches `app/admin`. The lead works only in files neither holds
 
 ---
 
+# THE BOARD, 14 November 2026, late evening
+
+The founder asked for this session to be planned and organised, so here is
+one board a person can read top to bottom. Two workers at a time plus the
+lead, never in the same file. Nothing is Done until it was run and seen.
+
+## DONE AND PUSHED TONIGHT
+
+| What | Commit |
+|---|---|
+| The four small works: pill, paste, count tabs, action sheet | `967721ce` `148a1968` `10e5c515` `7e0407f0` |
+| The keyboard pass, and Enter no longer sends on a phone | `03578827` |
+| Back is a chevron, every back and close control on the page's line | `f11d35c4` `70455692` |
+| The banner: capsule, small type, brand rail, one circled mark per tone, a processing tone, both marks at one size and stroke | `2c7d7deb` `c102125a` `55e097a3` `3facb325` |
+| Motion: nine of ten already existed, one gap built | `acfd1ea4` |
+| The site root opens on Vallo, landing kept at `/tour` | `5d6cb242` `883105f8` |
+| The database audit, measured, with five SQL files for him | `17bde0ab` `531d0549` `713c013a` `05b42fb6` `f168f32e` |
+| Bugs found and fixed: a realtime crash loop, a mandate rule drift, an unwatched cron job, a 0.239 layout shift | `1094b98f` `d5d08b36` `dbf89b3b` |
+
+## WAITING ON THE FOUNDER (nothing is blocked behind these)
+
+1. Five SQL files to run, in order: scoped staff doors (unblocks the BD
+   Director's listings desk, failing now), alerts cleanup, insert limits,
+   cascade indexes. Plus one draft (stale sessions) that signs people out.
+2. Supabase dashboard: Authentication, Sessions. No session time limit is set
+   at all, which is why 720 of them are still open.
+3. Where the showcase lives: a public address, inside the app, or both.
+4. Whether the back chevron should sit further in than the text line.
+
+## NOW
+
+| Who | Task | Done when |
+|---|---|---|
+| Agent A | The consistency sweep's table: 161 routes, 390 and 1440, both themes, then fix the outliers worst first | The table exists with real numbers and every outlier is fixed or explained |
+| Agent B | The help centre (brief section 12), which has guides but no searchable centre | A person can find an answer to a real question in two taps |
+| Lead | The remaining database work and the founder's reports | Each item measured, each SQL file tested twice |
+
+## NEXT, IN ORDER
+
+1. The signed-in performance baseline, on the harness, since this sandbox has
+   no database credentials (the correction at the top of the performance
+   report explains why the first listing-page number was wrong).
+2. The console: the restricted staff frame, desk tables on a phone, then the
+   founder command centre as a proposal with screenshots.
+3. Public areas not yet swept: stays, restaurants, roommates, feed and Circle,
+   profile and account.
+4. The second audit, by whichever worker did not build the thing.
+
+---
+
 # THE FULL QUEUE TO DONE (written 14 November 2026)
 
 Everything left in the handoff and the two briefs, broken into pieces one
