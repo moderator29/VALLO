@@ -31,6 +31,8 @@ import { getShellIdentity, getShellWorkspaces } from "@/lib/app/shell-queries";
 import { getSide } from "@/lib/side";
 import { shellDictionary } from "@/lib/i18n/shell-dictionary";
 import { AppShell } from "@/components/app/AppShell";
+import { SiteFooter } from "@/components/site/SiteFooter";
+import { requestSurface } from "@/lib/auth/surface";
 import { TermsUpdateMount } from "@/components/app/legal/TermsUpdateMount";
 import { PasscodeGate, passkeyOfferedThisRequest } from "@/components/passcode/PasscodeGate";
 import { resolvePasscodeGate } from "@/lib/passcode/state";
@@ -135,6 +137,7 @@ export default async function AppLayout({
   ] = await Promise.all([getSide(), getShellIdentity(), getShellWorkspaces(), isSocialEnabled(), isFeatureEnabled("roommates")]);
   /* The `roommates` switch: off takes the nav row and the Create row out in
      one place (both read `roommatesEntry`, so dropping it drops both). */
+  const web = !signedIn && (await requestSurface()) === "web";
   const shellT = shellDictionary(t);
   const shell = roommatesOn ? shellT : { ...shellT, roommatesEntry: undefined };
 
@@ -156,6 +159,12 @@ export default async function AppLayout({
       /* North star 10 E: Around's tab, row and Create action leave the
          navigation while the `social` switch is off (fails open). */
       socialOn={socialOn}
+      /* The website's foot, for a guest in a browser only: there is no
+         separate landing page (founder, 14 November 2026), so the browsing
+         pages end the way a website does. Never for a member, never inside
+         the app (`SiteFooter` also withholds its store badges there). The
+         shell decides which routes carry it (`showsSiteFoot`). */
+      foot={!signedIn && web ? <SiteFooter t={t} variant="app" /> : null}
     >
       {/* 9 November 2026: the new Terms (the Guarantee retired), shown once to
           each existing member at their next visit, and never to a new one. */}

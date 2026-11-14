@@ -3,6 +3,7 @@ import { cookies, headers } from "next/headers";
 import { resolveSession } from "@/lib/actions/session";
 import { firstRunCookieFrom, isFirstRunSeen } from "@/components/app/welcome/first-run-seen";
 import { isShellRequest, shellStartPath } from "@/lib/native/shell";
+import { publicCatalogueEnabled } from "@/lib/catalogue/public-access";
 
 /**
  * THE HANG THIS ROUTE USED TO BE ABLE TO CAUSE, FOUND FROM A REAL DEVICE
@@ -101,7 +102,10 @@ export async function GET(request: Request) {
      nothing inside can load, so sending somebody to `/home` would swap one
      dead end for another. `signedInWithDeadline` already answers false for
      "unconfigured", the same as a real signed-out session. */
-  const target = signedIn ? "/home" : "/";
+  /* The website has no landing page while the public catalogue is open
+     (founder, 14 November 2026): a signed-out caller goes to the listings.
+     Never to `/` then, which would send them straight back here. */
+  const target = signedIn ? "/home" : publicCatalogueEnabled() ? "/search" : "/";
   return NextResponse.redirect(new URL(target, request.url), {
     /* 307, not 308. Where somebody belongs changes when they sign in or out,
        so this answer must never be cached by a browser as permanent. */

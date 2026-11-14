@@ -45,16 +45,21 @@ describe("the website footer carries the store badges", () => {
     expect(footer).not.toMatch(/native:\s*false/);
   });
 
-  it("uses a class that a stylesheet actually declares", () => {
+  it("uses classes that the footer's own stylesheet declares", () => {
     /*
-     * The class in the markup and no rule anywhere is the exact shape of the
-     * `nf-md` defect found on 13 November, where fourteen money pages wore a
-     * class declared only in the admin desk's own sheet and got no layout at
-     * all. Both layouts that render this footer import landing-rooms.css,
-     * which is where the whole badge family lives.
+     * The badge family lives in site.css, the sheet this footer imports for
+     * itself (14 November 2026). It used to live in landing-rooms.css, which
+     * only the site and landing layouts load; the footer is now also drawn
+     * under the listings a guest lands on, where that sheet is absent, and
+     * the badges would have been unstyled artwork there.
      */
+    expect(footer).toContain('import "@/app/css/site.css";');
     expect(footer).toContain("nf-site-footer__badges");
-    const sheet = readFileSync(join(SRC, "app", "css", "landing-rooms.css"), "utf8");
-    expect(sheet).toContain(".nf-site-footer__badges");
+    const sheet = readFileSync(join(SRC, "app", "css", "site.css"), "utf8");
+    for (const rule of [".nf-site-footer__badges", ".nf-store-badges {", ".nf-store-badge {", ".nf-store-badge--soon {", ".nf-store-badge:focus-visible"]) {
+      expect(sheet, rule).toContain(rule);
+    }
+    /* Declared once: the old sheet no longer carries the family. */
+    expect(readFileSync(join(SRC, "app", "css", "landing-rooms.css"), "utf8")).not.toContain(".nf-store-badge {");
   });
 });

@@ -19,6 +19,7 @@ import {
   isPublicCataloguePath,
   PUBLIC_CATALOGUE_API_PATHS,
   publicCatalogueEnabled,
+  websiteFrontDoor,
 } from "@/lib/catalogue/public-access";
 import { isSupabaseConfigured, SUPABASE_ANON_KEY, SUPABASE_URL } from "./lib/supabase/env";
 import { deadlineFetch, PROXY_CUT_PATHS, PROXY_DEADLINE_MS } from "./lib/supabase/deadline-fetch";
@@ -745,6 +746,21 @@ export async function proxy(request: NextRequest) {
    */
   if (request.nextUrl.pathname === "/" && isShellUserAgent(request.headers.get("user-agent"))) {
     return withSecurityPolicy(NextResponse.redirect(new URL(SHELL_START, request.url), 307), nonce);
+  }
+
+  /*
+   * THE WEBSITE HAS NO LANDING PAGE (founder, 14 November 2026). A browser
+   * that asks for the root is sent to the listings, or to its own home when
+   * it carries a session, before anything renders, for the same reason as
+   * the shell above: a page-level redirect would arrive after the root
+   * skeleton had streamed. 307, never 308: where the root leads depends on
+   * who is asking and on a switch, so no browser may remember it. While the
+   * public catalogue is closed this answers nothing and the old front page
+   * is served (`websiteFrontDoor`).
+   */
+  if ((request.method === "GET" || request.method === "HEAD") && pathname === "/") {
+    const door = websiteFrontDoor({ carriesSession: carriesSessionCookie(request), search: request.nextUrl.searchParams });
+    if (door) return withSecurityPolicy(NextResponse.redirect(new URL(door, request.url), 307), nonce);
   }
 
   /*

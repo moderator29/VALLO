@@ -33,6 +33,8 @@
   }
 
   /* ------------------------------------------------------- the footer */
+  /* Rebuilt 14 November 2026 (`components/site/SiteFooter.tsx`): four bands,
+     the head, the links, the stay-connected panel and the legal bar. */
 
   .nf-site-footer {
     position: relative;
@@ -40,8 +42,8 @@
     background: var(--nf-surface-canvas);
     border-top: 1px solid var(--nf-brand-edge-soft);
   }
-  /* The lit horizon the render draws along the top of its footer: one
-     line of brand light and a soft bloom under it, nothing animated. */
+  /* The lit horizon along the top of the foot: one line of brand light and
+     a soft bloom under it, nothing animated. */
   .nf-site-footer::before {
     content: "";
     position: absolute;
@@ -53,61 +55,102 @@
   .nf-site-footer > * {
     position: relative;
   }
-  .nf-site-footer-grid {
+  /* Under the listings a guest lands on: the page's own ground, a plain
+     hairline, no bloom. The shell's own bottom reservation clears the dock. */
+  .nf-site-footer--app {
+    margin-top: var(--nf-gap-block);
+    background: transparent;
+    border-top-color: var(--nf-border-subtle);
+  }
+  .nf-site-footer--app::before {
+    content: none;
+  }
+  .nf-foot {
+    padding-block: var(--nf-gap-block) var(--nf-gap-group);
+  }
+  @media (min-width: 1024px) {
+    .nf-foot {
+      padding-block-start: var(--nf-gap-section-tight);
+    }
+  }
+
+  /* 1. The head. */
+  .nf-foot__head {
+    display: flex;
+    flex-direction: column;
+    gap: var(--nf-gap-group);
+  }
+  @media (min-width: 768px) {
+    .nf-foot__head {
+      flex-direction: row;
+      align-items: flex-end;
+      justify-content: space-between;
+    }
+  }
+  /* The lockup is a link home: a full 44px target, whatever the artwork's height. */
+  .nf-foot__brand > a {
+    align-items: center;
+    min-height: 2.75rem;
+  }
+  .nf-foot__line {
+    max-width: 26rem;
+    margin-top: var(--nf-gap-inline);
+    font-size: var(--nf-text-body-sm);
+    line-height: 1.5;
+    color: var(--nf-content-secondary);
+  }
+  .nf-foot__label,
+  .nf-foot .nf-social__heading {
+    font-size: var(--nf-text-caption);
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--nf-content-muted);
+  }
+  .nf-foot__apps .nf-site-footer__badges {
+    margin-block-start: var(--nf-space-xs);
+  }
+
+  /* 2. The links: two tracks on a phone with Support across both, three
+     columns from 768. A hairline opens the band and, on a phone, divides
+     Support from the pair above it. */
+  .nf-foot__cols {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: var(--nf-gap-block) var(--nf-gap-group);
+    column-gap: var(--nf-gap-group);
+    row-gap: var(--nf-gap-group);
+    margin-top: var(--nf-gap-block);
+    padding-top: var(--nf-gap-block);
+    border-top: 1px solid var(--nf-border-subtle);
   }
-  @media (min-width: 768px) {
-    .nf-site-footer-grid {
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-    }
-  }
-  @media (min-width: 1024px) {
-    .nf-site-footer-grid {
-      /* Brand, the three link columns, then the newsletter. It was four link
-         tracks for three columns, so the newsletter fell into a narrow link
-         track, truncated its own field, and left a wide empty track at the
-         end (Track M footer tidy). */
-      grid-template-columns: minmax(0, 1.4fr) repeat(3, minmax(0, 0.8fr)) minmax(0, 1.4fr);
-      column-gap: var(--nf-gap-block);
-    }
-  }
-  .nf-site-footer-brand,
-  .nf-site-footer-connect {
+  .nf-foot__col--wide {
     grid-column: span 2;
+    padding-top: var(--nf-gap-group);
+    border-top: 1px solid var(--nf-border-subtle);
   }
-  @media (min-width: 768px) {
-    .nf-site-footer-connect {
-      grid-column: span 4;
-    }
-  }
-  @media (min-width: 1024px) {
-    .nf-site-footer-brand,
-    .nf-site-footer-connect {
-      grid-column: span 1;
-    }
-  }
-  /* The support column's nine links: across both phone tracks in two
-     columns of their own (it was a single column of nine, the footer's
-     longest run at 390), one column again from 1024px. */
-  .nf-site-footer-col--wide {
-    grid-column: span 2;
-  }
-  .nf-site-footer-col--wide > ul {
+  .nf-foot__col--wide > ul {
     columns: 2;
     column-gap: var(--nf-gap-group);
   }
-  .nf-site-footer-col--wide li {
+  .nf-foot__col--wide li {
     break-inside: avoid;
   }
-  @media (min-width: 1024px) {
-    .nf-site-footer-col--wide {
-      grid-column: span 1;
+  @media (min-width: 768px) {
+    .nf-foot__cols {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 2fr);
+      column-gap: var(--nf-gap-block);
     }
-    .nf-site-footer-col--wide > ul {
-      columns: 1;
+    .nf-foot__col--wide {
+      grid-column: auto;
+      padding-top: 0;
+      border-top: 0;
     }
+  }
+  .nf-foot__title {
+    margin-bottom: var(--nf-space-2xs);
+    font-size: var(--nf-text-body-sm);
+    font-weight: 600;
+    color: var(--nf-content-primary);
   }
   .nf-site-footer-link {
     display: inline-flex;
@@ -119,6 +162,12 @@
     font-size: var(--nf-text-body-sm);
     color: var(--nf-content-secondary);
     transition: color var(--nf-duration-fast) var(--nf-ease-standard);
+  }
+  /* A mouse does not need the finger's 44px row: the lists close up. */
+  @media (hover: hover) and (pointer: fine) {
+    .nf-site-footer-link {
+      min-height: 2.25rem;
+    }
   }
   /* The Cookie settings entry is a button that opens a sheet; it draws as its neighbours do. */
   button.nf-site-footer-link {
@@ -139,22 +188,120 @@
     border-radius: var(--nf-radius-xs);
   }
 
-  /* One hairline above the legal line (UIUX item 11; the skyline and the
-     shield that sat here are gone). */
-  .nf-site-footer-legal {
+  /* 3. Stay connected: one contained panel, the field at the start and
+     Follow Vallo at the end. */
+  .nf-foot__connect {
+    display: grid;
+    gap: var(--nf-gap-group);
+    margin-top: var(--nf-gap-block);
+    padding: var(--nf-space-lg);
+    border: var(--nf-border-width) solid var(--nf-card-border);
+    border-radius: var(--nf-radius-lg);
+    background: var(--nf-surface-secondary);
+  }
+  @media (min-width: 768px) {
+    .nf-foot__connect {
+      grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+      align-items: start;
+      column-gap: var(--nf-gap-section-tight);
+      padding: var(--nf-space-xl);
+    }
+    .nf-foot__follow {
+      justify-self: end;
+    }
+  }
+  .nf-foot__note {
+    max-width: 28rem;
+    margin-bottom: var(--nf-gap-row);
+    font-size: var(--nf-text-body-sm);
+    color: var(--nf-content-secondary);
+  }
+
+  /* 4. The legal bar: one hairline above it, the owner at the start, the
+     legal links on one wrapping row. */
+  .nf-foot__legal {
     display: flex;
     flex-direction: column;
     gap: var(--nf-gap-inline);
-    margin-top: var(--nf-gap-section-tight);
-    padding-top: var(--nf-gap-heading);
+    margin-top: var(--nf-gap-block);
+    padding-top: var(--nf-gap-group);
     border-top: 1px solid var(--nf-border-subtle);
+    font-size: var(--nf-text-caption);
+    color: var(--nf-content-muted);
   }
-  @media (min-width: 640px) {
-    .nf-site-footer-legal {
+  .nf-foot__owner {
+    display: grid;
+    gap: var(--nf-space-3xs);
+  }
+  .nf-foot__owner > p {
+    color: var(--nf-content-secondary);
+  }
+  .nf-foot__terms {
+    display: flex;
+    flex-wrap: wrap;
+    column-gap: var(--nf-gap-group);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .nf-foot__terms .nf-site-footer-link {
+    font-size: var(--nf-text-caption);
+  }
+  @media (min-width: 1024px) {
+    .nf-foot__legal {
       flex-direction: row;
-      align-items: center;
+      align-items: flex-start;
       justify-content: space-between;
+      column-gap: var(--nf-gap-block);
     }
+    .nf-foot__terms {
+      justify-content: flex-end;
+      max-width: 34rem;
+    }
+  }
+
+  /* ================================================ store badges */
+
+  .nf-store-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--nf-gap-row);
+  }
+  .nf-store-badge {
+    display: block;
+    border-radius: var(--nf-radius-md);
+  }
+  /* 44px tall: above both stores' 40px minimum and a full tap target. */
+  .nf-store-badge svg {
+    display: block;
+    width: auto;
+    height: 2.75rem;
+  }
+  /* Not live yet: the same unaltered artwork (neither store allows a faded
+     badge), with the plain words under it. */
+  .nf-store-badge--soon {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.375rem;
+  }
+  .nf-store-badge__soon {
+    font-size: var(--nf-text-caption);
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: var(--nf-content-secondary);
+  }
+  /* IN THE FOOTER, the badges close the brand block, so they need the same
+     air the lines above them have and nothing else: the badge family's own
+     size, wrap and focus rules all still apply. Added 13 November 2026 when
+     the badges moved from the landing's two bands onto every page of the
+     website. */
+  .nf-site-footer__badges {
+    margin-block-start: var(--nf-space-sm);
+  }
+  .nf-store-badge:focus-visible {
+    outline: var(--nf-focus-ring-width) solid var(--nf-focus-ring);
+    outline-offset: 3px;
   }
 
   /* The email field: one glass capsule with the round submit inside it. */
