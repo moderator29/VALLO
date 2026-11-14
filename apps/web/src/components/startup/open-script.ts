@@ -21,13 +21,12 @@
  * don't like the image 1"). Image 2 is this layer: the mark beside the
  * wordmark on the lit ground. Image 1 is the opening the 1.0.2 binary draws
  * itself (`LaunchMark`: the mark above the wordmark, with a version line).
- * On 13 November this layer was switched OFF inside such a binary so there
- * would be one opening and not two; that left the app with only the one he
- * does not want. So it plays there again, and it is timed to begin as the
- * binary's own mark leaves (`OPEN_AFTER_NATIVE_MS`), never underneath it.
  * The binary's opening cannot be taken out of an app that is already
- * installed; the next build draws nothing of its own and says so by
- * registering `ValloShell.pageOpens`, and there this layer starts at once.
+ * installed, so for a few hours this layer was played after it, and the app
+ * had two openings. His ruling the same day: ONE opening, always. So inside
+ * a binary that draws its own, this layer is OFF and that one is the
+ * opening; the next build draws nothing of its own, says so by registering
+ * `ValloShell.pageOpens`, and there this layer is the one opening.
  *
  * ON THE NATIVE SHELL (founder, 10 November 2026: the centred logo, slower).
  * The opening plays there too, but it must NOT begin while the Capacitor
@@ -103,16 +102,6 @@ export const OPEN_NATIVE_METHOD = "handoff";
  */
 export const OPEN_NATIVE_PAGE_METHOD = "pageOpens";
 
-/**
- * In a binary that still draws its own opening, this layer is not lit before
- * this long on the page's own clock: the binary's mark has landed at 1,400ms
- * (`LaunchMark.sequenceEnd`) and fades over the next 220ms, so this drawing
- * begins as that one leaves. The page's clock starts a little after the
- * binary's, so this errs towards a short overlap inside the fade, never a gap
- * in which the page would show before its opening.
- */
-export const OPEN_AFTER_NATIVE_MS = 1400;
-
 /** sessionStorage key marking this session's opening as shown. */
 export const OPEN_SESSION_KEY = "nf_open";
 
@@ -125,20 +114,20 @@ export const OPEN_SCRIPT =
      still decide how the layer is TIMED below (the shell waits for its splash),
      but no surface is refused the opening now. A cold open in this browser
      session is still the only one that plays: the warm check is next. */
-  /* THE BINARY'S OWN OPENING, AND THIS ONE AFTER IT (14 November 2026). A
-     1.0.2 binary draws its own opening over the launch ground (`LaunchMark`
-     in ValloShell.swift and LaunchMark.java) and hands over to the page. The
-     founder wants this layer as the opening and not that one, and an
-     installed binary cannot be changed from here, so this layer plays as
-     that one leaves: `floor` holds it until the binary's mark has landed.
+  /* ONE OPENING, ALWAYS (the founder, 14 November 2026). A 1.0.2 binary
+     draws its own opening over the launch ground (`LaunchMark` in
+     ValloShell.swift and LaunchMark.java) and hands over to the page. An
+     installed binary cannot be changed from here, and he will not have two
+     openings in a row, so inside such a binary this layer is switched off
+     before it can draw a frame and the binary's is the one opening.
      The binary says which it is at document start, before this script runs:
      Capacitor injects every registered plugin's header
      (`window.Capacitor.PluginHeaders`). `ValloShell.handoff` alone is a
      binary that draws its own; with `ValloShell.pageOpens` beside it the
-     binary draws nothing and this layer starts with no floor; neither is an
-     older binary, timed after the splash as it always was. */
-  "var floor=0;if(nat){var own=false,page=false;try{var H=W.Capacitor&&W.Capacitor.PluginHeaders;if(H&&H.length)for(var i=0;i<H.length;i++){var h=H[i];if(h&&h.name==='" + OPEN_NATIVE_PLUGIN + "'&&h.methods)for(var j=0;j<h.methods.length;j++){var n=h.methods[j]&&h.methods[j].name;if(n==='" + OPEN_NATIVE_METHOD + "')own=true;if(n==='" + OPEN_NATIVE_PAGE_METHOD + "')page=true}}}catch(e){}" +
-  "if(own&&!page)floor=" + OPEN_AFTER_NATIVE_MS + "}" +
+     binary draws nothing and this layer is the opening; neither is an older
+     binary, where this layer is the opening as it always was. */
+  "if(nat){var own=false,page=false;try{var H=W.Capacitor&&W.Capacitor.PluginHeaders;if(H&&H.length)for(var i=0;i<H.length;i++){var h=H[i];if(h&&h.name==='" + OPEN_NATIVE_PLUGIN + "'&&h.methods)for(var j=0;j<h.methods.length;j++){var n=h.methods[j]&&h.methods[j].name;if(n==='" + OPEN_NATIVE_METHOD + "')own=true;if(n==='" + OPEN_NATIVE_PAGE_METHOD + "')page=true}}}catch(e){}" +
+  "if(own&&!page){r.setAttribute('data-open','off');return}}" +
   "var warm=true;try{warm=!!sessionStorage.getItem('" + OPEN_SESSION_KEY + "');if(!warm)sessionStorage.setItem('" + OPEN_SESSION_KEY + "','1')}catch(e){}" +
   "if(warm){r.setAttribute('data-open','off');return}" +
   /* LIT ONCE, NEVER AFTER IT HAS GONE, AND TIMED FROM WHEN IT IS SHOWN (13
@@ -157,9 +146,7 @@ export const OPEN_SCRIPT =
      happened. */
   "var lit=0,gone=0;function light(){if(lit||gone)return;lit=1;r.setAttribute('data-open','on');setTimeout(function(){if(!gone)leave()}," + (OPEN_CAP_MS + OPEN_HARD_GRACE_MS) + ");if(D.readyState==='loading')D.addEventListener('DOMContentLoaded',arm,{once:true});else arm()}" +
   /* The shell waits for the splash to be down; the website lights up at once. */
-  /* Not before the binary's own mark has landed (`floor`, zero elsewhere). */
-  "function after(){var w=0;try{w=floor-performance.now()}catch(e){}if(w>0)setTimeout(light,w);else light()}" +
-  "if(nat){if(W.__nfSplashDown)after();else{try{W.addEventListener('nf:splash-down',after,{once:true})}catch(e){}setTimeout(light," + OPEN_NATIVE_WAIT_MS + ")}}else light();" +
+  "if(nat){if(W.__nfSplashDown)light();else{try{W.addEventListener('nf:splash-down',light,{once:true})}catch(e){}setTimeout(light," + OPEN_NATIVE_WAIT_MS + ")}}else light();" +
   "var still=false;try{still=W.matchMedia('(prefers-reduced-motion: reduce)').matches}catch(e){}" +
   "var mo=r.getAttribute('data-motion');if(mo==='calm'||mo==='off')still=true;" +
   "var min=still?" + OPEN_MIN_STILL_MS + ":" + OPEN_MIN_MS + ",cap=" + OPEN_CAP_MS + ",t0=0;" +

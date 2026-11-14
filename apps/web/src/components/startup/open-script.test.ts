@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { OPEN_HARD_GRACE_MS, OPEN_AFTER_NATIVE_MS,
+import { OPEN_HARD_GRACE_MS,
   OPEN_NATIVE_METHOD,
   OPEN_NATIVE_PAGE_METHOD, OPEN_NATIVE_PLUGIN, OPEN_CAP_MS, OPEN_CSS_CAP_MS, OPEN_FADE_MS, OPEN_MIN_MS, OPEN_MIN_STILL_MS, OPEN_NATIVE_WAIT_MS, OPEN_SCRIPT, OPEN_SESSION_KEY } from "./open-script";
 
@@ -142,49 +142,31 @@ describe("the opening screen's decision", () => {
 });
 
 /*
- * THIS LAYER IS THE OPENING IN THE APP TOO (the founder, 14 November 2026). A
- * 1.0.2 binary draws its own opening (`LaunchMark`) and registers
- * `ValloShell.handoff`. On 13 November this layer was switched off there; the
- * founder wants this one and not the binary's, so it plays there again, and
- * never before the binary's own mark has landed. A later binary that draws
- * nothing says so with `ValloShell.pageOpens`, and has no such wait.
+ * ONE OPENING, ALWAYS (the founder, 14 November 2026). A 1.0.2 binary draws
+ * its own opening (`LaunchMark`) and registers `ValloShell.handoff`; it cannot
+ * be changed once installed, and he will not have two openings in a row, so
+ * this layer is off there. A later binary that draws nothing says so with
+ * `ValloShell.pageOpens`, and there this layer is the one opening.
  */
 describe("the opening inside the app", () => {
   const SPLASH = { name: "SplashScreen", methods: [{ name: "hide" }, { name: "show" }] };
   const SHELL_102 = { name: OPEN_NATIVE_PLUGIN, methods: [{ name: "setPrivacyCover" }, { name: OPEN_NATIVE_METHOD }, { name: "takeCrashReport" }] };
   const SHELL_NEXT = { name: OPEN_NATIVE_PLUGIN, methods: [{ name: OPEN_NATIVE_METHOD }, { name: OPEN_NATIVE_PAGE_METHOD }] };
 
-  it("plays in a binary that draws its own opening, once the splash is down and that mark has landed", () => {
+  it("is off, before a frame and for good, in a binary that draws its own opening", () => {
     for (const env of [{ native: true }, { ua: "Mozilla/5.0 VALLO-NATIVE" }]) {
       const r = run({ ...env, pluginHeaders: [SPLASH, SHELL_102] });
-      expect(r.attrs["data-open"]).toBeUndefined();
-      /* The splash comes down early: the layer still waits for the binary's mark. */
-      r.setNow(600);
+      expect(r.attrs["data-open"]).toBe("off");
+      /* Nothing lights it later: not the splash coming down, not the long wait. */
       r.relight();
-      expect(r.attrs["data-open"]).toBeUndefined();
-      r.advance(OPEN_AFTER_NATIVE_MS - 1);
-      expect(r.attrs["data-open"]).toBeUndefined();
-      r.advance(OPEN_AFTER_NATIVE_MS);
-      expect(r.attrs["data-open"]).toBe("on");
+      r.advance(OPEN_NATIVE_WAIT_MS + 5000);
+      expect(r.attrs["data-open"]).toBe("off");
     }
   });
 
-  it("plays at once when the splash comes down after the binary's mark has already landed", () => {
-    const r = run({ native: true, pluginHeaders: [SPLASH, SHELL_102] });
-    r.setNow(OPEN_AFTER_NATIVE_MS + 800);
-    r.relight();
-    expect(r.attrs["data-open"]).toBe("on");
-  });
-
-  it("is never lost in such a binary when the splash never says it is down", () => {
-    const r = run({ native: true, pluginHeaders: [SPLASH, SHELL_102] });
-    r.advance(OPEN_NATIVE_WAIT_MS + 100);
-    expect(r.attrs["data-open"]).toBe("on");
-  });
-
-  it("has no wait in a binary that draws no opening of its own", () => {
+  it("is the one opening, with no wait, in a binary that draws none of its own", () => {
     const r = run({ native: true, pluginHeaders: [SPLASH, SHELL_NEXT] });
-    r.setNow(300);
+    expect(r.attrs["data-open"]).toBeUndefined();
     r.relight();
     expect(r.attrs["data-open"]).toBe("on");
   });
