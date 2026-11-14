@@ -118,6 +118,9 @@ export const ROUTE_PARENTS: Readonly<Record<string, ParentRoute>> = {
   /* ---------------------------------------------------------- the website */
   "/": ROOT,
   "/about": "/",
+  /* The landing page's own address since 14 November 2026, when `/` became
+     the signed-out discovery screen. Back from it is the front door. */
+  "/tour": "/",
   /* The Community Promise, a company page beside About (founder, 7 November 2026). */
   "/community": "/",
   /* V-82: a public area price page sits under the landing page, as the

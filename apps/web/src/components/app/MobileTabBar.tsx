@@ -234,6 +234,21 @@ export { isFocusedRoute };
  */
 export function tabRootFor(pathname: string): string | null {
   if (isImmersiveRoute(pathname) || isFocusedRoute(pathname)) return null;
+  /*
+   * THE FRONT DOOR IS THE SEARCH TAB (the founder, 14 November 2026: `/` is
+   * the signed-out discovery screen, and his screenshot of it has the dock
+   * along the bottom). The proxy REWRITES `/` to `/search`, so the browser's
+   * address stays `/` and `usePathname` answers `/`, which matched no tab at
+   * all: the dock vanished on the one screen that most needs it.
+   *
+   * It answers `/search` rather than `/`, because that is the tab the reader
+   * is actually on: adding `/` to the tab list would have shown the dock with
+   * nothing lit, which this file's own comment above calls a lie.
+   *
+   * It cannot reach the landing page: that lives in its own route group with
+   * no shell, so nothing here is ever asked about it.
+   */
+  if (pathname === "/") return "/search";
   return (
     TAB_BAR_ROUTES.find(
       (route) => pathname === route || pathname.startsWith(`${route}/`),
