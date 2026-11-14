@@ -9,6 +9,7 @@ import type {
   TextareaHTMLAttributes,
 } from "react";
 import { UiIcon, type UiIconName } from "@/design-system/icons/UiIcon";
+import { hintsFor, type FieldKind } from "@/lib/ui/keyboard-hints";
 import { counterFor } from "@/lib/ui/small-rules";
 import { FieldProblem } from "@/components/ui/FieldProblem";
 
@@ -315,6 +316,13 @@ export type TextFieldProps = Omit<
      * attribute spread. Passed straight through to the `<input>`.
      */
     enterKeyHint?: "enter" | "done" | "go" | "next" | "previous" | "search" | "send";
+    /**
+     * What this field HOLDS, which decides its keyboard (`lib/ui/keyboard-hints.ts`).
+     * Left out, it is read from the field's own `type`, `name` and `id`, which
+     * is right for most fields; name it where the markup does not say, for
+     * example a plain text input that takes an amount.
+     */
+    fieldKind?: FieldKind;
     leadingIcon?: UiIconName;
     /**
      * A leading glyph that is not a `UiIcon`: a glass `BrandIcon` in the well,
@@ -359,6 +367,7 @@ export function TextField({
   trailing,
   clearable,
   onClear,
+  fieldKind,
   size = "md",
   inputClassName,
   onChange,
@@ -380,17 +389,17 @@ export function TextField({
   const controlled = rest.value !== undefined;
   const filled = controlled ? String(rest.value ?? "").length > 0 : typedInto;
   /*
-   * THE PHONE KEYBOARD, SET FOR WHAT IS TYPED (13 November 2026). An address
-   * is never capitalised, corrected or spell-checked and gets the @ keyboard;
-   * a search field's return key says Search. Defaults only: anything the call
-   * site passes wins, because it is spread after.
+   * THE PHONE KEYBOARD, SET FOR WHAT IS TYPED (13 November 2026, widened 14
+   * November 2026 to every kind of field: `lib/ui/keyboard-hints.ts`). An
+   * address is never capitalised, corrected or spell-checked and gets the @
+   * keyboard; an amount gets the decimal pad; a number the phone pad; a code
+   * the number pad with `one-time-code`; a name capitals by word and no spell
+   * check; a search field's return key says Search. The kind is named by the
+   * caller (`fieldKind`) or read from the field's own type, name and id.
+   * Defaults only: anything the call site passes wins, because it is spread
+   * after.
    */
-  const keyboard =
-    rest.type === "email"
-      ? ({ inputMode: "email", autoCapitalize: "none", autoCorrect: "off", spellCheck: false } as const)
-      : rest.type === "search"
-        ? ({ inputMode: "search", enterKeyHint: "search" } as const)
-        : {};
+  const keyboard = hintsFor({ type: rest.type, name: rest.name, id: rest.id }, fieldKind);
   const showClear = Boolean(clearable) && filled && !rest.disabled && !rest.readOnly;
 
   const clear = () => {
@@ -608,6 +617,7 @@ export function TextArea({
   textAreaClassName,
   validate,
   showCount = true,
+  fieldKind,
   onChange,
   onBlur,
   ...rest
@@ -632,6 +642,11 @@ export function TextArea({
     >
       {(control) => (
         <textarea
+          /* The same keyboard rules as a single-line field, read from what
+             this box holds (`lib/ui/keyboard-hints.ts`). A multiline box
+             keeps sentence capitals and sets no enterKeyHint, because Enter
+             there makes a new line rather than closing a form. */
+          {...hintsFor({ name: rest.name, id: rest.id, multiline: true }, fieldKind)}
           {...rest}
           {...control}
           rows={rows}

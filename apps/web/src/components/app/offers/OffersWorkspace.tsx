@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { Segmented } from "@/components/ui/Segmented";
-import { Chip, ChipRow } from "@/components/ui/Chip";
+import { CountTabs } from "@/components/ui/CountTabs";
 import { Panel } from "@/components/ui/Panel";
 import { RemoteImage } from "@/components/ui/RemoteImage";
 import { State } from "@/components/ui/State";
@@ -21,11 +21,24 @@ import { GapBar, Naira, OfferStateChip } from "./OfferParts";
 import "./offers.css";
 
 type Tab = "made" | "received";
-type Filter = OfferState | "all" | "awaiting_you";
+/**
+ * The founder's count tab row on the offers workspace (handoff 6.3, 14
+ * November 2026): Waiting on you, Waiting on them, Agreed, Closed.
+ *
+ * `awaiting_you` and the per-state counts come from the server
+ * (`OfferCounts`). The two NEW tabs are derived from the rows this screen
+ * already holds, never from a new read: "waiting on them" is an open offer
+ * whose turn is the other side, and "closed" is the four states that end an
+ * offer, added up. The per-state tabs they fold up are still reachable: a
+ * closed offer says which kind it is on its own row.
+ */
+type Filter = OfferState | "all" | "awaiting_you" | "waiting_them" | "closed";
 type SortKey = "activity" | "amount" | "gap";
 type Dir = "ascending" | "descending";
 
-const FILTERS: readonly Filter[] = ["all", "awaiting_you", "open", "agreed", "declined", "withdrawn", "expired", "cancelled"];
+const FILTERS: readonly Filter[] = ["all", "awaiting_you", "waiting_them", "agreed", "closed"];
+/** The states that end an offer, folded into one tab. */
+const CLOSED_STATES: readonly OfferState[] = ["declined", "withdrawn", "expired", "cancelled"];
 
 export type OffersWorkspaceProps = {
   made: { rows: OfferRow[]; counts: OfferCounts };
@@ -215,6 +228,8 @@ export function OffersWorkspace({ made, received, initialTab, nowMs }: OffersWor
     const q = query.trim().toLowerCase();
     let all = data.rows;
     if (filter === "awaiting_you") all = all.filter((r) => r.state === "open" && r.turn === r.viewerSide);
+    else if (filter === "waiting_them") all = all.filter((r) => r.state === "open" && r.turn !== r.viewerSide);
+    else if (filter === "closed") all = all.filter((r) => CLOSED_STATES.includes(r.state));
     else if (filter !== "all") all = all.filter((r) => r.state === filter);
     if (q) all = all.filter((r) => [r.listingTitle, r.reference, r.counterpartyName].some((x) => x.toLowerCase().includes(q)));
     const val = (r: OfferRow) => (sort.key === "amount" ? r.amountMinor : sort.key === "gap" ? r.differencePct : Date.parse(r.lastActivityAt));
@@ -229,7 +244,15 @@ export function OffersWorkspace({ made, received, initialTab, nowMs }: OffersWor
   };
   const onSort = (key: SortKey) => setSort((s) => (s.key === key ? { key, dir: s.dir === "descending" ? "ascending" : "descending" } : { key, dir: "descending" }));
 
-  const visibleFilters = FILTERS.filter((f) => f === "all" || data.counts[f] > 0 || f === filter);
+  /* Every tab's count, from what this screen already has in hand. */
+  const countFor = (f: Filter): number => {
+    if (f === "waiting_them") return data.rows.filter((r) => r.state === "open" && r.turn !== r.viewerSide).length;
+    if (f === "closed") return CLOSED_STATES.reduce((sum, state) => sum + (data.counts[state] ?? 0), 0);
+    return data.counts[f as keyof typeof data.counts] ?? 0;
+  };
+  /* A tab appears only when it has something in it; the tab you are on never
+     vanishes under you. */
+  const visibleFilters = FILTERS.filter((f) => f === "all" || countFor(f) > 0 || f === filter);
 
   return (
     <div className="nf-ofr-ws grid gap-md" data-testid="offers-workspace">
@@ -250,13 +273,17 @@ export function OffersWorkspace({ made, received, initialTab, nowMs }: OffersWor
           <div className="hidden min-w-[16rem] flex-1 lg:block">
             <TextField label="Search" hideLabel placeholder="Search property, person or reference (press /)" leadingIcon="search" inputMode="search" enterKeyHint="search" value={query} onChange={(e) => setQuery(e.target.value)} clearable="Clear search" onClear={() => setQuery("")} data-testid="offers-search" />
           </div>
-          <ChipRow label="Filter by state" radiogroup bleed={false} fadeEdges={false}>
-            {visibleFilters.map((f) => (
-              <Chip key={f} behaviour="choice" selected={filter === f} onSelectedChange={() => setFilter(f)} count={data.counts[f]} data-testid={`offers-filter-${f}`}>
-                {STATE_FILTER_LABEL[f]}
-              </Chip>
-            ))}
-          </ChipRow>
+          <CountTabs
+            label="Filter by state"
+            active={filter}
+            onChange={(key) => setFilter(key as Filter)}
+            items={visibleFilters.map((f) => ({
+              key: f,
+              label: STATE_FILTER_LABEL[f],
+              ...(countFor(f) > 0 ? { count: countFor(f) } : {}),
+              "data-testid": `offers-filter-${f}`,
+            }))}
+          />
         </div>
       ) : null}
 

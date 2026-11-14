@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { getDictionary, type Locale } from "@vallo/i18n";
 import { getLocale } from "@/lib/locale";
 import { getSide } from "@/lib/side";
@@ -17,6 +16,7 @@ import { Reveal } from "@/components/site/Reveal";
 import { EmptyActions } from "@/components/app/EmptyActions";
 import { EmptyState, Row, RowList, Section, TYPE } from "@/components/app/Screen";
 import { TenancyCard } from "@/components/app/bookings/TenancyCard";
+import { CountTabs } from "@/components/ui/CountTabs";
 import { TripSpine } from "@/components/app/plans/TripSpine";
 import { lagosToday } from "@/components/app/plans/trip-spine";
 import { InspectionsBoard } from "@/components/app/plans/InspectionsBoard";
@@ -179,7 +179,15 @@ export default async function PlansPage({
         <PageFrame title={copy.title} subtitle={copy.lede}>
         <div>
 
-      <FilterLinks filter={inspectionsOnly ? "property" : filter} copy={copy} />
+      <FilterLinks
+        filter={inspectionsOnly ? "property" : filter}
+        copy={copy}
+        counts={{
+          all: items.length,
+          property: items.filter((item) => inFilter(item, "property")).length,
+          stays: items.filter((item) => inFilter(item, "stays")).length,
+        }}
+      />
       {billReturn && <BillReturnCheck reference={billReturn} />}
 
       {nothing ? (
@@ -274,12 +282,28 @@ export default async function PlansPage({
 }
 
 /** The three sides of the filter, as links: the address is the state. */
+/**
+ * The side filter, on the shared count tab row (handoff 6.3, 14 November
+ * 2026). Every tab is a real address, so back, share and a reload keep the
+ * side, which is what it always was; the counts are how many plans each side
+ * holds, taken from the items this page has already built.
+ *
+ * NOT the handoff's Upcoming / Now / Past / Cancelled. This screen is a date
+ * spine: what is coming up, then the property side, then the stays, then
+ * what is done and what was cancelled, all visible in one scroll. Those four
+ * words are its SECTIONS, and putting them behind tabs would hide three
+ * quarters of the page to save a scroll nobody asked to be saved. The tab
+ * row this screen does have is the side, so that is the one that moved.
+ */
 function FilterLinks({
   filter,
   copy,
+  counts,
 }: {
   filter: PlanFilter;
   copy: ReturnType<typeof getDictionary>["shape"]["plans"];
+  /** How many plans each side holds, from the items already built. */
+  counts: { all: number; property: number; stays: number };
 }) {
   const options: { value: PlanFilter; label: string }[] = [
     { value: "all", label: copy.filterAll },
@@ -287,25 +311,19 @@ function FilterLinks({
     { value: "stays", label: copy.filterStays },
   ];
   return (
-    <nav
-      aria-label={copy.filterLabel}
-      className="nf-segmented mb-block flex w-full items-center gap-2xs p-2xs"
+    <CountTabs
+      semantics="links"
+      label={copy.filterLabel}
+      active={filter}
+      className="mb-block"
       data-testid="plans-filter"
-    >
-      {options.map((option) => (
-        <Link
-          key={option.value}
-          href={`/bookings?side=${option.value}`}
-          aria-current={option.value === filter ? "true" : undefined}
-          className={`nf-segmented__link min-h-11 flex-1 text-[length:var(--nf-text-caption)] ${
-            option.value === filter ? "font-bold" : ""
-          }`}
-          prefetch={false}
-        >
-          {option.label}
-        </Link>
-      ))}
-    </nav>
+      items={options.map((option) => ({
+        key: option.value,
+        label: option.label,
+        href: `/bookings?side=${option.value}`,
+        ...(counts[option.value] > 0 ? { count: counts[option.value] } : {}),
+      }))}
+    />
   );
 }
 
