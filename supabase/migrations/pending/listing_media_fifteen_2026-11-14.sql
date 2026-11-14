@@ -1,14 +1,10 @@
 -- ============================================================================
--- CHECK AGAINST THE LIVE DEFINITIONS BEFORE ANYONE RUNS IT. Written from the
--- migrations in the repository while the database connection was down (13
--- November 2026). Read on live first:
---   select conname, pg_get_constraintdef(oid) from pg_constraint
---    where conrelid = 'public.listing_photos'::regclass and contype = 'c';
---   select pg_get_functiondef('private.listing_video_ceiling()'::regprocedure);
--- The photo position check was created inline (20260728152229_listings_core),
--- so its generated name is expected to be listing_photos_position_check; if
--- live names it otherwise, use the live name. NOT APPLIED. Only the founder
--- applies it.
+-- NOT APPLIED. CHECKED AGAINST LIVE ON 14 NOVEMBER 2026 WITH READS ONLY: the
+-- photo position check is named listing_photos_position_check (0..9), the
+-- videos' trigger is listing_videos_ceiling on private.listing_video_ceiling()
+-- (three), listing_photos has no ceiling trigger, and the fullest listing holds
+-- five photos and videos with a highest photo position of 3, so nothing is
+-- over the new shape. Only the founder applies it.
 -- ============================================================================
 --
 -- FIFTEEN IN ALL, PHOTOS AND VIDEOS TOGETHER (the founder, 13 November 2026:
@@ -83,25 +79,30 @@ create trigger listing_photos_media_ceiling
   for each row
   execute function private.listing_media_ceiling();
 
-commit;
-
--- READ-BACK
+-- READ-BACK, inside the transaction: if anything is not as written, nothing is kept.
 do $$
 begin
   if not exists (select 1 from pg_constraint where conname = 'listing_photos_position_fifteen') then
     raise exception 'the fifteen-position check on listing_photos is not there';
   end if;
   if exists (select 1 from pg_constraint where conrelid = 'public.listing_photos'::regclass and contype = 'c'
-              and pg_get_constraintdef(oid) ~ 'position < 10') then
+              and pg_get_constraintdef(oid) ~ 'position"? < 10') then
     raise exception 'an old ten-position check is still on listing_photos';
   end if;
-  if not exists (select 1 from pg_trigger where tgname = 'listing_videos_ceiling' and not tgisinternal)
-     or not exists (select 1 from pg_trigger where tgname = 'listing_photos_media_ceiling' and not tgisinternal) then
-    raise exception 'a media ceiling trigger is missing';
+  if (select count(*) from pg_trigger t join pg_proc p on p.oid = t.tgfoid
+       where not t.tgisinternal and p.proname = 'listing_media_ceiling'
+         and t.tgname in ('listing_videos_ceiling', 'listing_photos_media_ceiling')) <> 2 then
+    raise exception 'a media ceiling trigger is missing or still on the old function';
   end if;
-  if has_function_privilege('authenticated', 'private.listing_media_ceiling()', 'EXECUTE') then
-    raise exception 'the media ceiling is executable by authenticated';
+  if has_function_privilege('authenticated', 'private.listing_media_ceiling()', 'EXECUTE')
+     or has_function_privilege('anon', 'private.listing_media_ceiling()', 'EXECUTE') then
+    raise exception 'the media ceiling is executable by a client role';
   end if;
-  raise notice 'fifteen in all: photo positions 0..14 and one shared ceiling on both tables';
 end
 $$;
+
+commit;
+
+select (select pg_get_constraintdef(oid) from pg_constraint where conname = 'listing_photos_position_fifteen') as photo_positions,
+       (select count(*) from pg_trigger t join pg_proc p on p.oid = t.tgfoid
+         where not t.tgisinternal and p.proname = 'listing_media_ceiling') as shared_ceiling_triggers_of_2;
