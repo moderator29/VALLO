@@ -98,12 +98,14 @@ export function enterFor(place: "last" | "middle", submits: "go" | "done" = "go"
 
 const NAME_HINTS = /(^|[^a-z])(name|fullname|firstname|lastname|surname|givenname|familyname)([^a-z]|$)/i;
 const EMAIL_HINTS = /e-?mail/i;
-const PHONE_HINTS = /(phone|mobile|tel|whatsapp|msisdn)/i;
+const PHONE_HINTS = /\b(phone|mobile|tel|whatsapp|msisdn)\b/i;
 const CODE_HINTS = /(^|[^a-z])(code|otp|pin|passcode)([^a-z]|$)/i;
-const AMOUNT_HINTS = /(amount|price|rent|budget|naira|fee|cost|deposit|salary|total)/i;
-const HANDLE_HINTS = /(handle|username|user_name)/i;
-const SEARCH_HINTS = /(search|query|^q$)/i;
-const URL_HINTS = /(url|website|link)/i;
+/* Word boundaries, because "parentId" holds "rent" and a reply box is not
+   an amount: that exact mistake reached 62 files in this pass. */
+const AMOUNT_HINTS = /\b(amount|price|rent|budget|naira|fee|cost|deposit|salary|total)\b/i;
+const HANDLE_HINTS = /\b(handle|username|user_name)\b/i;
+const SEARCH_HINTS = /(\bsearch\b|\bquery\b|^q$)/i;
+const URL_HINTS = /\b(url|website|link)\b/i;
 
 /**
  * The kind a field looks like, from what the markup already says: its `type`

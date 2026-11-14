@@ -146,12 +146,12 @@ export function NewGroupFlow({ live, schools, prefill }: { live: boolean; school
         <div className="grid gap-md">
           <div className="nf-rmb-field">
             <label htmlFor="rm-ng-name">{C.name}</label>
-            <input id="rm-ng-name" value={d.name} maxLength={LIMITS.groupNameMax} placeholder={C.namePlaceholder} {...field("name")} onChange={(e) => set({ name: e.target.value })} />
+            <input id="rm-ng-name" value={d.name} maxLength={LIMITS.groupNameMax} placeholder={C.namePlaceholder} {...field("name")} onChange={(e) => set({ name: e.target.value })} autoCapitalize="words" autoCorrect="off" spellCheck={false} />
             {problem("name")}
           </div>
           <div className="nf-rmb-field">
             <label htmlFor="rm-ng-intro">{C.intro}</label>
-            <textarea id="rm-ng-intro" value={d.intro} maxLength={LIMITS.groupIntroMax} placeholder={C.introPlaceholder} onChange={(e) => set({ intro: e.target.value })} />
+            <textarea id="rm-ng-intro" value={d.intro} maxLength={LIMITS.groupIntroMax} placeholder={C.introPlaceholder} onChange={(e) => set({ intro: e.target.value })} autoCapitalize="sentences" />
             <span className="nf-rmb-field__hint nf-numeric">{`${d.intro.length} / ${LIMITS.groupIntroMax}`}</span>
           </div>
         </div>
@@ -204,13 +204,13 @@ export function NewGroupFlow({ live, schools, prefill }: { live: boolean; school
             </div>
             <div className="nf-rmb-field">
               <label htmlFor="rm-ng-city">{C.city}</label>
-              <input id="rm-ng-city" value={d.city} maxLength={60} placeholder={C.cityPlaceholder} {...field("city")} onChange={(e) => set({ city: e.target.value })} />
+              <input id="rm-ng-city" value={d.city} maxLength={60} placeholder={C.cityPlaceholder} {...field("city")} onChange={(e) => set({ city: e.target.value })} inputMode="text" autoCapitalize="sentences" />
               {problem("city")}
             </div>
           </div>
           <div className="nf-rmb-field">
             <label htmlFor="rm-ng-areas">{C.areas}</label>
-            <input id="rm-ng-areas" value={d.areas} placeholder={C.areasPlaceholder} onChange={(e) => set({ areas: e.target.value })} />
+            <input id="rm-ng-areas" value={d.areas} placeholder={C.areasPlaceholder} onChange={(e) => set({ areas: e.target.value })} inputMode="text" autoCapitalize="sentences" />
           </div>
           <div className="nf-rmb-field">
             <label htmlFor="rm-ng-school">{C.school}</label>

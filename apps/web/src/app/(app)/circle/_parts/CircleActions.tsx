@@ -275,6 +275,7 @@ export function ReplyBox({ rootId, parentId, question }: { rootId: string; paren
         maxLength={4000}
         placeholder={question ? CIRCLE_COPY.thread.answerHint : CIRCLE_COPY.thread.replyHint}
         onChange={(e) => setBody(e.target.value)}
+        autoCapitalize="sentences"
       />
       <div className="nf-creplybox__foot">
         <span className="nf-circle-field__hint nf-numeric">{body.length > 3600 ? `${4000 - body.length} left` : ""}</span>
@@ -409,6 +410,7 @@ export function VouchButton({
         placeholder={CIRCLE_COPY.vouch.notePlaceholder}
         value={note}
         onChange={(e) => setNote(e.target.value)}
+        autoCapitalize="sentences"
       />
       <div className="flex gap-sm">
         <Button
@@ -527,11 +529,11 @@ export function CommunitySettingsForm({
     >
       <label className="block">
         <span className="nf-label">{words.nameLabel}</span>
-        <input className="nf-field mt-2xs w-full" maxLength={60} value={n} onChange={(e) => setN(e.target.value)} required />
+        <input className="nf-field mt-2xs w-full" maxLength={60} value={n} onChange={(e) => setN(e.target.value)} required inputMode="text" autoCapitalize="sentences" />
       </label>
       <label className="block">
         <span className="nf-label">{words.descriptionLabel}</span>
-        <textarea className="nf-field mt-2xs min-h-[4rem] w-full" maxLength={500} value={d} onChange={(e) => setD(e.target.value)} />
+        <textarea className="nf-field mt-2xs min-h-[4rem] w-full" maxLength={500} value={d} onChange={(e) => setD(e.target.value)} autoCapitalize="sentences" />
       </label>
       {isOwner && (
         <fieldset className="block">
@@ -559,6 +561,7 @@ export function CommunitySettingsForm({
           value={r}
           placeholder="One rule per line (up to 10)"
           onChange={(e) => setR(e.target.value)}
+          autoCapitalize="sentences"
         />
       </label>
       <Button type="submit" variant="primary" full loading={pending} disabled={pending}>

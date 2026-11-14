@@ -707,6 +707,7 @@ export function InspectionSheet({
                   if (editable && notes !== (saved.notes ?? "")) saveReport({});
                 }}
                 data-testid="inspection-notes"
+                autoCapitalize="sentences"
               />
             )}
           </div>

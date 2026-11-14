@@ -62,6 +62,7 @@ export function EddReviewCard({ view, copy }: { view: EddCardView; copy: Copy })
               rows={3}
               aria-describedby={`${id}-sof-help`}
               className="nf-field mt-xs w-full"
+              autoCapitalize="sentences"
             />
             <p id={`${id}-sof-help`} className="nf-caption mt-2xs text-[var(--nf-content-muted)]">
               {copy.sourceOfFundsHelp}
@@ -82,7 +83,7 @@ export function EddReviewCard({ view, copy }: { view: EddCardView; copy: Copy })
             <label htmlFor={`${id}-note`} className="nf-label block">
               {copy.note}
             </label>
-            <input id={`${id}-note`} name="note" maxLength={1000} className="nf-field mt-xs min-h-[44px] w-full" />
+            <input id={`${id}-note`} name="note" maxLength={1000} className="nf-field mt-xs min-h-[44px] w-full" inputMode="text" autoCapitalize="sentences" />
           </div>
           {/* The decision stays one thumb away on a phone while the source of
               funds above it is read (the console's decision bar). */}

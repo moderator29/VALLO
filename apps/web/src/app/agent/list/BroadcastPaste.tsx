@@ -93,6 +93,7 @@ export function BroadcastPaste({
           onChange={(e) => setText(e.target.value)}
           placeholder={copy.placeholder}
           data-testid="broadcast-text"
+          autoCapitalize="sentences"
         />
       </label>
       <div className="mt-row flex flex-wrap gap-row">

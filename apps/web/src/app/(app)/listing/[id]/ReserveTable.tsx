@@ -420,6 +420,7 @@ export function ReserveTable({
           maxLength={500}
           placeholder={w.notePlaceholder}
           className="mt-2xs w-full nf-glass--well rounded-control border px-sm py-xs text-[length:var(--nf-text-body-sm)] text-[var(--nf-content-primary)] placeholder:text-[var(--nf-content-muted)]"
+          autoCapitalize="sentences"
         />
       </div>
 

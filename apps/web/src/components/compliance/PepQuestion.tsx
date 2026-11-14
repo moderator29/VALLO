@@ -112,6 +112,7 @@ export function PepQuestion({
               className="nf-field mt-xs min-h-[44px] w-full"
               aria-invalid={err?.fieldErrors?.role ? true : undefined}
               aria-describedby={err?.fieldErrors?.role ? `${id}-role-problem` : undefined}
+              inputMode="text" autoCapitalize="sentences"
             />
             <FieldProblem id={`${id}-role-problem`} message={err?.fieldErrors?.role} when={state} />
           </div>

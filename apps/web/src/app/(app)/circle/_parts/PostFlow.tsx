@@ -257,6 +257,7 @@ export function PostFlow({
             maxLength={LIMITS.titleMax}
             placeholder={question ? "How much is caution fee in Yaba?" : "Landlords: how do you handle late rent?"}
             onChange={(e) => update({ title: e.target.value })}
+            autoCapitalize="words" autoCorrect="off" spellCheck={false}
           />
           <span className="nf-circle-field__hint">{`${draft.title.length} of ${LIMITS.titleMax}`}</span>
         </div>
@@ -286,7 +287,7 @@ export function PostFlow({
       >
         <div className="nf-circle-field">
           <label htmlFor="circle-body" className="sr-only">Details</label>
-          <textarea id="circle-body" value={draft.body} maxLength={LIMITS.bodyMax} onChange={(e) => update({ body: e.target.value })} />
+          <textarea id="circle-body" value={draft.body} maxLength={LIMITS.bodyMax} onChange={(e) => update({ body: e.target.value })} autoCapitalize="sentences" />
         </div>
       </StepFrame>
     );

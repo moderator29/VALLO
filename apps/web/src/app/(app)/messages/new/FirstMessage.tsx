@@ -82,6 +82,7 @@ export function FirstMessage({
           onChange={(event) => setBody(event.target.value)}
           placeholder={copy.placeholder}
           className="nf-field"
+          autoCapitalize="sentences"
         />
       </label>
       {questions.length > 0 && (

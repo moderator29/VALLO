@@ -90,6 +90,7 @@ import { AttachmentRow } from "@/components/app/messages/AttachmentRow";
 import { PasteChip } from "@/components/app/messages/PasteChip";
 import { PASTE_WORDS } from "@/lib/paste/words";
 import { overBy, readPaste } from "@/lib/paste/parse";
+import { coarsePointer, dismissKeyboard, dragDismissHandlers, enterSends } from "@/lib/ui/typing";
 import { MAX_MESSAGE_LENGTH } from "@/lib/messages/schema";
 import { VoiceNote, type VoiceNoteData } from "@/components/app/messages/VoiceNote";
 import { dayHeading, dayStarts } from "@/components/app/threads/day";
@@ -131,6 +132,7 @@ const COPIED_WORDS = { done: "Message copied", failed: "Couldn't copy that messa
 const SAVED_PHOTO_WORDS = { done: "Photo saved", failed: "Couldn't save that photo. Try again." };
 /* A thread sends one picture per message, so a paste of several holds the first. */
 const THREAD_PASTE_WORDS = { onePhoto: "One picture at a time in a chat. The first one is attached." };
+const THREAD_CAMERA_LABEL = "Take a photo";
 
 /* GRADE 1 (P1.3): voice notes, reactions and the new-messages pill. English
    only for now, beside the other Grade 1 words above. */
@@ -776,6 +778,15 @@ export function ThreadView({
   const [away, setAway] = useState(false);
 
   const scrollerRef = useRef<HTMLDivElement | null>(null);
+  /* One pair of handlers per mount, so the drag's own start point survives. */
+  const dragDismiss = useRef(dragDismissHandlers()).current;
+  const cameraRef = useRef<HTMLInputElement | null>(null);
+  /* A camera to open: a phone or a tablet. Read once, after mount, so the
+     server and the client render the same thing first. */
+  const [hasCamera, setHasCamera] = useState(false);
+  useEffect(() => {
+    setHasCamera(coarsePointer());
+  }, []);
   const fileRef = useRef<HTMLInputElement | null>(null);
   const sheetTriggerRef = useRef<HTMLButtonElement | null>(null);
   const objectUrls = useRef<string[]>([]);
@@ -1916,6 +1927,18 @@ export function ThreadView({
         aria-live="polite"
         aria-label={view.conversation}
         onScroll={onThreadScroll}
+        /* Drag the thread down and the keyboard goes away, as it does in
+           every phone messenger (founder, 14 November 2026, handoff 6.4
+           item 5). Coarse pointers only, past a deliberate distance, so
+           reading the message above does not take the keyboard with it. */
+        {...dragDismiss}
+        /* Tapping the thread itself, away from the field, puts it away too.
+           On the scroller rather than the document, so a tap on the composer,
+           a sheet or the header is untouched. */
+        onPointerDown={(event) => {
+          if (event.target instanceof HTMLElement && !event.target.closest("input, textarea, [contenteditable], button, a"))
+            dismissKeyboard();
+        }}
       >
         <ChatWatermark hidden={bundles.length > 0} />
         <p className="nf-thread__safety">
@@ -2438,6 +2461,24 @@ export function ThreadView({
           tabIndex={-1}
           onChange={(e) => pickImage(e.target.files?.[0])}
         />
+        {/* THE ACCESSORY CONTROLS (founder, 14 November 2026, handoff 6.4
+            item 6). The row under the field is the accessory bar this
+            composer already has: it sits directly above the keyboard, where
+            the hand is. Rather than a SECOND bar repeating attach and voice,
+            the one control the row lacked is added to it: the camera, which
+            on a phone opens the camera rather than the photo library. The
+            paste chip from the paste work sits above the field in the same
+            stack. */}
+        <input
+          ref={cameraRef}
+          type="file"
+          accept="image/*"
+          capture="environment"
+          className="sr-only"
+          aria-hidden="true"
+          tabIndex={-1}
+          onChange={(e) => pickImage(e.target.files?.[0])}
+        />
         {/* GRADE 1 (reference R58): ONE rounded box. The words on top, growing
             to five lines; the photo button bottom left; the round send button
             bottom right, lit only when there is something to send. */}
@@ -2456,8 +2497,14 @@ export function ThreadView({
               el.style.height = `${Math.min(el.scrollHeight, 132)}px`;
             }}
             onKeyDown={(e) => {
-              /* Enter sends (the keyboard's Send key); Shift and Enter is a new line. */
-              if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) {
+              /*
+               * ON A COMPUTER Enter sends and Shift with Enter makes a new
+               * line; ON A PHONE Enter makes a new line and the button sends
+               * (founder, 14 November 2026, handoff 6.4 item 7). Before this
+               * the desk rule ran on every device, so a thumbed Return sent a
+               * half-written message. `enterSends` decides, and is tested.
+               */
+              if (enterSends(e)) {
                 e.preventDefault();
                 send();
                 e.currentTarget.style.height = "auto";
@@ -2466,7 +2513,8 @@ export function ThreadView({
             onPaste={onPaste}
             placeholder={view.placeholder}
             autoComplete="off"
-            enterKeyHint="send"
+            /* On a phone the key makes a new line, so it must not say Send. */
+            enterKeyHint="enter"
             className="nf-composer__field"
           />
           <div className="nf-composer__row">
@@ -2479,6 +2527,19 @@ export function ThreadView({
               {/* The input bar's plus (founder, 7 November 2026): attach. */}
               <UiIcon name="plus" size={22} />
             </button>
+            {/* Take one now. Only where there is a camera to open: on a
+                computer the file picker above is the whole story, and a
+                second button that opens the same picker is clutter. */}
+            {hasCamera && (
+              <button
+                type="button"
+                aria-label={THREAD_CAMERA_LABEL}
+                className="nf-composer__tool"
+                onClick={() => cameraRef.current?.click()}
+              >
+                <UiIcon name="camera" size={22} />
+              </button>
+            )}
             {/* GRADE 1 (P1.3, R58): the microphone while there is nothing to
                 send, Send the moment there is (`ComposerVoice`). */}
             <ComposerVoice ready={Boolean(draft.trim() || pasted || pendingFile)} sendLabel={view.send} onVoice={sendVoice} />

@@ -316,6 +316,7 @@ export function StoryComposer({
             placeholder={STORY_COPY.headlinePlaceholder}
             aria-label="Headline"
             onChange={(event) => setHeadline(event.target.value)}
+            autoCapitalize="sentences"
           />
           <textarea
             className="nf-story-compose__standfirst"
@@ -325,6 +326,7 @@ export function StoryComposer({
             placeholder={STORY_COPY.standfirstPlaceholder}
             aria-label="The opening paragraph"
             onChange={(event) => setStandfirst(event.target.value)}
+            autoCapitalize="sentences"
           />
           <label className="nf-story-compose__place">
             <UiIcon name="location" size={12} />
@@ -334,6 +336,7 @@ export function StoryComposer({
               placeholder={STORY_COPY.placePlaceholder}
               aria-label="Where it happened"
               onChange={(event) => setPlace(event.target.value)}
+              inputMode="text" autoCapitalize="sentences"
             />
           </label>
         </div>

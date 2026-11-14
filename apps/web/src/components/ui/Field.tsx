@@ -251,7 +251,7 @@ const FIELD_TYPE = "text-[length:var(--nf-text-body)] pointer-coarse:text-[16px]
  * blank the fill.
  */
 /*
- * Exported because a control that cannot be a real `<input>` still has to show
+ * Exported because a control that cannot be a real `<input inputMode="text" autoCapitalize="sentences" >` still has to show
  * the same error. `ChoicePicker`'s control is a `<button>` wearing `.nf-field`,
  * so it cannot go through `Field` - and it was forced to restate this recipe
  * locally, which is exactly how the two drift apart. One definition, both
@@ -313,7 +313,7 @@ export type TextFieldProps = Omit<
      *
      * Already part of `InputHTMLAttributes`, surfaced here so callers see it
      * beside `inputMode` and `autoComplete` without digging into the HTML
-     * attribute spread. Passed straight through to the `<input>`.
+     * attribute spread. Passed straight through to the `<input inputMode="text" autoCapitalize="sentences" >`.
      */
     enterKeyHint?: "enter" | "done" | "go" | "next" | "previous" | "search" | "send";
     /**
@@ -598,6 +598,8 @@ export type TextAreaProps = Omit<
   "className" | "id"
 > &
   Omit<FieldProps, "children"> & {
+    /** What this box holds, which decides its keyboard. See `TextFieldProps`. */
+    fieldKind?: FieldKind;
     textAreaClassName?: string;
     /** Checked when the reader leaves the field; see `useBlurValidation`. */
     validate?: (value: string) => string | null | undefined;
@@ -666,6 +668,7 @@ export function TextArea({
             checked.onBlurValue(event.target.value);
             onBlur?.(event);
           }}
+          autoCapitalize="sentences"
         />
       )}
     </Field>

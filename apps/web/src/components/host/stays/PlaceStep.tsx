@@ -152,6 +152,7 @@ export function PlaceStep({
           className="nf-field nf-field--glass nf-stays-input"
           value={name}
           onChange={(event) => setName(event.target.value)}
+          autoCapitalize="words" autoCorrect="off" spellCheck={false}
         />
         <p className="nf-stays-plate__note">
           {w.place.nameNote}

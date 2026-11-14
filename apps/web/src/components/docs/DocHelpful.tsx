@@ -70,6 +70,7 @@ export function DocHelpful({ page }: { page: string }) {
               maxLength={500}
               value={note}
               onChange={(e) => setNote(e.target.value)}
+              autoCapitalize="sentences"
             />
             <button type="submit" className="nf-chip" aria-pressed="true" disabled={pending}>
               Send

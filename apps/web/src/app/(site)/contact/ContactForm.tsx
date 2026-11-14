@@ -172,6 +172,7 @@ export function ContactForm({
           className="nf-field resize-y"
           placeholder="Tell us what happened, including any booking reference."
           aria-invalid={fieldError("message") ? true : undefined}
+          autoCapitalize="sentences"
         />
         {fieldError("message") && (
           <span className="mt-inline block text-[length:var(--nf-text-overline)] text-[var(--nf-state-warning)]">

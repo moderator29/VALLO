@@ -104,6 +104,7 @@ export function RefundRequestForm({
               maxLength={1000}
               value={note}
               onChange={(event) => setNote(event.target.value)}
+              autoCapitalize="sentences"
             />
           )}
         </Field>

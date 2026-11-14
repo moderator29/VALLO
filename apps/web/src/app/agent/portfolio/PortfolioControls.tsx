@@ -170,6 +170,7 @@ export function PitchForm({ invitationId, copy }: { invitationId: string; copy: 
         placeholder={copy.pitchPlaceholder}
         aria-invalid={state === "short" ? true : undefined}
         aria-describedby={state === "short" ? `${fieldId}-problem` : undefined}
+        autoCapitalize="sentences"
       />
       <FieldProblem id={`${fieldId}-problem`} message={state === "short" ? copy.pitchShort : null} />
       <Button type="submit" variant="primary" size="md" loading={pending} disabled={text.trim().length < 10} data-testid="portfolio-pitch">

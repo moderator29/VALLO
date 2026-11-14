@@ -142,6 +142,7 @@ export function ShareToFeedSheet({ open, onClose, listingId }: { open: boolean; 
               data-testid="share-note"
               aria-describedby="share-note-count"
               className="nf-lsp__textarea"
+              autoCapitalize="sentences"
             />
             <span id="share-note-count" className="nf-caption text-[var(--nf-content-muted)]" data-testid="share-note-count">
               {SHARE_WORDS.noteCount.replace("{count}", String(length)).replace("{max}", String(LISTING_SHARE_NOTE_MAX))}

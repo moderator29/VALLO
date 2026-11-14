@@ -505,6 +505,7 @@ function DeleteDrawer({
                 onChange={(event) => setReasonNote(event.target.value)}
                 className="nf-field"
                 data-testid="delete-reason-note"
+                autoCapitalize="sentences"
               />
               <p className="mt-2xs text-[length:var(--nf-text-overline)] text-[var(--nf-content-muted)]">
                 {phrase(copy.reasonNoteHint, { max: String(DELETION_NOTE_MAX) })}

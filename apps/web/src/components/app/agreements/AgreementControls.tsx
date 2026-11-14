@@ -190,7 +190,7 @@ export function AmendTerms({
       </label>
       <label className="block">
         <span className="nf-label">Notes</span>
-        <textarea className="nf-field mt-2xs min-h-[4.5rem] w-full" maxLength={2000} value={n} onChange={(e) => setN(e.target.value)} />
+        <textarea className="nf-field mt-2xs min-h-[4.5rem] w-full" maxLength={2000} value={n} onChange={(e) => setN(e.target.value)} autoCapitalize="sentences" />
       </label>
       <div className="flex flex-wrap gap-inline">
         <Button type="submit" variant="primary" disabled={pending}>
@@ -376,6 +376,7 @@ export function ClaimForm({ agreementId, capNaira }: { agreementId: string; capN
           maxLength={4000}
           onChange={(e) => setDescription(e.target.value)}
           placeholder="What is different from the inspection report, and when you found it"
+          autoCapitalize="sentences"
         />
       </label>
       <label className="block">

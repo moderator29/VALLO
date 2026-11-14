@@ -207,6 +207,7 @@ export function TableSeatingPanel({ table }: { table: ReservationView }) {
             placeholder="A few words about your meal (optional)"
             value={words}
             onChange={(event) => setWords(event.target.value)}
+            autoCapitalize="sentences"
           />
           <span>
             <Button

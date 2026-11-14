@@ -183,6 +183,7 @@ export function RoomRequestAnswer({
                 value={reason}
                 onChange={(event) => setReason(event.target.value)}
                 disabled={pending}
+                autoCapitalize="sentences"
               />
             </label>
           </ConfirmPanel>

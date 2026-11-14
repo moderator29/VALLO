@@ -31,6 +31,7 @@ export function LocationStep({ ctx, states }: { ctx: StepCtx; states: { code: st
           value={values.city}
           onChange={(e) => set("city", e.target.value)}
           placeholder={copy.location.cityPlaceholder}
+          inputMode="text" autoCapitalize="sentences"
         />
       </Field>
       <Field fromMessage={mark("area")} label={copy.location.areaLabel} error={errors.area} hint={copy.location.areaHint}>
@@ -39,6 +40,7 @@ export function LocationStep({ ctx, states }: { ctx: StepCtx; states: { code: st
           value={values.area}
           onChange={(e) => set("area", e.target.value)}
           placeholder={copy.location.areaPlaceholder}
+          inputMode="text" autoCapitalize="sentences"
         />
       </Field>
       <Field label={copy.location.addressLabel} hint={copy.location.addressHint} error={errors.address}>
@@ -47,6 +49,7 @@ export function LocationStep({ ctx, states }: { ctx: StepCtx; states: { code: st
           value={values.address}
           onChange={(e) => set("address", e.target.value)}
           placeholder={copy.location.addressPlaceholder}
+          inputMode="text" autoCapitalize="sentences"
         />
       </Field>
       <Field label={copy.location.landmarkLabel} hint={copy.location.landmarkHint} error={errors.landmark}>
@@ -55,6 +58,7 @@ export function LocationStep({ ctx, states }: { ctx: StepCtx; states: { code: st
           value={values.landmark}
           onChange={(e) => set("landmark", e.target.value)}
           placeholder={copy.location.landmarkPlaceholder}
+          inputMode="text" autoCapitalize="sentences"
         />
       </Field>
       <div className="nf-lw2-privacy" data-testid="location-privacy">

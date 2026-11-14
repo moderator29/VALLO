@@ -130,6 +130,7 @@ function FollowupRow({
               value={note}
               onChange={(e) => setNote(e.target.value)}
               data-testid="enquiry-followup-note"
+              autoCapitalize="sentences"
             />
           </label>
           <div className="flex flex-wrap gap-sm">

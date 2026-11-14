@@ -132,6 +132,7 @@ export function ReportSheet({
                 maxLength={600}
                 onChange={(event) => setDetail(event.target.value)}
                 placeholder={words.detailPlaceholder}
+                autoCapitalize="sentences"
               />
             </label>
 

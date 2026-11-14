@@ -77,6 +77,7 @@ export function PostEditor({
         autoFocus
         aria-label="Change what you wrote"
         onChange={(event) => setBody(event.target.value)}
+        autoCapitalize="sentences"
       />
 
       <p className="mt-xs text-[length:var(--nf-text-overline)] leading-relaxed text-[var(--nf-content-muted)]">

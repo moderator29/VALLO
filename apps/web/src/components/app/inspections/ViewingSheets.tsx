@@ -137,6 +137,7 @@ export function ViewingTimeSheet({
             onChange={(event) => setNote(event.target.value)}
             placeholder={words.notePlaceholder}
             className="nf-field mt-2xs w-full"
+            inputMode="text" autoCapitalize="sentences"
           />
         </label>
         <Refusal error={error} />
@@ -198,6 +199,7 @@ export function ViewingStepSheet({
               onChange={(event) => setNote(event.target.value)}
               className="nf-field mt-2xs w-full"
               data-testid="viewing-step-note"
+              inputMode="text" autoCapitalize="sentences"
             />
           </label>
         )}

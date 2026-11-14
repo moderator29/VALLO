@@ -185,6 +185,7 @@ export function RoomTypesStep({
               aria-invalid={fieldErrors.name ? true : undefined}
               aria-describedby={fieldErrors.name ? "stays-room-name-problem" : undefined}
               onChange={(event) => setName(event.target.value)}
+              autoCapitalize="words" autoCorrect="off" spellCheck={false}
             />
             <FieldProblem id="stays-room-name-problem" message={fieldErrors.name} />
             <p className="nf-stays-plate__note">{w.roomTypes.nameNote}</p>

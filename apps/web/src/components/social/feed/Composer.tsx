@@ -672,6 +672,7 @@ export function Composer({
         onChange={(event) => setBody(event.target.value)}
         onPaste={onPaste}
         aria-label={isReply ? "Your reply" : KIND_LABEL[kind]}
+        autoCapitalize="sentences"
       />
 
       {pasted ? (

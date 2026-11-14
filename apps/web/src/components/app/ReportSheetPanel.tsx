@@ -220,6 +220,7 @@ export function ReportSheetPanel({
                         maxLength={DETAILS_MAX}
                         className="nf-field mt-xs resize-y"
                         placeholder="He asked me to transfer to a personal account before any inspection."
+                        autoCapitalize="sentences"
                       />
                     </div>
 

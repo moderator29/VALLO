@@ -32,6 +32,7 @@ export function AccessStep({ ctx }: { ctx: StepCtx }) {
           maxLength={MAX_ESTATE_NAME}
           onChange={(e) => set("estateName", e.target.value)}
           placeholder="Alagomeji Court"
+          inputMode="text" autoCapitalize="sentences"
         />
       </Field>
       <Field label={W.gateDirections} hint={W.gateDirectionsHint} error={errors.gateDirections}>
@@ -41,6 +42,7 @@ export function AccessStep({ ctx }: { ctx: StepCtx }) {
           maxLength={MAX_GATE_DIRECTIONS}
           onChange={(e) => set("gateDirections", e.target.value)}
           placeholder="Second gate off Herbert Macaulay. Tell security you are visiting flat 4B."
+          autoCapitalize="sentences"
         />
       </Field>
       <Field label={W.securityPhone} error={errors.securityPhone}>
@@ -60,6 +62,7 @@ export function AccessStep({ ctx }: { ctx: StepCtx }) {
           maxLength={MAX_ACCESS_CODE}
           onChange={(e) => set("accessCode", e.target.value)}
           placeholder="4471"
+          inputMode="text" autoCapitalize="sentences"
         />
       </Field>
     </>

@@ -35,6 +35,7 @@ export function DemandLetter({ facts, copy }: { facts: LetterFacts; copy: { pers
               maxLength={1500}
               value={personal}
               onChange={(event) => setPersonal(event.target.value)}
+              autoCapitalize="sentences"
             />
           )}
         </Field>

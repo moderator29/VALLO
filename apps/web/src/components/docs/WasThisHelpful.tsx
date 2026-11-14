@@ -61,6 +61,7 @@ export function WasThisHelpful({ path, title }: { path: string; title: string })
             maxLength={1500}
             onChange={(event) => setNote(event.target.value)}
             placeholder="A sentence is enough."
+            autoCapitalize="sentences"
           />
           {stage === "failed" && <FieldProblem id="helpful-problem" message={message} />}
           <div className="nf-dk-helpful__row">

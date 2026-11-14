@@ -170,6 +170,7 @@ export function ShowMePanel({
               placeholder={copy.otherPlaceholder}
               aria-label={copy.items.other}
               onChange={(event) => setOther(event.target.value)}
+              inputMode="text" autoCapitalize="sentences"
             />
             <Button
               variant="secondary"

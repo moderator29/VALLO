@@ -208,6 +208,7 @@ export function AuthFieldCard({
           aria-describedby={error ? errorId : undefined}
           className={`nf-slate-input${trailing ? " nf-slate-input--trailing" : ""}${className ? ` ${className}` : ""}`}
           {...input}
+          inputMode="text" autoCapitalize="sentences"
         />
         {trailing ? <span className="nf-slate-field__trailing">{trailing}</span> : null}
       </div>

@@ -197,6 +197,7 @@ export function TenancyReportCard({
             maxLength={4000}
             value={notes}
             onChange={(event) => setNotes(event.target.value)}
+            autoCapitalize="sentences"
           />
           <input
             ref={fileRef}
