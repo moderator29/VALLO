@@ -134,15 +134,43 @@ const MEASURE = () => {
 
   /* THE GAP under the header: the first element below it that paints
      something, and how far its top sits from the header's bottom. */
+  /*
+   * BOUNDED, because the first version of this was the whole sweep's cost.
+   * It read every element under `main` and took a rect for each, which is a
+   * forced layout per node: on a long page that is tens of thousands of
+   * them, and 644 page loads of it did not finish in half an hour.
+   *
+   * The first thing drawn under a header is one of its own later siblings,
+   * or one of their first few children. So it walks the siblings after the
+   * header, and for each one descends at most two levels looking for
+   * something painted. It stops at the first hit, which is the answer.
+   */
   let headerGap = null;
   if (headEl) {
     const bottom = headEl.getBoundingClientRect().bottom;
-    const below = [...document.querySelectorAll("main *, body > div *")]
-      .filter((el) => visible(el) && !headEl.contains(el) && !el.contains(headEl))
-      .map((el) => el.getBoundingClientRect())
-      .filter((r) => r.top >= bottom - 1 && r.height > 4)
-      .sort((a, b) => a.top - b.top)[0];
-    if (below) headerGap = px(below.top - bottom);
+    const painted = (el, depth) => {
+      if (depth > 2) return null;
+      const r = el.getBoundingClientRect();
+      if (visible(el) && r.height > 4 && r.top >= bottom - 1) return r;
+      for (const child of el.children) {
+        const hit = painted(child, depth + 1);
+        if (hit) return hit;
+      }
+      return null;
+    };
+    let node = headEl;
+    let found = null;
+    /* Up through the ancestors: a header wrapped in its own box has its
+       siblings one level out, which is where the page's body actually is. */
+    for (let up = 0; up < 3 && !found && node; up += 1) {
+      let sibling = node.nextElementSibling;
+      while (sibling && !found) {
+        found = painted(sibling, 0);
+        sibling = sibling.nextElementSibling;
+      }
+      node = node.parentElement;
+    }
+    if (found) headerGap = px(found.top - bottom);
   }
 
   /* THE FIRST CARD's corner. The card tier is 18px (`--nf-radius-card`). */
@@ -166,10 +194,15 @@ const MEASURE = () => {
        an absolutely positioned child taller than its parent). */
     let h = r.height;
     let w = r.width;
-    for (const child of el.children) {
-      const cr = child.getBoundingClientRect();
-      if (cr.height > h) h = cr.height;
-      if (cr.width > w) w = cr.width;
+    /* A hit area that overflows its own box is the chip's own trick, so a
+       control that already passes needs no second look; only one that fails
+       is asked about its children. */
+    if (h < 43.5 || w < 43.5) {
+      for (const child of el.children) {
+        const cr = child.getBoundingClientRect();
+        if (cr.height > h) h = cr.height;
+        if (cr.width > w) w = cr.width;
+      }
     }
     if (h < 43.5 || w < 43.5) {
       small.push({
