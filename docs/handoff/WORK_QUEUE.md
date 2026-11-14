@@ -23,16 +23,16 @@ Testing, Bug fixing, Re-auditing, Completed.
 | # | Task (handoff section) | Owner | Stage |
 |---|---|---|---|
 | S1 | Confirmation pill `banner.quick`, and the copy and save moments moved onto it (6.1) | Agent INPUT | Completed (seen on the preview at 390, dark and light; 42 touched tests green; not seen on a real phone) |
-| S2 | Paste: photos as attachments, long text as a chip, link chips, one-tap codes, cleaning, safety (6.2) | Agent INPUT | Implementing |
+| S2 | Paste: photos as attachments, long text as a chip, link chips, one-tap codes, cleaning, safety (6.2) | Agent INPUT | Completed (148a1968) |
 | S3 | `CountTabs` shared part, then inbox, notifications, saved (6.3 part 1) | Agent SHEETS | Completed (seen on the preview at 390 and 1440, both themes; mounted screen suites green; not seen signed in on live) |
-| S4 | `ActionSheet` shared part, then inbox rows, card menu, profile menu, post menu (6.3 part 2) | Agent SHEETS | Implementing |
-| S5 | Keyboard pass over every field, composer on the keyboard, accessory bar (6.4) | Agent INPUT | Queued behind S2 |
-| S6 | The remaining CountTabs and ActionSheet screens in the 6.3 tables (offers, bookings, search, agent and host) | Agent SHEETS | Queued behind S4 |
-| M1 | One bug register, every open finding re-checked against the code today (7, phase 1) | Lead | Researching |
-| M2 | Measured Core Web Vitals baseline on the eleven pages, throttled phone profile (7, phase 1) | Agent | Queued |
+| S4 | `ActionSheet` shared part, then inbox rows, card menu, profile menu, post menu (6.3 part 2) | Agent SHEETS | Completed (10e5c515) |
+| S5 | Keyboard pass over every field, composer on the keyboard, accessory bar (6.4) | Agent INPUT | Implementing |
+| S6 | The remaining CountTabs and ActionSheet screens in the 6.3 tables (offers, bookings, search, agent and host) | Agent SHEETS | Completed (7e0407f0), three items skipped with reasons below |
+| M1 | One bug register, every open finding re-checked against the code today (7, phase 1) | Lead | Completed (17bde0ab), kept up to date as findings land |
+| M2 | Measured Core Web Vitals baseline, throttled phone profile (7, phase 1) | Lead | Completed for the six signed-out pages (dbf89b3b); the signed-in pages need the QA member or the harness and are the next run |
 | M3 | Supabase audit: queries, indexes, realtime, cron, storage, RLS, auth sessions; report in `docs/DB_NOTES.md` plus SQL files (8) | Agent | Queued |
 | M4 | Bug fixes from the register, worst first, each with a test (7, phase 2) | Both agents | Queued |
-| M5 | Consistency audit with numbers at 390 and 1440; the circular home control, then the founder confirms the page (7, phase 3) | Agent | Queued |
+| M5 | Consistency audit with numbers at 390 and 1440; the circular home control, then the founder confirms the page (7, phase 3) | Agent SHEETS | Researching |
 | M6 | Public platform area by area: home, search, listing, offers, messaging, stays, restaurants, roommates, feed and Circle, profile and account, help, showcase (7, phase 4) | Both agents | Queued |
 | M7 | Staff console: the restricted frame, desk tables on a phone, founder command centre proposal first (7, phase 5) | Agent | Queued |
 | M8 | Motion and performance from the M2 baseline, worst number first (7, phase 6) | Agent | Queued |
@@ -67,6 +67,17 @@ Neither touches `app/admin`. The lead works only in files neither holds
 - Heart saves lose the top banner's Undo button: the pill says Saved or
   Removed, and the opposite tap within the pill's life is the silent undo
   (handoff 6.1). FOUNDER-VISIBLE change, named in the report to him.
+
+
+## Queued by the lead from what the agents found
+
+| # | Task | Why | Owner |
+|---|---|---|---|
+| Q1 | Widen the bookings spine's read so a plan row carries its conversation, its place and its receipt | Without it a booking row's action sheet can only offer actions that do not exist (S6 item 6) | Unassigned |
+| Q2 | The listing page's LCP: a decorative background is the largest paint, and the route ships 559 KB of JavaScript | The worst number in the measured baseline, 4.81 s against a 2.5 s target | Lead, phase 6 |
+| Q3 | Stays: same wrong LCP element as the listing page | 3.14 s measured | Lead, phase 6 |
+| Q4 | The thread's header menu onto the shared ActionSheet | Deferred while the keyboard pass holds the thread files | Agent SHEETS, after S5 |
+| Q5 | Replace the agent listing row's inline control bar on narrow screens with the held sheet | Ten controls wrap onto four lines on a phone; the sheet already answers it | Agent SHEETS |
 
 ## Notes
 
