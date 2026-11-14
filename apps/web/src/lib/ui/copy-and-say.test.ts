@@ -31,6 +31,10 @@ describe("copyAndSay", () => {
     expect(await copyAndSay("https://x.test/l/1", "link")).toBe(true);
     expect(writeText).toHaveBeenCalledWith("https://x.test/l/1");
     expect(currentToast()?.message).toBe(COPY_WORDS.link);
+    /* The confirmation is the QUICK PILL (founder, 14 November 2026): short,
+       near the hand, gone by itself, never an action. */
+    expect(currentToast()?.quick).toBe(true);
+    expect(currentToast()?.action).toBeUndefined();
   });
 
   it("falls back to a textarea when there is no async clipboard", async () => {
@@ -45,5 +49,7 @@ describe("copyAndSay", () => {
     expect(await copyAndSay("x", "text")).toBe(false);
     expect(currentToast()?.message).toBe(COPY_WORDS.failed);
     expect(currentToast()?.tone).toBe("error");
+    /* A failure needs reading time: the top banner, never the pill. */
+    expect(currentToast()?.quick).toBeUndefined();
   });
 });

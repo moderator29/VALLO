@@ -182,6 +182,16 @@ export const experienceDiscoverEn = {
     capture: "Your saved searches",
     /* The header link to /saved/searches, and the page title (Round 3 sweep, C3). */
     searchesLink: "Saved searches",
+    /* The kind tabs on the shortlist (the founder's count tab row, 14
+       November 2026): one scrolling row, a count on each kind that holds
+       something, and the searches screen riding the same row as a link. */
+    kinds: {
+      label: "Filter saved by kind",
+      all: "All",
+      homes: "Homes",
+      stays: "Stays",
+      restaurants: "Restaurants",
+    },
     /* The quiet action under each saved card and the undo chip that takes
        its place (SavedBoard); they were English literals in the component. */
     remove: "Remove",

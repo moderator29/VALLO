@@ -41,6 +41,8 @@
  * caller shows something in a browser).
  */
 
+import { feedback } from "./feedback";
+
 export type ToastTone = "neutral" | "success" | "info" | "warning" | "error";
 
 export type ToastAction = { label: string; run: () => void };
@@ -56,6 +58,10 @@ export type ToastItem = {
   shownAt: number;
   /** A person's avatar URL, shown as a small circle beside the message. */
   avatarUrl?: string;
+  /** THE QUICK PILL (founder, 14 November 2026): a compact confirmation above
+   * the dock, a tick then two or three words, gone by itself. Never an error,
+   * an undo or a retry; those stay on the top banner. */
+  quick?: true;
   "data-testid"?: string;
 };
 
@@ -73,6 +79,35 @@ export type ToastOptions = {
 
 /** An error is never replaced by a calmer message sooner than this. */
 export const ERROR_HOLD_MS = 1500;
+
+/**
+ * THE QUICK PILL'S CLOCK (founder, 14 November 2026, after WhatsApp's
+ * "Message copied": "built clean sharp and goes back by itself within 0.4
+ * seconds"). In on `--nf-duration-fast` (160ms), held long enough to read two
+ * words, out on `--nf-duration-slow` (380ms, inside his 0.4 seconds). A pill
+ * gone 0.4s after it appeared could not be read; the lead told him and he has
+ * not objected. The same words fired twice restart this clock in place.
+ */
+export const QUICK_DWELL_MS = 1400;
+
+/** The exit fallback where tokens cannot be read (a server render, a test). */
+const QUICK_EXIT_FALLBACK_MS = 380;
+
+/**
+ * How long a leaving quick pill stays mounted: `--nf-duration-slow` as the
+ * page has it right now, so the Motion setting and reduced motion (1ms) are
+ * obeyed, exactly as `bannerExitMs` does for the top banner.
+ */
+export function quickExitMs(): number {
+  if (typeof window === "undefined" || typeof document === "undefined") return QUICK_EXIT_FALLBACK_MS;
+  try {
+    const raw = getComputedStyle(document.documentElement).getPropertyValue("--nf-duration-slow").trim();
+    const value = raw.endsWith("ms") ? parseFloat(raw) : raw.endsWith("s") ? parseFloat(raw) * 1000 : NaN;
+    return Number.isFinite(value) && value >= 0 ? Math.min(value, 600) : QUICK_EXIT_FALLBACK_MS;
+  } catch {
+    return QUICK_EXIT_FALLBACK_MS;
+  }
+}
 
 /**
  * Long enough to read a short confirmation; an error or an undo gets longer.
@@ -186,15 +221,26 @@ function promoteWaiting() {
   emit();
 }
 
-function show(message: string, options: ToastOptions = {}): number {
+function show(message: string, options: ToastOptions & { quick?: true } = {}): number {
   const tone = options.tone ?? "neutral";
-  const action: ToastAction | undefined =
-    options.action ?? (options.retry ? { label: options.retryLabel ?? "Try again", run: options.retry } : undefined);
+  /* A quick pill never carries an action: an undo or a retry needs the top
+     banner's dwell and its button. The type on `banner.quick` already refuses
+     them; this keeps a spread caller honest too. */
+  const action: ToastAction | undefined = options.quick
+    ? undefined
+    : options.action ?? (options.retry ? { label: options.retryLabel ?? "Try again", run: options.retry } : undefined);
 
   /* The same words again: keep the banner, restart its clock, never a second
      slide-in. The id is KEPT (the host keys the card on it, so a new id was a
      remount and a second entrance); the host restarts the clock on `shownAt`. */
-  if (current && current.message === message && current.tone === tone && !action && !current.action) {
+  if (
+    current &&
+    current.message === message &&
+    current.tone === tone &&
+    !action &&
+    !current.action &&
+    Boolean(current.quick) === Boolean(options.quick)
+  ) {
     current = { ...current, shownAt: now() };
     emit();
     return current.id;
@@ -204,8 +250,11 @@ function show(message: string, options: ToastOptions = {}): number {
     id: nextId++,
     message,
     tone,
-    durationMs: options.durationMs ?? dwellFor(tone, Boolean(action)),
+    /* A quick pill's clock is the system's, never a caller's: a spread that
+       smuggles `durationMs` in cannot stretch it. */
+    durationMs: options.quick ? QUICK_DWELL_MS : options.durationMs ?? dwellFor(tone, Boolean(action)),
     shownAt: now(),
+    ...(options.quick ? { quick: true as const } : {}),
     ...(action ? { action } : {}),
     ...(options.avatarUrl ? { avatarUrl: options.avatarUrl } : {}),
     ...(options["data-testid"] ? { "data-testid": options["data-testid"] } : {}),
@@ -302,11 +351,29 @@ export function currentToast(): ToastItem | null {
 
 type Toned = (message: string, options?: Omit<ToastOptions, "tone">) => number;
 
+/**
+ * The quick pill's options: words, a test id and the haptic switch, nothing
+ * else. No tone (it is always the good-news tick), no action, no duration a
+ * caller could stretch.
+ */
+type QuickOptions = Pick<ToastOptions, "data-testid"> & {
+  /**
+   * A light tick through the hand beside the pill (handoff 6.1: "a haptic
+   * tick beside it where the action had none"). On by default; a call site
+   * whose action already buzzes passes `haptic: false` so a copy never
+   * buzzes twice. No-op on the server and on devices that refuse it.
+   */
+  haptic?: boolean;
+};
+
 type ToastFn = ((message: string, options?: ToastOptions) => number) & {
   success: Toned;
   info: Toned;
   warning: Toned;
   error: Toned;
+  /** The second, lighter voice: a compact pill above the dock ("Message
+   * copied"), gone by itself. Same store, same host, one at a time. */
+  quick: (message: string, options?: QuickOptions) => number;
   dismiss: typeof dismissToast;
 };
 
@@ -317,6 +384,13 @@ export const toast: ToastFn = Object.assign(
     info: ((message, options) => show(message, { ...options, tone: "info" })) as Toned,
     warning: ((message, options) => show(message, { ...options, tone: "warning" })) as Toned,
     error: ((message, options) => show(message, { ...options, tone: "error" })) as Toned,
+    quick: (message: string, options?: QuickOptions) => {
+      const { haptic, ...rest } = options ?? {};
+      const id = show(message, { ...rest, tone: "success", quick: true });
+      /* Each press earns its tick, a restart of the clock included. */
+      if (haptic !== false) feedback("select");
+      return id;
+    },
     dismiss: dismissToast,
   },
 );

@@ -71,7 +71,7 @@ export function Checklist() {
           leadingIcon="link"
           onClick={async () => {
             const copied = await (navigator.clipboard ? navigator.clipboard.writeText(text).then(() => true, () => false) : Promise.resolve(false));
-            if (copied) banner.success(T.copied);
+            if (copied) banner.quick(T.copied);
             else banner.error(T.copyFailed);
           }}
         >

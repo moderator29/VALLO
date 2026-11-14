@@ -107,7 +107,7 @@ export function BadgeMoment({
         : "failed";
     if (outcome === "copied") {
       feedback("select");
-      banner.success(copy.copied);
+      banner.quick(copy.copied, { haptic: false });
     } else if (outcome === "failed") {
       banner.error(copy.copyFailed);
     }

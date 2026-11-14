@@ -13,7 +13,7 @@ export function CopyValue({ value, label, copied, testId }: { value: string; lab
   const copy = async () => {
     try {
       await navigator.clipboard.writeText(value);
-      banner.success(copied);
+      banner.quick(copied);
     } catch {
       /* A browser that refuses the clipboard leaves the value selectable. */
     }

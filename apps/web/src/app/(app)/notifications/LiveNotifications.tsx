@@ -9,7 +9,7 @@ import { formatMoney, intlTag, plural } from "@vallo/i18n/core";
 import { PageHeader } from "@/components/app/PageHeader";
 import { EmptyState } from "@/components/app/Screen";
 import { Button, ButtonLink } from "@/components/ui/Button";
-import { Chip, ChipRow } from "@/components/ui/Chip";
+import { CountTabs } from "@/components/ui/CountTabs";
 import { IconPlate, ICON_PLATE_GLYPH } from "@/components/ui/IconPlate";
 import { ListGroup } from "@/components/ui/ListGroup";
 import { UiIcon } from "@/design-system/icons/UiIcon";
@@ -128,7 +128,10 @@ export function LiveNotifications({
   const [items, setItems] = useState<NotificationItem[]>(initial);
   const [more, setMore] = useState(initialMore);
   const [loadingOlder, setLoadingOlder] = useState(false);
-  const [family, setFamily] = useState<NotificationFamily | "all">("all");
+  /* The pick: everything, only what is unread, or one family (the founder's
+     count tab row, 14 November 2026). Unread is a filter over every family,
+     the same word the inbox uses. */
+  const [family, setFamily] = useState<NotificationFamily | "all" | "unread">("all");
 
   /* Rows this screen archived, so a server read that was already on its way
      cannot bring one back (`adoptFresh`). */
@@ -282,7 +285,12 @@ export function LiveNotifications({
   }, [items]);
 
   const shown = useMemo(
-    () => (family === "all" ? items : items.filter((n) => familyOf(n) === family)),
+    () =>
+      family === "all"
+        ? items
+        : family === "unread"
+          ? items.filter((n) => !n.read)
+          : items.filter((n) => familyOf(n) === family),
     [items, family],
   );
 
@@ -371,22 +379,24 @@ export function LiveNotifications({
   const nowMs = now > 0 ? now : undefined;
   const days = splitByDay(sectioned.earlier, (e) => e.row.createdAt);
 
+  /* The founder's count tab row (14 November 2026): All, Unread, then one tab
+     per family, each carrying its waiting count. The counts come from the
+     rows already on screen, never a new read. */
   const chips = (
-    <ChipRow label={c.filterLabel} radiogroup className="nf-notif__chips">
-      {(["all", ...FAMILY_ORDER] as const).map((key) => (
-        <Chip
-          key={key}
-          behaviour="choice"
-          size="md"
-          selected={family === key}
-          onSelectedChange={() => setFamily(key)}
-          {...(key !== "all" && unreadBy[key] > 0 ? { count: unreadBy[key] } : {})}
-          data-testid={`notifications-filter-${key}`}
-        >
-          {c.families[key]}
-        </Chip>
-      ))}
-    </ChipRow>
+    <CountTabs
+      label={c.filterLabel}
+      bleed
+      className="nf-notif__chips"
+      active={family}
+      onChange={(key) => setFamily(key as NotificationFamily | "all" | "unread")}
+      items={(["all", "unread", ...FAMILY_ORDER] as const).map((key) => ({
+        key,
+        label: key === "unread" ? c.unreadMark : c.families[key],
+        ...(key === "unread" && unreadCount > 0 ? { count: unreadCount } : {}),
+        ...(key !== "all" && key !== "unread" && unreadBy[key] > 0 ? { count: unreadBy[key] } : {}),
+        "data-testid": `notifications-filter-${key}`,
+      }))}
+    />
   );
 
   return (
@@ -403,8 +413,10 @@ export function LiveNotifications({
       {shown.length === 0 ? (
         <EmptyState
           icon="bell-badge"
-          title={fill(c.emptyFamily.title, { family: c.families[family] })}
-          body={c.emptyFamily.body}
+          /* An empty Unread pick is the good news itself, not a family with
+             nothing under it. */
+          title={family === "unread" ? c.empty.title : fill(c.emptyFamily.title, { family: c.families[family as NotificationFamily | "all"] })}
+          body={family === "unread" ? c.empty.body : c.emptyFamily.body}
           action={
             <Button variant="secondary" onClick={() => setFamily("all")}>
               {c.emptyFamily.action}

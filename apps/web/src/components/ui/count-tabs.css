@@ -1,0 +1,115 @@
+@layer components {
+  /*
+   * THE COUNT TAB ROW (the founder, 14 November 2026, after Snapchat's chat
+   * filters: "upgrade in platform areas like this kind of tabs"). One
+   * horizontal row of filter tabs that scrolls sideways with no scrollbar,
+   * the chosen tab filled and lit, the rest on the quiet glass every chip
+   * wears, and a tab may carry a small round count. Vallo's tokens and
+   * radius, not Snapchat's look: the control radius (the token gate refuses
+   * a capsule on a control), the shared glass fill, the shared selected
+   * fill the chips and the console's open tab already light up with.
+   *
+   * The row itself rides `.nf-scroll-x` (utilities.css), which supplies the
+   * overflow, the hidden scrollbar in both engines, the snap and
+   * `flex-shrink: 0` on every child, so a tab can NEVER shrink: a shrunken
+   * chip's count ran under its neighbour on 14 November.
+   */
+  .nf-counttabs {
+    display: flex;
+    align-items: center;
+    gap: var(--nf-space-2xs);
+    min-inline-size: 0;
+  }
+  /* The trailing fade: a tab past the edge reads as more, never as cut. The
+     mask reads only the stop's alpha, so the token's hue is irrelevant; both
+     content tokens are fully opaque in either theme. */
+  .nf-counttabs--fade {
+    -webkit-mask-image: linear-gradient(
+      to right,
+      var(--nf-content-primary) 0,
+      var(--nf-content-primary) calc(100% - 2.5rem),
+      transparent 100%
+    );
+    mask-image: linear-gradient(
+      to right,
+      var(--nf-content-primary) 0,
+      var(--nf-content-primary) calc(100% - 2.5rem),
+      transparent 100%
+    );
+  }
+  /* The bleed rail: out to the screen edge and padded back to the gutter,
+     with the snap inset set from the same token so the pair cannot drift
+     (the `.nf-scroll-x--gutter` lesson, utilities.css). */
+  .nf-counttabs--bleed {
+    margin-inline: calc(var(--nf-chiprow-bleed, 1.25rem) * -1);
+    padding-inline: var(--nf-chiprow-bleed, 1.25rem);
+    --nf-rail-snap-pad: var(--nf-chiprow-bleed, 1.25rem);
+  }
+
+  .nf-counttabs__tab {
+    flex: none;
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--nf-gap-inline);
+    min-block-size: 2.75rem;
+    min-inline-size: 2.75rem;
+    padding-inline: var(--nf-pad-chip-inline);
+    border-radius: var(--nf-radius-control);
+    border: var(--nf-border-width) solid var(--nf-btn-glass-edge);
+    background: var(--nf-btn-glass-fill);
+    color: var(--nf-content-secondary);
+    font: inherit;
+    font-size: var(--nf-text-body-sm);
+    font-weight: 600;
+    white-space: nowrap;
+    text-decoration: none;
+    cursor: pointer;
+    transition:
+      color var(--nf-duration-fast) var(--nf-ease-standard),
+      border-color var(--nf-duration-fast) var(--nf-ease-standard);
+  }
+  @media (hover: hover) {
+    .nf-counttabs__tab:not([aria-selected="true"], [aria-checked="true"], [aria-current="page"]):hover {
+      color: var(--nf-content-primary);
+    }
+  }
+  /* The chosen tab is FILLED AND LIT: the same selected state the filter
+     chips, the console's open tab and the primary button agree on, so "this
+     one is chosen" looks the same everywhere. */
+  .nf-counttabs__tab:is([aria-selected="true"], [aria-checked="true"], [aria-current="page"]) {
+    background: var(--nf-selected-fill);
+    border-color: var(--nf-selected-edges);
+    box-shadow: var(--nf-selected-shadow-inline);
+    color: var(--nf-content-on-brand);
+    font-weight: 700;
+  }
+  .nf-counttabs__tab:focus-visible {
+    outline: var(--nf-focus-ring-width) solid var(--nf-focus-ring);
+    outline-offset: calc(-1 * var(--nf-focus-ring-width));
+  }
+
+  /* The count: a small round figure in the shared count colours the dock and
+     the rail badges already wear. Nothing is drawn at zero. */
+  .nf-counttabs__count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-inline-size: 1.25rem;
+    block-size: 1.25rem;
+    padding-inline: var(--nf-space-3xs);
+    border-radius: var(--nf-radius-circle);
+    background: var(--nf-count-fill);
+    color: var(--nf-count-ink);
+    font-size: var(--nf-text-overline);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .nf-counttabs__tab {
+      transition: none;
+    }
+  }
+}

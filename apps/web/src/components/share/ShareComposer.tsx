@@ -109,7 +109,7 @@ export function ShareComposer({
     }
     if (typeof navigator !== "undefined" && navigator.clipboard) {
       void navigator.clipboard.writeText(url);
-      banner.success(t.copied);
+      banner.quick(t.copied);
       return;
     }
     banner.info(url);

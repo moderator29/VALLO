@@ -660,7 +660,9 @@ export function ThreadView({
     if (!text) return;
     try {
       await navigator.clipboard?.writeText(text);
-      banner.success(COPIED_WORDS.done);
+      /* The founder's WhatsApp reference, 14 November 2026: the quick pill
+         above the composer, gone by itself. A failure keeps the top banner. */
+      banner.quick(COPIED_WORDS.done);
     } catch {
       banner.error(COPIED_WORDS.failed);
     }
@@ -672,7 +674,7 @@ export function ThreadView({
     if (!url) return;
     const result = await saveMedia({ kind: "photo", id: target.id, src: url });
     if (result === "failed") banner.error(SAVED_PHOTO_WORDS.failed);
-    else banner.success(SAVED_PHOTO_WORDS.done);
+    else banner.quick(SAVED_PHOTO_WORDS.done);
   };
   const menuDeleteForMe = async () => {
     const target = actionMsg;

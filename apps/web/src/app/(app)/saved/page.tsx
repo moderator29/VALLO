@@ -1,6 +1,5 @@
 import { PullToRefresh } from "@/components/ui/PullToRefresh";
 import type { Metadata } from "next";
-import Link from "next/link";
 import { cookies } from "next/headers";
 import { getDictionary } from "@vallo/i18n";
 import { getLocale } from "@/lib/locale";
@@ -9,6 +8,7 @@ import { PageScene } from "@/components/app/PageScene";
 import { stayCardFromRow } from "@/components/app/stays/stay-card-model";
 import { SAVED_COOKIE, parseSavedCookie } from "@/lib/saved/keys";
 import { getSavedListings, getSavedPlaces } from "@/lib/saved/queries";
+import { CountTabs } from "@/components/ui/CountTabs";
 import { SavedBoard, type SavedBoardItem } from "./SavedBoard";
 import { AddToList, CollectionsBar } from "./Collections";
 import { collectionKey, inCollection } from "@/lib/saved/collections";
@@ -63,8 +63,12 @@ export async function generateMetadata(): Promise<Metadata> {
  * so the board is one shortlist in the order the person built it rather than
  * two piles with a heading between them.
  */
-export default async function SavedPage({ searchParams }: { searchParams: Promise<{ list?: string; sort?: string; rm?: string }> }) {
-  const { list, sort, rm } = await searchParams;
+export default async function SavedPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ list?: string; sort?: string; rm?: string; kind?: string }>;
+}) {
+  const { list, sort, rm, kind } = await searchParams;
   const locale = await getLocale();
   const t = getDictionary(locale);
 
@@ -155,32 +159,66 @@ export default async function SavedPage({ searchParams }: { searchParams: Promis
     : "recent";
 
   const sorted = sortSavedItems(allItems, sortKey, entries);
-  const items = inCollection(sorted, activeList);
+  const inList = inCollection(sorted, activeList);
+
+  /*
+   * THE KIND TABS (the founder's count tab row, 14 November 2026): the one
+   * shortlist, narrowed to homes, stays or restaurants, each tab carrying how
+   * many it holds. The kind lives in the address (`?kind=`), so back, share
+   * and a reload keep the tab, and the counts come from the rows this page
+   * already read, never a new query. Saved searches are the same idea kept in
+   * another shape, so their screen rides the same row as a link.
+   */
+  const kindKey: SavedKind = (["all", "homes", "stays", "restaurants"] as const).includes(kind as SavedKind)
+    ? (kind as SavedKind)
+    : "all";
+  const items = inList.filter((item) => inKind(item, kindKey));
+  const kindCounts = {
+    homes: allItems.filter((i) => inKind(i, "homes")).length,
+    stays: allItems.filter((i) => inKind(i, "stays")).length,
+    restaurants: allItems.filter((i) => inKind(i, "restaurants")).length,
+  };
+  const sv = t.experienceDiscover.saved;
+  const hrefFor = (next: SavedKind) => {
+    const params = new URLSearchParams();
+    if (next !== "all") params.set("kind", next);
+    if (list) params.set("list", list);
+    if (sort) params.set("sort", sort);
+    const q = params.toString();
+    return q ? `/saved?${q}` : "/saved";
+  };
 
   return (
     <GuideScope copy={t.experienceSettings.preferences}>
     <PullToRefresh className="nf-cat-surface mx-auto max-w-3xl">
       <div className="relative">
         <PageScene art="globe-pin" />
-      {/* The saved SEARCHES live one tap from the saved places, because they
-          are the same idea kept in two shapes and because a person with none
-          of them yet has no other way to reach that screen and read what it
-          is for. */}
-      <PageHeader
-        variant="large"
-        title={t.nav.saved}
-        actions={
-          <Link
-            href="/saved/searches"
-            prefetch
-            className="nf-link-quiet nf-body-sm inline-flex min-h-11 items-center text-[var(--nf-content-link)]"
-            data-testid="saved-searches-link"
-          >
-            {t.experienceDiscover.saved.searchesLink}
-          </Link>
-        }
-      />
+      <PageHeader variant="large" title={t.nav.saved} />
       </div>
+      {/* The kind tabs (the founder's count tab row, 14 November 2026). The
+          saved SEARCHES ride the same row as a link, because they are the
+          same idea kept in another shape and a person with none of them yet
+          has no other way to reach that screen and read what it is for. */}
+      <CountTabs
+        semantics="links"
+        label={sv.kinds.label}
+        active={kindKey}
+        countCap={99}
+        className="mb-heading"
+        data-testid="saved-kind-tabs"
+        items={[
+          { key: "all", label: sv.kinds.all, href: hrefFor("all") },
+          { key: "homes", label: sv.kinds.homes, href: hrefFor("homes"), ...(kindCounts.homes > 0 ? { count: kindCounts.homes } : {}) },
+          { key: "stays", label: sv.kinds.stays, href: hrefFor("stays"), ...(kindCounts.stays > 0 ? { count: kindCounts.stays } : {}) },
+          {
+            key: "restaurants",
+            label: sv.kinds.restaurants,
+            href: hrefFor("restaurants"),
+            ...(kindCounts.restaurants > 0 ? { count: kindCounts.restaurants } : {}),
+          },
+          { key: "searches", label: sv.searchesLink, href: "/saved/searches", "data-testid": "saved-searches-link" },
+        ]}
+      />
       {/* V-77: the saved listings, copied to the phone for when there is no
           signal, and any figure that moved since it was first copied. */}
       <SavedFreshness render={crypto.randomUUID()} />
@@ -244,6 +282,17 @@ export default async function SavedPage({ searchParams }: { searchParams: Promis
     </PullToRefresh>
     </GuideScope>
   );
+}
+
+/** The kind tabs' keys. "searches" is a link off the page, never a filter here. */
+type SavedKind = "all" | "homes" | "stays" | "restaurants";
+
+/** Which tab a saved row belongs under: the place kind, or a home listing. */
+function inKind(item: SavedBoardItem, kind: SavedKind): boolean {
+  if (kind === "all") return true;
+  if (kind === "homes") return !item.place;
+  if (kind === "stays") return item.place?.kind === "accommodation";
+  return item.place?.kind === "restaurant";
 }
 
 /** V-77: the phone's copies, stamped with the time of the read, not a render. */

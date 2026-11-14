@@ -170,7 +170,7 @@ export function SafetyShareControl({
                   .then(() => {
                     setPhase({ ...phase, copied: true });
                     /* Said by the one banner at the top of the screen (founder, 7 November 2026). */
-                    banner.success(copy.copied);
+                    banner.quick(copy.copied);
                   })
                   .catch(() => undefined);
               }}

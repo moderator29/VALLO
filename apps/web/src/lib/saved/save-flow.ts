@@ -4,8 +4,8 @@ import { useSyncExternalStore } from "react";
 import { toggleSave } from "./actions";
 import { saveRestaurant, saveStay, unsaveRestaurant, unsaveStay } from "./places-actions";
 import { addLocalSave, removeLocalSave } from "./local";
-import { SAVE_WORDS, saveDoneBanner } from "../ui/save-banner";
-import { banner, updateToast, type ToastAction } from "../ui/toast";
+import { SAVE_WORDS } from "../ui/save-banner";
+import { banner, dismissToast, QUICK_DWELL_MS, updateToast, type ToastAction } from "../ui/toast";
 import { setOrKeep } from "../offline/send-or-keep";
 import { tapFailedOffline } from "../offline/tap-failed";
 import type { ActionResult } from "../actions/envelope";
@@ -129,6 +129,9 @@ export function resetSessionSaves(): void {
   changeVersion = 0;
   inFlight = 0;
   settledWaiters = [];
+  lastPill.key = "";
+  lastPill.id = 0;
+  lastPill.at = 0;
 }
 
 /* ------------------------------------------------------------- the tap */
@@ -154,6 +157,35 @@ function writeDevice(listingId: string, saved: boolean, deviceChanged: () => voi
   if (saved) addLocalSave(listingId);
   else removeLocalSave(listingId);
   deviceChanged();
+}
+
+/* ------------------------------------------------------- the quick pill */
+
+/** The last pill a heart raised, so the opposite tap can take it back quietly. */
+const lastPill = { key: "", want: false, id: 0, at: 0 };
+
+/**
+ * Raise the pill for a heart's tap, or say nothing: the OPPOSITE tap on the
+ * same heart inside the pill's life is "never mind", so the pill goes and no
+ * second one ("Removed from Saved") answers a change of mind (handoff 6.1:
+ * "a second tap within the pill's life undoes it silently").
+ */
+function raiseSavePill(key: string, next: boolean, device: boolean): number {
+  const at = Date.now();
+  if (lastPill.key === key && lastPill.want === !next && at - lastPill.at < QUICK_DWELL_MS) {
+    dismissToast(lastPill.id);
+    lastPill.key = "";
+    return 0;
+  }
+  const id = banner.quick(
+    next ? (device ? SAVE_WORDS.quickSavedDevice : SAVE_WORDS.quickSaved) : SAVE_WORDS.quickRemoved,
+    { haptic: false, "data-testid": "save-pill" },
+  );
+  lastPill.key = key;
+  lastPill.want = next;
+  lastPill.id = id;
+  lastPill.at = at;
+  return id;
 }
 
 export type TapSaveOptions = {
@@ -188,23 +220,12 @@ export function tapSave(options: TapSaveOptions): Promise<void> {
   apply(next);
   setSessionSaved(target, next);
 
-  const undo = async () => {
-    if (device) {
-      writeDevice(target.listingId, !next, deviceChanged);
-      return { ok: true as const };
-    }
-    const back = await sendWanted(target, !next);
-    return back.ok ? { ok: true as const } : { ok: false as const, error: back.error };
-  };
-  const bannerId = saveDoneBanner({
-    saved: next,
-    device,
-    undo,
-    onUndone: () => {
-      apply(!next);
-      setSessionSaved(target, !next);
-    },
-  });
+  /* THE QUICK PILL ON A HEART (founder, 14 November 2026, handoff 6.1). The
+     heart itself stays under the thumb as the real inverse, so the pill
+     carries no Undo button; collections and the story keep the top banner
+     with Undo because their control may be gone by then. The haptic is the
+     heart's own (`feedback("select")` on the flip), so the pill adds none. */
+  const bannerId = raiseSavePill(key, next, device);
 
   const rollBack = (error: string, action?: ToastAction) => {
     if (!current()) return;
@@ -227,11 +248,10 @@ export function tapSave(options: TapSaveOptions): Promise<void> {
     try {
       const sent = await setOrKeep(kind, key, next, () => sendWanted(target, next));
       if (sent.state === "kept") {
-        updateToast(bannerId, {
-          message: next ? words.savedWaiting : words.removedWaiting,
-          tone: "info",
-          action: null,
-        });
+        /* Kept for later is news the pill's voice cannot carry: the info
+           banner says it, and the pill (when still up) leaves with it. */
+        dismissToast(bannerId);
+        banner(next ? words.savedWaiting : words.removedWaiting, { tone: "info" });
         return;
       }
       if (sent.state === "not_kept") {
@@ -245,7 +265,7 @@ export function tapSave(options: TapSaveOptions): Promise<void> {
         if (!target.place && result.error.startsWith("Sign in")) {
           device = true;
           writeDevice(target.listingId, next, deviceChanged);
-          if (next) updateToast(bannerId, { message: SAVE_WORDS.savedDevice });
+          if (next) updateToast(bannerId, { message: SAVE_WORDS.quickSavedDevice });
           return;
         }
         rollBack(result.error, target.place && result.error.startsWith("Sign in") ? options.signIn : undefined);
@@ -255,7 +275,7 @@ export function tapSave(options: TapSaveOptions): Promise<void> {
       if (data && data.mode === "local") {
         device = true;
         writeDevice(target.listingId, next, deviceChanged);
-        if (next) updateToast(bannerId, { message: SAVE_WORDS.savedDevice });
+        if (next) updateToast(bannerId, { message: SAVE_WORDS.quickSavedDevice });
         return;
       }
       /* The database is the authority: a second tab may have got there first. */

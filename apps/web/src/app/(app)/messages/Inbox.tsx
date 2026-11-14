@@ -23,7 +23,7 @@ import { VerifiedAvatar } from "@/components/messages/VerifiedAvatar";
 import type { Dictionary } from "@vallo/i18n/core";
 import type { ThreadContextKind } from "@/lib/messages/db";
 import { Segmented } from "@/components/ui/Segmented";
-import { Chip, ChipRow } from "@/components/ui/Chip";
+import { CountTabs } from "@/components/ui/CountTabs";
 import { useInboxPart } from "@/components/app/threads/use-inbox-copy";
 import { formatNumber, plural } from "@vallo/i18n/core";
 import { useClientLocale } from "@/lib/i18n/use-client-locale";
@@ -850,17 +850,20 @@ export function Inbox({
       </div>
       ) : null}
       <div className="mt-sm" data-testid="inbox-views">
-        {/* The views as filter chips (north star 15.4): one rail, radio
-            semantics because it filters the list below, the waiting counts
-            on the two chips that have a queue. Chips have room for a count
-            where the old segmented track cut the word. */}
-        <ChipRow label={tabLabels.filterLabel} radiogroup bleed={false}>
-          {/* A filter appears only when it has something in it. Recent and
-              Requests always show; the view you are on never vanishes under you. */}
-          {/* GRADE 1 (R59): All, Unread and Requests as the one chip row;
-              Archived and Reported open from the options sheet and show a
-              chip only while they are the view. */}
-          {VIEW_ORDER.filter(
+        {/* The views as the founder's count tab row (14 November 2026, after
+            Snapchat's chat filters): one scrolling rail, radio semantics
+            because it filters the list below, the waiting counts as round
+            badges on the tabs that have a queue, "9+" past nine. */}
+        {/* A filter appears only when it has something in it. Recent and
+            Requests always show; the view you are on never vanishes under you.
+            GRADE 1 (R59): All, Unread and Requests as the one row; Archived
+            and Reported open from the options sheet and show a tab only while
+            they are the view. */}
+        <CountTabs
+          label={tabLabels.filterLabel}
+          active={view}
+          onChange={(key) => setView(key as View)}
+          items={VIEW_ORDER.filter(
             (key) =>
               key === "recent" ||
               view === key ||
@@ -875,27 +878,21 @@ export function Inbox({
                   : key === "support"
                     ? supportRows.filter((r) => r.unread).length
                     : 0;
-            return (
-              <Chip
-                key={key}
-                behaviour="choice"
-                size="md"
-                selected={view === key}
-                onSelectedChange={() => setView(key)}
-                {...(count > 0 ? { count } : {})}
-                data-testid={`inbox-view-${key}`}
-              >
-                {key === "requests"
+            return {
+              key,
+              label:
+                key === "requests"
                   ? tabLabels.requests
                   : key === "support"
                     ? POLISH_WORDS.support
                     : key === "recent" && plus
                       ? plus.all
-                      : inbox.filters[key]}
-              </Chip>
-            );
+                      : inbox.filters[key],
+              ...(count > 0 ? { count } : {}),
+              "data-testid": `inbox-view-${key}`,
+            };
           })}
-        </ChipRow>
+        />
       </div>
 
       {/* Archive and move back are said in the top banner (Grade 1). */}

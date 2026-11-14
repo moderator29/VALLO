@@ -38,11 +38,12 @@ const HEART_ENTRY = `
 
 /**
  * Click `selector` and time, from inside the page, the moment the control's
- * `aria-pressed` flips and the moment a banner is drawn at opacity 0.5 or more.
+ * `aria-pressed` flips and the moment the feedback (the quick pill for a
+ * save, the top banner otherwise: `card`) is drawn at opacity 0.5 or more.
  */
-async function timeTap(page: Page, selector: string, words = "") {
+async function timeTap(page: Page, selector: string, words = "", card = ".nf-quick") {
   return page.evaluate(
-    ([sel, expected]) =>
+    ([sel, expected, cardSel]) =>
       new Promise<{ flip: number | null; mounted: number | null; visible: number | null; text: string | null }>((resolve) => {
         const control = document.querySelector(sel) as HTMLElement;
         const before = control.getAttribute("aria-pressed");
@@ -54,7 +55,7 @@ async function timeTap(page: Page, selector: string, words = "") {
         const tick = () => {
           const at = performance.now() - t0;
           if (flip === null && control.getAttribute("aria-pressed") !== before) flip = at;
-          const found = document.querySelector(".nf-toast:not([data-leaving])") as HTMLElement | null;
+          const found = document.querySelector(`${cardSel}:not([data-leaving])`) as HTMLElement | null;
           const card = found && (found.textContent ?? "").includes(expected) ? found : null;
           if (card && mounted === null) {
             mounted = at;
@@ -67,21 +68,25 @@ async function timeTap(page: Page, selector: string, words = "") {
         control.click();
         tick();
       }),
-    [selector, words] as const,
+    [selector, words, card] as const,
   );
 }
 
 describe.skipIf(!hasBrowser && !process.env.CI)("feedback on the tap", () => {
-  it("a heart flips and its banner is up within 100ms while the server has not answered", async () => {
-    /* No staged `toggleSave`: the harness answers with a promise that never settles. */
+  it("a heart flips and its quick pill is up within 100ms while the server has not answered", async () => {
+    /* No staged `toggleSave`: the harness answers with a promise that never settles.
+       The heart's feedback is the QUICK PILL (founder, 14 November 2026): short
+       words, no Undo button, the heart itself stays as the inverse. */
     const { page, close } = await mountInBrowser({ entry: HEART_ENTRY, css: CSS });
     try {
       const t = await timeTap(page, "[data-testid=card-save]");
-      expect(t.text).toContain("Saved. It is in Saved.");
+      expect(t.text).toContain("Saved");
       expect(t.flip).not.toBeNull();
       expect(t.flip!).toBeLessThan(100);
       expect(t.mounted!).toBeLessThan(100);
       expect(t.visible!).toBeLessThan(100);
+      /* No button inside the pill, and it never takes the pointer. */
+      expect(await page.locator(".nf-quick button").count()).toBe(0);
       /* Never disabled while the call is out. */
       expect(await page.locator("[data-testid=card-save]").isDisabled()).toBe(false);
       /* The state WANTED is sent, never "flip". */
@@ -102,9 +107,13 @@ describe.skipIf(!hasBrowser && !process.env.CI)("feedback on the tap", () => {
     });
     try {
       await timeTap(page, "[data-testid=card-save]");
+      /* An unsave INSIDE the pill's life is a change of mind: the pill goes
+         quietly and nothing else is said (handoff 6.1). So wait the pill out;
+         an unsave after it is news again and says so. */
+      await page.locator(".nf-quick").waitFor({ state: "detached" });
       await page.waitForFunction(() => (window as unknown as { __calls: unknown[] }).__calls.length === 1);
-      const t = await timeTap(page, "[data-testid=card-save]", "Removed from Saved.");
-      expect(t.text).toContain("Removed from Saved.");
+      const t = await timeTap(page, "[data-testid=card-save]", "Removed from Saved");
+      expect(t.text).toContain("Removed from Saved");
       expect(t.visible!).toBeLessThan(100);
       expect(await page.locator("[data-testid=card-save]").getAttribute("aria-pressed")).toBe("false");
     } finally {
@@ -144,12 +153,12 @@ describe.skipIf(!hasBrowser && !process.env.CI)("feedback on the tap", () => {
       const heart = page.locator("[data-testid=card-save]");
       const t = await timeTap(page, "[data-testid=card-save]");
       expect(t.visible!).toBeLessThan(100);
-      const id = await page.evaluate(() => document.querySelector(".nf-toast")?.outerHTML.length);
-      await page.getByText("Saved on this device. It is in Saved.").waitFor();
+      const id = await page.evaluate(() => document.querySelector(".nf-quick")?.outerHTML.length);
+      await page.getByText("Saved on this device").waitFor();
       /* Kept on: the device owns it now. */
       expect(await heart.getAttribute("aria-pressed")).toBe("true");
-      /* One banner, no second entrance and no error. */
-      expect(await page.locator(".nf-toast").count()).toBe(1);
+      /* One pill whose words changed in place, no second entrance, no error. */
+      expect(await page.locator(".nf-quick").count()).toBe(1);
       expect(await page.getByRole("alert").count()).toBe(0);
       expect(id).toBeGreaterThan(0);
     } finally {
@@ -167,7 +176,7 @@ describe.skipIf(!hasBrowser && !process.env.CI)("feedback on the tap", () => {
       css: CSS,
     });
     try {
-      const t = await timeTap(page, "button[aria-pressed]");
+      const t = await timeTap(page, "button[aria-pressed]", "", ".nf-toast");
       expect(t.text).toContain("You follow @ada_o");
       expect(t.flip!).toBeLessThan(100);
       expect(t.visible!).toBeLessThan(100);

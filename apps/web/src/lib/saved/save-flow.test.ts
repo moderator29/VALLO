@@ -59,12 +59,16 @@ afterEach(() => {
 });
 
 describe("a save, answered on the tap", () => {
-  it("flips and raises the banner before the server answers, sending the state wanted", () => {
+  it("flips and raises the quick pill before the server answers, sending the state wanted", () => {
+    /* The heart's feedback is the QUICK PILL (founder, 14 November 2026,
+       handoff 6.1): short words, no Undo button, because the heart itself is
+       the inverse and stays under the thumb. */
     const applied: boolean[] = [];
     void tap(true, (v) => applied.push(v));
     expect(applied).toEqual([true]);
-    expect(currentToast()?.message).toBe("Saved. It is in Saved.");
-    expect(currentToast()?.action?.label).toBe("Undo");
+    expect(currentToast()?.message).toBe("Saved");
+    expect(currentToast()?.quick).toBe(true);
+    expect(currentToast()?.action).toBeUndefined();
     expect(state.calls).toEqual([{ listingId: LISTING, want: true }]);
     expect(state.answers).toHaveLength(1);
     expect(savesInFlight()).toBe(true);
@@ -82,19 +86,36 @@ describe("a save, answered on the tap", () => {
     expect(savesInFlight()).toBe(false);
   });
 
-  it("never lets an earlier answer undo a later tap", async () => {
+  it("never lets an earlier answer undo a later tap, and takes the pill back quietly", async () => {
     const applied: boolean[] = [];
     const first = tap(true, (v) => applied.push(v));
+    /* The opposite tap inside the pill's life is "never mind": the pill goes
+       and no "Removed from Saved" answers a change of mind (handoff 6.1). */
     const second = tap(false, (v) => applied.push(v));
+    expect(currentToast()).toBeNull();
     /* The first fails after the second tap: the heart stays where the second put it. */
     state.answers[0]!({ ok: false, error: "Refused" });
     state.answers[1]!({ ok: true, data: { mode: "db", listingId: LISTING, saved: false } });
     await Promise.all([first, second]);
     expect(applied).toEqual([true, false]);
-    expect(currentToast()?.message).toBe("Removed from Saved.");
+    expect(currentToast()).toBeNull();
   });
 
-  it("turns a signed-out save into a device save, changing the words in place", async () => {
+  it("says Removed from Saved when the second tap comes after the pill has gone", async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(10_000);
+    const first = tap(true, () => undefined);
+    vi.setSystemTime(10_000 + 2_000);
+    const second = tap(false, () => undefined);
+    expect(currentToast()?.message).toBe("Removed from Saved");
+    expect(currentToast()?.quick).toBe(true);
+    state.answers[0]!({ ok: true, data: { mode: "db", listingId: LISTING, saved: true } });
+    state.answers[1]!({ ok: true, data: { mode: "db", listingId: LISTING, saved: false } });
+    await Promise.all([first, second]);
+    vi.useRealTimers();
+  });
+
+  it("turns a signed-out save into a device save, changing the pill's words in place", async () => {
     const applied: boolean[] = [];
     const done = tap(true, (v) => applied.push(v));
     const id = currentToast()?.id;
@@ -103,14 +124,14 @@ describe("a save, answered on the tap", () => {
     expect(applied).toEqual([true]);
     expect(state.local).toEqual([`+${LISTING}`]);
     expect(currentToast()?.id).toBe(id);
-    expect(currentToast()?.message).toBe("Saved on this device. It is in Saved.");
+    expect(currentToast()?.message).toBe("Saved on this device");
   });
 
   it("keeps a catalogue id on the device without asking the server", async () => {
     await tap(true, () => undefined, "lagos-yaba-12");
     expect(state.calls).toEqual([]);
     expect(state.local).toEqual(["+lagos-yaba-12"]);
-    expect(currentToast()?.message).toBe("Saved on this device. It is in Saved.");
+    expect(currentToast()?.message).toBe("Saved on this device");
   });
 
   it("counts every answer so /saved knows to refresh, and says when the writes have landed", async () => {

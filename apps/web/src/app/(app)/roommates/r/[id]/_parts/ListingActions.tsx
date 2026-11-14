@@ -428,7 +428,7 @@ export function ListingShareMenu({
   const link = async () => {
     feedback("select");
     const outcome = await shareOrCopy({ url: `${window.location.origin}${ROOMMATES_ROUTES.listing(id)}`, title });
-    if (outcome === "copied") banner.success(copy.ui.profile.shared);
+    if (outcome === "copied") banner.quick(copy.ui.profile.shared, { haptic: false });
     else if (outcome === "shared") banner.success(copy.ui.profile.sharedNative);
     else if (outcome === "failed") banner.error(copy.ui.profile.shareFailed);
     if (outcome !== "cancelled") setOpen(false);

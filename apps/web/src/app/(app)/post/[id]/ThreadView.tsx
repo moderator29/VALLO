@@ -192,7 +192,7 @@ export function ThreadView({
         return;
       }
       void navigator.clipboard?.writeText(url);
-      banner.success(POST_COPY.copied);
+      banner.quick(POST_COPY.copied);
       return;
     }
     /* Contact agent, the one row in the sheet that had no branch in either

@@ -10,6 +10,7 @@ import {
   currentToast,
   dismissToast,
   noteRouteChange,
+  quickExitMs,
   subscribeToast,
   swipeDismisses,
   type ToastItem,
@@ -95,7 +96,7 @@ export function ToastHost() {
     const t = window.setTimeout(() => {
       setShown(null);
       setLeaving(false);
-    }, exitMs());
+    }, shown.quick ? quickExitMs() : exitMs());
     return () => window.clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps -- `shown` is read, the change that matters is `item`
   }, [item]);
@@ -106,18 +107,28 @@ export function ToastHost() {
   return (
     /* No name and no role: an empty landmark on every page is noise, and the
        two live lanes inside do the announcing (axe: aria-prohibited-attr). */
-    <div className="nf-toast-host">
-      <div aria-live="polite" aria-atomic="true" className="nf-toast-host__lane">
-        {shown && !urgent(shown.tone) ? (
-          <ToastCard key={shown.id} item={shown} leaving={leaving} />
-        ) : null}
+    <>
+      <div className="nf-toast-host">
+        <div aria-live="polite" aria-atomic="true" className="nf-toast-host__lane">
+          {shown && !shown.quick && !urgent(shown.tone) ? (
+            <ToastCard key={shown.id} item={shown} leaving={leaving} />
+          ) : null}
+        </div>
+        <div aria-live="assertive" aria-atomic="true" className="nf-toast-host__lane">
+          {shown && !shown.quick && urgent(shown.tone) ? (
+            <ToastCard key={shown.id} item={shown} leaving={leaving} />
+          ) : null}
+        </div>
       </div>
-      <div aria-live="assertive" aria-atomic="true" className="nf-toast-host__lane">
-        {shown && urgent(shown.tone) ? (
-          <ToastCard key={shown.id} item={shown} leaving={leaving} />
-        ) : null}
+      {/* THE QUICK PILL (founder, 14 November 2026): the same store's lighter
+          voice, drawn near the BOTTOM, above the dock, the composer or the
+          home indicator, where the hand just acted. Its own fixed host so the
+          top banner's geometry is untouched; still one message at a time,
+          because the store holds one. */}
+      <div aria-live="polite" aria-atomic="true" className="nf-quick-host">
+        {shown && shown.quick ? <QuickPill key={shown.id} item={shown} leaving={leaving} /> : null}
       </div>
-    </div>
+    </>
   );
 }
 
@@ -281,6 +292,44 @@ function ToastCard({ item, leaving }: { item: ToastItem; leaving: boolean }) {
       >
         <UiIcon name="close" size={16} />
       </button>
+    </div>
+  );
+}
+
+/**
+ * THE QUICK PILL: a tick in the success colour, the words, nothing else. No
+ * close button, no action, no pause on touch (it does not take the pointer at
+ * all: a copy confirmation must never block the tap under it). The same words
+ * fired twice restart this clock in place (same id, a new `shownAt`), with no
+ * second entrance. Under reduced motion the stylesheet collapses its slide to
+ * a fade and the duration tokens to 1ms.
+ */
+function QuickPill({ item, leaving }: { item: ToastItem; leaving: boolean }) {
+  /* `data-toast-up` on <html> while it is on screen: back to top and other
+     bottom floaters step aside for it, exactly as they did for the old pill. */
+  useRootFlag("toast-up");
+
+  const timer = useRef<number | null>(null);
+  useEffect(() => {
+    if (timer.current !== null) window.clearTimeout(timer.current);
+    timer.current = window.setTimeout(() => dismissToast(item.id), item.durationMs);
+    return () => {
+      if (timer.current !== null) window.clearTimeout(timer.current);
+    };
+    /* The clock restarts when the same words are said again (`shownAt` moves). */
+  }, [item.id, item.shownAt, item.durationMs]);
+
+  return (
+    <div
+      data-testid={item["data-testid"]}
+      data-leaving={leaving || undefined}
+      role="status"
+      className="nf-quick"
+    >
+      <span className="nf-quick__mark" aria-hidden="true">
+        <UiIcon name="check" size={16} />
+      </span>
+      <p className="nf-quick__text">{item.message}</p>
     </div>
   );
 }

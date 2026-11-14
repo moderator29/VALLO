@@ -62,6 +62,10 @@ export function InviteLinkCard({
     if (await copyText(url)) {
       feedback("select");
       flash();
+      /* The quick pill (founder, 14 November 2026, handoff 6.1: "invite link
+         copied" is a pill moment). The button's own glyph flash stays; the
+         haptic above is this tap's, so the pill adds none. */
+      banner.quick(copy.copied, { haptic: false, ...say });
     } else {
       banner.error(copy.copyFailed, say);
     }

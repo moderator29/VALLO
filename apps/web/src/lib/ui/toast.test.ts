@@ -1,4 +1,13 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
+
+/* The quick pill's haptic tick, watched rather than felt. */
+const felt: string[] = [];
+vi.mock("./feedback", () => ({
+  feedback: (kind: string) => {
+    felt.push(kind);
+  },
+}));
+
 import {
   BANNER_CARRY_MS,
   BANNER_TIMING,
@@ -8,6 +17,7 @@ import {
   dwellFor,
   ERROR_HOLD_MS,
   noteRouteChange,
+  QUICK_DWELL_MS,
   subscribeToast,
   swipeDismisses,
   toast,
@@ -180,5 +190,68 @@ describe("the one toast", () => {
     banner.success("Two");
     expect(updateToast(old, { message: "Changed" })).toBe(false);
     expect(currentToast()?.message).toBe("Two");
+  });
+});
+
+/* THE QUICK PILL (founder, 14 November 2026): the same store's lighter voice. */
+describe("banner.quick", () => {
+  afterEach(() => {
+    vi.useRealTimers();
+    felt.length = 0;
+    dismissToast();
+    dismissToast();
+  });
+
+  it("is a success-toned quick item on the system's own clock", () => {
+    banner.quick("Message copied");
+    const item = currentToast();
+    expect(item?.quick).toBe(true);
+    expect(item?.tone).toBe("success");
+    expect(item?.durationMs).toBe(QUICK_DWELL_MS);
+    expect(item?.action).toBeUndefined();
+  });
+
+  it("refuses an action and a stretched clock, even from a dishonest spread", () => {
+    banner.quick("Link copied", {
+      action: { label: "Undo", run: () => undefined },
+      retry: () => undefined,
+      durationMs: 60_000,
+    } as never);
+    const item = currentToast();
+    expect(item?.action).toBeUndefined();
+    expect(item?.durationMs).toBe(QUICK_DWELL_MS);
+  });
+
+  it("restarts the clock for the same words in place, with the same id", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(1_000);
+    const first = banner.quick("Message copied");
+    vi.setSystemTime(1_800);
+    const second = banner.quick("Message copied");
+    expect(second).toBe(first);
+    expect(currentToast()?.shownAt).toBe(1_800);
+  });
+
+  it("never folds into a top banner that happens to share its words", () => {
+    const bannerId = banner.success("Saved");
+    const quickId = banner.quick("Saved");
+    expect(quickId).not.toBe(bannerId);
+    expect(currentToast()?.quick).toBe(true);
+  });
+
+  it("ticks the hand once per press, and not when the caller already buzzed", () => {
+    banner.quick("Message copied");
+    banner.quick("Message copied");
+    expect(felt).toEqual(["select", "select"]);
+    felt.length = 0;
+    banner.quick("Photo saved", { haptic: false });
+    expect(felt).toEqual([]);
+  });
+
+  it("gives way to an error at once, as any success does", () => {
+    banner.quick("Link copied");
+    banner.error("Could not reach Vallo");
+    expect(currentToast()?.tone).toBe("error");
+    expect(currentToast()?.quick).toBeUndefined();
   });
 });
