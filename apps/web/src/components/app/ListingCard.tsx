@@ -390,6 +390,15 @@ export function ListingCard({
       : listing.area || listing.city;
 
   const price = cardPrice(listing);
+  /* The price as one line of words, for the long-press sheet's head card:
+     the same figure and the same note the card itself prints, built by the
+     card's own glance model so the two can never disagree. */
+  const glance = cardGlance(listing, locale, copy);
+  const glanceLine = glance.price
+    ? [glance.price, glance.priceNote].filter(Boolean).join(" ")
+    : undefined;
+  /* The same search the saved board offers when a listing goes: this area. */
+  const similarHref = `/search?q=${encodeURIComponent(listing.area || listing.city)}`;
   /* V-65: the months of rent asked for up front, for the line under the rent. */
   const cash = cashAtDoor(listing);
   const facts = cardFacts(listing, t, locale);
@@ -696,6 +705,10 @@ export function ListingCard({
           }}
           mint={menu.mint}
           shareable={shareable}
+          priceLine={glanceLine}
+          href={href}
+          {...(messageHref ? { messageHref, messageLabel: t.shape.card.messageAgent } : {})}
+          similarHref={similarHref}
         />
       </SpaceCard>
     );
@@ -1132,6 +1145,10 @@ export function ListingCard({
         }}
         mint={menu.mint}
         shareable={shareable}
+        priceLine={glanceLine}
+        href={href}
+        {...(messageHref ? { messageHref, messageLabel: t.shape.card.messageAgent } : {})}
+        similarHref={similarHref}
       />
     </article>
   );

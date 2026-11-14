@@ -1,11 +1,17 @@
 /**
- * THE PROFILE'S "..." MENU OPENS WHOLLY ON SCREEN (D79).
+ * THE PROFILE'S "..." MENU OPENS WHOLLY ON SCREEN (D79), WHATEVER ITS
+ * TRIGGER'S POSITION.
  *
  * The founder on a phone: Copy, Mute, Report and Block "render clipped off the
- * right edge of the screen". The menu hung from one edge of its trigger
- * whatever room there was on that side. Here the trigger is placed at the
- * left edge, in the middle and at the right edge of a 390px screen, and the
- * open menu must sit inside the viewport every time.
+ * right edge of the screen". The menu was a popover hanging off one edge of
+ * its trigger whatever room there was on that side, and a layout effect
+ * measured the viewport and slid it back in. It is the platform's action
+ * sheet since 14 November 2026, anchored to the bottom edge of the screen,
+ * so a trigger's position cannot clip it at all. The trigger is still placed
+ * at the left edge, in the middle and at the right edge of a 390px screen,
+ * and the open sheet must sit inside the viewport every time: the defect the
+ * founder reported is the thing being measured, not the mechanism that was
+ * replaced.
  *
  * Fictional person; nothing is sent (server actions are stubbed).
  */
@@ -31,6 +37,8 @@ const CSS = [
   read("src", "app", "social-feed.shared.css"),
   read("src", "app", "social-feed.css"),
   read("src", "components", "social", "profile", "social-profile.css"),
+  read("src", "app", "css", "list-views.css"),
+  read("src", "components", "ui", "action-sheet.css"),
 ].join("\n");
 
 const entry = (justify: string) => `
@@ -58,13 +66,36 @@ describe.skipIf(!hasBrowser && !process.env.CI)("the profile's overflow menu at 
       const { page, close } = await mountInBrowser({ entry: entry(justify), css: CSS });
       try {
         await page.getByRole("button", { name: /More actions for/ }).click();
-        const box = await page.getByRole("menu").boundingBox();
+        const sheet = page.getByTestId("profile-menu");
+        await sheet.waitFor();
+        const box = await sheet.boundingBox();
         expect(box).not.toBeNull();
         expect(box!.x).toBeGreaterThanOrEqual(0);
         expect(box!.x + box!.width).toBeLessThanOrEqual(390);
+        /* And the page itself never gains a sideways scroll from it. */
+        const overflow = await page.evaluate(
+          () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
+        );
+        expect(overflow).toBeLessThanOrEqual(0);
       } finally {
         await close();
       }
     });
   }
+
+  it("offers copy, mute, report and block, with the two destructive rows last", async () => {
+    const { page, close } = await mountInBrowser({ entry: entry("center"), css: CSS });
+    try {
+      await page.getByRole("button", { name: /More actions for/ }).click();
+      await page.getByTestId("profile-menu").waitFor();
+      expect(await page.getByTestId("profile-menu-copy").isVisible()).toBe(true);
+      expect(await page.getByTestId("profile-menu-mute").isVisible()).toBe(true);
+      const keys = await page
+        .locator('[data-testid="profile-menu"] .nf-list-item')
+        .evaluateAll((els) => els.map((el) => el.querySelector("[data-testid]")?.getAttribute("data-testid") ?? ""));
+      expect(keys).toEqual(["profile-menu-report", "profile-menu-block"]);
+    } finally {
+      await close();
+    }
+  });
 });

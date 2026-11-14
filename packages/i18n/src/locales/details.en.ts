@@ -50,6 +50,11 @@ export const detailsEn = {
     removed: "Removed from saved",
     share: "Share",
     hide: "Hide from my results",
+    /* The sheet's quieter rows and its dismiss (the shared action sheet,
+       14 November 2026). */
+    copyLink: "Copy link",
+    seeSimilar: "See similar nearby",
+    done: "Done",
     /** Hidden on this phone only; nothing leaves the device. */
     hidden: "Hidden on this phone",
     undo: "Undo",

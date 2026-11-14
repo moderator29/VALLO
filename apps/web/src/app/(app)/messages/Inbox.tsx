@@ -24,6 +24,8 @@ import type { Dictionary } from "@vallo/i18n/core";
 import type { ThreadContextKind } from "@/lib/messages/db";
 import { Segmented } from "@/components/ui/Segmented";
 import { CountTabs } from "@/components/ui/CountTabs";
+import { ActionSheet, type QuickAction, type SheetRow } from "@/components/ui/ActionSheet";
+import { useLongPress } from "@/lib/ui/use-long-press";
 import { useInboxPart } from "@/components/app/threads/use-inbox-copy";
 import { formatNumber, plural } from "@vallo/i18n/core";
 import { useClientLocale } from "@/lib/i18n/use-client-locale";
@@ -127,6 +129,13 @@ const POLISH_WORDS = {
   mutedDone: "Muted. You will not be notified about this chat",
   unmutedDone: "Unmuted",
   close: "Close",
+  /* The row's own sheet (handoff 6.3 part 2, 14 November 2026). */
+  rowMenuTitle: "Actions for this chat",
+  open: "Open",
+  done: "Done",
+  archiveRow: "Archive",
+  moveBackRow: "Move back to the inbox",
+  archiveRowNote: "It leaves your inbox. The other person still sees it.",
 };
 
 /**
@@ -246,7 +255,10 @@ function Row({
   words,
   query = "",
   swipe = [],
+  onHold,
 }: {
+  /** Hold the row to open its sheet (handoff 6.3 part 2). */
+  onHold?: (row: InboxRow) => void;
   row: InboxRow;
   typing: boolean;
   /** The search, so the row marks where it matched. */
@@ -267,6 +279,9 @@ function Row({
      word. A shared card previews as its words, never as the path it carries. */
   /* Searching: a match past the first line is brought into view. */
   const preview = query.trim() ? previewLine(snippetAround(row.lastMessage, query)) : previewLine(row.lastMessage);
+  /* A hold opens the row's sheet; the click that ends the hold is swallowed
+     by the hook, so the conversation does not open behind it. */
+  const hold = useLongPress(() => onHold?.(row), { disabled: !onHold });
   return (
     <li className="flex items-center gap-3xs">
       <InboxSwipe actions={swipe}>
@@ -275,6 +290,7 @@ function Row({
         data-testid="inbox-row"
         data-unread={row.unread > 0 || undefined}
         className="nf-inbox-row min-w-0 flex-1"
+        {...hold.handlers}
       >
         {/* The avatar in the thread family's lit ring, carrying the verified
             mark: one mark per person per row, where the eye lands first. */}
@@ -490,6 +506,8 @@ export function Inbox({
   const [prefsLocal, setPrefsLocal] = useState<Record<string, ConversationPref>>({});
   /* The conversation whose mute choices are open. */
   const [muteTarget, setMuteTarget] = useState<InboxRow | null>(null);
+  /* The conversation whose own sheet is open (a hold on the row). */
+  const [menuRow, setMenuRow] = useState<InboxRow | null>(null);
   const [query, setQuery] = useState("");
   /* GRADE 1: search is a button in the header until it is wanted (R59). */
   const [searchOpen, setSearchOpen] = useState(false);
@@ -940,6 +958,7 @@ export function Inbox({
                 unreadWord={plural(row.unread, inbox.unreadBadge, locale)}
                 words={{ typing: inbox.typing, archive: inbox.archive, moveBack: inbox.moveBack }}
                 query={query}
+                onHold={setMenuRow}
                 swipe={[
                   ...(canMarkRead && row.unread > 0
                     ? [{ key: "read", label: POLISH_WORDS.read, icon: "check" as const, run: () => markOneRead(row) }]
@@ -1021,6 +1040,100 @@ export function Inbox({
           />
         )}
       </div>
+
+      {/*
+        THE ROW'S OWN SHEET (handoff 6.3 part 2, the founder's Snapchat
+        long-press reference of 14 November 2026). Hold a conversation and
+        the person comes up with the things this inbox genuinely does to it:
+        open it, mark it read, pin it, mute it, archive it.
+
+        WHAT IS NOT HERE, and why. Call, Video and Profile would need the
+        counterpart's id or handle, which an inbox row does not carry
+        (`InboxRow`), and Block, Report and Delete have no per-conversation
+        door in this product today: blocking and reporting are on the
+        person's profile and inside the thread, where the evidence is. A
+        control that cannot work must not be drawn, so none of the six is.
+      */}
+      <ActionSheet
+        open={menuRow !== null}
+        onOpenChange={(next) => {
+          if (!next) setMenuRow(null);
+        }}
+        title={POLISH_WORDS.rowMenuTitle}
+        testId="inbox-row-menu"
+        {...(menuRow
+          ? {
+              head: {
+                name: menuRow.counterpartName,
+                ...(menuRow.listingTitle ? { line: menuRow.listingTitle } : {}),
+                ...(menuRow.counterpartAvatarUrl ? { thumb: menuRow.counterpartAvatarUrl } : {}),
+                icon: "user" as const,
+                href: `/messages/${menuRow.id}`,
+                "data-testid": "inbox-row-menu-open",
+              },
+            }
+          : {})}
+        quick={
+          menuRow
+            ? ([
+                {
+                  key: "open",
+                  label: POLISH_WORDS.open,
+                  icon: "chat-bubble",
+                  href: `/messages/${menuRow.id}`,
+                  "data-testid": "inbox-row-menu-chat",
+                },
+                ...(canMarkRead && menuRow.unread > 0
+                  ? [
+                      {
+                        key: "read",
+                        label: POLISH_WORDS.read,
+                        icon: "check" as const,
+                        onSelect: () => markOneRead(menuRow),
+                        "data-testid": "inbox-row-menu-read",
+                      },
+                    ]
+                  : []),
+                ...(prefsOpen
+                  ? [
+                      {
+                        key: "pin",
+                        label: menuRow.pinnedAt ? POLISH_WORDS.unpin : POLISH_WORDS.pin,
+                        icon: "bookmark" as const,
+                        on: Boolean(menuRow.pinnedAt),
+                        onSelect: () => togglePin(menuRow),
+                        "data-testid": "inbox-row-menu-pin",
+                      },
+                      {
+                        key: "mute",
+                        label: isMuted(menuRow.mutedUntil) ? POLISH_WORDS.unmute : POLISH_WORDS.mute,
+                        icon: isMuted(menuRow.mutedUntil) ? ("bell" as const) : ("mute" as const),
+                        on: isMuted(menuRow.mutedUntil),
+                        onSelect: () =>
+                          isMuted(menuRow.mutedUntil) ? setMute(menuRow, null) : setMuteTarget(menuRow),
+                        "data-testid": "inbox-row-menu-mute",
+                      },
+                    ]
+                  : []),
+              ] as QuickAction[])
+            : []
+        }
+        rows={
+          menuRow && archiveOpen && view !== "reported"
+            ? ([
+                {
+                  key: "archive",
+                  label: menuRow.archived ? POLISH_WORDS.moveBackRow : POLISH_WORDS.archiveRow,
+                  sub: menuRow.archived ? undefined : POLISH_WORDS.archiveRowNote,
+                  icon: "archive",
+                  onSelect: () => toggleArchive(menuRow),
+                  "data-testid": "inbox-row-menu-archive",
+                },
+              ] as SheetRow[])
+            : []
+        }
+        doneLabel={POLISH_WORDS.done}
+      />
 
       {/* Job 8: how long to mute a conversation for. */}
       <Sheet

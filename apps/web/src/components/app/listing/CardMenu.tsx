@@ -1,13 +1,10 @@
 "use client";
 
 import { useCallback, useRef, useState, useSyncExternalStore } from "react";
-import { Sheet } from "@/components/ui/Sheet";
-import { ListGroup, ListRow } from "@/components/ui/ListGroup";
-import { IconPlate } from "@/components/ui/IconPlate";
-import { UiIcon } from "@/design-system/icons/UiIcon";
+import { ActionSheet, type QuickAction, type SheetRow } from "@/components/ui/ActionSheet";
 import { useClientCopy } from "@/lib/i18n/client-copy";
 import { createShareLink } from "@/lib/share/actions";
-import { toast } from "@/lib/ui/toast";
+import { banner, toast } from "@/lib/ui/toast";
 import { useShare } from "@/lib/ui/use-copy";
 import { useLongPress } from "@/lib/ui/use-long-press";
 import { hideListing, isHidden, subscribeHidden, unhideListing } from "@/lib/ui/hidden-listings";
@@ -15,28 +12,42 @@ import { toggleCompare, useCompareTray } from "@/lib/compare/tray";
 import { useRequireAuth } from "@/components/auth/AuthGate";
 import { ShareToFeedHost } from "@/components/social/share/ShareToFeedHost";
 import { SHARE_WORDS } from "@/lib/features/listing-share/model";
+import { POST_COPY } from "@/lib/social/posts-model";
 import "@/app/css/catalogue.css";
 import "@/app/css/list-views.css";
 
 /**
- * THE LISTING CARD'S LONG-PRESS MENU (details pass, 30 September 2026).
+ * THE LISTING CARD'S LONG-PRESS MENU (details pass, 30 September 2026; moved
+ * onto the shared `ActionSheet` on 14 November 2026).
  *
- * Hold a card and a short sheet rises with the three things people do to a
- * card without opening it: Save (or take it out of saved), Share, and Hide
- * from my results. A phone's own long press does the same (Android fires a
- * context menu on a held link); a mouse's right click keeps the browser's
- * menu.
+ * Hold a card and a short sheet rises: the listing itself at the top with its
+ * photograph, its title and its price, a chevron into the listing; a row of
+ * round quick actions for the four things people do to a card without
+ * reading it; then the quieter rows. A phone's own long press does the same
+ * (Android fires a context menu on a held link); a mouse's right click keeps
+ * the browser's menu.
  *
  *   Save    goes through the card's own `useSaveControl`, so the heart on the
- *           card and the row here are one state, optimistic, felt as a confirm
- *           when the server accepts it.
+ *           card and the circle here are one state, optimistic, felt as a
+ *           confirm when the server accepts it.
  *   Share   mints the listing's share door as the sheet opens (Safari drops
  *           the gesture across a round trip; `ListingActions` says why), then
  *           hands it to the phone's share sheet or the clipboard. A door goes
- *           out with no title (rule 10). An Example, which has no door, is not
- *           offered for sharing.
+ *           out with no title (rule 10). An Example, which has no door, is
+ *           offered neither for sharing nor for copying.
+ *   Compare puts it in the compare tray, or takes it out.
+ *   Message opens the conversation with the lister, where the card has one.
+ *   Copy link  takes the same minted door to the clipboard, said in the quick
+ *           pill rather than the top banner (handoff 6.1).
+ *   See similar  the same search this card's area already answers.
  *   Hide    this phone only (`lib/ui/hidden-listings.ts`), with Undo in the
- *           toast. A saved listing cannot be hidden.
+ *           banner. A saved listing cannot be hidden.
+ *
+ * REPORT IS NOT HERE and that is deliberate: reporting a listing asks for a
+ * reason and a sentence (`ReportSheetPanel`), which is a form, not a menu
+ * row, and it lives on the listing page where the evidence is. A row that
+ * opened a second sheet from a long press on a card in a list would be a
+ * dead end on the way to a form.
  */
 export function useCardMenu(listingId: string, options: { shareable: boolean }) {
   const [open, setOpen] = useState(false);
@@ -79,6 +90,11 @@ export function CardMenu({
   onToggleSave,
   mint,
   shareable,
+  priceLine,
+  href,
+  messageHref,
+  messageLabel,
+  similarHref,
 }: {
   open: boolean;
   onOpenChange(open: boolean): void;
@@ -89,6 +105,16 @@ export function CardMenu({
   onToggleSave(): void;
   mint(): Promise<string | null>;
   shareable: boolean;
+  /** The price as the card already prints it, under the title. */
+  priceLine?: string | undefined;
+  /** The listing itself, opened by the head card's chevron. */
+  href?: string | undefined;
+  /** The conversation with the lister, where this card offers one. */
+  messageHref?: string | undefined;
+  /** That circle's word, from the card's own dictionary (`shape.card`). */
+  messageLabel?: string | undefined;
+  /** The search that answers "more like this". */
+  similarHref?: string | undefined;
 }) {
   /* From the root layout's client copy, not the card's dictionary slice: the
      slice (lib/i18n/slice.ts) carries only what `t` reaches. Destructured, so
@@ -99,108 +125,148 @@ export function CardMenu({
   const compare = useCompareTray();
   const inTray = compare.has(listingId);
 
-  const close = () => onOpenChange(false);
   const { requireAuth } = useRequireAuth();
   const [feedOpen, setFeedOpen] = useState(false);
 
-  return (
-    <>
-    <ShareToFeedHost listingId={listingId} open={feedOpen} onClose={() => setFeedOpen(false)} />
-    <Sheet open={open} onOpenChange={onOpenChange} title={words.title} hideTitle detents={[0.5]} testId="card-menu">
-      <div className="nf-card-menu__head">
-        {thumb ? (
-          // eslint-disable-next-line @next/next/no-img-element -- the card's own photograph, already in cache
-          <img src={thumb} alt="" className="nf-card-menu__thumb" />
-        ) : (
-          <IconPlate size="md" shape="round">
-            <UiIcon name="house" size={20} />
-          </IconPlate>
-        )}
-        <p className="nf-body min-w-0 truncate font-semibold text-[var(--nf-content-primary)]">{title}</p>
-      </div>
-      <ListGroup>
-        <ListRow
-          data-testid="card-menu-save"
-          leading={
-            <IconPlate size="sm" shape="round" tone="brand">
-              <UiIcon name="heart" size={18} filled={saved} />
-            </IconPlate>
-          }
-          title={saved ? words.unsave : words.save}
-          onClick={() => {
-            onToggleSave();
-            close();
-          }}
-        />
-        {shareable ? (
-          <ListRow
-            data-testid="card-menu-share"
-            leading={
-              <IconPlate size="sm" shape="round" tone="info">
-                <UiIcon name="share" size={18} />
-              </IconPlate>
-            }
-            title={words.share}
-            onClick={async () => {
-              close();
-              const url = await mint();
-              if (!url) {
-                toast(frontDoor.share.failed, { tone: "error" });
-                return;
-              }
-              await share({ url });
-            }}
-          />
-        ) : null}
-        {shareable ? (
-          <ListRow
-            data-testid="card-menu-share-to-feed"
-            leading={
-              <IconPlate size="sm" shape="round" tone="brand">
-                <UiIcon name="feed" size={18} />
-              </IconPlate>
-            }
-            title={SHARE_WORDS.button}
-            onClick={() => {
-              close();
-              requireAuth("share", () => setFeedOpen(true));
-            }}
-          />
-        ) : null}
-        <ListRow
-          data-testid="card-menu-compare"
-          leading={
-            <IconPlate size="sm" shape="round" tone="info">
-              <UiIcon name="scale" size={18} filled={inTray} />
-            </IconPlate>
-          }
-          title={inTray ? details.compareTray.remove : details.compareTray.add}
-          onClick={() => {
-            close();
-            const result = toggleCompare(listingId);
-            if (result.full) toast(details.compareTray.full, { tone: "error" });
-          }}
-        />
-        {!saved ? (
-          <ListRow
-            data-testid="card-menu-hide"
-            leading={
-              <IconPlate size="sm" shape="round">
-                <UiIcon name="eye-off" size={18} />
-              </IconPlate>
-            }
-            title={words.hide}
-            onClick={() => {
-              close();
+  const shareNow = async () => {
+    const url = await mint();
+    if (!url) {
+      toast(frontDoor.share.failed, { tone: "error" });
+      return;
+    }
+    await share({ url });
+  };
+
+  const quick: QuickAction[] = [
+    {
+      key: "save",
+      label: saved ? words.unsave : words.save,
+      icon: "heart",
+      on: saved,
+      onSelect: onToggleSave,
+      "data-testid": "card-menu-save",
+    },
+    ...(shareable
+      ? [
+          {
+            key: "share",
+            label: words.share,
+            icon: "share" as const,
+            onSelect: () => {
+              void shareNow();
+            },
+            "data-testid": "card-menu-share",
+          },
+        ]
+      : []),
+    {
+      key: "compare",
+      label: inTray ? details.compareTray.remove : details.compareTray.add,
+      icon: "scale",
+      on: inTray,
+      onSelect: () => {
+        const result = toggleCompare(listingId);
+        if (result.full) toast(details.compareTray.full, { tone: "error" });
+      },
+      "data-testid": "card-menu-compare",
+    },
+    ...(messageHref && messageLabel
+      ? [
+          {
+            key: "message",
+            label: messageLabel,
+            icon: "chat-bubble" as const,
+            href: messageHref,
+            "data-testid": "card-menu-message",
+          },
+        ]
+      : []),
+  ];
+
+  const rows: SheetRow[] = [
+    ...(shareable
+      ? [
+          {
+            key: "copy",
+            label: details.cardMenu.copyLink,
+            icon: "link" as const,
+            onSelect: () => {
+              void mint().then((url) => {
+                if (!url) {
+                  banner.error(frontDoor.share.failed);
+                  return;
+                }
+                if (typeof navigator !== "undefined" && navigator.clipboard) {
+                  void navigator.clipboard.writeText(url);
+                  /* The quick pill, not the top banner: a copy is a
+                     confirmation, not news (handoff 6.1). */
+                  banner.quick(POST_COPY.copied);
+                  return;
+                }
+                banner.info(url);
+              });
+            },
+            "data-testid": "card-menu-copy",
+          },
+          {
+            key: "share-to-feed",
+            label: SHARE_WORDS.button,
+            icon: "feed" as const,
+            onSelect: () => requireAuth("share", () => setFeedOpen(true)),
+            "data-testid": "card-menu-share-to-feed",
+          },
+        ]
+      : []),
+    ...(similarHref
+      ? [
+          {
+            key: "similar",
+            label: details.cardMenu.seeSimilar,
+            icon: "search" as const,
+            href: similarHref,
+            chevron: true,
+            "data-testid": "card-menu-similar",
+          },
+        ]
+      : []),
+    ...(!saved
+      ? [
+          {
+            key: "hide",
+            label: words.hide,
+            icon: "eye-off" as const,
+            onSelect: () => {
               hideListing(listingId);
               toast(words.hidden, {
                 action: { label: words.undo, run: () => unhideListing(listingId) },
               });
-            }}
-          />
-        ) : null}
-      </ListGroup>
-    </Sheet>
+            },
+            "data-testid": "card-menu-hide",
+          },
+        ]
+      : []),
+  ];
+
+  return (
+    <>
+      <ShareToFeedHost listingId={listingId} open={feedOpen} onClose={() => setFeedOpen(false)} />
+      <ActionSheet
+        open={open}
+        onOpenChange={onOpenChange}
+        title={words.title}
+        testId="card-menu"
+        head={{
+          name: title,
+          ...(priceLine ? { line: priceLine } : {}),
+          ...(thumb ? { thumb } : {}),
+          icon: "house",
+          ...(href ? { href } : {}),
+          "data-testid": "card-menu-open",
+        }}
+        quick={quick}
+        rows={rows}
+        doneLabel={details.cardMenu.done}
+      />
     </>
   );
 }

@@ -1,0 +1,183 @@
+@layer components {
+  /*
+   * THE ACTION SHEET (the founder, 14 November 2026, after Snapchat's
+   * long-press sheet: "those are cool deep refs we included in many areas for
+   * our platform for actions and tabs"). The JOB that sheet does, in Vallo's
+   * own material: a card that says what the sheet is about, a row of round
+   * quick actions, a card of rows, and a Done bar standing apart from both.
+   *
+   * It owns only what is inside. Everything about being a sheet (the portal,
+   * the scrim, the rise on the spring, the drag and flick to close, Escape,
+   * Back, the focus trap and its return, the scroll lock, the safe-area
+   * inset, and the centred dialog from 64rem with a mouse) is `Sheet`'s.
+   *
+   * The founder's taste as of 14 November: these small surfaces are tighter
+   * and rounder, not boxy. So the quick actions are true circles on the
+   * glass door, their words small and quiet under them; the rows keep the
+   * platform's card and hairlines; and the Done bar stays the platform's
+   * rectangle button, because the shape law reserves the capsule and a
+   * full-width action is a button like any other.
+   */
+
+  /* ------------------------------------------------------------ the head */
+  .nf-asheet__head {
+    display: flex;
+    align-items: center;
+    gap: var(--nf-space-sm);
+    inline-size: 100%;
+    min-block-size: 3.5rem;
+    padding: var(--nf-space-xs) var(--nf-space-sm);
+    border: var(--nf-border-width) solid var(--nf-btn-glass-edge);
+    border-radius: var(--nf-container-radius);
+    background: var(--nf-btn-glass-fill);
+    color: inherit;
+    text-align: start;
+    text-decoration: none;
+  }
+  /* A head that opens something is a control and says so; a head that is
+     only a label is not focusable and never looks tappable. */
+  a.nf-asheet__head,
+  button.nf-asheet__head {
+    cursor: pointer;
+  }
+  a.nf-asheet__head:focus-visible,
+  button.nf-asheet__head:focus-visible {
+    outline: var(--nf-focus-ring-width) solid var(--nf-focus-ring);
+    outline-offset: var(--nf-focus-ring-offset);
+  }
+  @media (hover: hover) {
+    a.nf-asheet__head:hover,
+    button.nf-asheet__head:hover {
+      border-color: var(--nf-border-strong);
+    }
+  }
+  .nf-asheet__thumb {
+    flex: none;
+    inline-size: 2.75rem;
+    block-size: 2.75rem;
+    border-radius: var(--nf-radius-control);
+    object-fit: cover;
+  }
+  .nf-asheet__headtext {
+    min-inline-size: 0;
+    flex: 1;
+  }
+  .nf-asheet__name {
+    display: block;
+    overflow: hidden;
+    font-size: var(--nf-text-body);
+    font-weight: 600;
+    color: var(--nf-content-primary);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .nf-asheet__line {
+    display: block;
+    overflow: hidden;
+    margin-block-start: var(--nf-space-3xs);
+    font-size: var(--nf-text-body-sm);
+    color: var(--nf-content-secondary);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .nf-asheet__headchev {
+    flex: none;
+    color: var(--nf-content-muted);
+  }
+
+  /* -------------------------------------------------- the quick actions */
+  .nf-asheet__quick {
+    display: flex;
+    justify-content: space-evenly;
+    gap: var(--nf-space-sm);
+    margin-block-start: var(--nf-space-md);
+  }
+  .nf-asheet__quickitem {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--nf-space-2xs);
+    min-inline-size: 0;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--nf-content-secondary);
+    text-decoration: none;
+  }
+  /* The circle: a true round control on the shared glass door, tight around
+     its glyph. 48px, so it is comfortably past the 44 floor without
+     becoming a plate. */
+  .nf-asheet__quickdisc {
+    display: grid;
+    place-items: center;
+    inline-size: 3rem;
+    block-size: 3rem;
+    border: var(--nf-border-width) solid var(--nf-btn-glass-edge);
+    border-radius: var(--nf-radius-circle);
+    background: var(--nf-btn-glass-fill);
+    color: var(--nf-content-primary);
+    transition: transform var(--nf-duration-press) var(--nf-ease-press);
+  }
+  .nf-asheet__quickword {
+    max-inline-size: 100%;
+    overflow: hidden;
+    font-size: var(--nf-text-caption);
+    font-weight: 600;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .nf-asheet__quickitem:focus-visible {
+    outline: none;
+  }
+  .nf-asheet__quickitem:focus-visible .nf-asheet__quickdisc {
+    outline: var(--nf-focus-ring-width) solid var(--nf-focus-ring);
+    outline-offset: var(--nf-focus-ring-offset);
+  }
+  .nf-asheet__quickitem:active .nf-asheet__quickdisc {
+    transform: scale(0.94);
+  }
+  @media (hover: hover) {
+    .nf-asheet__quickitem:hover {
+      color: var(--nf-content-primary);
+    }
+    .nf-asheet__quickitem:hover .nf-asheet__quickdisc {
+      border-color: var(--nf-border-strong);
+    }
+  }
+  /* The chosen or live quick action (saved, muted) wears the same lit
+     selected state as the chips, the count tabs and the console's open tab. */
+  .nf-asheet__quickitem[aria-pressed="true"] .nf-asheet__quickdisc {
+    background: var(--nf-selected-fill);
+    border-color: var(--nf-selected-edges);
+    box-shadow: var(--nf-selected-shadow-inline);
+    color: var(--nf-content-on-brand);
+  }
+
+  /* ---------------------------------------------------- rows and the bar */
+  .nf-asheet__rows {
+    margin-block-start: var(--nf-space-md);
+  }
+  /* The rows card is the platform's list group; only the floor is ours:
+     52px minimum, the founder's row height for an action sheet. */
+  .nf-asheet__rows .nf-list-row {
+    min-block-size: 3.25rem;
+  }
+  .nf-asheet__rows .nf-asheet__row--danger .nf-list-row__title {
+    color: var(--nf-state-error);
+  }
+  /* The Done bar stands apart from the rows: its own block, above the home
+     indicator, never inside the card it dismisses. */
+  .nf-asheet__done {
+    margin-block-start: var(--nf-space-md);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .nf-asheet__quickdisc {
+      transition: none;
+    }
+    .nf-asheet__quickitem:active .nf-asheet__quickdisc {
+      transform: none;
+    }
+  }
+}
