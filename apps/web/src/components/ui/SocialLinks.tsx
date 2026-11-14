@@ -9,12 +9,14 @@ import { liveSocials, type SocialKey } from "@/lib/brand/socials";
  * opened in a new tab, named for a screen reader, 44 pixels to tap, with a
  * visible keyboard focus. Nothing is drawn for a network with no address.
  */
+/* eslint-disable nf/no-raw-colour -- each network's own brand colour, not themeable */
 const BRAND_COLOR: Record<SocialKey, string> = {
   facebook: "#1877F2",
   instagram: "linear-gradient(135deg, #FD5 0%, #FF543E 25%, #C837AB 50%, #5B51D8 100%)",
   tiktok: "#000000",
   linkedin: "#0A66C2",
 };
+/* eslint-enable nf/no-raw-colour */
 
 const GLYPH: Record<SocialKey, React.ReactNode> = {
   facebook: <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />,
