@@ -13,6 +13,7 @@ import type { CollectedRange } from "@/lib/admin/reads/shapes";
 import { LiveRefresh } from "./_components/LiveRefresh";
 import { safeDesk } from "./_components/entry";
 import { OverviewView } from "./_components/OverviewView";
+import { YourDesks } from "./_components/YourDesks";
 
 export const dynamic = "force-dynamic";
 
@@ -46,6 +47,9 @@ export default async function AdminOverviewPage({
     const door = await requireConsole();
     return door.state === "console" ? <StaffHome staff={door.staff} /> : null;
   }
+  /* An operator who also holds a named position sees that position's desks first. */
+  const door = await requireConsole();
+  const staff = door.state === "console" ? door.staff : null;
   const locale = await getLocale();
   const params = await searchParams;
   const range = RANGES.find((r) => r === params.range) ?? "12m";
@@ -66,6 +70,11 @@ export default async function AdminOverviewPage({
   return (
     <>
       <LiveRefresh />
+      {staff && staff.scopes.length > 0 ? (
+        <div className="nf-console mb-block">
+          <YourDesks staff={staff} />
+        </div>
+      ) : null}
       <OverviewView
         locale={locale}
         now={now}

@@ -2846,4 +2846,278 @@
     flex-wrap: wrap;
     gap: var(--nf-space-xs);
   }
+
+  /* ------------------------------------------------ the pipeline table
+
+     Business development's prospects (app/admin/business-development). It is
+     the console's row table with its own columns: on a phone each row is a
+     card (the business and its stage, then the person, the follow-up and the
+     last thing said); from 1024px it is six columns under a header row. */
+  .nf-bd {
+    display: grid;
+    gap: var(--nf-space-sm);
+    min-width: 0;
+  }
+  .nf-bd__tools {
+    display: grid;
+    gap: var(--nf-space-xs);
+    align-items: end;
+  }
+  .nf-bd__tools .nf-field {
+    width: 100%;
+  }
+  @media (min-width: 768px) {
+    .nf-bd__tools {
+      grid-template-columns: minmax(0, 1fr) 14rem auto;
+    }
+  }
+  .nf-bd__stages {
+    margin-bottom: 0;
+  }
+  /* A chip keeps its own width in the scrolling row; shrunk, its count ran under the next chip. */
+  .nf-bd__stages .nf-admin-chip {
+    flex: none;
+  }
+  /* The row draws the grid at every width; the header row keeps the table's
+     own rule (hidden on a phone, a grid from 1024px). */
+  .nf-bd-row .nf-bd-grid {
+    display: grid;
+  }
+  .nf-bd-table .nf-bd-grid {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      "business stage"
+      "contact contact"
+      "due due"
+      "last last";
+    align-items: start;
+    column-gap: var(--nf-space-sm);
+    row-gap: var(--nf-space-2xs);
+    padding: var(--nf-space-sm);
+  }
+  .nf-bd-cell {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    column-gap: var(--nf-space-xs);
+    row-gap: 2px;
+    min-width: 0;
+    font-size: var(--nf-text-caption);
+    color: var(--nf-content-secondary);
+  }
+  .nf-bd-cell--business {
+    grid-area: business;
+    flex-direction: column;
+  }
+  .nf-bd-cell--contact {
+    grid-area: contact;
+  }
+  .nf-bd-cell--stage {
+    grid-area: stage;
+    justify-content: flex-end;
+  }
+  .nf-bd-cell--due {
+    grid-area: due;
+  }
+  .nf-bd-cell--last {
+    grid-area: last;
+  }
+  /* The whole row opens the record; the word is drawn where there is a column for it. */
+  .nf-bd-cell--open {
+    display: none;
+  }
+  .nf-bd-cell__main {
+    max-width: 100%;
+    font-size: var(--nf-text-body);
+    font-weight: 600;
+    color: var(--nf-content-primary);
+    overflow-wrap: break-word;
+  }
+  .nf-bd-cell__main--quiet {
+    font-size: var(--nf-text-caption);
+  }
+  .nf-bd-cell__sub {
+    max-width: 100%;
+    overflow-wrap: break-word;
+  }
+  /* The column's name, on the phone only: the header row is hidden there. */
+  .nf-bd-cell__label {
+    font-weight: 600;
+    color: var(--nf-content-muted);
+  }
+  .nf-bd-cell__clip {
+    min-width: 0;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: var(--nf-content-primary);
+  }
+  @media (min-width: 1024px) {
+    .nf-bd-table .nf-bd-grid {
+      grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr) 9.5rem 10rem minmax(0, 1.2fr) 3.5rem;
+      grid-template-areas: "business contact stage due last open";
+      align-items: center;
+      padding: var(--nf-space-sm) var(--nf-space-md);
+    }
+    .nf-bd-cell--contact,
+    .nf-bd-cell--last {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    .nf-bd-cell--stage {
+      justify-content: flex-start;
+    }
+    .nf-bd-cell__label {
+      display: none;
+    }
+    /* A long email keeps to one line in its column; the record under the row shows it whole. */
+    .nf-bd-cell--contact .nf-bd-cell__sub {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .nf-bd-cell--open {
+      display: block;
+      grid-area: open;
+      text-align: right;
+      font-weight: 600;
+      color: var(--nf-content-link);
+    }
+  }
+  /* The record under a row: details and controls beside the history from 900px. */
+  .nf-bd-record {
+    display: grid;
+    gap: var(--nf-space-md);
+    padding-block: var(--nf-space-sm) var(--nf-space-md);
+  }
+  @media (min-width: 900px) {
+    .nf-bd-record {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    }
+  }
+  .nf-bd-record__col {
+    display: grid;
+    align-content: start;
+    gap: var(--nf-space-sm);
+    min-width: 0;
+  }
+  .nf-bd-record__title {
+    font-size: var(--nf-text-overline);
+    font-weight: 700;
+    letter-spacing: var(--nf-tracking-overline);
+    text-transform: uppercase;
+    color: var(--nf-content-muted);
+  }
+  .nf-bd-facts {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--nf-space-xs) var(--nf-space-sm);
+    margin: 0;
+  }
+  .nf-bd-facts > div {
+    min-width: 0;
+  }
+  .nf-bd-facts__wide {
+    grid-column: 1 / -1;
+  }
+  .nf-bd-facts dt {
+    font-size: var(--nf-text-caption);
+    color: var(--nf-content-muted);
+  }
+  .nf-bd-facts dd {
+    margin: 0;
+    font-size: var(--nf-text-body);
+    color: var(--nf-content-primary);
+    overflow-wrap: break-word;
+  }
+  .nf-bd-link {
+    font-weight: 600;
+    color: var(--nf-content-link);
+  }
+  @media (hover: hover) {
+    .nf-bd-link:hover {
+      text-decoration: underline;
+    }
+  }
+  .nf-bd-controls {
+    display: grid;
+    gap: var(--nf-space-xs);
+    padding-top: var(--nf-space-sm);
+    border-top: var(--nf-border-width) solid var(--nf-brand-edge-soft);
+  }
+  .nf-bd-controls .nf-field,
+  .nf-bd-record .nf-field {
+    width: 100%;
+  }
+  .nf-bd-history {
+    display: grid;
+    gap: var(--nf-space-sm);
+    margin: 0;
+    padding: var(--nf-space-sm) 0 0;
+    list-style: none;
+    border-top: var(--nf-border-width) solid var(--nf-brand-edge-soft);
+  }
+  .nf-bd-history > li {
+    padding-left: var(--nf-space-sm);
+    border-left: 2px solid var(--nf-brand-edge-soft);
+  }
+
+  /* --------------------------------------------- best on a computer
+
+     The console works on a phone, and its tables are easier on a wider
+     screen. One quiet line says so under 768px, and can be put away. */
+  .nf-desktop-note {
+    display: none;
+  }
+  @media (max-width: 767.98px) {
+    .nf-desktop-note {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--nf-space-sm);
+      margin-bottom: var(--nf-space-sm);
+      padding: var(--nf-space-xs) var(--nf-space-sm);
+      border: var(--nf-border-width) solid var(--nf-brand-edge-soft);
+      border-radius: var(--nf-radius-sm);
+      background: var(--nf-glass-fill-thin);
+      font-size: var(--nf-text-caption);
+      color: var(--nf-content-secondary);
+    }
+  }
+
+  /* ------------------------------------------------- your desks
+
+     The desks a person's position opens, as the first thing on the overview. */
+  .nf-your-desks {
+    display: grid;
+    gap: var(--nf-space-xs);
+  }
+  @media (min-width: 640px) {
+    .nf-your-desks {
+      grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+    }
+  }
+  .nf-your-desks__desk {
+    display: grid;
+    gap: 2px;
+    min-height: 2.75rem;
+    padding: var(--nf-space-sm);
+    border: var(--nf-border-width) solid var(--nf-btn-glass-edge);
+    border-radius: var(--nf-radius-sm);
+    background: var(--nf-btn-glass-fill);
+    color: var(--nf-content-primary);
+  }
+  .nf-your-desks__name {
+    font-weight: 600;
+  }
+  .nf-your-desks__what {
+    font-size: var(--nf-text-caption);
+    color: var(--nf-content-secondary);
+  }
+  @media (hover: hover) {
+    .nf-your-desks__desk:hover {
+      border-color: var(--nf-brand-secondary);
+    }
+  }
 }

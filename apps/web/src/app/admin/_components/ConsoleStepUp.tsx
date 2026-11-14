@@ -30,6 +30,9 @@ export function ConsoleStepUp({ name }: { name: string }) {
   const [password, setPassword] = useState("");
   const [code, setCode] = useState("");
   const [codeSent, setCodeSent] = useState(false);
+  /* The key did not answer: usually the key is on another device (a phone)
+     and the console was opened on a computer. Say what to do about it. */
+  const [missed, setMissed] = useState(false);
   const [pending, start] = useSafeTransition();
   const router = useRouter();
 
@@ -47,6 +50,7 @@ export function ConsoleStepUp({ name }: { name: string }) {
         }
         const proof = await assertPlatformKey({ challenge: begun.challenge, rpId: begun.rpId, allow: begun.credentialIds });
         if (!proof) {
+          setMissed(true);
           banner.error("Your key did not answer. Try again, on the device where you set it up.", { retry: confirm });
           return;
         }
@@ -168,10 +172,31 @@ export function ConsoleStepUp({ name }: { name: string }) {
             </ButtonLink>
           </div>
         ) : (
-          <div className="mt-block">
-            <Button variant="primary" size="md" onClick={confirm} disabled={pending} loading={pending}>
-              Confirm with my security key
-            </Button>
+          <div className="mt-block grid gap-sm">
+            <div>
+              <Button variant="primary" size="md" onClick={confirm} disabled={pending} loading={pending}>
+                Confirm with my security key
+              </Button>
+            </div>
+            <p className="nf-caption text-[var(--nf-content-secondary)]">
+              Your key is the Face ID, fingerprint or screen lock of the phone or computer where you set it up.
+            </p>
+            {missed ? (
+              <div className="border-t border-[var(--nf-brand-edge-soft)] pt-sm" role="status" data-testid="console-step-up-help">
+                <p className="font-semibold">If your key is on a different device</p>
+                <ol className="nf-body mt-inline grid list-decimal gap-2xs pl-md">
+                  <li>The quickest way in is to open the console on the device that holds your key, and confirm there.</li>
+                  <li>
+                    To stay on this device, press Confirm again and choose the option to use a phone or tablet when your
+                    browser asks. Scan the code with the phone that holds your key. Bluetooth must be on for both.
+                  </li>
+                  <li>
+                    If that device is lost, ask a super admin to clear your key on the Staff desk. You can then set up a
+                    new key on this device.
+                  </li>
+                </ol>
+              </div>
+            ) : null}
           </div>
         )}
       </section>

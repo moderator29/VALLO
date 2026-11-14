@@ -5,6 +5,7 @@ const PAGES = [
   ["alerts", "Alerts with inventory drift on the console frame"],
   ["refunds", "The refund console on the console frame"],
   ["payments", "The payment-method lookup panel on the console frame"],
+  ["pipeline", "The Business development pipeline table on the console frame"],
 ];
 
 export default function PreviewBD() {

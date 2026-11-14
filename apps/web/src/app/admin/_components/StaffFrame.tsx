@@ -2,7 +2,8 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { BackButton } from "@/components/site/BackButton";
 import { STAFF_SCOPE_LABEL, type StaffAccess, type StaffScope } from "@/lib/admin/guard";
-import { JOB_DESCRIPTIONS } from "@/lib/admin/staff-positions";
+import type { ManualSlug } from "@/lib/admin/manual/chapters";
+import { JOB_DESCRIPTIONS, type StaffPosition } from "@/lib/admin/staff-positions";
 import { PageHead } from "./panels";
 
 /**
@@ -68,6 +69,16 @@ export const STAFF_EXTRA_DESKS: Partial<Record<StaffScope, { href: string; label
   marketing: [{ href: "/admin/account-deletions", label: "Account deletions" }],
   /* Listing stats: the read-only analyst reads the Listings desk too. */
   analyst: [{ href: "/admin/analytics/listings", label: "Listing analytics" }],
+};
+
+/** The manual chapter written for a position, where one exists (the slugs of `lib/admin/manual/chapters.ts`). */
+export const POSITION_GUIDE: Partial<Record<StaffPosition, ManualSlug>> = {
+  business_development_executive: "business-development",
+  social_media_manager: "social-media",
+  marketing_manager: "marketing",
+  content_manager: "content",
+  technical_administrator: "technical",
+  customer_support_lead: "support-lead",
 };
 
 export function StaffFrame({ staff, name, children }: { staff: StaffAccess; name: string; children: ReactNode }) {
@@ -176,6 +187,16 @@ export function StaffHome({ staff }: { staff: StaffAccess }) {
                 Open My desk
               </Link>
             </li>
+            {staff.position && POSITION_GUIDE[staff.position] ? (
+              <li>
+                <Link
+                  href={`/admin/manual/${POSITION_GUIDE[staff.position]}`}
+                  className="font-semibold text-[var(--nf-content-link)] hover:underline"
+                >
+                  Read the step by step guide for your position
+                </Link>
+              </li>
+            ) : null}
             {staff.scopes.map((scope) => (
               <li key={scope}>
                 <Link href={STAFF_DESK[scope]} className="font-semibold text-[var(--nf-content-link)] hover:underline">

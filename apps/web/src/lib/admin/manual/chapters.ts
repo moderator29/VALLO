@@ -20,9 +20,9 @@ import type { StaffScope } from "@/lib/admin/guard";
  */
 
 /** The day the chapters were last read against the code. */
-export const MANUAL_UPDATED = "2026-11-10";
+export const MANUAL_UPDATED = "2026-11-14";
 
-export const MANUAL_SLUGS = ["access", "desks", "queues", "decisions", "records", "escalation", "my-desk", "weekly-report", "marketing", "content", "technical", "support-lead"] as const;
+export const MANUAL_SLUGS = ["access", "desks", "queues", "decisions", "records", "escalation", "my-desk", "weekly-report", "marketing", "content", "technical", "support-lead", "business-development", "social-media"] as const;
 export type ManualSlug = (typeof MANUAL_SLUGS)[number];
 
 export type ManualChapter = {
@@ -118,6 +118,20 @@ export const MANUAL_CHAPTERS: readonly ManualChapter[] = [
     title: "Customer Support Lead",
     icon: "headset",
     description: "Running the team, escalations, quality reviews and coaching, the support figures, and replies and policy, for the Customer Support Lead.",
+  },
+  {
+    slug: "business-development",
+    number: 13,
+    title: "Business Development Director",
+    icon: "hand-coins",
+    description: "Getting to your desks, keeping every prospect in the pipeline step by step, the stages, follow-ups, the spreadsheet download and listing review.",
+  },
+  {
+    slug: "social-media",
+    number: 14,
+    title: "Social Media Manager",
+    icon: "camera",
+    description: "The content calendar, a post from draft to posted, approval, the media library, what a post may say and the report.",
   },
 ];
 

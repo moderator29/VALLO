@@ -23,6 +23,7 @@ import { getOpenChargebackCount } from "@/lib/admin/reads/chargebacks";
 import { getShellIdentity } from "@/lib/app/shell-queries";
 import { AccessScreen } from "./_components/AccessScreen";
 import { ConsoleStepUp } from "./_components/ConsoleStepUp";
+import { DesktopNote } from "./_components/DesktopNote";
 import { notFound } from "next/navigation";
 import { AdminFrame } from "./_components/AdminFrame";
 import type { AdminIdentity } from "./_components/AdminNav";
@@ -82,6 +83,7 @@ export default async function AdminLayout({ children }: { children: ReactNode })
     const name = shell.userName && shell.userName !== "Guest" ? shell.userName : (door.user.email ?? "Staff");
     return (
       <StaffFrame staff={door.staff} name={name}>
+        <DesktopNote />
         <PasscodeLayer>{children}</PasscodeLayer>
         <DeskKeys jumps={CONSOLE_JUMPS} jumpWords={CONSOLE_JUMP_WORDS} />
         {/* VC1: review calls ring and play on the staff desk too. */}
@@ -135,6 +137,7 @@ export default async function AdminLayout({ children }: { children: ReactNode })
       }}
     >
       <EntryGate entered={entered} userId={access.user.id} opening={t.admin.shell.entry.opening}>
+        <DesktopNote />
         {/* The passcode lock (docs/PASSCODE.md), for staff as for everyone. */}
         <PasscodeLayer>{children}</PasscodeLayer>
         {/* C6: j/k, a/x, g-jumps and ? on every desk but support, which has its own. */}

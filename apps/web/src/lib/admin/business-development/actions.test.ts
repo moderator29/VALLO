@@ -15,7 +15,7 @@ vi.mock("../guard", () => ({
   adminRefusal: () => "Your access does not allow this.",
 }));
 
-const { addProspect, changeStage, setNextFollowUp, linkListing, logActivity } = await import("./actions");
+const { addProspect, changeStage, setNextFollowUp, linkListing, logActivity, updateProspect } = await import("./actions");
 
 let db: ReturnType<typeof fakeSupabase>;
 
@@ -126,5 +126,44 @@ describe("linkListing and setNextFollowUp", () => {
     const out = await setNextFollowUp({ prospectId: PROSPECT, date: "2026-12-01" });
     expect(out.ok).toBe(true);
     expect(db.of("bd_prospects", "update")[0]?.values).toMatchObject({ next_follow_up_at: "2026-12-01" });
+  });
+});
+
+describe("updateProspect", () => {
+  const input = { prospectId: PROSPECT, contactName: " Ada Obi ", businessName: "Ada Lets", category: "hotel", email: "ada@example.com", phone: "", location: "Ikoyi", notes: "" };
+
+  it("refuses a caller requireAdmin does not let through", async () => {
+    state.access = { state: "not-admin" };
+    const out = await updateProspect(input);
+    expect(out.ok).toBe(false);
+    expect(db.wrote()).toBe(false);
+  });
+
+  it("will not leave a prospect with no way to reach them", async () => {
+    const out = await updateProspect({ ...input, email: " ", phone: "" });
+    expect(out.ok).toBe(false);
+    if (!out.ok) expect(out.fieldErrors?.phone).toBeTruthy();
+    expect(db.wrote()).toBe(false);
+  });
+
+  it("refuses a category the pipeline does not have", async () => {
+    const out = await updateProspect({ ...input, category: "spaceship" });
+    expect(out.ok).toBe(false);
+    expect(db.wrote()).toBe(false);
+  });
+
+  it("saves the trimmed details and clears an emptied field", async () => {
+    admin({ bd_prospects: { update: { data: [{ id: PROSPECT }] } } });
+    const out = await updateProspect(input);
+    expect(out.ok).toBe(true);
+    const update = db.of("bd_prospects", "update")[0];
+    expect(update?.values).toMatchObject({ contact_name: "Ada Obi", business_name: "Ada Lets", category: "hotel", email: "ada@example.com", phone: null, location: "Ikoyi", notes: null });
+  });
+
+  it("says so when the prospect is not there", async () => {
+    admin({ bd_prospects: { update: { data: [] } } });
+    const out = await updateProspect(input);
+    expect(out.ok).toBe(false);
+    if (!out.ok) expect(out.error).toContain("Could not find");
   });
 });

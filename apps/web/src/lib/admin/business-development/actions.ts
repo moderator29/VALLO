@@ -108,6 +108,57 @@ export async function addProspect(input: AddProspectInput): Promise<ActionResult
   return ok({ id: data.id as string });
 }
 
+export type UpdateProspectInput = {
+  prospectId: string;
+  contactName: string;
+  businessName: string;
+  category: string;
+  email?: string;
+  phone?: string;
+  location?: string;
+  notes?: string;
+};
+
+/** Correct a prospect's details: who, which business, how to reach them, and the standing notes. */
+export async function updateProspect(input: UpdateProspectInput): Promise<ActionResult> {
+  const s = await staff();
+  if ("error" in s) return fail(s.error);
+  if (!uuid.test(input.prospectId)) return fail(FAILED);
+
+  const contactName = trimmed(input.contactName, 160);
+  const businessName = trimmed(input.businessName, 160);
+  const email = trimmed(input.email, 200);
+  const phone = trimmed(input.phone, 40);
+  const fieldErrors: Record<string, string> = {};
+  if (!contactName) fieldErrors.contactName = "Enter who you are talking to.";
+  if (!businessName) fieldErrors.businessName = "Enter the business name.";
+  if (!isCategory(input.category)) fieldErrors.category = "Choose a category.";
+  if (!email && !phone) {
+    fieldErrors.email = "Keep an email or a phone number.";
+    fieldErrors.phone = "Keep an email or a phone number.";
+  }
+  if (Object.keys(fieldErrors).length > 0) return fail("Please check the highlighted fields and try again.", fieldErrors);
+
+  const { data, error } = await (s.db as Loose)
+    .from("bd_prospects")
+    .update({
+      contact_name: contactName,
+      business_name: businessName,
+      category: input.category,
+      email,
+      phone,
+      location: trimmed(input.location, 200),
+      notes: trimmed(input.notes, 4000),
+    })
+    .eq("id", input.prospectId)
+    .select("id");
+  if (error) return fail(words(error));
+  if (!data || data.length === 0) return fail("Could not find that prospect.");
+  await audit(s, "bd.prospect.updated", input.prospectId, { business_name: businessName, category: input.category });
+  revalidatePath(PATH);
+  return ok(null);
+}
+
 /** Move a prospect to a new stage, logging the change in the activity log. */
 export async function changeStage(input: { prospectId: string; stage: string; note?: string }): Promise<ActionResult> {
   const s = await staff();

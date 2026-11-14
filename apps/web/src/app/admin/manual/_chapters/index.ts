@@ -1,5 +1,6 @@
 import type { ManualSlug } from "@/lib/admin/manual/chapters";
 import { ACCESS } from "./access";
+import { BUSINESS_DEVELOPMENT } from "./business-development";
 import { CONTENT } from "./content";
 import { MARKETING } from "./marketing";
 import { SUPPORT_LEAD } from "./support-lead";
@@ -11,6 +12,7 @@ import { MY_DESK } from "./my-desk";
 import type { ManualBody } from "./parts";
 import { QUEUES } from "./queues";
 import { RECORDS } from "./records";
+import { SOCIAL_MEDIA } from "./social-media";
 import { WEEKLY_REPORT } from "./weekly-report";
 
 /** Each chapter's words, keyed by the slug the index in `lib/admin/manual` lists. */
@@ -27,4 +29,6 @@ export const MANUAL_BODIES: Record<ManualSlug, ManualBody> = {
   content: CONTENT,
   technical: TECHNICAL,
   "support-lead": SUPPORT_LEAD,
+  "business-development": BUSINESS_DEVELOPMENT,
+  "social-media": SOCIAL_MEDIA,
 };

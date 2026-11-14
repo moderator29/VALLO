@@ -7,6 +7,7 @@ import { PageHead, Panel } from "../_components/panels";
 import { AdminCopilot } from "@/components/admin/copilot/AdminCopilot";
 import { listPipeline, listAllActivity, dueThisWeek, kpiCounts, weeklySummary, listingsAwaitingReview } from "@/lib/admin/business-development/reads";
 import { BD_STAGE_LABEL } from "@/lib/admin/business-development/types";
+import { FOLLOW_UP_WORD, followUpState, lagosToday } from "@/lib/admin/business-development/pipeline";
 import { AddProspectForm } from "./AddProspectForm";
 import { ProspectBoard } from "./ProspectBoard";
 
@@ -103,39 +104,52 @@ export default async function BusinessDevelopmentPage() {
   if (listingsWaiting !== null) contextParts.push(`${countOf(listingsWaiting, "listings")} awaiting your review`);
   const context = contextParts.join(", ") + ".";
 
+  const today = lagosToday(requestTime());
+
   return (
     <div className="nf-console nf-admin-stack" data-testid="business-development-desk">
       <PageHead
         title="Business development"
-        lede={JOB_DESCRIPTIONS.business_development_executive.summary}
+        lede="Your pipeline of landlords, agents, hotels, shortlet hosts and restaurants, and the listings waiting for your review."
+        action={
+          <Link href="/admin/manual/business-development" className="nf-btn nf-btn--glass nf-btn--sm">
+            How to use this desk
+          </Link>
+        }
       />
 
-      <Panel title="This week">
-        <ul className="grid gap-2xs nf-body">
-          <li>{countOf(week.prospectsAdded, "prospects")} added</li>
-          <li>{countOf(week.contactsLogged, "contacts")} logged</li>
-          <li>{countOf(week.followUpsDone, "followUps")} done</li>
-          <li>{week.onboardedThisWeek} onboarded</li>
-        </ul>
-        <p className="nf-caption mt-row text-[var(--nf-content-secondary)]">
-          All-time: {kpi.prospectsIdentified} identified, {kpi.qualifiedContacted} contacted, {kpi.followUpActivity} follow-ups
-          logged, {kpi.onboarded} onboarded, {kpi.listingsSubmittedFromPipeline} with a listing linked. Onboarded and
-          listing-linked are reported separately: a business can be onboarded with no listing yet, or have a listing
-          waiting on review.
-        </p>
-      </Panel>
+      <div className="nf-admin-grid nf-admin-grid--halves">
+        <Panel title="This week">
+          <ul className="grid gap-2xs nf-body">
+            <li>{countOf(week.prospectsAdded, "prospects")} added</li>
+            <li>{countOf(week.contactsLogged, "contacts")} logged</li>
+            <li>{countOf(week.followUpsDone, "followUps")} done</li>
+            <li>{week.onboardedThisWeek} onboarded</li>
+          </ul>
+          <p className="nf-caption mt-row text-[var(--nf-content-secondary)]">
+            All-time: {kpi.prospectsIdentified} identified, {kpi.qualifiedContacted} contacted, {kpi.followUpActivity} follow-ups
+            logged, {kpi.onboarded} onboarded, {kpi.listingsSubmittedFromPipeline} with a listing linked. Onboarded and
+            listing-linked are reported separately: a business can be onboarded with no listing yet, or have a listing
+            waiting on review.
+          </p>
+        </Panel>
 
-      <Panel title="Listings awaiting review">
-        <p className="nf-body">
-          {listingsWaiting === null ? (
-            "Could not be read just now."
-          ) : (
-            <Link href="/admin/listings" className="font-semibold text-[var(--nf-content-link)] hover:underline">
-              {countOf(listingsWaiting, "listings")} waiting on a review decision
+        <Panel title="Listing approval">
+          <p className="nf-body">
+            {listingsWaiting === null
+              ? "The count could not be read just now."
+              : `${countOf(listingsWaiting, "listings")} waiting on a review decision.`}
+          </p>
+          <p className="nf-caption mt-row text-[var(--nf-content-secondary)]">
+            Reviewing, approving, sending back and rejecting listings happens on the Listings desk.
+          </p>
+          <p className="mt-row">
+            <Link href="/admin/listings" className="nf-btn nf-btn--primary nf-btn--sm">
+              Open the Listings desk
             </Link>
-          )}
-        </p>
-      </Panel>
+          </p>
+        </Panel>
+      </div>
 
       <Panel title="Follow-ups due this week">
         {followUps.length === 0 ? (
@@ -144,7 +158,7 @@ export default async function BusinessDevelopmentPage() {
           <ul className="grid gap-2xs nf-body">
             {followUps.map((p) => (
               <li key={p.id}>
-                {dateLabel(p.nextFollowUpAt)} · {p.businessName} ({BD_STAGE_LABEL[p.stage]})
+                {dateLabel(p.nextFollowUpAt)} ({FOLLOW_UP_WORD[followUpState(p, today)]}) · {p.businessName} · {BD_STAGE_LABEL[p.stage]}
               </li>
             ))}
           </ul>
@@ -156,7 +170,7 @@ export default async function BusinessDevelopmentPage() {
       </Panel>
 
       <Panel title="Pipeline">
-        <ProspectBoard prospects={prospects} />
+        <ProspectBoard prospects={prospects} activity={activity} today={today} />
       </Panel>
 
       <AdminCopilot
