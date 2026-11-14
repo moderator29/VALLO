@@ -306,3 +306,48 @@ Two things remain, and they are the founder's:
    `supabase/drafts/stale_auth_sessions_2026-11-14.sql` ends sessions idle
    for more than thirty days by setting `not_after`, which is how GoTrue
    marks a session finished, rather than deleting rows.
+
+### Can the current plan carry Vallo? (the answer the follow-up brief asks for, 14 November 2026)
+
+**Today: yes, with room, and the evidence says the recent work is why.**
+
+Read from live on 14 November:
+
+| What | Reading |
+|---|---|
+| Database size | 118 MB |
+| Connections in use | 22 of 60 (11 of them PostgREST, idle) |
+| Total execution time recorded since the 13 Nov reset | 5,591 seconds, and that window CONTAINS the crisis |
+| Cron fleet, 7 days | about 2 percent of one core, all 45 jobs green since the 13 Nov fixes |
+| Storage | 15 MB across 23 buckets |
+| The four hot signed-in functions | 107 ms of database time between them, down from an 963 ms historical total |
+
+**What actually went wrong on 13 November was not size.** It was disk IO
+budget exhaustion, caused by a cron history table nobody had ever purged
+(183,960 rows from August), two jobs running every minute, and
+`shell_context()` evaluating row security on seven tables on every signed-in
+page load. All three are fixed, and the statement table still carries their
+old cost in its averages, which is why those averages overstate everything
+today.
+
+**So the honest recommendation is: do not buy a bigger instance yet.** There
+is no measurement that says the Nano is the limit. The levers that remain are
+all free:
+
+1. Fewer round trips on a signed-in page load (four separate reads that could
+   be one), which is an application change.
+2. The realtime WAL reader, still the heaviest statement by total time, which
+   is about how many channels are open, not about the publication (all five
+   published tables are subscribed, so nothing is published for nobody).
+3. Image delivery, which is bytes to a phone rather than database work.
+
+**What WOULD force a bigger instance**, so it can be watched for rather than
+guessed at: sustained CPU near the top on a quiet database; the disk IO
+balance falling again when no cron backlog explains it; or connections
+approaching 60 as real members arrive. None of those is true today.
+
+**If it does become necessary**, it is a spend and therefore a recommendation
+with a price for the three founders to decide, never an action from a
+session. The next size up from Nano is Micro. Anybody pricing it should read
+the current figure from the Supabase dashboard on the day rather than trust a
+number written here, because it changes.
