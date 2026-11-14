@@ -133,14 +133,24 @@ export function ToastHost() {
 }
 
 /** One clean mark per tone (docs/UX_SYSTEM.md, "Feedback"). */
+/*
+ * ONE CIRCLED MARK PER TONE (founder, 14 November 2026, holding up EscrowPay
+ * and WhatsApp: "that checkmark icon make it exactly the one in the escrow
+ * pay ... it's same as the WhatsApp ss"). Both draw the ring and the mark as
+ * ONE glyph, which is what makes them read as neat at 20px; a CSS border with
+ * a loose glyph inside it never quite centres and never quite matches the
+ * stroke. The icon set already carried `circle-check` and `circle-x`;
+ * `circle-alert` and `circle-info` were added beside them in the same
+ * construction, so the family is complete and consistent.
+ */
 const MARK: Record<ToastItem["tone"], UiIconName> = {
-  neutral: "info",
-  info: "info",
-  success: "check",
-  warning: "alert-triangle",
-  error: "alert-triangle",
-  /* Under way: a clock, which says "this is taking its time" rather than
-     "this is broken". The ring that turns around it is the stylesheet's. */
+  neutral: "circle-info",
+  info: "circle-info",
+  success: "circle-check",
+  warning: "circle-alert",
+  error: "circle-x",
+  /* Under way: the turning ring is the mark, so the clock is drawn only when
+     motion is off (grade1.css). */
   processing: "clock",
 };
 
@@ -330,7 +340,9 @@ function QuickPill({ item, leaving }: { item: ToastItem; leaving: boolean }) {
       className="nf-quick"
     >
       <span className="nf-quick__mark" aria-hidden="true">
-        <UiIcon name="check" size={16} />
+        {/* The banner's mark, at the pill's size: one circled tick, as the
+            references draw it. */}
+        <UiIcon name="circle-check" size={17} />
       </span>
       <p className="nf-quick__text">{item.message}</p>
     </div>

@@ -194,6 +194,8 @@ export type UiIconName =
   | "hourglass"
   | "circle-check"
   | "circle-x"
+  | "circle-alert"
+  | "circle-info"
   | "clipboard-list"
   | "square-check"
   /* The feed's repost as a LEVEL loop (the feed image), beside `repost`. */
@@ -1383,6 +1385,26 @@ const PATHS: Record<UiIconName, React.ReactNode> = {
     <>
       <circle cx="12" cy="12" r="10" />
       <path d="m16 9-5.5 5.5L8 12" />
+    </>
+  ),
+  /* [circle-alert] and [circle-info]: the same ring as [circle-check], so a
+     banner's mark is one drawn glyph in every tone rather than a border in
+     the stylesheet with a loose glyph inside it (the founder's reference, 14
+     November 2026: one circled mark, as the apps he held up draw it). */
+  // [circle-alert]
+  "circle-alert": (
+    <>
+      <circle cx="12" cy="12" r="10" />
+      <path d="M12 8v4" />
+      <path d="M12 16h.01" />
+    </>
+  ),
+  // [circle-info]
+  "circle-info": (
+    <>
+      <circle cx="12" cy="12" r="10" />
+      <path d="M12 16v-4" />
+      <path d="M12 8h.01" />
     </>
   ),
   // [circle-x]
