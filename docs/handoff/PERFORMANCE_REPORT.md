@@ -461,6 +461,42 @@ flight payloads (`BASE_URL=... node scripts/check-flight-props.mjs`).
 
 ---
 
+# CORRECTION TO THE BASELINE BELOW (14 November 2026, later the same day)
+
+**Read this before the table.** The baseline below was measured in a sandbox
+with NO Supabase credentials (`apps/web/.env` does not exist here; only
+`.env.example` does). So every page that needs data rendered its no-data
+state, and one row is worse than that:
+
+- **The "listing page" row is not a listing page.** The id in the URL does
+  not resolve without a database, so that measurement is of the NOT-FOUND
+  system screen. Its 4.81 s and its "decorative background is the largest
+  paint" are true of that screen and of nothing else. The conclusion drawn
+  from it, that a listing's own photograph should be promoted, cannot be
+  tested here at all: there is no photograph on a screen with no listing.
+- **Search, stays and restaurants** rendered their empty states for the same
+  reason, not because the platform has no restaurants.
+- **Landing and help** carry no data and are unaffected. Their numbers stand.
+- **The CLS finding stands in full**, because a layout shift caused by a
+  script hiding a header after hydration does not depend on data. It was
+  measured, traced to `BarBack`, fixed and measured again: 0.239 to 0.022.
+
+**What is still true and still useful from the run:** the app shell ships
+about 637 KB of JavaScript to a screen that shows one card of words, and the
+last of 44 script files lands at 5.5 seconds on this profile. That is the
+platform's floor on every route and it is measurable without any data at all.
+It is the number to attack.
+
+**What has to be measured again, with credentials, before anyone trusts a
+row:** the listing page, search, stays and restaurants. Until then the only
+honest statement about a real listing page's speed is that nobody has
+measured it.
+
+This correction is kept rather than the numbers quietly edited, because the
+first version of this table was reported to the founder.
+
+---
+
 # THE UPGRADE BASELINE: CORE WEB VITALS, MEASURED (14 November 2026)
 
 Phase 1 of the next-generation upgrade asks for a measured baseline before

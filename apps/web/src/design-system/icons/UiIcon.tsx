@@ -64,6 +64,7 @@ export type UiIconName =
   | "verified-badge"
   | "location"
   | "chevron-down"
+  | "chevron-left"
   | "arrow-right"
   | "arrow-left"
   | "home"
@@ -522,9 +523,17 @@ const PATHS: Record<UiIconName, React.ReactNode> = {
       <path d="M9 3v18" />
     </>
   ),
-  // [chevron-right] [chevron-down]
+  // [chevron-right] [chevron-down] [chevron-left]
   "chevron-right": <path d="m9 18 6-6-6-6" />,
   "chevron-down": <path d="m6 9 6 6 6-6" />,
+  /* [chevron-left]: the exact mirror of `chevron-right` about x=12, so the
+     pair is one shape pointing two ways and a row that goes back and forward
+     cannot drift into two different glyphs. It is the back control's glyph
+     since 14 November 2026 (the founder, with an App Store screenshot: "our
+     go back icon ... it's like arrow instead of this greater sign <"). The
+     arrow (`arrow-left`) stays exactly as it was, because a link that moves
+     forward and a carousel step are arrows and are not navigation. */
+  "chevron-left": <path d="m15 18-6-6 6-6" />,
   /* [shield-minus]: an agent stopped from trading. The same shield as
      `verified` to the unit, with a bar where the tick goes, so the two read
      as one judgement pointing opposite ways. */
