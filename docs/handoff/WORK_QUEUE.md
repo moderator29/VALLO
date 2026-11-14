@@ -26,16 +26,16 @@ Testing, Bug fixing, Re-auditing, Completed.
 | S2 | Paste: photos as attachments, long text as a chip, link chips, one-tap codes, cleaning, safety (6.2) | Agent INPUT | Completed (148a1968) |
 | S3 | `CountTabs` shared part, then inbox, notifications, saved (6.3 part 1) | Agent SHEETS | Completed (seen on the preview at 390 and 1440, both themes; mounted screen suites green; not seen signed in on live) |
 | S4 | `ActionSheet` shared part, then inbox rows, card menu, profile menu, post menu (6.3 part 2) | Agent SHEETS | Completed (10e5c515) |
-| S5 | Keyboard pass over every field, composer on the keyboard, accessory bar (6.4) | Agent INPUT | Implementing |
+| S5 | Keyboard pass over every field, composer on the keyboard, accessory bar (6.4) | Agent INPUT | Completed (03578827) |
 | S6 | The remaining CountTabs and ActionSheet screens in the 6.3 tables (offers, bookings, search, agent and host) | Agent SHEETS | Completed (7e0407f0), three items skipped with reasons below |
 | M1 | One bug register, every open finding re-checked against the code today (7, phase 1) | Lead | Completed (17bde0ab), kept up to date as findings land |
 | M2 | Measured Core Web Vitals baseline, throttled phone profile (7, phase 1) | Lead | Completed for the six signed-out pages (dbf89b3b); the signed-in pages need the QA member or the harness and are the next run |
-| M3 | Supabase audit: queries, indexes, realtime, cron, storage, RLS, auth sessions; report in `docs/DB_NOTES.md` plus SQL files (8) | Agent | Queued |
+| M3 | Supabase audit: queries, indexes, realtime, cron, storage, RLS, auth sessions; report in `docs/DB_NOTES.md` plus SQL files (8) | Lead | Implementing (baseline landed in 70453708; the rest is broken out as D1 to D9 below) |
 | M4 | Bug fixes from the register, worst first, each with a test (7, phase 2) | Both agents | Queued |
 | M5 | Consistency audit with numbers at 390 and 1440; the circular home control, then the founder confirms the page (7, phase 3) | Agent SHEETS | Researching |
 | M6 | Public platform area by area: home, search, listing, offers, messaging, stays, restaurants, roommates, feed and Circle, profile and account, help, showcase (7, phase 4) | Both agents | Queued |
 | M7 | Staff console: the restricted frame, desk tables on a phone, founder command centre proposal first (7, phase 5) | Agent | Queued |
-| M8 | Motion and performance from the M2 baseline, worst number first (7, phase 6) | Agent | Queued |
+| M8 | Motion and performance from the M2 baseline, worst number first (7, phase 6) | Agent INPUT | Implementing (P1, the listing page's 4.81 s) |
 | M9 | Final QA, the probes, the whole suite, a second audit by the agent that did not build it (7, phase 7) | Crossed over | Queued |
 
 ## File ownership while S1 to S6 run
@@ -54,6 +54,110 @@ SHEETS: `components/ui/Sheet.tsx`, the new `CountTabs.tsx` and
 
 Neither touches `app/admin`. The lead works only in files neither holds
 (docs, the bug register, SQL).
+
+
+---
+
+# THE FULL QUEUE TO DONE (written 14 November 2026)
+
+Everything left in the handoff and the two briefs, broken into pieces one
+worker can finish, each with what proves it. Two agents at a time and the
+lead, always on separate files. Nothing here is "Completed" until it was run
+and seen.
+
+**Who holds what, so two workers never meet in a file.** The lead holds
+`app/admin/**`, every SQL file, `app/css/chrome.css`, and all of `docs`
+except the files named against an agent below. Agent INPUT holds the
+performance work and whatever it names in its report. Agent SHEETS holds the
+consistency audit, its sweep script and `docs/handoff/CONSISTENCY_AUDIT.md`.
+
+## P. PERFORMANCE (brief section 8, handoff phase 6)
+
+| # | Task | Proof it is done |
+|---|---|---|
+| P1 | The listing page: its largest paint is decorative artwork, not the property. 4.81 s against a 2.5 s target | Before and after on the same throttled profile |
+| P2 | The listing route's 559 KB of JavaScript, the heaviest measured | The same, plus the per-kind transfer table |
+| P3 | `/stays`, same wrong LCP element, 3.14 s | Before and after |
+| P4 | The landing hero at 2.67 s, just over target | Before and after |
+| P5 | The signed-in baseline: home, inbox, a thread, the feed, profile, the agent dashboard, the console overview, on the preview harness or the QA member | The table in the performance report, same profile |
+| P6 | Route-level JavaScript: find what every route ships and split what is not needed for the first paint | Per-route transfer sizes before and after |
+| P7 | Image delivery: every listing and stay photograph served at the size it is drawn, correct format, no layout shift | Measured bytes per page, CLS unchanged at 0 |
+| P8 | Re-measure every page in the baseline table after P1 to P7 and publish the comparison | One table, before and after, same profile |
+
+## D. THE DATABASE (brief follow-up section 2, handoff section 8)
+
+Reads only against live. Every change is a SQL file the founder runs.
+
+| # | Task | Proof it is done |
+|---|---|---|
+| D1 | The three pending files run by the founder and verified on live | A read-only query per file after he runs it |
+| D2 | `pg_stat_statements` read again after a clean day, so the numbers are not the 13 November crisis | The new table in `docs/DB_NOTES.md` |
+| D3 | `explain (analyze, buffers)` as the calling role on each of the ten heaviest statements | Plans recorded with the finding each one supports |
+| D4 | The permissive policy merge on `listings`, `accommodations`, `businesses`, measured before and after, delivered as a DRAFT because it is security on the hottest table | A plan before and after, and the draft file |
+| D5 | The 90 unindexed foreign keys: index the ones with real join traffic, leave the audit columns, say which and why | The advisor count before and after he runs it |
+| D6 | Realtime: the WAL reader is the heaviest statement by total time. Reduce concurrent channels, not the publication (all five published tables are subscribed) | Call count before and after |
+| D7 | Auth: whether `reauthenticate` and the console password door leave sessions behind, and whether a purge is needed | A count of `auth.sessions` by kind over a week |
+| D8 | Storage and egress: 15 MB today, so the lever is image delivery (P7), not buckets. Record it and stop looking | Written in `docs/DB_NOTES.md` |
+| D9 | The cost conclusion: what the Nano can carry, what the next size costs, and the evidence either way. A recommendation with a price, never an action | The section the follow-up brief asks for |
+
+## B. THE BUG REGISTER (brief section 1, handoff phase 2)
+
+| # | Task | Proof it is done |
+|---|---|---|
+| B1 | BR-11: publish blockers live in three implementations that can disagree. One SQL function all three read | The wizard checklist, the admin desk and `heldReasons` reading one source |
+| B2 | BR-17: stale open alerts from September and October closed with a note | The alerts desk showing only live faults |
+| B3 | BR-07: the last two hand-rolled dialogs onto `Sheet`, and the guard widened so it cannot happen again | The guard test failing on a new one |
+| B4 | BR-08 and BR-09: two people finders become one, the redirect-only route becomes a redirect | The routes gone from the build output |
+| B5 | A fresh walk as a member, an agent, a host and a guest at 390 px, adding what the surveys could not see | New rows in the register with how to see each one |
+
+## A. THE PUBLIC PLATFORM, AREA BY AREA (brief section 5, handoff phase 4)
+
+For each area: read its rows in the ledger and the register, mark each of the
+brief's numbered items true, to build, or not for Vallo with a reason, build,
+then see it at 390 and 1440 in light and dark.
+
+| # | Area | The brief's items |
+|---|---|---|
+| A1 | Home and discovery | 1 to 15, 30 |
+| A2 | Search and filters | 16 to 29 |
+| A3 | The listing page | 31 to 50 |
+| A4 | Make an Offer and the deal room | 51 to 70 |
+| A5 | Messaging | 86, 87, and the communication list in section 13 |
+| A6 | Stays | 71 to 76 |
+| A7 | Restaurants | 77 to 79 |
+| A8 | Roommates | 80 to 83 |
+| A9 | Feed and Circle | 84, 85 |
+| A10 | Profile, notifications, account and trust | 89 to 100 |
+| A11 | The help centre (brief section 12) | A searchable centre, guides per journey, contextual help, screenshots of real screens |
+| A12 | The showcase, "Discover Vallo" (brief section 11) | Proposal with screenshots to the founder FIRST, then build |
+
+## C. THE CONSOLE (brief section 10, handoff phase 5)
+
+| # | Task | Proof it is done |
+|---|---|---|
+| C1 | The restricted staff frame given the same care as the operator's rail: a real nav on a wide screen, a clean drawer on a phone, the person's own tasks on the front page | Seen at 390 and 1440, dark only |
+| C2 | Every desk's tables on a phone, following the pipeline table's pattern | Each desk seen at 390 |
+| C3 | The founder command centre: proposal with screenshots FIRST, then build | His word, then the build |
+| C4 | Staff manual screenshots: every chapter has an empty slot | Captures from the harness with fixture rows, labelled as examples |
+| C5 | Admin search, filtering and bulk actions (brief items 120) | Seen working on a desk with real rows |
+
+## M. MOTION (brief section 6, handoff phase 6)
+
+| # | Task | Proof it is done |
+|---|---|---|
+| M-a | Choose which of the brief's ten signature moments have a place here, and say why the rest do not | The list, with reasons |
+| M-b | Build the chosen ones on the existing motion system, inside the brief's budgets | Seen, and reduced motion respected |
+| M-c | Nothing added delays a tap; every entrance collapses under the calm setting | Measured interaction latency unchanged |
+
+## Q. QUALITY AND THE SECOND AUDIT (brief section 17, handoff phase 7)
+
+| # | Task | Proof it is done |
+|---|---|---|
+| Q-a | The journeys in the brief's section 17, run for real where the rules allow | What passed, what failed, what could not be run |
+| Q-b | The permission probes in `supabase/tests/probes`, including one new probe for everything closed in D4 and D5 | Green, on live |
+| Q-c | The whole test suite and a production build | Both green, named in the final report |
+| Q-d | The second audit, by the worker that did not build the thing | Its findings, and what was done about each |
+| Q-e | The documents in handoff section 12 brought up to date | Each one dated and true |
 
 ## Rulings made by the lead while S1 and S3 landed (confirm with the founder only if he asks)
 
