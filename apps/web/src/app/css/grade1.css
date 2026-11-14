@@ -300,11 +300,22 @@
  * time and switched off below for reduced motion instead, where it becomes a
  * complete quiet ring: the banner still says "under way" without moving.
  */
+/*
+ * THE TURNING RING IS THE SAME RING AS THE DRAWN ONES (founder, 14 November
+ * 2026: "why would the image 2 have another outer beautiful art and the
+ * approved one have only a tick ... uniform those"). It was 23px wide at a
+ * 1.5px stroke beside a 20px glyph at 1.875px, so the two marks did not match
+ * each other, which is exactly what he saw.
+ *
+ * The glyph set draws at stroke 2.25 in a 24 unit square, so at 20px its
+ * stroke lands at 2.25 x 20 / 24 = 1.875px. This ring takes that number and
+ * `border-box`, so it is 20px across INCLUDING its stroke, like the glyph.
+ * Change the mark's size and both follow from the one line above.
+ */
 .nf-toast-host .nf-toast[data-tone="processing"] .nf-toast__mark {
-  /* The one ring still drawn in CSS, because it has to turn: one quarter lit
-     against a quiet remainder is what the eye reads as "under way". */
+  box-sizing: border-box;
   border-radius: var(--nf-radius-circle);
-  border: 1.5px solid color-mix(in oklab, var(--nf-toast-tone) 28%, transparent);
+  border: 1.875px solid color-mix(in oklab, var(--nf-toast-tone) 26%, transparent);
   border-block-start-color: var(--nf-toast-tone);
   animation: nf-toast-turn 1100ms linear infinite;
 }
