@@ -16,6 +16,8 @@ beforeAll(warmBrowser);
 afterAll(closeBrowser);
 
 const CSS = productCss("app/css/list-views.css");
+/* The token ladder, which is what collapses under reduced motion. */
+const CSS_WITH_TOKENS = productCss("app/css/list-views.css", "../../../packages/design-tokens/src/tokens.css");
 
 /** A one-pixel PNG, so the load event is real and immediate. */
 const PIXEL =
@@ -47,6 +49,20 @@ describe.skipIf(!hasBrowser && !process.env.CI)("a card photograph settling in",
          principle 6, and the list's CLS is 0 today). */
       const transition = await img.evaluate((el) => getComputedStyle(el).transitionProperty);
       expect(transition).toBe("opacity");
+    } finally {
+      await close();
+    }
+  });
+
+  it("collapses to no fade at all under reduced motion", async () => {
+    /* Every duration token is 1ms there (motion system, section 0), so this
+       rule needs no branch of its own. Proven rather than assumed. */
+    const { page, close } = await mountInBrowser({ entry: entry(false), css: CSS_WITH_TOKENS, reducedMotion: true });
+    try {
+      const img = page.locator("img[data-reveal]").first();
+      await img.waitFor();
+      const seconds = await img.evaluate((el) => parseFloat(getComputedStyle(el).transitionDuration));
+      expect(seconds).toBeLessThanOrEqual(0.01);
     } finally {
       await close();
     }
