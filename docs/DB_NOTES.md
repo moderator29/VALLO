@@ -279,3 +279,30 @@ which is why an index on them is instant now and will not be later.
 Delivered as `supabase/migrations/pending/cascade_fk_indexes_2026-11-14.sql`.
 The audit columns (`*_decided_by`, `*_granted_by`, `*_updated_by`) are
 deliberately left alone: written once, read by a desk at human speed.
+
+### 720 sessions that never end (read from live, 14 November 2026)
+
+`auth.sessions` holds 720 rows and **every one is still open**, for 22
+people, the oldest opened on 11 August. 597 have not been touched in thirty
+days. By user agent: 330 from the test browser (315 idle over thirty days),
+154 from real iPhones, and **146 from `node`**.
+
+The 146 are ours. Checking a password means signing in with it, and
+`lib/account-deletion/reauthenticate.ts` did that for every money step-up,
+every console entry and every deletion check without ever signing out. Fixed
+in code on this branch: the proof now signs out with `scope: "local"`, which
+revokes that one session and no other (the default would sign the person out
+of every device, which is why the scope is spelled out and tested).
+
+Two things remain, and they are the founder's:
+
+1. **The setting, which is the real fix.** Supabase Auth can time-box a
+   session and end an idle one by itself. Dashboard, Authentication,
+   Sessions: a time-box and an inactivity timeout. With those set, GoTrue
+   does this for ever and no SQL is needed again. A session that never
+   expires is a credential that never expires, and 315 of ours belong to a
+   test browser.
+2. **The ones already there**, as a draft because it signs people out:
+   `supabase/drafts/stale_auth_sessions_2026-11-14.sql` ends sessions idle
+   for more than thirty days by setting `not_after`, which is how GoTrue
+   marks a session finished, rather than deleting rows.
