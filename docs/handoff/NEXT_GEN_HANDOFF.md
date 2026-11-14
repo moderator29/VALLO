@@ -49,10 +49,10 @@ Store, and on the web.
 | Database | Supabase project `uccixoonmbhrnyczyigt`, eu-west-1, Nano compute | 773 migration files; pending SQL in `supabase/migrations/pending`, risky drafts in `supabase/drafts` |
 | Hosting | Vercel, region dub1 | Deploys from `main`. You never deploy |
 
-**Branch.** All work is on `claude/rentme-v2-platform-audit-xuvg0a`. At the
-handoff it is 55 commits ahead of `main` and 0 behind. The founder asked on 14
-November for it to be re-audited and pushed to `main`; section 10 records
-whether that happened. Check `git log origin/main -1` before assuming either.
+**Branch.** All work is on `claude/rentme-v2-platform-audit-xuvg0a`. The
+founder asked on 14 November for it to be re-audited and pushed to `main`, and
+it was, at `4baa05fb4` (section 10). Work after that commit is on the branch
+only. Check `git log origin/main -1` before assuming anything about `main`.
 
 **What shipped on the branch on 13 and 14 November** (newest first):
 
@@ -803,8 +803,8 @@ position.
 
 | Item | State | What unblocks it |
 |---|---|---|
-| Push to `main` | He asked for it on 14 November after a re-audit. Typecheck, lint, every gate and a production build passed; the whole test suite was still running when this file was written. Check `git log origin/main -1` | The suite green, then the push |
-| `staff_desks_only_2026-11-14.sql` | Written, tested locally, not sent yet | Send it; he runs it |
+| Push to `main` | DONE on 14 November at `4baa05fb4`, after typecheck, lint, every gate, a production build and the whole suite (16,334 tests; seven failed on the first run, all from the door's new wording and one weekday-dependent test, fixed and rerun green). Everything after that commit is on the branch only | His next literal say-so |
+| `staff_desks_only_2026-11-14.sql` | Sent to him on 14 November. Check on live whether he ran it | He runs it |
 | App icon badge | No badge plugin is installed and push sends no badge number | His yes to `@capawesome/capacitor-badge`, then a store release |
 | Approximate figure in saved-search emails | No saved-search email exists; alerts are in-app only | His decision to send that email at all |
 | Link previews in messages | Deliberately not built (see `lib/messages/linkify.ts`) | Only if he reverses the security choice |
