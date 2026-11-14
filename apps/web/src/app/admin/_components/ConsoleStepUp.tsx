@@ -47,20 +47,22 @@ function PasswordDoor({ name, byCode }: { name: string; byCode: boolean }) {
   const [password, setPassword] = useState("");
   const [code, setCode] = useState("");
   const [codeSent, setCodeSent] = useState(false);
-  const [refused, setRefused] = useState<string | null>(null);
+  /* The field's red edge; the words go to the one banner, as every refusal does. */
+  const [refused, setRefused] = useState(false);
   const [pending, start] = useSafeTransition();
   const router = useRouter();
 
   const open = (): void =>
     start(async () => {
       try {
-        setRefused(null);
+        setRefused(false);
         const done = await confirmConsoleWithPassword(byCode ? { code: code.trim() } : { password });
         if (done.ok) {
           router.refresh();
           return;
         }
-        setRefused(
+        setRefused(true);
+        banner.error(
           done.error === "too_many"
             ? "Too many tries. Wait fifteen minutes, then try again."
             : done.error === "rejected"
@@ -113,6 +115,7 @@ function PasswordDoor({ name, byCode }: { name: string; byCode: boolean }) {
               value={code}
               onChange={(event) => setCode(event.target.value)}
               disabled={pending}
+              aria-invalid={refused ? true : undefined}
             />
           ) : null
         ) : (
@@ -124,13 +127,9 @@ function PasswordDoor({ name, byCode }: { name: string; byCode: boolean }) {
             value={password}
             onChange={(event) => setPassword(event.target.value)}
             disabled={pending}
+            aria-invalid={refused ? true : undefined}
           />
         )}
-        {refused ? (
-          <p className="nf-body text-[var(--nf-state-error)]" role="alert" data-testid="console-door-refused">
-            {refused}
-          </p>
-        ) : null}
         <div className="flex flex-wrap items-center gap-sm">
           {byCode && !codeSent ? (
             <Button type="submit" variant="primary" size="md" loading={pending} disabled={pending}>

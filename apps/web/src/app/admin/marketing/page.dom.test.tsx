@@ -38,7 +38,7 @@ beforeEach(() => {
 describe("the door", () => {
   it.each([
     ["signed-out", /Sign in/],
-    ["step-up", /security key/],
+    ["step-up", /Confirm it is you/],
     ["unconfigured", /cannot reach the console/],
     ["not-admin", /Marketing Manager/],
   ])("answers %s with its own words and reads nothing", async (state, words) => {

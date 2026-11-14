@@ -12,7 +12,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
  *    the money export, before any of them reads or writes anything;
  *  - a staff member without the support scope, a signed-in member, a
  *    signed-out visitor, and a support agent whose session has not proved
- *    the security key are all refused by every support action and read,
+ *    the console's door are all refused by every support action and read,
  *    before any database call beyond reading their own access;
  *  - the support desk's reads name no private column, and the pending
  *    member-context function returns only the fields support needs.
@@ -184,10 +184,10 @@ describe("only support reaches the support desk", () => {
     expect(results[0]!.ok === false && results[0]!.error).toMatch(/Sign in/);
   });
 
-  it("refuses a support agent whose session has not proved the security key", async () => {
+  it("refuses a support agent whose session has not confirmed it is them at the console door", async () => {
     who = "support-unproved";
     const results = await refusedEveryWay();
-    expect(results[0]!.ok === false && results[0]!.error).toMatch(/security key/);
+    expect(results[0]!.ok === false && results[0]!.error).toMatch(/Confirm it is you/);
   });
 
   it("lets a support agent through to the database, which decides again", async () => {

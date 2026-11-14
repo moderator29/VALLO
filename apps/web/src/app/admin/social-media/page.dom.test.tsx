@@ -67,7 +67,14 @@ describe("the calendar and the honest empty state", () => {
           slot: "post_1",
           campaign: "December push",
           caption: "Hello",
-          plannedAt: new Date().toISOString().slice(0, 10),
+          /* The desk's week is Monday to Friday, so the post is planned for
+             this week's Monday. Planned for "today", it fell outside the week
+             whenever the suite ran on a Saturday or a Sunday. */
+          plannedAt: (() => {
+            const day = new Date();
+            day.setUTCDate(day.getUTCDate() - ((day.getUTCDay() + 6) % 7));
+            return day.toISOString().slice(0, 10);
+          })(),
           status: "draft",
           mediaUrls: [],
           approvedBy: null,
