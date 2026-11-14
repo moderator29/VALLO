@@ -42,16 +42,28 @@ import { useClientCopy } from "@/lib/i18n/client-copy";
  */
 export type BackSurface = "bare" | "round" | "plate" | "glass" | "media" | "pill";
 
-/* THE BACK IS A BARE GLYPH NOW (founder, 13 November 2026: "too big and too
-   far from the edge, like X, Instagram and Facebook"). The 38pt bordered disc
-   went; the 44pt target stays, and `.nf-back-plain` (chrome.css) pulls it
-   outward so the glyph lines up with the content edge, as a navigation bar's
-   chevron does. Over a photograph (`media`, `pill`) it keeps its plate,
+/* THE BACK IS A BARE CHEVRON NOW (founder, 14 November 2026, with an App
+   Store screenshot: "our go back icon in our platform rn it's like arrow
+   instead of this greater sign <, bro this should be wide platform"). It was
+   `arrow-left`; it is `chevron-left`, the mirror of the chevron the whole
+   product already uses to mean "this way". `arrow-left` is untouched and
+   still correct where something MOVES forward or back through content: a
+   carousel step, a link onward.
+
+   The 38pt bordered disc went on 13 November ("too big and too far from the
+   edge"); the 44pt target stays. Where it rests is decided by arithmetic in
+   `.nf-back-plain` (chrome.css): the glyph's INK, not its box, lines up with
+   the page's text. Over a photograph (`media`, `pill`) it keeps its plate,
    which is what keeps it legible on a bright picture. */
-const ROUND = "nf-back-plain";
+/* The edge rule's arithmetic (chrome.css). Every surface that sits on the
+   page's own gutter carries it, so one calculation places them all. A plated
+   surface does NOT: over a photograph the plate is the visible edge, so the
+   plate lines up with the gutter and the glyph stays centred in it. */
+const EDGE = "nf-nav-edge";
+const ROUND = `${EDGE} nf-back-plain`;
 
 const SURFACE: Record<BackSurface, string> = {
-  bare: "rounded-control text-[var(--nf-content-primary)] transition-colors hover:text-[var(--nf-brand-secondary)]",
+  bare: `${EDGE} rounded-control text-[var(--nf-content-primary)] transition-colors hover:text-[var(--nf-brand-secondary)]`,
   round: ROUND,
   plate: ROUND,
   glass: ROUND,
@@ -110,12 +122,26 @@ export function BackControl({
       title={accessibleName}
       data-nav-back=""
       data-back-destination={onBack ? undefined : destination}
-      className={`inline-grid min-h-11 min-w-11 shrink-0 place-items-center ${
+      /* `place-items-center` is a Tailwind UTILITY, and utilities beat the
+         components layer where `.nf-nav-edge` lives, so the glyph stayed
+         centred and the edge rule moved only the box (measured on /help: ink
+         at 28px against text at 16). A plated surface still centres its
+         glyph inside the plate; an edge surface packs the glyph to the start
+         so the arithmetic in chrome.css can place its INK. */
+      className={`inline-grid min-h-11 min-w-11 shrink-0 items-center ${
+        surface === "media" || surface === "pill" ? "justify-items-center" : "justify-items-start"
+      } ${
         surface === "pill" ? "" : "h-11 w-11"
-      } ${surface === "bare" && className ? "" : SURFACE[surface]} ${className ?? ""}`}
+      } ${
+        /* A bar's own class replaces the PAINT of a bare control, never its
+           geometry: the edge rule still places it, or the auth slate and the
+           workspace island would drift away from every other back on the
+           platform (measured, 14 November 2026). */
+        surface === "bare" && className ? EDGE : SURFACE[surface]
+      } ${className ?? ""}`}
       {...rest}
     >
-      <UiIcon name="arrow-left" size={20} />
+      <UiIcon name="chevron-left" size={20} />
       {word ? <span aria-hidden="true">{word}</span> : null}
     </button>
   );

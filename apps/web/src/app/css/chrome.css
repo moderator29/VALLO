@@ -1144,11 +1144,53 @@
   .nf-app-header__lead {
     display: contents;
   }
-  /* The in-page back (BackControl `round`): no plate, the primary ink, a
-     quiet tint under the finger, and the 44pt target pulled out by half its
-     slack so the 20px glyph starts on the content edge. */
+  /*
+   * ============================================================= THE EDGE RULE
+   * WHERE A BARE NAVIGATION CONTROL RESTS, AS ARITHMETIC (the founder, 14
+   * November 2026: "this go back button are too close to the end of the page
+   * like no space maybe it's arrow icon so you know look into that too").
+   *
+   * Both of his rulings are true and they are about different boxes. On 13
+   * November the control was "too big and too far from the edge", and it was
+   * pulled outward by half its slack (-12px), which put the 44px BOX 4px from
+   * the screen at a 16px gutter. On 14 November that box reads as having no
+   * space at all. Meanwhile the GLYPH inside it sat at 20.2px, further in
+   * than the title text below it at 16px, so nothing lined up either.
+   *
+   * So the resting place is decided by the glyph's INK against the page's
+   * text, and the box follows. A chevron is drawn from x=9 to x=15 in a 24
+   * unit square, so at a 20px glyph its ink starts 7.5px inside its own box
+   * (20 * 9/24). Pulling the control out by exactly that much puts the ink
+   * on the gutter: the chevron, the title under it and every row below share
+   * one vertical line, and the 44px target keeps 8.5px of air at the screen
+   * edge instead of 4.
+   *
+   * Measured at 390 (gutter 16px): box 4 -> 8.5px from the edge, ink
+   * 20.2 -> 16.0px, which is the text. At 1440 (gutter 32px) the same
+   * arithmetic puts the ink on 32px. Nothing here is a magic number: change
+   * the glyph size or the gutter and both follow.
+   *
+   * `justify-items: start` is what makes the ink, not the box, the thing
+   * being placed; the component's own `place-items-center` centres it
+   * otherwise.
+   */
+  /*
+   * The arithmetic itself, on its own class, because the edge rule belongs to
+   * EVERY back control and not only to the one with a tint. It was on
+   * `.nf-back-plain` alone for an hour on 14 November, and measuring proved
+   * why that is not enough: `/help`, `/guides` and `/docs` draw the `bare`
+   * surface, so their chevron's ink sat at 35.5px while their text sat at 16,
+   * which is the very drift the founder was pointing at. Both surfaces carry
+   * this now, so one piece of arithmetic places every back control.
+   */
+  .nf-nav-edge {
+    --nf-nav-glyph: 20px;
+    /* A chevron's ink begins 9/24 of the way into its square. */
+    --nf-nav-ink-inset: calc(var(--nf-nav-glyph) * 0.375);
+    margin-inline-start: calc(var(--nf-nav-ink-inset) * -1);
+    justify-items: start;
+  }
   .nf-back-plain {
-    margin-inline-start: -0.75rem;
     border-radius: var(--nf-radius-control);
     color: var(--nf-content-primary);
     transition: background-color var(--nf-duration-fast) var(--nf-ease-standard);
@@ -1170,8 +1212,14 @@
       transition: none;
     }
   }
+  /* The app bar's back takes the same rule: the ink on the gutter, the box
+     following it. It used to be pulled a whole 16px, which put its box hard
+     against the screen edge. */
   .nf-bar-back {
-    margin-inline-start: calc(var(--nf-space-md) * -1);
+    --nf-nav-glyph: 20px;
+    --nf-nav-ink-inset: calc(var(--nf-nav-glyph) * 0.375);
+    margin-inline-start: calc(var(--nf-nav-ink-inset) * -1);
+    justify-items: start;
     border-radius: var(--nf-radius-control);
     color: var(--nf-content-primary);
   }

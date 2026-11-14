@@ -167,7 +167,7 @@ export function StepFrame({
         <div className="nf-g1step__bar">
           {onBack ? (
             <button type="button" className="nf-g1step__round" aria-label={backLabel} onClick={onBack}>
-              <UiIcon name="arrow-left" size={20} />
+              <UiIcon name="chevron-left" size={20} />
             </button>
           ) : (
             <span className="nf-g1step__round nf-g1step__round--empty" aria-hidden="true" />

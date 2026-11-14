@@ -55,7 +55,7 @@ export function DocShell({
       <div className="nf-doc-shell__bar">
         {upward ? (
           <Link href={upward.href} className="nf-doc-shell__back nf-tap" aria-label={upward.label}>
-            <UiIcon name="arrow-left" size={20} />
+            <UiIcon name="chevron-left" size={20} />
           </Link>
         ) : null}
         <Link href={indexHref} className="nf-doc-shell__section">
