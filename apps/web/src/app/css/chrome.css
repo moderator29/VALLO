@@ -1198,12 +1198,40 @@
       order: 99;
       margin-inline: 0 calc(var(--nf-space-2xs) * -1);
     }
-    /* !important because the control carries Tailwind's inline-grid, and the
-       utilities layer outranks this one for a normal declaration. */
-    :root[data-page-back] :is(.nf-ph-large__row, .nf-ph-row) > [data-nav-back] {
+    /*
+     * THE PAGE'S OWN BACK AND TITLE STEP ASIDE FROM THE FIRST PAINT, NOT AFTER
+     * HYDRATION (BR-23, measured 14 November 2026).
+     *
+     * These three rules used to hang on `:root[data-page-back]`, which
+     * `BarBack` sets in a `useEffect`. So every phone page painted a 44px back
+     * control and a full-size title, and about 1.3 seconds later both
+     * vanished: the header lost 53px of height and everything below jumped up.
+     * Measured on `/restaurants` with a 4x CPU slowdown: CLS 0.239, against
+     * the brief's target of 0.1 or lower, and the same jump is on every phone
+     * page that draws a header.
+     *
+     * The condition is known before any script runs, so it is written as one:
+     * `.nf-app-shell` is the member shell, server rendered, and it always
+     * draws the bar with its lead slot (AppShell), while `PageHeader` always
+     * renders `BarBack`. So inside the shell, below 64rem, the page's copy is
+     * never the one on screen, and reserving space for it is the defect.
+     * Outside the shell (the agent and host workspaces, a preview with no
+     * bar) the rules do not apply and the page header draws its own back, as
+     * it always did.
+     *
+     * WHAT THIS COSTS: a phone reader with JavaScript off now sees no visible
+     * page title inside the member shell, because the bar's copy is portalled
+     * by script. The `h1` stays in the document for a screen reader, which is
+     * what the clip below is for. Told to the founder on 14 November.
+     *
+     * `[data-page-back]` is kept beside the shell selector so a surface that
+     * sets the flag another way still obeys, and !important because the
+     * control carries Tailwind's inline-grid, which outranks this layer.
+     */
+    :is(.nf-app-shell, :root[data-page-back]) :is(.nf-ph-large__row, .nf-ph-row) > [data-nav-back] {
       display: none !important;
     }
-    :root[data-page-back] :is(.nf-ph-large__title, .nf-ph-row__title) {
+    :is(.nf-app-shell, :root[data-page-back]) :is(.nf-ph-large__title, .nf-ph-row__title) {
       position: absolute;
       width: 1px;
       height: 1px;
@@ -1211,7 +1239,7 @@
       clip-path: inset(50%);
       white-space: nowrap;
     }
-    :root[data-page-back] .nf-ph-large {
+    :is(.nf-app-shell, :root[data-page-back]) .nf-ph-large {
       margin-block-start: 0;
     }
   }
