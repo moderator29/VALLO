@@ -106,6 +106,11 @@ export type PgCronJob = { name: string; cron: string; when: string; what: string
 
 export const PG_CRON_JOBS: readonly PgCronJob[] = [
   { name: "vallo_push_drain", cron: "*/5 * * * *", when: "every 5 min", what: "asks the app to drain the push queue" },
+  /* Scheduled by the roommates drop of 9 November, and missing from this list
+     until 14 November: the job that retires a stale roommate listing ran
+     unwatched, so the desk could not have said if it stopped. This list's own
+     test found it the moment the drop was filed as a migration. */
+  { name: "vallo-roommates-expire", cron: "17 3 * * *", when: "daily at 04:17", what: "retires a roommate listing nobody has touched, and the saved searches that watched it" },
   { name: "vallo_safety_share_sweep", cron: "*/10 * * * *", when: "every 10 min", what: "reminds a renter who has not checked in after an inspection they shared" },
   { name: "vallo_hold_claims_sweep", cron: "* * * * *", when: "every minute", what: "lets compliance hold claims take over within a minute of a this-was-not-me hold ending (SCUML items 6 and 8)" },
   { name: "vallo_calls_sweep", cron: "* * * * *", when: "every minute", what: "applies every call deadline (missed, failed, connection lost, expired reviews) and writes the missed-call notice (VC1)" },

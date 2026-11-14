@@ -1109,6 +1109,7 @@ a fall is emerald. The line is alerts raised per day.
 | calls-sweep | Vercel Cron `*/5 * * * *` | every 5 min | 1 h | VC1: runs the calls deadline sweep and deletes the provider room of every finished call, so an old token cannot sit in it and nothing keeps metering (`lib/cron/jobs/calls-sweep.ts`); skipped while `video_calls` is off |
 | display-rates | Vercel Cron `50 0,12 * * *` | twice daily 01:50 and 13:50 Lagos (00:50 and 12:50 UTC) | 26 h | fetches the day's exchange rates (ExchangeRate-API, falling back to the CC0 currency-api) into `display_exchange_rates` for the "about" guide beside naira prices; display only, never used to charge, and a rate older than 48 hours is not shown (`lib/currency/rates-job.ts`) |
 | vallo_push_drain | pg_cron `*/5 * * * *` | every 5 min | | asks the app to drain the push queue (`private.request_push_drain`) |
+| vallo-roommates-expire | pg_cron `17 3 * * *` | daily at 04:17 | | retires a roommate listing nobody has touched, and the saved searches that watched it (`private.roommate_expire_listings`) |
 | vallo_safety_share_sweep | pg_cron `*/10 * * * *` | every 10 min | | reminds a renter once when half an hour has passed since they expected to be back from an inspection they shared and they have not tapped I'm done (V-62) |
 | vallo_release_stale_holds | pg_cron `*/15 * * * *` | every 15 min | | database side of the hold release |
 | vallo_remind_hosts_to_decide | pg_cron `4,19,34,49 * * * *` | every 15 min | | reminds a host once, in the app and by push, when a room or table request has used three quarters of its window (C3, `private.remind_hosts_to_decide`) |
@@ -1151,7 +1152,7 @@ a fall is emerald. The line is alerts raised per day.
 | vallo_send_feature_notices | pg_cron `10 17 * * *` | daily 18:10 | | sends the daily feature notices to members who opted in, one topic at a time (A5, `private.send_feature_notices`) |
 | vallo_send_gentle_nudges | pg_cron `20 10 * * *` | daily 11:20 | | sends the gentle nudges to members who opted in, never more than the opt-in allows (A6, `private.send_gentle_nudges`) |
 
-24 Vercel Cron jobs and 42 pg_cron jobs in all. The numbers are derived,
+24 Vercel Cron jobs and 43 pg_cron jobs in all. The numbers are derived,
 not remembered: the Vercel list is `VERCEL_JOBS` in
 `lib/admin/reads/jobs.ts`, held equal to `vercel.json` by a test, and the
 database list is `PG_CRON_JOBS` in the same file, held equal by

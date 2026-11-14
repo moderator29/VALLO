@@ -100,7 +100,9 @@
     ".next-z/types/**/*.ts",
     ".next-z/dev/types/**/*.ts",
     ".next-input/types/**/*.ts",
-    ".next-input/dev/types/**/*.ts"
+    ".next-input/dev/types/**/*.ts",
+    ".next-perf/types/**/*.ts",
+    ".next-perf/dev/types/**/*.ts"
   ],
   "exclude": [
     "node_modules",
