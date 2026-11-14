@@ -3393,32 +3393,3 @@
     margin-top: var(--nf-space-xs);
   }
 }
-
-@layer components {
-  /*
-   * THE SITE FOOTER UNDER THE FRONT DOOR (the founder, 14 November 2026:
-   * "And then the down part would still be this our stuffs", with the
-   * footer's Product and Company columns, the store badges, the newsletter
-   * and the legal row).
-   *
-   * `/` is the signed-out discovery screen and it carries the dock, so the
-   * footer's last row would sit under the dock without this. The clearance
-   * is the shell's own `--nf-tabbar-clearance` (chrome.css), which already
-   * carries the dock's height, its offset, the home indicator's safe area
-   * and the gap, so this cannot drift from the dock it is clearing.
-   *
-   * The footer keeps the page's full width while the results above it sit
-   * in the content column, which is how every site page draws it.
-   */
-  .nf-search-foot {
-    margin-block-start: var(--nf-space-2xl);
-    padding-block-end: var(--nf-tabbar-clearance, 0px);
-  }
-  /* From the laptop width the dock is gone and the rail takes its place, so
-     the reservation goes with it. */
-  @media (min-width: 64rem) {
-    .nf-search-foot {
-      padding-block-end: 0;
-    }
-  }
-}

@@ -20,7 +20,6 @@ import { matchRoute } from "./resolve";
 const NAMES: Readonly<Record<string, string>> = {
   "/": "Vallo",
   "/about": "About",
-  "/tour": "A tour of Vallo",
   "/community": "the Community Promise",
   "/docs": "the guide",
   "/docs/[slug]": "the chapter",

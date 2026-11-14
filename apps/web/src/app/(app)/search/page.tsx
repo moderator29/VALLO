@@ -1,11 +1,5 @@
 import type { Metadata } from "next";
 import { FunnelBeacon } from "@/components/site/FunnelBeacon";
-import { headers } from "next/headers";
-import { SiteFooter } from "@/components/site/SiteFooter";
-import { JsonLd } from "@/components/site/JsonLd";
-import { organizationLd, websiteLd } from "@/lib/site/structured-data";
-import { FRONT_DOOR_HEADER } from "@/lib/site/front-door";
-import { publicCatalogueEnabled } from "@/lib/catalogue/public-access";
 import { forListingCard } from "@/lib/i18n/slice";
 import { after } from "next/server";
 import { demandRecorder } from "@/lib/demand/record";
@@ -213,16 +207,6 @@ export default async function SearchPage({
 }) {
   const locale: Locale = await getLocale();
   const t = getDictionary(locale);
-  /*
-   * THE FRONT DOOR. The proxy rewrites `/` here for a signed-out visitor
-   * while the catalogue is open, so this same screen is the home page
-   * (`lib/site/front-door.ts`). It is drawn exactly as `/search` is drawn,
-   * with two things added that belong to a home page and not to a search:
-   * the site footer under the results, and the structured data search
-   * engines read at the root. Nothing is duplicated; the stamp only says
-   * which of the two addresses asked.
-   */
-  const frontDoor = (await headers()).get(FRONT_DOOR_HEADER) === "1";
   const briefsCopy = t.frontDoor.briefs;
   const sx = t.experienceDiscover.search;
   const raw = await searchParams;
@@ -571,15 +555,6 @@ export default async function SearchPage({
     <GuideScope copy={t.experienceSettings.preferences}>
       {/* A6: the funnel's "first search", once a search has something in it. */}
       {Object.keys(raw).length > 0 && <FunnelBeacon step="first_search" />}
-      {/* Serving `/`: the home page's own structured data and the funnel's
-          first step, which used to live on the landing page and still
-          describe the address a search engine is reading. */}
-      {frontDoor ? (
-        <>
-          <JsonLd data={[organizationLd(), websiteLd({ searchOpen: publicCatalogueEnabled() })]} />
-          <FunnelBeacon step="landing_view" />
-        </>
-      ) : null}
       {/*
         THE WAY BACK, ON THE BAR'S OWN ROW.
 
@@ -606,10 +581,7 @@ export default async function SearchPage({
         t={t}
         openFilters={raw.filters === "open"}
         anchors={anchors}
-        /* No way back from the front door: serving `/`, this screen IS the
-           home screen, and a back control there points at nothing. On
-           `/search` it is the way back to home, as it has always been. */
-        leading={frontDoor ? undefined : <BackButton fallback="/" surface="round" />}
+        leading={<BackButton fallback="/" surface="round" />}
       />
       <ReadAs query={query} said={said} locale={locale} copy={t.shape.unit} />
 
@@ -942,18 +914,6 @@ export default async function SearchPage({
           to={query.view === "map" ? "list" : "map"}
         />
       )}
-      {/* "And then the down part would still be this our stuffs": the site
-          footer under the listings, so scrolling past them reaches Product,
-          Company, the store badges, the newsletter, Follow Vallo and the
-          legal row. Only on the front door: inside the app the dock and the
-          drawer are the way around, and a footer there would be a second
-          navigation. `nf-search-foot` carries the dock's clearance so the
-          legal row is never under it. */}
-      {frontDoor ? (
-        <div className="nf-search-foot">
-          <SiteFooter t={t} />
-        </div>
-      ) : null}
     </GuideScope>
     </Pull>
   );

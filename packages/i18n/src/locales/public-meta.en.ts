@@ -18,13 +18,6 @@ export const publicMetaEn = {
       "Homes, land, hotels and shortlets across Nigeria, with the cost of moving in written down before you call anybody. Hotels, apartments and restaurant tables on Vallo Stays. One account, one inbox.",
   },
   pages: {
-    /* The landing page at its own address since 14 November 2026, when `/`
-       became the signed-out discovery screen. */
-    tour: {
-      title: "A tour of Vallo",
-      description:
-        "What Vallo is, in one walk through: homes and land to rent or buy, hotels, apartments and shortlets to stay in, restaurant tables to hold, roommates to find, and the one account and inbox behind all of it.",
-    },
     about: {
       title: "About",
       description:

@@ -1373,8 +1373,6 @@ export const en = {
       support: "Support",
       legal: "Legal",
       about: "About",
-      /* The landing page's own address since 14 November 2026. */
-      tour: "A tour of Vallo",
       careers: "Careers",
       help: "Help centre",
       contact: "Contact",

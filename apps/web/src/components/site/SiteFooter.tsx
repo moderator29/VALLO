@@ -9,7 +9,6 @@ import { StoreBadges } from "./landing/StoreBadges";
 import { storeBadges } from "./landing/store-badges";
 import { requestSurface } from "@/lib/auth/surface";
 import "@/app/css/site.css";
-import { LANDING_PATH } from "@/lib/site/front-door";
 
 /**
  * Site footer, to the governing fullpage image.
@@ -98,11 +97,6 @@ export async function SiteFooter({ t }: { t: Dictionary }) {
       title: f.company,
       links: [
         { href: "/about", label: face.footer.aboutUs },
-        /* The landing page's own address since 14 November 2026, when `/`
-           became the signed-out discovery screen. It is a real page with the
-           city capsules, the stats band and the explainers, so it is linked
-           rather than left for a search engine to find. */
-        { href: LANDING_PATH, label: f.tour },
         { href: "/careers", label: f.careers },
         /* A9: the supply front doors, public pages rather than a sign-in
            wall (the old "Become an agent" / "List your property" entry went
