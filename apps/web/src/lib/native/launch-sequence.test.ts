@@ -86,11 +86,15 @@ describe("Android's opening, drawn the same way (founder's ruling, 7 November 20
     expect(java).toMatch(/static void handOff\(\) \{[\s\S]*?if \(!started\) start\(\);/);
   });
 
-  it("never takes a touch, steps aside when animations are off, and is shown and handed over from the shell", () => {
+  it("never takes a touch, steps aside when animations are off, and is no longer shown by the shell", () => {
     expect(java).toContain("g.setClickable(false)");
     expect(java).toContain("IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS");
     expect(java).toMatch(/if \(!animatorsOn\(\)\) \{\s*remove\(ground\);/);
-    expect(read("android/app/src/main/java/com/vallospaces/app/MainActivity.java")).toContain("LaunchMark.show(this)");
+    /* Founder's ruling, 14 November 2026: the only opening is the page's own.
+       The shell stops showing its mark; the hand-over still answers, and does
+       nothing when no overlay was put up. */
+    expect(read("android/app/src/main/java/com/vallospaces/app/MainActivity.java")).not.toContain("LaunchMark.show(");
+    expect(java).toMatch(/static void handOff\(\) \{\s*if \(ground == null\) return;/);
     expect(read("android/app/src/main/java/com/vallospaces/app/ValloShellPlugin.java")).toContain("runOnUiThread(LaunchMark::handOff)");
   });
 });
@@ -188,7 +192,9 @@ describe("the iPhone's launch, from the storyboard to the window", () => {
   it("one window: the one UIKit gave, if it gave one", () => {
     expect(sceneDelegate).toContain("if window == nil { window = UIWindow(windowScene: windowScene) }");
     expect(sceneDelegate).toMatch(/if !\(window\?\.rootViewController is ValloBridgeViewController\) \{/);
-    expect(sceneDelegate).toContain("LaunchMark.shared.show(in: window)");
+    /* 14 November 2026: the scene draws no mark of its own. */
+    expect(sceneDelegate).not.toContain("LaunchMark.shared.show(");
+    expect(swift).toMatch(/func handOff\(\) \{\s*guard let ground = layer else \{ return \}/);
   });
 });
 

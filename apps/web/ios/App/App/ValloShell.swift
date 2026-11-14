@@ -56,6 +56,7 @@ public class ValloShellPlugin: CAPPlugin, CAPBridgedPlugin {
         CAPPluginMethod(name: "setPrivacyCover", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "takeCrashReport", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "handoff", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "pageOpens", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "notePath", returnType: CAPPluginReturnPromise)
     ]
 
@@ -81,6 +82,13 @@ public class ValloShellPlugin: CAPPlugin, CAPBridgedPlugin {
 
     @objc func handoff(_ call: CAPPluginCall) {
         DispatchQueue.main.async { LaunchMark.shared.handOff() }
+        call.resolve()
+    }
+
+    /// The opening is the page's (14 November 2026): this shell draws no mark
+    /// of its own. The page reads this method's presence and starts its
+    /// opening at once; a binary without it drew its own first.
+    @objc func pageOpens(_ call: CAPPluginCall) {
         call.resolve()
     }
 }
