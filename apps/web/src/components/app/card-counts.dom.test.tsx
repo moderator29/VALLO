@@ -1,13 +1,9 @@
 /**
  * THE CARD'S SIGNAL LINE (founder, 14 November 2026), on the real search card
- * at 390 in Chromium: one small star and the rating at the start, views, saves
- * and shares as small glyphs with bare figures at the end, under the facts as
- * its own quiet line; the facts row keeps the height it had (the line never
- * wraps the facts). A reviewed listing shows
- * its average and review count; one nobody has reviewed shows the 2.5 every
- * listing starts at with "New", and a screen reader is told it is not yet
- * rated. Views and saves show from the first, never a zero; an example shows
- * its counts like any other; a compact figure is read out whole.
+ * at 390 in Chromium: one small star and the rating at the start, views only
+ * as a small eye glyph with a bare figure at the end. Saves and shares appear
+ * only on the listing page. A reviewed listing shows its average and review
+ * count; an unreviewed one shows 2.5 with "New".
  */
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import { BROWSER_TEST_TIMEOUT, closeBrowser, hasBrowser, mountInBrowser, warmBrowser } from "@/lib/testing/mount-in-browser";
@@ -43,7 +39,7 @@ const ENTRY = `
 `;
 
 describe.skipIf(!hasBrowser && !process.env.CI)("the signal line on a card", () => {
-  it("draws the rating and the counts under the facts without moving them, and never a zero", async () => {
+  it("draws the rating and views under the facts without moving them, never saves or shares", async () => {
     const { page, close } = await mountInBrowser({
       entry: ENTRY,
       css: productCss("app/css/base.css", "app/css/symbols.css", "app/css/controls.css", "app/css/catalogue.css", "app/css/space-card.css"),
@@ -57,16 +53,16 @@ describe.skipIf(!hasBrowser && !process.env.CI)("the signal line on a card", () 
       /* One star, never a row of five, and small glyphs: 12px each. */
       const glyphs = (id: string) => counts(id).locator("svg").evaluateAll((els) => els.map((el) => Math.round(el.getBoundingClientRect().width)));
 
-      /* Reviewed: its own average, how many reviews, then the counts. */
-      expect(await keys("counts")).toEqual(["rating", "views", "saves", "shares"]);
-      expect(await seen("counts")).toEqual(["4.6", "(12)", "1.2k", "24", "7"]);
-      expect((await heard("counts")).map((x) => x.trim())).toEqual(["Rated 4.6 out of 5, 12 reviews.", "1,234 views.", "24 saves.", "7 shares."]);
-      expect(await glyphs("counts")).toEqual([12, 12, 12, 12]);
-      /* Two ends: the rating starts the row, the counts end it. */
+      /* Reviewed: its own average, how many reviews, then views only. */
+      expect(await keys("counts")).toEqual(["rating", "views"]);
+      expect(await seen("counts")).toEqual(["4.6", "(12)", "1.2k"]);
+      expect((await heard("counts")).map((x) => x.trim())).toEqual(["Rated 4.6 out of 5, 12 reviews.", "1,234 views."]);
+      expect(await glyphs("counts")).toEqual([12, 12]);
+      /* Two ends: the rating starts the row, views end it. */
       const ends = await counts("counts").evaluate((el) => {
         const row = el.getBoundingClientRect();
         const rating = el.querySelector('[data-stat="rating"]')!.getBoundingClientRect();
-        const last = el.querySelector('[data-stat="shares"]')!.getBoundingClientRect();
+        const last = el.querySelector('[data-stat="views"]')!.getBoundingClientRect();
         return [Math.round(rating.left - row.left), Math.round(row.right - last.right)];
       });
       expect(ends).toEqual([0, 0]);
@@ -78,12 +74,12 @@ describe.skipIf(!hasBrowser && !process.env.CI)("the signal line on a card", () 
       expect((await heard("plain"))[0]).toContain("Not yet rated");
       expect(await glyphs("plain")).toEqual([12]);
       expect(await counts("plain").locator('[data-stat="rating"]').getAttribute("data-rated")).toBe("false");
-      /* Never a zero; saves from the first; an example like any other. */
+      /* Never a zero; saves only on the listing page. */
       expect(await keys("zero")).toEqual(["rating"]);
-      expect(await keys("saves")).toEqual(["rating", "saves"]);
+      expect(await keys("saves")).toEqual(["rating"]);
       expect(await keys("demo")).toEqual(["rating", "views"]);
       expect(await seen("demo")).toEqual(["2.5", "New", "3"]);
-      expect(await seen("home")).toEqual(["2.5", "New", "40", "2"]);
+      expect(await seen("home")).toEqual(["2.5", "New", "40"]);
       /* One line at 390, on both cards. */
       for (const id of ["counts", "home"]) {
         expect(await counts(id).evaluate((el) => el.getBoundingClientRect().height), id).toBeLessThan(30);

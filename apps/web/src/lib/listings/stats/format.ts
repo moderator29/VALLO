@@ -205,10 +205,10 @@ export function conversionPercent(part: number, views: number): number | null {
 export const CARD_VIEWS_FROM = 1;
 
 /**
- * The card's counts: views, saves and shares, each from its first. Never a
- * zero, nothing without figures. Views, saves, shares, so the larger number
- * leads. `text` is the bare compact figure ("1.2k"): the card draws it beside
- * its glyph, and `full` is the sentence a screen reader hears. Pure; client safe.
+ * The card's view count, or null when there are no views to show. Only views
+ * appear on cards (founder, 14 November 2026: "it should be only views icon
+ * that should be there remove the love and share icon ... The likes should be
+ * when the listing been clicked"). Saves and shares live on the listing page.
  */
 export function cardStatItems({
   stats,
@@ -220,14 +220,6 @@ export function cardStatItems({
   words?: ListingStatsWords;
 }): StatItem[] | null {
   if (!stats) return null;
-  const items: StatItem[] = [];
-  const bare = (key: "views" | "saves" | "shares", n: number): StatItem => ({
-    key,
-    text: compactCount(n, locale),
-    full: countPhrase(n, words[key], locale).full,
-  });
-  if (stats.views >= CARD_VIEWS_FROM) items.push(bare("views", stats.views));
-  if (stats.saves >= 1) items.push(bare("saves", stats.saves));
-  if ((stats.shares ?? 0) >= 1) items.push(bare("shares", stats.shares ?? 0));
-  return items.length > 0 ? items : null;
+  if (stats.views < CARD_VIEWS_FROM) return null;
+  return [{ key: "views", text: compactCount(stats.views, locale), full: countPhrase(stats.views, words.views, locale).full }];
 }

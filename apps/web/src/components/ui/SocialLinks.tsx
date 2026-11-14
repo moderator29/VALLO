@@ -1,18 +1,21 @@
 import { liveSocials, type SocialKey } from "@/lib/brand/socials";
 
 /**
- * THE SOCIAL ROW (28 October 2026).
+ * THE SOCIAL ROW (28 October 2026, updated 14 November 2026).
  *
- * One mark per network, drawn on the product's own 24 pixel grid at one line
- * weight, white on the brand blue in both themes (the marks are the networks'
- * black and white glyphs, in Vallo's colours). Each is a real link to Vallo's
- * page, opened in a new tab (the native shell hands it to the system browser,
- * `lib/native/external-links.ts`), named for a screen reader ("Vallo on
- * Instagram"), 44 pixels to tap, with a visible keyboard focus. `rel="me"`
- * says the account is ours, which is what the networks read to verify it.
- *
- * Nothing is drawn for a network with no address (`lib/brand/socials.ts`).
+ * Each network's own brand icon and colour on a disc: Facebook blue, the
+ * Instagram gradient, TikTok black and LinkedIn blue. White marks on each
+ * network's real ground, in both themes. Each is a real link to Vallo's page,
+ * opened in a new tab, named for a screen reader, 44 pixels to tap, with a
+ * visible keyboard focus. Nothing is drawn for a network with no address.
  */
+const BRAND_COLOR: Record<SocialKey, string> = {
+  facebook: "#1877F2",
+  instagram: "linear-gradient(135deg, #FD5 0%, #FF543E 25%, #C837AB 50%, #5B51D8 100%)",
+  tiktok: "#000000",
+  linkedin: "#0A66C2",
+};
+
 const GLYPH: Record<SocialKey, React.ReactNode> = {
   facebook: <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />,
   instagram: (
@@ -79,6 +82,7 @@ export function SocialLinks({
               rel="me noopener noreferrer"
               aria-label={template.replace("{network}", a.label)}
               data-network={a.key}
+              style={{ background: BRAND_COLOR[a.key] }}
             >
               <SocialMark network={a.key} size={size === "lg" ? 24 : 20} />
             </a>

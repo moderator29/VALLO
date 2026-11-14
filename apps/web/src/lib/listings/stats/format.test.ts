@@ -109,24 +109,15 @@ describe("conversion", () => {
 });
 
 describe("the card's counts", () => {
-  it("shows views, saves and shares from the first of each, as bare figures, never a zero", async () => {
+  it("shows only views on a card, never saves or shares, never a zero", async () => {
     const { cardStatItems } = await import("./format");
     expect(cardStatItems({ stats: null })).toBeNull();
     expect(cardStatItems({ stats: undefined })).toBeNull();
     expect(cardStatItems({ stats: { views: 0, saves: 0 } })).toBeNull();
-    expect(cardStatItems({ stats: { views: 0, saves: 1 } })?.map((i) => [i.key, i.text, i.full])).toEqual([["saves", "1", "1 save"]]);
+    expect(cardStatItems({ stats: { views: 0, saves: 1 } })).toBeNull();
     expect(cardStatItems({ stats: { views: 1, saves: 0 } })?.map((i) => [i.key, i.text, i.full])).toEqual([["views", "1", "1 view"]]);
-    expect(cardStatItems({ stats: { views: 1234, saves: 24 } })?.map((i) => [i.text, i.full])).toEqual([
-      ["1.2k", "1,234 views"],
-      ["24", "24 saves"],
-    ]);
-    /* Shares from the first, and never before the database knows them. */
-    expect(cardStatItems({ stats: { views: 5, saves: 1, shares: 0 } })?.map((i) => i.key)).toEqual(["views", "saves"]);
-    expect(cardStatItems({ stats: { views: 5, saves: 1, shares: 3 } })?.map((i) => [i.key, i.text, i.full])).toEqual([
-      ["views", "5", "5 views"],
-      ["saves", "1", "1 save"],
-      ["shares", "3", "3 shares"],
-    ]);
+    expect(cardStatItems({ stats: { views: 1234, saves: 24 } })?.map((i) => [i.text, i.full])).toEqual([["1.2k", "1,234 views"]]);
+    expect(cardStatItems({ stats: { views: 5, saves: 1, shares: 3 } })?.map((i) => i.key)).toEqual(["views"]);
   });
 });
 
