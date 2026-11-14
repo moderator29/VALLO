@@ -3064,6 +3064,15 @@ export const en = {
       emptyTitle: "No listings yet",
       emptyBody:
         "Your first property takes about ten minutes, most of it photos. Start whenever you are ready: drafts are saved as you go.",
+      /* The status tab row above the groups (survey B A-05, the founder's
+         count tabs of 14 November 2026). */
+      filterByStatus: "Filter listings by status",
+      filterAll: "All",
+      /* The row's own held sheet (handoff 6.3 part 2). */
+      listingActionsTitle: "Actions for this listing",
+      calendarAction: "Calendar",
+      takeDownNote: "It leaves search and comes back to your drafts, where you can edit it.",
+      done: "Done",
       groups: {
         live: { title: "Live", blurb: "Guests can find these in search." },
         review: {

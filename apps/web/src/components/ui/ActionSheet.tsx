@@ -236,7 +236,11 @@ export function ActionSheet({
         ) : null}
 
         {quick.length > 0 ? (
-          <div className="nf-asheet__quick" data-testid={testId ? `${testId}-quick` : undefined}>
+          <div
+            className="nf-asheet__quick"
+            data-few={quick.length < 3 ? "true" : undefined}
+            data-testid={testId ? `${testId}-quick` : undefined}
+          >
             {quick.slice(0, 4).map((action) => (
               <QuickItem key={action.key} action={action} onDone={close} />
             ))}

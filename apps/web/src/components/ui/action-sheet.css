@@ -92,6 +92,18 @@
     gap: var(--nf-space-sm);
     margin-block-start: var(--nf-space-md);
   }
+  /* One or two circles do not spread: a single action stretched across the
+     sheet and centred read as a mistake rather than as a choice (seen on an
+     offer with no conversation, 14 November 2026). Three or four share the
+     width as before. */
+  .nf-asheet__quick[data-few="true"] {
+    justify-content: flex-start;
+    padding-inline-start: var(--nf-space-xs);
+  }
+  .nf-asheet__quick[data-few="true"] .nf-asheet__quickitem {
+    flex: none;
+    min-inline-size: 4.5rem;
+  }
   .nf-asheet__quickitem {
     display: flex;
     flex: 1;

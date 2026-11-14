@@ -56,7 +56,7 @@ const entry = `
               onSelect: () => window.__ran.push("delete"), "data-testid": "row-delete" },
             { key: "pin", label: "Pin", icon: "bookmark", onSelect: () => window.__ran.push("pin"), "data-testid": "row-pin" },
             { key: "mute", label: "Mute", sub: "You still see the messages", icon: "mute", onSelect: () => window.__ran.push("mute"), "data-testid": "row-mute" },
-            { key: "shared", label: "Shared media", icon: "image", chevron: true, onSelect: () => window.__ran.push("shared"), "data-testid": "row-shared" },
+            { key: "shared", label: "Shared media", icon: "picture", chevron: true, onSelect: () => window.__ran.push("shared"), "data-testid": "row-shared" },
           ]}
           doneLabel="Done"
         />
