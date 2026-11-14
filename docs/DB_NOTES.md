@@ -261,3 +261,21 @@ delivery in the performance report, not here. The one-day optimised-image
 cache floor is a deliberate moderation choice (a photograph taken down must
 stop being served within a day) and is correctly documented in
 `apps/web/next.config.ts`. Leave it.
+
+### The ninety unindexed foreign keys, read properly (14 November 2026)
+
+The advisor lists 90. Read against live, almost all are on tables with no
+rows, and none duplicates another index. So most are not worth an index yet.
+
+Thirteen are different, and the difference is a product flow rather than a
+guess: each is `ON DELETE CASCADE` pointing at `auth.users` or
+`public.profiles`. Deleting an account makes Postgres find the child rows to
+cascade, and with no index it reads the whole child table to do it, once per
+table, inside the deletion's transaction. Vallo deletes accounts (a member
+flow and a console desk). All thirteen tables are the newest on the platform
+(the roommates and Circle waves of 8 and 9 November) and are empty today,
+which is why an index on them is instant now and will not be later.
+
+Delivered as `supabase/migrations/pending/cascade_fk_indexes_2026-11-14.sql`.
+The audit columns (`*_decided_by`, `*_granted_by`, `*_updated_by`) are
+deliberately left alone: written once, read by a desk at human speed.
