@@ -146,3 +146,49 @@ tiles), the payment rail design pass.
 - Retention (F): `lib/legal/retention.ts`, drawn by `components/legal/RetentionTable.tsx` in Privacy section 7. Pending counsel.
 - Displayed "Last updated" for Terms and Privacy moved to 10 November; `TERMS_VERSION` and `PRIVACY_VERSION` NOT bumped (the update sheet's words are about the Guarantee). Founder's call with counsel.
 - COUNSEL_BRIEF 2.1 handled by Vallo, 2.9 closed, 2.2 to 2.5 and 2.7 carry the new status.
+
+## 14 November 2026: the next-generation upgrade begins (lead plus two agents)
+
+Read `NEXT_GEN_HANDOFF.md` first; it replaces the older reading order above
+for this work. The founder's briefs are in `NEXT_GEN_BRIEF_VERBATIM.md`.
+Branch: `claude/rentme-v2-platform-audit-xuvg0a`.
+
+**Shipped on the branch today** (see `git log`): the console's password door
+for admins and staff (super admins keep the key, the founder's word), the
+staff console's desk cards, the Business Development pipeline table and two
+manual chapters, native feel round two, budget in your currency, any mix of
+fifteen photos and videos, and the three handoff documents.
+
+**Founder SQL waiting:** `supabase/migrations/pending/staff_desks_only_2026-11-14.sql`.
+
+**The queue** (stages: Queued, Researching, Ready for implementation,
+Implementing, Testing, Bug fixing, Re-auditing, Completed). The lead updates
+this table at the end of every round.
+
+| # | Task (handoff section) | Owner | Stage |
+|---|---|---|---|
+| S1 | Confirmation pill, `banner.quick`, and moving the copy and save moments onto it (6.1) | Agent INPUT | Implementing |
+| S2 | Paste: photos, long text, links, codes, cleaning (6.2) | Agent INPUT | Queued behind S1 |
+| S3 | `CountTabs`, the shared part, then inbox, notifications, saved (6.3 part 1) | Agent SHEETS | Implementing |
+| S4 | `ActionSheet`, the shared part, then inbox rows, card menu, profile menu, post menu (6.3 part 2) | Agent SHEETS | Queued behind S3 |
+| S5 | Keyboard pass over every field, and the composer on the keyboard (6.4) | Agent INPUT | Queued behind S2 |
+| S6 | The remaining screens for CountTabs and ActionSheet in the 6.3 tables | Agent SHEETS | Queued |
+| M1 | One bug register, re-checked against the code (7, phase 1) | Lead, then an agent | Queued |
+| M2 | Measured Core Web Vitals baseline on the eleven pages (7, phase 1) | Agent | Queued |
+| M3 | Supabase audit: queries, indexes, realtime, cron, storage, RLS, auth sessions (8) | Agent | Queued |
+| M4 | Bug fixes from the register (7, phase 2) | Both agents | Queued |
+| M5 | Consistency audit with numbers; the circular home control (7, phase 3) | Agent | Queued |
+| M6 | Public platform, area by area (7, phase 4) | Both agents | Queued |
+| M7 | Staff console: the restricted frame, tables on a phone, command centre proposal (7, phase 5) | Agent | Queued |
+| M8 | Motion and performance from the baseline (7, phase 6) | Agent | Queued |
+| M9 | Final QA, security probes and the second audit (7, phase 7) | The agent that did not build it | Queued |
+
+**File ownership while S1 to S6 run.** INPUT: `lib/ui/toast.ts`,
+`components/ui/ToastHost.tsx`, every composer (the thread's `ThreadView.tsx`
+and `components/app/messages/*`, the support composer, the feed composer),
+`components/ui/Field.tsx`, `NairaField.tsx`, the code fields under
+`app/(auth)`, `lib/native/keyboard.ts`. SHEETS: `components/ui/Sheet.tsx` and
+the new `CountTabs` and `ActionSheet`, `app/(app)/messages/Inbox.tsx` and its
+swipe, `app/(app)/notifications`, `app/(app)/saved`,
+`components/app/listing/CardMenu.tsx`, `components/social/ActionSheet.tsx`,
+`components/social/profile/ProfileMenu.tsx`. Neither touches `app/admin`.
