@@ -139,6 +139,9 @@ const MARK: Record<ToastItem["tone"], UiIconName> = {
   success: "check",
   warning: "alert-triangle",
   error: "alert-triangle",
+  /* Under way: a clock, which says "this is taking its time" rather than
+     "this is broken". The ring that turns around it is the stylesheet's. */
+  processing: "clock",
 };
 
 /** Error and warning are announced at once; the rest politely. */

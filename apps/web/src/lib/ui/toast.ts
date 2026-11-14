@@ -43,7 +43,7 @@
 
 import { feedback } from "./feedback";
 
-export type ToastTone = "neutral" | "success" | "info" | "warning" | "error";
+export type ToastTone = "neutral" | "success" | "info" | "warning" | "error" | "processing";
 
 export type ToastAction = { label: string; run: () => void };
 
@@ -123,6 +123,14 @@ export const TOAST_DWELL_MS = 3200;
 export const TOAST_DWELL_LONG_MS = 6000;
 
 /**
+ * A processing banner does not leave by itself. This is the backstop, not the
+ * plan: five minutes, after which something has gone wrong enough that a
+ * banner saying "still going" is a lie, and leaving the screen honest matters
+ * more than keeping the message.
+ */
+export const PROCESSING_DWELL_MS = 5 * 60 * 1000;
+
+/**
  * A BANNER RAISED THIS CLOSE BEFORE A ROUTE CHANGE IS CARRIED ONTO THE NEXT
  * PAGE; ONE OLDER THAN THIS LEAVES WITH THE PAGE IT WAS ABOUT.
  *
@@ -171,6 +179,14 @@ export const BANNER_TIMING = {
 
 /** The dwell a message gets when the caller does not name one. */
 export function dwellFor(tone: ToastTone, hasAction: boolean): number {
+  /* A PROCESSING BANNER WAITS FOR ITS ANSWER (founder, 14 November 2026:
+     "some would be like processing icon"). It says a thing is under way, so
+     it cannot leave on a timer: the work it reports has not finished. It
+     stays until the code that raised it replaces it with the outcome
+     (`updateToast`) or takes it away (`banner.dismiss`). A caller that
+     forgets is the caller's bug, and a visible one, which is better than a
+     banner that lies about something still running. */
+  if (tone === "processing") return PROCESSING_DWELL_MS;
   return tone === "error" || tone === "warning" || hasAction ? TOAST_DWELL_LONG_MS : TOAST_DWELL_MS;
 }
 
@@ -373,6 +389,8 @@ type ToastFn = ((message: string, options?: ToastOptions) => number) & {
   error: Toned;
   /** The second, lighter voice: a compact pill above the dock ("Message
    * copied"), gone by itself. Same store, same host, one at a time. */
+  /* Under way, and not gone until the caller says how it ended. */
+  processing: Toned;
   quick: (message: string, options?: QuickOptions) => number;
   dismiss: typeof dismissToast;
 };
@@ -384,6 +402,9 @@ export const toast: ToastFn = Object.assign(
     info: ((message, options) => show(message, { ...options, tone: "info" })) as Toned,
     warning: ((message, options) => show(message, { ...options, tone: "warning" })) as Toned,
     error: ((message, options) => show(message, { ...options, tone: "error" })) as Toned,
+    /* Something is under way. Stays until the caller says how it ended: keep
+       the id and pass it to `updateToast`, or `banner.dismiss(id)`. */
+    processing: ((message, options) => show(message, { ...options, tone: "processing" })) as Toned,
     quick: (message: string, options?: QuickOptions) => {
       const { haptic, ...rest } = options ?? {};
       const id = show(message, { ...rest, tone: "success", quick: true });

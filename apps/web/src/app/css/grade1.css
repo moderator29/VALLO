@@ -177,29 +177,138 @@
 .nf-toast-host .nf-toast__action:active {
   background: var(--nf-brand-tint-1);
 }
-/* A plain glyph in the tone's colour (R62), no tile behind it. */
-.nf-toast-host .nf-toast__mark {
-  inline-size: 1.25rem;
-  block-size: 1.25rem;
-  border-radius: 0;
-  background: none;
+/*
+ * THE BANNER WEARS THE BRAND (founder, 14 November 2026, with a screenshot of
+ * another product's banner: "make VALLO own be like that should have that
+ * marked icon and our branding line vertical you know how you would make it
+ * lovely ... make it fucking attractive add some arts stuffs around it make
+ * it unique looking really good ... let our platform and the branding stands
+ * out").
+ *
+ * Three parts, and ONE colour decides all three. `--nf-toast-tone` is set
+ * once per tone below, and the rail, the plate and the glow all read it, so a
+ * new tone is one line and can never half-match itself.
+ *
+ *   THE RAIL   a vertical line down the leading edge, inset top and bottom so
+ *              it reads as a drawn line rather than a cut edge. This is the
+ *              "branding line vertical" he asked for, and it is what makes a
+ *              Vallo banner recognisable at a glance from across a room.
+ *   THE PLATE  the glyph on a tinted rounded square, as on his reference. It
+ *              was a bare glyph (the 7 November "no tile" ruling, R62), which
+ *              is what he is now asking to change; this note is here so the
+ *              next reader knows it was a decision and not a drift.
+ *   THE GLOW   one soft circle of the tone behind the plate, at low strength.
+ *              It is the "art" of it: the banner reads as lit from its own
+ *              mark rather than as a grey slab with a coloured dot. It is
+ *              NOT a gradient behind reading content (UX_SYSTEM 2): it sits
+ *              behind the glyph, at the leading edge, and the words are on
+ *              plain surface.
+ *
+ * Both themes get the same construction. The tone tokens already carry their
+ * own light and dark values, so nothing here is theme-specific.
+ */
+.nf-toast-host .nf-toast {
+  --nf-toast-tone: var(--nf-brand-primary);
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  /* Room for the rail AND for the ring that turns around a processing plate,
+     which reaches 3px outside it. Measured at 390: the rail ends at 7px and
+     the ring starts at 17px. */
+  padding-inline-start: calc(var(--nf-space-md) + var(--nf-space-2xs));
 }
-.nf-toast-host .nf-toast[data-tone="success"] .nf-toast__mark {
-  background: none;
-  color: var(--nf-state-success);
+.nf-toast-host .nf-toast[data-tone="success"] {
+  --nf-toast-tone: var(--nf-state-success);
 }
-.nf-toast-host .nf-toast[data-tone="error"] .nf-toast__mark {
-  background: none;
-  color: var(--nf-state-error);
+.nf-toast-host .nf-toast[data-tone="error"] {
+  --nf-toast-tone: var(--nf-state-error);
 }
-.nf-toast-host .nf-toast[data-tone="warning"] .nf-toast__mark {
-  background: none;
-  color: var(--nf-state-warning);
+.nf-toast-host .nf-toast[data-tone="warning"] {
+  --nf-toast-tone: var(--nf-state-warning);
 }
-.nf-toast-host .nf-toast[data-tone="info"] .nf-toast__mark,
-.nf-toast-host .nf-toast[data-tone="neutral"] .nf-toast__mark {
-  background: none;
-  color: var(--nf-brand-primary);
+.nf-toast-host .nf-toast[data-tone="info"] {
+  --nf-toast-tone: var(--nf-state-info);
+}
+.nf-toast-host .nf-toast[data-tone="processing"] {
+  --nf-toast-tone: var(--nf-brand-primary);
+}
+
+/* THE RAIL. */
+.nf-toast-host .nf-toast::before {
+  content: "";
+  position: absolute;
+  inset-block: var(--nf-space-2xs);
+  inset-inline-start: var(--nf-space-2xs);
+  inline-size: 3px;
+  border-radius: var(--nf-radius-pill);
+  background: var(--nf-toast-tone);
+  z-index: -1;
+}
+
+/* THE GLOW. Behind everything, clipped by the banner's own corner. */
+.nf-toast-host .nf-toast::after {
+  content: "";
+  position: absolute;
+  inset-block-start: -2.5rem;
+  inset-inline-start: -1.5rem;
+  inline-size: 7rem;
+  block-size: 7rem;
+  background: radial-gradient(
+    circle,
+    color-mix(in oklab, var(--nf-toast-tone) 26%, transparent) 0%,
+    transparent 70%
+  );
+  pointer-events: none;
+  z-index: -1;
+}
+
+/*
+ * THE PLATE. Written with `[data-tone]` in the selector deliberately:
+ * `overlays.css` and `details.css` each carry per-tone rules at that same
+ * weight which strip the plate back to a bare glyph (the 7 November ruling
+ * this one supersedes). Matching their weight lets import order decide, and
+ * grade1.css is imported last by design, as the note at the top of this file
+ * says. The alternative, editing three sheets, would leave the next reader
+ * with the rule in three places.
+ */
+.nf-toast-host .nf-toast[data-tone] .nf-toast__mark {
+  position: relative;
+  display: grid;
+  place-items: center;
+  inline-size: 1.75rem;
+  block-size: 1.75rem;
+  flex-shrink: 0;
+  border-radius: var(--nf-radius-sm);
+  background: color-mix(in oklab, var(--nf-toast-tone) 18%, transparent);
+  color: var(--nf-toast-tone);
+}
+
+/*
+ * UNDER WAY: a ring turns around the plate. One gap in the ring is what the
+ * eye reads as motion; a full ring turning looks still. `--nf-duration-*`
+ * tokens collapse under the Motion setting, so this is written in its own
+ * time and switched off below for reduced motion instead, where it becomes a
+ * complete quiet ring: the banner still says "under way" without moving.
+ */
+.nf-toast-host .nf-toast[data-tone="processing"] .nf-toast__mark::after {
+  content: "";
+  position: absolute;
+  inset: -3px;
+  border-radius: var(--nf-radius-md);
+  border: 2px solid color-mix(in oklab, var(--nf-toast-tone) 30%, transparent);
+  border-block-start-color: var(--nf-toast-tone);
+  animation: nf-toast-turn 1100ms linear infinite;
+}
+@keyframes nf-toast-turn {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .nf-toast-host .nf-toast[data-tone="processing"] .nf-toast__mark::after {
+    animation: none;
+    border-color: color-mix(in oklab, var(--nf-toast-tone) 45%, transparent);
+  }
 }
 /* 4.4: a person's face beside the message, for banners that name someone. */
 .nf-toast__avatar {
