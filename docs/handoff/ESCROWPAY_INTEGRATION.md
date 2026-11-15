@@ -125,7 +125,7 @@ with real HMACs), the `expired` state, and the automatic payout itself.
 
 After the bank releases a payment, the provider sends it to the lister's
 bank by itself. Vallo records that step from the provider's own word, on its
-own columns (pending SQL `protected_payout_to_lister_2026-11-15.sql`), never
+own columns (migration `20261115120000_protected_payout_to_lister.sql`), never
 as the payment's state:
 
 - the provider's `payout.created`, `payout.processing`, `payout.completed`,

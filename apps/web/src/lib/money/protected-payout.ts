@@ -14,8 +14,8 @@ import { providerReachable, type ProtectedRailDeps } from "./protected-provider"
  * straight on to the lister's own bank account. That last step is the
  * partner's, and Vallo records it only from the partner's own word: its
  * signed `payout.*` webhooks, or a read-back of its payouts when a webhook
- * was missed. It is kept on the payment record's own payout columns (pending
- * SQL protected_payout_to_lister_2026-11-15.sql), never as the payment's
+ * was missed. It is kept on the payment record's own payout columns (migration
+ * 20261115120000_protected_payout_to_lister.sql), never as the payment's
  * state: a released payment stays released whatever happens to the transfer
  * after it, and a payout that failed is a person's to follow up, with the
  * lister told.

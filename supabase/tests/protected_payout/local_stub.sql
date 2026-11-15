@@ -1,5 +1,5 @@
 -- A local stand-in for the parts of the live schema the payout SQL touches
--- (protected_payout_to_lister_2026-11-15.sql). Not the live database.
+-- (20261115120000_protected_payout_to_lister.sql). Not the live database.
 do $$ begin create role anon nologin; create role authenticated nologin; create role service_role nologin bypassrls; exception when duplicate_object then null; end $$;
 create schema if not exists private;
 create type public.notification_kind as enum ('booking','message','wallet','listing','agent','support','system','social');
