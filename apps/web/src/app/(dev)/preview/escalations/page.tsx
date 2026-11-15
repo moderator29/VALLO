@@ -8,6 +8,7 @@ import { EscalationRecordView } from "@/app/admin/escalations/EscalationRecordVi
 import { EscalationsDesk } from "@/app/admin/escalations/EscalationsDesk";
 import { NewEscalation } from "@/app/admin/escalations/NewEscalation";
 import { WaitingOnYou } from "@/app/admin/escalations/WaitingOnYou";
+import { NotSetUp } from "@/app/admin/escalations/parts";
 import { COUNTS, LIST_EMPTY, LIST_MIXED, LIST_NOT_SET_UP, PREVIEW_NOW, RECORD_RESOLVED, RECORD_WAITING, ROWS } from "./fixtures";
 
 /**
@@ -82,7 +83,7 @@ export default async function PreviewEscalations({ searchParams }: { searchParam
         name="Kemi Adeyemi"
         staff={{ isAdmin: false, isSuperAdmin: false, scopes: ["kyc_review"], position: "kyc_reviewer", handbookVersion: "v", handbookAcknowledged: true, consoleVerified: true }}
         escalationsWaiting={2}
-        escalate={<EscalateButton staffed={staffed} setUp={setUp} />}
+        escalate={<EscalateButton staffed={staffed} {...(setUp ? {} : { notSetUp: <NotSetUp /> })} />}
       >
         {menu}
         {body}
@@ -100,7 +101,7 @@ export default async function PreviewEscalations({ searchParams }: { searchParam
       searchLabel={t.admin.common.searchLabel}
       bellLabel={t.uiCommon.console.notifications}
       shell={t.admin.shell}
-      escalate={<EscalateButton compact staffed={staffed} setUp={setUp} />}
+      escalate={<EscalateButton compact staffed={staffed} {...(setUp ? {} : { notSetUp: <NotSetUp /> })} />}
       experience={{ palette: t.experienceAdmin.palette, deskLedes: t.experienceAdmin.deskLedes, waitingTotal: t.experienceAdmin.shell.waitingTotal }}
     >
       {menu}

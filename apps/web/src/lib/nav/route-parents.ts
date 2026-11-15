@@ -543,6 +543,8 @@ export const ROUTE_PARENTS: Readonly<Record<string, ParentRoute>> = {
   "/admin/arrangements": "/admin",
   "/admin/arrangements/[id]": "/admin/arrangements",
   /* Escalations for every admin desk (15 November 2026): the desk, one record, and the form as a page. */
+  /* The super admin's control room (15 November 2026). */
+  "/admin/control": "/admin",
   "/admin/escalations": "/admin",
   "/admin/escalations/[id]": "/admin/escalations",
   "/admin/escalations/new": "/admin/escalations",

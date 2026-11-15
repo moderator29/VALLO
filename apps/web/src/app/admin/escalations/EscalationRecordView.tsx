@@ -14,7 +14,7 @@ import {
 import { clockOf, eventWords, ownerWords, raisedByWords, statusWords, waitedWords } from "@/lib/admin/escalations/words";
 import { deskHref, deskName } from "./desk-name";
 import { EscalationActions } from "./EscalationActions";
-import { ReadState, SeverityBadge, StatusBadge } from "./parts";
+import { ClockWords, ReadState, SeverityBadge, StatusBadge } from "./parts";
 
 /**
  * ONE ESCALATION, AS A SHORT PLAIN-ENGLISH BRIEF: what happened, what is
@@ -80,9 +80,12 @@ export function EscalationRecordView({ read, now, locale }: { read: EscalationRe
       label: COPY.clock,
       testId: "escalation-record-clock",
       value: (
-        <span className={clock.overdue ? "font-semibold text-[var(--nf-state-error)]" : undefined}>
-          {closed ? waitedWords(record, now) : `${clock.words}, ${waitedWords(record, now)}`}
-          {closed ? "" : ` (answer by ${ui.when(record.dueAt)})`}
+        <span className="flex flex-wrap items-center gap-x-xs gap-y-2xs">
+          {closed ? null : <ClockWords words={clock.words} overdue={clock.overdue} />}
+          <span>
+            {waitedWords(record, now)}
+            {closed ? "" : `, answer by ${ui.when(record.dueAt)}`}
+          </span>
         </span>
       ),
     },

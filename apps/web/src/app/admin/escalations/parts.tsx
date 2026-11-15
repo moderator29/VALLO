@@ -36,6 +36,22 @@ export function StatusBadge({ status }: { status: EscalationStatus }) {
   return <Badge tone={STATUS_TONE[status]}>{STATUS_LABEL[status]}</Badge>;
 }
 
+/**
+ * The clock in words. An overdue one is a badge, so it is told apart by its
+ * shape and its word ("overdue by 3 hours") as well as its colour.
+ */
+export function ClockWords({ words, overdue, testId }: { words: string; overdue: boolean; testId?: string }) {
+  return overdue ? (
+    <span data-testid={testId} data-overdue="true">
+      <Badge tone="error">{words}</Badge>
+    </span>
+  ) : (
+    <span className="nf-caption font-semibold text-content" data-testid={testId} data-overdue="false">
+      {words}
+    </span>
+  );
+}
+
 export const STATE_COPY = {
   notSetUpTitle: "Escalations are not set up yet",
   notSetUpBody:

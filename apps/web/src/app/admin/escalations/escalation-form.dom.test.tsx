@@ -35,10 +35,12 @@ const FORM = `
   );
 `;
 
+/* The layout hands the "not set up yet" panel in as a node; a plain stand-in here. */
 const BUTTON = (setUp: boolean) => `
   import { EscalateButton } from "@/app/admin/_components/EscalateButton";
   import { mount } from "@/lib/testing/browser-root";
-  mount(<div style={{ padding: 16 }}><EscalateButton staffed={["finance", "coo"]} setUp={${setUp}} /></div>);
+  const notSetUp = ${setUp ? "undefined" : '<div data-testid="escalations-not-set-up">Escalations are not set up yet</div>'};
+  mount(<div style={{ padding: 16 }}><EscalateButton staffed={["finance", "coo"]} notSetUp={notSetUp} /></div>);
 `;
 
 const ACTIONS = `
@@ -58,6 +60,8 @@ const ACTIONS = `
 
 const RAISED = `async () => ({ ok: true, data: { id: "10000000-0000-4000-8000-000000000009", reference: "ESC-000123", routedTo: "coo", intended: "trust_safety", dueAt: null } })`;
 const ACTED = `async () => ({ ok: true, data: { status: "resolved", routedTo: "finance" } })`;
+
+const REFUSAL = "Link the record instead of pasting an ID or account number.";
 
 type Call = [string, Record<string, unknown>];
 const calls = (page: Page) => page.evaluate(() => (window as unknown as { __calls?: Call[] }).__calls ?? []);
@@ -112,14 +116,14 @@ describe.skipIf(!hasBrowser && !process.env.CI)("the escalation form", () => {
       expect(await page.getByTestId("escalation-send").isDisabled()).toBe(false);
       for (const text of ["Their NIN is 12345678901 and it failed.", "Refund account 0123456789 today please.", "The card 4084 0840 8408 4081 was charged."]) {
         await page.getByTestId("escalation-what-happened").fill(text);
-        expect(await page.getByTestId("escalation-number-refused").innerText(), text).toBe("Link the record instead of pasting an ID or account number.");
+        await page.getByText(REFUSAL).first().waitFor();
         expect(await page.getByTestId("escalation-send").isDisabled(), text).toBe(true);
         expect(await page.getByTestId("escalation-what-happened").getAttribute("aria-invalid"), text).toBe("true");
       }
       await page.getByTestId("escalation-what-happened").press("Enter");
       expect(await calls(page)).toEqual([]);
       await page.getByTestId("escalation-what-happened").fill("A member wrote a threat to a lister in a chat this morning.");
-      expect(await page.getByTestId("escalation-number-refused").count()).toBe(0);
+      expect(await page.getByTestId("escalation-what-happened").getAttribute("aria-invalid")).toBeNull();
       expect(await page.getByTestId("escalation-send").isDisabled()).toBe(false);
     } finally {
       await close();
@@ -281,7 +285,8 @@ describe.skipIf(!hasBrowser && !process.env.CI)("the actions on one escalation",
       expect(await send.isDisabled()).toBe(true);
       await page.getByTestId("escalation-act-body").fill("Refund sent to account 0123456789 today.");
       expect(await send.isDisabled()).toBe(true);
-      expect(await page.getByRole("alert").filter({ hasText: "Link the record" }).count()).toBeGreaterThan(0);
+      await page.getByText(REFUSAL).first().waitFor();
+      expect(await page.getByTestId("escalation-act-body").getAttribute("aria-invalid")).toBe("true");
       await page.getByTestId("escalation-act-body").fill("Both accounts are held while we look.");
       await send.click();
       await page.getByText("Resolved. The raiser has been told.").first().waitFor();

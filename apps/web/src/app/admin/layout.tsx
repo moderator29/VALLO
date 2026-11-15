@@ -36,6 +36,7 @@ import { PasscodeLayer } from "@/components/passcode/PasscodeLayer";
 import { CallLayerMount } from "@/components/calls/CallLayerMount";
 import { getEscalationCounts } from "@/lib/admin/escalations/read";
 import { EscalateButton } from "./_components/EscalateButton";
+import { NotSetUp as EscalationsNotSetUp } from "./escalations/parts";
 /* The console's stylesheet, loaded by the console alone (B-4): it left
    `globals.css`, where every page paid for it. */
 import "@/app/css/admin.css";
@@ -94,7 +95,7 @@ export default async function AdminLayout({ children }: { children: ReactNode })
         escalate={
           <EscalateButton
             staffed={escalations.state === "ok" ? escalations.data.staffed : null}
-            setUp={escalations.state !== "not_set_up"}
+            {...(escalations.state === "not_set_up" ? { notSetUp: <EscalationsNotSetUp /> } : {})}
           />
         }
       >
@@ -153,7 +154,7 @@ export default async function AdminLayout({ children }: { children: ReactNode })
         <EscalateButton
           compact
           staffed={escalations.state === "ok" ? escalations.data.staffed : null}
-          setUp={escalations.state !== "not_set_up"}
+          {...(escalations.state === "not_set_up" ? { notSetUp: <EscalationsNotSetUp /> } : {})}
         />
       }
       experience={{

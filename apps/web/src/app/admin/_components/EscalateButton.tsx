@@ -1,12 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { usePathname } from "next/navigation";
 import { Sheet } from "@/components/ui/Sheet";
 import { UiIcon } from "@/design-system/icons/UiIcon";
 import { safeRecordUrl } from "@/lib/admin/escalations/types";
 import { EscalationForm } from "../escalations/EscalationForm";
-import { NotSetUp } from "../escalations/parts";
 
 /**
  * ESCALATE, ON EVERY ADMIN PAGE. Placed once, in the console shell (the
@@ -20,7 +19,10 @@ import { NotSetUp } from "../escalations/parts";
  * member has to be typed. The overview has no record to attach.
  *
  * Before the SQL has run the sheet says "not set up yet" instead of offering
- * a form that cannot send.
+ * a form that cannot send. That panel is handed in by the layout as a node
+ * (`notSetUp`), not imported here: it is drawn from the console's shared
+ * panels, which read the whole dictionary, and this file ships to the
+ * browser on every admin page (`app/client-import-graph.test.ts`).
  */
 export const ESCALATE_COPY = {
   button: "Escalate",
@@ -32,13 +34,13 @@ export const ESCALATE_COPY = {
 
 export function EscalateButton({
   staffed,
-  setUp = true,
+  notSetUp,
   compact = false,
 }: {
   /** Routes that have somebody on them; null when it could not be read. */
   staffed: readonly string[] | null;
-  /** False until the escalations SQL has run. */
-  setUp?: boolean;
+  /** The "not set up yet" panel, given only until the escalations SQL has run. */
+  notSetUp?: ReactNode;
   /** The operator's bar on a phone has room for the glyph only. */
   compact?: boolean;
 }) {
@@ -79,7 +81,7 @@ export function EscalateButton({
         testId="escalate-sheet"
       >
         <div className="min-w-0">
-          {setUp ? (
+          {notSetUp ?? (
             <EscalationForm
               key={source}
               sourcePath={source}
@@ -88,8 +90,6 @@ export function EscalateButton({
               staffed={staffed}
               onDone={() => setOpen(false)}
             />
-          ) : (
-            <NotSetUp />
           )}
         </div>
       </Sheet>

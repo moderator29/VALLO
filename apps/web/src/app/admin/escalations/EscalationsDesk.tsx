@@ -6,7 +6,7 @@ import type { EscalationListData, EscalationRead } from "@/lib/admin/escalations
 import { CATEGORY_LABEL, isClosed, type EscalationRow, type EscalationView } from "@/lib/admin/escalations/types";
 import { clockOf, raisedByWords, waitedWords } from "@/lib/admin/escalations/words";
 import { deskName } from "./desk-name";
-import { ReadState, SeverityBadge, StatusBadge } from "./parts";
+import { ClockWords, ReadState, SeverityBadge, StatusBadge } from "./parts";
 
 /**
  * THE ESCALATIONS DESK: what waits on me, what I raised, and (the COO and the
@@ -88,7 +88,7 @@ export function EscalationsDesk({
         title={COPY.panel[view]}
         id="escalations-list"
         flush={rows.length > 0}
-        action={overdue > 0 ? <span className="nf-caption font-semibold text-[var(--nf-state-error)]" data-testid="escalations-overdue-count">{`${overdue} ${COPY.overdueCount}`}</span> : undefined}
+        action={overdue > 0 ? <ClockWords words={`${overdue} ${COPY.overdueCount}`} overdue testId="escalations-overdue-count" /> : undefined}
       >
         {read.state !== "ok" ? (
           <ReadState state={read.state} what={COPY.title} locale={locale} />
@@ -136,12 +136,7 @@ export function EscalationListRow({ row, now, when }: { row: EscalationRow; now:
         </span>
         {/* A closed one has no clock: its badge already says how it ended. */}
         {isClosed(row.status) ? null : (
-          <span
-            className={`nf-caption font-semibold ${clock.overdue ? "text-[var(--nf-state-error)]" : "text-content"}`}
-            data-testid="escalation-clock"
-          >
-            {clock.words}
-          </span>
+          <ClockWords words={clock.words} overdue={clock.overdue} testId="escalation-clock" />
         )}
       </span>
     </li>

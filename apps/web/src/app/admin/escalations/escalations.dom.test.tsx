@@ -161,7 +161,7 @@ describe("one escalation", () => {
     expect(text).toContain("Open: Identity check for a member");
     expect(text).toContain("Kemi raised this from the Verification desk.");
     expect(text).toContain("Trust and Safety. Nobody has taken it yet.");
-    expect(text).toContain("due in 2 hours, waiting 5 hours");
+    expect(text).toContain("due in 2 hours waiting 5 hours, answer by");
     expect(text).toContain("High: answered within 4 hours");
   });
 

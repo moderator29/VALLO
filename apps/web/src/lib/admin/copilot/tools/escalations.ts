@@ -98,7 +98,7 @@ export const getEscalations = defineTool({
       ok: true,
       data: {
         waitingOnYou: waiting
-          ? { total: waiting.length, overdue: waiting.filter((w) => w.overdue).length, ...capList(waiting, limit) }
+          ? { overdue: waiting.filter((w) => w.overdue).length, ...capList(waiting, limit) }
           : null,
         raisedByYou:
           raised && raisedOpen

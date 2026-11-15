@@ -5,7 +5,7 @@ import { Panel, PanelEmpty, PanelLink } from "../_components/panels";
 import type { EscalationListData, EscalationRead } from "@/lib/admin/escalations/read";
 import { clockOf, raisedByWords } from "@/lib/admin/escalations/words";
 import { deskName } from "./desk-name";
-import { ReadState, SeverityBadge } from "./parts";
+import { ClockWords, ReadState, SeverityBadge } from "./parts";
 
 /**
  * "WAITING ON YOU": the card on the console overview (the super admin and the
@@ -69,7 +69,7 @@ export function WaitingOnYou({
                     </span>
                     <span className="flex shrink-0 flex-col items-start gap-2xs sm:items-end">
                       <SeverityBadge severity={row.severity} />
-                      <span className={`nf-caption font-semibold ${clock.overdue ? "text-[var(--nf-state-error)]" : "text-content"}`}>{clock.words}</span>
+                      <ClockWords words={clock.words} overdue={clock.overdue} />
                     </span>
                   </li>
                 );

@@ -38,7 +38,9 @@ import { useSafeTransition } from "@/lib/ui/use-safe-transition";
  * with a way to send it somewhere else. The page it was raised from travels
  * as a link ("Attached: this page"), so nobody has to paste an ID number, a
  * bank detail or a document, and the form refuses a long run of digits
- * before anything is sent. The server checks every one of these again.
+ * before anything is sent: the field is marked, the banner says why
+ * (`FieldProblem`, the console's one way of saying a problem) and Send stays
+ * off. The server checks every one of these again.
  */
 export const FORM_COPY = {
   category: "What kind of issue is it?",
@@ -286,11 +288,6 @@ export function EscalationForm({ sourcePath, recordUrl, recordLabel, initialCate
         <p className="nf-caption" data-testid="escalation-no-paste">
           {FORM_COPY.noPaste}
         </p>
-        {hasNumber ? (
-          <p className="nf-body-sm font-semibold text-[var(--nf-state-error)]" role="alert" data-testid="escalation-number-refused">
-            {PERSONAL_NUMBER_REFUSAL}
-          </p>
-        ) : null}
         {NO_TIP_OFF_CATEGORIES.includes(category) ? (
           <p className="nf-body-sm font-semibold text-content" data-testid="escalation-no-tip-off">
             {FORM_COPY.noTipOff}

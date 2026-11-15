@@ -16,7 +16,14 @@
     "src/app/(dev)/preview/escalations/**/*.ts",
     "src/app/(dev)/preview/escalations/**/*.tsx",
     "src/lib/email/escalation-messages.ts",
-    "src/lib/notify/templates.ts"
+    "src/lib/notify/templates.ts",
+    "src/lib/cron/jobs/escalations-overdue.ts",
+    "src/app/api/cron/escalations-overdue/route.ts",
+    "src/lib/admin/copilot/tools/escalations.ts",
+    "src/lib/admin/copilot/tools/registry.ts",
+    "src/app/admin/manual/_chapters/escalation.tsx",
+    "src/lib/cron/jobs/escalations-overdue.test.ts",
+    "src/lib/admin/copilot/tools/escalations.test.ts"
   ],
   "exclude": ["node_modules"]
 }

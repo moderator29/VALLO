@@ -216,11 +216,6 @@ export function EscalationActions({
             </label>
           )}
           <p className="nf-caption">{spec.hint}</p>
-          {hasNumber ? (
-            <p className="nf-body-sm font-semibold text-[var(--nf-state-error)]" role="alert">
-              {PERSONAL_NUMBER_REFUSAL}
-            </p>
-          ) : null}
           <div className="flex flex-wrap gap-xs">
             <Button type="submit" variant={spec.danger ? "danger" : "primary"} size="sm" loading={pending} disabled={!ready} data-testid="escalation-act-send">
               {spec.send}

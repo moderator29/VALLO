@@ -285,6 +285,12 @@ export const ADMIN_SETTINGS: AdminDestination = {
   icon: ui("settings-gear"),
   label: "Settings",
   children: [
+    /* The control room (15 November 2026): the super admin's own page (what
+       is waiting, which database files are in, the main switches, the
+       services set up). The rail cannot hide a row by role, so it is listed
+       here for every operator and the page itself refuses anyone who is not
+       a super admin (`readControlRoom`), as the Staff desk does. */
+    { key: "control", href: "/admin/control", icon: ui("sliders"), label: "Control room" },
     { key: "switches", href: "/admin/switches", icon: ui("key"), label: "Switches" },
     { key: "reference", href: "/admin/reference", icon: ui("grid"), label: "Reference data" },
     { key: "examples", href: "/admin/examples", icon: ui("building-apartment"), label: "Examples" },
@@ -376,7 +382,7 @@ export const ADMIN_GROUPS: AdminGroup[] = [
   },
   { key: "g-intelligence", label: "Intelligence", icon: glyph("bars"), sections: [{ key: "intelligence", label: null, items: pick("analytics", "listing-analytics", "front-door", "field-speed", "trust", "account-deletions", "audit") }] },
   { key: "g-knowledge", label: "Knowledge Centre", icon: ui("document"), sections: [{ key: "knowledge", label: null, items: pick("handbook", "manual", "doc-feedback") }] },
-  { key: "g-settings", label: "Settings", icon: ui("settings-gear"), sections: [{ key: "settings", label: null, items: pick("settings", "switches", "reference", "examples", "help") }] },
+  { key: "g-settings", label: "Settings", icon: ui("settings-gear"), sections: [{ key: "settings", label: null, items: pick("settings", "control", "switches", "reference", "examples", "help") }] },
 ];
 
 /** The destinations a group holds, in order. */
