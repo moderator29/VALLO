@@ -222,7 +222,7 @@ describe("testers are exempt at every gate", () => {
   it("the decision asks the QA question before the first-of-its-kind count", async () => {
     const prior = vi.fn(async () => 0);
     const verdict = await decidePhoneGate(
-      { flagOn: async () => true, confirmed: async () => false, qa: async () => true, prior },
+      { flagOn: async () => true, confirmed: async () => false, qa: async () => true, abroadWaived: async () => false, prior },
       QA_MEMBER,
       "payment",
     );
