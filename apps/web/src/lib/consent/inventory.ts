@@ -126,6 +126,7 @@ export const STORAGE_INVENTORY: readonly StorageItem[] = [
   { id: "read", name: "nf_messages_read", kind: "localStorage", category: "necessary", purpose: "Which messages you have read on this device.", lifetime: DEVICE },
   { id: "rail", name: "nf-rail-collapsed", kind: "localStorage", category: "necessary", purpose: "Whether you folded the side menu.", lifetime: DEVICE },
   { id: "side-flip", name: "nf_side_flipped", kind: "localStorage", category: "necessary", purpose: "Remembers you tried switching sides, so the hint is not repeated.", lifetime: DEVICE },
+  { id: "save-education", name: "vallo.saved.education.v1", kind: "localStorage", category: "necessary", purpose: "Remembers you saw the first-save tip, so it is not repeated.", lifetime: DEVICE },
   { id: "offline-caches", name: "vallo-*", kind: "cache", category: "necessary", purpose: "Pages and images saved by the service worker so Vallo opens on a weak connection, and the offline outbox.", lifetime: "Until Vallo updates, or you clear site data" },
   /* ----------------------------------------------------------- preferences */
   { id: "recent-searches", name: "nf_recent_searches", kind: "localStorage", category: "preferences", purpose: "Your last few searches, as shortcuts.", lifetime: DEVICE },

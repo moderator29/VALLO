@@ -70,14 +70,13 @@ export function PostEditor({
         if (changed && !pending) save();
       }}
     >
-      <textarea
+      <textarea autoCapitalize="sentences" enterKeyHint="enter"
         className="nf-field min-h-[92px] w-full resize-y text-[length:var(--nf-text-body)] leading-[1.5]"
         value={body}
         maxLength={POST_MAX}
         autoFocus
         aria-label="Change what you wrote"
         onChange={(event) => setBody(event.target.value)}
-        autoCapitalize="sentences"
       />
 
       <p className="mt-xs text-[length:var(--nf-text-overline)] leading-relaxed text-[var(--nf-content-muted)]">

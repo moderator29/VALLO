@@ -176,14 +176,13 @@ export function RoomRequestAnswer({
           >
             <label className="grid gap-2xs">
               <span className="nf-caption">{words.why}</span>
-              <textarea
+              <textarea autoCapitalize="sentences" enterKeyHint="enter"
                 className="nf-field"
                 rows={2}
                 maxLength={500}
                 value={reason}
                 onChange={(event) => setReason(event.target.value)}
                 disabled={pending}
-                autoCapitalize="sentences"
               />
             </label>
           </ConfirmPanel>

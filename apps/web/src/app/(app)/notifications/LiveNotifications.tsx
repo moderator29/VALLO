@@ -93,6 +93,12 @@ type Copy = Dictionary["experienceInbox"]["notifications"];
 type Entry = { row: NotificationItem; verdict: SeverityVerdict };
 
 /** Where a row goes when it is tapped: its conversation, else its full view. */
+/** What the filter row can be on: everything, only the unread, or one family. */
+type FilterKey = NotificationFamily | "all" | "unread";
+
+/* English only for now: the dictionary has no words for an empty Unread view. */
+const UNREAD_EMPTY = { title: "Nothing unread", body: "You have read everything here." };
+
 function rowHref(n: NotificationItem, family: NotificationFamily): string {
   if (family === "messages" && n.href) return n.href;
   return `/notifications/${n.id}`;
@@ -128,10 +134,7 @@ export function LiveNotifications({
   const [items, setItems] = useState<NotificationItem[]>(initial);
   const [more, setMore] = useState(initialMore);
   const [loadingOlder, setLoadingOlder] = useState(false);
-  /* The pick: everything, only what is unread, or one family (the founder's
-     count tab row, 14 November 2026). Unread is a filter over every family,
-     the same word the inbox uses. */
-  const [family, setFamily] = useState<NotificationFamily | "all" | "unread">("all");
+  const [family, setFamily] = useState<FilterKey>("all");
 
   /* Rows this screen archived, so a server read that was already on its way
      cannot bring one back (`adoptFresh`). */
@@ -379,22 +382,27 @@ export function LiveNotifications({
   const nowMs = now > 0 ? now : undefined;
   const days = splitByDay(sectioned.earlier, (e) => e.row.createdAt);
 
-  /* The founder's count tab row (14 November 2026): All, Unread, then one tab
-     per family, each carrying its waiting count. The counts come from the
-     rows already on screen, never a new read. */
+  /* The filter as the shared count tabs (handoff 6.3): All, Unread while
+     something is unread (or while it is the view), then one tab per family.
+     Every count is the unread rows already in `items`; nothing is fetched. */
+  const filterKeys: FilterKey[] = [
+    "all",
+    ...(unreadCount > 0 || family === "unread" ? (["unread"] as const) : []),
+    ...FAMILY_ORDER,
+  ];
   const chips = (
-    <CountTabs
+    <CountTabs<FilterKey>
       label={c.filterLabel}
-      bleed
       className="nf-notif__chips"
-      active={family}
-      onChange={(key) => setFamily(key as NotificationFamily | "all" | "unread")}
-      items={(["all", "unread", ...FAMILY_ORDER] as const).map((key) => ({
+      bleed
+      value={family}
+      onChange={setFamily}
+      countLabel={(n) => `${n} ${c.unreadMark.toLowerCase()}`}
+      items={filterKeys.map((key) => ({
         key,
         label: key === "unread" ? c.unreadMark : c.families[key],
-        ...(key === "unread" && unreadCount > 0 ? { count: unreadCount } : {}),
-        ...(key !== "all" && key !== "unread" && unreadBy[key] > 0 ? { count: unreadBy[key] } : {}),
-        "data-testid": `notifications-filter-${key}`,
+        count: key === "all" ? 0 : key === "unread" ? unreadCount : unreadBy[key],
+        testId: `notifications-filter-${key}`,
       }))}
     />
   );
@@ -413,10 +421,8 @@ export function LiveNotifications({
       {shown.length === 0 ? (
         <EmptyState
           icon="bell-badge"
-          /* An empty Unread pick is the good news itself, not a family with
-             nothing under it. */
-          title={family === "unread" ? c.empty.title : fill(c.emptyFamily.title, { family: c.families[family as NotificationFamily | "all"] })}
-          body={family === "unread" ? c.empty.body : c.emptyFamily.body}
+          title={family === "unread" ? UNREAD_EMPTY.title : fill(c.emptyFamily.title, { family: c.families[family] })}
+          body={family === "unread" ? UNREAD_EMPTY.body : c.emptyFamily.body}
           action={
             <Button variant="secondary" onClick={() => setFamily("all")}>
               {c.emptyFamily.action}

@@ -39,7 +39,9 @@ export function paystackSeam(): AnyFiatProvider {
  * environment stop needs no database). Any error is false.
  */
 export async function escrowRailLive(): Promise<boolean> {
-  if (escrowPayConfig(process.env) === null) return false;
+  const config = escrowPayConfig(process.env);
+  /* A test key on the production deployment records and reads, and is never offered to a member as protection. */
+  if (config === null || !config.startsMoney) return false;
   return protectedPaySwitchOn();
 }
 

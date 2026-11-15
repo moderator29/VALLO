@@ -1,10 +1,9 @@
 /**
- * THE CARD'S COUNT LINE (listing stats, founder, 13 November 2026), on the
- * real search card at 390 in Chromium: "1.2k views  24 saves" under the facts
- * as its own quiet line; the facts row keeps the height it had without it (it
- * never wraps the facts); views below ten and a zero draw nothing; an example
- * draws nothing whatever its figures; a compact figure keeps its whole number
- * for a screen reader.
+ * THE CARD'S SIGNAL LINE (founder, 14 November 2026), on the real search card
+ * at 390 in Chromium: one small star and the rating at the start, views only
+ * as a small eye glyph with a bare figure at the end. Saves and shares appear
+ * only on the listing page. A reviewed listing shows its average and review
+ * count; an unreviewed one shows 2.5 with "New".
  */
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import { BROWSER_TEST_TIMEOUT, closeBrowser, hasBrowser, mountInBrowser, warmBrowser } from "@/lib/testing/mount-in-browser";
@@ -29,34 +28,62 @@ const ENTRY = `
   const card = (id, listing, extra = {}) => <div id={id}><ListingCard listing={listing} locale="en" t={cardCopy} layout="row" brief {...extra} /></div>;
   mount(
     <div style={{ width: 358 }}>
-      {card("counts", { ...REAL, stats: { views: 1234, saves: 24 } })}
+      {card("counts", { ...REAL, rating: 4.6, reviewCount: 12, stats: { views: 1234, saves: 24, shares: 7 } })}
       {card("plain", REAL)}
-      {card("few", { ...REAL, stats: { views: 9, saves: 0 } })}
-      {card("saves", { ...REAL, stats: { views: 9, saves: 1 } })}
-      {card("demo", { ...REAL, isDemo: true, stats: { views: 1234, saves: 24 } })}
+      {card("zero", { ...REAL, stats: { views: 0, saves: 0 } })}
+      {card("saves", { ...REAL, stats: { views: 0, saves: 1 } })}
+      {card("demo", { ...REAL, isDemo: true, stats: { views: 3, saves: 0 } })}
       <div id="home"><HomeListingCard listing={{ ...REAL, stats: { views: 40, saves: 2 } }} locale="en" copy={homeCardCopyOf(t)} layout="card" /></div>
     </div>,
   );
 `;
 
-describe.skipIf(!hasBrowser && !process.env.CI)("the count line on a card", () => {
-  it("draws the counts under the facts without moving them, and nothing where nothing is honest", async () => {
+describe.skipIf(!hasBrowser && !process.env.CI)("the signal line on a card", () => {
+  it("draws the rating and views under the facts without moving them, never saves or shares", async () => {
     const { page, close } = await mountInBrowser({
       entry: ENTRY,
-      css: productCss("app/css/base.css", "app/css/catalogue.css", "app/css/space-card.css"),
+      css: productCss("app/css/base.css", "app/css/symbols.css", "app/css/controls.css", "app/css/catalogue.css", "app/css/space-card.css"),
     });
     try {
       const counts = (id: string) => page.locator(`#${id} [data-testid="card-counts"]`);
       await counts("counts").waitFor();
-      expect(await counts("counts").locator("[data-stat]").evaluateAll((els) => els.map((el) => el.getAttribute("data-stat")))).toEqual(["views", "saves"]);
-      const visible = (id: string) => page.locator(`#${id} [data-testid="card-counts"] [data-stat] > span:not(.sr-only)`).allInnerTexts();
-      expect(await visible("counts")).toEqual(["1.2k views", "24 saves"]);
-      expect(await counts("counts").locator(".sr-only").allTextContents()).toEqual(["1,234 views"]);
-      expect(await counts("plain").count()).toBe(0);
-      expect(await counts("few").count()).toBe(0);
-      expect(await counts("saves").innerText()).toBe("1 save");
-      expect(await counts("demo").count()).toBe(0);
-      expect(await visible("home")).toEqual(["40 views", "2 saves"]);
+      const keys = (id: string) => counts(id).locator("[data-stat]").evaluateAll((els) => els.map((el) => el.getAttribute("data-stat")));
+      const seen = (id: string) => counts(id).locator('span[aria-hidden="true"]').allInnerTexts();
+      const heard = (id: string) => counts(id).locator(".sr-only").allTextContents();
+      /* One star, never a row of five, and small glyphs: 12px each. */
+      const glyphs = (id: string) => counts(id).locator("svg").evaluateAll((els) => els.map((el) => Math.round(el.getBoundingClientRect().width)));
+
+      /* Reviewed: its own average, how many reviews, then views only. */
+      expect(await keys("counts")).toEqual(["rating", "views"]);
+      expect(await seen("counts")).toEqual(["4.6", "(12)", "1.2k"]);
+      expect((await heard("counts")).map((x) => x.trim())).toEqual(["Rated 4.6 out of 5, 12 reviews.", "1,234 views."]);
+      expect(await glyphs("counts")).toEqual([12, 12]);
+      /* Two ends: the rating starts the row, views end it. */
+      const ends = await counts("counts").evaluate((el) => {
+        const row = el.getBoundingClientRect();
+        const rating = el.querySelector('[data-stat="rating"]')!.getBoundingClientRect();
+        const last = el.querySelector('[data-stat="views"]')!.getBoundingClientRect();
+        return [Math.round(rating.left - row.left), Math.round(row.right - last.right)];
+      });
+      expect(ends).toEqual([0, 0]);
+      expect(await counts("counts").locator('[data-stat="rating"]').getAttribute("data-rated")).toBe("true");
+
+      /* Nobody has reviewed it: the 2.5 every listing starts at, said to be so. */
+      expect(await keys("plain")).toEqual(["rating"]);
+      expect(await seen("plain")).toEqual(["2.5", "New"]);
+      expect((await heard("plain"))[0]).toContain("Not yet rated");
+      expect(await glyphs("plain")).toEqual([12]);
+      expect(await counts("plain").locator('[data-stat="rating"]').getAttribute("data-rated")).toBe("false");
+      /* Never a zero; saves only on the listing page. */
+      expect(await keys("zero")).toEqual(["rating"]);
+      expect(await keys("saves")).toEqual(["rating"]);
+      expect(await keys("demo")).toEqual(["rating", "views"]);
+      expect(await seen("demo")).toEqual(["2.5", "New", "3"]);
+      expect(await seen("home")).toEqual(["2.5", "New", "40"]);
+      /* One line at 390, on both cards. */
+      for (const id of ["counts", "home"]) {
+        expect(await counts(id).evaluate((el) => el.getBoundingClientRect().height), id).toBeLessThan(30);
+      }
 
       /* The facts row is the same height with the counts as without them. */
       const factsHeight = (id: string) => page.locator(`#${id} [data-testid="card-facts"]`).evaluate((el) => el.getBoundingClientRect().height);

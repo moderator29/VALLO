@@ -1,5 +1,6 @@
 "use client";
 
+import { PasteCodeButton } from "@/components/ui/PasteCodeButton";
 import { useRef, useState } from "react";
 
 import { Button } from "@/components/ui/Button";
@@ -63,6 +64,10 @@ export function EmailCheck({ schools }: { schools: School[] }) {
             {...field("code")}
             onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
           />
+          {/* Paste the emailed code in one tap (14 November 2026). */}
+          <div className="nf-paste-code__row">
+            <PasteCodeButton length={6} onCode={(pasted) => setCode(pasted.replace(/\D/g, "").slice(0, 6))} />
+          </div>
           <FieldProblem id="rm-ve-code-problem" message={problems.code} />
         </div>
         <div className="nf-rmb-actions">

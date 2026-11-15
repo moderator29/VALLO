@@ -25,7 +25,7 @@ const plugin = read("src/lib/native/shell-plugin.ts");
 const javaPlugin = read("android/app/src/main/java/com/vallospaces/app/ValloShellPlugin.java");
 const activity = read("android/app/src/main/java/com/vallospaces/app/MainActivity.java");
 
-const METHODS = ["setPrivacyCover", "takeCrashReport", "handoff", "notePath"];
+const METHODS = ["setPrivacyCover", "takeCrashReport", "handoff", "notePath", "pageOpens"];
 
 describe("the app switcher cover: which screens are private", () => {
   it("covers money, the passcode and identity screens", () => {
@@ -101,9 +101,10 @@ describe("iOS: the shell is wired into the project", () => {
     expect(sources).toContain("ValloShell.swift in Sources");
   });
 
-  it("the scene uses Vallo's controller, shows the launch mark and covers on resign", () => {
+  it("the scene uses Vallo's controller, draws no opening of its own and covers on resign", () => {
     expect(scene).toContain("rootViewController = ValloBridgeViewController()");
-    expect(scene).toContain("LaunchMark.shared.show(in: window)");
+    expect(scene).not.toContain("LaunchMark.shared.show(");
+    expect(activity).not.toContain("LaunchMark.show(");
     expect(scene).toMatch(/func sceneWillResignActive[\s\S]*?PrivacyCover\.shared\.show/);
     expect(scene).toMatch(/func sceneDidBecomeActive[\s\S]*?PrivacyCover\.shared\.hide/);
     expect(delegate).toContain("ValloCrashLog.install()");

@@ -1,8 +1,9 @@
 import { getDictionary, type Locale } from "@vallo/i18n";
 import { listingStatsEn } from "@vallo/i18n/en/listing-stats";
 import { getLocale } from "@/lib/locale";
-import { ListingStatsRow } from "@/components/app/listing/ListingStatsRow";
-import { listingStatItems } from "@/lib/listings/stats/format";
+import { ListingPulse } from "@/components/app/listing/ListingPulse";
+import { daysLive, listingPulse, timeOnVallo } from "@/lib/listings/stats/format";
+import { shownRating } from "@/lib/listings/stats/rating";
 import { ListingStatsDesk } from "@/app/admin/analytics/listings/ListingStatsDesk";
 import { PageHead, ReadOnlyNote } from "@/app/admin/_components/panels";
 import { ListingsWorkspace } from "@/app/agent/listings/ListingsWorkspace";
@@ -14,18 +15,18 @@ import { ListingCard } from "@/components/app/ListingCard";
 import { HomeListingCard } from "@/components/app/home/HomeListingCard";
 import { homeCardCopyOf } from "@/components/app/home/home-card-copy";
 import { forListingCard } from "@/lib/i18n/slice";
-import { RENTAL, SHELF } from "../f3/fixtures";
+import { SHELF } from "../f3/fixtures";
 import "@/app/css/space-card.css";
 
 /**
  * LISTING STATS, FROM FIXTURES (founder, 13 November 2026). Real components,
  * invented figures; nothing here reads a database.
  *
- *   ?v=row     the row under a listing's description, in five states
+ *   ?v=row     the pulse under a listing's description, in seven states
  *   ?v=admin   Analytics > Listings in the console frame (&range=7d|30d|90d)
  *   ?v=empty   the desk before anything is counted, and before the SQL
  *   ?v=agent   the lister's own rows with their figures
- *   ?v=cards   the count line on the search card and the home card
+ *   ?v=cards   the signal line (rating, views, saves) on the search card and the home card
  */
 export const dynamic = "force-dynamic";
 
@@ -112,32 +113,31 @@ export default async function ListingStatsPreview({ searchParams }: { searchPara
   }
 
   if (v === "cards") {
-    const counts = [
-      { views: 1234, saves: 24 },
-      { views: 40, saves: 2 },
-      { views: 9, saves: 1 },
-      { views: 9, saves: 0 },
-    ];
-    const cards = SHELF.slice(0, 4).map((listing, i) => ({ ...listing, isDemo: false, stats: counts[i]! }));
+    const cards = [
+      { stats: { views: 1234, saves: 24, shares: 7 }, rating: 4.6, reviewCount: 12, isDemo: false },
+      { stats: { views: 40, saves: 2, shares: 0 }, rating: 0, reviewCount: 0, isDemo: false },
+      { stats: { views: 3, saves: 0, shares: 0 }, rating: 0, reviewCount: 0, isDemo: true },
+      { stats: undefined, rating: 0, reviewCount: 0, isDemo: true },
+    ].map((over, i) => ({ ...SHELF[i]!, ...over }));
     const copy = homeCardCopyOf(t);
     const cardCopy = forListingCard(t);
     return (
       <main className="nf-shell mx-auto max-w-3xl py-section">
-        <h1 className="nf-h2">Count line on the cards</h1>
-        <p className="nf-caption mt-xs">1.2k views and 24 saves; 40 views and 2 saves; 1 save (views under ten say nothing); nothing (no saves, nine views); and an example with figures, which draws none.</p>
+        <h1 className="nf-h2">The signal line on the cards</h1>
+        <p className="nf-caption mt-xs">
+          Reviewed (4.6 from 12 reviews) with 1.2k views and 24 saves; not yet rated (2.5, New) with 40 views and 2 saves; an
+          example with 3 views; an example before anything is counted (the rating alone).
+        </p>
         <ul className="mt-lg grid gap-md" data-testid="search-cards">
           {cards.map((listing, i) => (
             <li key={listing.id}>
               <ListingCard listing={listing} locale={locale} t={cardCopy} layout="row" brief index={i} />
             </li>
           ))}
-          <li>
-            <ListingCard listing={{ ...RENTAL, isDemo: true, stats: { views: 1234, saves: 24 } }} locale={locale} t={cardCopy} layout="row" brief index={4} />
-          </li>
         </ul>
         <h2 className="nf-h3 mt-lg">Home cards</h2>
         <ul className="mt-sm grid gap-md sm:grid-cols-2" data-testid="home-cards">
-          {cards.slice(0, 2).map((listing) => (
+          {cards.map((listing) => (
             <li key={listing.id}>
               <HomeListingCard listing={listing} locale={locale} copy={copy} layout="card" />
             </li>
@@ -160,32 +160,38 @@ export default async function ListingStatsPreview({ searchParams }: { searchPara
     );
   }
 
-  const states: { name: string; publishedAt: string; views: number; saves: number; demo?: boolean }[] = [
-    { name: "Listed today, nobody has looked yet", publishedAt: daysAgo(0), views: 0, saves: 0 },
-    { name: "Twelve days live", publishedAt: daysAgo(12), views: 340, saves: 18 },
-    { name: "One view, one save", publishedAt: daysAgo(1), views: 1, saves: 1 },
-    { name: "Four months live, compact figures", publishedAt: daysAgo(130), views: 12_480, saves: 1_999 },
-    { name: "An example listing: no row at all", publishedAt: daysAgo(30), views: 50, saves: 3, demo: true },
+  const states: { name: string; publishedAt: string; figures: { views: number; saves: number; shares?: number } | null; rating?: number; reviews?: number; demo?: boolean }[] = [
+    { name: "Listed today, nobody has looked yet", publishedAt: daysAgo(0), figures: { views: 0, saves: 0, shares: 0 } },
+    { name: "Twelve days live, reviewed", publishedAt: daysAgo(12), figures: { views: 340, saves: 18, shares: 7 }, rating: 4.6, reviews: 12 },
+    { name: "One of each", publishedAt: daysAgo(1), figures: { views: 1, saves: 1, shares: 1 } },
+    { name: "Four months live, compact figures", publishedAt: daysAgo(130), figures: { views: 12_480, saves: 1_999, shares: 1_204 }, rating: 3.5, reviews: 240 },
+    { name: "An example listing: its counts, no time on Vallo", publishedAt: daysAgo(30), figures: { views: 50, saves: 3, shares: 2 }, demo: true },
+    { name: "Before the shares SQL: views and saves only", publishedAt: daysAgo(4), figures: { views: 22, saves: 4 } },
+    { name: "The read failed: the rating alone", publishedAt: daysAgo(4), figures: null },
   ];
   return (
     <main className="nf-shell mx-auto max-w-3xl py-section">
-      <h1 className="nf-h2">Listing stats row</h1>
+      <h1 className="nf-h2">Listing pulse</h1>
       <div className="mt-lg grid gap-lg">
-        {states.map((s) => (
-          <section key={s.name} className="nf-panel nf-panel--card p-card" data-state={s.name}>
-            <p className="nf-overline text-[var(--nf-content-muted)]">{s.name}</p>
-            <h2 className="nf-h3 mt-xs">{t.catalogue.detail.description}</h2>
-            <p className="mt-xs text-[var(--nf-content-secondary)]">
-              A bright two bedroom flat on a quiet street, five minutes from the bus stop. Prepaid meter, borehole water and a
-              shared generator for the compound.
-            </p>
-            <ListingStatsRow
-              className="mt-sm"
-              label={listingStatsEn.rowLabel}
-              items={listingStatItems({ isDemo: Boolean(s.demo), publishedAt: s.publishedAt, figures: { views: s.views, saves: s.saves }, now: NOW, locale })}
-            />
-          </section>
-        ))}
+        {states.map((s) => {
+          const days = s.demo || !s.figures ? null : daysLive(s.publishedAt, NOW);
+          return (
+            <section key={s.name} className="nf-panel nf-panel--card p-card" data-state={s.name}>
+              <p className="nf-overline text-[var(--nf-content-muted)]">{s.name}</p>
+              <h2 className="nf-h3 mt-xs">{t.catalogue.detail.description}</h2>
+              <p className="mt-xs text-[var(--nf-content-secondary)]">
+                A bright two bedroom flat on a quiet street, five minutes from the bus stop. Prepaid meter, borehole water and a
+                shared generator for the compound.
+              </p>
+              <ListingPulse
+                className="mt-sm"
+                tiles={listingPulse({ figures: s.figures, locale })}
+                rating={shownRating({ rating: s.rating, reviewCount: s.reviews }, locale)}
+                age={days === null ? null : timeOnVallo(days, locale)}
+              />
+            </section>
+          );
+        })}
       </div>
     </main>
   );

@@ -9,6 +9,7 @@
      ?screen=review                            screen 2, review the agreement
      ?screen=funding                           screen 3, transfer details and clock
      ?screen=funding-no-expiry                 screen 3 with no provider expiry
+     ?screen=funding-fee                       screen 3, the total includes the fee
      ?screen=waiting                           screen 4, the bank is confirming
      ?screen=expired                           the transfer details expired
      ?screen=protected                         screens 5 and 6, a stay
@@ -19,19 +20,25 @@
      ?screen=partner-unavailable  wrong-amount  late-transfer  duplicate-transfer
      ?screen=release-delayed  refund-delayed   the bank has not confirmed yet
      ?screen=lister-payout  lister-review      the lister's side of a problem
+     ?screen=lister-paying  lister-paid  lister-payout-failed   after the release, the transfer to the lister's bank
      ?screen=receipt                           the protected receipt, with help
-     ?screen=problem                           raising a problem (the sheet) */
+     ?screen=problem                           raising a problem (the sheet)
+   The start of a payment (14 November):
+     ?screen=identity                          the one identity check
+     ?screen=setup                             a lister's readiness card */
 import { getLocale } from "@/lib/locale";
 import { ListerProtectedView } from "@/components/money/protected-rail/ListerProtectedView";
 import { ProtectedReceipt } from "@/components/money/protected-rail/ProtectedReceipt";
+import { ProtectedSetup } from "@/components/money/protected-rail/ProtectedSetup";
 import { PREVIEW_DEALS, PREVIEW_NOW } from "./fixtures";
-import { PreviewProtected } from "./PreviewProtected";
+import { PreviewIdentity, PreviewProtected } from "./PreviewProtected";
 
 const SCREENS = [
   "choose",
   "review",
   "funding",
   "funding-no-expiry",
+  "funding-fee",
   "waiting",
   "expired",
   "protected",
@@ -52,8 +59,13 @@ const SCREENS = [
   "refund-delayed",
   "lister-payout",
   "lister-review",
+  "lister-paying",
+  "lister-paid",
+  "lister-payout-failed",
   "receipt",
   "problem",
+  "identity",
+  "setup",
 ] as const;
 
 export default async function Page({ searchParams }: { searchParams: Promise<{ screen?: string; offer?: string }> }) {
@@ -76,13 +88,17 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ s
           </a>
         ))}
       </nav>
-      {screen === "lister" || screen === "lister-payout" || screen === "lister-review" ? (
+      {screen === "lister" || screen.startsWith("lister-") ? (
         <ListerProtectedView deal={screen === "lister" ? PREVIEW_DEALS.protected! : PREVIEW_DEALS[screen]!} now={PREVIEW_NOW} locale={locale} />
       ) : screen === "receipt" ? (
         <div className="grid gap-lg">
           <PreviewProtected screen="journey" deal={PREVIEW_DEALS.receipt!} now={now} locale={locale} />
           <ProtectedReceipt deal={PREVIEW_DEALS.receipt!} now={now} locale={locale} paymentHref="/preview/protected?screen=receipt" />
         </div>
+      ) : screen === "identity" ? (
+        <PreviewIdentity />
+      ) : screen === "setup" ? (
+        <ProtectedSetup setup={{ identity: "needed", payoutAccount: "missing" }} />
       ) : screen === "problem" ? (
         <PreviewProtected screen="problem" deal={PREVIEW_DEALS.protected!} now={now} locale={locale} />
       ) : (

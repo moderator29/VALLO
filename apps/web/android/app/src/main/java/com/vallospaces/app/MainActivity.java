@@ -93,9 +93,11 @@ public class MainActivity extends BridgeActivity {
         registerPlugin(ValloShellPlugin.class);
         registerPlugin(com.vallospaces.app.plugins.callkit.ValloCallKitPlugin.class);
         super.onCreate(savedInstanceState);
-        /* The opening (founder's rulings, 7 November 2026): the exact mark
-           drawn in over the launch navy, as on the iPhone (LaunchMark). */
-        LaunchMark.show(this);
+        /* THE OPENING IS THE PAGE'S (founder's ruling, 14 November 2026).
+           The mark this shell used to draw over the launch navy is retired:
+           the only opening a person sees is the page's own lockup, and the
+           plain launch navy holds until the page says it has painted.
+           ValloShellPlugin.pageOpens tells the page so. */
         try {
             if (getBridge() != null) {
                 getBridge().addWebViewListener(new WebViewListener() {

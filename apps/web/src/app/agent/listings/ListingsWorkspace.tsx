@@ -1,8 +1,5 @@
 "use client";
 
-import { CountTabs } from "@/components/ui/CountTabs";
-import { ActionSheet, type QuickAction, type SheetRow } from "@/components/ui/ActionSheet";
-import { useLongPress } from "@/lib/ui/use-long-press";
 import { DuplicateListing } from "./DuplicateListing";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -321,7 +318,6 @@ function ListingRow({
   locale,
   onAction,
   onDelete,
-  onHold,
   boardLabel,
   duplicateCopy,
   statusLabel,
@@ -366,8 +362,6 @@ function ListingRow({
   locale: Locale;
   onAction: (kind: SheetKind, listing: ListingSummary) => void;
   onDelete: (listing: ListingSummary) => void;
-  /** Hold the row for its own sheet (handoff 6.3 part 2). */
-  onHold?: (listing: ListingSummary) => void;
   /** V-48: why this listing was closed, when it was. */
   closedReason?: string | undefined;
   closeCopy?: CloseCopy | undefined;
@@ -386,15 +380,11 @@ function ListingRow({
      sale keeps "Take down", which is the right control for them. */
   const closesWithReason = Boolean(onCloseListing && closeCopy && live && listing.intent === "rent");
 
-  /* A hold anywhere on the card opens its sheet, which is the whole row of
-     actions below in one place: ten of them wrap onto four lines at 390. */
-  const hold = useLongPress(() => onHold?.(listing), { disabled: !onHold });
   return (
     <li
       className={`nf-panel nf-panel--card block overflow-hidden p-0${payoff ? " nf-live-payoff" : ""}`}
       data-selected={selection?.selected ? "true" : undefined}
       data-testid={payoff ? "live-payoff" : undefined}
-      {...hold.handlers}
     >
       <div className="flex gap-4.5 p-md">
         {selection ? (
@@ -769,11 +759,7 @@ export function ListingsWorkspace({
   const listings = term ? all.filter((row) => row.title.toLowerCase().includes(term)) : all;
   const [sheet, setSheet] = useState<SheetState | null>(null);
   const [closing, setClosing] = useState<ListingSummary | null>(null);
-  /* The listing whose own sheet is open (a hold on its card). */
-  const [menuListing, setMenuListing] = useState<ListingSummary | null>(null);
   /* C5: select mode. The anchor is the last row toggled, for shift-click ranges. */
-  /* Which status group the page is narrowed to ("all" is every group). */
-  const [status, setStatus] = useState<string>("all");
   const [selecting, setSelecting] = useState(false);
   const [selected, setSelected] = useState<string[]>([]);
   const anchor = useRef<string | null>(null);
@@ -899,54 +885,8 @@ export function ListingsWorkspace({
   };
   const plan = planBulk(listings, selected);
 
-  /*
-   * THE STATUS TAB ROW (survey B, A-05: "no counted segmented filter ... and
-   * no status filter sheet"; the founder's count tabs, handoff 6.3). Every
-   * group is still a section with its own heading and blurb; the row narrows
-   * the page to one of them, which is what an agent with forty listings
-   * wants when a buyer asks about the one that needs changes.
-   *
-   * Every count is the one the section already computed, from the listings
-   * this screen was given. Nothing new is read, and a group with nothing in
-   * it draws no tab, so no tab here can ever be empty.
-   */
-  const countOfGroup = (group: Group): number =>
-    listings.filter((l) => group.statuses.includes(l.status) && !(l.id in closed) && !pending.includes(l.id)).length;
-  const closedCount = listings.filter((l) => l.id in closed).length;
-  const statusTabs = [
-    ...GROUPS.filter((group) => countOfGroup(group) > 0 || status === group.key).map((group) => ({
-      key: group.key as string,
-      label: t.workspace.groups[group.key].title,
-      ...(countOfGroup(group) > 0 ? { count: countOfGroup(group) } : {}),
-      "data-testid": `listings-status-${group.key}`,
-    })),
-    ...(closeCopy && (closedCount > 0 || status === "closed")
-      ? [
-          {
-            key: "closed",
-            label: closeCopy.groupTitle,
-            ...(closedCount > 0 ? { count: closedCount } : {}),
-            "data-testid": "listings-status-closed",
-          },
-        ]
-      : []),
-  ];
-  const shows = (key: string) => status === "all" || status === key;
-
   return (
     <div className="space-y-7">
-      {statusTabs.length > 1 ? (
-        <CountTabs
-          label={t.workspace.filterByStatus}
-          active={status}
-          onChange={setStatus}
-          data-testid="listings-status-tabs"
-          items={[
-            { key: "all", label: t.workspace.filterAll, "data-testid": "listings-status-all" },
-            ...statusTabs,
-          ]}
-        />
-      ) : null}
       <div className="flex justify-end">
         <Button
           type="button"
@@ -963,7 +903,6 @@ export function ListingsWorkspace({
         </Button>
       </div>
       {GROUPS.map((group) => {
-        if (!shows(group.key)) return null;
         const rows = listings.filter((l) => group.statuses.includes(l.status) && !(l.id in closed));
         if (rows.length === 0) return null;
         const heading = t.workspace.groups[group.key];
@@ -1009,7 +948,6 @@ export function ListingsWorkspace({
                     locale={locale}
                     onAction={(kind, target) => setSheet({ kind, listing: target })}
                     onDelete={scheduleDelete}
-                    onHold={setMenuListing}
                     boardLabel={boardLabel}
                     duplicateCopy={duplicateCopy}
                     statusLabel={statusLabel}
@@ -1035,7 +973,7 @@ export function ListingsWorkspace({
       })}
 
       {/* V-48: closed with a reason. Last, because nothing here needs doing. */}
-      {closeCopy && shows("closed") && listings.some((l) => l.id in closed) && (
+      {closeCopy && listings.some((l) => l.id in closed) && (
         <section data-testid="closed-group">
           <span className="flex items-center gap-xs">
             <h2 className="nf-h3">{closeCopy.groupTitle}</h2>
@@ -1057,7 +995,6 @@ export function ListingsWorkspace({
                   locale={locale}
                   onAction={(kind, target) => setSheet({ kind, listing: target })}
                   onDelete={scheduleDelete}
-                  onHold={setMenuListing}
                   closedReason={closed[listing.id]}
                   closeCopy={closeCopy}
                   stats={stats?.[listing.id] ? { figures: stats[listing.id]!, at: statsAt } : null}
@@ -1070,150 +1007,6 @@ export function ListingsWorkspace({
       {selecting && selected.length > 0 ? (
         <BulkBar plan={plan} count={selected.length} onClear={() => setSelected([])} />
       ) : null}
-
-      {/*
-        THE LISTING ROW'S OWN SHEET (handoff 6.3 part 2). A hold anywhere on
-        a card gathers that card's actions into one place. The inline bar
-        below each card stays as it was: on a desktop it is a single tidy
-        row, and taking it away would move every agent's hands on their main
-        working screen. On a phone that same bar is ten controls wrapping
-        onto four lines, and this is the way through it.
-
-        Every action here is one the row already draws, under the same
-        condition and through the same door: Edit is the wizard, Calendar and
-        Health are their pages, Take down and Close go through `onAction` and
-        the close sheet, Delete goes through `onDelete`, which already shows
-        the undo row. Nothing new is reachable from here, and nothing that
-        the row would not offer.
-      */}
-      <ActionSheet
-        open={menuListing !== null}
-        onOpenChange={(next) => {
-          if (!next) setMenuListing(null);
-        }}
-        title={t.workspace.listingActionsTitle}
-        testId="listing-menu"
-        {...(menuListing
-          ? {
-              head: {
-                name: menuListing.title,
-                ...(menuListing.coverUrl ? { thumb: menuListing.coverUrl } : {}),
-                icon: "house" as const,
-                line: t.workspace.status[menuListing.status],
-                href: `/listing/${menuListing.id}`,
-                "data-testid": "listing-menu-open",
-              },
-            }
-          : {})}
-        quick={
-          menuListing
-            ? ([
-                ...(EDITABLE.includes(menuListing.status) && !(menuListing.id in closed)
-                  ? [
-                      {
-                        key: "edit",
-                        label: t.workspace.actions.edit,
-                        icon: "pencil" as const,
-                        href: `/agent/list?id=${menuListing.id}`,
-                        "data-testid": "listing-menu-edit",
-                      },
-                    ]
-                  : []),
-                ...(menuListing.pricePeriod === "night"
-                  ? [
-                      {
-                        key: "calendar",
-                        label: t.workspace.calendarAction,
-                        icon: "calendar-booking" as const,
-                        href: `/agent/listings/${menuListing.id}/calendar`,
-                        "data-testid": "listing-menu-calendar",
-                      },
-                    ]
-                  : []),
-                ...(healthLabel
-                  ? [
-                      {
-                        key: "health",
-                        label: healthLabel,
-                        icon: "file-search" as const,
-                        href: `/agent/listings/${menuListing.id}/health`,
-                        "data-testid": "listing-menu-health",
-                      },
-                    ]
-                  : []),
-                ...(statusLabel && menuListing.status === "PUBLISHED"
-                  ? [
-                      {
-                        key: "status",
-                        label: statusLabel,
-                        icon: "share" as const,
-                        href: `/agent/listings/${menuListing.id}/status`,
-                        "data-testid": "listing-menu-status",
-                      },
-                    ]
-                  : []),
-              ] as QuickAction[])
-            : []
-        }
-        rows={
-          menuListing
-            ? ([
-                ...(promoteLabel && canPromote(menuListing) && !(menuListing.id in closed)
-                  ? [
-                      {
-                        key: "promote",
-                        label: promoteLabel,
-                        icon: "trending-up" as const,
-                        href: promotionHref(menuListing.id),
-                        chevron: true,
-                        "data-testid": "listing-menu-promote",
-                      },
-                    ]
-                  : []),
-                ...(menuListing.status === "PUBLISHED" || menuListing.status === "APPROVED"
-                  ? [
-                      {
-                        key: "unpublish",
-                        label: t.workspace.actions.takeDown,
-                        sub: t.workspace.takeDownNote,
-                        icon: "circle-pause" as const,
-                        onSelect: () => setSheet({ kind: "unpublish", listing: menuListing }),
-                        "data-testid": "listing-menu-unpublish",
-                      },
-                    ]
-                  : []),
-                ...(closeCopy && !(menuListing.id in closed)
-                  ? [
-                      {
-                        key: "close",
-                        label: closeCopy.action,
-                        icon: "archive" as const,
-                        onSelect: () => setClosing(menuListing),
-                        "data-testid": "listing-menu-close",
-                      },
-                    ]
-                  : []),
-                ...(menuListing.status === "DRAFT"
-                  ? [
-                      {
-                        key: "delete",
-                        label: t.workspace.actions.delete,
-                        icon: "trash" as const,
-                        danger: true,
-                        /* `onDelete` schedules it and puts an undo row in its
-                           place for a while, which is the question asked
-                           after the fact rather than before it. */
-                        confirmElsewhere: true,
-                        onSelect: () => scheduleDelete(menuListing),
-                        "data-testid": "listing-menu-delete",
-                      },
-                    ]
-                  : []),
-              ] as SheetRow[])
-            : []
-        }
-        doneLabel={t.workspace.done}
-      />
 
       {sheet && <ConfirmSheet t={t} state={sheet} onClose={() => setSheet(null)} />}
       {closing && closeCopy && (

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import type { AgentInbox as Inbox, AgentThread } from "@/lib/agent/messages-queries";
 import { UiIcon } from "@/design-system/icons/UiIcon";
-import { CountTabs } from "@/components/ui/CountTabs";
+import { Chip, ChipRow } from "@/components/ui/Chip";
 import { countByStage, STAGES, type DeskStage, type Stage } from "@/lib/enquiry/stage";
 import { countOf, type Dictionary } from "@vallo/i18n/core";
 import { IconPlate } from "@/components/ui/IconPlate";
@@ -187,58 +187,60 @@ export function AgentInbox({
 
   return (
     <div>
-      {/* The founder's count tab row (handoff 6.3, 14 November 2026). Every
-          tab is a real address, so a filtered inbox is a link that survives
-          back, share and a reload, which is what this surface already was;
-          the tab the reader is on says `aria-current="page"`. Each count is
-          the one this server component already has in hand. */}
-      <CountTabs
-        semantics="links"
-        label="Filter enquiries"
-        active={activeStage !== null ? "" : filter}
-        data-testid="agent-inbox-tabs"
-        items={[
-          ...chips.map((chip) => ({
-            key: chip.key,
-            label: chip.label,
-            href: chip.key === "all" ? "/agent/messages?filter=all" : "/agent/messages",
-            ...(chip.count > 0 ? { count: chip.count } : {}),
-            "data-testid": `agent-inbox-${chip.key}`,
-          })),
-          ...(due && dueCopy
-            ? [
-                {
-                  key: "due",
-                  label: dueCopy.chip,
-                  href: "/agent/messages?filter=due",
-                  ...(due.size > 0 ? { count: due.size } : {}),
-                  "data-testid": "agent-inbox-due",
-                },
-              ]
-            : []),
-          ...(briefsLabel
-            ? [{ key: "briefs", label: briefsLabel, href: "/agent/messages?filter=briefs", "data-testid": "agent-inbox-briefs" }]
-            : []),
-        ]}
-      />
+      {/* The shared rail. A selected link chip is describing where the reader
+          already is, so the primitive marks it `aria-current="page"` rather
+          than pressed, and paints selection as a ring and a fill instead of the
+          `.nf-chip--active` border glow that a phone in daylight cannot show. */}
+      <nav aria-label="Filter enquiries">
+        <ChipRow bleed={false}>
+          {chips.map((chip) => (
+            <Chip
+              key={chip.key}
+              behaviour="link"
+              href={chip.key === "all" ? "/agent/messages?filter=all" : "/agent/messages"}
+              selected={activeStage === null && chip.key === filter}
+              count={chip.count}
+            >
+              {chip.label}
+            </Chip>
+          ))}
+          {due && dueCopy && (
+            <Chip
+              behaviour="link"
+              href="/agent/messages?filter=due"
+              selected={activeStage === null && filter === "due"}
+              count={due.size}
+            >
+              {dueCopy.chip}
+            </Chip>
+          )}
+          {briefsLabel && (
+            <Chip behaviour="link" href="/agent/messages?filter=briefs" selected={false}>
+              {briefsLabel}
+            </Chip>
+          )}
+        </ChipRow>
+      </nav>
 
       {/* V-72: the desk. Every stage with its count; the filter travels in
           the address bar like the one above, so a filtered desk is a link. */}
       {stageCounts && deskCopy && (
-        <CountTabs
-          semantics="links"
-          label={deskCopy.filterLabel}
-          active={activeStage ?? ""}
-          className="mt-sm"
-          data-testid="inbox-stages"
-          items={STAGES.map((stage) => ({
-            key: stage,
-            label: deskCopy.stages[stage],
-            href: activeStage === stage ? "/agent/messages?filter=all" : `/agent/messages?stage=${stage}`,
-            ...(stageCounts[stage] > 0 ? { count: stageCounts[stage] } : {}),
-            "data-testid": `inbox-stage-${stage}`,
-          }))}
-        />
+        <nav aria-label={deskCopy.filterLabel} className="mt-sm" data-testid="inbox-stages">
+          <ChipRow bleed={false}>
+            {STAGES.map((s) => (
+              <Chip
+                key={s}
+                behaviour="link"
+                href={activeStage === s ? "/agent/messages?filter=all" : `/agent/messages?stage=${s}`}
+                selected={activeStage === s}
+                count={stageCounts[s]}
+                size="sm"
+              >
+                {deskCopy.stages[s]}
+              </Chip>
+            ))}
+          </ChipRow>
+        </nav>
       )}
 
       {threads.length > 0 ? (

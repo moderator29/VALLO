@@ -269,13 +269,12 @@ export function ReplyBox({ rootId, parentId, question }: { rootId: string; paren
       <label htmlFor={`reply-${parentId}`} className="nf-circle-section__title">
         {label}
       </label>
-      <textarea
+      <textarea autoCapitalize="sentences" enterKeyHint="enter"
         id={`reply-${parentId}`}
         value={body}
         maxLength={4000}
         placeholder={question ? CIRCLE_COPY.thread.answerHint : CIRCLE_COPY.thread.replyHint}
         onChange={(e) => setBody(e.target.value)}
-        autoCapitalize="sentences"
       />
       <div className="nf-creplybox__foot">
         <span className="nf-circle-field__hint nf-numeric">{body.length > 3600 ? `${4000 - body.length} left` : ""}</span>
@@ -404,13 +403,12 @@ export function VouchButton({
   }
   return (
     <div className="flex flex-col gap-xs" data-testid="circle-vouch-form">
-      <textarea
+      <textarea autoCapitalize="sentences" enterKeyHint="enter"
         className="nf-field min-h-[3rem]"
         maxLength={280}
         placeholder={CIRCLE_COPY.vouch.notePlaceholder}
         value={note}
         onChange={(e) => setNote(e.target.value)}
-        autoCapitalize="sentences"
       />
       <div className="flex gap-sm">
         <Button
@@ -529,11 +527,11 @@ export function CommunitySettingsForm({
     >
       <label className="block">
         <span className="nf-label">{words.nameLabel}</span>
-        <input className="nf-field mt-2xs w-full" maxLength={60} value={n} onChange={(e) => setN(e.target.value)} required inputMode="text" autoCapitalize="sentences" />
+        <input type="text" autoComplete="off" autoCapitalize="words" className="nf-field mt-2xs w-full" maxLength={60} value={n} onChange={(e) => setN(e.target.value)} required />
       </label>
       <label className="block">
         <span className="nf-label">{words.descriptionLabel}</span>
-        <textarea className="nf-field mt-2xs min-h-[4rem] w-full" maxLength={500} value={d} onChange={(e) => setD(e.target.value)} autoCapitalize="sentences" />
+        <textarea autoCapitalize="sentences" enterKeyHint="enter" className="nf-field mt-2xs min-h-[4rem] w-full" maxLength={500} value={d} onChange={(e) => setD(e.target.value)} />
       </label>
       {isOwner && (
         <fieldset className="block">
@@ -555,13 +553,12 @@ export function CommunitySettingsForm({
       )}
       <label className="block">
         <span className="nf-label">{words.rulesLabel}</span>
-        <textarea
+        <textarea autoCapitalize="sentences" enterKeyHint="enter"
           className="nf-field mt-2xs min-h-[6rem] w-full"
           maxLength={2200}
           value={r}
           placeholder="One rule per line (up to 10)"
           onChange={(e) => setR(e.target.value)}
-          autoCapitalize="sentences"
         />
       </label>
       <Button type="submit" variant="primary" full loading={pending} disabled={pending}>

@@ -104,7 +104,7 @@ export function PepQuestion({
             <label htmlFor={`${id}-role`} className="nf-label block">
               {copy.role}
             </label>
-            <input
+            <input type="text" autoComplete="organization-title" autoCapitalize="sentences"
               id={`${id}-role`}
               name="role"
               maxLength={200}
@@ -112,7 +112,6 @@ export function PepQuestion({
               className="nf-field mt-xs min-h-[44px] w-full"
               aria-invalid={err?.fieldErrors?.role ? true : undefined}
               aria-describedby={err?.fieldErrors?.role ? `${id}-role-problem` : undefined}
-              inputMode="text" autoCapitalize="sentences"
             />
             <FieldProblem id={`${id}-role-problem`} message={err?.fieldErrors?.role} when={state} />
           </div>

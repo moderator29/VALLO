@@ -16,7 +16,7 @@ const state = vi.hoisted(() => ({
   documented: false,
   allowed: true,
   locked: null as string | null,
-  session: { state: "signed-in", user: { id: "11111111-1111-4111-8111-111111111111" }, supabase: {} } as unknown,
+  session: { state: "signed-in", user: { id: "11111111-1111-4111-8111-111111111111", email: "me@example.test" }, supabase: {} } as unknown,
   sessionReads: 0,
   admin: null as unknown,
   rail: {
@@ -25,6 +25,8 @@ const state = vi.hoisted(() => ({
     confirmProtectedMilestone: vi.fn(async (_d: unknown, _i: unknown) => ({ outcome: "submitted" })),
     raiseProtectedDispute: vi.fn(async (_d: unknown, _i: unknown) => ({ outcome: "submitted" })),
     askNewTransferDetails: vi.fn(async (_d: unknown, _i: unknown) => ({ outcome: "refused", reason: "not_documented" })),
+    openProtectedPayment: vi.fn(async (_d: unknown, _i: unknown) => ({ outcome: "opened", arrangementId: "arr-1", status: "awaiting_payment" }) as unknown),
+    onboardMember: vi.fn(async (_d: unknown, _i: unknown) => ({ state: "verified", partyId: "PAR_1", maskedIdentifier: null, verifiedName: null }) as unknown),
   },
 }));
 
@@ -57,14 +59,18 @@ vi.mock("./protected-rail", () => ({
   confirmProtectedMilestone: (d: unknown, i: unknown) => state.rail.confirmProtectedMilestone(d, i),
   raiseProtectedDispute: (d: unknown, i: unknown) => state.rail.raiseProtectedDispute(d, i),
   askNewTransferDetails: (d: unknown, i: unknown) => state.rail.askNewTransferDetails(d, i),
+  openProtectedPayment: (d: unknown, i: unknown) => state.rail.openProtectedPayment(d, i),
 }));
+vi.mock("./protected-provider", () => ({ onboardMember: (d: unknown, i: unknown) => state.rail.onboardMember(d, i) }));
 
 const actions = await import("./protected-actions");
-const { PROTECTED_ACTION_REFUSED } = await import("./copy");
+const { PROTECTED_ACTION_REFUSED, PROTECTED_IDENTITY_RESULT, PROTECTED_START_REFUSED } = await import("./copy");
 
 const ME = "11111111-1111-4111-8111-111111111111";
 const target = { agreementId: "33333333-3333-4333-8333-333333333333", arrangementId: "44444444-4444-4444-8444-444444444444" };
 const problem = { ...target, reason: "no_access", statement: "The door code did not work at all." };
+const identity = { kind: "nin" as const, identifier: "12345678901", dateOfBirth: "1990-01-31", consent: true as const };
+const start = { agreementId: target.agreementId, acceptedVersion: 3 };
 
 const all = [
   ["refreshProtected", () => actions.refreshProtected(target)],
@@ -72,6 +78,8 @@ const all = [
   ["confirmProtected", () => actions.confirmProtected(target)],
   ["raiseProtectedProblem", () => actions.raiseProtectedProblem(problem)],
   ["newProtectedDetails", () => actions.newProtectedDetails(target)],
+  ["verifyProtectedIdentity", () => actions.verifyProtectedIdentity(identity)],
+  ["startProtected", () => actions.startProtected(start)],
 ] as const;
 
 let admin: ReturnType<typeof fakeSupabase>;
@@ -118,7 +126,7 @@ describe("once the rail is on (built, not live)", () => {
   it.each(all)("%s refuses a signed-out caller and an exhausted limit", async (_name, run) => {
     state.session = { state: "signed-out" };
     expect((await run()).ok).toBe(false);
-    state.session = { state: "signed-in", user: { id: ME }, supabase: {} };
+    state.session = { state: "signed-in", user: { id: ME, email: "me@example.test" }, supabase: {} };
     state.allowed = false;
     expect(await run()).toEqual({ ok: false, error: PROTECTED_ACTION_REFUSED.too_many });
     expect(railCalls()).toBe(0);
@@ -167,5 +175,91 @@ describe("once the rail is on (built, not live)", () => {
 
   it("new details are refused while the provider's process is undocumented", async () => {
     expect(await actions.newProtectedDetails(target)).toEqual({ ok: false, error: PROTECTED_ACTION_REFUSED.rail_off });
+  });
+});
+
+describe("the identity check", () => {
+  beforeEach(() => {
+    state.enabled = true;
+    state.documented = true;
+    state.session = { state: "signed-in", user: { id: ME, email: "me@example.test" }, supabase: {} };
+  });
+
+  it("passes the number straight to the check, as the signed-in member, and answers only that it passed", async () => {
+    expect(await actions.verifyProtectedIdentity(identity)).toEqual({ ok: true, data: { verified: true } });
+    expect(state.rail.onboardMember.mock.calls[0]?.[1]).toEqual({ userId: ME, kind: "nin", identifier: "12345678901", dateOfBirth: "1990-01-31", email: "me@example.test", name: null, phone: null });
+    expect(admin.calls).toHaveLength(0);
+  });
+
+  it("refuses without the member's own consent, a number that is not eleven digits, and a date that is not one", async () => {
+    expect(await actions.verifyProtectedIdentity({ ...identity, consent: false as never })).toEqual({ ok: false, error: PROTECTED_IDENTITY_RESULT.bad_input });
+    expect(await actions.verifyProtectedIdentity({ ...identity, identifier: "1234" })).toEqual({ ok: false, error: PROTECTED_IDENTITY_RESULT.bad_input });
+    expect(await actions.verifyProtectedIdentity({ ...identity, dateOfBirth: "1990-02-31" })).toEqual({ ok: false, error: PROTECTED_IDENTITY_RESULT.bad_input });
+    expect(state.rail.onboardMember).not.toHaveBeenCalled();
+    expect(state.sessionReads).toBe(0);
+  });
+
+  it("refuses a member under 18, and one with no email on the account", async () => {
+    const young = `${new Date().getUTCFullYear() - 10}-01-01`;
+    expect(await actions.verifyProtectedIdentity({ ...identity, dateOfBirth: young })).toEqual({ ok: false, error: PROTECTED_IDENTITY_RESULT.under_age });
+    state.session = { state: "signed-in", user: { id: ME }, supabase: {} };
+    expect(await actions.verifyProtectedIdentity(identity)).toEqual({ ok: false, error: PROTECTED_IDENTITY_RESULT.no_email });
+    expect(state.rail.onboardMember).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ["not_matched", PROTECTED_IDENTITY_RESULT.not_matched],
+    ["needs_review", PROTECTED_IDENTITY_RESULT.needs_review],
+    ["bad_input", PROTECTED_IDENTITY_RESULT.bad_input],
+    ["unavailable", PROTECTED_IDENTITY_RESULT.unavailable],
+  ])("a check that came back %s is not success", async (stateName, message) => {
+    state.rail.onboardMember.mockResolvedValueOnce({ state: stateName });
+    expect(await actions.verifyProtectedIdentity(identity)).toEqual({ ok: false, error: message });
+  });
+
+  it("a passcode-locked session checks nothing", async () => {
+    state.locked = "Unlock Vallo first.";
+    expect(await actions.verifyProtectedIdentity(identity)).toEqual({ ok: false, error: "Unlock Vallo first." });
+    expect(state.rail.onboardMember).not.toHaveBeenCalled();
+  });
+});
+
+describe("starting a protected payment", () => {
+  beforeEach(() => {
+    state.enabled = true;
+    state.documented = true;
+    state.session = { state: "signed-in", user: { id: ME, email: "me@example.test" }, supabase: {} };
+  });
+
+  it("opens on the exact version the payer accepted, as the signed-in member", async () => {
+    expect(await actions.startProtected(start)).toEqual({ ok: true, data: { state: "opened" } });
+    expect(state.rail.openProtectedPayment.mock.calls[0]?.[1]).toEqual({ agreementId: target.agreementId, acceptedVersion: 3, actorUserId: ME });
+  });
+
+  it("sends an unchecked payer to the identity step, and reports an unanswered open as still being set up", async () => {
+    state.rail.openProtectedPayment.mockResolvedValueOnce({ outcome: "refused", reason: "payer_identity_required" });
+    expect(await actions.startProtected(start)).toEqual({ ok: true, data: { state: "identity" } });
+    state.rail.openProtectedPayment.mockResolvedValueOnce({ outcome: "unknown", arrangementId: "arr-1" });
+    expect(await actions.startProtected(start)).toEqual({ ok: true, data: { state: "pending" } });
+  });
+
+  it.each([
+    ["lister_not_ready", PROTECTED_START_REFUSED.lister_not_ready],
+    ["agreement_changed", PROTECTED_START_REFUSED.agreement_changed],
+    ["card_payment_started", PROTECTED_START_REFUSED.card_payment_started],
+    ["category_not_approved", PROTECTED_START_REFUSED.not_offered],
+    ["switched_off", PROTECTED_ACTION_REFUSED.rail_off],
+    ["store_unavailable", PROTECTED_ACTION_REFUSED.unavailable],
+  ])("a refusal for %s is said plainly and is never success", async (reason, message) => {
+    state.rail.openProtectedPayment.mockResolvedValueOnce({ outcome: "refused", reason });
+    expect(await actions.startProtected(start)).toEqual({ ok: false, error: message });
+  });
+
+  it("a passcode-locked session opens nothing, and a malformed request opens nothing", async () => {
+    state.locked = "Unlock Vallo first.";
+    expect(await actions.startProtected(start)).toEqual({ ok: false, error: "Unlock Vallo first." });
+    state.locked = null;
+    expect((await actions.startProtected({ agreementId: "x", acceptedVersion: 3 })).ok).toBe(false);
+    expect(state.rail.openProtectedPayment).not.toHaveBeenCalled();
   });
 });

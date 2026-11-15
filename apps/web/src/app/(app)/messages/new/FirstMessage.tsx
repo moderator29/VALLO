@@ -73,7 +73,7 @@ export function FirstMessage({
         <span className="nf-label">
           {listingTitle ? copy.firstAbout.replace("{title}", listingTitle) : copy.first}
         </span>
-        <textarea
+        <textarea autoCapitalize="sentences" enterKeyHint="enter"
           name="body"
           required
           maxLength={2000}
@@ -82,7 +82,6 @@ export function FirstMessage({
           onChange={(event) => setBody(event.target.value)}
           placeholder={copy.placeholder}
           className="nf-field"
-          autoCapitalize="sentences"
         />
       </label>
       {questions.length > 0 && (

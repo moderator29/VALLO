@@ -166,13 +166,12 @@ export function ContactForm({
 
       <label className="block">
         <span className="nf-overline mb-inline block">Message</span>
-        <textarea
+        <textarea autoCapitalize="sentences" enterKeyHint="enter"
           name="message"
           rows={5}
           className="nf-field resize-y"
           placeholder="Tell us what happened, including any booking reference."
           aria-invalid={fieldError("message") ? true : undefined}
-          autoCapitalize="sentences"
         />
         {fieldError("message") && (
           <span className="mt-inline block text-[length:var(--nf-text-overline)] text-[var(--nf-state-warning)]">

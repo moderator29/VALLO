@@ -390,7 +390,7 @@ export type Listing = {
    * query for the page. Absent until the pending SQL is applied or when the
    * read failed; a card then draws no count. Never on an example.
    */
-  stats?: { views: number; saves: number };
+  stats?: { views: number; saves: number; shares?: number };
   instantBook: boolean;
   amenities: string[];
   /**

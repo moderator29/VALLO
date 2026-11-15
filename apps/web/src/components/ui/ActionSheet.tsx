@@ -1,135 +1,102 @@
 "use client";
 
+import {
+  useCallback,
+  useEffect,
+  useId,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+  useSyncExternalStore,
+  type KeyboardEvent,
+  type ReactNode,
+  type RefObject,
+} from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
-import Image from "next/image";
-import { useState, type ReactNode } from "react";
 import { Button } from "@/components/ui/Button";
 import { ConfirmSheet } from "@/components/ui/ConfirmSheet";
 import { IconPlate } from "@/components/ui/IconPlate";
-import { ListGroup, ListRow } from "@/components/ui/ListGroup";
 import { Sheet } from "@/components/ui/Sheet";
+import { Switch } from "@/components/ui/Switch";
 import { UiIcon, type UiIconName } from "@/design-system/icons/UiIcon";
-import { feedback } from "@/lib/ui/feedback";
+import { useClientMount } from "@/lib/ui/client-mount";
+import { useOverlay } from "@/lib/ui/use-overlay";
+import {
+  ACTION_SHEET_QUICK_MAX,
+  groupRows,
+  orderRows,
+  placePopover,
+  type ActionSheetActionRow,
+  type ActionSheetDangerRow,
+  type ActionSheetHeader,
+  type ActionSheetProps,
+  type ActionSheetQuick,
+  type ActionSheetRadioRow,
+  type ActionSheetRow,
+  type ActionSheetSwitchRow,
+} from "./action-sheet-model";
 import "./action-sheet.css";
 
+export type {
+  ActionSheetActionRow,
+  ActionSheetConfirm,
+  ActionSheetDangerRow,
+  ActionSheetHeader,
+  ActionSheetProps,
+  ActionSheetQuick,
+  ActionSheetRadioRow,
+  ActionSheetRow,
+  ActionSheetSwitchRow,
+} from "./action-sheet-model";
+
 /**
- * THE ACTION SHEET (the founder, 14 November 2026, with two Snapchat
- * screenshots: a long-press on a chat, and a "more" menu).
+ * THE ACTION SHEET: what can be done with one thing, in two cards and a Done
+ * bar (handoff 6.3).
  *
- * The JOB those sheets do, in Vallo's material, never their look. Anatomy,
- * top to bottom, every part optional except the rows:
+ *  - THE HEADER CARD says what the sheet is about (a face or a photograph, a
+ *    name, one line under it, and a chevron when it opens) and carries up to
+ *    four round quick actions with a word under each.
+ *  - THE ROWS CARD holds everything else: a plain action, a row that opens
+ *    something (a chevron), a row with a second line, a row that ends in a
+ *    switch or a radio, and the destructive rows, which are always last and
+ *    always behind a confirm.
+ *  - THE DONE BAR is its own full-width button under both.
  *
- *   1. a HEAD CARD for the thing the sheet is about: a thumbnail or an
- *      avatar, a name, one quiet line under it, and a chevron when it opens
- *      that thing. Without `href` or `onSelect` it is a label, not a control;
- *   2. a row of up to FOUR ROUND QUICK ACTIONS, a word under each;
- *   3. a CARD OF ROWS, on the platform's `ListGroup` so a row here and a row
- *      in settings are the same row;
- *   4. a full-width DONE BAR, standing apart from the rows card.
+ * It is the platform's `Sheet`, so the swipe down, the scrim, Escape, Back,
+ * the focus trap and the focus return are the ones every sheet has, and a
+ * hand-rolled overlay stays refused (`hand-rolled-sheets.test.ts`). Under
+ * reduced motion it fades instead of sliding (action-sheet.css).
  *
- * IT COMPOSES `Sheet`, IT DOES NOT REPLACE IT, which is the whole reason the
- * hand-rolled-sheets guard stays green. The portal, the scrim, the rise on
- * the spring, the drag and flick to close, Escape, Back, the focus trap and
- * its return, the scroll lock, the home-indicator inset and the CENTRED
- * DIALOG from 64rem with a mouse (overlays.css) are all inherited unchanged.
- * The visible head is not the title: `Sheet` gets `hideTitle`, so the sheet
- * still has one accessible name and the screen has no second heading.
+ * ON A WIDE SCREEN WITH A MOUSE the same content is a popover hung from the
+ * control that opened it (`anchor`), not a sheet stretched across a monitor:
+ * no scrim, no Done bar, a press outside or Escape closes it, Tab stays
+ * inside and focus goes back to the control. With no `anchor` (a long press
+ * has none) the wide screen gets the sheet's own centred dialog.
  *
- * A DESTRUCTIVE ROW IS ALWAYS LAST AND ALWAYS BEHIND A CONFIRM. Give the row
- * `danger` and a `confirm`, and this file opens `ConfirmSheet` with the
- * caller's words, closes the action sheet, and runs the row only when the
- * person says yes. A danger row without `confirm` is refused in development,
- * because the guard is the point.
- *
- * COPY IS ENTIRELY THE CALLER'S. No default labels, no invented rows. A row
- * that has no backend must not be passed in.
+ * A destructive row cannot be built without saying how it is confirmed:
+ * `confirm` is either the words for the shared `ConfirmSheet`, or `"own"`
+ * when the caller already asks in a sheet of its own (a report form, a block
+ * that explains itself). Choosing an action closes the sheet; a switch or a
+ * radio changes in place and leaves it open.
  */
 
-export type QuickAction = {
-  key: string;
-  /** The word under the circle. Also the control's accessible name. */
-  label: string;
-  icon: UiIconName;
-  /** A real address instead of an action. */
-  href?: string;
-  onSelect?: () => void;
-  /** Live state (saved, muted): the circle wears the lit selected fill. */
-  on?: boolean;
-  disabled?: boolean;
-  "data-testid"?: string;
-};
+const WIDE = "(min-width: 64rem) and (pointer: fine)";
 
-export type SheetRow = {
-  key: string;
-  label: string;
-  /** The second line, where two rows would otherwise be hard to tell apart. */
-  sub?: string;
-  icon?: UiIconName;
-  /** A real address. */
-  href?: string;
-  onSelect?: () => void;
-  /** Opens another sheet or a page: draws the chevron. */
-  chevron?: boolean;
-  /** A switch, a radio or a count at the end of the row. */
-  trailing?: ReactNode;
-  /** Destructive: the danger colour, forced last, and `confirm` is required. */
-  danger?: boolean;
-  confirm?: {
-    title: string;
-    line: string;
-    confirmLabel: string;
-    cancelLabel: string;
-  };
-  /**
-   * The caller asks the question itself, further down (the feed's own
-   * `DeleteSheet`, the profile's block sheet, a report form). Without this a
-   * destructive row MUST carry `confirm`: the guard is the point, and two
-   * confirmations for one act is its own defect.
-   */
-  confirmElsewhere?: boolean;
-  disabled?: boolean;
-  "data-testid"?: string;
-};
+function subscribeWide(notify: () => void): () => void {
+  const query = window.matchMedia?.(WIDE);
+  if (!query) return () => {};
+  query.addEventListener("change", notify);
+  return () => query.removeEventListener("change", notify);
+}
 
-function QuickItem({ action, onDone }: { action: QuickAction; onDone: () => void }) {
-  const inner = (
-    <>
-      <span className="nf-asheet__quickdisc">
-        <UiIcon name={action.icon} size={20} filled={action.on} />
-      </span>
-      <span className="nf-asheet__quickword">{action.label}</span>
-    </>
-  );
-  if (action.href) {
-    return (
-      <Link
-        href={action.href}
-        className="nf-asheet__quickitem"
-        data-testid={action["data-testid"]}
-        onClick={() => {
-          action.onSelect?.();
-          onDone();
-        }}
-      >
-        {inner}
-      </Link>
-    );
-  }
-  return (
-    <button
-      type="button"
-      className="nf-asheet__quickitem"
-      disabled={action.disabled}
-      aria-pressed={action.on === undefined ? undefined : action.on}
-      data-testid={action["data-testid"]}
-      onClick={() => {
-        feedback("select");
-        action.onSelect?.();
-        onDone();
-      }}
-    >
-      {inner}
-    </button>
+/** A wide screen driven by a mouse: where a sheet becomes a popover. False on the server. */
+function useWidePointer(): boolean {
+  return useSyncExternalStore(
+    subscribeWide,
+    () => window.matchMedia?.(WIDE).matches ?? false,
+    () => false,
   );
 }
 
@@ -137,180 +104,419 @@ export function ActionSheet({
   open,
   onOpenChange,
   title,
-  head,
+  header,
   quick = [],
-  rows,
-  doneLabel,
-  testId,
-}: {
-  open: boolean;
-  onOpenChange(open: boolean): void;
-  /** The dialog's accessible name. Never drawn: the head card is what is seen. */
-  title: string;
-  /** The thing this sheet is about. */
-  head?: {
-    name: string;
-    line?: string;
-    /** A photograph already in cache (a listing's, a person's). */
-    thumb?: string;
-    /** Where the thumbnail is absent: a glyph on the round plate. */
-    icon?: UiIconName;
-    href?: string;
-    onSelect?: () => void;
-    "data-testid"?: string;
-  };
-  /** Up to four. A fifth is dropped rather than wrapped onto a second line. */
-  quick?: QuickAction[];
-  rows: SheetRow[];
-  /** The full-width bar under everything. Omit it and no bar is drawn. */
-  doneLabel?: string;
-  testId?: string;
-}) {
-  const [confirming, setConfirming] = useState<SheetRow | null>(null);
-  const close = () => onOpenChange(false);
+  rows = [],
+  doneLabel = "Done",
+  anchor,
+  testId = "action-sheet",
+}: ActionSheetProps) {
+  const wide = useWidePointer();
+  const popover = wide && anchor != null;
+  /* The row being confirmed, and its words kept while the confirm leaves. */
+  const [confirm, setConfirm] = useState<{ row: ActionSheetDangerRow; open: boolean } | null>(null);
 
-  /* Destructive rows are always last, whatever order the caller passed. */
-  const ordered = [...rows.filter((row) => !row.danger), ...rows.filter((row) => row.danger)];
+  const close = useCallback(() => onOpenChange(false), [onOpenChange]);
 
-  if (process.env.NODE_ENV !== "production") {
-    for (const row of ordered) {
-      if (row.danger && !row.confirm && !row.confirmElsewhere && !row.href) {
-        throw new Error(
-          `ActionSheet: the destructive row "${row.key}" needs a confirm, or confirmElsewhere when the caller asks.`,
-        );
+  const choose = useCallback(
+    (row: ActionSheetActionRow | ActionSheetDangerRow) => {
+      if (row.kind === "danger") {
+        onOpenChange(false);
+        if (row.confirm === "own") row.onSelect();
+        else setConfirm({ row, open: true });
+        return;
       }
-    }
-  }
+      if (!row.keepOpen) onOpenChange(false);
+      row.onSelect?.();
+    },
+    [onOpenChange],
+  );
 
-  const headInner = head ? (
-    <>
-      {head.thumb ? (
-        <Image src={head.thumb} alt="" width={88} height={88} className="nf-asheet__thumb" unoptimized />
-      ) : (
-        <IconPlate size="md" shape="round">
-          <UiIcon name={head.icon ?? "user"} size={20} />
-        </IconPlate>
-      )}
-      <span className="nf-asheet__headtext">
-        <span className="nf-asheet__name">{head.name}</span>
-        {head.line ? <span className="nf-asheet__line">{head.line}</span> : null}
-      </span>
-      {head.href || head.onSelect ? (
-        <UiIcon name="chevron-right" size={18} className="nf-asheet__headchev" />
-      ) : null}
-    </>
-  ) : null;
+  const body = (
+    <ActionSheetBody
+      header={header}
+      quick={quick}
+      rows={rows}
+      onClose={close}
+      onChoose={choose}
+      testId={testId}
+    />
+  );
+
+  const words = confirm && confirm.row.confirm !== "own" ? confirm.row.confirm : null;
 
   return (
     <>
-      <Sheet
-        open={open}
-        onOpenChange={onOpenChange}
-        title={title}
-        hideTitle
-        detents={[0.6]}
-        testId={testId}
-      >
-        {head ? (
-          head.href ? (
-            <Link href={head.href} className="nf-asheet__head" data-testid={head["data-testid"]} onClick={close}>
-              {headInner}
-            </Link>
-          ) : head.onSelect ? (
-            <button
-              type="button"
-              className="nf-asheet__head"
-              data-testid={head["data-testid"]}
-              onClick={() => {
-                head.onSelect?.();
-                close();
-              }}
-            >
-              {headInner}
-            </button>
-          ) : (
-            <div className="nf-asheet__head" data-testid={head["data-testid"]}>
-              {headInner}
-            </div>
-          )
-        ) : null}
-
-        {quick.length > 0 ? (
-          <div
-            className="nf-asheet__quick"
-            data-few={quick.length < 3 ? "true" : undefined}
-            data-testid={testId ? `${testId}-quick` : undefined}
-          >
-            {quick.slice(0, 4).map((action) => (
-              <QuickItem key={action.key} action={action} onDone={close} />
-            ))}
-          </div>
-        ) : null}
-
-        <ListGroup className="nf-asheet__rows">
-          {ordered.map((row) => (
-            <ListRow
-              key={row.key}
-              className={row.danger ? "nf-asheet__row--danger" : undefined}
-              data-testid={row["data-testid"]}
-              leading={
-                row.icon ? (
-                  <IconPlate size="sm" shape="round" tone={row.danger ? "danger" : undefined}>
-                    <UiIcon name={row.icon} size={18} />
-                  </IconPlate>
-                ) : undefined
-              }
-              title={row.label}
-              sub={row.sub}
-              trailing={row.trailing}
-              chevron={row.chevron}
-              href={row.href}
-              onClick={
-                row.disabled
-                  ? undefined
-                  : () => {
-                      if (row.confirm) {
-                        /* The question replaces this sheet rather than
-                           stacking on it: two scrims over one decision. */
-                        close();
-                        setConfirming(row);
-                        return;
-                      }
-                      row.onSelect?.();
-                      if (!row.href) close();
-                    }
-              }
-            />
-          ))}
-        </ListGroup>
-
-        {doneLabel ? (
-          <div className="nf-asheet__done">
-            <Button variant="glass" size="lg" full onClick={close} data-testid={testId ? `${testId}-done` : undefined}>
+      {popover ? (
+        <ActionPopover open={open} onClose={close} anchor={anchor} title={title} testId={testId}>
+          {body}
+        </ActionPopover>
+      ) : (
+        <Sheet
+          open={open}
+          onOpenChange={onOpenChange}
+          title={title}
+          hideTitle
+          closeLabel={null}
+          className="nf-acts-sheet"
+          testId={testId}
+          footer={
+            <Button variant="secondary" size="lg" full onClick={close} data-testid={`${testId}-done`}>
               {doneLabel}
             </Button>
-          </div>
-        ) : null}
-      </Sheet>
-
-      {confirming?.confirm ? (
+          }
+        >
+          {body}
+        </Sheet>
+      )}
+      {confirm && words ? (
         <ConfirmSheet
-          open
+          open={confirm.open}
           onOpenChange={(next) => {
-            if (!next) setConfirming(null);
+            if (!next) setConfirm((current) => (current ? { ...current, open: false } : current));
           }}
-          title={confirming.confirm.title}
-          line={confirming.confirm.line}
-          confirmLabel={confirming.confirm.confirmLabel}
-          cancelLabel={confirming.confirm.cancelLabel}
+          title={words.title}
+          line={words.line}
+          confirmLabel={words.confirmLabel}
+          cancelLabel={words.cancelLabel ?? "Cancel"}
           onConfirm={() => {
-            const row = confirming;
-            setConfirming(null);
-            row.onSelect?.();
+            setConfirm((current) => (current ? { ...current, open: false } : current));
+            confirm.row.onSelect();
           }}
-          testId={testId ? `${testId}-confirm` : "action-sheet-confirm"}
+          testId={`${testId}-confirm`}
         />
       ) : null}
     </>
+  );
+}
+
+function ActionSheetBody({
+  header,
+  quick,
+  rows,
+  onClose,
+  onChoose,
+  testId,
+}: {
+  header: ActionSheetHeader | undefined;
+  quick: readonly ActionSheetQuick[];
+  rows: readonly ActionSheetRow[];
+  onClose: () => void;
+  onChoose: (row: ActionSheetActionRow | ActionSheetDangerRow) => void;
+  testId: string;
+}) {
+  const shownQuick = quick.slice(0, ACTION_SHEET_QUICK_MAX);
+  const grouped = useMemo(() => groupRows(orderRows(rows)), [rows]);
+
+  return (
+    <div className="nf-acts">
+      {header || shownQuick.length > 0 ? (
+        <section className="nf-acts__card" data-testid={`${testId}-head`}>
+          {header ? <HeaderCard header={header} onClose={onClose} /> : null}
+          {shownQuick.length > 0 ? (
+            <ul className="nf-acts__quick" role="list" data-divided={header ? "true" : undefined}>
+              {shownQuick.map((action) => (
+                <li key={action.id} className="nf-acts__quick-item">
+                  <QuickAction action={action} onClose={onClose} />
+                </li>
+              ))}
+            </ul>
+          ) : null}
+        </section>
+      ) : null}
+      {grouped.length > 0 ? (
+        <ul className="nf-acts__card nf-acts__rows" role="list" data-testid={`${testId}-rows`}>
+          {grouped.map((entry) =>
+            Array.isArray(entry) ? (
+              <li key={`group-${entry[0]?.id}`} className="nf-acts__li">
+                <RadioGroup rows={entry} />
+              </li>
+            ) : (
+              <li key={entry.id} className="nf-acts__li">
+                {entry.kind === "switch" ? (
+                  <SwitchRow row={entry} />
+                ) : entry.kind === "radio" ? null : (
+                  <ChoiceRow row={entry} onChoose={onChoose} onClose={onClose} />
+                )}
+              </li>
+            ),
+          )}
+        </ul>
+      ) : null}
+    </div>
+  );
+}
+
+function HeaderCard({ header, onClose }: { header: ActionSheetHeader; onClose: () => void }) {
+  const opens = Boolean(header.href || header.onOpen);
+  const inner = (
+    <>
+      {header.media != null ? <span className="nf-acts__media">{header.media}</span> : null}
+      <span className="nf-acts__head-text">
+        <span className="nf-acts__head-title">{header.title}</span>
+        {header.subtitle ? <span className="nf-acts__head-sub">{header.subtitle}</span> : null}
+      </span>
+      {opens ? <UiIcon name="chevron-right" size={20} className="nf-acts__chevron" /> : null}
+    </>
+  );
+  if (header.href) {
+    return (
+      <Link href={header.href} className="nf-acts__head" onClick={onClose} data-testid={header.testId}>
+        {inner}
+      </Link>
+    );
+  }
+  if (header.onOpen) {
+    const open = header.onOpen;
+    return (
+      <button
+        type="button"
+        className="nf-acts__head"
+        onClick={() => {
+          onClose();
+          open();
+        }}
+        data-testid={header.testId}
+      >
+        {inner}
+      </button>
+    );
+  }
+  return (
+    <div className="nf-acts__head" data-testid={header.testId}>
+      {inner}
+    </div>
+  );
+}
+
+function QuickAction({ action, onClose }: { action: ActionSheetQuick; onClose: () => void }) {
+  const inner = (
+    <>
+      <IconPlate size="md" shape="round" tone={action.active ? "brand" : "neutral"}>
+        <UiIcon name={action.icon} size={20} filled={action.active} />
+      </IconPlate>
+      <span className="nf-acts__quick-label">{action.label}</span>
+    </>
+  );
+  if (action.href && !action.disabled) {
+    return (
+      <Link href={action.href} className="nf-acts__quick-btn" onClick={onClose} data-testid={action.testId}>
+        {inner}
+      </Link>
+    );
+  }
+  return (
+    <button
+      type="button"
+      className="nf-acts__quick-btn"
+      aria-pressed={action.active === undefined ? undefined : action.active}
+      disabled={action.disabled}
+      onClick={() => {
+        if (!action.keepOpen) onClose();
+        action.onSelect?.();
+      }}
+      data-testid={action.testId}
+    >
+      {inner}
+    </button>
+  );
+}
+
+function RowText({ row, labelId }: { row: { label: string; hint?: string }; labelId?: string }) {
+  return (
+    <span className="nf-acts__text">
+      <span className="nf-acts__label" id={labelId}>
+        {row.label}
+      </span>
+      {row.hint ? <span className="nf-acts__hint">{row.hint}</span> : null}
+    </span>
+  );
+}
+
+function RowIcon({ icon }: { icon: UiIconName | undefined }) {
+  return icon ? (
+    <span className="nf-acts__icon" aria-hidden="true">
+      <UiIcon name={icon} size={20} />
+    </span>
+  ) : null;
+}
+
+function ChoiceRow({
+  row,
+  onChoose,
+  onClose,
+}: {
+  row: ActionSheetActionRow | ActionSheetDangerRow;
+  onChoose: (row: ActionSheetActionRow | ActionSheetDangerRow) => void;
+  onClose: () => void;
+}) {
+  const danger = row.kind === "danger";
+  const href = !danger && !row.disabled ? row.href : undefined;
+  const value = !danger ? row.value : undefined;
+  const chevron = !danger && (row.chevron || Boolean(row.href));
+  const inner = (
+    <>
+      <RowIcon icon={row.icon} />
+      <RowText row={row} />
+      {value ? <span className="nf-acts__value">{value}</span> : null}
+      {chevron ? <UiIcon name="chevron-right" size={20} className="nf-acts__chevron" /> : null}
+    </>
+  );
+  if (href) {
+    return (
+      <Link href={href} className="nf-acts__row" onClick={onClose} data-testid={row.testId}>
+        {inner}
+      </Link>
+    );
+  }
+  return (
+    <button
+      type="button"
+      className="nf-acts__row"
+      data-danger={danger ? "true" : undefined}
+      disabled={row.disabled}
+      onClick={() => onChoose(row)}
+      data-testid={row.testId}
+    >
+      {inner}
+    </button>
+  );
+}
+
+function SwitchRow({ row }: { row: ActionSheetSwitchRow }) {
+  const labelId = useId();
+  /* A label, so a press anywhere on the row turns the switch, and the switch
+     is named by the words beside it. */
+  return (
+    <label className="nf-acts__row nf-acts__row--control" data-disabled={row.disabled ? "true" : undefined}>
+      <RowIcon icon={row.icon} />
+      <RowText row={row} labelId={labelId} />
+      <Switch
+        checked={row.checked}
+        onCheckedChange={row.onChange}
+        disabled={row.disabled}
+        aria-labelledby={labelId}
+        data-testid={row.testId}
+      />
+    </label>
+  );
+}
+
+function RadioGroup({ rows }: { rows: ActionSheetRadioRow[] }) {
+  const group = rows[0]?.group ?? "";
+  const anyChecked = rows.some((row) => row.checked);
+  function onKeyDown(event: KeyboardEvent<HTMLDivElement>) {
+    const step = event.key === "ArrowDown" || event.key === "ArrowRight" ? 1 : event.key === "ArrowUp" || event.key === "ArrowLeft" ? -1 : 0;
+    if (step === 0) return;
+    const radios = [...event.currentTarget.querySelectorAll<HTMLButtonElement>('[role="radio"]:not(:disabled)')];
+    const at = radios.indexOf(document.activeElement as HTMLButtonElement);
+    if (at < 0 || radios.length === 0) return;
+    event.preventDefault();
+    const next = radios[(at + step + radios.length) % radios.length];
+    next?.focus();
+    next?.click();
+  }
+  return (
+    <div role="radiogroup" aria-label={group} className="nf-acts__group" onKeyDown={onKeyDown}>
+      {rows.map((row, index) => (
+        <button
+          key={row.id}
+          type="button"
+          role="radio"
+          aria-checked={row.checked}
+          /* One stop in the tab order; the arrows reach the others. */
+          tabIndex={row.checked || (!anyChecked && index === 0) ? 0 : -1}
+          className="nf-acts__row nf-acts__row--radio"
+          disabled={row.disabled}
+          onClick={() => {
+            if (!row.checked) row.onSelect();
+          }}
+          data-testid={row.testId}
+        >
+          <RowIcon icon={row.icon} />
+          <RowText row={row} />
+          <span className="nf-acts__radio" data-checked={row.checked ? "true" : undefined} aria-hidden="true">
+            {row.checked ? <UiIcon name="check" size={16} /> : null}
+          </span>
+        </button>
+      ))}
+    </div>
+  );
+}
+
+function ActionPopover({
+  open,
+  onClose,
+  anchor,
+  title,
+  testId,
+  children,
+}: {
+  open: boolean;
+  onClose: () => void;
+  anchor: RefObject<HTMLElement | null>;
+  title: string;
+  testId: string;
+  children: ReactNode;
+}) {
+  const mounted = useClientMount();
+  const panelRef = useRef<HTMLDivElement | null>(null);
+
+  /* Escape, Back, the Tab trap, the scroll lock and the focus return to the
+     trigger: the one shared implementation. It draws no scrim. */
+  useOverlay({ open: open && mounted, onClose, panelRef });
+
+  /* Placed before paint, and again when the window changes size. Written
+     straight onto the node as two custom properties, so placing it is not a
+     render. */
+  useLayoutEffect(() => {
+    const panel = panelRef.current;
+    const trigger = anchor.current;
+    if (!open || !panel || !trigger) return;
+    const place = () => {
+      const box = panel.getBoundingClientRect();
+      const at = placePopover(
+        trigger.getBoundingClientRect(),
+        { width: box.width, height: box.height },
+        { width: document.documentElement.clientWidth, height: window.innerHeight },
+        getComputedStyle(panel).direction === "rtl",
+      );
+      panel.style.setProperty("--nf-acts-x", `${Math.round(at.left)}px`);
+      panel.style.setProperty("--nf-acts-y", `${Math.round(at.top)}px`);
+      panel.dataset.above = at.above ? "true" : "false";
+      panel.dataset.placed = "true";
+    };
+    place();
+    window.addEventListener("resize", place);
+    return () => window.removeEventListener("resize", place);
+  }, [open, mounted, anchor]);
+
+  /* A press anywhere else closes it. The trigger is left to its own click,
+     which already toggles. */
+  useEffect(() => {
+    if (!open) return;
+    const onDown = (event: PointerEvent) => {
+      const target = event.target as Node | null;
+      if (!target || panelRef.current?.contains(target) || anchor.current?.contains(target)) return;
+      onClose();
+    };
+    document.addEventListener("pointerdown", onDown, true);
+    return () => document.removeEventListener("pointerdown", onDown, true);
+  }, [open, onClose, anchor]);
+
+  if (!mounted || !open) return null;
+  return createPortal(
+    <div
+      ref={panelRef}
+      role="dialog"
+      aria-modal="true"
+      aria-label={title}
+      tabIndex={-1}
+      className="nf-acts-pop outline-none"
+      data-testid={testId}
+    >
+      {children}
+    </div>,
+    document.body,
   );
 }

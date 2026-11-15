@@ -14,7 +14,7 @@ import type { StatItem, StatKey } from "@/lib/listings/stats/format";
  * draws nothing. Where a figure is compacted ("1.2k views") a screen reader
  * hears the whole number. Server and client safe.
  */
-const GLYPH: Record<StatKey, UiIconName> = { days: "calendar-clock", views: "eye", saves: "heart" };
+const GLYPH: Record<StatKey, UiIconName> = { days: "calendar-clock", views: "eye", saves: "heart", shares: "share" };
 
 export function ListingStatsRow({
   items,

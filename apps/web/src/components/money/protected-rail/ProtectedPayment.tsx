@@ -21,6 +21,7 @@ import {
   PROTECTED_FUNDING_CTA,
   PROTECTED_FUNDING_CTA_NOTE,
   PROTECTED_FUNDING_EXACT,
+  PROTECTED_FUNDING_FEE_INCLUDED,
   PROTECTED_FUNDING_EYEBROW,
   PROTECTED_FUNDING_ROWS,
   PROTECTED_FUNDING_WARNING,
@@ -108,6 +109,8 @@ export function ProtectedPayment({
     now,
   });
   const amount = money(deal.amountMinor, locale);
+  /* What the payer transfers: the provider's own total when it gave one, never less than the amount. */
+  const transferMinor = Math.max(deal.amountMinor, deal.funding?.amountMinor ?? 0);
   const timeline = <TimelineSpine stage={stage} stamps={deal.stamps} milestone={deal.milestone} locale={locale} />;
   const help = (
     <Link href={deal.links.help} className="nf-pp-link">
@@ -136,7 +139,12 @@ export function ProtectedPayment({
       return (
         <div className="nf-pp-screen" data-testid="pp-funding" data-stage={stage}>
           <ScreenHead eyebrow={PROTECTED_FUNDING_EYEBROW} stage={stage} title={PROTECTED_STAGE_LABEL[stage]} />
-          <AmountHero minor={deal.amountMinor} locale={locale} caption={PROTECTED_FUNDING_EXACT} />
+          <AmountHero minor={transferMinor} locale={locale} caption={PROTECTED_FUNDING_EXACT} />
+          {transferMinor > deal.amountMinor ? (
+            <p className="nf-pp-fine nf-pp-fine--center" data-testid="pp-funding-fee">
+              {PROTECTED_FUNDING_FEE_INCLUDED.replace("{fee}", money(transferMinor - deal.amountMinor, locale))}
+            </p>
+          ) : null}
           {deal.funding ? (
             <>
               <DetailRows

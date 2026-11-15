@@ -79,8 +79,6 @@
     ".next-forka/dev/types/**/*.ts",
     ".next-forkd/types/**/*.ts",
     ".next-forkd/dev/types/**/*.ts",
-    ".next-lead/types/**/*.ts",
-    ".next-lead/dev/types/**/*.ts",
     ".next-fe/types/**/*.ts",
     ".next-fe/dev/types/**/*.ts",
     ".next-native/types/**/*.ts",
@@ -101,10 +99,8 @@
     ".next-z/dev/types/**/*.ts",
     ".next-input/types/**/*.ts",
     ".next-input/dev/types/**/*.ts",
-    ".next-perf/types/**/*.ts",
-    ".next-perf/dev/types/**/*.ts",
-    ".next-gate/types/**/*.ts",
-    ".next-gate/dev/types/**/*.ts"
+    ".next-lead/types/**/*.ts",
+    ".next-lead/dev/types/**/*.ts"
   ],
   "exclude": [
     "node_modules",

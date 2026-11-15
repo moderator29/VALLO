@@ -1,4 +1,5 @@
 "use client";
+import { cleanKindFor, cleanOnPaste } from "@/lib/paste/field-paste";
 import "@/app/css/auth.css";
 
 import { useState } from "react";
@@ -149,6 +150,7 @@ export function Field({
    * "Ada@"); a name starts each word with a capital. Derived from the
    * autocomplete token so no call site has to remember it.
    */
+  const cleanKind = cleanKindFor({ type, inputMode, autoComplete });
   const literal = type === "email" || autoComplete === "one-time-code" || autoComplete === "off";
   const named = autoComplete === "given-name" || autoComplete === "family-name" || autoComplete === "nickname";
   const keyboard = literal
@@ -182,6 +184,10 @@ export function Field({
             ? { value, onChange: (event) => onChange(event.target.value) }
             : {})}
           {...(onBlur ? { onBlur: (event) => onBlur(event.target.value) } : {})}
+          /* A pasted email or phone number is cleaned as it lands (14 November
+             2026): "Seyi <Seyi@Example.com> " is seyi@example.com. Typing is
+             never touched. */
+          {...(cleanKind ? { onPaste: (event) => cleanOnPaste(event, cleanKind) } : {})}
         />
       </div>
       <FieldError id={errorId} error={error} />

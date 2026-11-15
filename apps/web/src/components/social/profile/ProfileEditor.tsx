@@ -180,7 +180,7 @@ export function ProfileEditor({
         <label htmlFor={bioId} className="nf-label mt-sm">
           Bio
         </label>
-        <textarea
+        <textarea autoCapitalize="sentences" enterKeyHint="enter"
           id={bioId}
           name="bio"
           value={bio}
@@ -191,7 +191,6 @@ export function ProfileEditor({
           aria-describedby={fieldError("bio") ? `${bioId}-help ${bioId}-problem` : `${bioId}-help`}
           className="nf-field resize-y"
           placeholder="Where you are, what you know, what you are looking for."
-          autoCapitalize="sentences"
         />
         <p id={`${bioId}-help`} className="mt-xs flex items-start justify-between gap-sm text-[length:var(--nf-text-overline)] leading-relaxed">
           <span className="text-[var(--nf-content-muted)]">

@@ -23,8 +23,10 @@ import org.json.JSONObject;
  *   takeCrashReport  the shell's own crash from the last run, once (ValloCrashLog).
  *   notePath         the page's current path, so a renderer the system
  *                    stopped for memory reopens on the same page (MainActivity).
- *   handoff          the page has painted: the launch overlay (LaunchMark)
- *                    fades onto it once the drawing has landed.
+ *   handoff          the page has painted. The launch overlay (LaunchMark) is
+ *                    no longer shown (14 November 2026), so this only answers.
+ *   pageOpens        answered and nothing else: its presence tells the page
+ *                    this shell draws no opening, so the page starts its own.
  *
  * Registered in MainActivity before the bridge starts. Built, NOT tested on a
  * device: no Android SDK runs in this repository.
@@ -64,6 +66,12 @@ public class ValloShellPlugin extends Plugin {
     public void handoff(PluginCall call) {
         Activity activity = getActivity();
         if (activity != null) activity.runOnUiThread(LaunchMark::handOff);
+        call.resolve();
+    }
+
+    /** The opening is the page's: this shell draws no mark of its own. The page reads this method's presence. */
+    @PluginMethod
+    public void pageOpens(PluginCall call) {
         call.resolve();
     }
 }

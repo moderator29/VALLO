@@ -6,7 +6,7 @@ import { ReportSheet } from "@/components/social/ReportSheet";
 import type { ReportWords } from "@/components/social/sheet-words";
 import { useOverlay } from "@/lib/ui/use-overlay";
 import { Sheet } from "@/components/ui/Sheet";
-import { ActionSheet, type QuickAction, type SheetRow } from "@/components/ui/ActionSheet";
+import { ActionSheet, type ActionSheetRow } from "@/components/ui/ActionSheet";
 import {
   blockUser,
   muteTarget,
@@ -104,11 +104,11 @@ export function ProfileMenu({
    * Three overlays live in this component and they are not the same kind of
    * thing, so they do not get the same treatment.
    *
-   * The MENU is a `role="menu"` popover. It never claimed `aria-modal` and it
-   * must not start: a menu is not a modal, nothing behind it is inert, and
-   * trapping Tab in a four-row popover strands the keyboard. It keeps Escape
-   * and its focus return, which it already had, and that is the whole
-   * contract for a popover.
+   * The MENU is the shared action sheet (components/ui/ActionSheet.tsx,
+   * handoff 6.3): the platform's sheet on a phone, and on a wide screen with
+   * a mouse a popover hung from the `…`, kept wholly on screen (D79, founder:
+   * the old menu "renders clipped off the right edge"). Escape, Back, the
+   * focus trap and the return to the `…` are the shared part's.
    *
    * The BLOCK CONFIRM is the platform's `Sheet`: a dismissable question, so
    * it takes the drag and flick to close, Back, Escape and the focus trap
@@ -135,11 +135,10 @@ export function ProfileMenu({
    * already writing, with no sheet in the way.
    */
   const copyLink = () => {
-    setOpen(false);
     const url = `${window.location.origin}/u/${handle}`;
     if (typeof navigator !== "undefined" && navigator.clipboard) {
       void navigator.clipboard.writeText(url);
-      banner.quick(POST_COPY.copied);
+      banner.success(POST_COPY.copied);
       return;
     }
     banner.info(`The address is ${displayHost()}/u/${handle}`);
@@ -152,7 +151,6 @@ export function ProfileMenu({
   };
 
   const onMute = () => {
-    setOpen(false);
     if (requireSignIn()) return;
     const next = !muted;
     startTransition(async () => {
@@ -269,86 +267,49 @@ export function ProfileMenu({
     );
   }
 
-  /*
-   * THE MENU IS THE PLATFORM'S ACTION SHEET NOW (handoff 6.3 part 2), and
-   * that closes D79 by construction rather than by arithmetic. It used to be
-   * a `role="menu"` popover hanging off the trigger, which on a phone
-   * "renders clipped off the right edge" (the founder), and a layout effect
-   * measured the viewport and slid it back inside on every open. A sheet is
-   * anchored to the bottom edge of the screen and cannot be clipped by a
-   * trigger's position, so the measuring went with the popover. On a wide
-   * screen `Sheet` already becomes a centred dialog (overlays.css), which is
-   * the popover's job done by the primitive.
-   *
-   * What it gains with it: the drag and flick to close, Back, the focus trap
-   * and its return, the scroll lock, and rows at the platform's size instead
-   * of menu items at the social layer's.
-   */
-  const quick: QuickAction[] = [
-    {
-      key: "copy",
-      label: "Copy link",
-      icon: "link",
-      onSelect: copyLink,
-      "data-testid": "profile-menu-copy",
-    },
+  /* The rows: the same four acts the menu always had, each a real one.
+     Report and Block are the destructive pair, last, and each asks in a
+     sheet of its own (the report form; the block that explains itself), so
+     the action sheet hands over to those rather than asking twice. */
+  const rows: ActionSheetRow[] = [
+    { id: "copy", label: "Copy link to this page", icon: "link", onSelect: copyLink, testId: "profile-menu-copy" },
     ...(isOwner
-      ? []
+      ? [{ id: "edit", label: "Edit your profile", icon: "pencil" as const, href: `/u/${handle}/edit`, testId: "profile-menu-edit" }]
       : [
           {
-            key: "mute",
-            label: muted ? "Unmute" : "Mute",
-            icon: "mute" as const,
-            on: muted,
+            id: "mute",
+            label: muted ? `Unmute ${who}` : `Mute ${who}`,
+            ...(muted ? {} : { hint: "Their posts stay out of your feeds." }),
+            icon: muted ? ("bell" as const) : ("mute" as const),
             onSelect: onMute,
-            "data-testid": "profile-menu-mute",
+            testId: "profile-menu-mute",
+          },
+          {
+            id: "report",
+            kind: "danger" as const,
+            label: reportWords.reportWho.replace("{who}", () => who),
+            icon: "flag" as const,
+            confirm: "own" as const,
+            onSelect: () => {
+              if (requireSignIn()) return;
+              setReporting(true);
+            },
+            testId: "profile-menu-report",
+          },
+          {
+            id: "block",
+            kind: "danger" as const,
+            label: `Block ${who}`,
+            icon: "block" as const,
+            confirm: "own" as const,
+            onSelect: () => {
+              if (requireSignIn()) return;
+              setConfirmBlock(true);
+            },
+            testId: "profile-menu-block",
           },
         ]),
   ];
-
-  const rows: SheetRow[] = isOwner
-    ? [
-        {
-          key: "edit",
-          label: "Edit your profile",
-          icon: "pencil",
-          href: `/u/${handle}/edit`,
-          chevron: true,
-          "data-testid": "profile-menu-edit",
-        },
-      ]
-    : [
-        {
-          key: "report",
-          label: reportWords.reportWho.replace("{who}", () => who),
-          sub: "Tell us what is wrong and a person reads it.",
-          icon: "flag",
-          danger: true,
-          /* The report form asks for a reason and a sentence; a confirm in
-             front of a form is a question about a question. */
-          confirmElsewhere: true,
-          onSelect: () => {
-            if (requireSignIn()) return;
-            setReporting(true);
-          },
-          "data-testid": "profile-menu-report",
-        },
-        {
-          key: "block",
-          label: `Block ${who}`,
-          sub: "You will not see each other anywhere on Vallo.",
-          icon: "block",
-          danger: true,
-          /* Blocking has its own sheet below, which says what it does and
-             offers Undo afterwards. */
-          confirmElsewhere: true,
-          onSelect: () => {
-            if (requireSignIn()) return;
-            setConfirmBlock(true);
-          },
-          "data-testid": "profile-menu-block",
-        },
-      ];
 
   return (
     <>
@@ -363,16 +324,14 @@ export function ProfileMenu({
       >
         <UiIcon name="more" size={20} />
       </button>
-
       <ActionSheet
         open={open}
         onOpenChange={setOpen}
         title={`Actions for ${who}`}
+        anchor={openerRef}
         testId="profile-menu"
-        head={{ name: who, line: `@${handle}`, icon: "user" }}
-        quick={quick}
+        header={{ title: who, ...(displayLabel ? { subtitle: `@${handle}` } : {}) }}
         rows={rows}
-        doneLabel="Done"
       />
 
       {/* ------------------------------------------------ before the block */}

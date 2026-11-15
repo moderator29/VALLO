@@ -105,13 +105,24 @@ function readFunding(row: RowLike): ProtectedDeal["funding"] {
   const raw = row.funding_instructions;
   if (!raw || typeof raw !== "object" || Array.isArray(raw)) return null;
   const f = raw as RowLike;
-  /* TODO(provider-docs): the instruction's own field names. Both spellings
-     Vallo's adapter may store are read; anything else draws no details. */
+  /* The keys `issueInstructions` stores (protected-rail.ts); anything else draws no details. */
   const bank = str(f.bank_name) ?? str(f.bank);
   const accountName = str(f.account_name);
   const accountNumber = str(f.account_number);
   if (!bank || !accountName || !accountNumber) return null;
-  return { bank, accountName, accountNumber, expiresAt: str(row.funding_expires_at) ?? str(f.expires_at) };
+  /* The total the provider said to transfer: the amount, plus its fee when the payer bears it. */
+  const total = num(f.amount_minor);
+  return { bank, accountName, accountNumber, expiresAt: str(row.funding_expires_at) ?? str(f.expires_at), amountMinor: total !== null && total > 0 ? total : null };
+}
+
+const PAYOUT_STATES = ["processing", "paid", "failed", "reversed"] as const;
+
+/** The transfer to the lister's bank, from the payout columns (pending SQL); absent while they are not there or empty. */
+function readPayoutState(row: RowLike): ProtectedDeal["payout"] {
+  const status = row.payout_status;
+  if (typeof status !== "string" || !(PAYOUT_STATES as readonly string[]).includes(status)) return null;
+  const sent = num(row.payout_amount_minor);
+  return { status: status as (typeof PAYOUT_STATES)[number], completedAt: str(row.payout_completed_at), amountMinor: sent !== null && sent > 0 ? sent : null };
 }
 
 function dayOf(iso: string): string | null {
@@ -120,7 +131,7 @@ function dayOf(iso: string): string | null {
   return new Intl.DateTimeFormat("en-NG", { day: "numeric", month: "long", timeZone: "Africa/Lagos" }).format(at);
 }
 
-function datesFor(kind: string, terms: RowLike | null): string | null {
+export function datesFor(kind: string, terms: RowLike | null): string | null {
   if (!terms) return null;
   if (kind === "stay") {
     const from = str(terms.check_in);
@@ -268,6 +279,7 @@ export async function buildProtectedDeal(
       },
       issue,
       listerPayoutMissing: missing,
+      payout: readPayoutState(arr),
       partnerMark: mark_,
       receipt: {
         providerReference: str(arr.provider_reference) ?? str(arr.provider_arrangement_id),

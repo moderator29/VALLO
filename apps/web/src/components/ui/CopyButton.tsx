@@ -13,8 +13,10 @@ import "./copy-button.css";
  *
  * A small icon button with an accessible name. It copies through the async
  * clipboard with a textarea fallback (`lib/ui/clipboard.ts`), says what it
- * copied in the one top banner ("Link copied", "Code copied", "Copied"), and
- * shows a check for a beat in place of the copy glyph. The swap is a change of
+ * copied in the quick pill at the bottom of the screen ("Link copied", "Code
+ * copied", "Copied"; founder, 14 November 2026), and shows a check for a beat
+ * in place of the copy glyph. A copy that failed is an error and is said at
+ * the top. The swap is a change of
  * glyph, not a motion, so it needs no reduced-motion branch. It works with or
  * without the client copy provider (the admin console has none), which is why
  * its words are plain English props with defaults.
@@ -59,7 +61,11 @@ export function CopyButton({
   );
 }
 
-/** A value shown as text with its copy button beside it: a reference, an id, an email. */
+/**
+ * A value shown as text with its copy button beside it: a reference, an id, an
+ * email. A double tap on the value itself copies it too (copy without the
+ * menu), and says so the same way; the button stays the named control.
+ */
 export function CopyValue({
   value,
   kind = "text",
@@ -77,7 +83,9 @@ export function CopyValue({
 }) {
   return (
     <span className={`nf-copy-value ${className ?? ""}`.trim()} data-testid={testId}>
-      <span className="nf-copy-value__text">{value}</span>
+      <span className="nf-copy-value__text" onDoubleClick={() => void copyAndSay(value, kind, message)}>
+        {value}
+      </span>
       <CopyButton value={value} kind={kind} {...(label ? { label } : {})} {...(message ? { message } : {})} />
     </span>
   );

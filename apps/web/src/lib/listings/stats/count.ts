@@ -52,7 +52,34 @@ const defaultDeps: CountDeps = {
       : null,
 };
 
-export async function countListingView(request: Request, deps: CountDeps = defaultDeps): Promise<CountOutcome> {
+/** What is being counted: an open of the page, or a share of it. */
+type Counted = "view" | "share";
+
+const shareDeps: CountDeps = {
+  ...defaultDeps,
+  /* A person shares far less often than they open: twenty an hour from one network is plenty. */
+  allow: async (subject) => (await consume({ bucket: "listing_share", subject, limit: 20, windowSeconds: 3_600 })).allowed,
+};
+
+export function countListingView(request: Request, deps: CountDeps = defaultDeps): Promise<CountOutcome> {
+  return countListing("view", request, deps);
+}
+
+/**
+ * LISTING SHARES (founder, 14 November 2026). The listing page posts `{ id }`
+ * to `/api/listing-share` when a share has actually gone out: the phone's
+ * share sheet finished, or the link was copied. The same door as a view (same
+ * site, a browser, consent, the rate limit), and the database keeps it to one
+ * share per person per listing per Lagos day and leaves out the lister, staff
+ * and internal accounts (`public.record_listing_share`, pending migration
+ * `listing_shares_2026-11-14.sql`). Before that SQL the function is missing
+ * and nothing is counted.
+ */
+export function countListingShare(request: Request, deps: CountDeps = shareDeps): Promise<CountOutcome> {
+  return countListing("share", request, deps);
+}
+
+async function countListing(what: Counted, request: Request, deps: CountDeps): Promise<CountOutcome> {
   if (Number(request.headers.get("content-length") ?? "0") > 1024) return "dropped";
   let listingId: string | null = null;
   try {
@@ -86,13 +113,13 @@ export async function countListingView(request: Request, deps: CountDeps = defau
     if (!db) return "unavailable";
     const viewer = await deps.viewer();
     if (viewer && isQaAccount(viewer)) return "refused:bot";
-    const { data, error } = await db.rpc("record_listing_view", {
+    const { data, error } = await db.rpc(what === "share" ? "record_listing_share" : "record_listing_view", {
       p_listing: listingId,
       p_viewer: viewer,
       p_guest: viewer ? null : guestKey(address, userAgent ?? ""),
     });
     if (!error) return data === true ? "counted" : "repeat";
-    if (isMissingFunction(error) && viewer) {
+    if (what === "view" && isMissingFunction(error) && viewer) {
       /* Before the pending SQL: the V-73 recorder still counts a member's open,
          with the internal-account check RecordViews used to make (C10). */
       const { isInternalAccount } = await import("@/lib/admin/internal-accounts");

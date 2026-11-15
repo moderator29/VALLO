@@ -271,6 +271,7 @@ const NAMES: Readonly<Record<string, string>> = {
   "/admin/payments": "Payments",
   "/admin/chargebacks": "Chargebacks",
   "/admin/arrangements": "the arrangement desk",
+  "/admin/arrangements/[id]": "the arrangement",
   "/admin/chargebacks/[chargebackId]": "the chargeback",
   "/admin/reference": "Reference",
   "/admin/settings": "Settings",

@@ -134,7 +134,7 @@ export function ShareToFeedSheet({ open, onClose, listingId }: { open: boolean; 
               November 2026): the same order the post takes in the feed. */}
           <label className="nf-lsp__note">
             <span className="nf-body font-semibold">{SHARE_WORDS.noteLabel}</span>
-            <textarea
+            <textarea autoCapitalize="sentences" enterKeyHint="enter"
               value={note}
               onChange={(event) => setNote(event.target.value)}
               placeholder={SHARE_WORDS.notePlaceholder}
@@ -142,7 +142,6 @@ export function ShareToFeedSheet({ open, onClose, listingId }: { open: boolean; 
               data-testid="share-note"
               aria-describedby="share-note-count"
               className="nf-lsp__textarea"
-              autoCapitalize="sentences"
             />
             <span id="share-note-count" className="nf-caption text-[var(--nf-content-muted)]" data-testid="share-note-count">
               {SHARE_WORDS.noteCount.replace("{count}", String(length)).replace("{max}", String(LISTING_SHARE_NOTE_MAX))}

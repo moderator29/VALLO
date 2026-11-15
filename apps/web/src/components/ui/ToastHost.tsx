@@ -4,15 +4,20 @@ import { useEffect, useRef, useState, useSyncExternalStore, type PointerEvent } 
 import { usePathname } from "next/navigation";
 import { UiIcon, type UiIconName } from "@/design-system/icons/UiIcon";
 import { useRootFlag } from "@/lib/ui/root-flag";
+import { prefersCalm } from "@/lib/ui/calm";
 import {
   BANNER_TIMING,
+  QUICK_TIMING,
   bannerExitMs,
+  currentQuick,
   currentToast,
+  dismissQuick,
   dismissToast,
   noteRouteChange,
-  quickExitMs,
+  subscribeQuick,
   subscribeToast,
   swipeDismisses,
+  type QuickItem,
   type ToastItem,
 } from "@/lib/ui/toast";
 
@@ -47,6 +52,15 @@ export const exitMs = bannerExitMs;
 
 function useToastItem(): ToastItem | null {
   return useSyncExternalStore(subscribeToast, currentToast, () => null);
+}
+
+function useQuickItem(): QuickItem | null {
+  return useSyncExternalStore(subscribeQuick, currentQuick, () => null);
+}
+
+/** How long a leaving pill stays mounted: its 0.4 seconds, or nothing where motion is turned down. */
+export function quickExitMs(): number {
+  return prefersCalm() ? 0 : QUICK_TIMING.exitMs;
 }
 
 /* A SINGLETON, even if it is mounted twice. In the app it is mounted once in
@@ -96,44 +110,89 @@ export function ToastHost() {
     const t = window.setTimeout(() => {
       setShown(null);
       setLeaving(false);
-    }, shown.quick ? quickExitMs() : exitMs());
+    }, exitMs());
     return () => window.clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps -- `shown` is read, the change that matters is `item`
   }, [item]);
+
+  /* THE QUICK PILL (`banner.quick`): its own slot at the bottom, kept through
+     its 0.4 second exit the same way. */
+  const quick = useQuickItem();
+  const [shownQuick, setShownQuick] = useState<QuickItem | null>(null);
+  const [quickLeaving, setQuickLeaving] = useState(false);
+  useEffect(() => {
+    if (quick) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- the exit keeps the last pill on screen
+      setShownQuick(quick);
+      setQuickLeaving(false);
+      return;
+    }
+    if (!shownQuick) return;
+    setQuickLeaving(true);
+    const t = window.setTimeout(() => {
+      setShownQuick(null);
+      setQuickLeaving(false);
+    }, quickExitMs());
+    return () => window.clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- `shownQuick` is read, the change that matters is `quick`
+  }, [quick]);
 
   /* A second host (a test harness one beside the app's) draws nothing. */
   if (!primary) return null;
 
   return (
-    /* No name and no role: an empty landmark on every page is noise, and the
-       two live lanes inside do the announcing (axe: aria-prohibited-attr). */
     <>
-      <div className="nf-toast-host">
+      <BannerLanes shown={shown} leaving={leaving} />
+      <div className="nf-quick-host">
         <div aria-live="polite" aria-atomic="true" className="nf-toast-host__lane">
-          {shown && !shown.quick && !urgent(shown.tone) ? (
-            <ToastCard key={shown.id} item={shown} leaving={leaving} />
-          ) : null}
+          {shownQuick ? <QuickPill key={shownQuick.id} item={shownQuick} leaving={quickLeaving} /> : null}
         </div>
-        <div aria-live="assertive" aria-atomic="true" className="nf-toast-host__lane">
-          {shown && !shown.quick && urgent(shown.tone) ? (
-            <ToastCard key={shown.id} item={shown} leaving={leaving} />
-          ) : null}
-        </div>
-      </div>
-      {/* THE QUICK PILL (founder, 14 November 2026): the same store's lighter
-          voice, drawn near the BOTTOM, above the dock, the composer or the
-          home indicator, where the hand just acted. Its own fixed host so the
-          top banner's geometry is untouched; still one message at a time,
-          because the store holds one. */}
-      <div aria-live="polite" aria-atomic="true" className="nf-quick-host">
-        {shown && shown.quick ? <QuickPill key={shown.id} item={shown} leaving={leaving} /> : null}
       </div>
     </>
   );
 }
 
-/** One clean mark per tone (docs/UX_SYSTEM.md, "Feedback"). */
-/*
+/**
+ * THE QUICK PILL: a tick and a few words, above the composer or the dock. No
+ * close, no action, nothing to press: it is said, held for `holdMs`, and
+ * leaves by itself. The same words said again restart the hold in place.
+ */
+function QuickPill({ item, leaving }: { item: QuickItem; leaving: boolean }) {
+  useEffect(() => {
+    const t = window.setTimeout(() => dismissQuick(item.id), QUICK_TIMING.holdMs);
+    return () => window.clearTimeout(t);
+  }, [item.id, item.shownAt]);
+
+  return (
+    <div role="status" className="nf-quick" data-leaving={leaving || undefined} data-testid={item["data-testid"] ?? "quick-pill"}>
+      <span className="nf-quick__mark" aria-hidden="true">
+        <UiIcon name="circle-check" size={17} />
+      </span>
+      <span className="nf-quick__text">{item.message}</span>
+    </div>
+  );
+}
+
+function BannerLanes({ shown, leaving }: { shown: ToastItem | null; leaving: boolean }) {
+  return (
+    /* No name and no role: an empty landmark on every page is noise, and the
+       two live lanes inside do the announcing (axe: aria-prohibited-attr). */
+    <div className="nf-toast-host">
+      <div aria-live="polite" aria-atomic="true" className="nf-toast-host__lane">
+        {shown && !urgent(shown.tone) ? (
+          <ToastCard key={shown.id} item={shown} leaving={leaving} />
+        ) : null}
+      </div>
+      <div aria-live="assertive" aria-atomic="true" className="nf-toast-host__lane">
+        {shown && urgent(shown.tone) ? (
+          <ToastCard key={shown.id} item={shown} leaving={leaving} />
+        ) : null}
+      </div>
+    </div>
+  );
+}
+
+/**
  * ONE CIRCLED MARK PER TONE (founder, 14 November 2026, holding up EscrowPay
  * and WhatsApp: "that checkmark icon make it exactly the one in the escrow
  * pay ... it's same as the WhatsApp ss"). Both draw the ring and the mark as
@@ -305,46 +364,6 @@ function ToastCard({ item, leaving }: { item: ToastItem; leaving: boolean }) {
       >
         <UiIcon name="close" size={16} />
       </button>
-    </div>
-  );
-}
-
-/**
- * THE QUICK PILL: a tick in the success colour, the words, nothing else. No
- * close button, no action, no pause on touch (it does not take the pointer at
- * all: a copy confirmation must never block the tap under it). The same words
- * fired twice restart this clock in place (same id, a new `shownAt`), with no
- * second entrance. Under reduced motion the stylesheet collapses its slide to
- * a fade and the duration tokens to 1ms.
- */
-function QuickPill({ item, leaving }: { item: ToastItem; leaving: boolean }) {
-  /* `data-toast-up` on <html> while it is on screen: back to top and other
-     bottom floaters step aside for it, exactly as they did for the old pill. */
-  useRootFlag("toast-up");
-
-  const timer = useRef<number | null>(null);
-  useEffect(() => {
-    if (timer.current !== null) window.clearTimeout(timer.current);
-    timer.current = window.setTimeout(() => dismissToast(item.id), item.durationMs);
-    return () => {
-      if (timer.current !== null) window.clearTimeout(timer.current);
-    };
-    /* The clock restarts when the same words are said again (`shownAt` moves). */
-  }, [item.id, item.shownAt, item.durationMs]);
-
-  return (
-    <div
-      data-testid={item["data-testid"]}
-      data-leaving={leaving || undefined}
-      role="status"
-      className="nf-quick"
-    >
-      <span className="nf-quick__mark" aria-hidden="true">
-        {/* The banner's mark, at the pill's size: one circled tick, as the
-            references draw it. */}
-        <UiIcon name="circle-check" size={17} />
-      </span>
-      <p className="nf-quick__text">{item.message}</p>
     </div>
   );
 }

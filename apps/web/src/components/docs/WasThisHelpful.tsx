@@ -54,14 +54,13 @@ export function WasThisHelpful({ path, title }: { path: string; title: string })
           <label htmlFor="dk-helpful-note" className="nf-dk-helpful__q">
             What was missing or wrong?
           </label>
-          <textarea
+          <textarea autoCapitalize="sentences" enterKeyHint="enter"
             id="dk-helpful-note"
             className="nf-field"
             value={note}
             maxLength={1500}
             onChange={(event) => setNote(event.target.value)}
             placeholder="A sentence is enough."
-            autoCapitalize="sentences"
           />
           {stage === "failed" && <FieldProblem id="helpful-problem" message={message} />}
           <div className="nf-dk-helpful__row">

@@ -219,7 +219,7 @@ export function ReviewForm({
         >
           {w.bodyLabel}
         </label>
-        <textarea
+        <textarea autoCapitalize="sentences" enterKeyHint="enter"
           id="review-body"
           name="body"
           rows={6}
@@ -228,7 +228,6 @@ export function ReviewForm({
           onChange={(e) => setBody(e.target.value)}
           placeholder={w.bodyPlaceholder}
           className="nf-field mt-heading w-full resize-y leading-relaxed"
-          autoCapitalize="sentences"
         />
         <p className="mt-row flex items-center justify-between gap-row nf-caption text-[var(--nf-content-muted)]">
           <span>{w.bodyHint}</span>

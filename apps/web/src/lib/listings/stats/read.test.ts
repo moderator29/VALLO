@@ -27,6 +27,15 @@ describe("the page's read fails closed", () => {
     expect(figuresFrom({ views: 3, saves: 2 })).toEqual({ views: 3, saves: 2 });
   });
 
+  it("carries shares once the database answers them, and never invents a zero before", async () => {
+    /* Before the shares migration the row has no shares column: not known, so absent. */
+    expect(figuresFrom({ views: 3, saves: 2 })).not.toHaveProperty("shares");
+    expect(figuresFrom({ views: 3, saves: 2, shares: null })).not.toHaveProperty("shares");
+    expect(figuresFrom({ views: 3, saves: 2, shares: "x" })).not.toHaveProperty("shares");
+    expect(figuresFrom({ views: 3, saves: 2, shares: 0 })).toEqual({ views: 3, saves: 2, shares: 0 });
+    expect(await fetchListingStats(client({ data: [{ views: "40", saves: 2, shares: 7 }], error: null }), ID)).toEqual({ views: 40, saves: 2, shares: 7 });
+  });
+
   it("reads nothing at all without a database or for an id that is not a uuid", async () => {
     clearListingStats();
     expect(await readListingStats("not-an-id")).toBeNull();
@@ -60,7 +69,7 @@ describe("the cards' counts, one query for the page", () => {
     expect(await fetchListingStatsFor(client({ data: null, error: { code: "PGRST202" } }), [ID])).toBeNull();
   });
 
-  it("attaches nothing without a database, and leaves an example alone", async () => {
+  it("attaches nothing without a database, to a real listing or an example", async () => {
     const { withListingStats } = await import("./read");
     const rows = [
       { id: ID, isDemo: false, title: "a" },

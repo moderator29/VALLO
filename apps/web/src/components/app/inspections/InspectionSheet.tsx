@@ -694,7 +694,7 @@ export function InspectionSheet({
               </p>
             )}
             {!noViewing && (
-              <textarea
+              <textarea autoCapitalize="sentences" enterKeyHint="enter"
                 id={`notes-${inspection.id}`}
                 className="nf-ix-notes__field"
                 rows={1}
@@ -707,7 +707,6 @@ export function InspectionSheet({
                   if (editable && notes !== (saved.notes ?? "")) saveReport({});
                 }}
                 data-testid="inspection-notes"
-                autoCapitalize="sentences"
               />
             )}
           </div>

@@ -3,7 +3,7 @@
 import { refreshUnreadConversations, useUnreadConversations } from "@/lib/messages/unread-live";
 import { NewPill } from "@/components/ui/NewPill";
 import { newSince, settleBaseline } from "@/lib/ui/small-rules";
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { useClientCopy } from "@/lib/i18n/client-copy";
 import Link from "next/link";
@@ -24,8 +24,9 @@ import type { Dictionary } from "@vallo/i18n/core";
 import type { ThreadContextKind } from "@/lib/messages/db";
 import { Segmented } from "@/components/ui/Segmented";
 import { CountTabs } from "@/components/ui/CountTabs";
-import { ActionSheet, type QuickAction, type SheetRow } from "@/components/ui/ActionSheet";
+import { ActionSheet, type ActionSheetRow } from "@/components/ui/ActionSheet";
 import { useLongPress } from "@/lib/ui/use-long-press";
+import "./inbox-menu.css";
 import { useInboxPart } from "@/components/app/threads/use-inbox-copy";
 import { formatNumber, plural } from "@vallo/i18n/core";
 import { useClientLocale } from "@/lib/i18n/use-client-locale";
@@ -129,13 +130,10 @@ const POLISH_WORDS = {
   mutedDone: "Muted. You will not be notified about this chat",
   unmutedDone: "Unmuted",
   close: "Close",
-  /* The row's own sheet (handoff 6.3 part 2, 14 November 2026). */
-  rowMenuTitle: "Actions for this chat",
-  open: "Open",
-  done: "Done",
-  archiveRow: "Archive",
-  moveBackRow: "Move back to the inbox",
-  archiveRowNote: "It leaves your inbox. The other person still sees it.",
+  /* The row's action sheet (handoff 6.3). */
+  more: "More actions",
+  menuTitle: "Actions for {name}",
+  noListing: "Direct message",
 };
 
 /**
@@ -248,17 +246,14 @@ function inView(row: InboxRow, view: View): boolean {
 function Row({
   row,
   typing,
-  onArchive,
-  archivePending,
+  onMenu,
+  menuOpen = false,
   presenceWord,
   unreadWord,
   words,
   query = "",
   swipe = [],
-  onHold,
 }: {
-  /** Hold the row to open its sheet (handoff 6.3 part 2). */
-  onHold?: (row: InboxRow) => void;
   row: InboxRow;
   typing: boolean;
   /** The search, so the row marks where it matched. */
@@ -266,22 +261,28 @@ function Row({
   /** The row's swipe actions on touch (`InboxSwipe`). */
   swipe?: SwipeAction[];
   /** The row's own words, from the inbox copy. */
-  words: { typing: string; archive: string; moveBack: string };
+  words: { typing: string };
   /** "Online now" and "3 unread messages", already worded and counted. */
   presenceWord: string;
   unreadWord: string;
-  /** Absent where archiving is not open (signed out, or the table is not live). */
-  onArchive?: (row: InboxRow) => void;
-  archivePending?: boolean;
+  /**
+   * Opens the row's action sheet: from a long press (no control to hang a
+   * popover from) or from the row's own More button, which is passed along
+   * so a wide screen can hang the popover from it. Absent where the row has
+   * no action to offer (signed out, or the tables are not live).
+   */
+  onMenu?: (row: InboxRow, from: HTMLElement | null) => void;
+  /** This row's sheet is the one that is open. */
+  menuOpen?: boolean;
 }) {
+  /* Hold the row for its actions (a phone's own long press does the same);
+     a mouse keeps its right click and has the More button. */
+  const press = useLongPress(() => onMenu?.(row, null), { disabled: !onMenu });
   const glyph = row.contextKind ? CONTEXT_GLYPH[row.contextKind] : undefined;
   /* One short line (founder, 11 October 2026): line breaks folded, cut at a
      word. A shared card previews as its words, never as the path it carries. */
   /* Searching: a match past the first line is brought into view. */
   const preview = query.trim() ? previewLine(snippetAround(row.lastMessage, query)) : previewLine(row.lastMessage);
-  /* A hold opens the row's sheet; the click that ends the hold is swallowed
-     by the hook, so the conversation does not open behind it. */
-  const hold = useLongPress(() => onHold?.(row), { disabled: !onHold });
   return (
     <li className="flex items-center gap-3xs">
       <InboxSwipe actions={swipe}>
@@ -289,8 +290,9 @@ function Row({
         href={`/messages/${row.id}`}
         data-testid="inbox-row"
         data-unread={row.unread > 0 || undefined}
+        data-holding={press.holding || undefined}
         className="nf-inbox-row min-w-0 flex-1"
-        {...hold.handlers}
+        {...press.handlers}
       >
         {/* The avatar in the thread family's lit ring, carrying the verified
             mark: one mark per person per row, where the eye lands first. */}
@@ -369,16 +371,17 @@ function Row({
         </span>
       </Link>
       </InboxSwipe>
-      {onArchive && (
+      {onMenu && (
         <Button
           variant="icon"
-          leadingIcon={row.archived ? "arrow-up" : "archive"}
-          onClick={() => onArchive(row)}
-          disabled={archivePending}
-          aria-label={`${row.archived ? words.moveBack : words.archive}: ${row.counterpartName}`}
-          title={row.archived ? words.moveBack : words.archive}
-          data-testid="inbox-archive"
-          className="shrink-0"
+          leadingIcon="more"
+          onClick={(event) => onMenu(row, event.currentTarget)}
+          aria-label={`${POLISH_WORDS.more}: ${row.counterpartName}`}
+          aria-haspopup="dialog"
+          aria-expanded={menuOpen}
+          title={POLISH_WORDS.more}
+          data-testid="inbox-row-more"
+          className="nf-inbox-more shrink-0"
         />
       )}
     </li>
@@ -497,7 +500,7 @@ export function Inbox({
   const newConversations = newSince(baseline, liveUnread);
   const [side, setSide] = useState<Side>(initialSide);
   const [view, setView] = useState<View>("recent");
-  const [archiving, startArchiving] = useSafeTransition();
+  const [, startArchiving] = useSafeTransition();
   /* Optimistic: an archived row leaves Recent the moment it is tapped. */
   const [archivedLocal, setArchivedLocal] = useState<Record<string, boolean>>({});
   /* Optimistic too: a row marked read by a swipe loses its count at once. */
@@ -506,12 +509,17 @@ export function Inbox({
   const [prefsLocal, setPrefsLocal] = useState<Record<string, ConversationPref>>({});
   /* The conversation whose mute choices are open. */
   const [muteTarget, setMuteTarget] = useState<InboxRow | null>(null);
-  /* The conversation whose own sheet is open (a hold on the row). */
-  const [menuRow, setMenuRow] = useState<InboxRow | null>(null);
   const [query, setQuery] = useState("");
   /* GRADE 1: search is a button in the header until it is wanted (R59). */
   const [searchOpen, setSearchOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  /* The row whose action sheet is up, as it was when the sheet opened (every
+     action closes the sheet, so a snapshot cannot go stale on screen), and
+     the More button it was opened from, when it was. */
+  const [rowMenu, setRowMenu] = useState<{ row: InboxRow; anchored: boolean; open: boolean } | null>(null);
+  const rowMenuAnchor = useRef<HTMLElement | null>(null);
+  /* The header's More button: the inbox's options hang from it on a wide screen. */
+  const optionsAnchor = useRef<HTMLButtonElement | null>(null);
   const [marking, startMarking] = useSafeTransition();
 
   /*
@@ -740,6 +748,58 @@ export function Inbox({
       </>
     ) : null;
 
+  /* What can be done to one conversation, in one place: the swipe uncovers
+     these and the action sheet lists them, so the two can never disagree.
+     Each is offered only where its table is live. */
+  const rowActions = (row: InboxRow): SwipeAction[] => [
+    ...(canMarkRead && row.unread > 0
+      ? [{ key: "read", label: POLISH_WORDS.read, icon: "check" as const, run: () => markOneRead(row) }]
+      : []),
+    ...(prefsOpen
+      ? [
+          {
+            key: "pin",
+            label: row.pinnedAt ? POLISH_WORDS.unpin : POLISH_WORDS.pin,
+            icon: "bookmark" as const,
+            run: () => togglePin(row),
+          },
+          {
+            key: "mute",
+            label: isMuted(row.mutedUntil) ? POLISH_WORDS.unmute : POLISH_WORDS.mute,
+            icon: isMuted(row.mutedUntil) ? ("bell" as const) : ("mute" as const),
+            run: () => (isMuted(row.mutedUntil) ? setMute(row, null) : setMuteTarget(row)),
+          },
+        ]
+      : []),
+    ...(archiveOpen && view !== "reported"
+      ? [
+          {
+            key: "archive",
+            label: row.archived ? inbox.moveBack : inbox.archive,
+            icon: row.archived ? ("arrow-up" as const) : ("archive" as const),
+            tone: "brand" as const,
+            run: () => toggleArchive(row),
+          },
+        ]
+      : []),
+  ];
+  const openRowMenu = (row: InboxRow, from: HTMLElement | null) => {
+    rowMenuAnchor.current = from;
+    setRowMenu({ row, anchored: from !== null, open: true });
+  };
+  /* The sheet's rows are the same actions. Mute opens the "for how long"
+     sheet, so it carries the chevron; turning it back on is one press. */
+  const rowMenuRows: ActionSheetRow[] = rowMenu
+    ? rowActions(rowMenu.row).map((action) => ({
+        id: action.key,
+        label: action.label,
+        icon: action.icon,
+        onSelect: action.run,
+        ...(action.key === "mute" && !isMuted(rowMenu.row.mutedUntil) ? { chevron: true } : {}),
+        testId: `inbox-row-menu-${action.key}`,
+      }))
+    : [];
+
   const pick = (next: View) => {
     setView(next);
     setMenuOpen(false);
@@ -812,10 +872,13 @@ export function Inbox({
             </button>
             <button
               type="button"
+              ref={optionsAnchor}
               aria-label={plus?.more ?? inbox.title}
+              aria-haspopup="dialog"
+              aria-expanded={menuOpen}
               data-testid="inbox-more"
               className="nf-icon-btn h-11 w-11"
-              onClick={() => setMenuOpen(true)}
+              onClick={() => setMenuOpen((open) => !open)}
             >
               <UiIcon name="more" size={ICON.row} />
             </button>
@@ -868,48 +931,46 @@ export function Inbox({
       </div>
       ) : null}
       <div className="mt-sm" data-testid="inbox-views">
-        {/* The views as the founder's count tab row (14 November 2026, after
-            Snapchat's chat filters): one scrolling rail, radio semantics
-            because it filters the list below, the waiting counts as round
-            badges on the tabs that have a queue, "9+" past nine. */}
-        {/* A filter appears only when it has something in it. Recent and
-            Requests always show; the view you are on never vanishes under you.
-            GRADE 1 (R59): All, Unread and Requests as the one row; Archived
-            and Reported open from the options sheet and show a tab only while
-            they are the view. */}
-        <CountTabs
+        {/* The views as the shared count tabs (handoff 6.3): one row that
+            scrolls sideways, radio semantics because it filters the list
+            below, the waiting counts on the tabs that have a queue. A tab
+            never shrinks, so a count cannot run under its neighbour. */}
+        {/* A filter appears only when it has something in it. All always
+            shows; the view you are on never vanishes under you. Archived
+            shows once something is archived; Reported opens from the options
+            sheet and shows a tab only while it is the view. Every count is
+            taken from the rows already on the screen. */}
+        <CountTabs<View>
           label={tabLabels.filterLabel}
-          active={view}
-          onChange={(key) => setView(key as View)}
+          idPrefix="inbox-view"
+          value={view}
+          onChange={setView}
           items={VIEW_ORDER.filter(
             (key) =>
               key === "recent" ||
               view === key ||
               (key === "support" && supportRows.length > 0) ||
-              ((key === "unread" || key === "requests") && onSide.some((r) => inView(r, key))),
-          ).map((key) => {
-            const count =
+              ((key === "unread" || key === "requests" || key === "archived") && onSide.some((r) => inView(r, key))),
+          ).map((key) => ({
+            key,
+            label:
+              key === "requests"
+                ? tabLabels.requests
+                : key === "support"
+                  ? POLISH_WORDS.support
+                  : key === "recent" && plus
+                    ? plus.all
+                    : inbox.filters[key],
+            count:
               key === "unread"
                 ? unreadThreads
                 : key === "requests"
                   ? requests.length
                   : key === "support"
                     ? supportRows.filter((r) => r.unread).length
-                    : 0;
-            return {
-              key,
-              label:
-                key === "requests"
-                  ? tabLabels.requests
-                  : key === "support"
-                    ? POLISH_WORDS.support
-                    : key === "recent" && plus
-                      ? plus.all
-                      : inbox.filters[key],
-              ...(count > 0 ? { count } : {}),
-              "data-testid": `inbox-view-${key}`,
-            };
-          })}
+                    : 0,
+            testId: `inbox-view-${key}`,
+          }))}
         />
       </div>
 
@@ -947,52 +1008,23 @@ export function Inbox({
              One line between two conversations, nothing around either. */
           <ul className="nf-inbox-list">
             {pinned}
-            {shown.map((row) => (
-              <Row
-                key={row.id}
-                row={row}
-                typing={typing.has(row.id)}
-                onArchive={archiveOpen && view !== "reported" ? toggleArchive : undefined}
-                archivePending={archiving}
-                presenceWord={inbox.presence.online}
-                unreadWord={plural(row.unread, inbox.unreadBadge, locale)}
-                words={{ typing: inbox.typing, archive: inbox.archive, moveBack: inbox.moveBack }}
-                query={query}
-                onHold={setMenuRow}
-                swipe={[
-                  ...(canMarkRead && row.unread > 0
-                    ? [{ key: "read", label: POLISH_WORDS.read, icon: "check" as const, run: () => markOneRead(row) }]
-                    : []),
-                  ...(prefsOpen
-                    ? [
-                        {
-                          key: "pin",
-                          label: row.pinnedAt ? POLISH_WORDS.unpin : POLISH_WORDS.pin,
-                          icon: "bookmark" as const,
-                          run: () => togglePin(row),
-                        },
-                        {
-                          key: "mute",
-                          label: isMuted(row.mutedUntil) ? POLISH_WORDS.unmute : POLISH_WORDS.mute,
-                          icon: isMuted(row.mutedUntil) ? ("bell" as const) : ("mute" as const),
-                          run: () => (isMuted(row.mutedUntil) ? setMute(row, null) : setMuteTarget(row)),
-                        },
-                      ]
-                    : []),
-                  ...(archiveOpen && view !== "reported"
-                    ? [
-                        {
-                          key: "archive",
-                          label: row.archived ? inbox.moveBack : inbox.archive,
-                          icon: row.archived ? ("arrow-up" as const) : ("archive" as const),
-                          tone: "brand" as const,
-                          run: () => toggleArchive(row),
-                        },
-                      ]
-                    : []),
-                ]}
-              />
-            ))}
+            {shown.map((row) => {
+              const actions = rowActions(row);
+              return (
+                <Row
+                  key={row.id}
+                  row={row}
+                  typing={typing.has(row.id)}
+                  onMenu={actions.length > 0 ? openRowMenu : undefined}
+                  menuOpen={rowMenu?.open === true && rowMenu.row.id === row.id}
+                  presenceWord={inbox.presence.online}
+                  unreadWord={plural(row.unread, inbox.unreadBadge, locale)}
+                  words={{ typing: inbox.typing }}
+                  query={query}
+                  swipe={actions}
+                />
+              );
+            })}
           </ul>
         ) : query.trim().length > 0 ? (
           <Empty
@@ -1041,101 +1073,41 @@ export function Inbox({
         )}
       </div>
 
-      {/*
-        THE ROW'S OWN SHEET (handoff 6.3 part 2, the founder's Snapchat
-        long-press reference of 14 November 2026). Hold a conversation and
-        the person comes up with the things this inbox genuinely does to it:
-        open it, mark it read, pin it, mute it, archive it.
-
-        WHAT IS NOT HERE, and why. Call, Video and Profile would need the
-        counterpart's id or handle, which an inbox row does not carry
-        (`InboxRow`), and Block, Report and Delete have no per-conversation
-        door in this product today: blocking and reporting are on the
-        person's profile and inside the thread, where the evidence is. A
-        control that cannot work must not be drawn, so none of the six is.
-      */}
-      <ActionSheet
-        open={menuRow !== null}
-        onOpenChange={(next) => {
-          if (!next) setMenuRow(null);
-        }}
-        title={POLISH_WORDS.rowMenuTitle}
-        testId="inbox-row-menu"
-        {...(menuRow
-          ? {
-              head: {
-                name: menuRow.counterpartName,
-                ...(menuRow.listingTitle ? { line: menuRow.listingTitle } : {}),
-                ...(menuRow.counterpartAvatarUrl ? { thumb: menuRow.counterpartAvatarUrl } : {}),
-                icon: "user" as const,
-                href: `/messages/${menuRow.id}`,
-                "data-testid": "inbox-row-menu-open",
-              },
-            }
-          : {})}
-        quick={
-          menuRow
-            ? ([
-                {
-                  key: "open",
-                  label: POLISH_WORDS.open,
-                  icon: "chat-bubble",
-                  href: `/messages/${menuRow.id}`,
-                  "data-testid": "inbox-row-menu-chat",
-                },
-                ...(canMarkRead && menuRow.unread > 0
-                  ? [
-                      {
-                        key: "read",
-                        label: POLISH_WORDS.read,
-                        icon: "check" as const,
-                        onSelect: () => markOneRead(menuRow),
-                        "data-testid": "inbox-row-menu-read",
-                      },
-                    ]
-                  : []),
-                ...(prefsOpen
-                  ? [
-                      {
-                        key: "pin",
-                        label: menuRow.pinnedAt ? POLISH_WORDS.unpin : POLISH_WORDS.pin,
-                        icon: "bookmark" as const,
-                        on: Boolean(menuRow.pinnedAt),
-                        onSelect: () => togglePin(menuRow),
-                        "data-testid": "inbox-row-menu-pin",
-                      },
-                      {
-                        key: "mute",
-                        label: isMuted(menuRow.mutedUntil) ? POLISH_WORDS.unmute : POLISH_WORDS.mute,
-                        icon: isMuted(menuRow.mutedUntil) ? ("bell" as const) : ("mute" as const),
-                        on: isMuted(menuRow.mutedUntil),
-                        onSelect: () =>
-                          isMuted(menuRow.mutedUntil) ? setMute(menuRow, null) : setMuteTarget(menuRow),
-                        "data-testid": "inbox-row-menu-mute",
-                      },
-                    ]
-                  : []),
-              ] as QuickAction[])
-            : []
-        }
-        rows={
-          menuRow && archiveOpen && view !== "reported"
-            ? ([
-                {
-                  key: "archive",
-                  label: menuRow.archived ? POLISH_WORDS.moveBackRow : POLISH_WORDS.archiveRow,
-                  sub: menuRow.archived ? undefined : POLISH_WORDS.archiveRowNote,
-                  icon: "archive",
-                  onSelect: () => toggleArchive(menuRow),
-                  "data-testid": "inbox-row-menu-archive",
-                },
-              ] as SheetRow[])
-            : []
-        }
-        doneLabel={POLISH_WORDS.done}
-      />
-
       {/* Job 8: how long to mute a conversation for. */}
+      {/* ONE CONVERSATION'S ACTIONS (handoff 6.3): the person and what the
+          conversation is about in the header card, which opens it; then the
+          actions the swipe has. A long press opens it on a phone; the row's
+          More button opens it for a mouse and a keyboard, as a popover hung
+          from that button on a wide screen. */}
+      <ActionSheet
+        open={rowMenu?.open === true}
+        onOpenChange={(next) => {
+          if (!next) setRowMenu((current) => (current ? { ...current, open: false } : current));
+        }}
+        title={POLISH_WORDS.menuTitle.replace("{name}", rowMenu?.row.counterpartName ?? "")}
+        anchor={rowMenu?.anchored ? rowMenuAnchor : undefined}
+        testId="inbox-row-menu"
+        header={
+          rowMenu
+            ? {
+                title: rowMenu.row.counterpartName,
+                subtitle: rowMenu.row.listingTitle ?? POLISH_WORDS.noListing,
+                media: (
+                  <VerifiedAvatar
+                    name={rowMenu.row.counterpartName}
+                    tier={rowMenu.row.counterpartTier}
+                    kind={rowMenu.row.counterpartKind}
+                    photoUrl={rowMenu.row.counterpartAvatarUrl ?? undefined}
+                    size="md"
+                  />
+                ),
+                href: `/messages/${rowMenu.row.id}`,
+                testId: "inbox-row-menu-open",
+              }
+            : undefined
+        }
+        rows={rowMenuRows}
+      />
       <Sheet
         open={muteTarget !== null}
         onOpenChange={(open) => {
@@ -1169,80 +1141,84 @@ export function Inbox({
         </ul>
       </Sheet>
 
-      {/* GRADE 1 (R61): the inbox's options, as one sheet. */}
-      <Sheet
+      {/* GRADE 1 (R61): the inbox's options, as one sheet. Since 14 November
+          2026 it is the shared action sheet in its plainest shape (handoff
+          6.3, "the more at the top of a list"): rows only, a Done bar on a
+          phone, a popover hung from the header's More button on a wide
+          screen. Every row is one the old sheet had. */}
+      <ActionSheet
         open={menuOpen}
         onOpenChange={setMenuOpen}
         title={plus?.menuTitle ?? inbox.title}
-        closeLabel={inbox.clearSearch}
-        detents={[0.5]}
+        anchor={optionsAnchor}
         testId="inbox-menu"
-      >
-        <ul className="nf-inbox-menu">
-          {canMarkRead && unreadTotal > 0 ? (
-            <li>
-              <button type="button" onClick={() => { markAllRead(); setMenuOpen(false); }} disabled={marking} data-testid="inbox-mark-read">
-                <UiIcon name="check" size={20} />
-                {marking ? inbox.marking : inbox.markAllRead}
-              </button>
-            </li>
-          ) : null}
-          <li>
-            <button type="button" onClick={() => pick(view === "unread" ? "recent" : "unread")}>
-              <UiIcon name="mail" size={20} />
-              {view === "unread" ? (plus?.showAll ?? inbox.filters.recent) : (plus?.showUnread ?? inbox.filters.unread)}
-            </button>
-          </li>
-          <li>
-            <button type="button" onClick={() => pick("requests")}>
-              <UiIcon name="users" size={20} />
-              {plus?.requests ?? tabLabels.requests}
-            </button>
-          </li>
-          {archiveOpen ? (
-            <li>
-              <button type="button" onClick={() => pick("archived")} data-testid="inbox-menu-archived">
-                <UiIcon name="archive" size={20} />
-                {plus?.archived ?? inbox.filters.archived}
-              </button>
-            </li>
-          ) : null}
-          <li>
-            <button type="button" onClick={() => pick("reported")}>
-              <UiIcon name="flag" size={20} />
-              {plus?.reported ?? inbox.filters.reported}
-            </button>
-          </li>
-          <li>
-            {/* Starting a conversation begins from a place (Grade 1: moved
-                here from the header, which keeps two round buttons). */}
-            <Link href="/search" onClick={() => setMenuOpen(false)} data-testid="inbox-compose">
-              <UiIcon name="pencil" size={20} />
-              {plus?.compose ?? inbox.compose}
-            </Link>
-          </li>
-          <li>
-            {/* With support conversations, they open here, in Messages (R70). */}
-            {supportRows.length > 0 ? (
-              <button type="button" onClick={() => pick("support")} data-testid="inbox-menu-support">
-                <UiIcon name="headset" size={20} />
-                {plus?.support ?? inbox.title}
-              </button>
-            ) : (
-              <Link href="/support/messages" onClick={() => setMenuOpen(false)}>
-                <UiIcon name="headset" size={20} />
-                {plus?.support ?? inbox.title}
-              </Link>
-            )}
-          </li>
-          <li>
-            <button type="button" onClick={() => { router.refresh(); setMenuOpen(false); }}>
-              <UiIcon name="history" size={20} />
-              {plus?.refresh ?? inbox.title}
-            </button>
-          </li>
-        </ul>
-      </Sheet>
+        rows={[
+          ...(canMarkRead && unreadTotal > 0
+            ? [
+                {
+                  id: "mark-read",
+                  label: marking ? inbox.marking : inbox.markAllRead,
+                  icon: "check" as const,
+                  disabled: marking,
+                  onSelect: markAllRead,
+                  testId: "inbox-mark-read",
+                },
+              ]
+            : []),
+          {
+            id: "unread",
+            label: view === "unread" ? (plus?.showAll ?? inbox.filters.recent) : (plus?.showUnread ?? inbox.filters.unread),
+            icon: "mail" as const,
+            onSelect: () => pick(view === "unread" ? "recent" : "unread"),
+            testId: "inbox-menu-unread",
+          },
+          {
+            id: "requests",
+            label: plus?.requests ?? tabLabels.requests,
+            icon: "users" as const,
+            onSelect: () => pick("requests"),
+            testId: "inbox-menu-requests",
+          },
+          ...(archiveOpen
+            ? [
+                {
+                  id: "archived",
+                  label: plus?.archived ?? inbox.filters.archived,
+                  icon: "archive" as const,
+                  onSelect: () => pick("archived"),
+                  testId: "inbox-menu-archived",
+                },
+              ]
+            : []),
+          {
+            id: "reported",
+            label: plus?.reported ?? inbox.filters.reported,
+            icon: "flag" as const,
+            onSelect: () => pick("reported"),
+            testId: "inbox-menu-reported",
+          },
+          /* Starting a conversation begins from a place (Grade 1: moved here
+             from the header, which keeps two round buttons). */
+          { id: "compose", label: plus?.compose ?? inbox.compose, icon: "pencil" as const, href: "/search", testId: "inbox-compose" },
+          /* With support conversations, they open here, in Messages (R70). */
+          supportRows.length > 0
+            ? {
+                id: "support",
+                label: plus?.support ?? inbox.title,
+                icon: "headset" as const,
+                onSelect: () => pick("support"),
+                testId: "inbox-menu-support",
+              }
+            : { id: "support", label: plus?.support ?? inbox.title, icon: "headset" as const, href: "/support/messages", testId: "inbox-menu-support" },
+          {
+            id: "refresh",
+            label: plus?.refresh ?? inbox.title,
+            icon: "history" as const,
+            onSelect: () => router.refresh(),
+            testId: "inbox-menu-refresh",
+          },
+        ]}
+      />
     </div>
   );
 }

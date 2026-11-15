@@ -16,6 +16,25 @@ export const listingStatsEn = {
   years: { one: "{count} year on Vallo", other: "{count} years on Vallo" },
   views: { one: "{count} view", other: "{count} views" },
   saves: { one: "{count} save", other: "{count} saves" },
+  shares: { one: "{count} share", other: "{count} shares" },
+
+  /* The tiles on the listing page: the figure is drawn large, the word under it. */
+  tile: {
+    views: { one: "view", other: "views" },
+    saves: { one: "save", other: "saves" },
+    shares: { one: "share", other: "shares" },
+    rating: "rating",
+  },
+
+  /* The rating, on a card and on the listing page. A listing nobody has
+     reviewed starts at 2.5 (founder, 14 November 2026) and says so. */
+  rating: {
+    isNew: "New",
+    notRated: "Not yet rated",
+    startsAt: "Not yet rated. Every listing starts at {rating} out of 5 until its first review.",
+    outOf: "Rated {rating} out of 5",
+    reviews: { one: "{count} review", other: "{count} reviews" },
+  },
 
   /* The lister's own rows on /agent/listings. */
   agentLabel: "Views, saves and time live for this listing",
@@ -70,7 +89,7 @@ export const listingStatsEn = {
     currentSaves: "Saves now",
     daysOnVallo: "Time on Vallo",
     notLive: "Unpublished",
-    example: "Example listing: never counted",
+    example: "Example listing: left out of this desk",
     back: "All listings",
     since: "Views are counted for members since 28 September 2026 and for everyone since the listing stats migration.",
   },

@@ -13,6 +13,7 @@
  *   banner.error("Message couldn't be sent. Check your connection and try again.", { retry })
  *   banner.info("Saved on your device. Price and availability may have changed.")
  *   banner.warning("Your session ends in 2 minutes")
+ *   banner.quick("Message copied")     the small pill at the bottom, see below
  *
  * THE QUEUE, AND WHY IT REPLACES. The newest message replaces the one on
  * screen, with two exceptions so nothing important is lost: the same message
@@ -41,8 +42,6 @@
  * caller shows something in a browser).
  */
 
-import { feedback } from "./feedback";
-
 export type ToastTone = "neutral" | "success" | "info" | "warning" | "error" | "processing";
 
 export type ToastAction = { label: string; run: () => void };
@@ -58,10 +57,6 @@ export type ToastItem = {
   shownAt: number;
   /** A person's avatar URL, shown as a small circle beside the message. */
   avatarUrl?: string;
-  /** THE QUICK PILL (founder, 14 November 2026): a compact confirmation above
-   * the dock, a tick then two or three words, gone by itself. Never an error,
-   * an undo or a retry; those stay on the top banner. */
-  quick?: true;
   "data-testid"?: string;
 };
 
@@ -81,35 +76,6 @@ export type ToastOptions = {
 export const ERROR_HOLD_MS = 1500;
 
 /**
- * THE QUICK PILL'S CLOCK (founder, 14 November 2026, after WhatsApp's
- * "Message copied": "built clean sharp and goes back by itself within 0.4
- * seconds"). In on `--nf-duration-fast` (160ms), held long enough to read two
- * words, out on `--nf-duration-slow` (380ms, inside his 0.4 seconds). A pill
- * gone 0.4s after it appeared could not be read; the lead told him and he has
- * not objected. The same words fired twice restart this clock in place.
- */
-export const QUICK_DWELL_MS = 1400;
-
-/** The exit fallback where tokens cannot be read (a server render, a test). */
-const QUICK_EXIT_FALLBACK_MS = 380;
-
-/**
- * How long a leaving quick pill stays mounted: `--nf-duration-slow` as the
- * page has it right now, so the Motion setting and reduced motion (1ms) are
- * obeyed, exactly as `bannerExitMs` does for the top banner.
- */
-export function quickExitMs(): number {
-  if (typeof window === "undefined" || typeof document === "undefined") return QUICK_EXIT_FALLBACK_MS;
-  try {
-    const raw = getComputedStyle(document.documentElement).getPropertyValue("--nf-duration-slow").trim();
-    const value = raw.endsWith("ms") ? parseFloat(raw) : raw.endsWith("s") ? parseFloat(raw) * 1000 : NaN;
-    return Number.isFinite(value) && value >= 0 ? Math.min(value, 600) : QUICK_EXIT_FALLBACK_MS;
-  } catch {
-    return QUICK_EXIT_FALLBACK_MS;
-  }
-}
-
-/**
  * Long enough to read a short confirmation; an error or an undo gets longer.
  * 2,400ms is the motion inventory's dwell (north star 7.1, moment 8): a toast
  * confirms something the person just did, so it reads at a glance and goes,
@@ -121,14 +87,6 @@ export function quickExitMs(): number {
    than two words above the dock. */
 export const TOAST_DWELL_MS = 3200;
 export const TOAST_DWELL_LONG_MS = 6000;
-
-/**
- * A processing banner does not leave by itself. This is the backstop, not the
- * plan: five minutes, after which something has gone wrong enough that a
- * banner saying "still going" is a lie, and leaving the screen honest matters
- * more than keeping the message.
- */
-export const PROCESSING_DWELL_MS = 5 * 60 * 1000;
 
 /**
  * A BANNER RAISED THIS CLOSE BEFORE A ROUTE CHANGE IS CARRIED ONTO THE NEXT
@@ -177,15 +135,17 @@ export const BANNER_TIMING = {
   exitToken: "--nf-duration-fast",
 } as const;
 
+/**
+ * HOW LONG A PROCESSING BANNER WAITS. It says a thing is under way, so it is
+ * the caller's to take down with `dismissToast` when the thing finishes or
+ * fails. This is only the backstop, for the case where that never happens:
+ * five minutes, long enough that no real wait reaches it, short enough that a
+ * forgotten banner does not sit on the screen for ever.
+ */
+export const PROCESSING_DWELL_MS = 5 * 60 * 1000;
+
 /** The dwell a message gets when the caller does not name one. */
 export function dwellFor(tone: ToastTone, hasAction: boolean): number {
-  /* A PROCESSING BANNER WAITS FOR ITS ANSWER (founder, 14 November 2026:
-     "some would be like processing icon"). It says a thing is under way, so
-     it cannot leave on a timer: the work it reports has not finished. It
-     stays until the code that raised it replaces it with the outcome
-     (`updateToast`) or takes it away (`banner.dismiss`). A caller that
-     forgets is the caller's bug, and a visible one, which is better than a
-     banner that lies about something still running. */
   if (tone === "processing") return PROCESSING_DWELL_MS;
   return tone === "error" || tone === "warning" || hasAction ? TOAST_DWELL_LONG_MS : TOAST_DWELL_MS;
 }
@@ -237,26 +197,15 @@ function promoteWaiting() {
   emit();
 }
 
-function show(message: string, options: ToastOptions & { quick?: true } = {}): number {
+function show(message: string, options: ToastOptions = {}): number {
   const tone = options.tone ?? "neutral";
-  /* A quick pill never carries an action: an undo or a retry needs the top
-     banner's dwell and its button. The type on `banner.quick` already refuses
-     them; this keeps a spread caller honest too. */
-  const action: ToastAction | undefined = options.quick
-    ? undefined
-    : options.action ?? (options.retry ? { label: options.retryLabel ?? "Try again", run: options.retry } : undefined);
+  const action: ToastAction | undefined =
+    options.action ?? (options.retry ? { label: options.retryLabel ?? "Try again", run: options.retry } : undefined);
 
   /* The same words again: keep the banner, restart its clock, never a second
      slide-in. The id is KEPT (the host keys the card on it, so a new id was a
      remount and a second entrance); the host restarts the clock on `shownAt`. */
-  if (
-    current &&
-    current.message === message &&
-    current.tone === tone &&
-    !action &&
-    !current.action &&
-    Boolean(current.quick) === Boolean(options.quick)
-  ) {
+  if (current && current.message === message && current.tone === tone && !action && !current.action) {
     current = { ...current, shownAt: now() };
     emit();
     return current.id;
@@ -266,11 +215,8 @@ function show(message: string, options: ToastOptions & { quick?: true } = {}): n
     id: nextId++,
     message,
     tone,
-    /* A quick pill's clock is the system's, never a caller's: a spread that
-       smuggles `durationMs` in cannot stretch it. */
-    durationMs: options.quick ? QUICK_DWELL_MS : options.durationMs ?? dwellFor(tone, Boolean(action)),
+    durationMs: options.durationMs ?? dwellFor(tone, Boolean(action)),
     shownAt: now(),
-    ...(options.quick ? { quick: true as const } : {}),
     ...(action ? { action } : {}),
     ...(options.avatarUrl ? { avatarUrl: options.avatarUrl } : {}),
     ...(options["data-testid"] ? { "data-testid": options["data-testid"] } : {}),
@@ -365,33 +311,113 @@ export function currentToast(): ToastItem | null {
   return current;
 }
 
-type Toned = (message: string, options?: Omit<ToastOptions, "tone">) => number;
+/*
+ * THE QUICK PILL (the founder, 14 November 2026, with WhatsApp's "Message
+ * copied" as the reference: "built clean sharp and goes back by itself").
+ *
+ * The second, lighter voice of the same system, for the small things a person
+ * just did and does not need to read twice: copied, saved, removed. A compact
+ * pill with a tick, at the BOTTOM of the screen above the composer or the
+ * dock, drawn by the same `ToastHost`. It has its own slot, so it never takes
+ * down a banner that matters (an error at the top stays while "Link copied"
+ * comes and goes underneath), and there is one pill at a time.
+ *
+ *   banner.quick("Message copied")
+ *
+ * WHAT IT MAY NOT CARRY: an error, a warning, an undo or a retry. A pill is
+ * gone before it could be pressed; anything that needs reading or acting on
+ * is `banner.error` or a banner with an action, at the top.
+ *
+ * THE CLOCK. In on `--nf-duration-fast` (160ms), held `holdMs`, out in
+ * `exitMs` (his number, 0.4 seconds). The whole pill on screen for 0.4
+ * seconds could not be read, so 0.4 is the leaving and 1.4 the staying. The
+ * same words again restart the clock in place, with no second entrance.
+ */
+export type QuickItem = {
+  id: number;
+  message: string;
+  /** When it went up (or was said again), for the hold. */
+  shownAt: number;
+  "data-testid"?: string;
+};
+
+export const QUICK_TIMING = {
+  /** The token the entrance runs on. */
+  enterToken: "--nf-duration-fast",
+  /** How long it stays before it starts to leave. */
+  holdMs: 1400,
+  /** How long the leaving takes. */
+  exitMs: 400,
+} as const;
+
+type QuickListener = (item: QuickItem | null) => void;
+
+let quick: QuickItem | null = null;
+const quickListeners = new Set<QuickListener>();
+
+function emitQuick() {
+  for (const listener of quickListeners) listener(quick);
+}
+
+/** Say a small confirmation in the pill. Returns its id. */
+export function showQuick(message: string, options: { "data-testid"?: string } = {}): number {
+  if (quick && quick.message === message) {
+    quick = { ...quick, shownAt: now() };
+    emitQuick();
+    return quick.id;
+  }
+  quick = {
+    id: nextId++,
+    message,
+    shownAt: now(),
+    ...(options["data-testid"] ? { "data-testid": options["data-testid"] } : {}),
+  };
+  emitQuick();
+  return quick.id;
+}
+
+/** Take the pill down. With an id, only if it is still the one showing. */
+export function dismissQuick(id?: number): void {
+  if (!quick) return;
+  if (id !== undefined && quick.id !== id) return;
+  quick = null;
+  emitQuick();
+}
 
 /**
- * The quick pill's options: words, a test id and the haptic switch, nothing
- * else. No tone (it is always the good-news tick), no action, no duration a
- * caller could stretch.
+ * Change what the pill on screen says without a second entrance (the same id,
+ * and the hold starts again so the new words can be read): "Saved" turns out
+ * to be "Saved on this device". False when that pill is no longer showing.
  */
-type QuickOptions = Pick<ToastOptions, "data-testid"> & {
-  /**
-   * A light tick through the hand beside the pill (handoff 6.1: "a haptic
-   * tick beside it where the action had none"). On by default; a call site
-   * whose action already buzzes passes `haptic: false` so a copy never
-   * buzzes twice. No-op on the server and on devices that refuse it.
-   */
-  haptic?: boolean;
-};
+export function updateQuick(id: number, message: string): boolean {
+  if (!quick || quick.id !== id) return false;
+  quick = { ...quick, message, shownAt: now() };
+  emitQuick();
+  return true;
+}
+
+export function subscribeQuick(listener: QuickListener): () => void {
+  quickListeners.add(listener);
+  return () => {
+    quickListeners.delete(listener);
+  };
+}
+
+export function currentQuick(): QuickItem | null {
+  return quick;
+}
+
+type Toned = (message: string, options?: Omit<ToastOptions, "tone">) => number;
 
 type ToastFn = ((message: string, options?: ToastOptions) => number) & {
   success: Toned;
   info: Toned;
   warning: Toned;
   error: Toned;
-  /** The second, lighter voice: a compact pill above the dock ("Message
-   * copied"), gone by itself. Same store, same host, one at a time. */
-  /* Under way, and not gone until the caller says how it ended. */
+  /** A thing is under way. Stays until the caller takes it down. */
   processing: Toned;
-  quick: (message: string, options?: QuickOptions) => number;
+  /** The quick pill at the bottom: "Message copied". Never an error, an undo or a retry. */
+  quick: typeof showQuick;
   dismiss: typeof dismissToast;
 };
 
@@ -402,16 +428,8 @@ export const toast: ToastFn = Object.assign(
     info: ((message, options) => show(message, { ...options, tone: "info" })) as Toned,
     warning: ((message, options) => show(message, { ...options, tone: "warning" })) as Toned,
     error: ((message, options) => show(message, { ...options, tone: "error" })) as Toned,
-    /* Something is under way. Stays until the caller says how it ended: keep
-       the id and pass it to `updateToast`, or `banner.dismiss(id)`. */
     processing: ((message, options) => show(message, { ...options, tone: "processing" })) as Toned,
-    quick: (message: string, options?: QuickOptions) => {
-      const { haptic, ...rest } = options ?? {};
-      const id = show(message, { ...rest, tone: "success", quick: true });
-      /* Each press earns its tick, a restart of the clock included. */
-      if (haptic !== false) feedback("select");
-      return id;
-    },
+    quick: showQuick,
     dismiss: dismissToast,
   },
 );

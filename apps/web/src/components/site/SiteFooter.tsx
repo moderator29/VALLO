@@ -8,21 +8,41 @@ import { NewsletterForm } from "./NewsletterForm";
 import { StoreBadges } from "./landing/StoreBadges";
 import { storeBadges } from "./landing/store-badges";
 import { requestSurface } from "@/lib/auth/surface";
+import { JsonLd } from "./JsonLd";
+import { organizationLd, websiteLd } from "@/lib/site/structured-data";
+import { publicCatalogueEnabled } from "@/lib/catalogue/public-access";
 import "@/app/css/site.css";
 
 /**
- * Site footer, to the governing fullpage image.
+ * THE WEBSITE'S FOOT (rebuilt 14 November 2026, the founder: "upgrade our
+ * down side of website that's infos of our platform ... high end").
  *
- * Brand block with the legal name and one line about the company, four link
- * columns, the "stay connected" column with the email field, then the legal
- * line. VALLO SPACES LTD appears here and in the copyright because a footer's
+ * Four bands, each doing one job, top to bottom:
+ *
+ *   1. THE HEAD. The lockup and one line about the company at the start; the
+ *      apps at the end, under their own small label. Who we are and where to
+ *      get it, before any list.
+ *   2. THE LINKS. Product, Company, Support: a title in the page's ink, the
+ *      links under it in the quieter ink, hairlines between the groups on a
+ *      phone so each reads as its own list.
+ *   3. STAY CONNECTED. One contained panel: the email field at the start,
+ *      Follow Vallo at the end. It was a loose column; it is now one object.
+ *   4. THE LEGAL BAR. The copyright with the legal name, the registered
+ *      office in an <address>, then the legal links on one wrapping row.
+ *
+ * VALLO SPACES LTD appears here and in the copyright because a footer's
  * legal line is a legal surface; it appears nowhere else on the page.
+ *
+ * `variant="app"` is the same foot under the listings a guest lands on (the
+ * website has no separate landing page): it sits on the page's own ground
+ * with no top bloom, and states who publishes the site for search engines,
+ * which the landing page used to do.
  *
  * The social row is `SocialLinks`, read from `lib/brand/socials.ts`: Facebook,
  * Instagram and TikTok today, LinkedIn the day its page address is set. A
  * network with no address is not drawn.
  */
-export async function SiteFooter({ t }: { t: Dictionary }) {
+export async function SiteFooter({ t, variant = "site" }: { t: Dictionary; variant?: "site" | "app" }) {
   /*
    * THE STORE BADGES, ON EVERY PAGE OF THE WEBSITE AND NOT ONLY THE LANDING
    * (the founder, 13 November 2026: "we are up and going on Play Store and
@@ -129,46 +149,35 @@ export async function SiteFooter({ t }: { t: Dictionary }) {
   const year = new Date().getFullYear();
 
   return (
-    <footer className="nf-site-footer">
-      <div className="nf-shell pt-section pb-block">
-        <div className="nf-site-footer-grid">
-          <div className="nf-site-footer-brand">
+    <footer className={variant === "app" ? "nf-site-footer nf-site-footer--app" : "nf-site-footer"} data-testid="site-footer">
+      {/* A13: who publishes this site, stated once, where a stranger now
+          lands (the landing page carried it until 14 November 2026). */}
+      {variant === "app" ? <JsonLd data={[organizationLd(), websiteLd({ searchOpen: publicCatalogueEnabled() })]} /> : null}
+      <div className="nf-shell nf-foot">
+        {/* 1. The head: who we are, and where to get it. */}
+        <div className="nf-foot__head">
+          <div className="nf-foot__brand">
             <Link href="/" aria-label={t.a11y.logoHome} className="nf-tap inline-flex">
-              <Logo size={44} wordSize={20} />
+              <Logo size={40} wordSize={19} />
             </Link>
-            <p className="nf-overline mt-heading text-[var(--nf-content-primary)]">
-              {face.footer.legalName}
-            </p>
-            <p className="nf-body-sm mt-inline max-w-measure-lede text-[var(--nf-content-secondary)]">
-              {face.footer.legalLine}
-            </p>
-            {/*
-              THE REGISTERED OFFICE, IN AN <address> ELEMENT.
-
-              A marketplace that asks a stranger to send a deposit owes them
-              a real place the company can be found, so this is a trust
-              surface before it is a legal one, and it belongs in the brand
-              block rather than buried in Terms. The element is `address`
-              because that is what it is: a screen reader announces it as
-              contact information and a search engine reads it as the
-              business location, which a `p` gives neither.
-
-              `not-italic` because the user agent italicises `address` by
-              default and nothing else in this footer is italic.
-            */}
-            <address className="nf-caption mt-inline not-italic text-[var(--nf-content-muted)]">
-              <span className="sr-only">{face.footer.registeredOfficeLabel}: </span>
-              {COMPANY_REGISTERED_OFFICE}
-            </address>
-            {/* The official artwork, drawn inline (StoreBadges.tsx). Nothing
-                is rendered when the list is empty, which is every native
-                request. */}
-            <StoreBadges badges={badges} labels={t.landingRooms.badges} className="nf-site-footer__badges" />
+            <p className="nf-foot__line">{face.footer.legalLine}</p>
           </div>
+          {badges.length > 0 ? (
+            <div className="nf-foot__apps">
+              <p className="nf-foot__label">{face.app.eyebrow}</p>
+              {/* The official artwork, drawn inline (StoreBadges.tsx). Nothing
+                  is rendered when the list is empty, which is every native
+                  request. */}
+              <StoreBadges badges={badges} labels={t.landingRooms.badges} className="nf-site-footer__badges" />
+            </div>
+          ) : null}
+        </div>
 
+        {/* 2. The links. */}
+        <div className="nf-foot__cols">
           {columns.map((col) => (
-            <nav key={col.title} aria-label={col.title} className={"wide" in col && col.wide ? "nf-site-footer-col--wide" : undefined}>
-              <h2 className="nf-overline mb-row text-[var(--nf-content-muted)]">{col.title}</h2>
+            <nav key={col.title} aria-label={col.title} className={"wide" in col && col.wide ? "nf-foot__col nf-foot__col--wide" : "nf-foot__col"}>
+              <h2 className="nf-foot__title">{col.title}</h2>
               <ul>
                 {col.links.map((l) => (
                   <li key={`${l.href}-${l.label}`}>
@@ -180,14 +189,13 @@ export async function SiteFooter({ t }: { t: Dictionary }) {
               </ul>
             </nav>
           ))}
+        </div>
 
-          <div className="nf-site-footer-connect">
-            <h2 className="nf-overline mb-row text-[var(--nf-content-muted)]">
-              {face.footer.stayConnected}
-            </h2>
-            <p className="nf-body-sm mb-group text-[var(--nf-content-secondary)]">
-              {face.footer.newsletterBody}
-            </p>
+        {/* 3. Stay connected: one contained panel. */}
+        <div className="nf-foot__connect">
+          <div className="nf-foot__news">
+            <h2 className="nf-foot__title">{face.footer.stayConnected}</h2>
+            <p className="nf-foot__note">{face.footer.newsletterBody}</p>
             <NewsletterForm
               label={face.footer.emailLabel}
               placeholder={face.footer.emailPlaceholder}
@@ -195,17 +203,35 @@ export async function SiteFooter({ t }: { t: Dictionary }) {
               note={face.footer.newsletterNote}
               done={face.footer.subscribed}
             />
-            <SocialLinks className="mt-group" heading={face.footer.followUs} template={face.footer.onNetwork} />
           </div>
+          <SocialLinks className="nf-foot__follow" heading={face.footer.followUs} template={face.footer.onNetwork} />
         </div>
 
-        {/* No skyline and no shield (UIUX item 11): the shield said nothing
-            and the strip was decoration between the columns and the legal
-            line. One hairline above the legal line is the whole division. */}
-        <div className="nf-site-footer-legal">
-          <p className="nf-caption">
-            &copy; <span className="nf-numeric">{year}</span> {face.footer.legalName}. {f.rights}
-          </p>
+        {/* 4. The legal bar. No skyline and no shield (UIUX item 11): one
+            hairline above it is the whole division. */}
+        <div className="nf-foot__legal">
+          <div className="nf-foot__owner">
+            <p>
+              &copy; <span className="nf-numeric">{year}</span> {face.footer.legalName}. {f.rights}
+            </p>
+            {/*
+              THE REGISTERED OFFICE, IN AN <address> ELEMENT.
+
+              A marketplace that asks a stranger to send a deposit owes them
+              a real place the company can be found, so this is a trust
+              surface before it is a legal one. The element is `address`
+              because that is what it is: a screen reader announces it as
+              contact information and a search engine reads it as the
+              business location, which a `p` gives neither.
+
+              `not-italic` because the user agent italicises `address` by
+              default and nothing else in this footer is italic.
+            */}
+            <address className="not-italic">
+              <span className="sr-only">{face.footer.registeredOfficeLabel}: </span>
+              {COMPANY_REGISTERED_OFFICE}
+            </address>
+          </div>
           {/*
             DELETE ACCOUNT SITS BESIDE PRIVACY AND TERMS, AND IT IS A STORE
             REQUIREMENT RATHER THAN A COURTESY.
@@ -213,31 +239,43 @@ export async function SiteFooter({ t }: { t: Dictionary }) {
             Google Play will not pass a submission without a publicly
             reachable page that explains how to request account deletion and
             what is destroyed against what is kept, and a reviewer looks for
-            it in the legal line at the foot of the site. `/delete-account`
-            has been built and live in `app/(site)` and linked from nowhere,
-            which is the same as not having it.
+            it in the legal line at the foot of the site.
           */}
-          <p className="nf-caption flex flex-wrap gap-group">
-            <Link href="/terms" className="nf-site-footer-link">
-              {f.terms}
-            </Link>
-            <Link href="/privacy" className="nf-site-footer-link">
-              {f.privacy}
-            </Link>
-            <Link href="/cookies" className="nf-site-footer-link">
-              {t.cookies.footerPolicy}
-            </Link>
-            <CookieSettingsButton className="nf-site-footer-link">{t.cookies.footerLink}</CookieSettingsButton>
-            <Link href="/disclaimer" className="nf-site-footer-link">
-              {f.disclaimer}
-            </Link>
-            <Link href="/delete-account" className="nf-site-footer-link">
-              {f.deleteAccount}
-            </Link>
-            <Link href="/community" className="nf-site-footer-link">
-              {f.community}
-            </Link>
-          </p>
+          <ul className="nf-foot__terms">
+            <li>
+              <Link href="/terms" className="nf-site-footer-link">
+                {f.terms}
+              </Link>
+            </li>
+            <li>
+              <Link href="/privacy" className="nf-site-footer-link">
+                {f.privacy}
+              </Link>
+            </li>
+            <li>
+              <Link href="/cookies" className="nf-site-footer-link">
+                {t.cookies.footerPolicy}
+              </Link>
+            </li>
+            <li>
+              <CookieSettingsButton className="nf-site-footer-link">{t.cookies.footerLink}</CookieSettingsButton>
+            </li>
+            <li>
+              <Link href="/disclaimer" className="nf-site-footer-link">
+                {f.disclaimer}
+              </Link>
+            </li>
+            <li>
+              <Link href="/delete-account" className="nf-site-footer-link">
+                {f.deleteAccount}
+              </Link>
+            </li>
+            <li>
+              <Link href="/community" className="nf-site-footer-link">
+                {f.community}
+              </Link>
+            </li>
+          </ul>
         </div>
       </div>
     </footer>

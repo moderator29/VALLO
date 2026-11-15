@@ -384,6 +384,7 @@ const MONEY: ManualPage = {
     { href: "/admin/money", label: "Money" },
     { href: "/admin/payments", label: "Payments" },
     { href: "/admin/chargebacks", label: "Chargebacks" },
+    { href: "/admin/arrangements", label: "Protected payments" },
     { href: "/admin/fees", label: "Fees" },
     { href: "/admin/restaurant-fees", label: "Restaurant fees" },
     { href: "/admin/referrals", label: "Referrals" },
@@ -405,6 +406,7 @@ const MONEY: ManualPage = {
             row(<Link href="/admin/money" className={A}>Money</Link>, "Finance", "Watch cautions, refunds, the reconciliation job and move-in charges.", "banknote"),
             row(<Link href="/admin/payments" className={A}>Payments</Link>, "Finance", "Payment attempts, with their state and reference.", "credit-card"),
             row(<Link href="/admin/chargebacks" className={A}>Chargebacks</Link>, "Finance", "Every card payment a bank reversed, worked to its outcome.", "alert-triangle"),
+            row(<Link href="/admin/arrangements" className={A}>Protected payments</Link>, "Finance", "Every payment the bank holds, with the partner's own words beside Vallo's record. Open one to read its trail and decide a dispute.", "shield-check"),
             row(<Link href="/admin/fees" className={A}>Fees</Link>, "Admins", "See the rates in force and what has been earned. Change a rate by adding a new dated row.", "coins"),
             row(<Link href="/admin/restaurant-fees" className={A}>Restaurant fees</Link>, "Admins", "Seated tables and what is owed, per restaurant per month, and the disagreements to settle.", "utensils"),
             row(<Link href="/admin/referrals" className={A}>Referrals</Link>, "Admins", "What Vallo owes in rewards, the budget, the live campaign and the referrals and payouts waiting.", "gift"),
@@ -422,6 +424,29 @@ const MONEY: ManualPage = {
           <li>Vallo charges no inspection fee. If a member says they were asked for one, treat it as a report.</li>
           <li>On a purchase, Vallo takes no money at any stage. Never present the value of agreed offers as Vallo revenue.</li>
         </ul>
+      ),
+    },
+    {
+      id: "disputes",
+      heading: "Deciding a disputed payment",
+      body: (
+        <>
+          <p>
+            The list is read only. Open a payment to see who pays, who is paid, what the partner last said, and the whole
+            trail, with each side&apos;s statement in their own words. Read both before deciding.
+          </p>
+          <p>
+            Two decisions can be made there, and only while the money is held: <strong>refund the payer</strong> (on a held or
+            a disputed payment) or <strong>release to the lister</strong> (on a disputed payment only; an ordinary release is
+            the payer&apos;s own confirmation). Each needs a written reason, which is kept on the payment and in the audit log
+            with your name.
+          </p>
+          <p>
+            A decision sends an instruction to the partner. The record does not change on your press: it reads refunded or
+            released when the partner reports it. If the partner does not answer, nothing is recorded as moved; do not
+            send it again, and tell finance.
+          </p>
+        </>
       ),
     },
     {

@@ -63,14 +63,13 @@ export function DocHelpful({ page }: { page: string }) {
             <label htmlFor={`${id}-note`} className="nf-doc-helpful__label">
               What was missing? (optional)
             </label>
-            <textarea
+            <textarea autoCapitalize="sentences" enterKeyHint="enter"
               id={`${id}-note`}
               className="nf-field"
               rows={3}
               maxLength={500}
               value={note}
               onChange={(e) => setNote(e.target.value)}
-              autoCapitalize="sentences"
             />
             <button type="submit" className="nf-chip" aria-pressed="true" disabled={pending}>
               Send

@@ -115,8 +115,8 @@ export function MoveInCalculator({
     try {
       await navigator.clipboard.writeText(shareUrl);
       setCopied(true);
-      /* The button keeps its tick; the banner says it (founder, 7 November 2026). */
-      banner(copy.copied, { tone: "success" });
+      /* The button keeps its tick; the quick pill says it (founder, 14 November 2026). */
+      banner.quick(copy.copied);
       window.setTimeout(() => setCopied(false), 2400);
     } catch {
       setCopied(false);

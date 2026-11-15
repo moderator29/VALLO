@@ -49,10 +49,10 @@ Store, and on the web.
 | Database | Supabase project `uccixoonmbhrnyczyigt`, eu-west-1, Nano compute | 773 migration files; pending SQL in `supabase/migrations/pending`, risky drafts in `supabase/drafts` |
 | Hosting | Vercel, region dub1 | Deploys from `main`. You never deploy |
 
-**Branch.** All work is on `claude/rentme-v2-platform-audit-xuvg0a`. At the
-handoff it is 55 commits ahead of `main` and 0 behind. The founder asked on 14
-November for it to be re-audited and pushed to `main`; section 10 records
-whether that happened. Check `git log origin/main -1` before assuming either.
+**Branch.** All work is on `claude/rentme-v2-platform-audit-xuvg0a`. The
+founder asked on 14 November for it to be re-audited and pushed to `main`, and
+it was, at `4baa05fb4` (section 10). Work after that commit is on the branch
+only. Check `git log origin/main -1` before assuming anything about `main`.
 
 **What shipped on the branch on 13 and 14 November** (newest first):
 
@@ -80,8 +80,8 @@ history purge with a daily job, the hold sweep every five minutes),
 `platform_speed` (`shell_context` as security definer) and the fifteen-item
 media ceiling.
 
-**Not yet run by the founder:** `staff_desks_only_2026-11-14.sql` (pending;
-see section 9) and the draft `sign_in_bookkeeping_off_the_sign_in_2026-11-13.sql`
+He also ran `staff_desks_only_2026-11-14.sql` later on 14 November (section
+9). **Not run:** the draft `sign_in_bookkeeping_off_the_sign_in_2026-11-13.sql`
 (his decision; see section 8).
 
 ---
@@ -785,17 +785,17 @@ password plus an emailed code; he chose password only. It is recorded in
 - The lock on money (`money-step-up-actions.ts`) is untouched: a payout or a
   refund still asks for its own proof.
 
-**What the founder still has to run:**
-`supabase/migrations/pending/staff_desks_only_2026-11-14.sql`. It adds
+**The database half, applied by the founder on 14 November:**
+`supabase/migrations/pending/staff_desks_only_2026-11-14.sql` added
 `kyc_review` to the Business Development bundle and to the holder's grant, and
-takes the `admin` role from the two people who hold a named position. Until he
-runs it they keep the whole console. After it, each must acknowledge the staff
-handbook before their desks open (neither has).
+took the `admin` role from the two people who hold a named position. Each must
+acknowledge the staff handbook before their desks open (neither had when this
+was written).
 
-**Who holds what on live** (14 November): two super admins (the founder, who
-is exempt from the door, and one other who uses a key); three admins, two of
-whom are the position holders above; three older staff grants with no named
-position.
+**Who holds what on live** (14 November, after that file): two super admins
+(the founder, who is exempt from the door, and one other who uses a key); one
+admin; the two position holders with their own desks only; three older staff
+grants with no named position.
 
 ---
 
@@ -803,8 +803,8 @@ position.
 
 | Item | State | What unblocks it |
 |---|---|---|
-| Push to `main` | He asked for it on 14 November after a re-audit. Typecheck, lint, every gate and a production build passed; the whole test suite was still running when this file was written. Check `git log origin/main -1` | The suite green, then the push |
-| `staff_desks_only_2026-11-14.sql` | Written, tested locally, not sent yet | Send it; he runs it |
+| Push to `main` | DONE on 14 November at `4baa05fb4`, after typecheck, lint, every gate, a production build and the whole suite (16,334 tests; seven failed on the first run, all from the door's new wording and one weekday-dependent test, fixed and rerun green). Everything after that commit is on the branch only | His next literal say-so |
+| `staff_desks_only_2026-11-14.sql` | APPLIED by him on 14 November and verified on live: neither position holder has the `admin` role; the Business Development grant holds `kyc_review` | Each of the two must acknowledge the staff handbook before their desks open (neither had) |
 | App icon badge | No badge plugin is installed and push sends no badge number | His yes to `@capawesome/capacitor-badge`, then a store release |
 | Approximate figure in saved-search emails | No saved-search email exists; alerts are in-app only | His decision to send that email at all |
 | Link previews in messages | Deliberately not built (see `lib/messages/linkify.ts`) | Only if he reverses the security choice |

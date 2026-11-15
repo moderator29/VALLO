@@ -191,13 +191,12 @@ export function TenancyReportCard({
           <label className="nf-label" htmlFor={`notes-${report.stage}`}>
             {copy.reportNotes}
           </label>
-          <textarea
+          <textarea autoCapitalize="sentences" enterKeyHint="enter"
             id={`notes-${report.stage}`}
             className="nf-field min-h-[5.5rem]"
             maxLength={4000}
             value={notes}
             onChange={(event) => setNotes(event.target.value)}
-            autoCapitalize="sentences"
           />
           <input
             ref={fileRef}

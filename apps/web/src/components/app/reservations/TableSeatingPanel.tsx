@@ -199,7 +199,7 @@ export function TableSeatingPanel({ table }: { table: ReservationView }) {
               </button>
             ))}
           </span>
-          <textarea
+          <textarea autoCapitalize="sentences" enterKeyHint="enter"
             className="nf-field w-full"
             rows={3}
             maxLength={2000}
@@ -207,7 +207,6 @@ export function TableSeatingPanel({ table }: { table: ReservationView }) {
             placeholder="A few words about your meal (optional)"
             value={words}
             onChange={(event) => setWords(event.target.value)}
-            autoCapitalize="sentences"
           />
           <span>
             <Button

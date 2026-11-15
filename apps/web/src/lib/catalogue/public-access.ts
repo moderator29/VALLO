@@ -66,3 +66,33 @@ export function isPublicCataloguePath(path: string): boolean {
 export function signedOutStart(env: Record<string, string | undefined> = process.env): string {
   return publicCatalogueEnabled(env) ? "/search" : "/welcome";
 }
+
+/**
+ * THE WEBSITE'S FRONT DOOR (founder, 14 November 2026: "in website there
+ * should not be landing page ... that's the industry standard flow").
+ *
+ * A stranger who opens the website's root in a browser is taken straight to
+ * the listings, the same screen the app opens on for a guest, and that screen
+ * ends with the website's foot (`showsSiteFoot`). Somebody whose browser
+ * carries a session goes to `/home-or-landing`, which answers `/home` for a
+ * member and this same door for a session that turned out to be spent.
+ *
+ * Null while the public catalogue is closed (`VALLO_PUBLIC_CATALOGUE` unset):
+ * the listings then need an account, so the root keeps the old front page
+ * rather than sending a stranger into a sign-in wall. Marketing tags
+ * (`utm_*`, `ref`) are carried; nothing else from the query is.
+ */
+export function websiteFrontDoor(
+  input: { carriesSession: boolean; search?: URLSearchParams },
+  env: Record<string, string | undefined> = process.env,
+): string | null {
+  if (!publicCatalogueEnabled(env)) return null;
+  if (input.carriesSession) return "/home-or-landing";
+  const kept = new URLSearchParams();
+  for (const [key, value] of input.search ?? []) {
+    if ((/^utm_[a-z]+$/.test(key) || key === "ref") && value.length <= 120) kept.set(key, value);
+  }
+  const query = kept.toString();
+  return query ? `/search?${query}` : "/search";
+}
+

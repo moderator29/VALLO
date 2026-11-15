@@ -106,7 +106,7 @@ export async function assertPlatformKey(input: {
       publicKey: {
         challenge: fromB64url(input.challenge),
         rpId: input.rpId,
-        allowCredentials: input.allow.map((id) => ({ type: "public-key" as const, id: fromB64url(id) })),
+        allowCredentials: input.allow.map((id) => ({ type: "public-key" as const, id: fromB64url(id), transports: ["internal" as AuthenticatorTransport] })),
         userVerification: "required",
         timeout: 60_000,
       },

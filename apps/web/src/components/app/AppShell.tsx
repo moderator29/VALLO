@@ -9,6 +9,7 @@ import { KeepWarm } from "@/components/app/KeepWarm";
 import { usePathname, useSearchParams } from "next/navigation";
 import { AppRail } from "./AppRail";
 import { isFocusedRoute, isImmersiveRoute, showsTabBar } from "./MobileTabBar";
+import { showsSiteFoot } from "./site-foot-routes";
 import { CIRCLE_ROUTE } from "./circle-route";
 import { ShellDock } from "./ShellDock";
 import { openCreateSheet } from "./CreateDock";
@@ -104,6 +105,7 @@ export function AppShell({
   currentProfile = { kind: "personal" },
   socialOn = true,
   preview,
+  foot,
   children,
 }: {
   t: ShellDictionary;
@@ -149,6 +151,14 @@ export function AppShell({
    * preview tree 404s in production.
    */
   preview?: { route?: string; drawer?: boolean };
+  /**
+   * The website's foot (company, links, the store badges, the legal line),
+   * handed down already rendered by the layout for a guest in a browser and
+   * for nobody else. Drawn under the page on the browsing routes a stranger
+   * lands on (`showsSiteFoot`), so the website has no separate landing page
+   * and still ends the way a website does (founder, 14 November 2026).
+   */
+  foot?: React.ReactNode;
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
@@ -469,6 +479,7 @@ export function AppShell({
         ) : (
           <div className="nf-shell nf-page-stage py-section-tight">{children}</div>
         )}
+        {!immersive && foot && showsSiteFoot(active, searchParams?.get("view")) ? foot : null}
       </main>
 
       {signedIn && !preview ? (

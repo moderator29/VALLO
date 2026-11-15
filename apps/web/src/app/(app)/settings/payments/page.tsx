@@ -5,6 +5,8 @@ import { PageFrame } from "@/components/app/PageFrame";
 import { EmptyState, TYPE } from "@/components/app/Screen";
 import { EmptyActions } from "@/components/app/EmptyActions";
 import { PaymentMethodsBlock } from "@/components/app/payments/PaymentMethodsBlock";
+import { ProtectedSetup } from "@/components/money/protected-rail/ProtectedSetup";
+import { readProtectedSetup } from "@/lib/money/protected-start";
 import { resolveSession } from "@/lib/actions/session";
 import { withNext } from "@/lib/auth/next-link";
 import { ListGroup, ListRow } from "@/components/ui/ListGroup";
@@ -58,6 +60,9 @@ export default async function PaymentsPage() {
     );
   }
 
+  /* Null while the protected rail is off: nothing is read and nothing is drawn. */
+  const protectedSetup = await readProtectedSetup();
+
   return (
     <PageFrame title={copy.title} subtitle={copy.lede} fallback="/settings" width="narrow">
       {/* `nf-money` stays on the body: its blocks reach into the gutter on a
@@ -74,6 +79,8 @@ export default async function PaymentsPage() {
         </h2>
         <p className={`mt-inline ${TYPE.body}`}>{PAYOUT_ANSWER}</p>
       </section>
+
+      {protectedSetup ? <ProtectedSetup setup={protectedSetup} /> : null}
 
       <div className="mt-block">
         <ListGroup label={SETTINGS_PAY_RECORDS} labelAs="h2">

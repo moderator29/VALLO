@@ -22,9 +22,9 @@ function detailsOf(copy: ClientCopy | null): Details | undefined {
 export type CopyKind = "text" | "link" | "code";
 
 /**
- * Copy with the one confirmation: the QUICK PILL ("Link copied") near the
- * hand, a light tick in it, or an error toast that says what to do instead
- * (a failure needs reading time, so it keeps the top banner).
+ * Copy with the one confirmation: the quick pill at the bottom ("Link
+ * copied", the founder's ruling of 14 November 2026), a light tick in the
+ * hand, or an error banner at the top that says what to do instead.
  */
 export function useCopy() {
   const words = detailsOf(useClientCopyOptional())?.copy;
@@ -33,10 +33,7 @@ export function useCopy() {
       const done = await copyText(text);
       if (done) {
         feedback("select");
-        if (words)
-          toast.quick(kind === "link" ? words.linkCopied : kind === "code" ? words.codeCopied : words.copied, {
-            haptic: false,
-          });
+        if (words) toast.quick(kind === "link" ? words.linkCopied : kind === "code" ? words.codeCopied : words.copied);
       } else if (words) {
         toast(words.failed, { tone: "error" });
       }
@@ -49,11 +46,12 @@ export function useCopy() {
 /**
  * Copy for a control that confirms in place ("Copy" becomes "Copied" with a
  * check): `copied` is true for a beat after the clipboard took it, and a
- * light tick is felt. The QUICK PILL says it too ("Link copied", "Code
- * copied"), near the hand and gone by itself (founder, 14 November 2026,
- * after WhatsApp's "Message copied"; it supersedes the 7 November "banner at
- * the top" for copies only). The button's own tick stays as the control's
- * state. A failure is a toast that says what to do instead.
+ * light tick is felt. The quick pill says it too ("Link copied", "Code
+ * copied"): the founder's ruling of 7 November 2026 ("THE BANNER
+ * EVERYWHERE") has every outcome said by the one system, and his ruling of
+ * 14 November gives a copy its small pill at the bottom. The button's own
+ * tick stays as the control's state. A failure is a banner at the top that
+ * says what to do instead.
  */
 export function useCopyFlash(ms = 2000) {
   const words = detailsOf(useClientCopyOptional())?.copy;
@@ -64,10 +62,7 @@ export function useCopyFlash(ms = 2000) {
       if (done) {
         feedback("select");
         flash();
-        if (words)
-          toast.quick(kind === "link" ? words.linkCopied : kind === "code" ? words.codeCopied : words.copied, {
-            haptic: false,
-          });
+        if (words) toast.quick(kind === "link" ? words.linkCopied : kind === "code" ? words.codeCopied : words.copied);
       } else if (words) {
         toast(words.failed, { tone: "error" });
       }
@@ -99,7 +94,7 @@ export function useShare() {
       const outcome = await shareOrCopy(payload);
       if (outcome === "copied") {
         feedback("select");
-        if (words) toast.quick(words.linkCopied, { haptic: false });
+        if (words) toast.quick(words.linkCopied);
       } else if (outcome === "failed" && words) {
         toast(words.failed, { tone: "error" });
       }

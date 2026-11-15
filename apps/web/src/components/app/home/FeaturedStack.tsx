@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useRef, useState } from "react";
-import { formatRating, type Locale } from "@vallo/i18n/core";
+import type { Locale } from "@vallo/i18n/core";
 import type { Listing } from "@/lib/listings/types";
 import { hrefForListing, marketFactsOf } from "@/lib/listings/href";
 import { cardGlance, placeOf } from "@/lib/listings/card-glance";
@@ -31,8 +31,8 @@ import "@/app/css/home.css";
  * edges. Each slide is the shared card shape: the outer card, the inset
  * photograph with its status pill and round heart, and the separate info panel
  * with the name, the area, the key figure in the one money language (the
- * amount in ink, the unit under it), the beds, baths and size and a star
- * rating ONLY where the listing has real reviews (no example ever has one). A
+ * amount in ink, the unit under it), the beds, baths and size and the signal
+ * line every card carries (rating, views, saves: `CardCounts`). A
  * small still map of the AREA, with its pin, sits on the photograph's bottom
  * right (`AreaMapTile`; never the address), and the round "i" on it reveals
  * the map data credit (MapLibre's compact pattern).
@@ -90,7 +90,6 @@ function StackCard({
   const href = hrefForListing(listing.kind, listing.id, marketFactsOf(listing));
   const photo = listing.photos[0];
   const point = areaPoint(listing.city, listing.area);
-  const rated = !listing.isDemo && listing.reviewCount > 0 && listing.rating > 0;
   const front = role === "front";
   const price = priceOf(listing, copy.card);
 
@@ -134,8 +133,8 @@ function StackCard({
             : null
         }
         facts={factsOf(listing, copy.card, locale, areaText)}
-        extra={<CardCounts stats={listing.stats} isDemo={listing.isDemo} locale={locale} />}
-        rating={rated ? `${formatRating(listing.rating, locale)} (${listing.reviewCount} ${copy.reviews})` : null}
+        extra={<CardCounts stats={listing.stats} rating={listing.rating} reviewCount={listing.reviewCount} locale={locale} />}
+        rating={null}
         overlay={
           point ? (
             /* The map data credit is a licence requirement and stays

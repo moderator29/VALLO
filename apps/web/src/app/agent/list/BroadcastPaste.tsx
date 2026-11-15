@@ -86,14 +86,13 @@ export function BroadcastPaste({
     <div className="nf-lw-broadcast" data-testid="broadcast-open">
       <label className="block">
         <span className="nf-label">{copy.label}</span>
-        <textarea
+        <textarea autoCapitalize="sentences" enterKeyHint="enter"
           className="nf-field min-h-[9rem] py-sm"
           value={text}
           maxLength={4000}
           onChange={(e) => setText(e.target.value)}
           placeholder={copy.placeholder}
           data-testid="broadcast-text"
-          autoCapitalize="sentences"
         />
       </label>
       <div className="mt-row flex flex-wrap gap-row">

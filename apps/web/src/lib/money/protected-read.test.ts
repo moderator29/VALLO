@@ -146,7 +146,7 @@ describe("the protected read, approved", () => {
         arrangement: {
           ...bare,
           transfer_reported_at: "2026-11-10T09:30:00Z",
-          funding_instructions: { bank_name: "A Bank", account_name: "Collection", account_number: "0101010101" },
+          funding_instructions: { bank_name: "A Bank", account_name: "Collection", account_number: "0101010101", amount_minor: 18_285_000 },
           funding_expires_at: "2026-11-10T10:30:00Z",
           last_provider_check_at: "2026-11-10T09:58:00Z",
           provider_reference: "EP-123",
@@ -157,7 +157,8 @@ describe("the protected read, approved", () => {
     const read = await buildProtectedDeal(db.client as never, PAYER, AGREEMENT, on, noMark);
     expect(read!.deal.transferReported).toBe(true);
     expect(read!.deal.status).toBe("awaiting_payment");
-    expect(read!.deal.funding).toEqual({ bank: "A Bank", accountName: "Collection", accountNumber: "0101010101", expiresAt: "2026-11-10T10:30:00Z" });
+    /* The total to transfer is the provider's own: the amount plus its fee when the payer bears it. */
+    expect(read!.deal.funding).toEqual({ bank: "A Bank", accountName: "Collection", accountNumber: "0101010101", expiresAt: "2026-11-10T10:30:00Z", amountMinor: 18_285_000 });
     expect(read!.deal.lastCheckedAt).toBe("2026-11-10T09:58:00Z");
     expect(read!.deal.receipt).toEqual({ providerReference: "EP-123", agreementVersion: 2, refundRequestedAt: null });
   });

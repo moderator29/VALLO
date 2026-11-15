@@ -36,7 +36,7 @@ export function CopyButton({
     const ok = await copyText(value);
     if (ok) {
       setDone(true);
-      banner(`${label} copied`, { tone: "success" });
+      banner.quick(`${label} copied`);
       window.setTimeout(() => setDone(false), 1600);
     } else {
       banner(`${label} could not be copied. Select it and copy it yourself.`, { tone: "warning" });

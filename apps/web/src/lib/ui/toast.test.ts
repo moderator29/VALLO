@@ -1,26 +1,21 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-
-/* The quick pill's haptic tick, watched rather than felt. */
-const felt: string[] = [];
-vi.mock("./feedback", () => ({
-  feedback: (kind: string) => {
-    felt.push(kind);
-  },
-}));
-
 import {
   BANNER_CARRY_MS,
   BANNER_TIMING,
   banner,
+  currentQuick,
   currentToast,
+  dismissQuick,
   dismissToast,
   dwellFor,
   ERROR_HOLD_MS,
   noteRouteChange,
-  QUICK_DWELL_MS,
+  QUICK_TIMING,
+  subscribeQuick,
   subscribeToast,
   swipeDismisses,
   toast,
+  updateQuick,
   updateToast,
 } from "./toast";
 
@@ -193,65 +188,72 @@ describe("the one toast", () => {
   });
 });
 
-/* THE QUICK PILL (founder, 14 November 2026): the same store's lighter voice. */
-describe("banner.quick", () => {
+/* THE QUICK PILL (founder, 14 November 2026: "built clean sharp and goes back
+   by itself within 0.4 seconds"). A second, lighter voice in the same store. */
+describe("the quick pill", () => {
   afterEach(() => {
     vi.useRealTimers();
-    felt.length = 0;
+    dismissQuick();
     dismissToast();
     dismissToast();
   });
 
-  it("is a success-toned quick item on the system's own clock", () => {
+  it("is one at a time: the newest words replace the last", () => {
+    const seen: (string | null)[] = [];
+    const off = subscribeQuick((item) => seen.push(item?.message ?? null));
     banner.quick("Message copied");
-    const item = currentToast();
-    expect(item?.quick).toBe(true);
-    expect(item?.tone).toBe("success");
-    expect(item?.durationMs).toBe(QUICK_DWELL_MS);
-    expect(item?.action).toBeUndefined();
+    banner.quick("Link copied");
+    expect(currentQuick()?.message).toBe("Link copied");
+    dismissQuick();
+    expect(currentQuick()).toBeNull();
+    off();
+    expect(seen).toEqual(["Message copied", "Link copied", null]);
   });
 
-  it("refuses an action and a stretched clock, even from a dishonest spread", () => {
-    banner.quick("Link copied", {
-      action: { label: "Undo", run: () => undefined },
-      retry: () => undefined,
-      durationMs: 60_000,
-    } as never);
-    const item = currentToast();
-    expect(item?.action).toBeUndefined();
-    expect(item?.durationMs).toBe(QUICK_DWELL_MS);
-  });
-
-  it("restarts the clock for the same words in place, with the same id", () => {
+  it("restarts the clock for the same words without a second entrance", () => {
     vi.useFakeTimers();
     vi.setSystemTime(1_000);
-    const first = banner.quick("Message copied");
-    vi.setSystemTime(1_800);
-    const second = banner.quick("Message copied");
-    expect(second).toBe(first);
-    expect(currentToast()?.shownAt).toBe(1_800);
+    const id = banner.quick("Link copied");
+    const first = currentQuick()?.shownAt;
+    vi.setSystemTime(1_600);
+    expect(banner.quick("Link copied")).toBe(id);
+    expect(currentQuick()?.id).toBe(id);
+    expect(currentQuick()?.shownAt).toBeGreaterThan(first ?? 0);
   });
 
-  it("never folds into a top banner that happens to share its words", () => {
-    const bannerId = banner.success("Saved");
-    const quickId = banner.quick("Saved");
-    expect(quickId).not.toBe(bannerId);
-    expect(currentToast()?.quick).toBe(true);
+  it("never carries a tone, an action, an undo or a retry", () => {
+    banner.quick("Saved. It is in Saved.");
+    const item = currentQuick() as Record<string, unknown>;
+    expect(Object.keys(item).sort()).toEqual(["id", "message", "shownAt"]);
+    /* The call takes words and a test id, and nothing an error would need. */
+    expect(banner.quick.length).toBe(1);
   });
 
-  it("ticks the hand once per press, and not when the caller already buzzed", () => {
-    banner.quick("Message copied");
-    banner.quick("Message copied");
-    expect(felt).toEqual(["select", "select"]);
-    felt.length = 0;
-    banner.quick("Photo saved", { haptic: false });
-    expect(felt).toEqual([]);
-  });
-
-  it("gives way to an error at once, as any success does", () => {
+  it("leaves the top banner alone, and the banner leaves the pill alone", () => {
+    banner.error("Could not save");
     banner.quick("Link copied");
-    banner.error("Could not reach Vallo");
+    expect(currentToast()?.message).toBe("Could not save");
     expect(currentToast()?.tone).toBe("error");
-    expect(currentToast()?.quick).toBeUndefined();
+    dismissToast();
+    expect(currentQuick()?.message).toBe("Link copied");
+  });
+
+  it("changes its words in place, and only while that pill is the one showing", () => {
+    const id = banner.quick("Saved. It is in Saved.");
+    expect(updateQuick(id, "Saved on this device. It is in Saved.")).toBe(true);
+    expect(currentQuick()?.id).toBe(id);
+    expect(currentQuick()?.message).toBe("Saved on this device. It is in Saved.");
+    const next = banner.quick("Link copied");
+    expect(updateQuick(id, "Changed")).toBe(false);
+    expect(currentQuick()?.message).toBe("Link copied");
+    /* A dismissal for an older pill does not take the newer one down. */
+    dismissQuick(id);
+    expect(currentQuick()?.id).toBe(next);
+    dismissQuick(next);
+    expect(currentQuick()).toBeNull();
+  });
+
+  it("is in on the fast token, held about 1.4 seconds and out in 400 ms", () => {
+    expect(QUICK_TIMING).toEqual({ enterToken: "--nf-duration-fast", holdMs: 1400, exitMs: 400 });
   });
 });

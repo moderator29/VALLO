@@ -364,7 +364,8 @@
   }
 
   /* ------------------------------------------------- the social row */
-  /* White marks on the brand blue, in both themes (SocialLinks.tsx). */
+  /* Each network's own brand colour as the disc (SocialLinks.tsx sets the
+     background inline); white marks in both themes. */
   .nf-social__heading {
     margin-bottom: var(--nf-space-xs);
     color: var(--nf-content-muted);
@@ -383,13 +384,16 @@
     place-items: center;
     width: 2.75rem;
     height: 2.75rem;
-    border-radius: var(--nf-radius-md);
+    border-radius: var(--nf-radius-pill);
     color: var(--nf-content-on-brand);
-    background: var(--nf-act-fill);
     box-shadow: var(--nf-elevation-raised);
     transition:
       transform var(--nf-duration-fast) var(--nf-ease-standard),
       filter var(--nf-duration-fast) var(--nf-ease-standard);
+  }
+  /* TikTok's black disc needs a rim at night so it reads against a dark page. */
+  :root:not([data-theme="light"]) .nf-social__link[data-network="tiktok"] {
+    box-shadow: var(--nf-elevation-raised), inset 0 0 0 1px color-mix(in srgb, var(--nf-content-on-brand) 18%, transparent);
   }
   .nf-social[data-size="lg"] .nf-social__link {
     width: 3.25rem;

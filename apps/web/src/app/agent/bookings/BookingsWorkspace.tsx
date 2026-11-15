@@ -25,7 +25,6 @@ import { Sheet } from "@/components/ui/Sheet";
 import { DecisionCard } from "@/components/app/confirm/DecisionCard";
 import { StatusPill, toneForStatus } from "@/components/ui/StatusPill";
 import { Chip, ChipRow } from "@/components/ui/Chip";
-import { CountTabs } from "@/components/ui/CountTabs";
 import { TextArea } from "@/components/ui/Field";
 import { Icon3D } from "@/components/ui/Icon3D";
 import { useSafeTransition } from "@/lib/ui/use-safe-transition";
@@ -463,34 +462,33 @@ export function BookingsWorkspace({
         </p>
       )}
 
-      {/*
-        The founder's count tab row (handoff 6.3, 14 November 2026). It was a
-        hand-rolled tablist wearing the underline tabs' classes; it is the
-        shared part now, so this desk, the member inbox and the offers
-        workspace are one control. Every count is `board[key].length`, which
-        this component already holds.
-
-        Only the selected panel is rendered, so only the selected tab names a
-        panel: pointing every tab at a `bookings-panel-<key>` id sent a screen
-        reader following the relationship to an element that does not exist.
-        `CountTabs` wires `aria-controls` from `panelIdPrefix`, so the prefix
-        is given and the unselected tabs point at nothing that is drawn; the
-        panel below keeps its own id and names its tab back.
-      */}
-      <CountTabs
-        semantics="tabs"
-        label={t.tabsLabel}
-        active={active}
-        onChange={(key) => setActive(key as TabKey)}
-        itemIdPrefix="bookings-tab"
-        data-testid="agent-bookings-tabs"
-        items={TAB_KEYS.map((key) => ({
-          key,
-          label: t.groups[key].title,
-          ...(board[key].length > 0 ? { count: board[key].length } : {}),
-          "data-testid": `bookings-tab-${key}`,
-        }))}
-      />
+      <div
+        role="tablist"
+        aria-label={t.tabsLabel}
+        className="nf-utabs nf-utabs__row"
+      >
+        {TAB_KEYS.map((key) => (
+          <button
+            key={key}
+            type="button"
+            role="tab"
+            id={`bookings-tab-${key}`}
+            aria-selected={active === key}
+            /*
+              Only the active panel is rendered, so pointing every tab at a
+              `bookings-panel-<key>` id sent a screen reader following the
+              relationship to an element that does not exist. Only the selected
+              tab controls anything, so only the selected tab says so.
+            */
+            aria-controls={active === key ? `bookings-panel-${key}` : undefined}
+            onClick={() => setActive(key)}
+            className="nf-utabs__tab"
+          >
+            {t.groups[key].title}
+            <span className="nf-utabs__count nf-numeric">{board[key].length}</span>
+          </button>
+        ))}
+      </div>
 
       <div
         role="tabpanel"

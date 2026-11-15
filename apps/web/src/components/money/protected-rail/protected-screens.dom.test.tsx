@@ -54,6 +54,23 @@ describe("the protected payment screens", () => {
     expect(words(journey("funding-no-expiry"))).toContain("No time limit was given");
   });
 
+  it("screen 3 shows the provider's own total when the payer bears the fee, and says what it includes", () => {
+    const text = words(journey("funding-fee"));
+    expect(journey("funding-fee")).toContain('data-testid="pp-funding-fee"');
+    expect(text).toContain("This total includes the protection fee of");
+    expect(text).toMatch(/182,850/);
+    /* With no fee on top, no such line is drawn. */
+    expect(journey("funding")).not.toContain('data-testid="pp-funding-fee"');
+  });
+
+  it("screen 2 says the total to transfer before anything opens, when the payer bears the fee", () => {
+    const buyer = { buyerPaysMinor: 182_850_00, moneyInFeeMinor: 2_850_00, sellerReceivesMinor: 180_000_00, payer: "buyer" as const };
+    const out = words(renderToStaticMarkup(<ReviewProtection deal={PREVIEW_DEALS.funding!} quote={buyer} agreementVersion={3} locale="en" onAgree={noop} />));
+    expect(out).toContain("Total to transfer");
+    expect(out).toMatch(/182,850/);
+    expect(out).not.toContain("paid by the lister");
+  });
+
   it("screen 4 waits and never says protected", () => {
     const text = words(journey("waiting"));
     expect(text).toContain("Transfer being confirmed");
@@ -119,6 +136,36 @@ describe("the screens nobody asks for", () => {
     const text = words(journey("partner-unavailable"));
     expect(text).toContain("Last confirmed status");
     expect(text).toMatch(/Last confirmed 10 Nov/);
+  });
+
+  it("after the release the lister is told the transfer is on its way, never paid, until the partner says so", () => {
+    const paying = words(renderToStaticMarkup(<ListerProtectedView deal={PREVIEW_DEALS["lister-paying"]!} now={PREVIEW_NOW} locale="en" />));
+    expect(paying).toContain("It is on its way to your bank account");
+    expect(paying).not.toMatch(/Paid to your bank|reached your bank/);
+    expect(paying).not.toContain("not a balance you can spend");
+  });
+
+  it("once the partner reports the transfer complete, the lister sees when it reached their bank", () => {
+    const out = renderToStaticMarkup(<ListerProtectedView deal={PREVIEW_DEALS["lister-paid"]!} now={PREVIEW_NOW} locale="en" />);
+    expect(out).toContain('data-payout="paid"');
+    expect(words(out)).toMatch(/Paid to your bank account on 10 Nov/);
+    /* The amount the partner reported sending, after its transfer fee, never the deal amount as if it all arrived. */
+    expect(words(out)).toMatch(/179,930 reached your bank account, after the payment partner's transfer fee\./);
+    const exact = renderToStaticMarkup(<ListerProtectedView deal={{ ...PREVIEW_DEALS["lister-paid"]!, payout: { status: "paid", completedAt: "2026-11-10T09:57:00Z", amountMinor: 180_000_00 } }} now={PREVIEW_NOW} locale="en" />);
+    expect(words(exact)).toContain("This reached your bank account.");
+  });
+
+  it("a transfer that did not go through is said plainly, with what the lister can check", () => {
+    const text = words(renderToStaticMarkup(<ListerProtectedView deal={PREVIEW_DEALS["lister-payout-failed"]!} now={PREVIEW_NOW} locale="en" />));
+    expect(text).toContain("did not go through");
+    expect(text).toContain("Check that your bank account on Vallo is correct.");
+    expect(text).not.toMatch(/Paid to your bank/);
+  });
+
+  it("before the release, no payout line is drawn at all", () => {
+    const out = renderToStaticMarkup(<ListerProtectedView deal={{ ...PREVIEW_DEALS.protected!, payout: { status: "paid", completedAt: "2026-11-10T09:57:00Z" } }} now={PREVIEW_NOW} locale="en" />);
+    expect(out).not.toContain("data-payout");
+    expect(words(out)).toContain("not a balance you can spend");
   });
 
   it("the lister is told to add a payout account, and sees a review in their own words", () => {

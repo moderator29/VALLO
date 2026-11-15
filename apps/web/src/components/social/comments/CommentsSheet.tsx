@@ -320,7 +320,7 @@ export function CommentsSheet({
             </p>
           ) : null}
           <div className="nf-comments__row">
-            <textarea
+            <textarea autoCapitalize="sentences" enterKeyHint="enter"
               ref={inputRef}
               className="nf-field nf-comments__field"
               rows={1}
@@ -329,7 +329,6 @@ export function CommentsSheet({
               placeholder={signedIn ? "Write a comment..." : "Sign in to comment"}
               aria-label="Write a comment"
               onChange={(event) => setBody(event.target.value)}
-              autoCapitalize="sentences"
             />
             <Button
               type="submit"

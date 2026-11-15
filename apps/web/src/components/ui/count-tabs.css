@@ -1,114 +1,120 @@
 @layer components {
-  /*
-   * THE COUNT TAB ROW (the founder, 14 November 2026, after Snapchat's chat
-   * filters: "upgrade in platform areas like this kind of tabs"). One
-   * horizontal row of filter tabs that scrolls sideways with no scrollbar,
-   * the chosen tab filled and lit, the rest on the quiet glass every chip
-   * wears, and a tab may carry a small round count. Vallo's tokens and
-   * radius, not Snapchat's look: the control radius (the token gate refuses
-   * a capsule on a control), the shared glass fill, the shared selected
-   * fill the chips and the console's open tab already light up with.
-   *
-   * The row itself rides `.nf-scroll-x` (utilities.css), which supplies the
-   * overflow, the hidden scrollbar in both engines, the snap and
-   * `flex-shrink: 0` on every child, so a tab can NEVER shrink: a shrunken
-   * chip's count ran under its neighbour on 14 November.
-   */
-  .nf-counttabs {
+  /* THE COUNT TABS (components/ui/CountTabs.tsx): a sideways-scrolling row of
+     filter tabs, the chosen one filled, the rest quiet, each able to carry a
+     count. The row scrolls with no scrollbar; a tab never shrinks, so a count
+     cannot run under its neighbour; every tab is 44 px or more in both axes. */
+  .nf-count-tabs {
+    min-inline-size: 0;
+    max-inline-size: 100%;
+  }
+  .nf-count-tabs__row {
     display: flex;
     align-items: center;
     gap: var(--nf-space-2xs);
-    min-inline-size: 0;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
   }
-  /* The trailing fade: a tab past the edge reads as more, never as cut. The
-     mask reads only the stop's alpha, so the token's hue is irrelevant; both
-     content tokens are fully opaque in either theme. */
-  .nf-counttabs--fade {
-    -webkit-mask-image: linear-gradient(
-      to right,
-      var(--nf-content-primary) 0,
-      var(--nf-content-primary) calc(100% - 2.5rem),
-      transparent 100%
-    );
-    mask-image: linear-gradient(
-      to right,
-      var(--nf-content-primary) 0,
-      var(--nf-content-primary) calc(100% - 2.5rem),
-      transparent 100%
-    );
+  .nf-count-tabs__row::-webkit-scrollbar {
+    display: none;
   }
-  /* The bleed rail: out to the screen edge and padded back to the gutter,
-     with the snap inset set from the same token so the pair cannot drift
-     (the `.nf-scroll-x--gutter` lesson, utilities.css). */
-  .nf-counttabs--bleed {
-    margin-inline: calc(var(--nf-chiprow-bleed, 1.25rem) * -1);
-    padding-inline: var(--nf-chiprow-bleed, 1.25rem);
-    --nf-rail-snap-pad: var(--nf-chiprow-bleed, 1.25rem);
+  /* Out to the screen edges inside a guttered page, resting on the gutter. */
+  .nf-count-tabs--bleed .nf-count-tabs__row {
+    margin-inline: calc(-1 * var(--nf-pad-shell));
+    padding-inline: var(--nf-pad-shell);
+    scroll-padding-inline: var(--nf-pad-shell);
+  }
+  .nf-count-tabs__list {
+    display: flex;
+    flex: none;
+    align-items: center;
+    gap: var(--nf-space-2xs);
+  }
+  .nf-count-tabs__trailing {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
   }
 
-  .nf-counttabs__tab {
-    flex: none;
+  .nf-count-tab {
+    /* The containing block of the tab's screen-reader words: left to the
+       page, a hidden span in a tab scrolled off the edge widens the page. */
     position: relative;
     display: inline-flex;
+    flex: none;
     align-items: center;
     justify-content: center;
-    gap: var(--nf-gap-inline);
+    gap: var(--nf-space-2xs);
     min-block-size: 2.75rem;
     min-inline-size: 2.75rem;
-    padding-inline: var(--nf-pad-chip-inline);
+    padding: var(--nf-pad-chip-block) var(--nf-pad-chip-inline);
+    border: var(--nf-border-width) solid transparent;
     border-radius: var(--nf-radius-control);
-    border: var(--nf-border-width) solid var(--nf-btn-glass-edge);
-    background: var(--nf-btn-glass-fill);
+    background: transparent;
     color: var(--nf-content-secondary);
     font: inherit;
     font-size: var(--nf-text-body-sm);
     font-weight: 600;
+    line-height: 1.2;
     white-space: nowrap;
-    text-decoration: none;
     cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
     transition:
-      color var(--nf-duration-fast) var(--nf-ease-standard),
-      border-color var(--nf-duration-fast) var(--nf-ease-standard);
+      background-color var(--nf-duration-fast) var(--nf-ease-standard),
+      border-color var(--nf-duration-fast) var(--nf-ease-standard),
+      color var(--nf-duration-fast) var(--nf-ease-standard);
   }
   @media (hover: hover) {
-    .nf-counttabs__tab:not([aria-selected="true"], [aria-checked="true"], [aria-current="page"]):hover {
+    .nf-count-tab:hover {
       color: var(--nf-content-primary);
+      background: var(--nf-surface-secondary);
     }
   }
-  /* The chosen tab is FILLED AND LIT: the same selected state the filter
-     chips, the console's open tab and the primary button agree on, so "this
-     one is chosen" looks the same everywhere. */
-  .nf-counttabs__tab:is([aria-selected="true"], [aria-checked="true"], [aria-current="page"]) {
-    background: var(--nf-selected-fill);
-    border-color: var(--nf-selected-edges);
-    box-shadow: var(--nf-selected-shadow-inline);
-    color: var(--nf-content-on-brand);
-    font-weight: 700;
+  /* The chosen tab: the platform's one selected-chip fill, the brand tint
+     with the brand ink on a brand hairline, and no glow. */
+  .nf-count-tab[data-selected="true"] {
+    color: var(--nf-content-link);
+    background: var(--nf-brand-tint-2);
+    border-color: var(--nf-border-brand);
   }
-  .nf-counttabs__tab:focus-visible {
+  /* The ring is drawn inside the tab: the scroller clips whatever leaves it,
+     and room made for an outer ring with a negative margin pushed the row
+     two pixels past a page that has no gutter. */
+  .nf-count-tab:focus-visible {
     outline: var(--nf-focus-ring-width) solid var(--nf-focus-ring);
     outline-offset: calc(-1 * var(--nf-focus-ring-width));
   }
-
-  /* The count: a small round figure in the shared count colours the dock and
-     the rail badges already wear. Nothing is drawn at zero. */
-  .nf-counttabs__count {
+  .nf-count-tab__label {
+    flex: none;
+  }
+  /* The count: the platform's count plate (the inbox row's own), a small
+     rounded rectangle that grows with "9+" and never shrinks. */
+  .nf-count-tab__count {
     display: inline-flex;
+    flex: none;
     align-items: center;
     justify-content: center;
-    min-inline-size: 1.25rem;
-    block-size: 1.25rem;
-    padding-inline: var(--nf-space-3xs);
-    border-radius: var(--nf-radius-circle);
+    min-inline-size: 1.375rem;
+    block-size: 1.375rem;
+    padding-inline: var(--nf-space-2xs);
+    border-radius: var(--nf-radius-badge);
     background: var(--nf-count-fill);
     color: var(--nf-count-ink);
-    font-size: var(--nf-text-overline);
-    font-weight: 700;
+    font-size: 0.75rem;
+    font-weight: 600;
+    line-height: 1;
     font-variant-numeric: tabular-nums;
+  }
+  /* A plain total (how many a list holds): a neutral plate, so it is never
+     read as something unread. */
+  .nf-count-tab__count[data-tone="quiet"] {
+    background: var(--nf-surface-raised);
+    color: var(--nf-content-secondary);
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .nf-counttabs__tab {
+    .nf-count-tab {
       transition: none;
     }
   }

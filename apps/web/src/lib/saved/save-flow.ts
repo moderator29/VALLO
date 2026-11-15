@@ -5,9 +5,10 @@ import { toggleSave } from "./actions";
 import { saveRestaurant, saveStay, unsaveRestaurant, unsaveStay } from "./places-actions";
 import { addLocalSave, removeLocalSave } from "./local";
 import { SAVE_WORDS } from "../ui/save-banner";
-import { banner, dismissToast, QUICK_DWELL_MS, updateToast, type ToastAction } from "../ui/toast";
+import { banner, dismissQuick, updateQuick, type ToastAction } from "../ui/toast";
 import { setOrKeep } from "../offline/send-or-keep";
 import { tapFailedOffline } from "../offline/tap-failed";
+import { triggerSaveEducation } from "./save-education";
 import type { ActionResult } from "../actions/envelope";
 
 /**
@@ -36,6 +37,14 @@ import type { ActionResult } from "../actions/envelope";
  *      entrance); a refusal puts the heart back and says why in an error
  *      banner, with Try again. A later tap supersedes an earlier answer, so a
  *      slow failure never undoes a newer tap.
+ *
+ * THE CONFIRMATION IS THE QUICK PILL (the founder, 14 November 2026: the
+ * small "copied" pill at the bottom, "and stuffs like that"). A save used to
+ * raise the top banner with Undo. It now says the same words in the pill
+ * (`banner.quick`), which carries no action: the heart that was just tapped
+ * is the undo, one tap away and already under the thumb. What needs reading
+ * or acting on still goes to the top: a save kept for when the signal is
+ * back is an info banner, and a refusal an error banner with Try again.
  */
 
 export type SavePlaceTarget = { kind: "accommodation" | "restaurant"; id: string };
@@ -129,9 +138,6 @@ export function resetSessionSaves(): void {
   changeVersion = 0;
   inFlight = 0;
   settledWaiters = [];
-  lastPill.key = "";
-  lastPill.id = 0;
-  lastPill.at = 0;
 }
 
 /* ------------------------------------------------------------- the tap */
@@ -157,35 +163,6 @@ function writeDevice(listingId: string, saved: boolean, deviceChanged: () => voi
   if (saved) addLocalSave(listingId);
   else removeLocalSave(listingId);
   deviceChanged();
-}
-
-/* ------------------------------------------------------- the quick pill */
-
-/** The last pill a heart raised, so the opposite tap can take it back quietly. */
-const lastPill = { key: "", want: false, id: 0, at: 0 };
-
-/**
- * Raise the pill for a heart's tap, or say nothing: the OPPOSITE tap on the
- * same heart inside the pill's life is "never mind", so the pill goes and no
- * second one ("Removed from Saved") answers a change of mind (handoff 6.1:
- * "a second tap within the pill's life undoes it silently").
- */
-function raiseSavePill(key: string, next: boolean, device: boolean): number {
-  const at = Date.now();
-  if (lastPill.key === key && lastPill.want === !next && at - lastPill.at < QUICK_DWELL_MS) {
-    dismissToast(lastPill.id);
-    lastPill.key = "";
-    return 0;
-  }
-  const id = banner.quick(
-    next ? (device ? SAVE_WORDS.quickSavedDevice : SAVE_WORDS.quickSaved) : SAVE_WORDS.quickRemoved,
-    { haptic: false, "data-testid": "save-pill" },
-  );
-  lastPill.key = key;
-  lastPill.want = next;
-  lastPill.id = id;
-  lastPill.at = at;
-  return id;
 }
 
 export type TapSaveOptions = {
@@ -220,17 +197,16 @@ export function tapSave(options: TapSaveOptions): Promise<void> {
   apply(next);
   setSessionSaved(target, next);
 
-  /* THE QUICK PILL ON A HEART (founder, 14 November 2026, handoff 6.1). The
-     heart itself stays under the thumb as the real inverse, so the pill
-     carries no Undo button; collections and the story keep the top banner
-     with Undo because their control may be gone by then. The haptic is the
-     heart's own (`feedback("select")` on the flip), so the pill adds none. */
-  const bannerId = raiseSavePill(key, next, device);
+  const pillId = banner.quick(next ? (device ? SAVE_WORDS.savedDevice : SAVE_WORDS.saved) : SAVE_WORDS.removed);
+
+  if (next) setTimeout(triggerSaveEducation, 600);
 
   const rollBack = (error: string, action?: ToastAction) => {
     if (!current()) return;
     apply(!next);
     setSessionSaved(target, !next);
+    /* The pill said it was saved; it was not. */
+    dismissQuick(pillId);
     banner.error(error, {
       ...(action ? { action } : { retry: () => void tapSave({ ...options }) }),
       "data-testid": options["data-testid"] ?? "save-banner",
@@ -248,10 +224,9 @@ export function tapSave(options: TapSaveOptions): Promise<void> {
     try {
       const sent = await setOrKeep(kind, key, next, () => sendWanted(target, next));
       if (sent.state === "kept") {
-        /* Kept for later is news the pill's voice cannot carry: the info
-           banner says it, and the pill (when still up) leaves with it. */
-        dismissToast(bannerId);
-        banner(next ? words.savedWaiting : words.removedWaiting, { tone: "info" });
+        /* Kept for later is something to read, so it goes to the top. */
+        dismissQuick(pillId);
+        banner.info(next ? words.savedWaiting : words.removedWaiting);
         return;
       }
       if (sent.state === "not_kept") {
@@ -265,7 +240,7 @@ export function tapSave(options: TapSaveOptions): Promise<void> {
         if (!target.place && result.error.startsWith("Sign in")) {
           device = true;
           writeDevice(target.listingId, next, deviceChanged);
-          if (next) updateToast(bannerId, { message: SAVE_WORDS.quickSavedDevice });
+          if (next) updateQuick(pillId, SAVE_WORDS.savedDevice);
           return;
         }
         rollBack(result.error, target.place && result.error.startsWith("Sign in") ? options.signIn : undefined);
@@ -275,7 +250,7 @@ export function tapSave(options: TapSaveOptions): Promise<void> {
       if (data && data.mode === "local") {
         device = true;
         writeDevice(target.listingId, next, deviceChanged);
-        if (next) updateToast(bannerId, { message: SAVE_WORDS.quickSavedDevice });
+        if (next) updateQuick(pillId, SAVE_WORDS.savedDevice);
         return;
       }
       /* The database is the authority: a second tab may have got there first. */
@@ -287,6 +262,7 @@ export function tapSave(options: TapSaveOptions): Promise<void> {
       if (current()) {
         apply(!next);
         setSessionSaved(target, !next);
+        dismissQuick(pillId);
       }
       if (!tapFailedOffline(error)) banner.error(SAVE_WORDS.failed);
     } finally {

@@ -47,14 +47,13 @@ export function PepFlagForm({ copy, question }: { copy: Dictionary["compliancePe
         <label htmlFor="pep-flag-role" className="nf-label block">
           {question.role}
         </label>
-        <input
+        <input type="text" autoComplete="organization-title" autoCapitalize="sentences"
           id="pep-flag-role"
           name="role"
           maxLength={200}
           className="nf-field mt-xs min-h-[44px] w-full"
           aria-invalid={err?.fieldErrors?.role ? true : undefined}
           aria-describedby={err?.fieldErrors?.role ? "pep-flag-role-problem" : undefined}
-          inputMode="text" autoCapitalize="sentences"
         />
         <FieldProblem id="pep-flag-role-problem" message={err?.fieldErrors?.role} when={state} />
       </div>
@@ -62,7 +61,7 @@ export function PepFlagForm({ copy, question }: { copy: Dictionary["compliancePe
         <label htmlFor="pep-flag-note" className="nf-label block">
           {copy.flagNote}
         </label>
-        <input id="pep-flag-note" name="note" required minLength={2} maxLength={600} className="nf-field mt-xs min-h-[44px] w-full" inputMode="text" autoCapitalize="sentences" />
+        <input type="text" autoComplete="off" autoCapitalize="sentences" id="pep-flag-note" name="note" required minLength={2} maxLength={600} className="nf-field mt-xs min-h-[44px] w-full" />
       </div>
       <div className="flex flex-wrap gap-xs">
         <Button type="submit" name="flagged" value="yes" variant="primary" disabled={pending}>

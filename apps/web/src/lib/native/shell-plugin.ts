@@ -38,6 +38,8 @@ export type ValloShellPlugin = {
   notePath(options: { path: string }): Promise<void>;
   /** The page has painted: the launch mark may hand over to it. */
   handoff(): Promise<void>;
+  /** Present from the build that draws no opening of its own: the page's opening is the only one. */
+  pageOpens(): Promise<void>;
 };
 
 export const ValloShell = registerPlugin<ValloShellPlugin>("ValloShell");

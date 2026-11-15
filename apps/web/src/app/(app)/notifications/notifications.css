@@ -112,10 +112,8 @@
   }
   .nf-notif__chips {
     margin-bottom: var(--nf-space-lg);
-    /* The rail sits in the page gutter, so it bleeds by the gutter in force (16, 24 or 32), not
-       the 20px default: 4px past each edge of a 390px phone otherwise (found by
-       components/locale-fit/members-a.dom.test.tsx), and the same shortfall HostNav fixes. */
-    --nf-chiprow-bleed: var(--nf-pad-shell);
+    /* The row is the shared count tabs (components/ui/count-tabs.css), which
+       bleeds by the page gutter in force (16, 24 or 32) on its own. */
   }
   /* The body is the sentence the trigger wrote about the event: two lines, so
      it can be acted on without opening, then the ellipsis. */

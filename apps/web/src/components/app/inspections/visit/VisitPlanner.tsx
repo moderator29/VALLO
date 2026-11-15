@@ -341,7 +341,7 @@ export function VisitPlanner({
           <label htmlFor="visit-note" className="nf-visit__heading">
             {copy.note.heading} <span className="nf-visit__heading-aside">{copy.note.optional}</span>
           </label>
-          <textarea
+          <textarea autoCapitalize="sentences" enterKeyHint="enter"
             id="visit-note"
             className="nf-field nf-visit-note"
             value={note}
@@ -350,7 +350,6 @@ export function VisitPlanner({
             aria-describedby="visit-note-count"
             onChange={(event) => setNote(event.target.value.slice(0, VISIT_NOTE_LIMIT))}
             data-testid="visit-note"
-            autoCapitalize="sentences"
           />
           <span id="visit-note-count" className="nf-visit-note__count" aria-live="polite">
             {countOf(remaining, "charactersLeft", locale)}

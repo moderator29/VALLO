@@ -37,6 +37,9 @@ export type ArrangementOpsRow = {
   reviewReason: string | null;
   releasePausedAt: string | null;
   createdAt: string | null;
+  /** The transfer to the lister's bank after the release (automatic payout), when the partner reported it. */
+  payoutStatus: string | null;
+  payoutAt: string | null;
 };
 
 export type ArrangementOpsRead =
@@ -76,6 +79,8 @@ export function toOpsRow(raw: Record<string, unknown>): ArrangementOpsRow | null
     reviewReason: str(raw.review_reason),
     releasePausedAt: str(raw.release_paused_at),
     createdAt: str(raw.created_at),
+    payoutStatus: str(raw.payout_status),
+    payoutAt: str(raw.payout_completed_at) ?? str(raw.payout_updated_at),
   };
 }
 

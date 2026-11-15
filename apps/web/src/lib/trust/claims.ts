@@ -144,18 +144,30 @@ export const BACKED_CLAIMS: readonly BackedClaim[] = [
      claim as above, for the new provider. Each sentence names the transfer
      rail or a state the provider confirmed, and is drawn only by
      components/money/protected-rail, which picks its screen from the recorded
-     state (lib/money/protected-journey.ts), never from the browser. No live
-     page mounts it: the rail is switched off (payments_escrowpay_on, fail
-     closed, lib/payments/providers/escrowpay/switch.ts), the client sends
-     nothing while the API is undocumented (DOCUMENTED false), and every
-     category is disabled (public.protected_payment_categories). Whole
+     state (lib/money/protected-journey.ts), never from the browser. No
+     member reaches it today: the rail is switched off (payments_escrowpay_on,
+     fail closed, lib/payments/providers/escrowpay/switch.ts), a test key on
+     the production deployment starts nothing (config.ts, startsMoney), and
+     every category is disabled (public.protected_payment_categories). Whole
      sentences, copy.ts only. */
   {
     phrase:
       /^Protected bank transfer$|^Continue with protected transfer$|^Your payment is protected\.$|^Protected transaction amount$/,
     onlyIn: MONEY_COPY_FILE,
     mechanism:
-      "the new protected rail (lib/payments/providers/escrowpay): funds held by the custodian bank named in lib/money/protected-wording.ts under the provider's agreement until release; the screens draw 'protected' only on a provider-confirmed state recorded in provider_arrangements; switched off by payments_escrowpay_on (fail closed), DOCUMENTED false in lib/payments/providers/escrowpay/client.ts, and every category disabled in public.protected_payment_categories",
+      "the new protected rail (lib/payments/providers/escrowpay): funds held by the custodian bank named in lib/money/protected-wording.ts under the provider's agreement until release; the screens draw 'protected' only on a provider-confirmed state recorded in provider_arrangements; switched off by payments_escrowpay_on (fail closed), a test key on the production deployment starting nothing (lib/payments/providers/escrowpay/config.ts), and every category disabled in public.protected_payment_categories",
+  },
+  /* A lister's readiness card on Settings, Payments (14 November 2026,
+     ProtectedSetup): the rail's own name as a heading, and the one sentence
+     saying what a lister does before being paid this way. Neither says any
+     payment is held or safe. Drawn only while the rail may start money for a
+     member (readProtectedSetup in lib/money/protected-start.ts). Whole
+     sentences, copy.ts only. */
+  {
+    phrase: /^Protected payments$|^To be paid through a protected payment you confirm your identity once, and keep a bank account on Vallo for the payout\.$/,
+    onlyIn: MONEY_COPY_FILE,
+    mechanism:
+      "the protected rail's name on a lister's readiness card: the identity check is the provider's own (POST /parties/onboard, lib/money/protected-provider.ts) and the payout account is made from the lister's bank account on Vallo; the card is drawn only when readProtectedSetup answers, which requires the rail verified, configured, allowed to start money on the deployment and payments_escrowpay_on on",
   },
   /* The protected rail's trust page, failure states and receipt (10
      November 2026), the same claim as the entry above, for the explainer at
@@ -169,7 +181,7 @@ export const BACKED_CLAIMS: readonly BackedClaim[] = [
       /^A protected payment is a bank transfer that a licensed bank holds under your agreement until the handover you agreed has happened\.|^When protected payment opens, the money you transfer goes to a designated account at a licensed bank\.|^How a protected payment moves$|^A protected payment, from agreement to release$|^Only now does the payment read as protected, with the bank named on screen\.$|^The states of a protected payment$|^Protected bank transfer, from a Nigerian account$/,
     onlyIn: MONEY_COPY_FILE,
     mechanism:
-      "the new protected rail's explainer: funds held by the custodian bank named in lib/money/protected-wording.ts under the provider's agreement until release; 'protected' is drawn on a payment only on a provider-confirmed state recorded in provider_arrangements (lib/money/protected-journey.ts); the page states first that the rail is not open (PROTECTED_NOT_OPEN), and the rail is switched off by payments_escrowpay_on (fail closed) with DOCUMENTED false in lib/payments/providers/escrowpay/client.ts",
+      "the new protected rail's explainer: funds held by the custodian bank named in lib/money/protected-wording.ts under the provider's agreement until release; 'protected' is drawn on a payment only on a provider-confirmed state recorded in provider_arrangements (lib/money/protected-journey.ts); the page states first that the rail is not open (PROTECTED_NOT_OPEN), and the rail is switched off by payments_escrowpay_on (fail closed), with every category disabled in public.protected_payment_categories",
   },
   { phrase: /^; Secure$/, mechanism: "the Secure attribute of the theme cookie (lib/theme/theme-client.ts), an HTTP cookie flag, not copy" },
 

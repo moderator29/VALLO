@@ -98,3 +98,15 @@ its time), with RLS on and no grant to `anon` or `authenticated`. Safe to run
 twice. The read-back at its foot asks each role with `has_table_privilege`.
 Until it runs, every page shows naira only and the twice-daily rates job
 records nothing; no price, payment or booking is affected either way.
+
+## The payout to the lister (15 November 2026)
+
+APPLIED by the founder on 15 November 2026 in the Supabase SQL Editor and
+verified live by the lead the same day (six `payout_*` columns, three checks,
+the trigger `provider_arrangements_zz_payout_notice` enabled, its function
+security definer, members cannot update or execute, service role can update,
+0 rows). Moved to
+`supabase/migrations/20261115120000_protected_payout_to_lister.sql` and
+recorded in `APPLIED.txt`. Do not run again (it is safe to, and changes
+nothing). The local test still runs:
+`supabase/tests/protected_payout/run.sh` ends `E2E_OK`.

@@ -1,7 +1,9 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { OPEN_HARD_GRACE_MS, OPEN_NATIVE_METHOD, OPEN_NATIVE_PLUGIN, OPEN_CAP_MS, OPEN_CSS_CAP_MS, OPEN_FADE_MS, OPEN_MIN_MS, OPEN_MIN_STILL_MS, OPEN_NATIVE_WAIT_MS, OPEN_SCRIPT, OPEN_SESSION_KEY } from "./open-script";
+import { OPEN_HARD_GRACE_MS,
+  OPEN_NATIVE_METHOD,
+  OPEN_NATIVE_PAGE_METHOD, OPEN_NATIVE_PLUGIN, OPEN_CAP_MS, OPEN_CSS_CAP_MS, OPEN_FADE_MS, OPEN_MIN_MS, OPEN_MIN_STILL_MS, OPEN_NATIVE_WAIT_MS, OPEN_SCRIPT, OPEN_SESSION_KEY } from "./open-script";
 
 /**
  * THE OPENING SCREEN'S CONTROLLER (10 November 2026). The script is run here
@@ -140,24 +142,33 @@ describe("the opening screen's decision", () => {
 });
 
 /*
- * ONE OPENING IN THE APP (13 November 2026). A 1.0.2 or later binary draws its
- * own opening (`LaunchMark`) and registers `ValloShell.handoff`; this layer then
- * played a second time over the page once the splash was down. Where the
- * binary carries its own, this one is off before the first frame, on a cold
- * open as on a warm one, and never lights later from the splash signal or the
- * native wait.
+ * ONE OPENING, ALWAYS (the founder, 14 November 2026). A 1.0.2 binary draws
+ * its own opening (`LaunchMark`) and registers `ValloShell.handoff`; it cannot
+ * be changed once installed, and he will not have two openings in a row, so
+ * this layer is off there. A later binary that draws nothing says so with
+ * `ValloShell.pageOpens`, and there this layer is the one opening.
  */
-describe("one opening inside the app", () => {
+describe("the opening inside the app", () => {
   const SPLASH = { name: "SplashScreen", methods: [{ name: "hide" }, { name: "show" }] };
   const SHELL_102 = { name: OPEN_NATIVE_PLUGIN, methods: [{ name: "setPrivacyCover" }, { name: OPEN_NATIVE_METHOD }, { name: "takeCrashReport" }] };
+  const SHELL_NEXT = { name: OPEN_NATIVE_PLUGIN, methods: [{ name: OPEN_NATIVE_METHOD }, { name: OPEN_NATIVE_PAGE_METHOD }] };
 
-  it("is off at once, cold, in a binary that draws its own opening, and never lights afterwards", () => {
+  it("is off, before a frame and for good, in a binary that draws its own opening", () => {
     for (const env of [{ native: true }, { ua: "Mozilla/5.0 VALLO-NATIVE" }]) {
       const r = run({ ...env, pluginHeaders: [SPLASH, SHELL_102] });
       expect(r.attrs["data-open"]).toBe("off");
-      r.advance(OPEN_NATIVE_WAIT_MS + OPEN_CAP_MS + 1000);
+      /* Nothing lights it later: not the splash coming down, not the long wait. */
+      r.relight();
+      r.advance(OPEN_NATIVE_WAIT_MS + 5000);
       expect(r.attrs["data-open"]).toBe("off");
     }
+  });
+
+  it("is the one opening, with no wait, in a binary that draws none of its own", () => {
+    const r = run({ native: true, pluginHeaders: [SPLASH, SHELL_NEXT] });
+    expect(r.attrs["data-open"]).toBeUndefined();
+    r.relight();
+    expect(r.attrs["data-open"]).toBe("on");
   });
 
   it("still plays, after the splash, in an older binary with no opening of its own", () => {

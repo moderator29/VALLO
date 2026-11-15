@@ -185,17 +185,19 @@ describe.skipIf(!hasBrowser && !process.env.CI)("the opening screen, in a browse
   });
 
   /*
-   * ONE OPENING IN THE APP (13 November 2026). A 1.0.2 binary draws its own
-   * opening natively; this layer must never draw over the page after it. An
-   * older binary has none, and this layer is still its opening.
+   * ONE OPENING, ALWAYS (the founder, 14 November 2026). A 1.0.2 binary
+   * draws its own opening natively and cannot be changed once installed, so
+   * this layer is never drawn there: not before the splash is down, not
+   * after. An older binary has none, and this layer is its opening as before.
    */
-  it("inside a 1.0.2 binary, the layer is never drawn: off before the first frame and still off after every wait", async () => {
+  it("inside a 1.0.2 binary, the layer is never drawn", async () => {
     const { page, close } = await installed({ hydrate: 50, shell: "1.0.2" });
     await page.waitForSelector("#nf-open svg", { state: "attached" });
     expect(await page.evaluate(() => document.documentElement.dataset.open)).toBe("off");
     expect((await state(page)).display).toBe("none");
     await page.evaluate(() => window.dispatchEvent(new Event("nf:splash-down")));
-    await page.waitForTimeout(800);
+    await page.waitForTimeout(1800);
+    expect(await page.evaluate(() => document.documentElement.dataset.open)).toBe("off");
     expect((await state(page)).display).toBe("none");
     await close();
   });

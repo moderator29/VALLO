@@ -6,44 +6,26 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { Segmented } from "@/components/ui/Segmented";
-import { CountTabs } from "@/components/ui/CountTabs";
-import { ActionSheet, type QuickAction, type SheetRow } from "@/components/ui/ActionSheet";
-import { useLongPress } from "@/lib/ui/use-long-press";
-import { banner } from "@/lib/ui/toast";
-import { withdrawOffer } from "@/lib/offers/actions";
+import { Chip, ChipRow } from "@/components/ui/Chip";
 import { Panel } from "@/components/ui/Panel";
 import { RemoteImage } from "@/components/ui/RemoteImage";
 import { State } from "@/components/ui/State";
 import { TextField } from "@/components/ui/Field";
 import { UiIcon } from "@/design-system/icons/UiIcon";
 import { differenceOf, formatPct, proposedDate, waitingFor } from "@/lib/offers/format";
-import { dealRoomHref, dealRoomTabHref } from "@/lib/offers/routes";
+import { dealRoomHref } from "@/lib/offers/routes";
 import { PAYMENT_LABEL, STATE_FILTER_LABEL, turnSentence } from "@/lib/offers/words";
 import type { OfferRow, OfferState } from "@/lib/offers/types";
 import type { OfferCounts } from "@/lib/offers/queries";
 import { GapBar, Naira, OfferStateChip } from "./OfferParts";
-import { nairaFull } from "@/lib/offers/format";
 import "./offers.css";
 
 type Tab = "made" | "received";
-/**
- * The founder's count tab row on the offers workspace (handoff 6.3, 14
- * November 2026): Waiting on you, Waiting on them, Agreed, Closed.
- *
- * `awaiting_you` and the per-state counts come from the server
- * (`OfferCounts`). The two NEW tabs are derived from the rows this screen
- * already holds, never from a new read: "waiting on them" is an open offer
- * whose turn is the other side, and "closed" is the four states that end an
- * offer, added up. The per-state tabs they fold up are still reachable: a
- * closed offer says which kind it is on its own row.
- */
-type Filter = OfferState | "all" | "awaiting_you" | "waiting_them" | "closed";
+type Filter = OfferState | "all" | "awaiting_you";
 type SortKey = "activity" | "amount" | "gap";
 type Dir = "ascending" | "descending";
 
-const FILTERS: readonly Filter[] = ["all", "awaiting_you", "waiting_them", "agreed", "closed"];
-/** The states that end an offer, folded into one tab. */
-const CLOSED_STATES: readonly OfferState[] = ["declined", "withdrawn", "expired", "cancelled"];
+const FILTERS: readonly Filter[] = ["all", "awaiting_you", "open", "agreed", "declined", "withdrawn", "expired", "cancelled"];
 
 export type OffersWorkspaceProps = {
   made: { rows: OfferRow[]; counts: OfferCounts };
@@ -72,23 +54,11 @@ function Thumb({ row }: { row: OfferRow }) {
   );
 }
 
-function OfferCard({
-  row,
-  nowMs,
-  index,
-  onHold,
-}: {
-  row: OfferRow;
-  nowMs: number;
-  index: number;
-  /* Hold the card for its sheet (handoff 6.3 part 2). */
-  onHold?: (row: OfferRow) => void;
-}) {
-  const hold = useLongPress(() => onHold?.(row), { disabled: !onHold });
+function OfferCard({ row, nowMs, index }: { row: OfferRow; nowMs: number; index: number }) {
   return (
     <li style={{ "--nf-i": Math.min(index, 8) } as CSSProperties}>
       <Panel as="div" variant="card" className="p-0">
-        <Link href={dealRoomHref(row.id)} className="nf-ofr-card" data-testid="offer-card" data-offer={row.id} {...hold.handlers}>
+        <Link href={dealRoomHref(row.id)} className="nf-ofr-card" data-testid="offer-card" data-offer={row.id}>
           <div className="nf-ofr-card__top">
             <div className="flex min-w-0 items-center gap-sm">
               <Thumb row={row} />
@@ -225,8 +195,6 @@ export function OffersWorkspace({ made, received, initialTab, nowMs }: OffersWor
   const router = useRouter();
   const [tab, setTab] = useState<Tab>(initialTab);
   const [filter, setFilter] = useState<Filter>("all");
-  /* The offer whose own sheet is open (a hold on its card). */
-  const [menuRow, setMenuRow] = useState<OfferRow | null>(null);
   const [query, setQuery] = useState("");
   const [sort, setSort] = useState<{ key: SortKey; dir: Dir }>({ key: "activity", dir: "descending" });
   const data = tab === "made" ? made : received;
@@ -247,8 +215,6 @@ export function OffersWorkspace({ made, received, initialTab, nowMs }: OffersWor
     const q = query.trim().toLowerCase();
     let all = data.rows;
     if (filter === "awaiting_you") all = all.filter((r) => r.state === "open" && r.turn === r.viewerSide);
-    else if (filter === "waiting_them") all = all.filter((r) => r.state === "open" && r.turn !== r.viewerSide);
-    else if (filter === "closed") all = all.filter((r) => CLOSED_STATES.includes(r.state));
     else if (filter !== "all") all = all.filter((r) => r.state === filter);
     if (q) all = all.filter((r) => [r.listingTitle, r.reference, r.counterpartyName].some((x) => x.toLowerCase().includes(q)));
     const val = (r: OfferRow) => (sort.key === "amount" ? r.amountMinor : sort.key === "gap" ? r.differencePct : Date.parse(r.lastActivityAt));
@@ -263,15 +229,7 @@ export function OffersWorkspace({ made, received, initialTab, nowMs }: OffersWor
   };
   const onSort = (key: SortKey) => setSort((s) => (s.key === key ? { key, dir: s.dir === "descending" ? "ascending" : "descending" } : { key, dir: "descending" }));
 
-  /* Every tab's count, from what this screen already has in hand. */
-  const countFor = (f: Filter): number => {
-    if (f === "waiting_them") return data.rows.filter((r) => r.state === "open" && r.turn !== r.viewerSide).length;
-    if (f === "closed") return CLOSED_STATES.reduce((sum, state) => sum + (data.counts[state] ?? 0), 0);
-    return data.counts[f as keyof typeof data.counts] ?? 0;
-  };
-  /* A tab appears only when it has something in it; the tab you are on never
-     vanishes under you. */
-  const visibleFilters = FILTERS.filter((f) => f === "all" || countFor(f) > 0 || f === filter);
+  const visibleFilters = FILTERS.filter((f) => f === "all" || data.counts[f] > 0 || f === filter);
 
   return (
     <div className="nf-ofr-ws grid gap-md" data-testid="offers-workspace">
@@ -292,126 +250,15 @@ export function OffersWorkspace({ made, received, initialTab, nowMs }: OffersWor
           <div className="hidden min-w-[16rem] flex-1 lg:block">
             <TextField label="Search" hideLabel placeholder="Search property, person or reference (press /)" leadingIcon="search" inputMode="search" enterKeyHint="search" value={query} onChange={(e) => setQuery(e.target.value)} clearable="Clear search" onClear={() => setQuery("")} data-testid="offers-search" />
           </div>
-          <CountTabs
-            label="Filter by state"
-            active={filter}
-            onChange={(key) => setFilter(key as Filter)}
-            items={visibleFilters.map((f) => ({
-              key: f,
-              label: STATE_FILTER_LABEL[f],
-              ...(countFor(f) > 0 ? { count: countFor(f) } : {}),
-              "data-testid": `offers-filter-${f}`,
-            }))}
-          />
+          <ChipRow label="Filter by state" radiogroup bleed={false} fadeEdges={false}>
+            {visibleFilters.map((f) => (
+              <Chip key={f} behaviour="choice" selected={filter === f} onSelectedChange={() => setFilter(f)} count={data.counts[f]} data-testid={`offers-filter-${f}`}>
+                {STATE_FILTER_LABEL[f]}
+              </Chip>
+            ))}
+          </ChipRow>
         </div>
       ) : null}
-
-      {/*
-        THE OFFER ROW'S SHEET (handoff 6.3 part 2). Hold a card and the
-        listing comes up with the amount under it, then the two places this
-        offer lives and the things that can be done to it from here.
-
-        Every destination is a real one. Counter and History are tabs of the
-        deal room (`dealRoomTabHref`), because countering asks for an amount
-        and a date, which is a form and belongs on the screen that has it.
-        Message is drawn only where the offer has a conversation. Withdraw is
-        the one direct action, it is destructive, it is behind the confirm,
-        and it is offered only on an OPEN offer this reader made: a seller
-        cannot withdraw a buyer's offer, and the database refuses it anyway
-        (`sale_offer_withdraw_as`).
-      */}
-      <ActionSheet
-        open={menuRow !== null}
-        onOpenChange={(next) => {
-          if (!next) setMenuRow(null);
-        }}
-        title="Actions for this offer"
-        testId="offer-menu"
-        {...(menuRow
-          ? {
-              head: {
-                name: menuRow.listingTitle,
-                line: nairaFull(menuRow.amountMinor),
-                ...(menuRow.listingThumb ? { thumb: menuRow.listingThumb } : {}),
-                icon: "house" as const,
-                href: dealRoomHref(menuRow.id),
-                "data-testid": "offer-menu-open",
-              },
-            }
-          : {})}
-        quick={
-          menuRow
-            ? ([
-                {
-                  key: "deal-room",
-                  label: "Deal room",
-                  icon: "hand-coins",
-                  href: dealRoomHref(menuRow.id),
-                  "data-testid": "offer-menu-deal-room",
-                },
-                /* NO "Message" HERE. The conversation id belongs to the deal
-                   room (`DealRoom.conversationId`), not to a row in this
-                   list, so a message action on this sheet would either need a
-                   read this screen does not make or a guessed address. The
-                   deal room above is one tap from the thread, and a quick
-                   action that cannot act is worse than one that is absent. */
-              ] as QuickAction[])
-            : []
-        }
-        rows={
-          menuRow
-            ? ([
-                {
-                  key: "counter",
-                  label: "Counter this offer",
-                  sub: "Opens the negotiation, where the amount and the date are set.",
-                  icon: "repost-loop",
-                  href: dealRoomTabHref(menuRow.id, "negotiation"),
-                  chevron: true,
-                  "data-testid": "offer-menu-counter",
-                },
-                {
-                  key: "history",
-                  label: "History",
-                  sub: "Every offer and counteroffer, in order.",
-                  icon: "history",
-                  href: dealRoomTabHref(menuRow.id, "activity"),
-                  chevron: true,
-                  "data-testid": "offer-menu-history",
-                },
-                ...(menuRow.state === "open" && menuRow.viewerSide === "buyer"
-                  ? [
-                      {
-                        key: "withdraw",
-                        label: "Withdraw this offer",
-                        icon: "close" as const,
-                        danger: true,
-                        confirm: {
-                          title: "Withdraw this offer?",
-                          line: "The other side is told, and the offer closes. You can make a new one afterwards.",
-                          confirmLabel: "Withdraw it",
-                          cancelLabel: "Keep it",
-                        },
-                        onSelect: () => {
-                          const offerId = menuRow.id;
-                          void withdrawOffer({ offerId }).then((result) => {
-                            if (!result.ok) {
-                              banner.error(result.error);
-                              return;
-                            }
-                            banner.success("Offer withdrawn");
-                            router.refresh();
-                          });
-                        },
-                        "data-testid": "offer-menu-withdraw",
-                      },
-                    ]
-                  : []),
-              ] as SheetRow[])
-            : []
-        }
-        doneLabel="Done"
-      />
 
       <div aria-live="polite" className="sr-only">
         {plural(rows.length, { one: "{count} offer", other: "{count} offers" })} shown
@@ -462,7 +309,7 @@ export function OffersWorkspace({ made, received, initialTab, nowMs }: OffersWor
         <>
           <ul className="nf-ofr-list" data-wide-hidden data-testid="offers-list">
             {rows.map((row, i) => (
-              <OfferCard key={row.id} row={row} nowMs={nowMs} index={i} onHold={setMenuRow} />
+              <OfferCard key={row.id} row={row} nowMs={nowMs} index={i} />
             ))}
           </ul>
           <OfferTable rows={rows} nowMs={nowMs} side={tab} sort={sort} onSort={onSort} />

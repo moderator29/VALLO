@@ -55,7 +55,7 @@ import { banner } from "@/lib/ui/toast";
  * the type makes it impossible to ask for a card without them.
  */
 
-/* The banner's words for a copied area link (founder, 7 November 2026). */
+/* The quick pill's words for a copied area link (founder, 14 November 2026). */
 const LINK_COPIED = "Link copied";
 
 export type ShareAreaCopy = {
@@ -183,7 +183,7 @@ function MintableShare({
       await navigator.clipboard.writeText(url);
       setCopied(true);
       /* The button keeps its tick; the banner says it (founder, 7 November 2026). */
-      banner(LINK_COPIED, { tone: "success" });
+      banner.quick(LINK_COPIED);
     } catch {
       /* A refused clipboard is not an error worth a sentence: the link is on
          the screen and selectable, which is the fallback every browser has. */

@@ -1,6 +1,9 @@
 "use client";
 
 import { banner } from "@/lib/ui/toast";
+import { PasteTray } from "@/components/app/messages/PasteTray";
+import { usePaste } from "@/components/app/messages/use-paste";
+import { PASTE_WORDS, fillCount } from "@/components/app/messages/paste-words";
 import type { Dictionary } from "@vallo/i18n/core";
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
@@ -151,6 +154,9 @@ function transcriptSummary(messages: Message[]): string {
 
 const DRAFT_KEY = "nf_support_chat_draft";
 
+/** The longest message this box sends, typed and pasted together (the stored draft is cut to the same). */
+const SUPPORT_TEXT_LIMIT = 2000;
+
 export function SupportChat({
   aiConsented = false,
   defaultOpen = false,
@@ -205,6 +211,9 @@ export function SupportChat({
      one voice for "thinking", "stop", "copy" and what each state announces. */
   const answerWords = useInboxPart("assistant", assistantCopy);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  /* PASTE (14 November 2026). This box takes words: a long pasted text or a
+     lone link is held as a chip above it and sent as the message's text. */
+  const paste = usePaste({ limit: SUPPORT_TEXT_LIMIT });
 
   const scrollerRef = useRef<HTMLDivElement | null>(null);
   const abortRef = useRef<AbortController | null>(null);
@@ -224,7 +233,7 @@ export function SupportChat({
     setMessages(loadThread());
     try {
       const stored = window.localStorage.getItem(DRAFT_KEY);
-      if (stored) setDraft(stored.slice(0, 2000));
+      if (stored) setDraft(stored.slice(0, SUPPORT_TEXT_LIMIT));
     } catch {
       // No stored draft.
     }
@@ -615,6 +624,7 @@ export function SupportChat({
                               ?.writeText(m.text)
                               .then(() => {
                                 setCopiedId(m.id);
+                                banner.quick(answerWords.copied);
                                 window.setTimeout(() => setCopiedId((id) => (id === m.id ? null : id)), 1600);
                               })
                               .catch(() => undefined);
@@ -660,10 +670,17 @@ export function SupportChat({
             {/* In the sheet the composer stays on screen while the thread
                 scrolls under it, the way a messaging app's does. */}
             <div className={embedded ? "sticky bottom-0 bg-[var(--nf-surface-elevated)]" : ""}>
+            <PasteTray paste={paste} over={paste.held ? paste.split(draft).over : 0} />
             <form
               onSubmit={(e) => {
                 e.preventDefault();
-                void send(draft);
+                const composed = paste.split(draft);
+                if (composed.over > 0) {
+                  banner.warning(fillCount(PASTE_WORDS.tooLong, composed.over));
+                  return;
+                }
+                paste.clear();
+                void send(composed.body);
               }}
               className="flex items-center gap-xs border-t border-[var(--nf-border-subtle)] p-row"
             >
@@ -676,8 +693,10 @@ export function SupportChat({
                 type="text"
                 value={draft}
                 onChange={(e) => setDraft(e.target.value)}
+                onPaste={paste.onPaste}
                 placeholder="Ask about a booking, a payment or your account"
                 autoComplete="off"
+                autoCapitalize="sentences"
                 enterKeyHint="send"
                 className="nf-field min-w-0 flex-1"
               />
@@ -690,7 +709,7 @@ export function SupportChat({
                 iconOnly
                 aria-label="Send message"
                 data-testid="support-send"
-                disabled={!draft.trim() || streaming}
+                disabled={(!draft.trim() && !paste.held) || streaming}
                 className="shrink-0"
               >
                 <UiIcon name="arrow-right" size={16} className="-rotate-90" />

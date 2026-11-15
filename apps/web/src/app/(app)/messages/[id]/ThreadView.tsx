@@ -3,7 +3,7 @@
 import { uploadToStorage, withTimeout, type UploadInput, type UploadResult } from "@/lib/media/upload";
 import { initial } from "@/lib/text/initial";
 import Link from "next/link";
-import { Fragment, useCallback, useEffect, useRef, useState, type ClipboardEvent as ReactClipboardEvent } from "react";
+import { Fragment, useCallback, useEffect, useRef, useState } from "react";
 import { adoptBubble, arrivalClass, attachCard, bubbleKey, mergeEcho } from "./thread-arrival";
 import { resolveLiveCard } from "./card-actions";
 import type { Dictionary, Locale } from "@vallo/i18n/core";
@@ -21,6 +21,14 @@ import { RemoteImage } from "@/components/ui/RemoteImage";
 import { UiIcon } from "@/design-system/icons/UiIcon";
 import { ChatCard, type ThreadCardData } from "@/components/app/messages/ChatCard";
 import { banner } from "@/lib/ui/toast";
+import { useComposerClearance } from "@/lib/ui/composer-clearance";
+import { composerEnterKeyHint, enterSends } from "@/lib/ui/field-keyboard";
+import { isTouchKeyboard, useTouchKeyboard } from "@/lib/ui/use-touch-keyboard";
+import { PasteTray, PastedPhotos } from "@/components/app/messages/PasteTray";
+import { usePaste } from "@/components/app/messages/use-paste";
+import { PASTE_WORDS, fillCount } from "@/components/app/messages/paste-words";
+import { shareBody } from "@/components/app/messages/share";
+import { MAX_PENDING_PHOTOS, THREAD_TEXT_LIMIT } from "./thread-paste";
 import { bundlePhotos, isCaption, isPhotoOnly } from "@/components/app/messages/bundle";
 import { cardRefFor, parseShare, shareHref } from "@/components/app/messages/share";
 import {
@@ -87,11 +95,6 @@ import type { ChargeOffer } from "@/lib/messages/charge-offer";
 import { DayDivider, UNREAD_DIVIDER_ID, UnreadDivider } from "@/components/app/messages/ThreadDividers";
 import { QuotedReply, type QuotedMessage } from "@/components/app/messages/QuotedReply";
 import { AttachmentRow } from "@/components/app/messages/AttachmentRow";
-import { PasteChip } from "@/components/app/messages/PasteChip";
-import { PASTE_WORDS } from "@/lib/paste/words";
-import { overBy, readPaste } from "@/lib/paste/parse";
-import { coarsePointer, dismissKeyboard, dragDismissHandlers, enterSends } from "@/lib/ui/typing";
-import { MAX_MESSAGE_LENGTH } from "@/lib/messages/schema";
 import { VoiceNote, type VoiceNoteData } from "@/components/app/messages/VoiceNote";
 import { dayHeading, dayStarts } from "@/components/app/threads/day";
 import { useInboxPart } from "@/components/app/threads/use-inbox-copy";
@@ -130,9 +133,6 @@ import { deliveryStates, type Delivery } from "@/lib/messages/delivery";
 const SEND_FAILED_WORDS = "Message couldn't be sent. Check your connection and try again.";
 const COPIED_WORDS = { done: "Message copied", failed: "Couldn't copy that message. Try again." };
 const SAVED_PHOTO_WORDS = { done: "Photo saved", failed: "Couldn't save that photo. Try again." };
-/* A thread sends one picture per message, so a paste of several holds the first. */
-const THREAD_PASTE_WORDS = { onePhoto: "One picture at a time in a chat. The first one is attached." };
-const THREAD_CAMERA_LABEL = "Take a photo";
 
 /* GRADE 1 (P1.3): voice notes, reactions and the new-messages pill. English
    only for now, beside the other Grade 1 words above. */
@@ -668,8 +668,6 @@ export function ThreadView({
     if (!text) return;
     try {
       await navigator.clipboard?.writeText(text);
-      /* The founder's WhatsApp reference, 14 November 2026: the quick pill
-         above the composer, gone by itself. A failure keeps the top banner. */
       banner.quick(COPIED_WORDS.done);
     } catch {
       banner.error(COPIED_WORDS.failed);
@@ -749,16 +747,9 @@ export function ThreadView({
   const verifiedWord = clientCopy.common.verified;
   const [ceremony, setCeremony] = useState(false);
   const [draft, setDraft] = useState("");
-  const [pendingFile, setPendingFile] = useState<{ file: File; url: string } | null>(null);
-  /* A paste too big for the field, held as a chip above it (founder, 14
-     November 2026). The field stays empty and usable; Send sends the held
-     text as the message body. A link chip holds one address and fetches
-     NOTHING (see `linkify.ts` for why). */
-  const [pasted, setPasted] = useState<
-    | { kind: "text"; text: string }
-    | { kind: "link"; href: string; host: string; path: string; vallo: "listing" | "stay" | "restaurant" | "profile" | "post" | null }
-    | null
-  >(null);
+  /* Photos waiting to be sent. One when picked; several when several were
+     pasted at once (14 November 2026). Each goes through the same send. */
+  const [pendingFiles, setPendingFiles] = useState<{ file: File; url: string }[]>([]);
   const [educationOpen, setEducationOpen] = useState(false);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [inspected, setInspected] = useState(inspectedInitial);
@@ -778,16 +769,38 @@ export function ThreadView({
   const [away, setAway] = useState(false);
 
   const scrollerRef = useRef<HTMLDivElement | null>(null);
-  /* One pair of handlers per mount, so the drag's own start point survives. */
-  const dragDismiss = useRef(dragDismissHandlers()).current;
-  const cameraRef = useRef<HTMLInputElement | null>(null);
-  /* A camera to open: a phone or a tablet. Read once, after mount, so the
-     server and the client render the same thing first. */
-  const [hasCamera, setHasCamera] = useState(false);
-  useEffect(() => {
-    setHasCamera(coarsePointer());
-  }, []);
   const fileRef = useRef<HTMLInputElement | null>(null);
+  const composerTopRef = useRef<HTMLDivElement | null>(null);
+  const composerRef = useRef<HTMLFormElement | null>(null);
+  /* A phone's return key says and does "new line"; a computer's sends. */
+  const touchKeyboard = useTouchKeyboard();
+  /* The quick pill clears the composer and whatever is stacked on it. */
+  /* The door for a picked photo, and so for a pasted one: an image, held
+     until Send, re-encoded and uploaded by `runImageSend` like any other. */
+  const addImages = useCallback((files: File[]) => {
+    const images = files.filter((file) => file.type.startsWith("image/"));
+    if (images.length === 0) return;
+    setPendingFiles((prev) => {
+      const room = Math.max(0, MAX_PENDING_PHOTOS - prev.length);
+      const added = images.slice(0, room).map((file) => {
+        const url = URL.createObjectURL(file);
+        objectUrls.current.push(url);
+        return { file, url };
+      });
+      return [...prev, ...added];
+    });
+  }, []);
+  const paste = usePaste({
+    limit: THREAD_TEXT_LIMIT,
+    onImages: addImages,
+    imageRoom: MAX_PENDING_PHOTOS - pendingFiles.length,
+    cards: live,
+  });
+  useComposerClearance(
+    composerTopRef,
+    `${pendingFiles.length}:${replyTo ? replyTo.id : ""}:${quickReplies.length}:${paste.chips.length}`,
+    composerRef,
+  );
   const sheetTriggerRef = useRef<HTMLButtonElement | null>(null);
   const objectUrls = useRef<string[]>([]);
   const retryPayloads = useRef<Map<string, RetryPayload>>(new Map());
@@ -876,6 +889,24 @@ export function ThreadView({
     };
     viewport.addEventListener("resize", keep);
     return () => viewport.removeEventListener("resize", keep);
+  }, []);
+
+  /* The same for anything that takes room from the thread without a new
+     message arriving: a reply strip, a pending photo, a pasted text chip, the
+     field growing as it is typed in, a browser whose window (not only its
+     visual viewport) shrinks for the keyboard. The scroller's own box got
+     shorter; a reader who was at the newest message stays there. */
+  useEffect(() => {
+    const el = scrollerRef.current;
+    if (!el || typeof ResizeObserver === "undefined") return;
+    let last = el.clientHeight;
+    const observer = new ResizeObserver(() => {
+      const now = el.clientHeight;
+      if (now !== last && atBottom.current) el.scrollTo({ top: el.scrollHeight });
+      last = now;
+    });
+    observer.observe(el);
+    return () => observer.disconnect();
   }, []);
 
   /* Choosing Reply (the menu or the swipe) puts the cursor in the field, ready
@@ -1354,20 +1385,20 @@ export function ThreadView({
   );
 
   const send = useCallback(() => {
-    /* A paste held as a chip is part of this message: the typed words first,
-       then what was pasted. Over the message's own limit nothing is sent and
-       the chip's own line already says by how much (founder, 14 November
-       2026). */
-    const held = pasted ? (pasted.kind === "text" ? pasted.text : pasted.href) : "";
-    const typed = draft.trim();
-    const body = [typed, held].filter(Boolean).join(typed && held ? "\n" : "");
-    const picked = pendingFile;
-    if (!body && !picked) return;
-    if (body.length > MAX_MESSAGE_LENGTH) return;
+    /* What was typed and what was pasted are one message: one string, sent
+       through the one send below, so every rule reads it as typed text. */
+    const composed = paste.split(draft);
+    const body = composed.body;
+    const picked = pendingFiles;
+    if (!body && picked.length === 0 && composed.cards.length === 0) return;
+    if (paste.held && composed.over > 0) {
+      banner.warning(fillCount(PASTE_WORDS.tooLong, composed.over));
+      return;
+    }
 
     setDraft("");
-    setPasted(null);
-    setPendingFile(null);
+    setPendingFiles([]);
+    paste.clear();
     if (fileRef.current) fileRef.current.value = "";
     /* Whatever the reader was looking at, their own send brings them down to it. */
     followNext.current = true;
@@ -1375,21 +1406,22 @@ export function ThreadView({
     if (!live) {
       // Seed mode: the thread lives on this device, exactly as before.
       const appended: ThreadBubble[] = [];
-      if (picked) {
+      for (const photo of picked) {
         appended.push({
           id: `local-${crypto.randomUUID()}`,
           mine: true,
           body: "",
           timeLabel: nowLabel(),
-          imageUrl: picked.url,
+          imageUrl: photo.url,
           createdAt: new Date().toISOString(),
         });
       }
-      if (body) {
+      for (const text of [body, ...composed.cards.map((ref) => shareBody(ref))]) {
+        if (!text) continue;
         appended.push({
           id: `local-${crypto.randomUUID()}`,
           mine: true,
-          body,
+          body: text,
           timeLabel: nowLabel(),
           imageUrl: null,
           createdAt: new Date().toISOString(),
@@ -1399,9 +1431,9 @@ export function ThreadView({
       return;
     }
 
-    if (picked) {
+    for (const photo of picked) {
       const tempId = `local-${crypto.randomUUID()}`;
-      retryPayloads.current.set(tempId, { kind: "image", file: picked.file });
+      retryPayloads.current.set(tempId, { kind: "image", file: photo.file });
       setItems((prev) => [
         ...prev,
         {
@@ -1409,12 +1441,26 @@ export function ThreadView({
           mine: true,
           body: "",
           timeLabel: nowLabel(),
-          imageUrl: picked.url,
+          imageUrl: photo.url,
           state: "sending",
           createdAt: new Date().toISOString(),
         },
       ]);
-      void runImageSend(tempId, picked.file, picked.url);
+      void runImageSend(tempId, photo.file, photo.url);
+    }
+    /* A pasted Vallo listing, stay or room goes as its own message, whose
+       whole body is that thing's path: the thread already draws such a
+       message as the thing's own card, read from Vallo's own data
+       (`share.ts`). The same text send, so the same rules. */
+    for (const ref of composed.cards) {
+      const tempId = `local-${crypto.randomUUID()}`;
+      const shared = shareBody(ref);
+      retryPayloads.current.set(tempId, { kind: "text", body: shared, replyToId: null });
+      setItems((prev) => [
+        ...prev,
+        { id: tempId, mine: true, body: shared, timeLabel: nowLabel(), imageUrl: null, state: "sending", createdAt: new Date().toISOString() },
+      ]);
+      void runTextSend(tempId, shared, null);
     }
     if (body) {
       const tempId = `local-${crypto.randomUUID()}`;
@@ -1436,7 +1482,7 @@ export function ThreadView({
       setReplyTo(null);
       void runTextSend(tempId, body, replyToId);
     }
-  }, [draft, pasted, pendingFile, live, runTextSend, runImageSend]);
+  }, [draft, pendingFiles, paste, live, runTextSend, runImageSend]);
 
   const retry = useCallback(
     (tempId: string) => {
@@ -1458,68 +1504,7 @@ export function ThreadView({
   }, [retry]);
 
   const pickImage = (file: File | undefined) => {
-    if (!file || !file.type.startsWith("image/")) return;
-    const url = URL.createObjectURL(file);
-    objectUrls.current.push(url);
-    setPendingFile({ file, url });
-  };
-
-  /**
-   * A PASTE IN THE COMPOSER (founder, 14 November 2026).
-   *
-   * A pasted picture goes through the SAME door a picked one does
-   * (`pickImage`): the same checks, the same preview chip, the same limit of
-   * one at a time in a thread, so a paste can never attach something a tap
-   * could not. A file that is neither picture nor video is refused with
-   * words. A wall of words or one address is held as a chip above the field.
-   * Everything shorter falls through to the browser's own paste, exactly as
-   * it always did.
-   *
-   * Vallo is never told WHICH APP the paste came from; iOS draws that banner
-   * itself when an app reads the clipboard. Nothing here pretends to know.
-   */
-  /**
-   * Tap the chip to read and edit what was pasted: the text moves into the
-   * field (after whatever is already there), where the person edits it as
-   * their own words. The chip has done its job and goes.
-   */
-  const openPasted = () => {
-    if (!pasted || pasted.kind !== "text") return;
-    onDraftChange(draft ? `${draft}\n${pasted.text}` : pasted.text);
-    setPasted(null);
-  };
-
-  const onPaste = (event: ReactClipboardEvent<HTMLTextAreaElement>) => {
-    const data = event.clipboardData;
-    if (!data) return;
-    const paste = readPaste(data, window.location.origin);
-    if (paste.kind === "files") {
-      event.preventDefault();
-      if (paste.files.length > 0) pickImage(paste.files[0]);
-      if (paste.refused > 0) {
-        banner.error(
-          paste.refused === 1
-            ? PASTE_WORDS.refusedFile
-            : PASTE_WORDS.refusedFiles.replace("{n}", String(paste.refused)),
-        );
-      } else if (paste.files.length > 1) {
-        /* A thread sends one picture per message, so the rest are not
-           silently dropped: the person is told which one is held. */
-        banner.info(THREAD_PASTE_WORDS.onePhoto);
-      }
-      return;
-    }
-    if (paste.kind === "long-text") {
-      event.preventDefault();
-      setPasted({ kind: "text", text: paste.text });
-      return;
-    }
-    if (paste.kind === "link") {
-      event.preventDefault();
-      setPasted({ kind: "link", href: paste.href, host: paste.host, path: paste.path, vallo: paste.vallo?.thing ?? null });
-      return;
-    }
-    /* Short text: the browser's own paste, into the field, as before. */
+    if (file) addImages([file]);
   };
 
   const handleConfirmInspection = useCallback(async () => {
@@ -1927,18 +1912,6 @@ export function ThreadView({
         aria-live="polite"
         aria-label={view.conversation}
         onScroll={onThreadScroll}
-        /* Drag the thread down and the keyboard goes away, as it does in
-           every phone messenger (founder, 14 November 2026, handoff 6.4
-           item 5). Coarse pointers only, past a deliberate distance, so
-           reading the message above does not take the keyboard with it. */
-        {...dragDismiss}
-        /* Tapping the thread itself, away from the field, puts it away too.
-           On the scroller rather than the document, so a tap on the composer,
-           a sheet or the header is untouched. */
-        onPointerDown={(event) => {
-          if (event.target instanceof HTMLElement && !event.target.closest("input, textarea, [contenteditable], button, a"))
-            dismissKeyboard();
-        }}
       >
         <ChatWatermark hidden={bundles.length > 0} />
         <p className="nf-thread__safety">
@@ -2355,11 +2328,18 @@ export function ThreadView({
       )}
 
       {/* --------------------------------------------------------- composer */}
-      {pendingFile && (
+      {/* Where the composer and everything stacked with it begins: the quick
+          pill ("Message copied") sits just above this line. */}
+      <div ref={composerTopRef} aria-hidden="true" />
+      <PasteTray paste={paste} over={paste.held ? paste.split(draft).over : 0} />
+      {pendingFiles.length > 1 ? (
+        <PastedPhotos photos={pendingFiles} onRemove={(index) => setPendingFiles((prev) => prev.filter((_, i) => i !== index))} />
+      ) : null}
+      {pendingFiles.length === 1 && pendingFiles[0] && (
         <div className="nf-composer__pending">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src={pendingFile.url}
+            src={pendingFiles[0].url}
             alt={view.photoReady}
             className="h-14 w-14 rounded-xl object-cover"
           />
@@ -2369,26 +2349,13 @@ export function ThreadView({
             size="sm"
             aria-label={view.removePhoto}
             onClick={() => {
-              setPendingFile(null);
+              setPendingFiles([]);
               if (fileRef.current) fileRef.current.value = "";
             }}
           >
             {view.remove}
           </Button>
         </div>
-      )}
-      {pasted && (
-        <PasteChip
-          kind={pasted.kind === "text" ? "text" : "link"}
-          {...(pasted.kind === "text"
-            ? { text: pasted.text, overBy: overBy(pasted.text, MAX_MESSAGE_LENGTH), onOpen: () => openPasted() }
-            : { host: pasted.host, path: pasted.path, vallo: pasted.vallo })}
-          onRemove={() => setPasted(null)}
-          words={{
-            ...PASTE_WORDS,
-            remove: pasted.kind === "text" ? PASTE_WORDS.remove : PASTE_WORDS.removeLink,
-          }}
-        />
       )}
       {replyTo && (
         <div className="nf-composer__reply" data-testid="composer-reply">
@@ -2451,29 +2418,12 @@ export function ThreadView({
           send();
         }}
         className="nf-composer"
+        ref={composerRef}
       >
         <input
           ref={fileRef}
           type="file"
           accept="image/*"
-          className="sr-only"
-          aria-hidden="true"
-          tabIndex={-1}
-          onChange={(e) => pickImage(e.target.files?.[0])}
-        />
-        {/* THE ACCESSORY CONTROLS (founder, 14 November 2026, handoff 6.4
-            item 6). The row under the field is the accessory bar this
-            composer already has: it sits directly above the keyboard, where
-            the hand is. Rather than a SECOND bar repeating attach and voice,
-            the one control the row lacked is added to it: the camera, which
-            on a phone opens the camera rather than the photo library. The
-            paste chip from the paste work sits above the field in the same
-            stack. */}
-        <input
-          ref={cameraRef}
-          type="file"
-          accept="image/*"
-          capture="environment"
           className="sr-only"
           aria-hidden="true"
           tabIndex={-1}
@@ -2497,24 +2447,21 @@ export function ThreadView({
               el.style.height = `${Math.min(el.scrollHeight, 132)}px`;
             }}
             onKeyDown={(e) => {
-              /*
-               * ON A COMPUTER Enter sends and Shift with Enter makes a new
-               * line; ON A PHONE Enter makes a new line and the button sends
-               * (founder, 14 November 2026, handoff 6.4 item 7). Before this
-               * the desk rule ran on every device, so a thumbed Return sent a
-               * half-written message. `enterSends` decides, and is tested.
-               */
-              if (enterSends(e)) {
+              /* On a computer Enter sends and Shift and Enter is a new line.
+                 On a phone the return key makes a new line and the button
+                 sends (14 November 2026; `lib/ui/field-keyboard.ts`). Read at
+                 the press, so plugging in a keyboard changes it at once. */
+              if (enterSends({ key: e.key, shiftKey: e.shiftKey, isComposing: e.nativeEvent.isComposing }, isTouchKeyboard())) {
                 e.preventDefault();
                 send();
                 e.currentTarget.style.height = "auto";
               }
             }}
-            onPaste={onPaste}
+            onPaste={paste.onPaste}
             placeholder={view.placeholder}
             autoComplete="off"
-            /* On a phone the key makes a new line, so it must not say Send. */
-            enterKeyHint="enter"
+            autoCapitalize="sentences"
+            enterKeyHint={composerEnterKeyHint(touchKeyboard)}
             className="nf-composer__field"
           />
           <div className="nf-composer__row">
@@ -2527,22 +2474,9 @@ export function ThreadView({
               {/* The input bar's plus (founder, 7 November 2026): attach. */}
               <UiIcon name="plus" size={22} />
             </button>
-            {/* Take one now. Only where there is a camera to open: on a
-                computer the file picker above is the whole story, and a
-                second button that opens the same picker is clutter. */}
-            {hasCamera && (
-              <button
-                type="button"
-                aria-label={THREAD_CAMERA_LABEL}
-                className="nf-composer__tool"
-                onClick={() => cameraRef.current?.click()}
-              >
-                <UiIcon name="camera" size={22} />
-              </button>
-            )}
             {/* GRADE 1 (P1.3, R58): the microphone while there is nothing to
                 send, Send the moment there is (`ComposerVoice`). */}
-            <ComposerVoice ready={Boolean(draft.trim() || pasted || pendingFile)} sendLabel={view.send} onVoice={sendVoice} />
+            <ComposerVoice ready={Boolean(draft.trim() || pendingFiles.length > 0 || paste.held)} sendLabel={view.send} onVoice={sendVoice} />
           </div>
         </div>
       </form>

@@ -89,7 +89,7 @@ export function MessageVenue({
         >
           <label className="grid gap-3xs">
             <span className="nf-label">Your first message to {venueName}</span>
-            <textarea
+            <textarea autoCapitalize="sentences" enterKeyHint="enter"
               ref={field}
               name="body"
               required
@@ -99,7 +99,6 @@ export function MessageVenue({
               onChange={(event) => setBody(event.target.value)}
               placeholder="Ask about rooms, dates, a table, parking or anything else before you book."
               className="nf-field"
-              autoCapitalize="sentences"
             />
           </label>
           <PhoneGateLink show={phoneGate} full />

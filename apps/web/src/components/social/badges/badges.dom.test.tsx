@@ -56,10 +56,12 @@ function entry(isOwner: boolean, count = 8, env: ShareEnv = "sheet") {
   return `
     import { BadgeRow } from "@/components/social/badges/BadgeRow";
     import { mount } from "@/lib/testing/browser-root";
-    import { subscribeToast } from "@/lib/ui/toast";
+    import { subscribeQuick, subscribeToast } from "@/lib/ui/toast";
     /* Every message the one toast host would draw, with its tone. */
     window.__toasts = [];
     subscribeToast((item) => { if (item) window.__toasts.push([item.message, item.tone]); });
+    /* A copy that worked is said by the quick pill, which has no tone. */
+    subscribeQuick((item) => { if (item) window.__toasts.push([item.message, "quick"]); });
     const now = Date.now();
     const badges = ${JSON.stringify(
       Array.from({ length: count }, (_, i) => ({
@@ -173,7 +175,7 @@ describe.skipIf(!hasBrowser && !process.env.CI)("the badge row", () => {
       expect(await page.evaluate(() => (window as unknown as { __clipboard: string[] }).__clipboard)).toEqual([]);
       expect(await toasts(page)).toEqual([]);
       await page.waitForFunction(() => (window as unknown as { __toasts: unknown[] }).__toasts.length > 0);
-      expect(await toasts(page)).toEqual([[COPY.copied, "success"]]);
+      expect(await toasts(page)).toEqual([[COPY.copied, "quick"]]);
       expect(await page.evaluate(() => (window as unknown as { __clipboard: string[] }).__clipboard)).toEqual([
         "https://example.test/u/seyi",
       ]);

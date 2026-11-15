@@ -12,19 +12,22 @@ import { adminDb } from "@/lib/money/member-wallet";
 import { applyProtectedWebhook, protectedRailDeps } from "@/lib/money/protected-rail";
 
 /**
- * THE PROTECTED RAIL'S WEBHOOK (EscrowPay; BUILD section 5 phase 3, built
- * switched off). The pipeline:
+ * THE PROTECTED RAIL'S WEBHOOK (EscrowPay; BUILD section 5 phase 3). The
+ * pipeline:
  *
  *   signature  ->  raw event stored  ->  idempotency  ->  processing  ->  answer
  *
- *  - The signature is checked before any database work. Its header and
- *    algorithm are not documented to Vallo yet, so today EVERY delivery is
- *    refused (401) and nothing is written.
- *  - A signed delivery is stored raw first, unique on (provider, key), so a
- *    redelivery changes nothing.
- *  - Arrival order is not trusted; the status in the body is, and the
- *    database refuses a step backwards.
- *  - An unknown status is acknowledged and recorded, and moves nothing.
+ *  - The signature is checked before any database work: the provider's
+ *    `EscrowPay-Signature` (`t=<unix>,v1=<hex>`, HMAC-SHA256 of `<t>.` and
+ *    the raw body under the endpoint's signing secret, five minutes of
+ *    tolerance). An unsigned or badly signed delivery is refused (401) and
+ *    nothing is written.
+ *  - A signed delivery is stored raw first, unique on (provider, key), the
+ *    key being the event's own id, so a redelivery changes nothing.
+ *  - Arrival order is not trusted; the event's meaning is, and the database
+ *    refuses a step backwards.
+ *  - An event Vallo does not act on is acknowledged and recorded, and moves
+ *    nothing.
  *  - Recording is never gated by the founder's switch: money already held is
  *    always recorded.
  */
@@ -45,8 +48,8 @@ export async function POST(request: Request): Promise<NextResponse> {
   const config = escrowPayConfig(process.env);
   if (!config || !config.webhookSecret) return answer({ received: false, reason: "not_configured" }, 503);
 
-  const header = ESCROWPAY_SIGNATURE_HEADER ? request.headers.get(ESCROWPAY_SIGNATURE_HEADER) : null;
-  if (!verifyEscrowPaySignature(rawBody, header, config.webhookSecret)) {
+  const header = request.headers.get(ESCROWPAY_SIGNATURE_HEADER);
+  if (!verifyEscrowPaySignature(rawBody, header, [config.webhookSecret, config.webhookSecretPrevious])) {
     const spray = await countRouteFailure(ROUTE_FAILURE_LIMITS.webhookBadSignature, request.headers);
     if (!spray.allowed) {
       return NextResponse.json(

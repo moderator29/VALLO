@@ -84,7 +84,7 @@ export function CopilotChat({
   const copyAnswer = async (text: string) => {
     try {
       await navigator.clipboard.writeText(text);
-      banner.success("Answer copied");
+      banner.quick("Answer copied");
     } catch {
       banner.error("Could not copy. Select the text and copy it by hand.");
     }

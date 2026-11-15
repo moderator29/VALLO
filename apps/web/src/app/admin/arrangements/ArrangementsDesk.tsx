@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { formatMoney, getDictionary, type Locale } from "@vallo/i18n";
 import { adminUi } from "../_components/ui";
 import { PageHead, Panel, PanelEmpty, PanelUnavailable, ReadOnlyNote, TabRow } from "../_components/panels";
@@ -12,7 +13,8 @@ import type { ArrangementFilter, ArrangementOpsRead, ArrangementOpsRow } from ".
  * what the last reconcile said, and why a payment is with a person. Staff
  * answer "where is my money?" from here. It is READ-ONLY on purpose: no
  * button on it moves, releases, refunds or edits anything, and the money
- * stays the provider's to report.
+ * stays the provider's to report. Each row opens that payment's own record
+ * (`ArrangementRecord`), which is where a dispute is decided.
  */
 
 const TONE: Record<string, StatusTone> = {
@@ -49,6 +51,7 @@ const COPY = {
   reconcile: "Last reconcile",
   reason: "Review reason",
   paused: "Release paused",
+  payout: "Transfer to the lister's bank",
   source: "from",
 } as const;
 
@@ -125,13 +128,16 @@ function ArrangementRow({
     { label: COPY.reconcile, value: row.lastReconcileResult ? `${when(row.lastReconcileAt)}, ${row.lastReconcileResult}` : when(row.lastReconcileAt) },
     ...(row.reviewReason ? [{ label: COPY.reason, value: row.reviewReason }] : []),
     ...(row.releasePausedAt ? [{ label: COPY.paused, value: when(row.releasePausedAt) }] : []),
+    ...(row.payoutStatus ? [{ label: COPY.payout, value: `${row.payoutStatus}, ${when(row.payoutAt)}` }] : []),
   ];
   return (
     <li className="nf-row flex-wrap items-start" data-testid="arrangement-row" data-status={row.status}>
       <span className="min-w-[14rem] flex-1 basis-0">
         <span className="nf-body flex flex-wrap items-center gap-xs font-semibold text-content">
           {/* Stays `overflow-wrap: anywhere` on purpose: a reference is one token and must wrap inside its cell (13 November 2026; the gate is app/css/overflow-wrap.test.ts). */}
-          <span className="font-mono [overflow-wrap:anywhere]">{row.reference}</span>
+          <Link href={`/admin/arrangements/${row.id}`} className="font-mono [overflow-wrap:anywhere]" data-testid="arrangement-open">
+            {row.reference}
+          </Link>
           <span className="nf-numeric">{formatMoney(row.amountMinor, locale, "NGN")}</span>
         </span>
         <span className="nf-caption block">

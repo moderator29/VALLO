@@ -40,6 +40,8 @@ function at(status: ArrangementStatus, over: Partial<ProtectedDeal> = {}): Prote
 export const PREVIEW_DEALS: Record<string, ProtectedDeal> = {
   funding: at("awaiting_payment"),
   "funding-no-expiry": at("awaiting_payment", { funding: { ...base.funding!, expiresAt: null } }),
+  /* The payer bears the provider's fee: the total to transfer is the amount plus it. */
+  "funding-fee": at("awaiting_payment", { funding: { ...base.funding!, amountMinor: base.amountMinor + 285_000 } }),
   waiting: at("awaiting_payment", { transferReported: true }),
   expired: at("awaiting_payment", { funding: { ...base.funding!, expiresAt: "2026-11-10T09:00:00Z" } }),
   protected: at("protected", { stamps: funded }),
@@ -78,6 +80,16 @@ export const PREVIEW_DEALS: Record<string, ProtectedDeal> = {
     receipt: { providerReference: null, agreementVersion: 3, refundRequestedAt: "2026-11-07T09:00:00Z" },
   }),
   "lister-payout": at("protected", { stamps: funded, listerPayoutMissing: true }),
+  /* After the release: the transfer to the lister's own bank (automatic payout, 15 November 2026). */
+  "lister-paying": at("released", { stamps: { ...funded, releaseRequestedAt: "2026-11-10T09:50:00Z", releaseConfirmedAt: "2026-11-10T09:55:00Z" } }),
+  "lister-paid": at("released", {
+    stamps: { ...funded, releaseRequestedAt: "2026-11-10T09:50:00Z", releaseConfirmedAt: "2026-11-10T09:55:00Z" },
+    payout: { status: "paid", completedAt: "2026-11-10T09:57:00Z", amountMinor: 179_930_00 },
+  }),
+  "lister-payout-failed": at("released", {
+    stamps: { ...funded, releaseRequestedAt: "2026-11-10T09:50:00Z", releaseConfirmedAt: "2026-11-10T09:55:00Z" },
+    payout: { status: "failed", completedAt: null },
+  }),
   "lister-review": at("requires_review", { issue: { kind: "amount_mismatch", receivedMinor: 170_000_00 } }),
   receipt: at("released", {
     stamps: { ...funded, releaseRequestedAt: "2026-11-12T13:10:00Z", releaseConfirmedAt: "2026-11-12T13:40:00Z" },

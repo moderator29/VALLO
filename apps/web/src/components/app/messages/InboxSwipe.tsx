@@ -14,9 +14,11 @@ import { lockAxis } from "./swipe";
  * exactly as it did. A swipe that moved the row swallows the tap that ends
  * it, so the conversation does not open by accident.
  *
- * The same actions stay reachable without a swipe: Archive is the row's own
- * button (shown on hover on a desktop) and Mark read is in the options
- * sheet. The uncovered buttons are hidden from the tab order and from screen
+ * The same actions stay reachable without a swipe: a long press on the row,
+ * or its More button (shown on hover on a desktop, and always reachable by
+ * keyboard), opens the row's action sheet with exactly these actions
+ * (Inbox.tsx builds both from one list). The uncovered buttons are hidden
+ * from the tab order and from screen
  * readers while the row is shut. Only `transform` moves; reduced motion
  * snaps instead of gliding (messages-g1.css).
  */

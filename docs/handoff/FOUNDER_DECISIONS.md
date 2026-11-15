@@ -115,3 +115,29 @@ Confirmed this round:
   position's bundle gains `kyc_review` (the same file, and
   `lib/admin/staff-positions.ts`).
 - The prospect pipeline is kept in the console, not in Zoho.
+
+## 14 November 2026, later: listings, the opening, and the website's front door
+
+- Every listing card shows a rating and its counts. A listing nobody has
+  reviewed starts at 2.5 and says "New" (card) or "Not yet rated" (listing
+  page); the figure is drawn, never stored. Views, saves and shares show from
+  the first of each. Example listings are counted and shown; the Analytics
+  desk still leaves them out. Needs
+  `supabase/migrations/pending/listing_shares_2026-11-14.sql` (the founder
+  runs it).
+- ONE app opening, always. He refused two in a row. Inside binary 1.0.2 the
+  binary's own opening is the only one and the page's is off; the next store
+  build draws none of its own and the page's lockup is the only one
+  (`NATIVE_BUILD_QUEUE.md` item 15).
+- The website has no landing page. A browser asking for the root goes to the
+  listings (`/search`), or to its own home with a session
+  (`websiteFrontDoor` in `lib/catalogue/public-access.ts`, decided in
+  `proxy.ts`). Only while `VALLO_PUBLIC_CATALOGUE` is on; with it off the old
+  front page is still served. The landing page's code is kept and is not
+  reachable while the switch is on.
+- The website's foot (company, links, store badges, legal line) is drawn
+  under `/search`, `/stays` and `/restaurants` for a guest in a browser, never
+  for a member and never inside the app. It was rebuilt into four bands.
+- The store badges read "Not in the store yet" until
+  `NEXT_PUBLIC_APP_STORE_URL` and `NEXT_PUBLIC_PLAY_STORE_URL` are set in
+  Vercel and the site is redeployed. The founder sets them.

@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { countListingView, type CountDeps } from "./count";
+import { countListingShare, countListingView, type CountDeps } from "./count";
 
 vi.mock("@/lib/admin/internal-accounts", () => ({ isInternalAccount: async (id: string) => id === "staff-user" }));
 
@@ -106,5 +106,47 @@ describe("counting one beacon", () => {
       }),
     });
     expect(await countListingView(beacon(body), throwing.d)).toBe("unavailable");
+  });
+});
+
+/*
+ * SHARES (founder, 14 November 2026): the same door as a view, a different
+ * recorder, and no older path to fall back to.
+ */
+describe("counting one share", () => {
+  it("goes to the share recorder with the same guest key rule, and never the address", async () => {
+    const { d, calls } = deps();
+    expect(await countListingShare(beacon(body), d)).toBe("counted");
+    const [fn, args] = calls[0]!;
+    expect(fn).toBe("record_listing_share");
+    expect(args.p_listing).toBe(ID);
+    expect(args.p_viewer).toBeNull();
+    expect(String(args.p_guest)).toMatch(/^[0-9a-f]{64}$/);
+    expect(JSON.stringify(args)).not.toContain(IP);
+  });
+
+  it("counts a member by id and reports the same person's second share of the day as a repeat", async () => {
+    const { d, calls } = deps({ viewer: async () => MEMBER, answers: [{ data: false, error: null }] });
+    expect(await countListingShare(beacon(body), d)).toBe("repeat");
+    expect(calls[0]![1]).toMatchObject({ p_viewer: MEMBER, p_guest: null });
+  });
+
+  it("is turned away at the same door as a view: another site, a bot, a no to usage counts, the limit", async () => {
+    const { d, calls } = deps();
+    expect(await countListingShare(beacon(body, { origin: "https://elsewhere.example" }), d)).toBe("refused:foreign");
+    expect(await countListingShare(beacon(body, { "user-agent": "curl/8.4.0" }), d)).toBe("refused:bot");
+    expect(await countListingShare(beacon(body, { "sec-gpc": "1" }), d)).toBe("refused:declined");
+    expect(await countListingShare(beacon("{}"), d)).toBe("dropped");
+    expect(calls).toHaveLength(0);
+    const limited = deps({ allow: async () => false });
+    expect(await countListingShare(beacon(body), limited.d)).toBe("limited");
+    expect(limited.calls).toHaveLength(0);
+  });
+
+  it("counts nothing before the shares SQL, and never falls back to the view recorder", async () => {
+    const missing = { data: null, error: { code: "PGRST202", message: "Could not find the function public.record_listing_share" } };
+    const { d, calls } = deps({ viewer: async () => MEMBER, answers: [missing] });
+    expect(await countListingShare(beacon(body), d)).toBe("unavailable");
+    expect(calls.map((c) => c[0])).toEqual(["record_listing_share"]);
   });
 });

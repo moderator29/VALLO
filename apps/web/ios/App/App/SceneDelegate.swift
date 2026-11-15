@@ -28,11 +28,11 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             window?.rootViewController = ValloBridgeViewController()
         }
         window?.makeKeyAndVisible()
-        // The exact mark and wordmark drawn in over the launch ground while
-        // the first page loads; it hands over when the page has painted.
-        if let window = window {
-            LaunchMark.shared.show(in: window)
-        }
+        // THE OPENING IS THE PAGE'S (founder's ruling, 14 November 2026).
+        // The mark this shell used to draw over the launch ground is retired:
+        // the only opening a person sees is the page's own lockup, and the
+        // plain launch ground holds until the page says it has painted.
+        // `ValloShell.pageOpens` tells the page so, and it starts at once.
 
         SceneDelegateProxy.shared.scene(scene, willConnectTo: session, options: connectionOptions)
     }

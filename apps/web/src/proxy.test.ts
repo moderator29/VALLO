@@ -400,6 +400,8 @@ const EXPECTED_PUBLIC = new Set([
   "/api/funnel",
   /* Listing stats: the view beacon, same-site, rate limited, no person stored. */
   "/api/listing-view",
+  /* Listing stats: the share beacon, under the same rules. */
+  "/api/listing-share",
   /* VC1: the media provider's webhook, behind its signature over the body. */
   "/api/calls/webhook",
   "/api/cron/account-purge",
