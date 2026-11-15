@@ -38,6 +38,7 @@ const PROCESSORS: Array<[RegExp, string]> = [
   [/api\.push\.apple\.com/, "Apple Push Notification service"],
   [/SENTRY_DSN/, "Sentry"],
   [/images\.unsplash\.com/, "Unsplash"],
+  [/escrowpay\.app/, "EscrowPay"],
 ];
 
 describe("the privacy notice names every processor the code uses", () => {
@@ -71,6 +72,12 @@ describe("the notice claims nothing the code does not do", () => {
 
   it("describes verification as it runs: the selfie, the bank name check, a person deciding", () => {
     for (const phrase of ["a selfie we compare with the photo on your ID", "proof of address", "No decision about your identity is made by a machine alone", "holding your ID", "explicit consent"]) {
+      expect(privacy).toContain(phrase);
+    }
+  });
+
+  it("describes the protected-payment identity check as it runs: payers included, nothing kept, EscrowPay its own controller", () => {
+    for (const phrase of ["renters and buyers included", "Vallo does not keep your NIN, BVN or date of birth", "independent data controller", "Rubies Microfinance Bank"]) {
       expect(privacy).toContain(phrase);
     }
   });

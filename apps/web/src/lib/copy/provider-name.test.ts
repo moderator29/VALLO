@@ -8,9 +8,8 @@ import { describe, expect, it } from "vitest";
  *
  * No source file under apps/web/src and packages may carry its name, in copy,
  * comments, identifiers, file names or routes, except lines that carry the
- * marker `legacy-name`: the old live flag key and the old deploy setting,
- * still read for compatibility until the next deploy settings change and the
- * pending removal SQL have both landed. This file is exempt because it must
+ * marker `legacy-name`: the one stored value of the wallet tables' provider
+ * column (`WALLET_PROVIDER_KEY`), which only SQL can rename. This file is exempt because it must
  * say the word to look for it.
  */
 const SRC = join(__dirname, "..", "..");
@@ -45,7 +44,7 @@ describe("the retired payment provider is not named anywhere in the source", () 
     expect(found).toEqual([]);
   });
 
-  it("keeps the marked compatibility lines to the two known ones, both in the protected-pay switch", () => {
+  it("keeps the marked compatibility line to the one known one, the stored wallet provider value", () => {
     const marked: string[] = [];
     for (const file of files(SRC)) {
       const at = relative(SRC, file).split("\\").join("/");
@@ -58,8 +57,6 @@ describe("the retired payment provider is not named anywhere in the source", () 
     }
     expect(marked.sort()).toEqual([
       "lib/money/member-wallet.ts",
-      "lib/money/protected-pay-switch.ts",
-      "lib/money/protected-pay-switch.ts",
     ]);
   });
 

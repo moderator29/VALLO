@@ -183,6 +183,15 @@ export const BACKED_CLAIMS: readonly BackedClaim[] = [
     mechanism:
       "the new protected rail's explainer: funds held by the custodian bank named in lib/money/protected-wording.ts under the provider's agreement until release; 'protected' is drawn on a payment only on a provider-confirmed state recorded in provider_arrangements (lib/money/protected-journey.ts); the page states first that the rail is not open (PROTECTED_NOT_OPEN), and the rail is switched off by payments_escrowpay_on (fail closed), with every category disabled in public.protected_payment_categories",
   },
+  /* The privacy notice's account of the protected-payment identity check (15
+     November 2026, the founder). It names the payment kind and the one-time
+     check; it says nothing is held or safe. Privacy notice only. */
+  {
+    phrase: /^The identity check for a protected payment\.$|^To have everyone who pays or is paid through a protected payment confirm their identity once, with EscrowPay,/,
+    onlyIn: "apps/web/src/lib/legal/privacy.tsx",
+    mechanism:
+      "the protected rail's identity step (IdentityCheck.tsx, verifyProtectedIdentity in lib/money/protected-actions.ts, onboardMember in lib/money/protected-provider.ts, POST /parties/onboard): required of payer and lister before a first protected payment; the rail is switched off by payments_escrowpay_on (fail closed) with every category disabled in public.protected_payment_categories",
+  },
   { phrase: /^; Secure$/, mechanism: "the Secure attribute of the theme cookie (lib/theme/theme-client.ts), an HTTP cookie flag, not copy" },
 
   /* "Instant" (29 September): the word promises speed, so it is a claim word

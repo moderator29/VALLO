@@ -14,7 +14,7 @@ Make it know that vallo don’t hold money it’s through escrow and it’s hold
 
 Here is it  “ iYes bro, I fully get what you mean.
 
-You don’t want Payluk, Yellow Card, Paystack, or any other provider leaking into the Vallo experience and making Vallo look like a wrapper around other companies.
+You don’t want EscrowPay, Yellow Card, Paystack, or any other provider leaking into the Vallo experience and making Vallo look like a wrapper around other companies.
 
 The user should experience:
 
@@ -46,7 +46,7 @@ Vallo does not custody customer funds. Eligible payments are processed through r
 
 I would not publicly say:
 
-“Our escrow provider is Payluk.”
+“Our escrow provider is EscrowPay.”
 
 unless there is a specific reason to disclose the name.
 
@@ -105,7 +105,7 @@ Vallo Payment Engine
         ↓
 Provider Adapter
         ↓
-Payluk / Paystack / Yellow Card / future provider
+EscrowPay / Paystack / Yellow Card / future provider
 The provider is infrastructure.
 
 Vallo is the product.
@@ -156,7 +156,7 @@ Audit every current payment flow.
 
 Search for:
 
-* Payluk checkout
+* EscrowPay checkout
 * Paystack checkout
 * Yellow Card checkout
 * provider logos
@@ -178,7 +178,7 @@ Where technically and contractually possible, make the experience Vallo-native.
 
 Instead of:
 
-Pay with Payluk
+Pay with EscrowPay
 
 the primary UI should say:
 
@@ -297,7 +297,7 @@ This makes Vallo fundamentally different from a payment gateway.
 6. PROVIDER ABSTRACTION
 
 
-The frontend must never depend directly on Payluk/Paystack/Yellow Card implementation details.
+The frontend must never depend directly on EscrowPay/Paystack/Yellow Card implementation details.
 
 Use:
 Vallo UI
@@ -314,7 +314,7 @@ Example:
   /core
   /services
   /providers
-    /payluk
+    /escrowpay
     /paystack
     /yellowcard
   /webhooks
@@ -343,9 +343,9 @@ Pending
 Completed
 Failed
 Not:
-PaylukPayment
-PaylukEscrow
-PaylukWallet
+EscrowPayPayment
+EscrowPayEscrow
+EscrowPayWallet
 PaystackCheckout
 YellowCardTransaction
 Provider-specific concepts should remain inside provider adapters.
@@ -428,7 +428,7 @@ Payment Methods
 Financial Activity
 Depending on the user’s role.
 
-Do not call it “Payluk Wallet.”
+Do not call it “EscrowPay Wallet.”
 
 Call it something like:
 
@@ -720,7 +720,7 @@ Nigeria
 NGN
 Escrow required
         ↓
-Payluk
+EscrowPay
 International
 Stablecoin
         ↓
@@ -858,7 +858,7 @@ Do not dump the user into a mysterious third-party screen without context.
 
 
 Never expose raw provider errors like:
-PAYLUK_ERR_4827
+ESCROWPAY_ERR_4827
 CUSTOMER_ID_INVALID
 PAYMENT_INTENT_STATUS_INVALID
 Translate them into Vallo language.
@@ -997,7 +997,7 @@ Review
 Resolution
 Not:
 
-Payluk Dispute Center.
+EscrowPay Dispute Center.
 
 Internally it maps to the provider dispute system.
 
@@ -1788,7 +1788,7 @@ The payment system should look like it was designed by the same team that design
 
 Not:
 
-Vallo + Payluk + Paystack + Yellow Card glued together.
+Vallo + EscrowPay + Paystack + Yellow Card glued together.
 
 Instead:
 
@@ -1833,7 +1833,7 @@ The target architecture should conceptually be:
                            │
        ┌───────────────────┼───────────────────┐
        │                   │                   │
-   Payluk Adapter     Paystack Adapter    Yellow Card Adapter
+   EscrowPay Adapter     Paystack Adapter    Yellow Card Adapter
        │                   │                   │
     Escrow             Commercial         Stablecoin /
     Wallet             Payments           Cross-border

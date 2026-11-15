@@ -1842,7 +1842,7 @@ export const PROTECTED_IDENTITY_NUMBER_HINT = "11 digits. Vallo does not keep th
 export const PROTECTED_IDENTITY_DOB_LABEL = "Date of birth";
 export const PROTECTED_IDENTITY_DOB_HINT = "As it is on your NIN or BVN record.";
 export const PROTECTED_IDENTITY_CONSENT =
-  "I agree to this identity check. My number and date of birth are sent to the checking partner for this purpose only.";
+  "I agree to this identity check. My number and date of birth are sent to Vallo's payment partner, which runs the check and keeps them under its own privacy policy. Vallo does not keep them.";
 export const PROTECTED_IDENTITY_CTA = "Check and continue";
 export const PROTECTED_IDENTITY_DONE = "Your identity is confirmed. You will not be asked again.";
 export const PROTECTED_IDENTITY_RESULT = {

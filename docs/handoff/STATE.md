@@ -124,18 +124,21 @@ tiles), the payment rail design pass.
   GitHub Actions minutes are back; nothing is on main until he says "push to
   main".
 
-## 10 November 2026: Payluk removed (founder's word)
-- Payluk is gone from the platform. Audit and what changed: docs/handoff/PAYLUK_REMOVAL.md.
-  Old rail code, webhook, merchant client, fund/release flows and their tests
-  are deleted. The EscrowPay rail (switched off) is the only protected-pay rail.
-- Nothing live depended on it. The member Wallet (/wallet) had Payluk as its
+## 10 November 2026: the old protected-pay provider removed (founder's word)
+- The old provider is gone from the platform: its rail code, webhook, merchant
+  client, fund and release flows and their tests are deleted. The EscrowPay
+  rail (switched off) is the only protected-pay rail.
+- Nothing live depended on it. The member Wallet (/wallet) had it as its
   only provider; it now reads "not configured" until the founder chooses a
   new one.
-- Pending SQL, NOT APPLIED and DESTRUCTIVE: supabase/migrations/pending/payluk_removal_2026-11-10.sql
-  (new flag key payments_protected_pay_on, drops one table and two functions).
-  The app reads the new flag first and falls back to the old key until it runs.
-- Privacy notice no longer names the provider. PRIVACY_VERSION NOT bumped:
-  counsel decides (docs/handoff/LEGAL_PAGES_CHANGES.md, "Payluk removal").
+- Its removal SQL (in supabase/migrations/pending/) is APPLIED: verified live
+  15 Nov 2026 (old table, function and flag row gone; payments_protected_pay_on
+  present). The code no longer reads the old switch keys.
+- Privacy notice no longer names it. PRIVACY_VERSION NOT bumped: counsel
+  decides (docs/handoff/LEGAL_PAGES_CHANGES.md, "Old provider removal").
+- 15 Nov 2026: at the founder's word its name is deleted from every doc. It
+  stays only in SQL files (applied migrations cannot be edited) and in one
+  stored value in code (`WALLET_PROVIDER_KEY`, which only SQL can rename).
 
 ## 10 November 2026: founder rulings A to G (fees, wallet, cookies, retention, under 18)
 - Wallet hidden (A): `lib/money/wallet-open.ts`, `WALLET_OPEN = false`. `app/(app)/wallet/layout.tsx` answers not found for every wallet route; the nav model and keyboard shortcut read the switch. Code kept. Rent payments stay on the protected rail (switched off); everything else is Paystack.

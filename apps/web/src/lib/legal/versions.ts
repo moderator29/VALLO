@@ -111,7 +111,12 @@ export type LegalDocument = (typeof ACCEPTED_AT_SIGNUP)[number]["document"];
  */
 export const LEGAL_TEXT_UPDATED_ISO = "2026-11-10";
 export const TERMS_UPDATED_ISO = LEGAL_TEXT_UPDATED_ISO;
-export const PRIVACY_UPDATED_ISO = LEGAL_TEXT_UPDATED_ISO;
+/* 15 NOVEMBER 2026 (founder, flagged for counsel): the privacy notice names
+   EscrowPay and the one-time NIN or BVN identity check for protected payments
+   (payers included), with EscrowPay as an independent controller of the data
+   it checks. The displayed date moves; `PRIVACY_VERSION` is not bumped, for
+   the reason above. See docs/handoff/LEGAL_PAGES_CHANGES.md. */
+export const PRIVACY_UPDATED_ISO = "2026-11-15";
 export const COOKIES_UPDATED_ISO = LEGAL_TEXT_UPDATED_ISO;
 export const DISCLAIMER_UPDATED_ISO = TERMS_VERSION;
 

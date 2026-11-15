@@ -39,7 +39,7 @@ five years) restate privacy sections 2 and 7.
 
 | Where | Old | New | Reference |
 |---|---|---|---|
-| Privacy, section 5, Payluk | "where the Vallo wallet is offered, the payment provider that holds and moves that money" (contradicted "Vallo has no wallet" in Terms 4 and Privacy 2) | Payluk is the provider behind the protected payment rail, which is built but switched off, so nothing is sent to it today; Vallo has no wallet; if switched on it would receive name, email, phone | `lib/money/rail-live.ts` (`protectedRailLive`, fails closed), `lib/money/copy.ts` header ("built and switched off"), `lib/payouts/payluk-merchant.ts` |
+| Privacy, section 5, the old protected-pay provider | "where the Vallo wallet is offered, the payment provider that holds and moves that money" (contradicted "Vallo has no wallet" in Terms 4 and Privacy 2) | The old provider was behind the protected payment rail, which is built but switched off, so nothing is sent to it today; Vallo has no wallet; if switched on it would receive name, email, phone | `lib/money/rail-live.ts` (`protectedRailLive`, fails closed), `lib/money/copy.ts` header ("built and switched off") |
 | Privacy, section 7, deletion | Did not say a reason is asked | New paragraph: we ask why from a short list, you can skip, nothing typed is kept, only the code goes in the audit log | `DELETION_REASONS` in `lib/account-deletion/constants.ts`; `detail.reason` in `lib/account-deletion/actions.ts:214` |
 
 Checked and found current (no change): Guarantee retired 9 November 2026
@@ -49,11 +49,9 @@ payment.
 
 ## For counsel to review (NOT in the legal text)
 
-1. Payluk: the coordinator brief says it is removed, but `lib/payouts/payluk-merchant.ts`,
-   `app/api/payluk/webhook` and `lib/payments/providers` still exist and
-   `privacy-truth.test.ts` requires the notice to name any processor whose host
-   is in the code. If Payluk is really removed from code, delete its line in
-   Privacy section 5 and its entry in that test together.
+1. The old protected-pay provider: closed 10 November 2026. Its code was
+   removed and its line in Privacy section 5 and its entry in
+   `privacy-truth.test.ts` went together.
 2. Privacy version: the deletion-reason paragraph is a clarification. Decide
    whether it warrants a new `PRIVACY_VERSION` (which re-prompts acceptance);
    it was not bumped.
@@ -84,18 +82,17 @@ EULA (`lib/legal/eula.tsx`), Disclaimer, Host Agreement and AI terms were not
 given the preface. Cookies and Safety pages were not found as separate legal
 routes. A browser visual check at 360px was not run in this pass.
 
-## 10 November 2026: Payluk removal (founder instruction; for counsel)
+## 10 November 2026: Old provider removal (founder instruction; for counsel)
 
-The founder said: "Remove Payluk. What is this Payluk naming? We are not using
-them in our platform no more." This is a legal-text change he instructed.
+The founder said: "Remove it. We are not using them in our platform no more." This is a legal-text change he instructed.
 `PRIVACY_VERSION` was NOT bumped (still `2026-11-09`); counsel decides whether
 removing a named processor warrants a new version and a re-prompt. A
 comment-only note was added in `lib/legal/versions.ts`.
 
 | Where | Old | New |
 |---|---|---|
-| Privacy, section 5 (service providers) | "Payluk (Nigeria): the provider behind the protected payment rail, which is built but switched off, so nothing is sent to it today. Vallo has no wallet. If the rail is ever switched on, Payluk (Nigeria) would receive your name, email address and phone number for that payment." | (bullet removed) |
-| `privacy-truth.test.ts`, processor table | `[/api\.payluk\.ng/, "Payluk"]` required the notice to name Payluk while its host was in the code | row removed; the host is no longer in the code, and a new test (`lib/copy/provider-name.test.ts`) fails if the name returns anywhere in the source |
+| Privacy, section 5 (service providers) | "[the old provider] (Nigeria): the provider behind the protected payment rail, built but switched off; it would have received name, email address and phone number." | (bullet removed) |
+| `privacy-truth.test.ts`, processor table | the old provider's row required the notice to name it while its host was in the code | row removed; the host is no longer in the code, and a new test (`lib/copy/provider-name.test.ts`) fails if the name returns anywhere in the source |
 
 Decisions flagged for counsel:
 1. The replacement protected-pay provider (EscrowPay) is switched off, sends
@@ -107,6 +104,32 @@ Decisions flagged for counsel:
    statement is still made in Terms sections 4 and 5 and Privacy section 2,
    which were not touched.
 3. Whether to bump `PRIVACY_VERSION` (re-prompts acceptance for every member).
-4. The older entries in this file that name the provider are the historical
-   record of earlier changes and were left as written.
+4. 15 November 2026: at the founder's word, the old provider's name was
+   removed from this file and every other doc.
 
+## 15 November 2026: EscrowPay and the protected-payment identity check (founder instruction; for counsel)
+
+The founder asked for the privacy notice to name EscrowPay and the NIN or BVN
+check now, and ruled that EscrowPay is the controller of the identity data it
+checks. This closes decision 1 of the entry above. `PRIVACY_VERSION` was NOT
+bumped (still `2026-11-09`, for the same reason as before); the displayed
+"last updated" date of the privacy notice moved to 15 November 2026
+(`PRIVACY_UPDATED_ISO` in `lib/legal/versions.ts`).
+
+| Where | Old | New |
+|---|---|---|
+| Privacy, section 2 (data we collect) | "Renters and buyers are never asked for any of this." stood alone | New bullet, "The identity check for a protected payment": everyone who pays or is paid that way, renters and buyers included, confirms identity once with NIN or BVN and date of birth, with consent on the screen; Vallo sends number, date of birth, name, email and phone to EscrowPay; Vallo keeps none of the NIN, BVN or date of birth and asks EscrowPay by account reference; a lister's payout bank account goes to EscrowPay with a name check |
+| Privacy, section 3 (how we use data) | (none) | One line: the one-time check with EscrowPay so held money is only paid to an identified person and the right bank account |
+| Privacy, section 4 (lawful bases), legal obligation | Verification of people who list and get paid | Adds the one-time check of everyone who pays or is paid through a protected payment, which the licensed payment partner must make |
+| Privacy, section 5 (who we share with) | EscrowPay not named | "EscrowPay (Nigeria), with its partner bank Rubies Microfinance Bank, licensed by the Central Bank of Nigeria", what it receives, and that it is an independent data controller under the NDPA with its own privacy policy |
+| Identity screen consent (`PROTECTED_IDENTITY_CONSENT`, `lib/money/copy.ts`) | "...sent to the checking partner for this purpose only." | "...sent to Vallo's payment partner, which runs the check and keeps them under its own privacy policy. Vallo does not keep them." |
+| Tests | | `privacy-truth.test.ts` requires EscrowPay in the notice while its host is in the code, and the four facts above; `protected-wording.test.ts` allows the provider's name in the privacy notice |
+
+For counsel:
+1. EscrowPay as an independent controller (the founder's ruling): confirm it
+   against EscrowPay's merchant agreement and privacy policy, and whether a
+   data sharing agreement is needed under the NDPA.
+2. "EscrowPay (Nigeria)": confirm the registered entity and country.
+3. Whether the consent on the screen, the notice and the legal-obligation
+   basis are enough for NIN and BVN, which are sensitive under the NDPA.
+4. Whether to bump `PRIVACY_VERSION` (re-prompts every member).

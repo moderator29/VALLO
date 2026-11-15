@@ -140,6 +140,21 @@ export const PRIVACY_SECTIONS: { id: string; title: string; body: React.ReactNod
             asked for any of this.
           </li>
           <li>
+            <strong>The identity check for a protected payment.</strong> Where a payment
+            is held by a licensed bank until the deal is done (a protected payment),
+            everyone who pays or is paid that way, renters and buyers included, confirms
+            their identity once, before their first such payment. You choose your NIN
+            or your BVN and enter it with your date of birth, and you agree to the check
+            on that screen. Vallo sends the number, your date of birth, your name, email
+            address and phone number to EscrowPay, which runs the check against the
+            official record. Vallo does not keep your NIN, BVN or date of birth: they
+            pass through us to EscrowPay in that one request and are in none of our
+            records or logs. When we need to know whether you have passed, we ask
+            EscrowPay, using a reference to your Vallo account. If you are paid
+            this way, EscrowPay also receives the bank account you nominate for payouts
+            and confirms the name on it.
+          </li>
+          <li>
             <strong>Location.</strong> Your device location is read only when you ask
             for it: to place a listing&rsquo;s pin, to centre the map on where you are,
             or to save a spot for a price check (stored to about 100 metres). We do not
@@ -210,6 +225,11 @@ export const PRIVACY_SECTIONS: { id: string; title: string; body: React.ReactNod
           you why.
         </li>
         <li>
+          To have everyone who pays or is paid through a protected payment confirm
+          their identity once, with EscrowPay, so that money held by the bank is only
+          ever paid to a real, identified person and to the right bank account.
+        </li>
+        <li>
           To carry messages between you and the people who list, about listings and
           bookings.
         </li>
@@ -247,7 +267,10 @@ export const PRIVACY_SECTIONS: { id: string; title: string; body: React.ReactNod
           <li>
             <strong>Legal obligation.</strong> Identity verification of the people who
             list and get paid (customer due diligence under the Money Laundering
-            (Prevention and Prohibition) Act 2022), financial record keeping and
+            (Prevention and Prohibition) Act 2022), the one-time identity check of
+            everyone who pays or is paid through a protected payment, which the
+            licensed payment partner must make before it holds or moves the money,
+            financial record keeping and
             responding to lawful requests from Nigerian authorities.
           </li>
           <li>
@@ -296,6 +319,19 @@ export const PRIVACY_SECTIONS: { id: string; title: string; body: React.ReactNod
                 lister&rsquo;s bank account, refunds, and
                 confirming the account holder&rsquo;s name on the bank account you
                 nominate for payouts.
+              </li>
+              <li>
+                EscrowPay (Nigeria), with its partner bank Rubies Microfinance Bank,
+                licensed by the Central Bank of Nigeria: protected payments, where the
+                bank holds a payment until the deal is done and then pays the lister.
+                For the one-time identity check it receives your NIN or BVN, your date
+                of birth, your name, email address and phone number; for each protected
+                payment, the amount and the deal it is for; and, if you are paid, the
+                bank account you nominate for payouts. Unlike our other providers,
+                EscrowPay decides for itself how it uses and keeps the identity data it
+                checks, as an independent data controller under the NDPA, and its own
+                privacy policy applies to it. Vallo keeps none of your NIN, BVN or date
+                of birth.
               </li>
               <li>
                 Termii (Nigeria) and Twilio (United States): sending the one-time codes
