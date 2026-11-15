@@ -126,7 +126,7 @@ const SAY_THIS: DocTableRow[] = [
   { id: "review", cells: { asked: "Why do you ask for my ID?", say: "Because every lister on Vallo is reviewed by a person before they go up. It is what lets a stranger trust your listing. Your documents are seen only by the review team and are never shown to other members." } },
   { id: "agent", cells: { asked: "Are you cutting out agents?", say: "No. Vallo does not remove the agent. It removes the runaround: people see who they are dealing with and what they will pay before they call." } },
   { id: "safe", cells: { asked: "Can you promise I will not be scammed?", say: "No, and we never say so. What we do is review every lister and listing, show what has been confirmed and what has not, keep viewings free, and tell everybody to pay only inside Vallo after a viewing. A badge is not a promise." } },
-  { id: "value", cells: { asked: "Can Vallo tell me what my property is worth?", say: "Not a valuation. Price Check shows what similar properties near a spot are currently asking on Vallo, how many it found, and how sure it is. If it has too few to be sure, it says so instead of guessing." } },
+  { id: "value", cells: { asked: "Can Vallo tell me what price to put on my property?", say: "No. Vallo does not put a price on anybody's property. Price Check shows what similar properties near a spot are currently asking on Vallo, how many it found, and how sure it is. If it has too few to be sure, it says so instead of guessing." } },
 ];
 
 export const PRODUCT_GUIDE: ManualBody = {
@@ -146,7 +146,7 @@ export const PRODUCT_GUIDE: ManualBody = {
     "Vallo never holds customer money. Card payments go to the owner, agent or host through the payment processor.",
     "Open today: search, listing, viewings, messages, agreements, offers on homes for sale, stays and hotel rooms paid by card, table bookings, Roommates, Circle, Around, the assistant and Price Check.",
     "Not open yet: paying rent through Vallo, the wallet, paying a restaurant bill, the Pro plan. Never promise these.",
-    "Never promise a number of customers, a valuation, a refund, or that a deal carries no risk. Say what Vallo does.",
+    "Never promise a number of customers, a price for somebody's property, a refund, or that a deal carries no risk. Say what Vallo does.",
   ],
   sections: [
     {
@@ -383,7 +383,7 @@ export const PRODUCT_GUIDE: ManualBody = {
           <p>
             Tell it where and what, and it shows what similar properties near there are currently advertised for on
             Vallo, how many it found, how far away and how recent, and how sure it is. It is the asking prices of
-            listings, not what anybody paid, not a valuation of a particular property and not advice. It needs at least
+            listings, not what anybody paid, not a price put on a particular property and not advice. It needs at least
             five comparable real listings nearby, and it says so when it has too few. It does not price land, hotels or
             restaurants, and it never builds a figure from example listings.
           </p>
@@ -503,7 +503,7 @@ export const PRODUCT_GUIDE: ManualBody = {
             <li>That Vallo holds, keeps or looks after anybody&apos;s money. It never does.</li>
             <li>That a listing, a person, a place or a payment comes with a promise of safety. Say what was looked at and by whom.</li>
             <li>A number of customers, enquiries or bookings a business will get.</li>
-            <li>That Vallo values a property. Price Check shows asking prices, with how sure it is.</li>
+            <li>That Vallo puts a price on a property. Price Check shows asking prices, with how sure it is.</li>
             <li>That listing is free only for now, or for a first period. Listing is free.</li>
             <li>That a feature marked Not open yet is available, or a date for it.</li>
             <li>That a member will get a refund or a payout. Another desk decides that, on the facts.</li>

@@ -2,7 +2,6 @@ import "server-only";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { isEmailConfigured } from "@/lib/email/client";
-import { escrowPayConfig } from "@/lib/payments/providers/escrowpay/config";
 import { termiiConfig } from "@/lib/phone-otp/termii";
 import { canSendAbroad } from "@/lib/phone-otp/transport";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -145,7 +144,8 @@ export async function readControlRoom(env: Readonly<Record<string, string | unde
     connections: readConnections({
       codesNigeria: termiiConfig(env as Record<string, string | undefined>) !== null,
       codesAbroad: canSendAbroad(),
-      paymentPartner: escrowPayConfig(env) !== null,
+      /* Presence only. The rail itself decides whether the settings are usable (its own config). */
+      paymentPartner: present("ESCROWPAY_API_KEY") && present("ESCROWPAY_API_BASE_URL"),
       paymentPartnerWebhook: present("ESCROWPAY_WEBHOOK_SECRET"),
       cardPayments: present("PAYSTACK_SECRET_KEY") || present("PAYSTACK_TEST_SECRET_KEY"),
       email: isEmailConfigured(),

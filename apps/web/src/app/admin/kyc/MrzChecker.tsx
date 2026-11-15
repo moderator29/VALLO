@@ -4,6 +4,7 @@ import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { mrzAgreementFindings } from "@/lib/identity/cross-check/consistency";
 import { MRZ_LINE_LENGTH, mrzFindings, normaliseMrzLine, parseMrz, plainDay } from "@/lib/identity/cross-check/mrz";
 import type { Finding } from "@/lib/identity/cross-check/signals";
+import { plural } from "@vallo/i18n/core";
 
 /**
  * THE PASSPORT MRZ CHECKER (15 November 2026).
@@ -38,6 +39,10 @@ const ZONE_KEYBOARD = {
 function elevens(line: string): string[] {
   return line.match(/.{1,11}/g) ?? [];
 }
+
+/** The two lines of the zone, by their place: a name and an example of how each begins. */
+const LINE_NAME = ["First line", "Second line"] as const;
+const LINE_HINT = ["P<NGA...", "A12345678..."] as const;
 
 export function MrzChecker({
   names,
@@ -91,7 +96,7 @@ export function MrzChecker({
       ] as const).map(([n, value, set, typed]) => (
         <label key={n} className="block min-w-0">
           <span className="nf-label">
-            {n === 1 ? "First line" : "Second line"}{" "}
+            {LINE_NAME[n - 1]}{" "}
             <span className="font-normal text-[var(--nf-content-muted)]" data-testid={`mrz-count-${n}`}>
               {typed} of {MRZ_LINE_LENGTH}
             </span>
@@ -102,7 +107,7 @@ export function MrzChecker({
             className="nf-field w-full font-mono uppercase tracking-[0.04em]"
             value={value}
             maxLength={80}
-            placeholder={n === 1 ? "P<NGA..." : "A12345678..."}
+            placeholder={LINE_HINT[n - 1]}
             onChange={(e) => set(e.target.value)}
             data-testid={`mrz-line-${n}`}
           />
@@ -140,7 +145,7 @@ export function MrzChecker({
             >
               {result.failed === 0
                 ? `All ${result.checks.length} check digits pass`
-                : `${result.failed} of ${result.checks.length} check digits ${result.failed === 1 ? "fails" : "fail"}`}
+                : plural(result.failed, { one: `{count} of ${result.checks.length} check digits fails`, other: `{count} of ${result.checks.length} check digits fail` })}
             </p>
             <ul className="grid gap-3xs text-[length:var(--nf-text-caption)]" data-testid="mrz-digits">
               {result.checks.map((check) => (

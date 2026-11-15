@@ -13,6 +13,7 @@ import {
   type EscalationStatus,
   type RoutePlan,
 } from "./types";
+import { plural } from "@vallo/i18n/core";
 
 /**
  * THE ESCALATION SCREENS' SENTENCES. Pure: every line a person reads on the
@@ -22,7 +23,7 @@ import {
  */
 
 function count(n: number, one: string): string {
-  return `${n} ${n === 1 ? one : `${one}s`}`;
+  return plural(n, { one: `{count} ${one}`, other: `{count} ${one}s` });
 }
 
 /** A length of time in the largest unit that reads well: minutes, hours, days. */

@@ -16,6 +16,7 @@ import {
 import { JOB_DESCRIPTIONS, STAFF_POSITIONS } from "@/lib/admin/staff-positions";
 import { CONTACT_EMAIL } from "@/lib/support-email";
 import { A, FounderToName, type ManualBody } from "./parts";
+import { plural } from "@vallo/i18n/core";
 
 /**
  * Chapter 6, rewritten on 15 November 2026 for escalations on every admin
@@ -46,7 +47,7 @@ const ROUTES: DocTableRow[] = ESCALATION_CATEGORIES.map((category) => {
   };
 });
 
-const hours = (n: number) => (n === 1 ? "1 hour" : `${n} hours`);
+const hours = (n: number) => plural(n, { one: "{count} hour", other: "{count} hours" });
 
 const CLOCK: DocTableRow[] = [...ESCALATION_SEVERITIES].reverse().map((severity) => ({
   id: severity,

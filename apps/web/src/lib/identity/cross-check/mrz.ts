@@ -1,4 +1,5 @@
 import { finding, type Finding } from "./signals";
+import { plural } from "@vallo/i18n/core";
 
 /**
  * THE MACHINE-READABLE ZONE OF A PASSPORT (ICAO Doc 9303, part 4).
@@ -269,7 +270,7 @@ export function mrzFindings(result: MrzResult): Finding[] {
       finding(
         "mrz.digits",
         "stop",
-        `Passport check digits: ${result.failed} of ${total} ${result.failed === 1 ? "fails" : "fail"}`,
+        plural(result.failed, { one: `Passport check digits: {count} of ${total} fails`, other: `Passport check digits: {count} of ${total} fail` }),
         `Not matching: ${names.join(", ")}. Type both lines again with care first. If a digit still fails, the page has very likely been edited: do not approve, and escalate.`,
       ),
     );

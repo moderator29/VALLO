@@ -1,3 +1,5 @@
+import { plural } from "@vallo/i18n/core";
+
 /**
  * ONE SHAPE FOR EVERY CROSS-CHECK FINDING (15 November 2026).
  *
@@ -110,7 +112,7 @@ export function levelWord(item: Finding): string {
 
 /** "1 other account", "3 other accounts". */
 export function otherAccounts(count: number): string {
-  return `${count} other ${count === 1 ? "account" : "accounts"}`;
+  return plural(count, { one: "{count} other account", other: "{count} other accounts" });
 }
 
 /** The sentence under the panel's heading. The same words on every person, on purpose. */

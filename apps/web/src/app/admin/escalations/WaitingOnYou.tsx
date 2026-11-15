@@ -6,6 +6,7 @@ import type { EscalationListData, EscalationRead } from "@/lib/admin/escalations
 import { clockOf, raisedByWords } from "@/lib/admin/escalations/words";
 import { deskName } from "./desk-name";
 import { ClockWords, ReadState, SeverityBadge } from "./parts";
+import { plural } from "@vallo/i18n/core";
 
 /**
  * "WAITING ON YOU": the card on the console overview (the super admin and the
@@ -51,7 +52,7 @@ export function WaitingOnYou({
         ) : (
           <>
             <p className="nf-caption px-card pt-sm" data-testid="escalations-waiting-summary">
-              {rows.length === 1 ? `1 escalation is waiting on ${who}` : `${rows.length} escalations are waiting on ${who}`}
+              {plural(rows.length, { one: `{count} escalation is waiting on ${who}`, other: `{count} escalations are waiting on ${who}` })}
               {overdue > 0 ? `, ${overdue} overdue` : ""}. The oldest first.{note ? ` ${note}` : ""}
             </p>
             <ul className="nf-rows nf-group" aria-label={title}>

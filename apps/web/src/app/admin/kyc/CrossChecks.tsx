@@ -19,6 +19,7 @@ import { CROSS_CHECK_SUMMARY, countFindings, levelWord, mergeFindings, orderFind
 import { CHECKLIST_CAVEAT, checklistFor } from "./id-checklists";
 import { identityEscalationHref } from "./escalate-link";
 import { MrzChecker } from "./MrzChecker";
+import { plural } from "@vallo/i18n/core";
 
 /**
  * CROSS-CHECKS (15 November 2026): what a reviewer can find out about an ID
@@ -185,7 +186,7 @@ export function CrossChecks(props: CrossChecksProps) {
       {fine.length > 0 ? (
         <details className="mt-xs" open={attention.length === 0} data-testid="cross-check-fine">
           <summary className="cursor-pointer text-[length:var(--nf-text-caption)] font-semibold text-[var(--nf-content-primary)]">
-            {fine.length === 1 ? "1 check found nothing wrong" : `${fine.length} checks found nothing wrong`}
+            {plural(fine.length, { one: "{count} check found nothing wrong", other: "{count} checks found nothing wrong" })}
           </summary>
           <ul className="mt-2xs">
             {fine.map((item) => (

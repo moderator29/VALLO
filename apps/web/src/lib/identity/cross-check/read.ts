@@ -5,6 +5,7 @@ import { createHash } from "node:crypto";
 import { MATCH_MAX_BITS, hamming } from "@/lib/photo-hash/dhash";
 import { IMAGE_SIGNAL_BYTES, imageFindings, readImageSignals } from "./image-signals";
 import { couldNotRun, finding, notAvailableYet, orderFindings, otherAccounts, type Finding, type FindingLink } from "./signals";
+import { plural } from "@vallo/i18n/core";
 
 /**
  * THE CROSS-CHECKS THAT NEED THE DATABASE, FOR ONE PERSON (15 November 2026).
@@ -96,7 +97,7 @@ export const MAX_LINKS = 5;
 export function accountLinks(ownerIds: readonly string[]): FindingLink[] {
   return ownerIds.slice(0, MAX_LINKS).map((id, index) => ({
     href: `/admin/people/${id}`,
-    label: ownerIds.length === 1 ? "Open the other account" : `Open other account ${index + 1}`,
+    label: plural(ownerIds.length, { one: "Open the other account", other: `Open other account ${index + 1}` }),
   }));
 }
 
@@ -415,7 +416,7 @@ async function accountChecks(port: CrossCheckPort, subjectId: string, now: Date)
   const days = created.ok && created.value ? daysBetween(created.value, now) : null;
   if (!created.ok || days === null) out.push(couldNotRun("account.age", "how old the account is"));
   else {
-    const age = days === 0 ? "The account was opened today" : days === 1 ? "The account was opened yesterday" : `The account is ${days} days old`;
+    const age = days === 0 ? "The account was opened today" : plural(days, { one: "The account was opened yesterday", other: "The account is {count} days old" });
     out.push(finding("account.age", "ok", age, "A new account is normal for a new lister. It matters more when something else here looks wrong."));
   }
 
@@ -426,7 +427,7 @@ async function accountChecks(port: CrossCheckPort, subjectId: string, now: Date)
       finding(
         "account.refused",
         "look",
-        refused.value === 1 ? "1 ID or selfie photo from this account was refused before" : `${refused.value} ID or selfie photos from this account were refused before`,
+        plural(refused.value, { one: "{count} ID or selfie photo from this account was refused before", other: "{count} ID or selfie photos from this account were refused before" }),
         "Read why in the documents below. A blurry photo sent again is ordinary; a different ID each time is not.",
       ),
     );

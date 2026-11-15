@@ -3,6 +3,7 @@ import type { ControlRoom } from "@/lib/admin/control/read";
 import { setupFileHref, type SetupState } from "@/lib/admin/control/setup";
 import { Badge, type BadgeTone } from "../_components/Badge";
 import { PageHead, Panel } from "../_components/panels";
+import { plural } from "@vallo/i18n/core";
 
 /**
  * THE CONTROL ROOM, DRAWN (the founder, 15 November 2026). Takes what
@@ -74,15 +75,16 @@ export function ControlRoomView({ room }: { room: Extract<ControlRoom, { state: 
         <p className={`${WORDS} mb-sm`} data-testid="control-setup-summary">
           {waitingSetup.length === 0
             ? "Every part listed here is in place on the live database."
-            : waitingSetup.length === 1
-              ? "1 part is waiting for its SQL to be run. Open the file, copy all of it, and run it in the Supabase SQL editor. It is safe to run twice."
-              : `${waitingSetup.length} parts are waiting for their SQL to be run. Open each file, copy all of it, and run it in the Supabase SQL editor. Each is safe to run twice.`}
+            : plural(waitingSetup.length, {
+                one: "{count} part is waiting for its SQL to be run. Open the file, copy all of it, and run it in the Supabase SQL editor. It is safe to run twice.",
+                other: "{count} parts are waiting for their SQL to be run. Open each file, copy all of it, and run it in the Supabase SQL editor. Each is safe to run twice.",
+              })}
         </p>
         {attention.length > 0 ? <ul role="list">{attention.map(setupRow)}</ul> : null}
         {ready.length > 0 ? (
           <details className="mt-sm" data-testid="control-setup-ready" open={attention.length === 0}>
             <summary className={`${TITLE} cursor-pointer`}>
-              {ready.length === 1 ? "1 part is in place" : `${ready.length} parts are in place`}
+              {plural(ready.length, { one: "{count} part is in place", other: "{count} parts are in place" })}
             </summary>
             <ul role="list" className="mt-sm">
               {ready.map(setupRow)}
