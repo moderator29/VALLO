@@ -488,9 +488,27 @@ export function ListingGallery({
           /* Section 17's round header button (gap audit UIUX-13). The hero
              is a night island, so `data-theme="light"` re-runs the paper
              tokens on the button itself: a white circle by day, the raised
-             night surface at night. Share, save and the photo arrows too. */
+             night surface at night. Share, save and the photo arrows too.
+             It wears `nf-icon-btn nf-icon-btn--round`, which is what draws
+             that circle and what share, compare and save beside it already
+             wear. Without it this control was a bare glyph on a photograph
+             while its three siblings sat on solid discs: on a dark picture
+             there was nothing to see and nothing to aim at, which is what
+             the founder photographed on 15 November. `detail-m.css` has said
+             the hero's back wears this class since the gap audit; only the
+             markup had not.
+
+             `ml-0 justify-items-center` take the edge rule back off THIS
+             control, and only this one. That rule lines a bare glyph's ink
+             up with the page's text, which is right on a page header and is
+             what the founder asked for on 14 November. On a photograph it is
+             wrong: here the DISC is the visible edge, so the disc sits on the
+             gutter beside its three siblings and the chevron centres inside
+             it. Utilities beat the components layer where `.nf-nav-edge`
+             lives, so these two win without touching any other back control
+             on the platform. */
           data-theme="light"
-          className="pointer-events-auto transition-transform active:scale-90 motion-reduce:transition-none"
+          className="nf-icon-btn nf-icon-btn--round ml-0 justify-items-center pointer-events-auto transition-transform active:scale-90 motion-reduce:transition-none"
         />
       </div>
 
