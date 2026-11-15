@@ -39,6 +39,7 @@ const OVERVIEW: Desk[] = [
   { href: "/admin", name: "Overview", icon: "home", what: "What is waiting on a person and how the platform is doing. A staff member sees their own desks here.", who: "Everybody with console access" },
   { href: "/admin/queue", name: "Unified queue", icon: "panel-left", what: "Listings, applications, reports, support tickets, message flags and held content in one list, ordered by when each is due. Each tab shows only what your areas decide.", who: "Any queue area; each tab by its own area" },
   { href: "/admin/lookup", name: "Lookup", icon: "search", what: "Paste a reference, an id or an email and find the record. Each part of the answer asks for its own area.", who: "Each section by its own area" },
+  { href: "/admin/escalations", name: "Escalations", icon: "alert-triangle", what: "Anything a colleague cannot or may not decide, sent to the people who can, with one owner and a response time. The Escalate button on every desk raises one.", who: "Everybody with console access" },
 ];
 
 const REVIEW: Desk[] = [
@@ -112,6 +113,7 @@ const OPERATIONS: Desk[] = [
 ];
 
 const SETTINGS: Desk[] = [
+  { href: "/admin/control", name: "Control room", icon: "sliders", what: "What is waiting on the super admin, which parts of the database are in place, how the main switches stand and which services are connected. It only reads.", who: "Super admin" },
   { href: "/admin/switches", name: "Switches", icon: "sliders", what: "Turning a feature on or off for everybody.", who: "Admins" },
   { href: "/admin/reference", name: "Reference data", icon: "grid", what: "The lists the product picks from: occupations, local governments.", who: "Admins" },
   { href: "/admin/examples", name: "Examples", icon: "building-apartment", what: "The example listings that show the product before real supply. They are never counted as real supply.", who: "Admins" },

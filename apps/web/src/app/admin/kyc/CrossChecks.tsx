@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useCallback, useEffect, useId, useMemo, useRef, useState, useTransition } from "react";
 import { Button } from "@/components/ui/Button";
+import { banner } from "@/lib/ui/toast";
 import { compareIdNumber, runCrossChecks, type CrossCheckReport } from "@/lib/identity/cross-check/actions";
 import { nameFindings, type NamesOnRecord } from "@/lib/identity/cross-check/consistency";
 import {
@@ -269,14 +270,18 @@ function IdNumberCheck({
       try {
         const result = await compareIdNumber({ documentId, kind, number: value });
         if (!result.ok) {
+          /* Said by the one banner at the top of the screen, like every other outcome. */
           setProblem(result.error);
+          banner.error(result.error, { "data-testid": "id-number-problem" });
           return;
         }
         setCompared(result.findings);
         /* The number has done its work: it does not stay on the screen. */
         setValue("");
       } catch {
-        setProblem("That number could not be compared just now. Nothing was saved. Try again in a moment.");
+        const words = "That number could not be compared just now. Nothing was saved. Try again in a moment.";
+        setProblem(words);
+        banner.error(words, { "data-testid": "id-number-problem" });
       }
     });
   }
@@ -339,11 +344,6 @@ function IdNumberCheck({
             </span>
           ) : null}
         </div>
-      ) : null}
-      {problem ? (
-        <p role="alert" className="text-[length:var(--nf-text-caption)] text-[var(--nf-status-rejected)]" data-testid="id-number-problem">
-          {problem}
-        </p>
       ) : null}
     </div>
   );

@@ -8,6 +8,7 @@ import { AGREEMENT_TOOLS } from "./agreements";
 import { ANALYTICS_TOOLS } from "./analytics";
 import { BD_TOOLS } from "./business-development";
 import { COMPLIANCE_TOOLS } from "./compliance";
+import { CONTROL_ROOM_TOOLS } from "./control-room";
 import { COO_TOOLS } from "./coo";
 import { DELETION_REASON_TOOLS } from "./deletion-reasons";
 import { ESCALATION_TOOLS } from "./escalations";
@@ -48,6 +49,8 @@ export const COPILOT_TOOLS: readonly CopilotTool[] = [
   ...STAFF_DESK_TOOLS,
   ...DELETION_REASON_TOOLS,
   ...COO_TOOLS,
+  /* The control room (15 November 2026): a super admin only. */
+  ...CONTROL_ROOM_TOOLS,
   ...PROPOSE_TOOLS,
 ];
 

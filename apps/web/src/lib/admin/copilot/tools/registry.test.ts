@@ -44,7 +44,11 @@ describe("the registry offers only the tools a viewer holds", () => {
     const admin = viewer({ isAdmin: true, scopes: STAFF_SCOPES, position: null });
     const offered = names(admin);
     expect(offered).toEqual(expect.arrayContaining(["get_support_queue", "get_money_overview", "get_listing_queue", "raise_escalation", "post_announcement", "recommend_staff_access"]));
-    expect(COPILOT_TOOLS.every((t) => offered.includes(t.name))).toBe(true);
+    /* Every tool but the control room, which is a super admin's alone. */
+    expect(COPILOT_TOOLS.filter((t) => t.name !== "get_control_room").every((t) => offered.includes(t.name))).toBe(true);
+    expect(offered).not.toContain("get_control_room");
+    const superAdmin = viewer({ isAdmin: true, isSuperAdmin: true, scopes: STAFF_SCOPES, position: null });
+    expect(COPILOT_TOOLS.every((t) => names(superAdmin).includes(t.name))).toBe(true);
   });
 
   it("keeps COO-only and announcement tools from an ordinary desk lead", () => {

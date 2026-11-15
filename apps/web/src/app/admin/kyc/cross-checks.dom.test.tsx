@@ -361,7 +361,8 @@ function entry(props: Partial<CrossChecksProps>, wrap: "open" | "closed" | "none
   return `
     import { mount } from "@/lib/testing/browser-root";
     import { CrossChecks } from "@/app/admin/kyc/CrossChecks";
-    mount(${body});
+    import { ToastHost } from "@/components/ui/ToastHost";
+    mount(<><ToastHost />${body}</>);
   `;
 }
 

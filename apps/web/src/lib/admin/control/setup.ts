@@ -35,6 +35,13 @@ export const SETUP_ITEMS: readonly SetupItem[] = [
     marker: { table: "staff_escalations" },
   },
   {
+    key: "identity_cross_check",
+    title: "Identity cross-checks",
+    unlocks: "Noticing the same ID file, a very similar picture or the same ID number on a second account, on the verification desk.",
+    file: "pending/identity_cross_check_2026-11-15.sql",
+    marker: { table: "kyc_document_fingerprints" },
+  },
+  {
     key: "payout_to_lister",
     title: "Payout to the lister on protected payments",
     unlocks: "Recording when the payment partner has paid a lister, and telling the lister.",

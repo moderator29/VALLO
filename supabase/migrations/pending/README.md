@@ -5,6 +5,20 @@ file is pasted by the founder in the Supabase SQL Editor, then the lead checks
 it live, moves it to `supabase/migrations/` under its stamped version and
 records it in `APPLIED.txt`.
 
+> **Checked against the live database on 15 November 2026 (read-only).** Every
+> table, function and column that the files in this folder create is on live,
+> and the rent partner fee row of 10 November is in place. So every file here
+> has been run, **except these two, which are waiting for the founder:**
+>
+> 1. `staff_escalations_2026-11-15.sql`
+> 2. `identity_cross_check_2026-11-15.sql`
+>
+> Rows below that still say NOT APPLIED were written before that check and
+> are out of date. The destructive files (`rt01`, `rt02`) and the newsletter
+> send were not part of the check and still need the founder's own word.
+> From now on the live answer is on the console at `/admin/control`
+> (Control room, Database setup), which reads the database itself.
+
 | File | Owner | Decided | Status |
 |---|---|---|---|
 | Applied 7 Nov 2026 by the founder, verified live by the lead, moved to `supabase/migrations/20261107180100` to `20261107180400` | Lead | | Done |

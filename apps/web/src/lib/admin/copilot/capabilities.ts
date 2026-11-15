@@ -190,7 +190,7 @@ const STARTERS: Partial<Record<StaffScope, readonly string[]>> = {
   roommates: ["What needs me first today?", "How many verifications are waiting?"],
   circle: ["What needs me first today?", "Which communities need attention?"],
   analyst: ["Give me the headline numbers", "How are bookings doing?"],
-  business_development: ["What needs me first today?", "Which follow-ups are due this week?", "Summarise my pipeline"],
+  business_development: ["What needs me first today?", "Which follow-ups are due this week?", "Summarise my pipeline", "Draft a reply to a business asking why they should list", "What can I tell a prospect about fees?", "How do I tell a forged ID?"],
   social_media: ["What is on the calendar this week?", "Which posts are overdue?"],
   marketing: ["Which campaigns end this week?", "How did referrals do lately?"],
   content: ["What is overdue on the calendar?", "Which help pages are failing members?"],

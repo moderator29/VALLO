@@ -253,6 +253,29 @@ describe("the form as a page", () => {
     });
   });
 
+  it("accepts exactly the link the ID cross-check panel builds, for a person and for the desk fallback", async () => {
+    const { identityEscalationHref } = await import("../kyc/escalate-link");
+    const read = (href: string) => {
+      const url = new URL(href, "http://vallo.test");
+      expect(url.pathname).toBe("/admin/escalations/new");
+      return readNewEscalationQuery(Object.fromEntries(url.searchParams.entries()));
+    };
+    const person = "44444444-4444-4444-8444-444444444444";
+    expect(read(identityEscalationHref(person, "Ada Balogun"))).toEqual({
+      category: "identity_fraud",
+      recordUrl: `/admin/people/${person}`,
+      recordLabel: "Identity check for Ada Balogun",
+    });
+    expect(read(identityEscalationHref(null, null))).toEqual({
+      category: "identity_fraud",
+      recordUrl: "/admin/kyc",
+      recordLabel: "Identity check for a member",
+    });
+    const html = page(read(identityEscalationHref(person, "Ada Balogun")));
+    expect(html).toContain(`href="/admin/people/${person}"`);
+    expect(words(html)).toContain("Attached: Identity check for Ada Balogun");
+  });
+
   it.each([
     [{ record: "https://example.com/admin/x" }],
     [{ record: "/settings/phone" }],

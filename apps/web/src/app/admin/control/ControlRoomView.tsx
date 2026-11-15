@@ -18,8 +18,8 @@ const SETUP_WORDS: Record<SetupState, { label: string; tone: BadgeTone }> = {
 
 const LINK = "font-semibold text-[var(--nf-content-link)] underline underline-offset-2";
 const ROW = "flex flex-col gap-2xs border-t border-[var(--nf-border-subtle)] py-sm first:border-t-0 first:pt-0 last:pb-0";
-const TITLE = "nf-body font-semibold text-[var(--nf-content-primary)] [overflow-wrap:anywhere]";
-const WORDS = "nf-body-sm text-[var(--nf-content-secondary)] [overflow-wrap:anywhere]";
+const TITLE = "nf-body font-semibold text-[var(--nf-content-primary)] break-words";
+const WORDS = "nf-body-sm text-[var(--nf-content-secondary)] break-words";
 
 export function ControlRoomView({ room }: { room: Extract<ControlRoom, { state: "ok" }> }) {
   const waitingSetup = room.setup.filter((r) => r.state === "waiting");
