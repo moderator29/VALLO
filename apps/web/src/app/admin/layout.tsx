@@ -15,7 +15,7 @@ import type { ReactNode } from "react";
 import { cookies } from "next/headers";
 import { getDictionary } from "@vallo/i18n";
 import { getLocale } from "@/lib/locale";
-import { requireAdmin, requireConsole } from "@/lib/admin/guard";
+import { readStaffAccess, requireAdmin, requireConsole } from "@/lib/admin/guard";
 import { StaffFrame } from "./_components/StaffFrame";
 import { getQueueCounts } from "@/lib/admin/queries";
 import { getCoverageCounts } from "@/lib/admin/desk-reads/extra-counts";
@@ -28,6 +28,7 @@ import { DesktopNote } from "./_components/DesktopNote";
 import { notFound } from "next/navigation";
 import { AdminFrame } from "./_components/AdminFrame";
 import type { AdminIdentity } from "./_components/AdminNav";
+import type { NavViewer } from "./_components/nav";
 import { EntryGate } from "./_components/EntryGate";
 import { BackButton } from "@/components/site/BackButton";
 import { getPersonTiers } from "@/lib/admin/reads/shared";
@@ -108,7 +109,7 @@ export default async function AdminLayout({ children }: { children: ReactNode })
     );
   }
 
-  const [counts, shell, jar, tiers, coverage, chargebacks, escalations] = await Promise.all([
+  const [counts, shell, jar, tiers, coverage, chargebacks, escalations, own] = await Promise.all([
     getQueueCounts(),
     getShellIdentity(),
     cookies(),
@@ -122,6 +123,12 @@ export default async function AdminLayout({ children }: { children: ReactNode })
     /* Escalations waiting on this operator, read on their own session
        (`staff_escalation_counts`); "not set up" until its SQL has run. */
     getEscalationCounts(),
+    /* WHO THE MENU IS DRAWN FOR: this operator's own access, read from the
+       database as every other read here is. The rail draws only the rows it
+       opens, so the Staff desk and the Control room are the super admin's
+       alone. It decides what is drawn and nothing else: every desk asks the
+       database again. */
+    readStaffAccess(access.userClient),
   ]);
   /* R-E: has this browser session opened the overview as this operator? */
   const entered = jar.get(ENTRY_COOKIE)?.value === access.user.id;
@@ -139,9 +146,17 @@ export default async function AdminLayout({ children }: { children: ReactNode })
     tier: tiers.get(access.user.id) ?? null,
   };
 
+  const viewer: NavViewer = {
+    isAdmin: true,
+    isSuperAdmin: access.isSuperAdmin,
+    scopes: own?.scopes ?? [],
+    position: own?.position ?? null,
+  };
+
   return (
     <AdminFrame
       identity={identity}
+      viewer={viewer}
       counts={badges}
       unread={shell.unreadNotifications}
       navLabel={t.admin.console.navLabel}

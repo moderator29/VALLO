@@ -57,7 +57,7 @@ export function PositionHandbookView({
             { href: "/admin/manual", label: "Staff manual" },
           ]}
         >
-          <p data-testid="handbook-whose">
+          <p className="mb-sm" data-testid="handbook-whose">
             <strong>This handbook is for the {job.title}.</strong>{" "}
             {own
               ? "That is your position, so this is your own handbook."

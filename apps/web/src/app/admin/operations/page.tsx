@@ -9,6 +9,7 @@ import { getDictionary } from "@vallo/i18n";
 import { adminReader } from "@/lib/admin/reads/shared";
 import { authOrigin } from "@/lib/site";
 import { runStoreChecks } from "@/lib/store/run";
+import { DeskLinks } from "../_components/panels";
 import { OperationsView, type OpsTab } from "./OperationsView";
 import { DeskCopilot } from "@/lib/admin/copilot/contexts/DeskCopilot";
 import { operationsContext } from "@/lib/admin/copilot/contexts/operations";
@@ -77,6 +78,11 @@ export default async function AdminOperationsPage({
 
   return (
     <>
+      {/* The desks the menu files under this one, as buttons: this desk drew
+          none of them, so reaching the crash log or the provider checks meant going back to the menu. */}
+      <div className="nf-console">
+        <DeskLinks deskKey="operations" label="The other operations desks" caption="More in this desk" />
+      </div>
       {/* Not on the Store tab: its checks sign the reviewer in and fetch our
           own pages, which is an operator's deliberate act, not a timer's. */}
       {tab !== "store" && <LiveRefresh />}

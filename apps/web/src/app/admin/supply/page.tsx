@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { getDictionary } from "@vallo/i18n";
+import { DeskLinks } from "../_components/panels";
 import { DemandBoard } from "@/components/agent/DemandBoard";
 import { readDemandBoard } from "@/lib/demand/queries";
 import { getLocale } from "@/lib/locale";
@@ -64,6 +65,11 @@ export default async function AdminSupplyPage({
 
   return (
     <>
+      {/* The desks the menu files under this one, as buttons: this desk drew
+          none of them, so reaching Businesses or Stops meant going back to the menu. */}
+      <div className="nf-console">
+        <DeskLinks deskKey="supply" label="The other supply desks" caption="More in this desk" />
+      </div>
       <SupplyDesk supply={supply} filter={filter} params={flat} locale={locale} pageSize={SUPPLY_PAGE_SIZE} rosters={roster.state === "ok" ? roster.data : null} tiers={tiers} now={new Date().getTime()} />
       {/* V-10: the recruiting map. Where demand sits that supply does not. */}
       <DemandBoard rows={demand} copy={getDictionary(locale).frontDoor.demand} locale={locale} />

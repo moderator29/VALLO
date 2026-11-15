@@ -33,6 +33,14 @@ import type { HandbookBody, HandbookSection, RoleWords } from "./types";
  * Nothing here says a thing the code does not do.
  */
 
+/**
+ * A SUB-HEADING INSIDE A SECTION. The documentation kit styles a section's
+ * prose but not an `h3` inside it, so a sub-heading would read as another
+ * paragraph; the platform's own h4 class gives it the display face and the
+ * weight at the right step below the section title.
+ */
+const H3 = "nf-h4 mt-xs text-[var(--nf-content-primary)]";
+
 const DESK_COLUMNS = [
   { key: "desk", label: "Desk" },
   { key: "what", label: "What it is for" },
@@ -63,16 +71,16 @@ function whatThisJobIsFor(position: StaffPosition, role: RoleWords): HandbookSec
       <>
         {role.purpose}
         <p>
-          In one line: {job.summary} You report to {job.reportsTo}. Your access areas are{" "}
+          In one line: {job.summary} Reports to: {job.reportsTo}. Your access areas are{" "}
           {job.scopes.map((scope) => MANUAL_AREA_LABEL[scope]).join(", ")}.
         </p>
-        <h3>What you are responsible for</h3>
+        <h3 className={H3}>What you are responsible for</h3>
         <ul role="list">
           {job.responsibilities.map((point) => (
             <li key={point}>{point}</li>
           ))}
         </ul>
-        <h3>What is expected of you</h3>
+        <h3 className={H3}>What is expected of you</h3>
         <ul role="list">
           {job.expectations.map((point) => (
             <li key={point}>{point}</li>
@@ -96,13 +104,13 @@ function firstWeek(role: RoleWords): HandbookSection {
     title: "Your first day, and your first week",
     body: (
       <>
-        <h3>Your first day, in order</h3>
+        <h3 className={H3}>Your first day, in order</h3>
         <ol role="list">
           {role.firstDay.map((step, index) => (
             <li key={index}>{step}</li>
           ))}
         </ol>
-        <h3>Your first week</h3>
+        <h3 className={H3}>Your first week</h3>
         <ol role="list">
           {role.firstWeek.map((step, index) => (
             <li key={index}>{step}</li>
@@ -149,20 +157,20 @@ function decisions(role: RoleWords): HandbookSection {
     title: "What you decide alone, what needs somebody else, and what you never decide",
     body: (
       <>
-        <h3>You may decide these alone</h3>
+        <h3 className={H3}>You may decide these alone</h3>
         <p>Inside your own access areas, and only on an item that is not yours:</p>
         <ul role="list">
           {role.alone.map((point, index) => (
             <li key={index}>{point}</li>
           ))}
         </ul>
-        <h3>These need somebody else</h3>
+        <h3 className={H3}>These need somebody else</h3>
         <ul role="list">
           {role.withSomebody.map((point, index) => (
             <li key={index}>{point}</li>
           ))}
         </ul>
-        <h3>You never decide these</h3>
+        <h3 className={H3}>You never decide these</h3>
         <ul role="list">
           {role.never.map((point, index) => (
             <li key={index}>{point}</li>
@@ -204,7 +212,7 @@ function theWork(role: RoleWords): HandbookSection {
         <p>Every routine task of this position, in the order the screens ask for it.</p>
         {role.tasks.map((task) => (
           <div key={task.id}>
-            <h3 id={`task-${task.id}`}>{task.title}</h3>
+            <h3 id={`task-${task.id}`} className={H3}>{task.title}</h3>
             <ol role="list">
               {task.steps.map((step, index) => (
                 <li key={index}>{step}</li>
@@ -261,13 +269,13 @@ function theWords(role: RoleWords): HandbookSection {
     title: "The words you use, and the words nobody at Vallo uses",
     body: (
       <>
-        <h3>The words you use</h3>
+        <h3 className={H3}>The words you use</h3>
         <ul role="list">
           {role.wordsUsed.map((point, index) => (
             <li key={index}>{point}</li>
           ))}
         </ul>
-        <h3>The words nobody at Vallo uses</h3>
+        <h3 className={H3}>The words nobody at Vallo uses</h3>
         <DocCallout tone="warning" title="Never write these">
           <ul role="list">
             <li>That Vallo holds, keeps, safeguards or looks after anybody&apos;s money.</li>
@@ -335,7 +343,7 @@ function yourCopilot(position: StaffPosition, role: RoleWords): HandbookSection 
           . It knows your position, your access areas, the figures on your desks and this handbook word for word. Ask
           it in plain words. It reads only what you may read: a desk you do not hold is closed to it as it is to you.
         </p>
-        <h3>What it can do for this position</h3>
+        <h3 className={H3}>What it can do for this position</h3>
         <DocTable
           caption="What the copilot can do on this position's desks"
           columns={[
@@ -347,7 +355,7 @@ function yourCopilot(position: StaffPosition, role: RoleWords): HandbookSection 
             cells: { desk: capability.desk, can: capability.can.join(". ") },
           }))}
         />
-        <h3>What it will not do</h3>
+        <h3 className={H3}>What it will not do</h3>
         <ul role="list">
           {COPILOT_LIMITS.map((limit) => (
             <li key={limit}>{limit}</li>
@@ -358,7 +366,7 @@ function yourCopilot(position: StaffPosition, role: RoleWords): HandbookSection 
             <li key={index}>{point}</li>
           ))}
         </ul>
-        <h3>Three good questions to ask it</h3>
+        <h3 className={H3}>Three good questions to ask it</h3>
         <ol role="list">
           {role.copilotAsk.map((question) => (
             <li key={question}>&quot;{question}&quot;</li>
@@ -380,15 +388,15 @@ export function buildHandbook(position: StaffPosition, role: RoleWords): Handboo
   return {
     intro: (
       <p>
-        Your handbook. Everything this position needs to know and everything it can reach: what the job is for, how to
-        get in, what to do on your first day, every desk you can open, what you may decide, the work step by step, the
-        standard you are held to, the words to use, how to escalate, what your copilot will do, and who to go to. Read
-        all of it once, then come back to the part you need. Save it to your phone from the button at the top.
+        Everything this position needs to know, and everything it can reach: what the job is for, how to get in, what
+        to do on your first day, every desk you can open, what you may decide, the work step by step, the standard you
+        are held to, the words to use, how to escalate, what your copilot will do, and who to go to. Read all of it
+        once, then come back to the part you need. Save it to your phone from the button at the top.
       </p>
     ),
     glance: [
       ...role.glance,
-      `You report to ${job.reportsTo}.`,
+      `Reports to: ${job.reportsTo}.`,
       "Nobody decides their own case, and every reason you write is read by the member exactly as you wrote it.",
       "When you are unsure, press Escalate rather than guess.",
     ],

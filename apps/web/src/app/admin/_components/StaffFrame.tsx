@@ -4,6 +4,7 @@ import { BackButton } from "@/components/site/BackButton";
 import { STAFF_SCOPE_LABEL, type StaffAccess, type StaffScope } from "@/lib/admin/guard";
 import type { ManualSlug } from "@/lib/admin/manual/chapters";
 import { JOB_DESCRIPTIONS, type StaffPosition } from "@/lib/admin/staff-positions";
+import { groupsFor, labelFor, type AdminGroup, type NavViewer } from "./nav";
 import { PageHead } from "./panels";
 
 /**
@@ -190,8 +191,67 @@ export function StaffFrame({
           </p>
         ) : null}
       </header>
+      {staff.handbookAcknowledged ? <StaffMenu staff={staff} /> : null}
       <div className="mt-block">{children}</div>
     </div>
+  );
+}
+
+
+/** This staff member, as the menu reads a viewer (`nav.ts`). */
+export function viewerFor(staff: StaffAccess): NavViewer {
+  return {
+    isAdmin: staff.isAdmin,
+    isSuperAdmin: staff.isSuperAdmin,
+    scopes: staff.scopes,
+    position: staff.position,
+  };
+}
+
+/**
+ * EVERYTHING THIS PERSON'S ACCESS OPENS (15 November 2026).
+ *
+ * The founder's brief: "in each admin desk make all things they have access
+ * to be in their nav and buttons for them to easy navigate". The buttons
+ * above are the few places everybody goes and the front door of each access
+ * area. They were the WHOLE menu, and they are not the whole of what a staff
+ * member may open: a support agent holds `support`, which opens the member
+ * file, account recovery, the pages that fail and the unified queue, and
+ * none of those had a way in from this frame.
+ *
+ * So the console's own map is drawn here, filtered to this person
+ * (`groupsFor`), in the rail's own groups and order. Nothing is listed that
+ * their access does not open, and a group left with nothing in it is not
+ * drawn. The desks still ask the database again, every time.
+ */
+function StaffMenu({ staff }: { staff: StaffAccess }) {
+  const groups: AdminGroup[] = groupsFor(viewerFor(staff));
+  if (groups.length === 0) return null;
+  return (
+    <nav aria-label="Everything your access opens" className="nf-panel nf-panel--card block mt-block p-card" data-testid="staff-menu">
+      <h2 className="nf-h4">Everything your access opens</h2>
+      <p className="nf-caption text-[var(--nf-content-secondary)]">
+        Every desk your access areas open, in the order the console lists them. A desk you cannot open is not here.
+      </p>
+      <div className="mt-inline grid gap-inline">
+        {groups.map((group) => (
+          <div key={group.key}>
+            <p className="nf-caption text-[var(--nf-content-secondary)]">{group.label}</p>
+            <ul className="mt-3xs flex flex-wrap gap-xs">
+              {group.sections.flatMap((section) =>
+                section.items.map((item) => (
+                  <li key={item.key}>
+                    <Link className="nf-btn nf-btn--glass nf-btn--sm" href={item.href}>
+                      {labelFor(item)}
+                    </Link>
+                  </li>
+                )),
+              )}
+            </ul>
+          </div>
+        ))}
+      </div>
+    </nav>
   );
 }
 

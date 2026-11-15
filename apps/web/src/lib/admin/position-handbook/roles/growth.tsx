@@ -233,7 +233,7 @@ export const BUSINESS_DEVELOPMENT_EXECUTIVE: RoleWords = {
   wordsNever: [
     "Never a fee, a discount or a commission that is not written down.",
     "Never that a payment, a tenant or a listing is covered or carries no risk.",
-    "Never a date by which a feature will open, or by which they will be live.",
+    "Never a date by which a feature will open, or by which a prospect will be listing on Vallo.",
     "Never a member's name or detail to a prospect, as an example or otherwise.",
   ],
   privacy: [

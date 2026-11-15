@@ -57,7 +57,7 @@ export type ProposalDraft = Omit<CopilotProposal, "id" | "tool" | "token" | "exp
 /**
  * A PLACE THE ANSWER MAY OFFER AS A BUTTON. A tool returns the desks its
  * answer is about; the registry drops every one the viewer may not open
- * before the model sees it (`tools/links.ts`), and the renderer draws only
+ * before the model sees it (`lib/admin/copilot/tools/links.ts`), and the renderer draws only
  * these as buttons. `scope` names the access area that opens it: leave it out
  * for a page every member of staff can open.
  */

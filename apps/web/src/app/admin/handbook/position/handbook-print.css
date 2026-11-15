@@ -39,9 +39,31 @@
 }
 
 @media print {
+  /* The bottom margin is deeper than the others, and that is what keeps the
+     running foot off the last line of each page. Chromium reserves no room
+     for a fixed element in print, so with an even 16mm margin the foot was
+     measured printing over the last two lines of every page; a negative
+     offset into the margin does not work either, because the overflow throws
+     the foot onto the top of the NEXT page (both were tried against a real
+     PDF). A deeper bottom margin with the foot at its edge is what prints
+     cleanly. */
   @page {
     size: A4 portrait;
     margin: 16mm;
+  }
+
+  /* THE PAPER IS WHITE, EVEN WITH BACKGROUND GRAPHICS TURNED ON.
+     `background: none` clears a painted background but not the canvas the
+     browser draws behind the root, and under `color-scheme: dark` (the
+     platform's only theme) that canvas is near-black. With the print dialog's
+     "Background graphics" box ticked, which a person may well tick to keep
+     the tables' rules, the whole handbook printed white on black: unreadable,
+     and a cartridge of ink. Asking the printed document for the light scheme
+     is what makes the canvas white; it needs no colour of its own, so there
+     is no literal here to drift from the tokens. Measured against a real PDF
+     with background graphics both on and off. */
+  html:has([data-handbook-print]) {
+    color-scheme: light !important;
   }
 
   html:has([data-handbook-print]),
@@ -122,6 +144,28 @@
     break-inside: avoid;
   }
 
+  /* THE BULLET HAS TO BE A CHARACTER ON PAPER, NOT A PAINTED DOT.
+     The documentation kit draws a list bullet as a small filled square turned
+     into a circle with a background colour. A browser prints background
+     graphics only when the person ticks that box in the print dialog, and it
+     is off by default, so every bullet in a saved PDF was missing (measured,
+     not guessed). In print the dot becomes a real bullet character in ink,
+     which prints whatever the dialog says. */
+  .nf-hbp .nf-doc-section__body ul:not([class]) > li::before {
+    content: "\2022";
+    inset-block-start: 0;
+    inline-size: auto;
+    block-size: auto;
+    border-radius: 0;
+    background: none !important;
+    color: var(--nf-content-on-paper) !important;
+    line-height: inherit;
+  }
+  .nf-hbp .nf-doc-summary__tick,
+  .nf-hbp .nf-doc-callout__icon {
+    color: var(--nf-content-on-paper) !important;
+  }
+
   /* Tables and callouts keep their rules in ink, so a printed table is still
      a table. */
   .nf-hbp .nf-doc-table th,
@@ -140,14 +184,25 @@
     font-size: 0.85em;
   }
 
+  /* THE FOOT PRINTS ONCE, AT THE END, AND NOT ON EVERY PAGE.
+     It was `position: fixed`, which in print paints the element once per
+     page: the running foot a long document wants. Chromium places such an
+     element at the foot of the CONTENT box, not inside the page margin, and
+     no amount of margin moves it, because CSS has no way to reserve a band on
+     every page for it (the `@bottom-center` margin box that would is not
+     implemented). So on any page whose text reached the bottom, which is most
+     of them, the foot printed straight through the last two lines. Measured
+     on a real PDF at a 16mm margin and again at 26mm: overlapping both times.
+     A document that identifies itself in its heading and once more at its end
+     is worth more than a running foot that eats a sentence a page. */
   .nf-hbp-foot {
     display: block;
-    position: fixed;
-    inset: auto 0 0 0;
-    padding-top: 2mm;
+    margin-top: 10mm;
+    padding-top: 3mm;
     border-top: 1px solid var(--nf-border-on-paper);
     color: var(--nf-content-on-paper) !important;
     font-size: 9pt;
     text-align: center;
+    break-inside: avoid;
   }
 }

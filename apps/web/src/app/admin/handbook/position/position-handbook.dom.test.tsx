@@ -144,13 +144,24 @@ describe.skipIf(!hasBrowser && !process.env.CI)("saving a position handbook", ()
       );
       expect((breaks as string[]).filter((value) => value === "page").length).toBeGreaterThanOrEqual(8);
 
-      /* The running foot carries the position and the date, on paper only. */
+      /* The paper is white whatever the print dialog's background graphics box
+         says. The platform has one theme and it is dark, so without asking the
+         printed document for the light scheme the whole handbook prints white
+         on near-black: measured on a real PDF with that box ticked. */
+      expect(await page.evaluate(`getComputedStyle(document.documentElement).colorScheme`)).toContain("light");
+
+      /* The foot carries the position and the date, on paper only, and it is
+         NOT fixed: a fixed element repeats on every page but Chromium paints
+         it at the foot of the content box rather than inside the page margin,
+         so it printed straight through the last lines of every full page.
+         Measured at two margins before this was changed. It prints once, at
+         the end, where it can overlap nothing. */
       const foot = await page.evaluate(
         `(() => { const el = document.querySelector('.nf-hbp-foot'); const s = getComputedStyle(el); return { display: s.display, position: s.position, text: el.textContent }; })()`,
       );
       const read = foot as { display: string; position: string; text: string };
       expect(read.display).toBe("block");
-      expect(read.position).toBe("fixed");
+      expect(read.position).not.toBe("fixed");
       expect(read.text).toContain("Business Development Director");
       expect(read.text).toContain("November 2026");
 
