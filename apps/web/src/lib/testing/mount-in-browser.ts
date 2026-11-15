@@ -58,6 +58,10 @@ const STUBS: Record<string, string> = {
   "next/image": `
     import { createElement } from "react";
     export default function Image({ fill, priority, sizes, ...rest }) { return createElement("img", rest); }
+    /* What the image's props would be: the source as given, no optimiser in a test. */
+    export function getImageProps({ src, alt, width, height, sizes }) {
+      return { props: { src, alt, width, height, sizes, srcSet: undefined } };
+    }
   `,
   "@/lib/supabase/client": `export const createClient = () => ({ storage: { from: () => ({}) }, channel: () => ({ on() { return this; }, subscribe() { return this; } }), removeChannel() {} });`,
   "server-only": `export {};`,

@@ -2,6 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { UiIconName } from "@/design-system/icons/UiIcon";
+import { RemoteImage } from "@/components/ui/RemoteImage";
+import { initial } from "@/lib/text/initial";
 import {
   ActionSheet as SharedActionSheet,
   type ActionSheetQuick,
@@ -54,6 +56,23 @@ export type SheetAction = {
   icon?: UiIconName;
   glyph?: UiIconName;
   danger?: boolean;
+  /** A row that goes somewhere (the author's page): a link, needing no handler in the caller. */
+  href?: string;
+};
+
+/**
+ * WHOSE POST THIS IS, for the sheet's header (the founder, 15 November 2026:
+ * "make it rich, add more stuffs"). The header used to say only "What would
+ * you like to do?". With a subject it shows the author's face and name and
+ * the first line of the post, as X and Instagram do, so a person can see what
+ * they are acting on before they act. The sentence stays as the dialog's
+ * accessible name.
+ */
+export type SheetSubject = {
+  name: string;
+  avatarUrl: string | null;
+  /** The post's first words, or null when it has none. */
+  line: string | null;
 };
 
 /** The acts drawn as round quick actions, in this order, when the caller offers them. */
@@ -68,9 +87,12 @@ export function ActionSheet({
   onClose,
   body,
   dismissLabel,
+  subject,
 }: {
   /** What this sheet is about: the header card's title, and the dialog's accessible name. */
   label: string;
+  /** Whose post, when there is a person behind it: drawn in the header instead of the bare question. */
+  subject?: SheetSubject | null;
   actions: SheetAction[];
   onChoose: (key: string) => void;
   onClose: () => void;
@@ -126,14 +148,23 @@ export function ActionSheet({
             },
             testId: `post-action-${action.key}`,
           }
-        : {
-            id: action.key,
-            label: action.title,
-            hint: action.note,
-            icon: iconOf(action),
-            onSelect: () => onChoose(action.key),
-            testId: `post-action-${action.key}`,
-          },
+        : action.href
+          ? {
+              id: action.key,
+              label: action.title,
+              hint: action.note,
+              icon: iconOf(action),
+              href: action.href,
+              testId: `post-action-${action.key}`,
+            }
+          : {
+              id: action.key,
+              label: action.title,
+              hint: action.note,
+              icon: iconOf(action),
+              onSelect: () => onChoose(action.key),
+              testId: `post-action-${action.key}`,
+            },
     );
 
   return (
@@ -142,7 +173,23 @@ export function ActionSheet({
         open={open}
         onOpenChange={setOpen}
         title={label}
-        header={{ title: label, subtitle: body }}
+        header={
+          subject
+            ? {
+                title: subject.name,
+                subtitle: subject.line ?? body,
+                media: (
+                  <span className="nf-acts__face" aria-hidden="true">
+                    {subject.avatarUrl ? (
+                      <RemoteImage src={subject.avatarUrl} alt="" width={88} height={88} sizes="44px" />
+                    ) : (
+                      <span className="nf-acts__monogram">{initial(subject.name)}</span>
+                    )}
+                  </span>
+                ),
+              }
+            : { title: label, subtitle: body }
+        }
         quick={quick}
         rows={rows}
         testId="post-action-sheet"
@@ -211,6 +258,8 @@ export function actionsForPost(options: {
   who: string;
   /** A listing shared into the feed: "Remove share" replaces Delete (and an edit is not offered). */
   isListingShare?: boolean;
+  /** The author's handle, when there is one: offers the way to their page. */
+  authorHandle?: string | null;
 }, words: MenuWords): SheetAction[] {
   /* The public count, said in words. The card's row has five items already and
      the owner's standing note is that nothing is jam-packed, so the number
@@ -277,6 +326,18 @@ export function actionsForPost(options: {
     note: words.copyNote,
     glyph: "link",
   });
+
+  /* The author's page, for somebody else's post. A link, so it works the
+     same from the feed, a thread or anywhere else this sheet is opened. */
+  if (!options.isMine && options.authorHandle) {
+    rows.push({
+      key: "profile",
+      title: words.viewProfile.replace("{who}", `@${options.authorHandle}`),
+      note: words.viewProfileNote,
+      glyph: "user",
+      href: `/u/${options.authorHandle}`,
+    });
+  }
 
   if (options.isMine && options.isListingShare) {
     rows.push({

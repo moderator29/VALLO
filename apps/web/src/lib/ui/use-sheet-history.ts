@@ -87,6 +87,42 @@ export function whenSheetsClosed(fn: () => void, timeoutMs = 1000): void {
 /** Take-backs deferred by a cleanup, so a StrictMode re-open can cancel them. */
 const pendingTakeBack = new Map<string, number>();
 
+/*
+ * WHETHER A BACK STEP IS ONLY A SHEET CLOSING (the founder, 15 November 2026:
+ * "if I save or do any action on that pop up the feed page scrolls down by
+ * itself").
+ *
+ * A sheet's entry and the entry under it are the same address, so stepping
+ * off it changes nothing on screen. `ScrollToTop` hears every `popstate` and
+ * treated this one as a return to a page: it sent the feed to the top, and
+ * the browser's own restore then glided it back down (traced on the feed:
+ * 479, then 0, then a smooth climb back to 479). It now asks here first.
+ *
+ * Two ways a sheet's entry comes off, and both are known here before
+ * `ScrollToTop` is told, because its listener was added when the app mounted,
+ * long before any sheet:
+ *   - the sheet closed itself and took its entry back (`history.back()`
+ *     below), marked the moment it is called;
+ *   - the reader pressed Back while a sheet was open: the sheet is still in
+ *     `openSheets` when the event reaches `ScrollToTop`, and the address is
+ *     the one it was opened on.
+ */
+const openSheets = new Set<string>();
+let openedOn: string | null = null;
+let takingBackAt = 0;
+
+const here = () => window.location.pathname + window.location.search;
+
+/** True when the `popstate` being handled is only a sheet coming off history. Consumes our own take-back. */
+export function popIsSheetClose(): boolean {
+  if (typeof window === "undefined") return false;
+  if (takingBackAt && Date.now() - takingBackAt < 1500) {
+    takingBackAt = 0;
+    return true;
+  }
+  return openSheets.size > 0 && openedOn === here();
+}
+
 export function useSheetHistory(open: boolean, id: string, onClose: () => void): void {
   const pushed = useRef(false);
   const closeRef = useRef(onClose);
@@ -109,18 +145,22 @@ export function useSheetHistory(open: boolean, id: string, onClose: () => void):
       window.history.pushState({ ...current, [MARKER]: [...ids, id] }, "");
     }
     pushed.current = true;
+    openSheets.add(id);
+    openedOn = here();
 
     const onPop = (event: PopStateEvent) => {
       if (!pushed.current) return;
       if (readSheetIds(event.state).includes(id)) return;
       /* Back took our entry off: the sheet goes with it. */
       pushed.current = false;
+      openSheets.delete(id);
       closeRef.current();
     };
     window.addEventListener("popstate", onPop);
 
     return () => {
       window.removeEventListener("popstate", onPop);
+      openSheets.delete(id);
       if (!pushed.current) return;
       pushed.current = false;
       /* A tick later, so a navigation made in the same handler as the close
@@ -134,6 +174,9 @@ export function useSheetHistory(open: boolean, id: string, onClose: () => void):
         const now = readSheetIds(state);
         if (!now.includes(id)) return;
         if (now[now.length - 1] === id) {
+          /* Said before it happens, so the page's scroll keeper leaves the
+             page exactly where it is (`popIsSheetClose`). */
+          takingBackAt = Date.now();
           window.history.back();
         } else {
           window.history.replaceState({ ...state, [MARKER]: now.filter((v) => v !== id) }, "");

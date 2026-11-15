@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useLayoutEffect, useRef } from "react";
+import { popIsSheetClose } from "@/lib/ui/use-sheet-history";
 import { usePathname } from "next/navigation";
 import { entryStamped, noteEntry } from "@/lib/ui/history";
 
@@ -248,6 +249,10 @@ export function ScrollToTop() {
     };
 
     const onPopState = () => {
+      /* A sheet coming off history is not a return to a page: the address is
+         the same and nothing on screen changed, so the page stays exactly
+         where it is (lib/ui/use-sheet-history.ts, `popIsSheetClose`). */
+      if (popIsSheetClose()) return;
       poppedAt.current = Date.now();
       noteEntry();
       const target = readPositions()[currentUrl()];

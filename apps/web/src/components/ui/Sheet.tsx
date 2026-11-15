@@ -415,7 +415,10 @@ export function Sheet({
    */
   useEffect(() => {
     if (!open) {
-      restoreFocus.current?.focus?.();
+      /* Without moving the page (see `lockBody` in lib/ui/use-overlay.ts):
+         the element focus goes back to may be far from where the person is
+         looking, and a plain focus() would scroll the page to it. */
+      restoreFocus.current?.focus?.({ preventScroll: true });
       restoreFocus.current = null;
       return;
     }

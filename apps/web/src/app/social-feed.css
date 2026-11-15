@@ -1064,6 +1064,20 @@
     object-fit: cover;
     z-index: -2;
   }
+  /* The ring's small picture, already on the phone, softened under the full
+     one so the story opens on its photo at once (StoryViewer). Scaled past
+     the edges so the blur has no soft border. */
+  .nf-story__underlay {
+    position: absolute;
+    inset: 0;
+    inline-size: 100%;
+    block-size: 100%;
+    object-fit: cover;
+    z-index: -3;
+    filter: blur(18px) saturate(1.1);
+    transform: scale(1.12);
+    pointer-events: none;
+  }
   .nf-story__image--none {
     background:
       radial-gradient(120% 100% at 0% 0%, color-mix(in oklab, var(--nf-brand-accent) 60%, transparent) 0%, transparent 60%),
@@ -3004,6 +3018,9 @@
   }
 
   /* The feed's way into the social search, beside the place. */
+  /* In the brand's blue, the Circle door's twin beside it (the founder, 15
+     November 2026: "make that search icon button blue, not black"): the same
+     soft brand fill, edge and ink, in both themes. */
   .nf-feed-find {
     display: grid;
     flex: none;
@@ -3011,9 +3028,22 @@
     inline-size: 44px;
     block-size: 44px;
     border-radius: var(--nf-radius-circle);
-    border: 1px solid color-mix(in oklab, var(--nf-lit) 40%, var(--nf-surface-canvas));
-    background: color-mix(in oklab, var(--nf-lit) 8%, var(--nf-surface-canvas));
-    color: var(--nf-content-primary);
+    border: var(--nf-border-width) solid var(--nf-brand-edge);
+    background: var(--nf-brand-tint-1);
+    color: var(--nf-content-link);
+    transition:
+      background-color var(--nf-duration-fast) var(--nf-ease-standard),
+      transform var(--nf-duration-press) var(--nf-ease-press);
+  }
+  .nf-feed-find:hover {
+    background: var(--nf-brand-tint-2);
+  }
+  .nf-feed-find:active {
+    transform: scale(0.95);
+  }
+  .nf-feed-find:focus-visible {
+    outline: var(--nf-focus-ring-width) solid var(--nf-focus-ring);
+    outline-offset: var(--nf-focus-ring-offset);
   }
 
   /* The card you just published, in flight over the cards it is landing

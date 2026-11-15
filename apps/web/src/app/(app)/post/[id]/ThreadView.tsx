@@ -511,11 +511,21 @@ export function ThreadView({
             editable: sheetFor.editable,
             hasAuthor: Boolean(sheetFor.author?.id),
             who: sheetFor.author?.handle ? `@${sheetFor.author.handle}` : sheet.thisPerson,
+            authorHandle: sheetFor.author?.handle ?? null,
           }, sheet.menu)}
           onChoose={(key) => onMenuAction(sheetFor, key)}
           onClose={() => setSheetFor(null)}
           body={sheet.body}
           dismissLabel={sheet.dismissLabel}
+          subject={
+            sheetFor.author
+              ? {
+                  name: sheetFor.author.displayLabel ?? (sheetFor.author.handle ? `@${sheetFor.author.handle}` : sheet.thisPerson),
+                  avatarUrl: sheetFor.author.avatarPath,
+                  line: sheetFor.body?.trim() ? sheetFor.body.trim().split("\n")[0]!.slice(0, 140) : null,
+                }
+              : null
+          }
         />
       ) : null}
 

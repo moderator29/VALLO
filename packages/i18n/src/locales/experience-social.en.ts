@@ -44,6 +44,12 @@ export const experienceSocialEn = {
       shareNote: "Send it to somebody",
       copy: "Copy link",
       copyNote: "Paste it anywhere",
+      /* The author's page, from the sheet (the founder, 15 November 2026:
+         "add more tools and flow"). `{who}` is "@handle". */
+      viewProfile: "Go to {who}",
+      viewProfileNote: "Their page, posts and listings",
+      /* The sheet's header line when the post has no words of its own. */
+      headPhotoOnly: "A post with a photo",
       edit: "Change what it says",
       editNote: "For fifteen minutes after posting. It says edited afterwards",
       delete: "Delete this post",

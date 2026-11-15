@@ -1,9 +1,13 @@
 "use client";
 
 import { useMemo, useRef } from "react";
+import { getImageProps } from "next/image";
 import { motionQuiet } from "@/lib/motion/gate";
 import { startPhotoMorph } from "@/lib/motion/photo-morph";
 import Link from "next/link";
+import { isOptimisable } from "@/lib/images/optimisable";
+import { useDataSaver } from "@/lib/ui/data-saver";
+import { STORY_IMAGE, STORY_THUMB } from "./story-image";
 import { initial } from "@/lib/text/initial";
 import { RemoteImage } from "@/components/ui/RemoteImage";
 import { allSeen, ringGradient, ringWindow } from "./ring";
@@ -59,6 +63,40 @@ export function StoryRingItem({
      page cutting to it. A plain tap only; a new-tab click and reduced motion
      open as before. */
   const disc = useRef<HTMLSpanElement>(null);
+
+  /*
+   * OPENS LIKE AN APP (the founder, 15 November 2026). Two head starts:
+   *
+   *   the page   `prefetch` loads the whole story, data and all, while its
+   *              ring is on screen, so a tap shows it rather than asks for it;
+   *   the photo  the full-screen picture starts downloading the moment a
+   *              finger lands on the ring, a few hundred milliseconds before
+   *              the tap even completes.
+   *
+   * Both stand down under data saver: somebody counting megabytes is not
+   * charged for stories they never open, and gets today's behaviour.
+   */
+  const frugal = useDataSaver();
+  const warmed = useRef(false);
+  const warmPhoto = () => {
+    if (warmed.current || !imageUrl || frugal) return;
+    warmed.current = true;
+    try {
+      const { props } = getImageProps({
+        src: imageUrl,
+        alt: "",
+        ...STORY_IMAGE,
+        unoptimized: !isOptimisable(imageUrl),
+      });
+      const img = new window.Image();
+      img.decoding = "async";
+      if (props.sizes) img.sizes = props.sizes;
+      if (props.srcSet) img.srcset = props.srcSet;
+      img.src = props.src;
+    } catch {
+      /* A warm-up is a courtesy: the viewer still loads its picture itself. */
+    }
+  };
   const storyId = href.startsWith("/stories/") ? href.slice("/stories/".length).split(/[?#]/)[0] : null;
   const onOpen = (event: React.MouseEvent<HTMLAnchorElement>) => {
     if (!storyId || !disc.current || motionQuiet()) return;
@@ -67,7 +105,15 @@ export function StoryRingItem({
   };
 
   return (
-    <Link href={href} className="nf-story-ring__item" title={title} onClick={onOpen}>
+    <Link
+      href={href}
+      className="nf-story-ring__item"
+      title={title}
+      onClick={onOpen}
+      prefetch={frugal ? null : true}
+      onPointerDown={warmPhoto}
+      onFocus={warmPhoto}
+    >
       <span
         ref={disc}
         className="nf-story-ring__disc nf-vt-morph"
@@ -75,7 +121,7 @@ export function StoryRingItem({
         style={{ "--nf-ring": ringGradient(flags) } as React.CSSProperties}
       >
         {imageUrl ? (
-          <RemoteImage src={imageUrl} alt="" width={128} height={128} sizes="64px" loading="lazy" />
+          <RemoteImage src={imageUrl} alt="" {...STORY_THUMB} loading="lazy" />
         ) : (
           <span className="nf-story-ring__monogram" aria-hidden="true">
             {initial(title)}

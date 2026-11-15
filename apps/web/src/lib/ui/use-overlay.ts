@@ -91,7 +91,20 @@ export function lockBody(): () => void {
     /* Only on the page it was taken from (A9). A sheet closed by a link
        inside it releases after the route has changed, and scrolling the new
        page to the old page's position dropped the person mid-page. */
-    if (window.location.href === restoreHref) window.scrollTo(0, restoreScrollY);
+    /*
+     * INSTANTLY, NEVER ANIMATED (the founder, 15 November 2026: "if I save or
+     * do any action on that pop up the feed page scrolls down by itself").
+     *
+     * `html` carries `scroll-behavior: smooth` (base.css), and a plain
+     * `scrollTo(0, y)` obeys it. Unpinning the body drops the page to the top
+     * for a frame, and the smooth scroll then glided it back down to where the
+     * person was, over most of a second: measured on the feed, 0 then 395
+     * then 479px. Every sheet on the platform did it. `behavior: "instant"`
+     * overrides the stylesheet, so the page is simply where it was.
+     */
+    if (window.location.href === restoreHref) {
+      window.scrollTo({ top: restoreScrollY, left: 0, behavior: "instant" });
+    }
   };
 }
 
@@ -215,7 +228,10 @@ export function useOverlay({
       const panelNow = panelRef.current ?? panel;
       const active = document.activeElement;
       if (!panelNow || !active || panelNow.contains(active) || active === document.body) {
-        opener?.focus?.();
+        /* Without moving the page. On an iPhone a tapped button never takes
+           focus, so the "opener" can be a field somewhere else on the page,
+           and a plain focus() scrolled the page to it. */
+        opener?.focus?.({ preventScroll: true });
       }
     };
   }, [open, panelRef, autoFocus, modal]);

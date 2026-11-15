@@ -18,6 +18,8 @@ import { StillAvailableCard } from "@/components/agent/StillAvailableCard";
 import { readLiveFreshness } from "@/lib/agent/freshness-read";
 import { daysSinceConfirmed, dueForConfirmation } from "@/lib/agent/freshness";
 import { KycBanner } from "@/components/agent/KycBanner";
+import { SwitchToPersonal } from "@/components/agent/SwitchToPersonal";
+import "@/app/css/agent.css";
 import { getKycStanding } from "@/lib/agent/kyc-standing";
 import { readInspectionsForLister } from "@/lib/inspections/queries";
 import { ButtonLink } from "@/components/ui/Button";
@@ -123,7 +125,18 @@ export default async function AgentDashboardPage({
            in the header. The rail, the drawer and the dock are the ways out. */
         chromeBack={false}
       >
-        <PageFrame title={t.agent.nav.dashboard} back={false} width="wide">
+        <PageFrame
+          title={t.agent.nav.dashboard}
+          back={false}
+          width="wide"
+          actions={
+            <SwitchToPersonal
+              lead={t.agent.mode.switchToPersonalLead}
+              main={t.agent.mode.switchToPersonalMain}
+              aria={t.agent.mode.switchToPersonalAria}
+            />
+          }
+        >
         <div>
         {standing ? <KycBanner standing={standing} /> : null}
         {due.length > 0 ? (

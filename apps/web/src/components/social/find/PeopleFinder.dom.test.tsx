@@ -21,7 +21,12 @@ const WORDS = `{
   searchLabel: "Search people", searchPlaceholder: "Search by name or @handle", clear: "Clear the search",
   searching: "Looking for people", resultsFor: "Results for {query}", noResultsTitle: "Nobody called {query} yet",
   noResultsBody: "Check the spelling.", unavailable: "Not available", roleLandlord: "Landlord", roleAgent: "Agent",
-  openProfile: "Open {name}", you: "You"
+  openProfile: "Open {name}", you: "You", yourProfile: "Your profile",
+  filterLabel: "Show", filterAll: "Everyone", filterAgents: "Agents", filterLandlords: "Landlords",
+  filterMembers: "Members", filterVerified: "Verified", filterNobody: "Nobody matches that.", filterReset: "Show everyone",
+  resultsCount: { one: "{count} person", other: "{count} people" },
+  recentTitle: "Recent searches", recentClear: "Clear all", recentRemove: "Remove {query}",
+  tipTitle: "Search tips", tipBody: "Type at least two letters."
 }`;
 
 const entry = `

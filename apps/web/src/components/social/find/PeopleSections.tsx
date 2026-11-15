@@ -31,7 +31,7 @@ export function cardOfDiscovery(card: DiscoveryCard, w: Words, locale: Locale): 
     roleWord,
     facts,
     action: card.isViewer
-      ? { kind: "you", label: w.you }
+      ? { kind: "you", label: w.yourProfile, href: card.href }
       : card.followable && card.handle
         ? { kind: "follow", handle: card.handle, following: card.viewerFollows }
         : {
@@ -84,16 +84,39 @@ export function PeopleSections({
   words: Words;
   locale: Locale;
 }) {
+  const jumps = [
+    ...rows.map((row) => ({ href: `#people-${row.id}`, label: words[TITLES[row.id]] as string })),
+    ...(suggestions.length > 0 ? [{ href: "#people-to-follow", label: words.peopleToFollow }] : []),
+  ];
   return (
     <>
+      {/* WHERE THE PAGE GOES, AT A GLANCE: one chip per section, which jumps
+          to it. Only when there is more than one section to choose between. */}
+      {jumps.length > 1 ? (
+        <nav className="nf-ppl__jumps" aria-label={words.jumpLabel} data-testid="people-jumps">
+          {jumps.map((jump) => (
+            <a key={jump.href} href={jump.href} className="nf-ppl__chip">
+              {jump.label}
+            </a>
+          ))}
+        </nav>
+      ) : null}
       {rows.map((row) => {
         const id = `nf-ppl-${row.id}`;
         return (
-          <section key={row.id} className="nf-ppl__section" aria-labelledby={id} data-testid={`people-row-${row.id}`}>
+          <section
+            key={row.id}
+            id={`people-${row.id}`}
+            className="nf-ppl__section"
+            aria-labelledby={id}
+            data-testid={`people-row-${row.id}`}
+          >
             <h2 id={id} className="nf-ppl__title">
               {words[TITLES[row.id]] as string}
             </h2>
-            <ul className="nf-ppl__row">
+            {/* How many cards, so one or two can fill the width instead of
+                sitting at the left with empty space beside them. */}
+            <ul className="nf-ppl__row" data-count={Math.min(row.cards.length, 3)}>
               {row.cards.map((card) => (
                 <PersonCard
                   key={card.key}
@@ -108,7 +131,7 @@ export function PeopleSections({
       })}
 
       {suggestions.length > 0 ? (
-        <section className="nf-ppl__section" aria-labelledby="nf-ppl-suggested" data-testid="people-to-follow">
+        <section id="people-to-follow" className="nf-ppl__section" aria-labelledby="nf-ppl-suggested" data-testid="people-to-follow">
           <h2 id="nf-ppl-suggested" className="nf-ppl__title">
             {words.peopleToFollow}
           </h2>

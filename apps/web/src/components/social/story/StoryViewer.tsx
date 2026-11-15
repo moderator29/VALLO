@@ -36,6 +36,7 @@ import { bannerWithUndo } from "@/lib/ui/undo-banner";
 import { POST_COPY, PROFILE_REPORT_REASONS } from "@/lib/social/posts-model";
 import { STORY_COPY } from "@/lib/social/stories-model";
 import { RemoteImage } from "@/components/ui/RemoteImage";
+import { STORY_IMAGE, STORY_THUMB } from "./story-image";
 import { banner } from "@/lib/ui/toast";
 import { countOf, formatNumber } from "@vallo/i18n/core";
 import { useClientLocale } from "@/lib/i18n/use-client-locale";
@@ -307,18 +308,23 @@ export function StoryViewer({
     <div className="nf-story nf-story--seq">
       <article className="nf-story__stage" ref={stage}>
         {story.imageUrl ? (
-          /* The picture IS the page, so it is the one image here that is
-             worth a full-width fetch and a priority hint. */
-          <RemoteImage
-            src={story.imageUrl}
-            alt=""
-            width={1200}
-            height={1600}
-            sizes="100vw"
-            priority
-            quality={90}
-            className="nf-story__image nf-vt-morph"
-          />
+          <>
+            {/* THE FIRST FRAME IS ALREADY HERE: the ring's own small picture,
+                the same file the feed just drew, laid underneath and softened,
+                so the story opens on its photo at once and the sharp one
+                fades in over it. On a slow network this is the difference
+                between a picture and a dark screen. */}
+            <RemoteImage src={story.imageUrl} alt="" {...STORY_THUMB} loading="eager" className="nf-story__underlay" />
+            {/* The picture IS the page, so it is the one image here that is
+                worth a full-width fetch and a priority hint. */}
+            <RemoteImage
+              src={story.imageUrl}
+              alt=""
+              {...STORY_IMAGE}
+              priority
+              className="nf-story__image nf-vt-morph"
+            />
+          </>
         ) : (
           <div className="nf-story__image nf-story__image--none nf-vt-morph" aria-hidden="true" />
         )}

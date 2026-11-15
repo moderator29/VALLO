@@ -104,7 +104,9 @@
     ".next-esc/types/**/*.ts",
     ".next-esc/dev/types/**/*.ts",
     ".next-hb/types/**/*.ts",
-    ".next-hb/dev/types/**/*.ts"
+    ".next-hb/dev/types/**/*.ts",
+    ".next-sweep/types/**/*.ts",
+    ".next-sweep/dev/types/**/*.ts"
   ],
   "exclude": [
     "node_modules",

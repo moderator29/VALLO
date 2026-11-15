@@ -2,6 +2,9 @@ import { getDictionary, type Locale } from "@vallo/i18n";
 import { getLocale } from "@/lib/locale";
 import { AgentShell } from "@/components/agent/AgentShell";
 import { RealDashboard } from "@/app/agent/dashboard/RealDashboard";
+import { PageFrame } from "@/components/app/PageFrame";
+import { SwitchToPersonal } from "@/components/agent/SwitchToPersonal";
+import "@/app/css/agent.css";
 import type { AgentNumbers } from "@/lib/agent/listings-queries";
 import { COUNTERPART } from "../_fixtures/people";
 import { agentFixture, ownerFixture } from "./fixtures";
@@ -56,15 +59,29 @@ export default async function PreviewWorkspaceDash({
       profile={{ id: COUNTERPART.id, displayName: COUNTERPART.name, status: "APPROVED", type: "individual",
   role: "agent" as const, verified: true }}
     >
-      <RealDashboard
-        t={t}
-        locale={locale}
-        displayName={COUNTERPART.name}
-        numbers={empty ? EMPTY_NUMBERS : NUMBERS}
-        inspections={{ inspections: [], openCount: 0, readFailed: false }}
-        workspace={side === "owner" ? { role: "owner", view: owner.view, places: owner.places } : { role: "agent", dash: agentFixture(now, empty) }}
-        now={now}
-      />
+      {/* The live page's own frame and title, with the switch beside it. */}
+      <PageFrame
+        title={t.agent.nav.dashboard}
+        back={false}
+        width="wide"
+        actions={
+          <SwitchToPersonal
+            lead={t.agent.mode.switchToPersonalLead}
+            main={t.agent.mode.switchToPersonalMain}
+            aria={t.agent.mode.switchToPersonalAria}
+          />
+        }
+      >
+        <RealDashboard
+          t={t}
+          locale={locale}
+          displayName={COUNTERPART.name}
+          numbers={empty ? EMPTY_NUMBERS : NUMBERS}
+          inspections={{ inspections: [], openCount: 0, readFailed: false }}
+          workspace={side === "owner" ? { role: "owner", view: owner.view, places: owner.places } : { role: "agent", dash: agentFixture(now, empty) }}
+          now={now}
+        />
+      </PageFrame>
     </AgentShell>
   );
 }

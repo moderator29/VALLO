@@ -1,7 +1,10 @@
 "use client";
 
 import { typedOf } from "./typed";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { plural } from "@vallo/i18n/core";
+import { clearRecent, forgetRecent, readRecent, rememberRecent } from "./recent-searches";
+import { filterHits, type RoleFilter } from "./people-filters";
 import { UiIcon } from "@/design-system/icons/UiIcon";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { searchPeople } from "@/lib/social/people-search-actions";
@@ -22,11 +25,27 @@ export type FinderWords = {
   roleAgent: string;
   openProfile: string;
   you: string;
+  yourProfile: string;
+  filterLabel: string;
+  filterAll: string;
+  filterAgents: string;
+  filterLandlords: string;
+  filterMembers: string;
+  filterVerified: string;
+  filterNobody: string;
+  filterReset: string;
+  resultsCount: { one: string; other: string };
+  recentTitle: string;
+  recentClear: string;
+  recentRemove: string;
+  tipTitle: string;
+  tipBody: string;
 };
 
 
+
 /** A search result as a row of the vertical list. */
-export function cardOfHit(hit: PersonHit, words: Pick<FinderWords, "roleLandlord" | "roleAgent" | "you">): PersonCardData {
+export function cardOfHit(hit: PersonHit, words: Pick<FinderWords, "roleLandlord" | "roleAgent" | "you" | "yourProfile">): PersonCardData {
   return {
     key: hit.handle,
     href: `/u/${hit.handle}`,
@@ -37,7 +56,7 @@ export function cardOfHit(hit: PersonHit, words: Pick<FinderWords, "roleLandlord
     roleWord: hit.role === "landlord" ? words.roleLandlord : hit.role === "agent" ? words.roleAgent : null,
     facts: [],
     action: hit.isViewer
-      ? { kind: "you", label: words.you }
+      ? { kind: "you", label: words.yourProfile, href: `/u/${hit.handle}` }
       : { kind: "follow", handle: hit.handle, following: hit.viewerFollows },
   };
 }
@@ -77,6 +96,14 @@ export function PeopleFinder({
       : null,
   );
   const latest = useRef(typed);
+  const field = useRef<HTMLInputElement>(null);
+  const [role, setRole] = useState<RoleFilter>("all");
+  const [verifiedOnly, setVerifiedOnly] = useState(false);
+  const [focused, setFocused] = useState(false);
+  /* Read after the first paint, never during it: the server has no device
+     storage, and a list that differed between the two would be a mismatch. */
+  const [recent, setRecent] = useState<string[]>([]);
+  useEffect(() => setRecent(readRecent()), []);
 
   useEffect(() => {
     latest.current = typed;
@@ -103,19 +130,48 @@ export function PeopleFinder({
   }, [typed]);
 
   const current = answer && answer.q === typed ? answer : null;
+  const shown = useMemo(() => (current ? filterHits(current.hits, role, verifiedOnly) : []), [current, role, verifiedOnly]);
+  const filtered = role !== "all" || verifiedOnly;
+  const showRecent = !active && focused && recent.length > 0;
+
+  const pick = (query: string) => {
+    setValue(query);
+    field.current?.focus();
+  };
+  const filterChip = (value: RoleFilter, label: string) => (
+    <button
+      key={value}
+      type="button"
+      className="nf-ppl__chip"
+      aria-pressed={role === value}
+      onClick={() => setRole(value)}
+    >
+      {label}
+    </button>
+  );
 
   return (
     <>
+      {/* THE FIELD STAYS UNDER THE THUMB: pinned under the top bar while the
+          rows scroll beneath it, so searching never means scrolling back up. */}
+      <div className="nf-ppl__dock">
       <form
         role="search"
         action="/around/people"
         method="get"
-        onSubmit={(event) => event.preventDefault()}
+        onSubmit={(event) => {
+          event.preventDefault();
+          field.current?.blur();
+        }}
         data-testid="people-finder"
       >
         <label className="nf-ppl__search">
           <UiIcon name="search" size={22} />
           <input
+            ref={field}
+            onFocus={() => setFocused(true)}
+            /* A tap on a recent search lands before the blur would hide it. */
+            onBlur={() => window.setTimeout(() => setFocused(false), 150)}
             className="nf-ppl__field"
             type="text"
             name="q"
@@ -132,12 +188,81 @@ export function PeopleFinder({
             maxLength={40}
           />
           {value ? (
-            <button type="button" className="nf-ppl__clear" aria-label={words.clear} onClick={() => setValue("")}>
+            <button
+              type="button"
+              className="nf-ppl__clear"
+              aria-label={words.clear}
+              onClick={() => {
+                setValue("");
+                field.current?.focus();
+              }}
+            >
               <UiIcon name="close" size={18} />
             </button>
           ) : null}
         </label>
       </form>
+
+      {active && current && !current.failed && current.hits.length > 0 ? (
+        <div className="nf-ppl__filters" role="group" aria-label={words.filterLabel} data-testid="people-filters">
+          {filterChip("all", words.filterAll)}
+          {filterChip("agent", words.filterAgents)}
+          {filterChip("landlord", words.filterLandlords)}
+          {filterChip("member", words.filterMembers)}
+          <button
+            type="button"
+            className="nf-ppl__chip nf-ppl__chip--toggle"
+            aria-pressed={verifiedOnly}
+            onClick={() => setVerifiedOnly((on) => !on)}
+          >
+            <UiIcon name="check" size={14} />
+            {words.filterVerified}
+          </button>
+        </div>
+      ) : null}
+      </div>
+
+      {showRecent ? (
+        <section className="nf-ppl__recent" aria-labelledby="nf-ppl-recent" data-testid="people-recent">
+          <div className="nf-ppl__recent-head">
+            <h2 id="nf-ppl-recent" className="nf-ppl__eyebrow">
+              {words.recentTitle}
+            </h2>
+            <button
+              type="button"
+              className="nf-ppl__link"
+              onMouseDown={(event) => event.preventDefault()}
+              onClick={() => setRecent(clearRecent())}
+            >
+              {words.recentClear}
+            </button>
+          </div>
+          <ul className="nf-ppl__recent-list">
+            {recent.map((query) => (
+              <li key={query} className="nf-ppl__recent-item">
+                <button
+                  type="button"
+                  className="nf-ppl__recent-pick"
+                  onMouseDown={(event) => event.preventDefault()}
+                  onClick={() => pick(query)}
+                >
+                  <UiIcon name="clock" size={16} />
+                  <span>{query}</span>
+                </button>
+                <button
+                  type="button"
+                  className="nf-ppl__recent-x"
+                  aria-label={words.recentRemove.replace("{query}", query)}
+                  onMouseDown={(event) => event.preventDefault()}
+                  onClick={() => setRecent(forgetRecent(query))}
+                >
+                  <UiIcon name="close" size={14} />
+                </button>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
 
       {active ? (
         <section className="nf-ppl__section" aria-live="polite" data-testid="people-results">
@@ -160,23 +285,46 @@ export function PeopleFinder({
           ) : current.failed ? (
             <p className="nf-ppl__status">{words.unavailable}</p>
           ) : current.hits.length === 0 ? (
-            <div className="nf-ppl__section">
+            <div className="nf-ppl__empty">
+              <span className="nf-ppl__empty-mark" aria-hidden="true">
+                <UiIcon name="search" size={24} />
+              </span>
               <h2 className="nf-ppl__title">{words.noResultsTitle.replace("{query}", `@${typed}`)}</h2>
               <p className="nf-ppl__note">{words.noResultsBody}</p>
             </div>
           ) : (
             <>
-              <h2 className="nf-ppl__title">{words.resultsFor.replace("{query}", typed)}</h2>
-              <ul className="nf-ppl__list">
-                {current.hits.map((hit) => (
-                  <PersonRowItem
-                    key={hit.handle}
-                    card={cardOfHit(hit, words)}
-                    signedIn={current.signedIn}
-                    openLabel={words.openProfile.replace("{name}", hit.displayLabel)}
-                  />
-                ))}
-              </ul>
+              <div className="nf-ppl__results-head">
+                <h2 className="nf-ppl__title">{words.resultsFor.replace("{query}", typed)}</h2>
+                <span className="nf-ppl__count nf-numeric">{plural(shown.length, words.resultsCount)}</span>
+              </div>
+              {shown.length === 0 && filtered ? (
+                <div className="nf-ppl__nomatch">
+                  <p className="nf-ppl__note">{words.filterNobody}</p>
+                  <button
+                    type="button"
+                    className="nf-ppl__link"
+                    onClick={() => {
+                      setRole("all");
+                      setVerifiedOnly(false);
+                    }}
+                  >
+                    {words.filterReset}
+                  </button>
+                </div>
+              ) : (
+                <ul className="nf-ppl__list">
+                  {shown.map((hit) => (
+                    <PersonRowItem
+                      key={hit.handle}
+                      card={cardOfHit(hit, words)}
+                      signedIn={current.signedIn}
+                      openLabel={words.openProfile.replace("{name}", hit.displayLabel)}
+                      onOpen={() => setRecent(rememberRecent(typed))}
+                    />
+                  ))}
+                </ul>
+              )}
             </>
           )}
         </section>

@@ -12,6 +12,51 @@
     margin-inline: auto;
     padding-block: var(--nf-space-md) var(--nf-space-3xl);
   }
+  /* ON A PHONE THE TITLE LIVES IN THE TOP BAR, so the page's own title row is
+     empty. It was still costing its margin and one gap of the grid: about 90px
+     of nothing between the bar and the search. Gone, so the search sits right
+     under the bar. */
+  @media (max-width: 63.999rem) {
+    :root[data-page-back] .nf-ppl {
+      padding-block-start: 0;
+    }
+    /* !important because the row carries Tailwind's `mb-heading`, and the
+       utilities layer outranks this one for a normal declaration (the same
+       reason `chrome.css` gives for hiding the row's back button). */
+    :root[data-page-back] .nf-ppl > .nf-ph-row {
+      margin-block: 0 !important;
+    }
+  }
+
+  /* THE PINNED SEARCH. On a phone it stays under the top bar while the rows
+     scroll beneath it, on the same frosted canvas the bar uses once scrolled,
+     so the two read as one piece of chrome. */
+  .nf-ppl__dock {
+    display: grid;
+    gap: var(--nf-space-sm);
+  }
+  @media (max-width: 63.999rem) {
+    .nf-ppl__dock {
+      position: sticky;
+      top: calc(var(--nf-header-height-sm) + env(safe-area-inset-top, 0px));
+      z-index: 30;
+      /* Up into the shell's own top padding and the one grid gap the empty
+         title row still leaves (a grid track cannot be negative, so a margin
+         on that row cannot take it back), so the field meets the bar instead
+         of floating under a strip of empty canvas. */
+      margin-block-start: calc(-1 * (var(--nf-gap-section-tight) + var(--nf-space-lg)));
+      margin-inline: calc(-1 * var(--nf-space-md));
+      padding: var(--nf-space-xs) var(--nf-space-md) var(--nf-space-sm);
+      background: color-mix(in oklab, var(--nf-surface-canvas) 86%, transparent);
+      -webkit-backdrop-filter: blur(var(--nf-glass-blur));
+      backdrop-filter: blur(var(--nf-glass-blur));
+    }
+    @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+      .nf-ppl__dock {
+        background: var(--nf-surface-canvas);
+      }
+    }
+  }
 
   /* The big field. */
   .nf-ppl__search {
@@ -21,9 +66,12 @@
     min-block-size: 3.5rem;
     padding-inline: var(--nf-space-md) var(--nf-space-xs);
     border-radius: var(--nf-radius-xl);
-    border: var(--nf-border-width) solid var(--nf-border-default);
-    background: var(--nf-surface-secondary);
-    color: var(--nf-content-muted);
+    border: var(--nf-border-width) solid color-mix(in oklab, var(--nf-brand-primary) 28%, var(--nf-border-default));
+    background:
+      linear-gradient(180deg, color-mix(in oklab, var(--nf-brand-primary) 9%, transparent), transparent),
+      var(--nf-surface-secondary);
+    box-shadow: var(--nf-card-shadow);
+    color: var(--nf-brand-secondary);
     transition: border-color var(--nf-duration-fast) var(--nf-ease-standard);
   }
   /* A search field draws no ring, border or glow when it is focused (the
@@ -97,19 +145,51 @@
      own tap above the link. */
   .nf-ppl-card {
     position: relative;
+    isolation: isolate;
     display: grid;
+    /*
+     * ONE COLUMN THAT CANNOT GROW PAST THE CARD (the founder's screenshot of
+     * 15 November 2026: a Follow button sticking out of its card into the
+     * next one). The card's single column was `auto`, so a long name that
+     * would not wrap ("Omojunioluwaseyifunmi") widened the column past the
+     * card, and the action, at 100% of that column, went with it. `minmax(0,
+     * 1fr)` holds the column to the card, and the name ellipsizes instead.
+     */
+    grid-template-columns: minmax(0, 1fr);
     flex: none;
     justify-items: center;
     align-content: start;
     gap: var(--nf-space-2xs);
     inline-size: 10.5rem;
     padding: var(--nf-space-md) var(--nf-space-sm) var(--nf-space-sm);
+    overflow: hidden;
     border-radius: var(--nf-radius-xl);
-    border: var(--nf-border-width) solid var(--nf-card-border);
+    border: var(--nf-border-width) solid color-mix(in oklab, var(--nf-brand-primary) 18%, var(--nf-card-border));
     background: var(--nf-surface-primary);
     box-shadow: var(--nf-card-shadow);
     text-align: center;
     scroll-snap-align: start;
+  }
+  /* The brand band behind the face, like the top of a profile. Drawn, so it
+     costs no download. */
+  .nf-ppl-card__cover {
+    position: absolute;
+    inset: 0 0 auto;
+    z-index: -1;
+    block-size: 3.25rem;
+    background: var(--nf-gradient-brand);
+    opacity: 0.32;
+    pointer-events: none;
+    mask-image: linear-gradient(180deg, black 40%, transparent);
+    -webkit-mask-image: linear-gradient(180deg, black 40%, transparent);
+  }
+  /* The reader's own card: the same card, a stronger edge, so it reads as
+     "this is you" without saying it in grey. */
+  .nf-ppl-card[data-mine] {
+    border-color: color-mix(in oklab, var(--nf-brand-primary) 55%, transparent);
+  }
+  .nf-ppl-card__mine {
+    inline-size: 100%;
   }
   .nf-ppl-card__open {
     position: absolute;
@@ -129,7 +209,15 @@
     margin-block-end: var(--nf-space-2xs);
     overflow: hidden;
     border-radius: var(--nf-radius-circle);
+    border: 3px solid var(--nf-surface-primary);
     background: var(--nf-surface-raised);
+    box-shadow: 0 0 0 1px var(--nf-card-border);
+  }
+  /* A published badge earns a brand ring. Never inferred: it is the badge. */
+  .nf-ppl-card__face[data-ringed] {
+    box-shadow:
+      0 0 0 2px var(--nf-brand-primary),
+      0 0 18px color-mix(in oklab, var(--nf-brand-primary) 35%, transparent);
   }
   .nf-ppl-card__face img {
     inline-size: 100%;
@@ -151,6 +239,7 @@
     align-items: center;
     justify-content: center;
     gap: var(--nf-space-2xs);
+    min-inline-size: 0;
     max-inline-size: 100%;
     color: var(--nf-content-primary);
     font-size: var(--nf-text-body-sm);
@@ -158,6 +247,7 @@
     line-height: 1.3;
   }
   .nf-ppl-card__name > span:first-child {
+    min-inline-size: 0;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -199,15 +289,6 @@
   .nf-ppl-card__act > *,
   .nf-ppl-card__act :is(button, a) {
     inline-size: 100%;
-  }
-  .nf-ppl-card__you {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-block-size: 2.75rem;
-    color: var(--nf-content-muted);
-    font-size: var(--nf-text-body-sm);
-    font-weight: 600;
   }
 
   /* The vertical list. */
@@ -278,5 +359,262 @@
     font-size: var(--nf-text-body-sm);
     font-weight: 600;
     text-decoration: none;
+  }
+
+  /* The badge beside a name keeps its size when the name ellipsizes. */
+  .nf-ppl-card__name > :not(:first-child) {
+    flex: none;
+  }
+
+  /* ONE OR TWO PEOPLE FILL THE WIDTH. A row with one card used to leave it at
+     the left with two thirds of the screen empty beside it. */
+  .nf-ppl__row[data-count="2"] > .nf-ppl-card {
+    flex: 1 1 0;
+    min-inline-size: 10.5rem;
+  }
+  .nf-ppl__row[data-count="1"] > .nf-ppl-card {
+    flex: 1 1 auto;
+    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-areas:
+      "face name"
+      "face role"
+      "face facts"
+      "act act";
+    justify-items: start;
+    column-gap: var(--nf-space-md);
+    padding: var(--nf-space-md);
+    text-align: start;
+  }
+  .nf-ppl__row[data-count="1"] > .nf-ppl-card .nf-ppl-card__face {
+    grid-area: face;
+    align-self: center;
+    margin: 0;
+  }
+  .nf-ppl__row[data-count="1"] > .nf-ppl-card .nf-ppl-card__name {
+    grid-area: name;
+    justify-content: flex-start;
+    font-size: var(--nf-text-body);
+  }
+  .nf-ppl__row[data-count="1"] > .nf-ppl-card :is(.nf-ppl-card__role, .nf-ppl-card__handle) {
+    grid-area: role;
+  }
+  .nf-ppl__row[data-count="1"] > .nf-ppl-card .nf-ppl-card__facts {
+    grid-area: facts;
+    min-block-size: 0;
+  }
+  .nf-ppl__row[data-count="1"] > .nf-ppl-card .nf-ppl-card__act {
+    grid-area: act;
+    margin-block-start: var(--nf-space-sm);
+  }
+  .nf-ppl__row[data-count="1"] > .nf-ppl-card .nf-ppl-card__cover {
+    block-size: 100%;
+    opacity: 0.18;
+  }
+
+  /* CHIPS: the section jumps under the search, and the filters on results. */
+  .nf-ppl__jumps,
+  .nf-ppl__filters {
+    display: flex;
+    gap: var(--nf-space-xs);
+    margin-inline: calc(-1 * var(--nf-space-md));
+    padding-inline: var(--nf-space-md);
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+  }
+  .nf-ppl__jumps::-webkit-scrollbar,
+  .nf-ppl__filters::-webkit-scrollbar {
+    display: none;
+  }
+  @media (min-width: 640px) {
+    .nf-ppl__jumps,
+    .nf-ppl__filters {
+      margin-inline: 0;
+      padding-inline: 0;
+      flex-wrap: wrap;
+    }
+  }
+  .nf-ppl__chip {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    gap: var(--nf-space-3xs);
+    min-block-size: 2.25rem;
+    padding-inline: var(--nf-space-sm);
+    border-radius: var(--nf-radius-pill);
+    border: var(--nf-border-width) solid color-mix(in oklab, var(--nf-brand-primary) 30%, var(--nf-border-default));
+    background: color-mix(in oklab, var(--nf-brand-primary) 10%, var(--nf-surface-primary));
+    color: var(--nf-content-primary);
+    font-size: var(--nf-text-body-sm);
+    font-weight: 600;
+    text-decoration: none;
+    white-space: nowrap;
+    transition:
+      background-color var(--nf-duration-fast) var(--nf-ease-standard),
+      border-color var(--nf-duration-fast) var(--nf-ease-standard);
+  }
+  /* A chip is 36px drawn and 44px to a thumb. */
+  .nf-ppl__chip {
+    position: relative;
+  }
+  /* Measured from inside the border (the padding box), so the border is
+     added back: 36px drawn, 44px to a thumb. */
+  .nf-ppl__chip::before {
+    content: "";
+    position: absolute;
+    inset-block: calc((2.25rem - 2.75rem) / 2 - var(--nf-border-width));
+    inset-inline: 0;
+  }
+  .nf-ppl__chip[aria-pressed="true"] {
+    border-color: transparent;
+    background: var(--nf-gradient-brand-ink);
+    color: var(--nf-content-on-brand);
+  }
+  .nf-ppl__chip:focus-visible {
+    outline: var(--nf-focus-ring-width) solid var(--nf-focus-ring);
+    outline-offset: var(--nf-focus-ring-offset);
+  }
+  /* The jump targets land below the pinned search, not under it. */
+  .nf-ppl__section[id] {
+    scroll-margin-block-start: calc(var(--nf-header-height-sm) + env(safe-area-inset-top, 0px) + 5.5rem);
+  }
+
+  /* RECENT SEARCHES, kept on this device only. */
+  .nf-ppl__recent {
+    display: grid;
+    gap: var(--nf-space-xs);
+    padding: var(--nf-space-sm);
+    border-radius: var(--nf-radius-xl);
+    border: var(--nf-border-width) solid var(--nf-card-border);
+    background: var(--nf-surface-primary);
+    box-shadow: var(--nf-card-shadow);
+  }
+  .nf-ppl__recent-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--nf-space-sm);
+    padding-inline: var(--nf-space-2xs);
+  }
+  .nf-ppl__eyebrow {
+    margin: 0;
+    color: var(--nf-content-muted);
+    font-size: var(--nf-text-overline);
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .nf-ppl__recent-list {
+    display: grid;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .nf-ppl__recent-item {
+    display: flex;
+    align-items: center;
+  }
+  .nf-ppl__recent-pick {
+    display: flex;
+    flex: 1;
+    align-items: center;
+    gap: var(--nf-space-sm);
+    min-inline-size: 0;
+    min-block-size: 2.75rem;
+    padding-inline: var(--nf-space-2xs);
+    border-radius: var(--nf-radius-md);
+    color: var(--nf-content-primary);
+    font-size: var(--nf-text-body);
+    text-align: start;
+  }
+  .nf-ppl__recent-pick > svg {
+    flex: none;
+    color: var(--nf-brand-secondary);
+  }
+  .nf-ppl__recent-pick > span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .nf-ppl__recent-pick:hover,
+  .nf-ppl__recent-pick:focus-visible {
+    background: color-mix(in oklab, var(--nf-brand-primary) 10%, transparent);
+  }
+  .nf-ppl__recent-x {
+    display: grid;
+    flex: none;
+    place-items: center;
+    inline-size: 2.75rem;
+    block-size: 2.75rem;
+    border-radius: var(--nf-radius-circle);
+    color: var(--nf-content-muted);
+  }
+  .nf-ppl__recent-x:hover {
+    background: var(--nf-surface-raised);
+    color: var(--nf-content-primary);
+  }
+  .nf-ppl__link {
+    display: inline-flex;
+    align-items: center;
+    min-block-size: 2.75rem;
+    padding-inline: var(--nf-space-2xs);
+    color: var(--nf-brand-secondary);
+    font-size: var(--nf-text-body-sm);
+    font-weight: 600;
+  }
+
+  /* RESULTS: the heading with how many, and the empty answers. */
+  .nf-ppl__results-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--nf-space-sm);
+    min-inline-size: 0;
+  }
+  .nf-ppl__results-head .nf-ppl__title {
+    min-inline-size: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .nf-ppl__count {
+    flex: none;
+    color: var(--nf-content-muted);
+    font-size: var(--nf-text-body-sm);
+  }
+  .nf-ppl__nomatch {
+    display: grid;
+    justify-items: start;
+    gap: var(--nf-space-2xs);
+    padding: var(--nf-space-md);
+    border-radius: var(--nf-radius-xl);
+    border: var(--nf-border-width) dashed var(--nf-card-border);
+  }
+  .nf-ppl__empty {
+    display: grid;
+    justify-items: center;
+    gap: var(--nf-space-xs);
+    padding: var(--nf-space-xl) var(--nf-space-md);
+    border-radius: var(--nf-radius-xl);
+    border: var(--nf-border-width) solid var(--nf-card-border);
+    background: var(--nf-surface-primary);
+    text-align: center;
+  }
+  .nf-ppl__empty-mark {
+    display: grid;
+    place-items: center;
+    inline-size: 3.5rem;
+    block-size: 3.5rem;
+    border-radius: var(--nf-radius-circle);
+    background: color-mix(in oklab, var(--nf-brand-primary) 16%, transparent);
+    color: var(--nf-brand-secondary);
+  }
+
+  /* A row of the vertical list gets the same brand edge as a card. */
+  .nf-ppl__rowitem {
+    border-color: color-mix(in oklab, var(--nf-brand-primary) 18%, var(--nf-card-border));
+  }
+  .nf-ppl__rowitem[data-mine] {
+    border-color: color-mix(in oklab, var(--nf-brand-primary) 55%, transparent);
   }
 }

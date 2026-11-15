@@ -79,6 +79,21 @@ export default async function FindPeoplePage({
           roleAgent: w.roleAgent,
           openProfile: w.openProfile,
           you: w.you,
+          yourProfile: w.yourProfile,
+          filterLabel: w.filterLabel,
+          filterAll: w.filterAll,
+          filterAgents: w.filterAgents,
+          filterLandlords: w.filterLandlords,
+          filterMembers: w.filterMembers,
+          filterVerified: w.filterVerified,
+          filterNobody: w.filterNobody,
+          filterReset: w.filterReset,
+          resultsCount: w.resultsCount,
+          recentTitle: w.recentTitle,
+          recentClear: w.recentClear,
+          recentRemove: w.recentRemove,
+          tipTitle: w.tipTitle,
+          tipBody: w.tipBody,
         }}
         initialQuery={query}
         initialHits={initialHits}

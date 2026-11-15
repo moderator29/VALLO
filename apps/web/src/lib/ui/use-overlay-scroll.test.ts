@@ -32,7 +32,10 @@ describe("lockBody", () => {
     expect(style.top).toBe("-1200px");
     release();
     expect(style.position).toBe("");
-    expect(scrollTo).toHaveBeenCalledWith(0, 1200);
+    /* Instantly, never animated: the page carries `scroll-behavior: smooth`,
+       and an animated restore was the feed scrolling down by itself after a
+       sheet closed (the founder, 15 November 2026). */
+    expect(scrollTo).toHaveBeenCalledWith({ top: 1200, left: 0, behavior: "instant" });
   });
 
   it("unpins but leaves the scroll alone when the route changed while it was locked", () => {
@@ -53,6 +56,6 @@ describe("lockBody", () => {
     expect(scrollTo).not.toHaveBeenCalled();
     location.href = "https://vallospaces.com/home";
     outer();
-    expect(scrollTo).toHaveBeenCalledWith(0, 300);
+    expect(scrollTo).toHaveBeenCalledWith({ top: 300, left: 0, behavior: "instant" });
   });
 });

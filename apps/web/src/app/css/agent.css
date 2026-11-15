@@ -607,3 +607,67 @@
     flex-wrap: wrap;
   }
 }
+
+/*
+ * SWITCH TO PERSONAL ACCOUNT, opposite the Dashboard title (the founder, 15
+ * November 2026). A soft brand control in two lines, the Circle door's
+ * material: brand tint, brand edge, brand ink, so it reads as Vallo's blue in
+ * both themes and as a way out rather than a primary action.
+ */
+@layer components {
+  .nf-switch-personal {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--nf-space-xs);
+    min-block-size: 2.75rem;
+    padding: var(--nf-space-2xs) var(--nf-space-sm) var(--nf-space-2xs) var(--nf-space-2xs);
+    border: var(--nf-border-width) solid var(--nf-brand-edge);
+    border-radius: var(--nf-act-radius-sm);
+    background: var(--nf-brand-tint-1);
+    color: var(--nf-content-link);
+    text-align: start;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition:
+      background-color var(--nf-duration-fast) var(--nf-ease-standard),
+      transform var(--nf-duration-press) var(--nf-ease-press);
+  }
+  .nf-switch-personal:hover {
+    background: var(--nf-brand-tint-2);
+  }
+  .nf-switch-personal:active {
+    transform: scale(0.97);
+  }
+  .nf-switch-personal:disabled {
+    opacity: 0.7;
+    cursor: progress;
+  }
+  .nf-switch-personal:focus-visible {
+    outline: var(--nf-focus-ring-width) solid var(--nf-focus-ring);
+    outline-offset: var(--nf-focus-ring-offset);
+  }
+  .nf-switch-personal__mark {
+    display: grid;
+    flex: none;
+    place-items: center;
+    inline-size: 2rem;
+    block-size: 2rem;
+    border-radius: var(--nf-radius-circle);
+    background: var(--nf-gradient-brand-ink);
+    color: var(--nf-content-on-brand);
+  }
+  .nf-switch-personal__words {
+    display: grid;
+    line-height: 1.15;
+  }
+  .nf-switch-personal__lead {
+    color: var(--nf-content-secondary);
+    font-size: var(--nf-text-overline);
+    font-weight: 600;
+  }
+  .nf-switch-personal__main {
+    font-size: var(--nf-text-caption);
+    font-weight: 700;
+    white-space: nowrap;
+  }
+}
