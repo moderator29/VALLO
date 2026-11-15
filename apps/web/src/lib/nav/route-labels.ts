@@ -314,6 +314,7 @@ const NAMES: Readonly<Record<string, string>> = {
   "/agent/listings/[listingId]/arrival": "the arrival guide",
   "/admin/examples": "Examples",
   "/admin/handbook/position": "the position",
+  "/admin/handbook/position/[position]": "the position handbook",
   "/admin/manual": "the staff manual",
   "/admin/manual/[chapter]": "the chapter",
   "/admin/handbook/manual": "the staff manual",

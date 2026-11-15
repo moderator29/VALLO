@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { STAFF_SCOPES } from "@/lib/admin/guard";
 import { JOB_DESCRIPTIONS, STAFF_POSITIONS } from "@/lib/admin/staff-positions";
-import { handbookSections, loadPositionHandbook } from "./handbook-source";
+import { handbookRoute, handbookSections, loadPositionHandbook } from "./handbook-source";
 import { buildPassages, searchPassages, visiblePassages, type ExtraSources, type ManualPassage } from "./manual-search";
 import { buildPlaybook, PLAYBOOKS } from "./playbooks";
 import { clip } from "./common";
@@ -43,7 +43,7 @@ export async function handbookSources(): Promise<NonNullable<ExtraSources["handb
   for (const position of STAFF_POSITIONS) {
     const sections = handbookSections(handbook, position);
     if (sections.length === 0) continue;
-    out.push({ position, title: JOB_DESCRIPTIONS[position].title, link: "/admin/handbook/position", sections });
+    out.push({ position, title: JOB_DESCRIPTIONS[position].title, link: handbookRoute(handbook, position), sections });
   }
   return out;
 }

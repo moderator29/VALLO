@@ -463,7 +463,7 @@ export const CEO: RoleWords = {
     </p>
   ),
   glance: [
-    "Your access areas are every one a staff member can hold: Listing approval, KYC review, Reports and moderation, Support, Agreement approval, Guarantee claims, Finance, Compliance and Operations.",
+    "You hold every access area a staff member can hold: Listing approval, KYC review, Reports and moderation, Support, Agreement approval, Guarantee claims, Finance, Compliance and Operations.",
     "Staff access is still granted and ended by the founder's super admin account, and switches are still changed by admins.",
     "Compliance is independent of you by design. You hear from the Compliance Officer directly; you do not overrule a compliance decision.",
     "Anything affecting the company's licence or its members' safety goes to the board.",

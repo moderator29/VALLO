@@ -3,7 +3,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 vi.mock("server-only", () => ({}));
 
 const { getMyHandbook } = await import("./handbook");
-const { asHandbookModule, handbookSections, loadPositionHandbook, setPositionHandbookSource } = await import("./handbook-source");
+const { asHandbookModule, handbookRoute, handbookSections, loadPositionHandbook, setPositionHandbookSource } = await import("./handbook-source");
 const { buildPassages, searchPassages, visiblePassages, OWN_HANDBOOK_BOOST } = await import("./manual-search");
 const { isOfferable } = await import("./registry");
 import type { CopilotViewer } from "./types";
@@ -34,10 +34,27 @@ const stub = {
 
 afterEach(() => setPositionHandbookSource(undefined));
 
-describe("the handbook source degrades", () => {
-  it("is absent by default, and nothing throws", async () => {
+describe("the handbook source", () => {
+  it("loads the real handbooks, which landed on 16 November 2026", async () => {
+    const real = await loadPositionHandbook();
+    expect(real).not.toBeNull();
+    const sections = handbookSections(real, "support_agent");
+    expect(sections.length).toBeGreaterThan(1);
+    expect(sections.every((s) => s.id && s.title && s.text)).toBe(true);
+    expect(handbookRoute(real, "support_agent")).toBe("/admin/handbook/position/support_agent");
+  });
+
+  it("degrades to no handbooks at all without throwing", async () => {
+    setPositionHandbookSource(null);
     expect(await loadPositionHandbook()).toBeNull();
     expect(handbookSections(null, "support_agent")).toEqual([]);
+    expect(handbookRoute(null, "support_agent")).toBe("/admin/handbook/position");
+  });
+
+  it("falls back to the index page when the module names no route", () => {
+    expect(handbookRoute(stub as never, "support_agent")).toBe("/admin/handbook/position");
+    const odd = { positionHandbookPassages: () => [], positionHandbookRoute: () => "https://evil.example" };
+    expect(handbookRoute(odd as never, "support_agent")).toBe("/admin/handbook/position");
   });
 
   it("refuses a module of the wrong shape rather than trusting it", () => {
@@ -140,6 +157,7 @@ describe("get_my_handbook", () => {
   });
 
   it("falls back to the job description when the handbook is not built, and invents nothing", async () => {
+    setPositionHandbookSource(null);
     const out = await getMyHandbook.handler({}, ctx(viewer()));
     if (!out.ok) throw new Error("expected an answer");
     const data = out.data as { handbookBuilt: boolean; note: string; jobDescription: { responsibilities: string[] } | null };
@@ -147,6 +165,15 @@ describe("get_my_handbook", () => {
     expect(data.note).toContain("not in place");
     expect(data.jobDescription!.responsibilities.length).toBeGreaterThan(0);
     expect(JSON.stringify(out.data)).not.toContain("sections");
+  });
+
+  it("reads the real handbook for a viewer's own position, with the position's own route", async () => {
+    const out = await getMyHandbook.handler({}, ctx(viewer({ position: "kyc_reviewer", scopes: ["kyc_review"] })));
+    if (!out.ok) throw new Error("expected an answer");
+    const data = out.data as { handbookBuilt: boolean; sections: { link: string }[]; page: string };
+    expect(data.handbookBuilt).toBe(true);
+    expect(data.page).toBe("/admin/handbook/position/kyc_reviewer");
+    expect(data.sections[0]!.link).toMatch(/^\/admin\/handbook\/position\/kyc_reviewer#/);
   });
 
   it("says there is no position handbook for somebody with no named position", async () => {

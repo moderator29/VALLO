@@ -2,7 +2,7 @@ import { z } from "zod";
 import { STAFF_SCOPES, STAFF_SCOPE_LABEL } from "@/lib/admin/guard";
 import { JOB_DESCRIPTIONS } from "@/lib/admin/staff-positions";
 import { clip } from "./common";
-import { handbookSections, loadPositionHandbook } from "./handbook-source";
+import { handbookRoute, handbookSections, loadPositionHandbook } from "./handbook-source";
 import { defineTool } from "./types";
 
 /**
@@ -17,7 +17,7 @@ import { defineTool } from "./types";
  * same page. It never invents a section.
  */
 
-const PAGE = "/admin/handbook/position";
+const INDEX = "/admin/handbook/position";
 const HANDBOOK = "/admin/handbook";
 
 export const getMyHandbook = defineTool({
@@ -33,6 +33,9 @@ export const getMyHandbook = defineTool({
     const job = position ? JOB_DESCRIPTIONS[position] : null;
     const handbook = await loadPositionHandbook();
     const sections = handbookSections(handbook, position);
+    /* The module's own route for this position, or the index page when the
+       handbooks are not built. A link is never guessed. */
+    const PAGE = position ? handbookRoute(handbook, position) : INDEX;
     const asked = (input.section ?? "").trim().toLowerCase();
     const picked = asked.length >= 3 ? sections.filter((s) => `${s.title} ${s.text}`.toLowerCase().includes(asked)) : sections;
     const shown = (picked.length > 0 ? picked : sections).slice(0, 12);

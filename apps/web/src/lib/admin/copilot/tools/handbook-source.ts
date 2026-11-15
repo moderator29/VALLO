@@ -22,25 +22,22 @@ export type PositionHandbookPassage = { id: string; title: string; text: string 
 /** What `lib/admin/position-handbook` is expected to export. */
 export type PositionHandbookModule = {
   positionHandbookPassages: (position: StaffPosition) => readonly PositionHandbookPassage[];
+  /** Where one position's handbook is read, when the module says. */
+  positionHandbookRoute?: (position: StaffPosition) => string;
   /** The handbook's own index, when it has one. Read for a title only. */
   POSITION_HANDBOOK_INDEX?: unknown;
 };
 
 /**
- * THE ONE WIRING LINE. While `lib/admin/position-handbook` does not exist,
- * naming it here would stop the build and fail every test, so it is not named
- * here: this returns nothing and the knowledge base carries no handbooks. The
- * day the module lands, this body becomes
+ * THE ONE WIRING LINE (the handbooks landed on 16 November 2026).
  *
- *     return (await import("@/lib/admin/position-handbook")) as unknown;
- *
- * and nothing else in the copilot changes: the passages, the scoping, the
- * ranking, `get_my_handbook` and their tests are already built around the
- * shape above, and `handbook.test.ts` proves both the present and the absent
- * path through `setPositionHandbookSource`.
+ * It is a lazy import, so the handbooks are loaded the first time somebody
+ * asks and not on every console request, and it is wrapped: if the module is
+ * ever absent or broken, `loadPositionHandbook` answers null, the knowledge
+ * base carries no handbooks, and every desk goes on working.
  */
 async function importPositionHandbook(): Promise<unknown> {
-  return null;
+  return import("@/lib/admin/position-handbook");
 }
 
 /** Only a module with a working `positionHandbookPassages` is used. */
@@ -88,4 +85,15 @@ export function handbookSections(handbook: PositionHandbookModule | null, positi
     out.push({ id, title, text });
   }
   return out;
+}
+
+/** Where this position's handbook is read: the module's own route, or the index page. */
+export function handbookRoute(handbook: PositionHandbookModule | null, position: StaffPosition | null): string {
+  if (!handbook || !position || typeof handbook.positionHandbookRoute !== "function") return "/admin/handbook/position";
+  try {
+    const route = handbook.positionHandbookRoute(position);
+    return typeof route === "string" && route.startsWith("/admin/handbook/position") ? route : "/admin/handbook/position";
+  } catch {
+    return "/admin/handbook/position";
+  }
 }

@@ -24,8 +24,11 @@
  * scroll clipping, so the article lands at the top of the first page at full
  * width.
  *
- * Tokens only, and every rule is inside @media print or @layer components, so
- * nothing here can reach a screen rule of another sheet.
+ * Tokens only. Every rule is inside @media print or @layer components, and
+ * every rule whose subject is a class the documentation kit also styles is
+ * written under this article's own `.nf-hbp`, so this sheet reaches nothing
+ * outside the handbook (`scripts/check-css-collisions.mjs` checks exactly
+ * that, and `print.css` needed an allowlist entry because it does not).
  */
 @layer components {
   /* The running foot: on screen it is nothing, in print it repeats on every
@@ -94,39 +97,39 @@
 
   /* The controls, the contents card and the shell's own furniture are screen
      things: a printed page cannot be pressed. */
-  [data-handbook-print] .nf-hbp-noprint,
-  [data-handbook-print] .nf-doc-toc {
+  .nf-hbp .nf-hbp-noprint,
+  .nf-hbp .nf-doc-toc {
     display: none !important;
   }
 
   /* One section per page, which is how a person reads a handbook on paper and
      finds a section again. */
-  [data-handbook-print] .nf-doc-section {
+  .nf-hbp .nf-doc-section {
     break-before: page;
     break-inside: auto;
   }
-  [data-handbook-print] .nf-doc-section:first-of-type {
+  .nf-hbp .nf-doc-section:first-of-type {
     break-before: auto;
   }
-  [data-handbook-print] .nf-doc-section__title,
+  .nf-hbp .nf-doc-section__title,
   [data-handbook-print] h3 {
     break-after: avoid;
   }
   [data-handbook-print] li,
   [data-handbook-print] tr,
-  [data-handbook-print] .nf-doc-callout,
-  [data-handbook-print] .nf-doc-summary {
+  .nf-hbp .nf-doc-callout,
+  .nf-hbp .nf-doc-summary {
     break-inside: avoid;
   }
 
   /* Tables and callouts keep their rules in ink, so a printed table is still
      a table. */
-  [data-handbook-print] .nf-doc-table th,
-  [data-handbook-print] .nf-doc-table td {
+  .nf-hbp .nf-doc-table th,
+  .nf-hbp .nf-doc-table td {
     border-color: var(--nf-border-on-paper) !important;
   }
-  [data-handbook-print] .nf-doc-callout,
-  [data-handbook-print] .nf-doc-summary {
+  .nf-hbp .nf-doc-callout,
+  .nf-hbp .nf-doc-summary {
     border: 1px solid var(--nf-border-on-paper) !important;
   }
 

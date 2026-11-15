@@ -55,9 +55,10 @@ export default async function HandbookPage() {
             ? `You hold the position of ${JOB_DESCRIPTIONS[door.staff.position].title}. ${JOB_DESCRIPTIONS[door.staff.position].summary}`
             : "Your access was given by access area rather than a named position."}{" "}
           <Link href="/admin/handbook/position" className="font-semibold text-[var(--nf-content-link)] hover:underline">
-            {door.staff.position ? "Read your full role description" : "Read the role descriptions"}
+            {door.staff.position ? "Read your own handbook" : "Read the position handbooks"}
           </Link>
-          .
+          . It covers every desk you can open, the work step by step, what you may decide, how to escalate and who to
+          go to, and it saves to your phone.
         </p>
       </Panel>
       <Panel title="Acknowledge">

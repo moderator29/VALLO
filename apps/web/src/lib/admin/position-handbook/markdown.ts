@@ -38,7 +38,7 @@ export function slugOf(title: string): string {
  * The file name, as the founder asked for it:
  * `vallo-handbook-business-development-director-2026-11-15.md`. The date is
  * the day the file is made, so a person with two copies can tell which is
- * newer; it falls back to the day the handbook was last checked.
+ * newer; it falls back to the day the handbook was last read against the code.
  */
 export function handbookFileName(document: HandbookDocument, isoDate?: string): string {
   const date = /^\d{4}-\d{2}-\d{2}/.test(isoDate ?? "") ? isoDate!.slice(0, 10) : document.updated.slice(0, 10);
@@ -82,10 +82,10 @@ export function handbookMarkdown(document: HandbookDocument): string {
   const lines: string[] = [];
   lines.push(`# Vallo staff handbook: ${document.title}`);
   lines.push("");
-  lines.push(`Last checked ${document.updated}. Read it on the console at ${document.route}.`);
+  lines.push(`Read against the console on ${document.updated}. Read it on the console at ${document.route}.`);
   lines.push("");
   lines.push(
-    "This file is a copy. The screen is the live answer: what is open on Vallo is checked often and changes, so where this file and the console disagree, believe the console.",
+    "This file is a copy. The screen is the live answer: what is open on Vallo is read against the code often and changes, so where this file and the console disagree, believe the console.",
   );
   lines.push("");
   lines.push(wrap(document.intro));
