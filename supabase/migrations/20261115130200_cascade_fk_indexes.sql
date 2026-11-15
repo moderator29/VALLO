@@ -1,8 +1,8 @@
 -- ============================================================================
 -- THE THIRTEEN INDEXES THAT MAKE DELETING AN ACCOUNT CHEAP (14 November 2026).
 --
--- NOT APPLIED. CHECKED AGAINST LIVE ON 14 NOVEMBER 2026 WITH READS ONLY.
--- Only the founder applies it, in the Supabase SQL editor.
+-- APPLIED on 15 November 2026 by the founder, and read back the same day:
+-- thirteen indexes present, no cascading foreign key to a person uncovered.
 --
 -- WHY THESE THIRTEEN AND NOT THE NINETY. The performance advisor lists 90
 -- foreign keys with no covering index. Read against live, almost every one is

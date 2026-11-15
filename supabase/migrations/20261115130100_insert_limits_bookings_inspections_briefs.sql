@@ -1,8 +1,8 @@
 -- ============================================================================
 -- THE DATABASE BACKSTOP ON HOLDS, INSPECTION REQUESTS AND BRIEFS (14 Nov 2026).
 --
--- NOT APPLIED. CHECKED AGAINST LIVE ON 14 NOVEMBER 2026 WITH READS ONLY.
--- Only the founder applies it, in the Supabase SQL editor.
+-- APPLIED on 15 November 2026 by the founder, and read back the same day:
+-- all three triggers present.
 --
 -- WHY. Survey B's B-03: a script with one account could hold every night of a
 -- listing. The app half is fixed (lib/security/member-write-limit.ts caps

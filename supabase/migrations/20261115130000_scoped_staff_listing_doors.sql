@@ -1,8 +1,10 @@
 -- ============================================================================
 -- THE LISTINGS DESK'S TWO DATABASE DOORS OPEN FOR SCOPED STAFF (14 Nov 2026).
 --
--- NOT APPLIED. CHECKED AGAINST LIVE ON 14 NOVEMBER 2026 WITH READS ONLY.
--- Only the founder applies it, in the Supabase SQL editor.
+-- APPLIED on 15 November 2026 by the lead on the founder's word, and read
+-- back the same day: both functions carry the scoped door, admin_person_file
+-- is untouched, and the three position holders who hold listing_approval
+-- without the admin role can open the listings desk again.
 --
 -- WHAT BROKE AND WHEN. At 13:54 UTC today, right after staff_desks_only took
 -- the admin role from the two position holders, the server crash log began

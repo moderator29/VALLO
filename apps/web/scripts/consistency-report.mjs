@@ -24,9 +24,17 @@ const CARD_RADIUS = 18;
    the frame's own pages rather than asserted, so the rule is what the
    majority of framed pages actually do; an outlier is a page that differs
    from its own system. */
-const measured = rows.filter((r) => !r.needsSession && r.header);
+/*
+ * EVERY ROW THAT IS A REAL PAGE, headed or not. The first version of this
+ * filter also required `r.header`, which silently dropped 24 of 108 live
+ * rows: a page with no h1 and no frame header has no gap to judge, but it
+ * still has a document that can scroll sideways and controls that can be
+ * painted under 44, and those were going unjudged. The gap rule below is
+ * guarded on `kind === "frame"`, so a headless row simply has no gap verdict.
+ */
+const measured = rows.filter((r) => !r.needsSession);
 const gapsByWidth = {};
-for (const row of measured.filter((r) => r.header.kind === "frame" && r.headerGap !== null)) {
+for (const row of measured.filter((r) => r.header?.kind === "frame" && r.headerGap !== null)) {
   (gapsByWidth[row.width] ??= []).push(row.headerGap);
 }
 const mode = (list) => {
@@ -103,8 +111,12 @@ for (const { row, issues } of [...byRouteWidth.values()].sort((a, b) =>
   const header = h ? `${h.kind}${h.hasSubtitle ? "+sub" : ""}${h.hasActions ? "+act" : ""}` : "none";
   const back = row.back.count === 0 ? "none" : `${row.back.box.x},${row.back.box.y},${row.back.box.w},${row.back.box.h}`;
   const states = `${row.states.loading ? "L" : "-"}${row.states.error ? "E" : "-"}`;
+  /* A route that sent the browser somewhere else was NOT measured at its own
+     address, and the table must not imply it was. The address actually
+     rendered is printed beside it. */
+  const where = row.redirected ? `\`${row.route}\`<br>to \`${row.finalUrl}\`` : `\`${row.route}\``;
   console.log(
-    `| \`${row.route}\` | ${row.width} | ${header} | ${back} | ${row.primary ? row.primary.box.y : "none"} | ` +
+    `| ${where} | ${row.width} | ${header} | ${back} | ${row.primary ? row.primary.box.y : "none"} | ` +
       `${row.headerGap ?? "-"} | ${row.cardRadius ?? "-"} | ${states} | ${row.overflow} | ${row.smallCount} | ` +
       `${issues.length === 0 ? "yes" : issues.join("; ")} |`,
   );
