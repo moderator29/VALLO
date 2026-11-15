@@ -327,12 +327,21 @@
      case below, where a still ring would say nothing by itself. */
   display: none;
 }
+/* THE STILL CASE. Whenever the ring may not turn, the clock comes back: a
+   still ring with one lit quarter says nothing by itself. This is the
+   system's reduced motion AND Vallo's own Motion setting (Calm, Off) and
+   data saver, the same four the call ring and the typing dots answer to. */
 @media (prefers-reduced-motion: reduce) {
   .nf-toast-host .nf-toast[data-tone="processing"] .nf-toast__mark svg {
     display: block;
     inline-size: 0.75rem;
     block-size: 0.75rem;
   }
+}
+:root:is([data-motion="calm"], [data-motion="off"], [data-save-data="on"]) .nf-toast-host .nf-toast[data-tone="processing"] .nf-toast__mark svg {
+  display: block;
+  inline-size: 0.75rem;
+  block-size: 0.75rem;
 }
 @keyframes nf-toast-turn {
   to {
@@ -347,6 +356,13 @@
   .nf-toast-host .nf-toast[data-tone="processing"] .nf-toast__mark {
     border-color: var(--nf-toast-tone);
   }
+}
+:root:is([data-motion="calm"], [data-motion="off"], [data-save-data="on"]) .nf-toast-host .nf-toast[data-tone="processing"] .nf-toast__mark,
+:root:is([data-motion="calm"], [data-motion="off"], [data-save-data="on"]) .nf-toast-host .nf-toast[data-tone="processing"] .nf-toast__mark svg {
+  animation: none;
+}
+:root:is([data-motion="calm"], [data-motion="off"], [data-save-data="on"]) .nf-toast-host .nf-toast[data-tone="processing"] .nf-toast__mark {
+  border-color: var(--nf-toast-tone);
 }
 /* 4.4: a person's face beside the message, for banners that name someone. */
 .nf-toast__avatar {

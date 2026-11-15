@@ -54,7 +54,6 @@ const REMOVES_AN_ITEM = new Set([
   "components/social/feed/ListingPicker.tsx", // takes the chosen listing off
   "components/social/share/ShareToFeedSheet.tsx", // takes the attachment off
   "components/social/find/PeopleFinder.tsx", // clears the search field
-  "components/app/messages/PasteChip.tsx", // drops a pasted chip
   "components/app/messages/PasteTray.tsx", // drops a pasted chip from the tray
   "components/roommates/SchoolPicker.tsx", // clears the chosen school
   "components/roommates/FirstRunCard.tsx", // the glyph beside the word "Later"
