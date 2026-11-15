@@ -279,6 +279,48 @@
     }
   }
 
+  /* TAKE ME THERE: the places an answer offers, as buttons under it. One tap,
+     wrapping at 390px, never a bare path for somebody to copy. */
+  .nf-copilot-go {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--nf-space-xs);
+    margin-top: var(--nf-space-sm);
+  }
+
+  .nf-copilot-go__btn {
+    max-width: 100%;
+  }
+
+  /* The typing state: three dots that settle, so a wait reads as work. */
+  .nf-copilot-typing {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+  }
+
+  .nf-copilot-typing span {
+    width: 6px;
+    height: 6px;
+    border-radius: var(--nf-radius-circle);
+    background: var(--nf-brand-primary);
+    animation: nf-copilot-pulse 1.2s var(--nf-ease-standard) infinite;
+  }
+
+  .nf-copilot-typing span:nth-child(2) {
+    animation-delay: 0.18s;
+  }
+
+  .nf-copilot-typing span:nth-child(3) {
+    animation-delay: 0.36s;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .nf-copilot-typing span {
+      animation: none;
+    }
+  }
+
   /* A suggested change. */
   .nf-copilot-card {
     display: grid;

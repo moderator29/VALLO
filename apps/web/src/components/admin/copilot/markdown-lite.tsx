@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { isConsolePath } from "@/lib/admin/copilot/destinations";
 
 /**
  * MARKDOWN-LITE FOR THE COPILOT'S ANSWERS. Paragraphs, bullet and numbered
@@ -14,11 +15,11 @@ import type { ReactNode } from "react";
 
 const EM_DASH = String.fromCharCode(0x2014);
 
-/** A console path and nothing else: no scheme, no host, no `..`, no `//`. */
-export function isConsolePath(value: string): boolean {
-  if (value.length > 300 || value.includes("..") || value.includes("//")) return false;
-  return /^\/admin([/?#][A-Za-z0-9_./?=&#%-]*)?$/.test(value);
-}
+/**
+ * A console path and nothing else, decided in one place for the renderer, the
+ * tools and the link filter (`lib/admin/copilot/destinations.ts`).
+ */
+export { isConsolePath } from "@/lib/admin/copilot/destinations";
 
 const INLINE = /(\*\*[^*\n]+\*\*|`[^`\n]+`|\[[^\]\n]+\]\([^)\s]+\)|\/admin[A-Za-z0-9_/.?=&%#-]*)/g;
 
