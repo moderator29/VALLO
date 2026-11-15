@@ -160,4 +160,28 @@ describe.skipIf(!hasBrowser && !process.env.CI)("confirming a phone number", () 
       await close();
     }
   });
+  it("a number abroad while no code can be sent: the server saves it, and the panel says so in plain words and asks for no code", async () => {
+    const { page, close } = await mountInBrowser({
+      entry: ENTRY,
+      css: CSS,
+      actions: {
+        sendPhoneCode: `async () => ({ ok: true, data: { sentTo: "+447911123456", waived: true } })`,
+        confirmPhoneCode: `async () => ({ ok: true, data: { confirmed: true } })`,
+      },
+    });
+    try {
+      await page.getByTestId("phone-country").click();
+      await page.getByLabel("Search countries").fill("United Kingdom");
+      await page.getByRole("button", { name: /United Kingdom/ }).click();
+      await page.getByLabel("Mobile number").fill("07911 123456");
+      await page.getByRole("button", { name: "Send the code" }).click();
+      const saved = page.getByTestId("phone-abroad-saved");
+      await saved.waitFor();
+      expect(await saved.textContent()).toContain("We cannot send codes to numbers outside Nigeria yet");
+      expect(await page.getByLabel("Code").count()).toBe(0);
+      expect(await page.getByRole("button", { name: "Send the code" }).count()).toBe(0);
+    } finally {
+      await close();
+    }
+  });
 });

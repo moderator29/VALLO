@@ -23,6 +23,16 @@
  *
  * Browsing and saving stay open, and a member is never asked who they are: a
  * phone is not an ID. A QA account (public.qa_accounts) is never asked at all.
+ *
+ * ONLY MONEY AND A LISTING ASK (the founder, 15 November 2026). A member signs
+ * up and messages, books, asks for a visit, reviews and reports with no phone
+ * at all. The phone is asked for at the first PAYMENT and before the first
+ * LISTING is published, and nowhere else (`ASKING_MOMENTS`). The other moments
+ * keep their names and their call sites, and answer "no need".
+ *
+ * A MEMBER ABROAD is not asked while no code can reach a number outside
+ * Nigeria (the international sender is not set up): see `abroadWaived` in
+ * `gate.ts`. The ask returns by itself the day that sender is configured.
  */
 
 export const OTP_LENGTH = 6;
@@ -39,6 +49,13 @@ export const PHONE_MOMENTS: readonly PhoneMoment[] = [
   "payment",
   "listing",
 ];
+
+/** The moments that ask for a confirmed phone at all (the founder, 15 November 2026). */
+export const ASKING_MOMENTS: readonly PhoneMoment[] = ["payment", "listing"];
+
+export function asksPhone(moment: PhoneMoment): boolean {
+  return ASKING_MOMENTS.includes(moment);
+}
 
 /**
  * THE TWO MOMENTS THAT FAIL CLOSED. The reputation moments (and a message, a
@@ -98,8 +115,9 @@ export function otpMessage(code: string): string {
 /**
  * Must this person confirm a phone before this action?
  *
- * Only with the flag on, only without a confirmed phone, only at the FIRST
- * action of its kind, and never for a danger report.
+ * Only at a moment that asks (a payment, a listing), only with the flag on,
+ * only without a confirmed phone, only at the FIRST action of its kind, and
+ * never for a danger report.
  */
 export function phoneGateNeeded(input: {
   flagOn: boolean;
@@ -111,6 +129,7 @@ export function phoneGateNeeded(input: {
   qa?: boolean;
 }): boolean {
   if (!input.flagOn || input.confirmed || input.qa) return false;
+  if (!asksPhone(input.moment)) return false;
   if (input.moment === "report" && input.reportCategory && DANGER_CATEGORIES.includes(input.reportCategory)) {
     return false;
   }

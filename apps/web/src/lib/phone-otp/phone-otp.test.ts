@@ -61,13 +61,16 @@ describe("the code and its message", () => {
   });
 });
 
-describe("the three moments", () => {
+describe("the moments that ask", () => {
   const base = { flagOn: true, confirmed: false, priorCount: 0 };
-  it("asks at the first inspection, review and non-danger report only", () => {
-    expect(phoneGateNeeded({ ...base, moment: "inspection" })).toBe(true);
-    expect(phoneGateNeeded({ ...base, moment: "review" })).toBe(true);
-    expect(phoneGateNeeded({ ...base, moment: "report", reportCategory: "scam" })).toBe(true);
-    expect(phoneGateNeeded({ ...base, priorCount: 1, moment: "inspection" })).toBe(false);
+  it("asks at the first payment and the first listing only (the founder, 15 November 2026)", () => {
+    expect(phoneGateNeeded({ ...base, moment: "payment" })).toBe(true);
+    expect(phoneGateNeeded({ ...base, moment: "listing" })).toBe(true);
+    expect(phoneGateNeeded({ ...base, priorCount: 1, moment: "payment" })).toBe(false);
+    for (const moment of ["inspection", "review", "message", "booking"] as const) {
+      expect(phoneGateNeeded({ ...base, moment })).toBe(false);
+    }
+    expect(phoneGateNeeded({ ...base, moment: "report", reportCategory: "scam" })).toBe(false);
   });
 
   it("never delays a report that somebody is unsafe", () => {
@@ -75,8 +78,8 @@ describe("the three moments", () => {
   });
 
   it("asks nothing with the flag off or a phone already confirmed", () => {
-    expect(phoneGateNeeded({ ...base, flagOn: false, moment: "inspection" })).toBe(false);
-    expect(phoneGateNeeded({ ...base, confirmed: true, moment: "inspection" })).toBe(false);
+    expect(phoneGateNeeded({ ...base, flagOn: false, moment: "payment" })).toBe(false);
+    expect(phoneGateNeeded({ ...base, confirmed: true, moment: "payment" })).toBe(false);
   });
 });
 

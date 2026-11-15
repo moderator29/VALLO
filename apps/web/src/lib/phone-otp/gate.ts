@@ -4,9 +4,11 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { getDictionary } from "@vallo/i18n";
 import { phoneGateRefusal, type PhoneGateRefusal } from "../actions/envelope";
 import { getLocale } from "../locale";
-import { countsAsOwnReport, failsClosed, phoneGateNeeded, type PhoneMoment } from "./core";
+import { isForeignMobile } from "../money/funds";
+import { asksPhone, countsAsOwnReport, failsClosed, phoneGateNeeded, type PhoneMoment } from "./core";
 import { phoneConfirmationOn } from "./flag";
 import { isQaTester } from "./qa";
+import { canSendAbroad } from "./transport";
 
 /**
  * THE MOMENTS (V-50, and the FULL GATE ruling of 13 October 2026): does this
@@ -147,6 +149,12 @@ type GateDeps = {
   flagOn(): Promise<boolean>;
   confirmed(userId: string): Promise<boolean>;
   qa(userId: string): Promise<boolean>;
+  /**
+   * A member abroad, while no code can reach a number outside Nigeria: their
+   * number from another country is on the profile and the international
+   * sender is not set up. Not asked, until it is.
+   */
+  abroadWaived(userId: string): Promise<boolean>;
   prior(userId: string): Promise<number>;
 };
 
@@ -163,10 +171,13 @@ export async function decidePhoneGate(
   moment: PhoneMoment,
   options: PhoneGateOptions = {},
 ): Promise<GateVerdict> {
+  /* Only a payment and a listing ask (15 November 2026): nothing is read for the rest. */
+  if (!asksPhone(moment)) return { kind: "open" };
   if (!(await deps.flagOn())) return { kind: "open" };
   try {
     if (await deps.confirmed(userId)) return { kind: "open" };
     if (await deps.qa(userId)) return { kind: "open" };
+    if (await deps.abroadWaived(userId)) return { kind: "open" };
     const needed = phoneGateNeeded({
       flagOn: true,
       confirmed: false,
@@ -201,6 +212,13 @@ export async function phoneGateFor(
         return Boolean(data);
       },
       qa: isQaTester,
+      abroadWaived: async (id) => {
+        if (canSendAbroad()) return false;
+        const { data, error } = await db.from("profiles").select("phone").eq("id", id).maybeSingle();
+        if (error) throw new Error("profile phone read failed");
+        const phone = (data as { phone?: string | null } | null)?.phone;
+        return typeof phone === "string" && isForeignMobile(phone);
+      },
       prior: (id) => priorCount(db, id, moment, options),
     },
     userId,

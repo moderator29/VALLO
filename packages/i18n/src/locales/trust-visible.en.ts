@@ -118,7 +118,7 @@ export const trustVisibleEn = {
   phone: {
     title: "Phone",
     subtitle: "One confirmed mobile number per account",
-    why: "Vallo asks for a confirmed mobile number once, before your first message, visit, booking, payment or listing, and before your first review and your first report. It is never shown to anybody. It keeps one person to one account, which is what makes reviews and reports worth trusting.",
+    why: "Vallo asks for a confirmed mobile number once, before your first payment and before you publish your first listing. Everything else on Vallo works without one. It is never shown to anybody, and it keeps one person to one account.",
     closedTitle: "Nothing is needed from you",
     closedBody: "Vallo is not asking for phone numbers at the moment. Browsing, saving and messaging never need one.",
     /* While codes are not sent: the number is saved to the profile unconfirmed,
@@ -175,6 +175,9 @@ export const trustVisibleEn = {
     required:
       "Confirm your mobile number first. It is asked once, it is never shown to anybody, and it keeps one person to one account. Open Settings, then Phone.",
     closed: "Vallo is not asking for phone numbers at the moment. Nothing is needed from you.",
+    /** A number outside Nigeria, while no code can be sent to it: saved, not confirmed, and the member carries on. */
+    abroadSaved:
+      "We cannot send codes to numbers outside Nigeria yet, so there is nothing to confirm. Your number is saved and you can carry on. We will ask you to confirm it when codes can reach you.",
     numberEmpty: "Enter your mobile number.",
     codeShape: "The code is six digits.",
     sendLimited: "That is a lot of codes in a short time. Wait an hour and try again.",

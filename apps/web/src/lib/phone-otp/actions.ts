@@ -18,7 +18,7 @@ import { isConfirmOutcome, memberConfirmRefusal, type MemberConfirmRefusal } fro
 import { phoneConfirmationOn } from "./flag";
 import { runSendCode, type SendOutcome } from "./send";
 import { recordNumberRefused } from "./staff-trail";
-import { otpTransport } from "./transport";
+import { canSendAbroad, otpTransport } from "./transport";
 
 /**
  * SEND A CODE, AND CONFIRM IT (V-50).
@@ -92,7 +92,7 @@ async function allowed(bucket: string, subject: string, limit: number, windowSec
   return verdict.allowed && !verdict.degraded;
 }
 
-export async function sendPhoneCode(input: unknown): Promise<ActionResult<{ sentTo: string }>> {
+export async function sendPhoneCode(input: unknown): Promise<ActionResult<{ sentTo: string; waived?: true }>> {
   const session = await resolveSession();
   if (session.state === "unconfigured") return fail(NOT_CONFIGURED_MESSAGE);
   if (session.state === "signed-out") return fail(SIGNED_OUT_MESSAGE);
@@ -126,6 +126,22 @@ export async function sendPhoneCode(input: unknown): Promise<ActionResult<{ sent
     const reading = readInternational(typed, country);
     if (reading.state !== "valid") return fail(copy.numberInvalid, { phone: copy.numberInvalid });
     e164 = reading.e164;
+    /* A MEMBER ABROAD, WHILE NO CODE CAN REACH THEM (the founder, 15 November
+       2026). The international sender is not set up, so no code is promised.
+       The number is put on the member's own profile, unconfirmed, through
+       their own session (RLS and the denylist trigger decide as for any
+       profile edit), and the gate lets them through until a code can be sent
+       (`abroadWaived` in gate.ts). It never writes `confirmed_phones`. */
+    if (!canSendAbroad()) {
+      const { error } = await session.supabase.from("profiles").update({ phone: e164 }).eq("id", session.user.id);
+      if (error) {
+        const code = (error as { code?: string }).code;
+        if (code === "23514" || code === "P0001") return refusedNumber(copy);
+        return fail(copy.profileFailed);
+      }
+      revalidatePath("/settings/phone");
+      return ok({ sentTo: e164, waived: true });
+    }
   }
   if (!hasServiceRole()) return fail(messages.unconfigured);
 

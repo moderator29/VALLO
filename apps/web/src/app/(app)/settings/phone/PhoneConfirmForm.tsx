@@ -61,6 +61,8 @@ export function PhoneConfirmForm({
   const [country, setCountry] = useState<CountryCode>(DEFAULT_COUNTRY);
   const [code, setCode] = useState("");
   const [sentTo, setSentTo] = useState<string | null>(null);
+  /* A number abroad, saved with no code because none can be sent (15 November 2026). */
+  const [waived, setWaived] = useState(false);
   /* The server said confirmed (the control morphs to the tick)... */
   const [done, setDone] = useState(false);
   /* ...and the payoff has settled (the panel's face turns). */
@@ -113,10 +115,10 @@ export function PhoneConfirmForm({
 
   /* Settled with somewhere to go back to: go, a beat after the words land. */
   useEffect(() => {
-    if (!settled || !returnTo) return;
-    const timer = window.setTimeout(() => router.push(returnTo), 900);
+    if (!(settled || waived) || !returnTo) return;
+    const timer = window.setTimeout(() => router.push(returnTo), waived ? 2600 : 900);
     return () => window.clearTimeout(timer);
-  }, [settled, returnTo, router]);
+  }, [settled, waived, returnTo, router]);
 
   /* The next action after a refusal, once the words are on screen and the
      wait has let go of the controls (a disabled button cannot take focus). */
@@ -134,6 +136,10 @@ export function PhoneConfirmForm({
       if (!result.ok) {
         /* Said by the one banner at the top of the screen (founder, 7 November 2026). */
         banner.error(result.error, { retry: send });
+        return;
+      }
+      if (result.data.waived) {
+        setWaived(true);
         return;
       }
       setSentTo(result.data.sentTo);
@@ -176,6 +182,15 @@ export function PhoneConfirmForm({
           </p>
           {returnTo && (
             <ButtonLink href={returnTo} variant="secondary" full data-testid="phone-return">
+              {copy.profileBack}
+            </ButtonLink>
+          )}
+        </div>
+      ) : waived ? (
+        <div role="status" className="grid gap-md" data-testid="phone-abroad-saved">
+          <p className="nf-body text-[var(--nf-content-primary)]">{copy.abroadSaved}</p>
+          {returnTo && (
+            <ButtonLink href={returnTo} variant="primary" full data-testid="phone-return">
               {copy.profileBack}
             </ButtonLink>
           )}

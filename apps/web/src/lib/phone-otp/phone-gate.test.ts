@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { getDictionary } from "@vallo/i18n";
@@ -12,6 +12,14 @@ import { getDictionary } from "@vallo/i18n";
  *                   even when a read fails.
  *   FULL GATE       the first message, visit, booking, payment and listing
  *                   ask, with the flag on, and nothing asks with it off.
+ *
+ * AND THE FOUNDER'S RULING OF 15 NOVEMBER 2026, which narrows the last one:
+ *
+ *   ONLY MONEY AND A LISTING ASK  the first payment and the first listing
+ *                   ask; a message, a visit, a booking, a review and a report
+ *                   never do.
+ *   A MEMBER ABROAD is not asked while no code can reach a number outside
+ *                   Nigeria, and is asked again the day one can.
  */
 
 const flag = { on: true };
@@ -22,7 +30,7 @@ vi.mock("../locale", () => ({ getLocale: async () => "en" }));
 
 const { decidePhoneGate, phoneGateFor } = await import("./gate");
 const { runSendCode } = await import("./send");
-const { PHONE_MOMENTS, failsClosed, memberConfirmRefusal, memberIssueRefusal } = await import("./core");
+const { ASKING_MOMENTS, PHONE_MOMENTS, asksPhone, failsClosed, memberConfirmRefusal, memberIssueRefusal } = await import("./core");
 const { capturingTransport } = await import("./transport");
 
 const MEMBER = "11111111-1111-4111-8111-111111111111";
@@ -32,7 +40,7 @@ const LOCALES = ["en", "yo", "ig", "ha"] as const;
 const en = getDictionary("en").trustVisible.phone;
 
 /** A stand-in for the member's Supabase client: no phone, no earlier actions. */
-function fakeDb(opts: { phone?: boolean; prior?: number; fail?: boolean } = {}) {
+function fakeDb(opts: { phone?: boolean; prior?: number; fail?: boolean; profilePhone?: string } = {}) {
   const answer = () => {
     if (opts.fail) return { data: null, count: null, error: { message: "down" } };
     /* The report count reads rows (to leave out danger reports), the rest count. */
@@ -40,9 +48,11 @@ function fakeDb(opts: { phone?: boolean; prior?: number; fail?: boolean } = {}) 
     return { data: rows, count: opts.prior ?? 0, error: null };
   };
   const chain: Record<string, unknown> = {};
+  let table = "";
   for (const m of ["select", "eq", "in", "not", "limit"]) chain[m] = () => chain;
   chain.maybeSingle = async () => {
     const a = answer();
+    if (table === "profiles") return { data: opts.fail ? null : { phone: opts.profilePhone ?? null }, error: a.error };
     return { data: opts.fail ? null : opts.phone ? { user_id: MEMBER } : null, error: a.error };
   };
   chain.then = (resolve: (v: unknown) => unknown) => resolve(answer());
@@ -51,7 +61,13 @@ function fakeDb(opts: { phone?: boolean; prior?: number; fail?: boolean } = {}) 
     const a = answer();
     return { data: a.error ? null : 0, error: a.error };
   };
-  return { from: () => chain, rpc };
+  return {
+    from: (name: string) => {
+      table = name;
+      return chain;
+    },
+    rpc,
+  };
 }
 
 beforeEach(() => {
@@ -111,11 +127,21 @@ describe("no enumeration", () => {
 });
 
 describe("the full gate, each moment", () => {
-  it.each(PHONE_MOMENTS)("%s asks the first time with the flag on, and never with it off", async (moment) => {
-    const required = await phoneGateFor(fakeDb(), MEMBER, moment);
-    expect(required).toEqual({ ok: false, error: en.required, gate: "phone" });
+  it("only a payment and a listing ask (15 November 2026)", () => {
+    expect([...ASKING_MOMENTS].sort()).toEqual(["listing", "payment"]);
+  });
+
+  it.each(PHONE_MOMENTS)("%s: a payment and a listing ask the first time with the flag on, the rest never ask, and nothing asks with it off", async (moment) => {
+    const answer = await phoneGateFor(fakeDb(), MEMBER, moment);
+    if (asksPhone(moment)) expect(answer).toEqual({ ok: false, error: en.required, gate: "phone" });
+    else expect(answer).toBeNull();
     flag.on = false;
     expect(await phoneGateFor(fakeDb(), MEMBER, moment)).toBeNull();
+  });
+
+  it.each(PHONE_MOMENTS.filter((m) => !asksPhone(m)))("%s reads nothing at all, so even a failed read never stops it", async (moment) => {
+    const db = { from: () => { throw new Error("must not read"); }, rpc: () => { throw new Error("must not read"); } };
+    expect(await phoneGateFor(db, MEMBER, moment)).toBeNull();
   });
 
   it.each(PHONE_MOMENTS)("%s never asks a member with a confirmed phone, or one past their first", async (moment) => {
@@ -135,6 +161,50 @@ describe("the full gate, each moment", () => {
     } else {
       expect(answer).toBeNull();
     }
+  });
+});
+
+describe("a member abroad, while no code can reach a number outside Nigeria", () => {
+  const twilio = ["TWILIO_ACCOUNT_SID", "TWILIO_AUTH_TOKEN", "TWILIO_FROM_NUMBER", "TWILIO_MESSAGING_SERVICE_SID"] as const;
+  const kept: Record<string, string | undefined> = {};
+  beforeEach(() => {
+    for (const name of twilio) {
+      kept[name] = process.env[name];
+      delete process.env[name];
+    }
+  });
+  afterEach(() => {
+    for (const name of twilio) {
+      if (kept[name] === undefined) delete process.env[name];
+      else process.env[name] = kept[name];
+    }
+  });
+
+  it.each(["payment", "listing"] as const)("%s: a number from another country on the profile is not asked", async (moment) => {
+    expect(await phoneGateFor(fakeDb({ profilePhone: "+447911123456" }), MEMBER, moment)).toBeNull();
+  });
+
+  it.each(["payment", "listing"] as const)("%s: a Nigerian number on the profile, or none, is still asked", async (moment) => {
+    expect(await phoneGateFor(fakeDb({ profilePhone: "08031234567" }), MEMBER, moment)).toEqual({ ok: false, error: en.required, gate: "phone" });
+    expect(await phoneGateFor(fakeDb({ profilePhone: "+2348031234567" }), MEMBER, moment)).toEqual({ ok: false, error: en.required, gate: "phone" });
+    expect(await phoneGateFor(fakeDb(), MEMBER, moment)).toEqual({ ok: false, error: en.required, gate: "phone" });
+  });
+
+  it("is asked again the day the international sender is set up", async () => {
+    process.env.TWILIO_ACCOUNT_SID = `AC${"0".repeat(32)}`;
+    process.env.TWILIO_AUTH_TOKEN = "token";
+    process.env.TWILIO_FROM_NUMBER = "+15005550006";
+    expect(await phoneGateFor(fakeDb({ profilePhone: "+447911123456" }), MEMBER, "payment")).toEqual({ ok: false, error: en.required, gate: "phone" });
+  });
+
+  it("the send action saves the number unconfirmed and promises no code, and never writes confirmed_phones", () => {
+    const src = readFileSync(join(__dirname, "actions.ts"), "utf8");
+    const at = src.indexOf("if (!canSendAbroad())");
+    expect(at).toBeGreaterThan(0);
+    const block = src.slice(at, src.indexOf("return ok({ sentTo: e164, waived: true })", at));
+    expect(block).toContain('.from("profiles").update({ phone: e164 }).eq("id", session.user.id)');
+    expect(block).not.toContain("confirmed_phones");
+    expect(block).not.toContain("phone_otp_issue");
   });
 });
 
