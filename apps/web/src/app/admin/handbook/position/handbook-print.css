@@ -1,0 +1,150 @@
+/*
+ * SAVE AS PDF, FOR A POSITION HANDBOOK (15 November 2026).
+ *
+ * A staff member reads their handbook on a phone or a computer and saves it
+ * to the device. One of the two ways is the browser's own PDF writer, which
+ * needs the page to print as a document rather than as a screenshot of the
+ * console: no rail, no bar, no drawer, no buttons, black ink on white paper,
+ * a page break before each numbered section, and the position and the date on
+ * the foot of every page. There is no second renderer, so the PDF cannot
+ * disagree with the screen.
+ *
+ * HOW, and it is `app/css/print.css` written again for this sheet rather than
+ * shared with it. That sheet keys on `[data-doc-print]` and prints ONE sheet
+ * per page; a handbook is a long article inside the console frame, wants page
+ * breaks of its own and a repeating foot, and `print.css` is imported by
+ * `DocumentSheet` for receipts and statements. Two sheets keyed on the same
+ * attribute would print as one run of both, so this one keys on
+ * `[data-handbook-print]` and is imported by the handbook view alone.
+ *
+ * In print, every element that neither is the handbook, nor sits inside it,
+ * nor contains it is taken out of the flow with `display: none`, not hidden
+ * with `visibility`, which would leave its height behind and print blank
+ * pages. The handbook's ancestors stay, stripped of padding, fill, shadow and
+ * scroll clipping, so the article lands at the top of the first page at full
+ * width.
+ *
+ * Tokens only, and every rule is inside @media print or @layer components, so
+ * nothing here can reach a screen rule of another sheet.
+ */
+@layer components {
+  /* The running foot: on screen it is nothing, in print it repeats on every
+     page, because a fixed element is painted once per printed page. */
+  .nf-hbp-foot {
+    display: none;
+  }
+}
+
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 16mm;
+  }
+
+  html:has([data-handbook-print]),
+  html:has([data-handbook-print]) body {
+    background: none !important;
+    color: var(--nf-content-on-paper) !important;
+  }
+
+  /* Everything that is not the handbook, not inside it and does not contain
+     it: the rail, the bar, the drawer, the dock, the escalate button, the
+     save controls' own wrapper. */
+  body:has([data-handbook-print])
+    *:not([data-handbook-print], [data-handbook-print] *, :has([data-handbook-print])) {
+    display: none !important;
+  }
+
+  body:has([data-handbook-print]) :has([data-handbook-print]) {
+    position: static !important;
+    inset: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    max-width: none !important;
+    width: auto !important;
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+    background: none !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    filter: none !important;
+    transform: none !important;
+    backdrop-filter: none !important;
+  }
+
+  [data-handbook-print] {
+    margin: 0 !important;
+    padding: 0 !important;
+    border-radius: 0 !important;
+    background: none !important;
+    box-shadow: none !important;
+    animation: none !important;
+    transform: none !important;
+    opacity: 1 !important;
+    color: var(--nf-content-on-paper) !important;
+  }
+
+  [data-handbook-print] * {
+    color: var(--nf-content-on-paper) !important;
+    background: none !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+
+  /* The controls, the contents card and the shell's own furniture are screen
+     things: a printed page cannot be pressed. */
+  [data-handbook-print] .nf-hbp-noprint,
+  [data-handbook-print] .nf-doc-toc {
+    display: none !important;
+  }
+
+  /* One section per page, which is how a person reads a handbook on paper and
+     finds a section again. */
+  [data-handbook-print] .nf-doc-section {
+    break-before: page;
+    break-inside: auto;
+  }
+  [data-handbook-print] .nf-doc-section:first-of-type {
+    break-before: auto;
+  }
+  [data-handbook-print] .nf-doc-section__title,
+  [data-handbook-print] h3 {
+    break-after: avoid;
+  }
+  [data-handbook-print] li,
+  [data-handbook-print] tr,
+  [data-handbook-print] .nf-doc-callout,
+  [data-handbook-print] .nf-doc-summary {
+    break-inside: avoid;
+  }
+
+  /* Tables and callouts keep their rules in ink, so a printed table is still
+     a table. */
+  [data-handbook-print] .nf-doc-table th,
+  [data-handbook-print] .nf-doc-table td {
+    border-color: var(--nf-border-on-paper) !important;
+  }
+  [data-handbook-print] .nf-doc-callout,
+  [data-handbook-print] .nf-doc-summary {
+    border: 1px solid var(--nf-border-on-paper) !important;
+  }
+
+  /* A link's address is worth having on paper, because a printed link cannot
+     be pressed. */
+  [data-handbook-print] a[href^="/"]::after {
+    content: " (vallospaces.com" attr(href) ")";
+    font-size: 0.85em;
+  }
+
+  .nf-hbp-foot {
+    display: block;
+    position: fixed;
+    inset: auto 0 0 0;
+    padding-top: 2mm;
+    border-top: 1px solid var(--nf-border-on-paper);
+    color: var(--nf-content-on-paper) !important;
+    font-size: 9pt;
+    text-align: center;
+  }
+}

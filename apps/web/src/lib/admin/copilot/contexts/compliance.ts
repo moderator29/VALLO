@@ -23,7 +23,7 @@ export function complianceContext(lane: string | null | ComplianceContextInput):
     input.laneTitle ? `The viewer has the ${input.laneTitle} lane open` : null,
     waiting !== null ? `${countWord(waiting, "item")} waiting in that lane${typeof input.overdueInThisLane === "number" ? `, ${input.overdueInThisLane} of them overdue` : ""}` : null,
     waiting === null
-      ? "No figures are passed from this page: call get_compliance_lanes for the counts rather than quoting a number from the screen"
+      ? "No figures are passed from this page, so do not quote any numbers from the screen: call get_compliance_lanes for the counts"
       : null,
   ]);
 }

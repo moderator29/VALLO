@@ -130,6 +130,7 @@ export const getPlatformPulse = defineTool({
         waitingAcrossTheDesks: waiting,
         waitingOnYou: r ? r.waiting.map((line) => ({ words: line.words, link: line.href })) : null,
         switches: r ? r.switches.map((sw) => ({ name: sw.note.title, state: sw.state, means: sw.state === "on" ? sw.note.on : sw.note.off })) : null,
+        readingValloWithoutAnAccount: r ? { name: r.reach.title, open: r.reach.open, means: r.reach.meaning, howToChange: r.reach.howToChange } : null,
         couldNotBeRead: [
           !p ? "the platform pulse" : null,
           !m ? "money over the last 30 days" : null,

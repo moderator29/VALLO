@@ -37,11 +37,11 @@ async function moneyFacts(): Promise<NonNullable<ExtraSources["facts"]>> {
  * in the index: nothing here throws and no desk waits on them.
  */
 export async function handbookSources(): Promise<NonNullable<ExtraSources["handbooks"]>> {
-  const module = await loadPositionHandbook();
-  if (!module) return [];
+  const handbook = await loadPositionHandbook();
+  if (!handbook) return [];
   const out: NonNullable<ExtraSources["handbooks"]>[number][] = [];
   for (const position of STAFF_POSITIONS) {
-    const sections = handbookSections(module, position);
+    const sections = handbookSections(handbook, position);
     if (sections.length === 0) continue;
     out.push({ position, title: JOB_DESCRIPTIONS[position].title, link: "/admin/handbook/position", sections });
   }

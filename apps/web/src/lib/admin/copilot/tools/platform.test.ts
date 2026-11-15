@@ -18,7 +18,7 @@ const { getConsolePulse, getCollectedSeries } = await import("@/lib/admin/reads/
 const { getSupplyDesk } = await import("@/lib/admin/reads/supply");
 const { readStaffDesk } = await import("@/lib/admin/staff-queries");
 const { getAuditLog, getAuditActivity } = await import("@/lib/admin/audit-queries");
-const { readSwitches } = await import("@/lib/admin/control/setup");
+const { readReach, readSwitches } = await import("@/lib/admin/control/setup");
 import type { CopilotViewer } from "./types";
 
 /**
@@ -64,6 +64,7 @@ const room = {
   setup: [],
   switches: readSwitches([{ key: "phone_confirmation", enabled: true }]),
   connections: [],
+  reach: readReach(true),
   waiting: [{ key: "escalations", count: 1, words: "1 escalation is waiting on you.", href: "/admin/escalations" }],
 };
 const supply = {
@@ -142,6 +143,7 @@ describe("get_platform_pulse", () => {
     const { data } = await run();
     expect(JSON.stringify(data.waitingOnYou)).toContain("1 escalation is waiting on you.");
     expect(JSON.stringify(data.switches)).toContain("Phone confirmation");
+    expect(JSON.stringify(data.readingValloWithoutAnAccount)).toContain("Reading Vallo without an account");
     expect(JSON.stringify(data.switches)).toContain("confirms a mobile number");
   });
 

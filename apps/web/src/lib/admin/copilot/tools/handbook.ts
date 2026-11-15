@@ -31,8 +31,8 @@ export const getMyHandbook = defineTool({
   handler: async (input, ctx) => {
     const position = ctx.viewer.position;
     const job = position ? JOB_DESCRIPTIONS[position] : null;
-    const module = await loadPositionHandbook();
-    const sections = handbookSections(module, position);
+    const handbook = await loadPositionHandbook();
+    const sections = handbookSections(handbook, position);
     const asked = (input.section ?? "").trim().toLowerCase();
     const picked = asked.length >= 3 ? sections.filter((s) => `${s.title} ${s.text}`.toLowerCase().includes(asked)) : sections;
     const shown = (picked.length > 0 ? picked : sections).slice(0, 12);

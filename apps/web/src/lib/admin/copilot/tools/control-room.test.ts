@@ -5,7 +5,7 @@ vi.mock("@/lib/admin/control/read", () => ({ readControlRoom: vi.fn() }));
 
 const { getControlRoom } = await import("./control-room");
 const { readControlRoom } = await import("@/lib/admin/control/read");
-const { SETUP_ITEMS, readConnections, readSwitches } = await import("@/lib/admin/control/setup");
+const { SETUP_ITEMS, readConnections, readReach, readSwitches } = await import("@/lib/admin/control/setup");
 const { isOfferable } = await import("./registry");
 
 const viewer = (isSuperAdmin: boolean) => ({ userId: "u", firstName: "A", isAdmin: true, isSuperAdmin, scopes: [], position: null }) as never;
@@ -29,6 +29,7 @@ describe("the control room tool", () => {
       setup: SETUP_ITEMS.map((item) => ({ item, state: item.key === "staff_escalations" ? ("waiting" as const) : ("ready" as const) })),
       switches: readSwitches([{ key: "phone_confirmation", enabled: true }]),
       connections: readConnections({ codesNigeria: true, codesAbroad: false, paymentPartner: false, paymentPartnerWebhook: false, cardPayments: true, email: true, copilot: true, onCallPage: false }),
+      reach: readReach(true),
       waiting: [{ key: "escalations", count: 1, words: "1 escalation is waiting on you.", href: "/admin/escalations" }],
     });
     const out = await getControlRoom.handler({}, ctx(true));
@@ -37,6 +38,9 @@ describe("the control room tool", () => {
     expect(text).toContain("1 escalation is waiting on you.");
     expect(text).toContain("supabase/migrations/pending/staff_escalations_2026-11-15.sql");
     expect(text).toContain("members abroad are not asked for a phone");
+    /* The control room's own reading of whether Vallo can be read signed out. */
+    expect(text).toContain("Reading Vallo without an account");
+    expect(text).toContain("VALLO_PUBLIC_CATALOGUE");
     expect(text).not.toMatch(/sk_|whsec_/);
   });
 

@@ -53,8 +53,8 @@ export function asHandbookModule(candidate: unknown): PositionHandbookModule | n
 let source: PositionHandbookModule | null | undefined;
 
 /** The handbook module for a test, or null to prove the absent path. */
-export function setPositionHandbookSource(module: PositionHandbookModule | null | undefined): void {
-  source = module;
+export function setPositionHandbookSource(handbook: PositionHandbookModule | null | undefined): void {
+  source = handbook;
 }
 
 /** The handbook module, or null when there is none. Never throws. */
@@ -68,11 +68,11 @@ export async function loadPositionHandbook(): Promise<PositionHandbookModule | n
 }
 
 /** One position's sections, cleaned and capped. Empty when the handbook has none. */
-export function handbookSections(module: PositionHandbookModule | null, position: StaffPosition | null): PositionHandbookPassage[] {
-  if (!module || !position) return [];
+export function handbookSections(handbook: PositionHandbookModule | null, position: StaffPosition | null): PositionHandbookPassage[] {
+  if (!handbook || !position) return [];
   let raw: unknown;
   try {
-    raw = module.positionHandbookPassages(position);
+    raw = handbook.positionHandbookPassages(position);
   } catch {
     return [];
   }

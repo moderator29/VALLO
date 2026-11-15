@@ -15,7 +15,7 @@ export function roommatesContext(tabLabel: string, counts?: { verificationsWaiti
     cases !== null ? `${countWord(cases, "open roommates case")}` : null,
     "Reports about roommates are decided as cases",
     waiting === null && cases === null
-      ? "No figures are passed from this page: call the case and verification reads for the counts rather than quoting a number from the screen"
+      ? "No figures are passed from this page, so do not quote any numbers from the screen: call the case and verification reads for the counts"
       : null,
   ]);
 }

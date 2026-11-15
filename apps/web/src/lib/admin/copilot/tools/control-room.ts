@@ -36,10 +36,19 @@ export const getControlRoom = defineTool({
           inPlace: room.setup.filter((r) => r.state === "ready").length,
         },
         switches: room.switches.map((s) => ({ name: s.note.title, state: s.state, means: s.state === "on" ? s.note.on : s.note.off })),
+        /* Added with the control room's own reading (16 November 2026): whether
+           Vallo can be read without an account. It is a deploy setting, not a
+           switch, so the answer has to say how it is changed. */
+        readingValloWithoutAnAccount: { name: room.reach.title, open: room.reach.open, means: room.reach.meaning, howToChange: room.reach.howToChange },
         services: room.connections.map((c) => ({ name: c.title, connected: c.ready, means: c.meaning })),
         page: "/admin/control",
       },
       note: "Say it in plain words, what is waiting first. SQL is run by the founder in the Supabase SQL editor and a switch is changed on the Switches desk: you cannot do either, so name the file or the desk. Never state a key or a secret; you have none.",
+      links: [
+        { label: "Open the control room", href: "/admin/control", requires: "super_admin" },
+        { label: "Open Switches", href: "/admin/switches", requires: "admin" },
+        { label: "Open Escalations", href: "/admin/escalations" },
+      ],
     };
   },
 });
