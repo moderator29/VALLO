@@ -150,14 +150,6 @@ describe("principle 10, the marketing and loading loops (Session 3, C1)", () => 
          dots, that lasts only while a call rings (45 s at most) and is
          stopped by reduced motion, Calm, Off and data saver. */
       "app/css/calls.css": 1,
-      /* THE PROCESSING BANNER (14 November 2026). `banner.processing` says a
-         thing is under way and stays until the caller takes it down, so its
-         ring must turn for as long as the wait lasts: a loop with a counted
-         number of turns would stop while the person is still waiting and
-         read as finished. Like the call ring and the typing dots it is a live
-         signal, and it rests under reduced motion, Calm, Off and data saver,
-         where the clock glyph is drawn in its place. */
-      "app/css/grade1.css": 1,
       /* THE FOUNDER'S RESTORATION (7 October 2026): the login, sign-up and
          welcome screens back exactly as they were before the redesign, with
          their own loops (the code caret, the focal glow, the welcome scenes'

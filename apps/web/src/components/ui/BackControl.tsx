@@ -141,7 +141,12 @@ export function BackControl({
       } ${className ?? ""}`}
       {...rest}
     >
-      <UiIcon name="chevron-left" size={20} />
+      {/* 24, not 20 (the founder, 15 November 2026: "make the go back button
+          a bit bigger wide platform"). The 44px target does not change: the
+          glyph grows inside it. `--nf-nav-glyph` in chrome.css carries the
+          same number, because the edge arithmetic is derived from the glyph's
+          size, so the ink stays on the page's text line at the new size. */}
+      <UiIcon name="chevron-left" size={24} />
       {word ? <span aria-hidden="true">{word}</span> : null}
     </button>
   );

@@ -166,7 +166,7 @@ function QuickPill({ item, leaving }: { item: QuickItem; leaving: boolean }) {
   return (
     <div role="status" className="nf-quick" data-leaving={leaving || undefined} data-testid={item["data-testid"] ?? "quick-pill"}>
       <span className="nf-quick__mark" aria-hidden="true">
-        <UiIcon name="circle-check" size={17} />
+        <UiIcon name="check" size={14} />
       </span>
       <span className="nf-quick__text">{item.message}</span>
     </div>
@@ -192,25 +192,13 @@ function BannerLanes({ shown, leaving }: { shown: ToastItem | null; leaving: boo
   );
 }
 
-/**
- * ONE CIRCLED MARK PER TONE (founder, 14 November 2026, holding up EscrowPay
- * and WhatsApp: "that checkmark icon make it exactly the one in the escrow
- * pay ... it's same as the WhatsApp ss"). Both draw the ring and the mark as
- * ONE glyph, which is what makes them read as neat at 20px; a CSS border with
- * a loose glyph inside it never quite centres and never quite matches the
- * stroke. The icon set already carried `circle-check` and `circle-x`;
- * `circle-alert` and `circle-info` were added beside them in the same
- * construction, so the family is complete and consistent.
- */
+/** One clean mark per tone (docs/UX_SYSTEM.md, "Feedback"). */
 const MARK: Record<ToastItem["tone"], UiIconName> = {
-  neutral: "circle-info",
-  info: "circle-info",
-  success: "circle-check",
-  warning: "circle-alert",
-  error: "circle-x",
-  /* Under way: the turning ring is the mark, so the clock is drawn only when
-     motion is off (grade1.css). */
-  processing: "clock",
+  neutral: "info",
+  info: "info",
+  success: "check",
+  warning: "alert-triangle",
+  error: "alert-triangle",
 };
 
 /** Error and warning are announced at once; the rest politely. */

@@ -158,8 +158,7 @@
   row-gap: 0;
 }
 .nf-toast-host .nf-toast__text {
-  /* "texts small inside": caption, the quick pill's size, not body. */
-  font-size: var(--nf-text-caption);
+  font-size: var(--nf-text-body-sm);
   font-weight: 600;
   line-height: 1.35;
 }
@@ -178,191 +177,29 @@
 .nf-toast-host .nf-toast__action:active {
   background: var(--nf-brand-tint-1);
 }
-/*
- * THE BANNER WEARS THE BRAND (founder, 14 November 2026, with a screenshot of
- * another product's banner: "make VALLO own be like that should have that
- * marked icon and our branding line vertical you know how you would make it
- * lovely ... make it fucking attractive add some arts stuffs around it make
- * it unique looking really good ... let our platform and the branding stands
- * out").
- *
- * Three parts, and ONE colour decides all three. `--nf-toast-tone` is set
- * once per tone below, and the rail, the plate and the glow all read it, so a
- * new tone is one line and can never half-match itself.
- *
- *   THE RAIL   a vertical line down the leading edge, inset top and bottom so
- *              it reads as a drawn line rather than a cut edge. This is the
- *              "branding line vertical" he asked for, and it is what makes a
- *              Vallo banner recognisable at a glance from across a room.
- *   THE PLATE  the glyph on a tinted rounded square, as on his reference. It
- *              was a bare glyph (the 7 November "no tile" ruling, R62), which
- *              is what he is now asking to change; this note is here so the
- *              next reader knows it was a decision and not a drift.
- *   THE GLOW   one soft circle of the tone behind the plate, at low strength.
- *              It is the "art" of it: the banner reads as lit from its own
- *              mark rather than as a grey slab with a coloured dot. It is
- *              NOT a gradient behind reading content (UX_SYSTEM 2): it sits
- *              behind the glyph, at the leading edge, and the words are on
- *              plain surface.
- *
- * Both themes get the same construction. The tone tokens already carry their
- * own light and dark values, so nothing here is theme-specific.
- */
-.nf-toast-host .nf-toast {
-  --nf-toast-tone: var(--nf-brand-primary);
-  position: relative;
-  isolation: isolate;
-  overflow: hidden;
-  /* A CAPSULE, SMALL (founder, 14 November 2026, holding WhatsApp's "Message
-     copied" against the first build of this: "the icons should be like this
-     WhatsApp own is small and capsule and texts small inside and you see how
-     professional it look ... those icons are too big and not capsule"). A
-     status, never a control, so the capsule reading the shape law protects
-     ("a pill means selectable") is not broken by it. */
-  border-radius: var(--nf-radius-pill);
-  padding-block: var(--nf-space-2xs);
-  /* Clearance for the rail: it ends at 8px, so the mark starts at 16px and
-     the line reads as a deliberate mark rather than as a nick in the edge. */
-  padding-inline-start: var(--nf-space-md);
-}
-.nf-toast-host .nf-toast[data-tone="success"] {
-  --nf-toast-tone: var(--nf-state-success);
-}
-.nf-toast-host .nf-toast[data-tone="error"] {
-  --nf-toast-tone: var(--nf-state-error);
-}
-.nf-toast-host .nf-toast[data-tone="warning"] {
-  --nf-toast-tone: var(--nf-state-warning);
-}
-.nf-toast-host .nf-toast[data-tone="info"] {
-  --nf-toast-tone: var(--nf-state-info);
-}
-.nf-toast-host .nf-toast[data-tone="processing"] {
-  --nf-toast-tone: var(--nf-brand-primary);
-}
-
-/*
- * THE RAIL CARRIES THE BRAND, NOT THE TONE (founder, 14 November 2026, on the
- * first build: "what is green finding in our platform"). He was right. The
- * rail, the glow and the plate all took the tone's colour, so a success
- * banner was green down one edge, green behind the mark and green in the
- * glyph, and Vallo is blue with an orange spark. The brand line is the brand
- * line in every tone; the ONLY coloured thing is the small mark, which is
- * what WhatsApp does too: a dark capsule, white words, one small green ring.
- */
-.nf-toast-host .nf-toast::before {
-  content: "";
-  position: absolute;
-  inset-block: 0.5rem;
-  inset-inline-start: 0.375rem;
-  inline-size: 2px;
-  border-radius: var(--nf-radius-pill);
-  background: var(--nf-brand-primary);
-  z-index: -1;
-}
-
-/*
- * THE MARK: A RING WITH THE GLYPH INSIDE IT, SMALL ("you add that checkmark
- * too like theirs but on our branding"). A ring reads at this size where a
- * filled plate reads as a blob, and it is the one place the tone's colour is
- * allowed. 1.25rem, against the 1.75rem plate it replaces.
- *
- * Written with `[data-tone]` in the selector deliberately: `overlays.css` and
- * `details.css` each carry per-tone rules at that same weight, and matching
- * their weight lets import order decide. grade1.css is imported last by
- * design, as the note at the top of this file says. The alternative, editing
- * three sheets, would leave one rule living in three places.
- */
-.nf-toast-host .nf-toast[data-tone] .nf-toast__mark {
-  position: relative;
-  display: grid;
-  place-items: center;
+/* A plain glyph in the tone's colour (R62), no tile behind it. */
+.nf-toast-host .nf-toast__mark {
   inline-size: 1.25rem;
   block-size: 1.25rem;
-  flex-shrink: 0;
-  /* NO BORDER HERE. The glyph draws its own ring (`circle-check` and its
-     family), which is how the references do it and the only way the ring and
-     the mark inside it share one stroke and one centre. */
   border-radius: 0;
-  border: 0;
   background: none;
-  color: var(--nf-toast-tone);
 }
-.nf-toast-host .nf-toast[data-tone] .nf-toast__mark svg {
-  inline-size: 1.25rem;
-  block-size: 1.25rem;
+.nf-toast-host .nf-toast[data-tone="success"] .nf-toast__mark {
+  background: none;
+  color: var(--nf-state-success);
 }
-
-/*
- * UNDER WAY: a ring turns around the plate. One gap in the ring is what the
- * eye reads as motion; a full ring turning looks still. `--nf-duration-*`
- * tokens collapse under the Motion setting, so this is written in its own
- * time and switched off below for reduced motion instead, where it becomes a
- * complete quiet ring: the banner still says "under way" without moving.
- */
-/*
- * THE TURNING RING IS THE SAME RING AS THE DRAWN ONES (founder, 14 November
- * 2026: "why would the image 2 have another outer beautiful art and the
- * approved one have only a tick ... uniform those"). It was 23px wide at a
- * 1.5px stroke beside a 20px glyph at 1.875px, so the two marks did not match
- * each other, which is exactly what he saw.
- *
- * The glyph set draws at stroke 2.25 in a 24 unit square, so at 20px its
- * stroke lands at 2.25 x 20 / 24 = 1.875px. This ring takes that number and
- * `border-box`, so it is 20px across INCLUDING its stroke, like the glyph.
- * Change the mark's size and both follow from the one line above.
- */
-.nf-toast-host .nf-toast[data-tone="processing"] .nf-toast__mark {
-  box-sizing: border-box;
-  border-radius: var(--nf-radius-circle);
-  border: 1.875px solid color-mix(in oklab, var(--nf-toast-tone) 26%, transparent);
-  border-block-start-color: var(--nf-toast-tone);
-  animation: nf-toast-turn 1100ms linear infinite;
+.nf-toast-host .nf-toast[data-tone="error"] .nf-toast__mark {
+  background: none;
+  color: var(--nf-state-error);
 }
-.nf-toast-host .nf-toast[data-tone="processing"] .nf-toast__mark svg {
-  /* NO GLYPH INSIDE THE RING WHILE IT TURNS. A clock drawn inside a circle is
-     a circle inside a circle, which at 20px reads as busy rather than as
-     "under way"; a ring with one lit quarter, turning, is the thing everybody
-     already understands. The glyph stays in the markup for the reduced-motion
-     case below, where a still ring would say nothing by itself. */
-  display: none;
+.nf-toast-host .nf-toast[data-tone="warning"] .nf-toast__mark {
+  background: none;
+  color: var(--nf-state-warning);
 }
-/* THE STILL CASE. Whenever the ring may not turn, the clock comes back: a
-   still ring with one lit quarter says nothing by itself. This is the
-   system's reduced motion AND Vallo's own Motion setting (Calm, Off) and
-   data saver, the same four the call ring and the typing dots answer to. */
-@media (prefers-reduced-motion: reduce) {
-  .nf-toast-host .nf-toast[data-tone="processing"] .nf-toast__mark svg {
-    display: block;
-    inline-size: 0.75rem;
-    block-size: 0.75rem;
-  }
-}
-:root:is([data-motion="calm"], [data-motion="off"], [data-save-data="on"]) .nf-toast-host .nf-toast[data-tone="processing"] .nf-toast__mark svg {
-  display: block;
-  inline-size: 0.75rem;
-  block-size: 0.75rem;
-}
-@keyframes nf-toast-turn {
-  to {
-    transform: rotate(360deg);
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  .nf-toast-host .nf-toast[data-tone="processing"] .nf-toast__mark,
-  .nf-toast-host .nf-toast[data-tone="processing"] .nf-toast__mark svg {
-    animation: none;
-  }
-  .nf-toast-host .nf-toast[data-tone="processing"] .nf-toast__mark {
-    border-color: var(--nf-toast-tone);
-  }
-}
-:root:is([data-motion="calm"], [data-motion="off"], [data-save-data="on"]) .nf-toast-host .nf-toast[data-tone="processing"] .nf-toast__mark,
-:root:is([data-motion="calm"], [data-motion="off"], [data-save-data="on"]) .nf-toast-host .nf-toast[data-tone="processing"] .nf-toast__mark svg {
-  animation: none;
-}
-:root:is([data-motion="calm"], [data-motion="off"], [data-save-data="on"]) .nf-toast-host .nf-toast[data-tone="processing"] .nf-toast__mark {
-  border-color: var(--nf-toast-tone);
+.nf-toast-host .nf-toast[data-tone="info"] .nf-toast__mark,
+.nf-toast-host .nf-toast[data-tone="neutral"] .nf-toast__mark {
+  background: none;
+  color: var(--nf-brand-primary);
 }
 /* 4.4: a person's face beside the message, for banners that name someone. */
 .nf-toast__avatar {
@@ -378,12 +215,10 @@
   flex-shrink: 0;
   display: inline-grid;
   place-items: center;
-  inline-size: 1.375rem;
-  block-size: 1.375rem;
+  inline-size: 1.75rem;
+  block-size: 1.75rem;
   margin-inline: var(--nf-space-2xs);
-  /* Round, because a square inside a capsule fights it. The 44px touch area
-     below is unchanged: this is the paint, not the target. */
-  border-radius: var(--nf-radius-circle);
+  border-radius: var(--nf-radius-sm);
   background: var(--nf-border-subtle);
   color: var(--nf-content-secondary);
 }
@@ -393,8 +228,8 @@
   inset: -0.5rem;
 }
 .nf-toast__close svg {
-  inline-size: 0.75rem;
-  block-size: 0.75rem;
+  inline-size: 0.875rem;
+  block-size: 0.875rem;
 }
 .nf-toast__close:active {
   background: var(--nf-border-default);
@@ -408,7 +243,6 @@
     animation: none;
   }
 }
-
 /*
  * THE QUICK PILL (`banner.quick`, `ToastHost`; the founder, 14 November 2026,
  * with WhatsApp's "Message copied" as the reference). A tick and a few words

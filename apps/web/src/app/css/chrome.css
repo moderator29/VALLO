@@ -1184,7 +1184,7 @@
    * this now, so one piece of arithmetic places every back control.
    */
   .nf-nav-edge {
-    --nf-nav-glyph: 20px;
+    --nf-nav-glyph: 24px;
     /* A chevron's ink begins 9/24 of the way into its square. */
     --nf-nav-ink-inset: calc(var(--nf-nav-glyph) * 0.375);
     margin-inline-start: calc(var(--nf-nav-ink-inset) * -1);
@@ -1216,7 +1216,7 @@
      following it. It used to be pulled a whole 16px, which put its box hard
      against the screen edge. */
   .nf-bar-back {
-    --nf-nav-glyph: 20px;
+    --nf-nav-glyph: 24px;
     --nf-nav-ink-inset: calc(var(--nf-nav-glyph) * 0.375);
     margin-inline-start: calc(var(--nf-nav-ink-inset) * -1);
     justify-items: start;

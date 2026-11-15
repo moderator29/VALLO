@@ -42,7 +42,7 @@
  * caller shows something in a browser).
  */
 
-export type ToastTone = "neutral" | "success" | "info" | "warning" | "error" | "processing";
+export type ToastTone = "neutral" | "success" | "info" | "warning" | "error";
 
 export type ToastAction = { label: string; run: () => void };
 
@@ -135,18 +135,8 @@ export const BANNER_TIMING = {
   exitToken: "--nf-duration-fast",
 } as const;
 
-/**
- * HOW LONG A PROCESSING BANNER WAITS. It says a thing is under way, so it is
- * the caller's to take down with `dismissToast` when the thing finishes or
- * fails. This is only the backstop, for the case where that never happens:
- * five minutes, long enough that no real wait reaches it, short enough that a
- * forgotten banner does not sit on the screen for ever.
- */
-export const PROCESSING_DWELL_MS = 5 * 60 * 1000;
-
 /** The dwell a message gets when the caller does not name one. */
 export function dwellFor(tone: ToastTone, hasAction: boolean): number {
-  if (tone === "processing") return PROCESSING_DWELL_MS;
   return tone === "error" || tone === "warning" || hasAction ? TOAST_DWELL_LONG_MS : TOAST_DWELL_MS;
 }
 
@@ -414,8 +404,6 @@ type ToastFn = ((message: string, options?: ToastOptions) => number) & {
   info: Toned;
   warning: Toned;
   error: Toned;
-  /** A thing is under way. Stays until the caller takes it down. */
-  processing: Toned;
   /** The quick pill at the bottom: "Message copied". Never an error, an undo or a retry. */
   quick: typeof showQuick;
   dismiss: typeof dismissToast;
@@ -428,7 +416,6 @@ export const toast: ToastFn = Object.assign(
     info: ((message, options) => show(message, { ...options, tone: "info" })) as Toned,
     warning: ((message, options) => show(message, { ...options, tone: "warning" })) as Toned,
     error: ((message, options) => show(message, { ...options, tone: "error" })) as Toned,
-    processing: ((message, options) => show(message, { ...options, tone: "processing" })) as Toned,
     quick: showQuick,
     dismiss: dismissToast,
   },
