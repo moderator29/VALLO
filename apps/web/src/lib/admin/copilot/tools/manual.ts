@@ -1,9 +1,11 @@
 import { z } from "zod";
 import { STAFF_SCOPES } from "@/lib/admin/guard";
+import { JOB_DESCRIPTIONS, STAFF_POSITIONS } from "@/lib/admin/staff-positions";
+import { handbookSections, loadPositionHandbook } from "./handbook-source";
 import { buildPassages, searchPassages, visiblePassages, type ExtraSources, type ManualPassage } from "./manual-search";
 import { buildPlaybook, PLAYBOOKS } from "./playbooks";
 import { clip } from "./common";
-import { defineTool } from "./types";
+import { defineTool, type ToolLink } from "./types";
 
 /**
  * SEARCH THE STAFF MANUAL AND THE JOB DESCRIPTIONS, and build playbooks.
@@ -30,6 +32,22 @@ async function moneyFacts(): Promise<NonNullable<ExtraSources["facts"]>> {
   return facts.filter((f) => typeof f.text === "string" && f.text.length > 0);
 }
 
+/**
+ * The position handbooks, when they are built. Absent handbooks are simply not
+ * in the index: nothing here throws and no desk waits on them.
+ */
+export async function handbookSources(): Promise<NonNullable<ExtraSources["handbooks"]>> {
+  const module = await loadPositionHandbook();
+  if (!module) return [];
+  const out: NonNullable<ExtraSources["handbooks"]>[number][] = [];
+  for (const position of STAFF_POSITIONS) {
+    const sections = handbookSections(module, position);
+    if (sections.length === 0) continue;
+    out.push({ position, title: JOB_DESCRIPTIONS[position].title, link: "/admin/handbook/position", sections });
+  }
+  return out;
+}
+
 export async function manualPassages(): Promise<ManualPassage[]> {
   if (cache) return cache;
   const [{ MANUAL_BODIES }, { CHAPTERS }, { FAQS }] = await Promise.all([
@@ -37,8 +55,13 @@ export async function manualPassages(): Promise<ManualPassage[]> {
     import("@/app/(site)/docs/chapters"),
     import("@/lib/support/help-articles"),
   ]);
-  cache = buildPassages(MANUAL_BODIES, { docs: CHAPTERS, faqs: FAQS, facts: await moneyFacts() });
+  cache = buildPassages(MANUAL_BODIES, { docs: CHAPTERS, faqs: FAQS, facts: await moneyFacts(), handbooks: await handbookSources() });
   return cache;
+}
+
+/** Drops the index, so a test (or the handbook landing) is read afresh. */
+export function forgetManualIndex(): void {
+  cache = null;
 }
 
 export const searchManual = defineTool({
@@ -50,9 +73,15 @@ export const searchManual = defineTool({
   status: "Searching the staff manual",
   input: z.object({ query: z.string().min(2).max(200) }),
   handler: async (input, ctx) => {
-    const hits = searchPassages(input.query, visiblePassages(await manualPassages(), ctx.viewer), 5);
+    const hits = searchPassages(input.query, visiblePassages(await manualPassages(), ctx.viewer), 5, { position: ctx.viewer.position });
     if (hits.length === 0) return { ok: true, data: { matches: [], note: "Nothing in the manual matched. Say so, and point to /admin/manual or their lead." } };
-    return { ok: true, data: { matches: hits.map((h) => ({ source: h.source, chapter: h.title, section: h.heading, passage: clip(h.text, 700), link: h.link })), page: "/admin/manual" } };
+    const links: ToolLink[] = [{ label: "Open the staff manual", href: "/admin/manual" }];
+    if (hits.some((h) => h.source === "handbook")) links.push({ label: "Read your handbook", href: "/admin/handbook/position" });
+    return {
+      ok: true,
+      data: { matches: hits.map((h) => ({ source: h.source, chapter: h.title, section: h.heading, passage: clip(h.text, 700), link: h.link })), page: "/admin/manual" },
+      links,
+    };
   },
 });
 
@@ -66,7 +95,11 @@ export const getPlaybook = defineTool({
   handler: async (input, ctx) => {
     const answer = buildPlaybook(input.task, await manualPassages(), ctx.viewer);
     if (!answer.ok) return { ok: true, data: answer };
-    return { ok: true, data: { ...answer, steps: answer.steps.map((s, i) => `${i + 1}. ${clip(s, 400)}`) } };
+    return {
+      ok: true,
+      data: { ...answer, steps: answer.steps.map((s, i) => `${i + 1}. ${clip(s, 400)}`) },
+      links: [{ label: `Open ${answer.desk.name}`, href: answer.desk.href }],
+    };
   },
 });
 
