@@ -71,6 +71,21 @@ export function ControlRoomView({ room }: { room: Extract<ControlRoom, { state: 
         )}
       </Panel>
 
+      <Panel title="Who can read Vallo" id="reach">
+        <div className={ROW} data-testid="control-reach" data-open={room.reach.open ? "yes" : "no"}>
+          <div className="flex flex-wrap items-center gap-x-sm gap-y-2xs">
+            <p className={TITLE}>{room.reach.title}</p>
+            <Badge tone={room.reach.open ? "success" : "info"}>{room.reach.open ? "Open to everybody" : "Account needed"}</Badge>
+          </div>
+          <p className={WORDS}>{room.reach.meaning}</p>
+          {!room.reach.open ? <p className={WORDS}>{room.reach.howToChange}</p> : null}
+        </div>
+        <p className={`${WORDS} mt-sm`}>
+          Nothing on Vallo is closed to a country. Somebody outside Nigeria can sign up, search, message, book a stay and pay by card today, and
+          sees prices in their own currency beside the naira figure. A lister still needs a Nigerian bank account to be paid.
+        </p>
+      </Panel>
+
       <Panel title="Database setup" id="setup">
         <p className={`${WORDS} mb-sm`} data-testid="control-setup-summary">
           {waitingSetup.length === 0

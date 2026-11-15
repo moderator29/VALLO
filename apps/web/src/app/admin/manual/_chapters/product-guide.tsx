@@ -40,7 +40,8 @@ const STATUS: DocTableRow[] = [
   { id: "price", cells: { feature: "Price Check", status: OPEN, say: "Shows what similar properties nearby are asking. It needs enough real listings near the spot to answer." } },
   { id: "rent-pay", cells: { feature: "Paying rent through Vallo", status: NOT_OPEN, say: "Do not promise it. Members can view, inspect and agree terms now." } },
   { id: "sale-pay", cells: { feature: "Paying for a property purchase through Vallo", status: { state: "Never", tone: "neutral" }, say: "Vallo does not take payment for a purchase at any stage." } },
-  { id: "protected", cells: { feature: "Payment held by a licensed bank until the deal is done", status: NOT_OPEN, say: "Built and switched off. Do not describe it to members or prospects as available." } },
+  { id: "protected", cells: { feature: "Payment held by a licensed bank until the deal is done", status: NOT_OPEN, say: "Built and switched off today. Do not describe it to members or prospects as available." } },
+  { id: "identity", cells: { feature: "Identity checked by a paid service", status: NOT_OPEN, say: "A person at Vallo reviews every identity today, with the free cross-checks on the verification desk. A paid service is being set up. If you are not sure about an ID, escalate it: do not decide it." } },
   { id: "wallet", cells: { feature: "Wallet", status: NOT_OPEN, say: "Vallo keeps no balance for anybody today." } },
   { id: "bill", cells: { feature: "Paying a restaurant bill through Vallo", status: NOT_OPEN, say: "Diners pay the restaurant directly." } },
   { id: "pro", cells: { feature: "The optional Pro plan", status: NOT_OPEN, say: "Nobody needs it to list, book, view or be paid." } },
@@ -197,6 +198,13 @@ export const PRODUCT_GUIDE: ManualBody = {
             ]}
             rows={STATUS}
           />
+          <DocCallout tone="note" title="Not open yet means today, not forever">
+            This table is checked against the product, and it moves often: several of these are being worked on now and
+            some will have changed within a day or two of you reading this. Never promise a date, and never say a
+            feature is coming. If you need to know where something stands right now, open the screen itself, or ask a
+            super admin to read the Control room, which reads the live platform. The guide follows the product; it
+            never runs ahead of it.
+          </DocCallout>
           <DocCallout tone="warning" title="Vallo is new, and the catalogue is young">
             Most of the listings a visitor sees today are example listings, marked as examples, there to show how the
             platform works. Real listings are being added now. Say this plainly to a prospect: the first listers in
@@ -386,6 +394,21 @@ export const PRODUCT_GUIDE: ManualBody = {
             listings, not what anybody paid, not a price put on a particular property and not advice. It needs at least
             five comparable real listings nearby, and it says so when it has too few. It does not price land, hotels or
             restaurants, and it never builds a figure from example listings.
+          </p>
+          <h3 className="nf-h4">How an identity is checked today</h3>
+          <p>
+            Every lister&apos;s identity is reviewed by a person at Vallo. On the verification desk, a reviewer opens
+            the person and sees their document beside their selfie, the names on record, whether the bank account name
+            agrees, and a panel of Cross-checks: whether the same ID number, the same file or a very similar picture is
+            on another account, whether the image carries the mark of an editing app, and, for a passport, whether the
+            check digits in the two lines at the bottom of the photo page pass. None of that proves an ID is genuine.
+            It catches common forgeries and an ID used twice.
+          </p>
+          <p>
+            A paid identity service is being set up. While identity is reviewed by hand, the rule is simple and it is
+            the founder&apos;s own: <strong>if you are not sure about an ID, do not decide it.</strong>{" "}
+            Do not approve it, do not tell the member what you suspect, and press Escalate. It reaches a person who can
+            decide. Nobody is marked down for escalating an ID that turns out to be real.
           </p>
           <h3 className="nf-h4">Badges and verification</h3>
           <p>

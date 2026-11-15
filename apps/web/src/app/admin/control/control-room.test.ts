@@ -10,7 +10,7 @@ async function render(waiting: boolean): Promise<string> {
   const html = await renderClient(`
     import { renderToStaticMarkup } from "react-dom/server";
     import { ControlRoomView } from "@/app/admin/control/ControlRoomView";
-    import { SETUP_ITEMS, orderSetup, readConnections, readSwitches } from "@/lib/admin/control/setup";
+    import { SETUP_ITEMS, orderSetup, readConnections, readReach, readSwitches } from "@/lib/admin/control/setup";
     const waiting = ${waiting};
     const room = {
       state: "ok",
@@ -18,6 +18,7 @@ async function render(waiting: boolean): Promise<string> {
       switches: readSwitches([{ key: "phone_confirmation", enabled: true }, { key: "wallet", enabled: false }]),
       connections: readConnections({ codesNigeria: true, codesAbroad: false, paymentPartner: false, paymentPartnerWebhook: false, cardPayments: true, email: true, copilot: true, onCallPage: false }),
       waiting: waiting ? [{ key: "escalations", count: 2, words: "2 escalations are waiting on you.", href: "/admin/escalations" }] : [],
+      reach: readReach(!waiting),
     };
     export const html = () => renderToStaticMarkup(<ControlRoomView room={room} />);
   `);
@@ -34,6 +35,9 @@ describe("the control room page", () => {
     expect(text).toMatch(/\d+ parts are in place/);
     expect(text).toContain("members abroad are not asked for a phone");
     expect(text).toContain("This page only reads; nothing here changes anything.");
+    expect(text).toContain("meets a sign-in page first");
+    expect(text).toContain("VALLO_PUBLIC_CATALOGUE");
+    expect(text).toContain("Nothing on Vallo is closed to a country.");
   }, 120_000);
 
   it("says so when nothing is waiting and everything is in place", async () => {
@@ -41,5 +45,6 @@ describe("the control room page", () => {
     expect(text).toContain("Nothing is waiting on you right now.");
     expect(text).toContain("Every part listed here is in place on the live database.");
     expect(text).not.toContain("The file to run");
+    expect(text).toContain("Anybody, anywhere, can read the listings");
   }, 120_000);
 });

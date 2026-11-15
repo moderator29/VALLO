@@ -2,7 +2,7 @@ import { getDictionary } from "@vallo/i18n";
 import { ControlRoomView } from "@/app/admin/control/ControlRoomView";
 import { getLocale } from "@/lib/locale";
 import type { ControlRoom } from "@/lib/admin/control/read";
-import { SETUP_ITEMS, orderSetup, readConnections, readSwitches } from "@/lib/admin/control/setup";
+import { SETUP_ITEMS, orderSetup, readConnections, readReach, readSwitches } from "@/lib/admin/control/setup";
 import { ConsoleFrame } from "../bd/ConsoleFrame";
 
 /**
@@ -44,6 +44,7 @@ export default async function PreviewControlRoom({ searchParams }: { searchParam
       copilot: true,
       onCallPage: quiet,
     }),
+    reach: readReach(quiet),
     waiting: quiet
       ? []
       : [

@@ -6,14 +6,17 @@ import { termiiConfig } from "@/lib/phone-otp/termii";
 import { canSendAbroad } from "@/lib/phone-otp/transport";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { requireAdmin } from "../guard";
+import { publicCatalogueEnabled } from "@/lib/catalogue/public-access";
 import {
   SETUP_ITEMS,
   orderSetup,
   readConnections,
+  readReach,
   readSwitches,
   setupStateFrom,
   type ConnectionReading,
   type SetupItem,
+  type ReachReading,
   type SetupReading,
   type SwitchReading,
 } from "./setup";
@@ -64,6 +67,7 @@ export type ControlRoom =
       setup: SetupReading[];
       switches: SwitchReading[];
       connections: ConnectionReading[];
+      reach: ReachReading;
       waiting: WaitingLine[];
     };
 
@@ -152,6 +156,7 @@ export async function readControlRoom(env: Readonly<Record<string, string | unde
       copilot: present("ANTHROPIC_API_KEY"),
       onCallPage: present("OPS_ALERT_EMAIL") || present("OPS_ALERT_WEBHOOK_URL"),
     }),
+    reach: readReach(publicCatalogueEnabled(env as Record<string, string | undefined>)),
     waiting,
   };
 }

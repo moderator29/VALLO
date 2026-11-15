@@ -260,6 +260,28 @@ export function readSwitches(rows: readonly { key: string; enabled: boolean }[])
 export type ConnectionReading = { key: string; title: string; ready: boolean; meaning: string };
 
 /**
+ * THE SIGN-IN WALL (the founder's question of 15 November 2026: how to open
+ * Vallo to people outside Nigeria). Nothing in the product locks a country
+ * out, so the only thing standing between a stranger abroad and a listing is
+ * whether the catalogue can be read signed out. That is a deploy setting
+ * (`VALLO_PUBLIC_CATALOGUE`), not a switch, because it changes what the app
+ * stores see; it is read here so the founder can see where it stands without
+ * opening the deploy settings.
+ */
+export type ReachReading = { open: boolean; title: string; meaning: string; howToChange: string };
+
+export function readReach(publicCatalogue: boolean): ReachReading {
+  return {
+    open: publicCatalogue,
+    title: "Reading Vallo without an account",
+    meaning: publicCatalogue
+      ? "Anybody, anywhere, can read the listings, stays and restaurants without signing up. Accounts, messages and every action still need an account, and an exact address is never shown to a stranger."
+      : "A visitor must sign up before they can see anything. Somebody who finds Vallo from a search or a shared link, in Nigeria or abroad, meets a sign-in page first.",
+    howToChange: "Set VALLO_PUBLIC_CATALOGUE to on in the deploy settings and deploy again. It is not a switch here, because it changes what the app stores see.",
+  };
+}
+
+/**
  * Which outside services this deployment is set up to reach. Only whether the
  * settings are present: never a key, a name or a value.
  */
