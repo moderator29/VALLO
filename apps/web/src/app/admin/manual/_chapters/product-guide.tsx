@@ -1,8 +1,27 @@
 import Link from "next/link";
 import { DocCallout } from "@/components/docs/DocArticle";
+import { plural } from "@vallo/i18n/core";
 import { DocTable, type DocTableRow } from "@/components/docs/DocTable";
-import { HOTEL_COMMISSION_PERCENT, SEATED_TABLE_FEE } from "@/app/(site)/docs/facts";
+import { DocCrossLink } from "@/components/docs/DocArticle";
+import { HOTEL_COMMISSION_PERCENT, HOTEL_COMMISSION_SENTENCE, SEATED_TABLE_FEE } from "@/app/(site)/docs/facts";
 import { FEE_PERCENT } from "@/lib/money/fee-schedule";
+import {
+  CARD_RAIL_MOVES,
+  FEE_OTHER_LINE,
+  FEE_PROVIDER_CHARGES,
+  FEE_RENT_LINE,
+  FEE_ROUND_NOTE,
+  FEE_WHO_PAYS,
+  GOVERNING_SENTENCE,
+  NO_INSPECTION_FEE,
+  NO_RENTER_FEES_LINE,
+  PAYOUT_ANSWER,
+  PRIVATE_FEE_NOTE,
+  REFUND_ROUTE,
+  RENT_PAYMENT_NOT_OPEN,
+  SALE_NEVER_PAID_ON_VALLO,
+} from "@/lib/money/copy";
+import { FOREIGN_CURRENCIES } from "@/lib/currency/currencies";
 import { A, type ManualBody } from "./parts";
 
 /**
@@ -20,6 +39,12 @@ import { A, type ManualBody } from "./parts";
  * built but not open, this chapter says so plainly. When the product
  * changes, this chapter changes with it.
  */
+
+/** "10 other currencies", counted the way every counted phrase on Vallo is. */
+const OTHER_CURRENCIES = plural(FOREIGN_CURRENCIES.length, {
+  one: "{count} other currency",
+  other: "{count} other currencies",
+});
 
 const OPEN = { state: "Open", tone: "success" } as const;
 const NOT_OPEN = { state: "Not open yet", tone: "pending" } as const;
@@ -47,6 +72,12 @@ const STATUS: DocTableRow[] = [
   { id: "pro", cells: { feature: "The optional Pro plan", status: NOT_OPEN, say: "Nobody needs it to list, book, view or be paid." } },
   { id: "crypto", cells: { feature: "Paying with crypto", status: NOT_OPEN, say: "Not offered." } },
   { id: "rewards", cells: { feature: "Rewards and referrals", status: PART, say: "Invite links work. Whether rewards are paid depends on the campaign running; the screen says so." } },
+  /* Read against the live platform on 15 November 2026 and added then. */
+  { id: "phone", cells: { feature: "Confirming a phone number with a code", status: OPEN, say: "Asked at a member's first payment, and before a first listing is published. Nowhere else, and not at all for a member abroad while codes cannot be sent out of Nigeria." } },
+  { id: "calls", cells: { feature: "Video and audio calls", status: OPEN, say: "Between members where a listing offers it, and as a review call a member of staff books with somebody." } },
+  { id: "cards", cells: { feature: "Saving a card for next time", status: OPEN, say: "A member can keep a card on their account. Vallo never sees a full card number." } },
+  { id: "currencies", cells: { feature: "Prices read in another currency", status: OPEN, say: `Naira is the price. A guide in ${OTHER_CURRENCIES} sits beside it, refreshed twice a day, marked approximate, and never on a money screen.` } },
+  { id: "apps", cells: { feature: "The Android and iPhone apps, with notifications on the phone", status: OPEN, say: "The same account as the website, from Google Play and the App Store." } },
 ];
 
 const B2B: DocTableRow[] = [
@@ -130,6 +161,247 @@ const SAY_THIS: DocTableRow[] = [
   { id: "value", cells: { asked: "Can Vallo tell me what price to put on my property?", say: "No. Vallo does not put a price on anybody's property. Price Check shows what similar properties near a spot are currently asking on Vallo, how many it found, and how sure it is. If it has too few to be sure, it says so instead of guessing." } },
 ];
 
+/**
+ * EVERY FEE, AND WHO KEEPS IT (the founder, 15 November 2026). Figures are
+ * imported from the fee schedule, never typed, so a change to the schedule
+ * moves this table with it.
+ */
+const MONEY_IN_FULL: DocTableRow[] = [
+  {
+    id: "m-member",
+    cells: {
+      payment: "A renter, buyer, guest or diner, on anything",
+      pays: "Nothing to Vallo. Exactly the price on the listing, with nothing added.",
+      keeps: "Nothing.",
+    },
+  },
+  {
+    id: "m-listing",
+    cells: { payment: "Listing a property, a stay or a restaurant", pays: "Nothing.", keeps: "Nothing." },
+  },
+  {
+    id: "m-viewing",
+    cells: { payment: "Viewing a property, in person or by video", pays: "Nothing.", keeps: "Nothing." },
+  },
+  {
+    id: "m-card",
+    cells: {
+      payment: "Any card payment on Vallo (a stay, a hotel room)",
+      pays: `About ${FEE_PERCENT.otherTotal}% in total, out of the lister's or host's share.`,
+      keeps: `Vallo's service fee of ${FEE_PERCENT.vallo}%. The payment processor's fee of about ${FEE_PERCENT.otherProcessor}% is the processor's own charge.`,
+    },
+  },
+  {
+    id: "m-hotel",
+    cells: {
+      payment: "A paid hotel room booking",
+      pays: `Vallo's commission of ${HOTEL_COMMISSION_PERCENT} percent of the booking, out of the hotel's share.`,
+      keeps: "The commission. It is never added to the guest's price.",
+    },
+  },
+  {
+    id: "m-restaurant",
+    cells: {
+      payment: "A table seated from a Vallo booking",
+      pays: `${SEATED_TABLE_FEE} for each table seated, billed to the restaurant once a month.`,
+      keeps: "The fee. A no-show or a cancelled table costs nothing.",
+    },
+  },
+  {
+    id: "m-rent",
+    cells: {
+      payment: "A rent payment (not open)",
+      pays: `About ${FEE_PERCENT.rentTotal}% in total when it opens, out of the lister's share.`,
+      keeps: `Vallo's ${FEE_PERCENT.vallo}%. The payment partner's fee of about ${FEE_PERCENT.rentPartner}% is the partner's own charge.`,
+    },
+  },
+  {
+    id: "m-sale",
+    cells: {
+      payment: "A property purchase",
+      pays: "Nothing passes through Vallo at any stage.",
+      keeps: "Nothing. Vallo takes no part of a purchase price and asks for no deposit.",
+    },
+  },
+  {
+    id: "m-referral",
+    cells: {
+      payment: "A referral reward",
+      pays: "Nothing. Vallo pays the reward.",
+      keeps: "Nothing. Whether a reward is paid depends on the campaign running, and the screen says so.",
+    },
+  },
+];
+
+/**
+ * EVERY PART OF THE PRODUCT, WITH THE STAFF HALF ADDED (15 November 2026).
+ * The member side is the published documents; the staff side names the desk
+ * where that part is read and decided. A desk named here is on the console
+ * menu, and the menu is what decides whether a reader can open it.
+ */
+const FOR_STAFF: DocTableRow[] = [
+  {
+    id: "s-account",
+    cells: {
+      part: "Accounts and profiles",
+      member: "Sign up free with an email and a password or Google, fill in a profile, claim a handle, choose a language and what their public page shows.",
+      staff: "The member file on People, and Lookup by name, email, phone or reference. Account recovery for somebody locked out of their email. You never change an email or a password for a member.",
+    },
+  },
+  {
+    id: "s-search",
+    cells: {
+      part: "Search, the map, saved places and compare",
+      member: "Search by city, area or kind of place, narrow by light, water and the gate, switch to the map, save a place or a search, and put up to four side by side.",
+      staff: "The front door funnel and the listing figures on Analytics: who arrives, who signs up, what is being viewed, saved and enquired about, by listing and by area.",
+    },
+  },
+  {
+    id: "s-listing",
+    cells: {
+      part: "A listing itself",
+      member: "Read the price with the move-in total under it, the gallery and video, the amenities, the answers on light and water, who listed it and the map.",
+      staff: "The Listings desk: approve, ask for more, or send it back with a reason. Approval and publishing wait on the lister's identity. Examples shows the example listings and when each retires.",
+    },
+  },
+  {
+    id: "s-viewings",
+    cells: {
+      part: "Viewings and inspection reports",
+      member: "Book a viewing from the listing, in person or by live video, free, then fill in a report of eight rooms and areas.",
+      staff: "Visits, as a week or month calendar, on the bookings desk. A member reporting a demand for an inspection fee becomes a case.",
+    },
+  },
+  {
+    id: "s-agreements",
+    cells: {
+      part: "Agreements for rent and sale",
+      member: "Both sides confirm the same written terms, drawn from the listing's figures and the inspection report. A change moves the version and both confirm again.",
+      staff: "The Agreements desk, which is the review gate before payment opens, with the risk threshold and the incident switch behind it. Both sides read a rejection's reason.",
+    },
+  },
+  {
+    id: "s-offers",
+    cells: {
+      part: "Offers and the Deal Room",
+      member: "A buyer sends a written offer; the seller accepts, declines, counters or asks a question; every version is kept, with the inspection and the documents each side asked for.",
+      staff: "The Offers and deals desk, from the first offer to the end of the deal. No money is involved at any point, so there is nothing to refund and nothing to release.",
+    },
+  },
+  {
+    id: "s-stays",
+    cells: {
+      part: "Stays: hotels, shortlets and serviced apartments",
+      member: "Priced for their dates and party, with every charge at the door shown before booking, paid by card, one of four cancellation policies fixed on the booking, and an as-listed question from check-in.",
+      staff: "Bookings for what is booked, in stay and finished. Payments and Chargebacks for the money. A no to the as-listed question reaches a person.",
+    },
+  },
+  {
+    id: "s-restaurants",
+    cells: {
+      part: "Restaurants and tables",
+      member: "Book a table free, up to 90 days ahead, for up to 50 people, with a check-in code, a conversation and two reminders. The bill is paid at the restaurant.",
+      staff: "Reservations for how each table went, and Restaurant fees for what a seated table owes and the seatings a restaurant and a diner disagree about.",
+    },
+  },
+  {
+    id: "s-roommates",
+    cells: {
+      part: "Roommates",
+      member: "A roommate profile, posts for a room or a roommate, groups searching together, a directory of schools and states of posting, optional checks they can add, and a cost splitter.",
+      staff: "The Roommates desk for its posts, profiles, checks and matching, and its cases on the Cases desk.",
+    },
+  },
+  {
+    id: "s-circle",
+    cells: {
+      part: "Circle and Around",
+      member: "Communities to ask and answer about areas and property, and a feed of the places people live and work in, by local government, estate or campus.",
+      staff: "The Circle desk and the Around desk for what is held or reported, Blocked terms for the words the safety scan acts on, and Withheld weight for reviews and reports that do not count.",
+    },
+  },
+  {
+    id: "s-messages",
+    cells: {
+      part: "Messages and calls",
+      member: "Message any lister, host or restaurant from the listing, with property and stays in their own tabs, and video or audio calls where they are offered.",
+      staff: "Flagged messages are a lane of the unified queue. Call volume, connect rate and minutes are on Call usage. Nobody reads a conversation without a reason written on the case.",
+    },
+  },
+  {
+    id: "s-assistant",
+    cells: {
+      part: "The assistant",
+      member: "Asks it about finding, renting, buying and staying, in four languages. It searches the same listings a member does, so it names only real ones.",
+      staff: "Nothing to moderate directly. A wrong answer is worth a case or a note to the Content desk, because the assistant reads the same published material staff do.",
+    },
+  },
+  {
+    id: "s-price",
+    cells: {
+      part: "Price Check",
+      member: "Sees what similar properties nearby are currently asking, how many were found, how far away and how recent, and how sure it is.",
+      staff: "Read-only. It needs enough real listings near the spot and says so when it has too few, and it never builds a figure from example listings. It is not a price put on a property, and nobody at Vallo may offer one.",
+    },
+  },
+  {
+    id: "s-badges",
+    cells: {
+      part: "Marks and the verification ladder",
+      member: "Sees what has been looked at about a lister, one rung at a time, and what each rung means.",
+      staff: "The Verification desk and its reviewer guide, Review calls where documents do not settle it, and Standing for a member's marks and strikes.",
+    },
+  },
+  {
+    id: "s-reviews",
+    cells: {
+      part: "Reviews",
+      member: "Only somebody who stayed, was seated or holds a tenancy can review. A review cannot be edited once posted; a host replies once in public.",
+      staff: "A review that breaks the rules is a case. Withheld weight is where a review or report that does not count is recorded, and where a mark is cleared.",
+    },
+  },
+  {
+    id: "s-money",
+    cells: {
+      part: "Money",
+      member: "Pays by card inside Vallo, reads receipts, and asks about a refund.",
+      staff: "The Money desk, Payments, Chargebacks, Fees, Referrals and Restaurant fees. Refunds are decided on the facts by the desk that owns them, never promised by whoever picked up the ticket.",
+    },
+  },
+  {
+    id: "s-rewards",
+    cells: {
+      part: "Rewards and referrals",
+      member: "Invites friends with a link or a code and reads where their invites stand.",
+      staff: "The Referrals desk: rewards owed, the monthly budget, and the referrals and payouts waiting on a decision. Whether a reward is paid depends on the campaign running.",
+    },
+  },
+  {
+    id: "s-support",
+    cells: {
+      part: "Support and reporting",
+      member: "Writes in, reports a listing, a person or a post, and appeals a decision.",
+      staff: "The Support desk and its lanes, Cases for one case per thing reported, Appeals for a second look, and Pages that fail for the help pages members say did not help.",
+    },
+  },
+  {
+    id: "s-privacy",
+    cells: {
+      part: "Privacy, data and leaving",
+      member: "Asks for a copy of their data, hides their activity, blocks somebody, or deletes the account.",
+      staff: "Account deletions reads why members leave as rates, never as names. Record retention lists money records past their retention date. Documents are opened only inside the console and never downloaded, printed or forwarded.",
+    },
+  },
+  {
+    id: "s-apps",
+    cells: {
+      part: "The apps, speed and faults",
+      member: "Uses Vallo in a browser or as the Android and iPhone app on the same account, in English, Yoruba, Hausa or Igbo.",
+      staff: "Crash log for iPhone, Android, the website and the server; Field speed for how fast it is on the phones people really use; Alerts and the Technical desk for anything live.",
+    },
+  },
+];
+
 export const PRODUCT_GUIDE: ManualBody = {
   intro: (
     <p>
@@ -148,6 +420,8 @@ export const PRODUCT_GUIDE: ManualBody = {
     "Open today: search, listing, viewings, messages, agreements, offers on homes for sale, stays and hotel rooms paid by card, table bookings, Roommates, Circle, Around, the assistant and Price Check.",
     "Not open yet: paying rent through Vallo, the wallet, paying a restaurant bill, the Pro plan. Never promise these.",
     "Never promise a number of customers, a price for somebody's property, a refund, or that a deal carries no risk. Say what Vallo does.",
+    "Naira is the price of record. Other currencies are a reading guide beside it, and never what anybody pays.",
+    "Onboarding has a chapter of its own on each side: a lister, and a member.",
   ],
   sections: [
     {
@@ -428,6 +702,51 @@ export const PRODUCT_GUIDE: ManualBody = {
             A move-in calculator that shows the real total up front, area price pages, and a checker for a property
             advert or a receipt seen elsewhere. These are open to anybody and are a good first thing to show a person.
           </p>
+          <h3 className="nf-h4">Notifications</h3>
+          <p>
+            A member chooses what reaches them: bookings, messages, payments and agreements, and separately ideas and
+            offers. Marketing is off until they turn it on, and nobody at Vallo turns it on for them. Notifications
+            arrive in the app, as a push on a phone where the app is installed and push is allowed, and by email
+            according to their email preferences.
+          </p>
+          <h3 className="nf-h4">Rewards and referrals</h3>
+          <p>
+            A member invites people with a link or a code, and can see where each invite stands. Whether a reward is
+            paid depends on the campaign running at the time, and the screen says which. Never tell somebody a reward
+            is owed: the Referrals desk decides each one against the budget, and the figures a member reads are their
+            own.
+          </p>
+          <h3 className="nf-h4">The workspaces a lister works from</h3>
+          <p>
+            An approved lister does not work from the ordinary member screens. An owner or agent has a workspace with
+            their listings, enquiries, viewing times, inspections, a calendar, earnings, reviews, their figures per
+            listing, and paid promotion where it is offered. A host has rooms or tables, a calendar, bookings and
+            requests to accept, photographs, arrival details, earnings with a statement, and their own settings. A
+            restaurant has its tables, its hours and the fees a seated table owes.
+          </p>
+          <h3 className="nf-h4">A tenancy after the keys</h3>
+          <p>
+            Once a tenancy exists it has a file of its own: the terms, the move-in figures each on their own row, the
+            documents, and a way to raise a complaint about the property that reaches a person. The move-in total a
+            renter saw on the listing is the same total they see here, which is the point of asking a lister for every
+            cost before publishing. Paying the rent itself through Vallo is not open, so a tenancy file today records
+            an agreement rather than a payment.
+          </p>
+          <h3 className="nf-h4">Cancellations and refunds</h3>
+          <p>
+            Every stay carries one of four cancellation policies, chosen by the host and fixed on the booking at the
+            moment it is paid, so a later change to the listing cannot move it. A refund that is due goes back to the
+            card or account the money came from, and banks usually show it within 5 to 10 working days. A refund is
+            decided by the desk that owns it, on the facts of the booking and the policy on it, never by whoever is in
+            the conversation.
+          </p>
+          <h3 className="nf-h4">A member&apos;s data, and leaving</h3>
+          <p>
+            A member can ask for a copy of their data, hide their activity, block another member, and delete their
+            account. Deleting is theirs to do, from their own settings. The reason they give is read as a rate on the
+            account deletions desk and never as a name beside a reason. Money records are kept for as long as the
+            rules require and no longer, which is what the record retention desk lists.
+          </p>
           <h3 className="nf-h4">Languages and apps</h3>
           <p>
             English, Yoruba, Hausa and Igbo. Vallo runs in any web browser and as the app for Android phones and
@@ -458,6 +777,208 @@ export const PRODUCT_GUIDE: ManualBody = {
             </Link>
             ; send that link rather than typing figures from memory.
           </p>
+        </>
+      ),
+    },
+    {
+      id: "the-money-in-full",
+      title: "The money in full: every fee, who pays, what Vallo keeps",
+      body: (
+        <>
+          <p>
+            The section above is the short answer. This is the whole of it, and it is the one part of the product where
+            a wrong sentence costs somebody money. Every figure here is read from the fee schedule the product itself
+            charges on, so none of it can drift out of date while this page says otherwise.
+          </p>
+          <DocTable
+            caption="Every payment on Vallo: who pays, and what Vallo keeps"
+            columns={[
+              { key: "payment", label: "The payment" },
+              { key: "pays", label: "Who pays, and what" },
+              { key: "keeps", label: "What Vallo keeps" },
+            ]}
+            rows={MONEY_IN_FULL}
+          />
+          <h3 className="nf-h4">The five sentences to know by heart</h3>
+          <ul role="list">
+            <li>{NO_RENTER_FEES_LINE}</li>
+            <li>{FEE_WHO_PAYS}</li>
+            <li>{CARD_RAIL_MOVES}</li>
+            <li>{PAYOUT_ANSWER}</li>
+            <li>{REFUND_ROUTE}</li>
+          </ul>
+          <h3 className="nf-h4">The rates, said exactly</h3>
+          <p>{FEE_OTHER_LINE}</p>
+          <p>{FEE_RENT_LINE}</p>
+          <p>
+            {FEE_PROVIDER_CHARGES} {FEE_ROUND_NOTE}
+          </p>
+          <p>{HOTEL_COMMISSION_SENTENCE}</p>
+          <h3 className="nf-h4">Who holds the money</h3>
+          <p>
+            {GOVERNING_SENTENCE} A card payment is split at the processor in the one transaction: the owner&apos;s,
+            agent&apos;s or host&apos;s share goes to their own bank account, Vallo&apos;s fee comes to Vallo, and
+            Vallo never sees a full card number. There is no account on Vallo holding anybody&apos;s balance.
+          </p>
+          <h3 className="nf-h4">What is not open, in money terms</h3>
+          <ul role="list">
+            <li>
+              <strong>Paying rent through Vallo.</strong> {RENT_PAYMENT_NOT_OPEN} The rent fee above is what it will
+              cost when it opens, and it is not charged to anybody today.
+            </li>
+            <li>
+              <strong>Paying for a purchase.</strong> {SALE_NEVER_PAID_ON_VALLO} This one is not a switch waiting to be
+              turned on: it is how Vallo works.
+            </li>
+            <li>
+              <strong>A payment held by a licensed bank until a deal is done.</strong> Built, and switched off. Do not
+              describe it to a member or a prospect as something they can use, and do not name a partner for it.
+            </li>
+            <li>
+              <strong>A wallet, a balance, a top-up or a withdrawal.</strong> Not open. Vallo keeps no balance for
+              anybody.
+            </li>
+            <li>
+              <strong>Paying a restaurant bill through Vallo, and crypto.</strong> Not open. A diner pays the
+              restaurant, and Vallo takes no crypto.
+            </li>
+            <li>
+              <strong>Payouts of money held by Vallo.</strong> There are none, because nothing is held. A lister is
+              paid by the processor in the same transaction as the payment.
+            </li>
+          </ul>
+          <h3 className="nf-h4">Two things that are free and are often doubted</h3>
+          <p>
+            {NO_INSPECTION_FEE} {PRIVATE_FEE_NOTE}
+          </p>
+          <p>
+            Listing is free, and not free for a trial. Nobody has to pay a subscription to list, book, view or be paid.
+          </p>
+          <h3 className="nf-h4">Prices in other currencies</h3>
+          <p>
+            Naira is the price. Every listing is priced in naira and every payment is charged in naira. Beside a naira
+            figure a member can read an approximate guide in {OTHER_CURRENCIES}, worked out from a published rate that
+            is refreshed twice a day, and it is marked as approximate every time it appears.
+            It never appears on a money screen: not a checkout, a receipt, a refund, a payout, an offer, an agreement
+            or the move-in figures. A lister cannot enter or publish a price in another currency, and nobody is ever
+            charged in one.
+          </p>
+          <DocCallout tone="warning" title="What you never say about money">
+            That Vallo holds, keeps or looks after anybody&apos;s money. That a payment is held for a member today.
+            That a refund or a payout will be made, which another desk decides on the facts. A figure from memory: the
+            exact naira amount is always on the screen in front of the person.
+          </DocCallout>
+        </>
+      ),
+    },
+    {
+      id: "the-platform-today",
+      title: "What the platform looks like today, honestly",
+      body: (
+        <>
+          <p>
+            Said plainly, because a prospect can tell when it is not: the product is built and the catalogue is young.
+            Read against the live platform on 15 November 2026, the public catalogue held 64 example listings, which
+            are marked as examples, and one real approved listing, with 32 member accounts on the platform. Every one
+            of those figures moves, so read the live one rather than quoting this page: the examples and their retirement
+            dates are on{" "}
+            <Link href="/admin/examples" className={A}>
+              Examples
+            </Link>
+            , the live counts on{" "}
+            <Link href="/admin/analytics" className={A}>
+              Analytics
+            </Link>
+            , and the platform in one answer in the control room, which only a super admin opens.
+          </p>
+          <h3 className="nf-h4">What that means in a conversation</h3>
+          <ul role="list">
+            <li>
+              <strong>Never promise customers.</strong> Not a number of enquiries, not a number of bookings, not
+              &quot;you will be busy by December&quot;. What you can say is true and better: listing costs nothing, and
+              the first listers in an area are the ones people find.
+            </li>
+            <li>
+              <strong>Never let an example listing be mistaken for a real one.</strong> They are there to show how the
+              platform works and they are marked. If a prospect asks how many real listings there are, give the figure
+              from the desk, not an impression.
+            </li>
+            <li>
+              <strong>Lead with what is finished.</strong> A person at Vallo reviews every lister and every listing;
+              the full cost is on the listing before anybody calls; viewings are free; a written agreement comes before
+              money; a card payment goes to the lister through the processor, not to Vallo.
+            </li>
+            <li>
+              <strong>Be straight about what is not open.</strong> Paying rent through Vallo is not open. Say so early.
+              A prospect who signs up expecting it is a complaint in three weeks.
+            </li>
+            <li>
+              <strong>Bring supply, not promises.</strong> The honest pitch to a landlord or a hotel is that it is free
+              to be here, a person checks who you are so a stranger can trust your listing, and your page shows what
+              you charge before anybody rings.
+            </li>
+          </ul>
+          <DocCallout tone="note" title="Built, and switched on, are two different things">
+            Several parts of this product are finished and switched off on purpose: payment held by a licensed bank,
+            the paid identity check, the wallet, the landlord line. Finished is not available. Only the screen itself,
+            or a super admin reading the control room, says where something stands right now.
+          </DocCallout>
+        </>
+      ),
+    },
+    {
+      id: "every-part-for-staff",
+      title: "Every part of the product, and what staff can do about it",
+      body: (
+        <>
+          <p>
+            The member documents are written for members. This is the same ground with the other half added: what staff
+            can see and where they do something about it. Where a row names a desk, that is where the work happens; the
+            documents it names are what to send a member rather than retyping an answer.
+          </p>
+          <DocTable
+            caption="Each part of the product, what a member does, and what staff can see and do"
+            columns={[
+              { key: "part", label: "The part" },
+              { key: "member", label: "What a member does" },
+              { key: "staff", label: "What staff can see and do" },
+            ]}
+            rows={FOR_STAFF}
+          />
+          <p>
+            Nothing in that last column happens quietly. Every file you open and every decision you take is written to
+            the audit log with your name, and a member reads the reason you wrote exactly as you wrote it.
+          </p>
+        </>
+      ),
+    },
+    {
+      id: "onboarding",
+      title: "Onboarding: the two chapters to read next",
+      body: (
+        <>
+          <p>
+            Bringing somebody onto Vallo is most of the work of several desks, so it has two chapters of its own rather
+            than a paragraph here.
+          </p>
+          <ul role="list">
+            <li>
+              <Link href="/admin/manual/onboarding-a-lister" className={A}>
+                Onboarding a lister, end to end
+              </Link>
+              : the five doors, what each kind of lister gives, how long each step takes, what the reviewer looks at,
+              what happens when something is missing, what the lister sees at each step, and the words to use when
+              asking a business for their papers.
+            </li>
+            <li>
+              <Link href="/admin/manual/onboarding-a-member" className={A}>
+                Onboarding a member
+              </Link>
+              : sign up to first booking, what Vallo asks for and exactly when, the settings members ask about, and
+              what staff can see and do about a member.
+            </li>
+          </ul>
+          <DocCrossLink href="/admin/manual/queues">Working a queue, for the decisions those two chapters end in</DocCrossLink>
         </>
       ),
     },

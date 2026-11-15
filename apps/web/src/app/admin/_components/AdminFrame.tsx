@@ -130,7 +130,7 @@ export function AdminFrame({
             hint={experience?.palette.shortcut}
           />
           {experience && (
-            <ConsolePalette copy={experience.palette} ledes={experience.deskLedes} counts={badges} shell={shell} />
+            <ConsolePalette copy={experience.palette} ledes={experience.deskLedes} counts={badges} shell={shell} viewer={viewer} />
           )}
           <span className="nf-admin-bar__spacer" />
           {escalate}

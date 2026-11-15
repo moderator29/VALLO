@@ -247,7 +247,10 @@ export const ADMIN_PRIMARY: AdminDestination[] = [
       /* Vallo Roommates (8 November 2026): posts, profiles, checks, schools, matching. */
       /* Trust and Safety (8 November): one case per thing reported, from
          every module; the overview, appeals and the Circle desk beside it. */
-      { key: "cases", scopes: ["trust_safety", "moderation"], door: "staff", href: "/admin/cases", icon: ui("flag"), label: "Cases" },
+      /* Support is here because `private.case_can` on the live database admits it:
+         a support agent opens the cases of their own module. The scope list and
+         the database were read against each other on 15 November 2026. */
+      { key: "cases", scopes: ["trust_safety", "moderation", "support"], door: "staff", href: "/admin/cases", icon: ui("flag"), label: "Cases" },
       { key: "trust", scopes: ["trust_safety", "analyst"], door: "staff", href: "/admin/trust", icon: ui("trending-up"), label: "Trust overview" },
       { key: "appeals", scopes: ["trust_safety"], door: "staff", href: "/admin/appeals", icon: ui("scale"), label: "Appeals" },
       { key: "roommates", scopes: ["roommates", "moderation"], door: "staff", href: "/admin/roommates", icon: ui("users"), label: "Roommates" },

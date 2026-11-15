@@ -78,7 +78,7 @@ export const DESK_NOTES: Readonly<Record<string, DeskNote>> = {
      row's own note is the one the map carries. */
   moderation: { purpose: "Moderation: the feed members post to, and what is held or reported in it.", scopes: ["moderation", "circle"], words: ["moderation", "around", "feed", "post", "held", "timeline"] },
   social: { purpose: "Around: the feed members post to, and what is held or reported in it.", scopes: ["moderation", "circle"], words: ["around", "feed", "post", "social", "timeline"] },
-  cases: { purpose: "One case per thing reported, from every part of the platform, with its timeline and what was decided.", scopes: ["trust_safety", "moderation"], words: ["case", "report", "abuse", "trust", "safety", "investigation"] },
+  cases: { purpose: "One case per thing reported, from every part of the platform, with its timeline and what was decided.", scopes: ["trust_safety", "moderation", "support"], words: ["case", "report", "abuse", "trust", "safety", "investigation"] },
   trust: { purpose: "The Trust and Safety overview: how cases, restrictions and appeals are trending.", scopes: ["trust_safety", "analyst"], words: ["trust overview", "safety figures", "restrictions trend"] },
   appeals: { purpose: "Members appealing a decision, waiting on a second look.", scopes: ["trust_safety"], words: ["appeal", "second look", "overturn", "dispute a decision"] },
   roommates: { purpose: "Vallo Roommates: its posts, profiles, checks, schools and matching.", scopes: ["roommates", "moderation"], words: ["roommate", "flatmate", "sharing", "school", "match"] },

@@ -139,7 +139,11 @@ export function blockersFrom(reading: BlockerReading): Blocker[] {
   if (reading.activeReservations > 0) {
     blockers.push({
       kind: "active-reservations",
-      href: "/trips",
+      /* `/trips` is not a route this app serves and never has been. A member
+         told to cancel their reservations was sent to a page that does not
+         exist, on the one screen where they are already trying to leave.
+         Reservations sit with the rest of what a member has booked. */
+      href: "/bookings",
       amount: reading.activeReservations,
     });
   }

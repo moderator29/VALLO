@@ -1,6 +1,6 @@
 import { isIdentifier } from "@/lib/admin/lookup-classify";
 import type { AdminIcon } from "./AdminGlyph";
-import { ADMIN_NAV, countFor, labelFor, type AdminDestination, type ShellCopy } from "./nav";
+import { ADMIN_NAV, canOpen, countFor, labelFor, type AdminDestination, type NavViewer, type ShellCopy } from "./nav";
 
 /**
  * THE CONSOLE SEARCH'S RULES, pure and tested (reference 7067).
@@ -39,24 +39,35 @@ export function deskIndex({
   ledes,
   counts,
   jumps,
+  viewer,
 }: {
   shell?: ShellCopy;
   ledes: Readonly<Record<string, string | undefined>>;
   counts: Readonly<Record<string, number>>;
   /** Letter to href, from `CONSOLE_JUMPS`. */
   jumps: Readonly<Record<string, string>>;
+  /**
+   * Who is searching. The palette is a second way into every desk, so it is
+   * filtered exactly as the rail is: a desk this person cannot open is not
+   * offered here either, or Control K would hand a support agent the Staff
+   * desk and the refusal that follows. Absent means draw everything, which is
+   * what a preview and a test want.
+   */
+  viewer?: NavViewer;
 }): PaletteDesk[] {
   const byHref = new Map<string, string>();
   for (const [letter, href] of Object.entries(jumps)) byHref.set(href, letter);
-  return [...ADMIN_NAV, ...EXTRA_DESKS].map((item) => ({
-    key: item.key,
-    href: item.href,
-    label: labelFor(item, shell),
-    lede: ledes[item.key] ?? "",
-    count: countFor(item, counts as Record<string, number>),
-    jump: byHref.get(item.href) ?? null,
-    icon: item.icon,
-  }));
+  return [...ADMIN_NAV, ...EXTRA_DESKS]
+    .filter((item) => !viewer || canOpen(item, viewer))
+    .map((item) => ({
+      key: item.key,
+      href: item.href,
+      label: labelFor(item, shell),
+      lede: ledes[item.key] ?? "",
+      count: countFor(item, counts as Record<string, number>),
+      jump: byHref.get(item.href) ?? null,
+      icon: item.icon,
+    }));
 }
 
 /** Lower case, accents folded, so "Verification" and "verification" meet. */
