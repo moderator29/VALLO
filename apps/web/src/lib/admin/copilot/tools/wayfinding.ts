@@ -13,7 +13,18 @@ import { defineTool, type ToolLink } from "./types";
  * copy. Nothing is read from the database here: it is the map, not the work.
  */
 
-const MAX_LIST = 12;
+/*
+ * HOW MANY DESKS THE WHOLE-LIST ANSWER NAMES.
+ *
+ * It was 12, and 12 is fewer than the desks a scoped staff member holds: a
+ * support agent holds 19, so the list was cut in the rail's order and their
+ * own Support desk fell off the end. The answer then named eleven desks they
+ * rarely touch and not the one they live in. The widest staff grant is inside
+ * this number, so a staff member is shown all of theirs; an admin holds every
+ * desk and is shown a sample with the true count beside it (`deskCount`),
+ * which is what the count is for.
+ */
+const MAX_LIST = 24;
 
 const row = (entry: DeskEntry) => ({ desk: entry.label, where: entry.href, section: entry.group, forWhat: entry.purpose });
 

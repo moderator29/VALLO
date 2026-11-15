@@ -21,7 +21,11 @@ import { describe, expect, it } from "vitest";
 const SRC = join(__dirname, "..");
 const ROOTS = [SRC, join(SRC, "..", "..", "..", "packages", "design-tokens", "src")];
 const SKIP_DIRS = new Set(["node_modules", ".next"]);
-const PRINT_ONLY = new Set(["print.css"]);
+/* Print sheets. Every `:has()` in these sits inside `@media print`, which is
+   not in the screen rule set and never runs on a phone, so the cost the rule
+   above is about cannot arise. Named one by one rather than matched on a
+   suffix, so a screen sheet cannot buy the exemption by renaming itself. */
+const PRINT_ONLY = new Set(["print.css", "handbook-print.css"]);
 
 function sheets(dir: string, out: string[] = []): string[] {
   for (const entry of readdirSync(dir, { withFileTypes: true })) {

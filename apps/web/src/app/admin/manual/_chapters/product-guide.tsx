@@ -21,7 +21,6 @@ import {
   RENT_PAYMENT_NOT_OPEN,
   SALE_NEVER_PAID_ON_VALLO,
 } from "@/lib/money/copy";
-import { FOREIGN_CURRENCIES } from "@/lib/currency/currencies";
 import { A, type ManualBody } from "./parts";
 
 /**
@@ -40,8 +39,20 @@ import { A, type ManualBody } from "./parts";
  * changes, this chapter changes with it.
  */
 
-/** "10 other currencies", counted the way every counted phrase on Vallo is. */
-const OTHER_CURRENCIES = plural(FOREIGN_CURRENCIES.length, {
+/**
+ * "10 other currencies", counted the way every counted phrase on Vallo is.
+ *
+ * The number is written here rather than read from `lib/currency`, because
+ * nothing under `app/admin` may import the currency guide: admin is a money
+ * surface and the rule that keeps a converted figure off one is absolute
+ * (`lib/currency/money-surfaces.test.ts`). This is prose about the product,
+ * not a price, so the figure is stated and `manual.test.ts` holds it to
+ * `FOREIGN_CURRENCIES.length`: add a currency and that test fails until this
+ * moves with it.
+ */
+export const OTHER_CURRENCY_COUNT = 10;
+
+const OTHER_CURRENCIES = plural(OTHER_CURRENCY_COUNT, {
   one: "{count} other currency",
   other: "{count} other currencies",
 });

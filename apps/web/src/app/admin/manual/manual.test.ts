@@ -1,4 +1,4 @@
-import { readdirSync, statSync } from "node:fs";
+import { readFileSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { BANNED_EVERYWHERE, SCHEDULE_PROMISES, firstBannedPhrase } from "@/lib/copy/banned-phrases";
@@ -72,6 +72,30 @@ const PAGES: { name: string; view: string }[] = [
 ];
 
 describe("the staff manual", () => {
+  /*
+   * The guide and the onboarding chapter both say how many other currencies a
+   * price can be read in. Nothing under `app/admin` may import the currency
+   * guide, because admin is a money surface and a converted figure must never
+   * reach one (`lib/currency/money-surfaces.test.ts`), so the number is
+   * written in the chapter. This is what keeps it honest: add a currency and
+   * this fails until both chapters move with it.
+   */
+  it("states the number of other currencies the product really carries", async () => {
+    /* Read as source rather than imported: a chapter is a component module,
+       and this suite aliases react to a file, so importing one throws. */
+    const { FOREIGN_CURRENCIES } = await import("@/lib/currency/currencies");
+    const chapters = join(APP, "admin", "manual", "_chapters");
+    for (const file of ["product-guide.tsx", "onboarding-a-member.tsx"]) {
+      const text = readFileSync(join(chapters, file), "utf8");
+      expect(text, file).toMatch(/OTHER_CURRENCY_COUNT = (\d+);/);
+      const stated = Number(/OTHER_CURRENCY_COUNT = (\d+);/.exec(text)![1]);
+      expect(stated, file).toBe(FOREIGN_CURRENCIES.length);
+      /* And no chapter IMPORTS the currency guide: admin is a money surface.
+         The comment that explains why may name it; an import may not. */
+      expect(text.replace(/\/\*[\s\S]*?\*\//g, ""), file).not.toMatch(/from "[^"]*lib\/currency/);
+    }
+  });
+
   it("lists every chapter once, numbered in order", () => {
     expect(MANUAL_CHAPTERS.map((c) => c.slug)).toEqual([...MANUAL_SLUGS]);
     expect(MANUAL_CHAPTERS.map((c) => c.number)).toEqual(MANUAL_SLUGS.map((_, i) => i + 1));
