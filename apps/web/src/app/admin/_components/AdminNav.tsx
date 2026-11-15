@@ -4,6 +4,7 @@ import { isIdentifier } from "@/lib/admin/lookup-classify";
 import { PersonTier } from "./PersonTier";
 import type { PersonTier as PersonTierValue } from "@/lib/admin/reads/shapes";
 import { useCallback, useRef, useState, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import type { Dictionary } from "@vallo/i18n/core";
@@ -342,7 +343,11 @@ export function AdminTabs({
         <UiIcon name="menu" size={20} />
         {waiting > 0 && <span className="nf-admin-menu__dot" aria-hidden="true" />}
       </button>
-      {open && (
+      {/* Drawn on the page itself, not inside the console bar: the bar is
+          frosted glass (backdrop-filter), and a frosted box becomes the frame
+          a fixed child is placed in. Inside it, the drawer was clipped to the
+          bar's own height and a tap on the menu seemed to open nothing. */}
+      {open && typeof document !== "undefined" && createPortal(
         <div className="nf-admin-drawer" id="admin-drawer">
           <button
             type="button"
@@ -396,7 +401,8 @@ export function AdminTabs({
               </div>
             )}
           </div>
-        </div>
+        </div>,
+        document.body,
       )}
     </>
   );
