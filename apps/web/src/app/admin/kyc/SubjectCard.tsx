@@ -11,6 +11,7 @@ import { CredentialForm } from "./CredentialForm";
 import { IdentityAtAGlance } from "./IdentityAtAGlance";
 import { getDictionary } from "@vallo/i18n";
 import { consentReceipt } from "@/lib/admin/member-file-rules";
+import type { CrossCheckReport } from "@/lib/identity/cross-check/actions";
 
 /* V-49 and V-87 copy on this card. The desk reads English. */
 const DESK = getDictionary("en").trustVisible.desk;
@@ -52,10 +53,13 @@ export function SubjectCard({
   subject,
   ui,
   decidable = false,
+  crossChecks,
 }: {
   subject: KycSubjectView;
   ui: AdminUi;
   decidable?: boolean;
+  /** Cross-check findings handed in already (a preview): no server call is made. */
+  crossChecks?: CrossCheckReport;
 }) {
   return (
     <article>
@@ -110,7 +114,7 @@ export function SubjectCard({
 
       {/* Manual verification: the ID beside the selfie, the names to compare,
           the bank account name, and the checklist, before any document. */}
-      <IdentityAtAGlance subject={subject} decidable={decidable} />
+      <IdentityAtAGlance subject={subject} decidable={decidable} {...(crossChecks ? { crossChecks } : {})} />
 
       {/* V-49: the Nigerian-name matcher's suggestion for the payout rung,
           both names side by side, marked as a suggestion. A person decides. */}

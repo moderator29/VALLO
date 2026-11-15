@@ -24,10 +24,18 @@ export type Playbook = {
 export const PLAYBOOKS: readonly Playbook[] = [
   { key: "approve_listing", title: "Approve a listing", words: ["listing", "approve", "send back", "reject", "review listing"], from: ["/admin/manual/queues#listings", "/admin/manual/decisions#alone"], deskHref: "/admin/listings", deskName: "Listings", scopes: ["listing_approval"] },
   { key: "kyc_check", title: "Process a KYC or identity check", words: ["kyc", "identity", "id check", "document", "selfie", "verification", "agent application"], from: ["/admin/manual/queues#identity"], deskHref: "/admin/kyc", deskName: "KYC review", scopes: ["kyc_review"] },
+  /* Added 15 November 2026 with the Cross-checks panel on the KYC desk. Its
+     steps are the manual's own ("Before you escalate a possible fake ID").
+     No word here is short enough to hide inside another word. */
+  { key: "forged_id", title: "Suspected forged ID", words: ["forged", "forgery", "fake", "tampered", "edited id", "same id number", "id on two accounts", "bvn", "nin slip", "nin number", "cross-check", "cross check", "check digits", "passport lines"], from: ["/admin/manual/business-development#forged-id"], deskHref: "/admin/kyc", deskName: "KYC review", scopes: ["kyc_review"] },
   { key: "handle_report", title: "Handle a report or flagged message", words: ["report", "flag", "moderation", "abuse", "held content"], from: ["/admin/manual/queues#reports"], deskHref: "/admin/reports", deskName: "Reports and moderation", scopes: ["moderation", "trust_safety"] },
   { key: "support_ticket", title: "Work a support ticket", words: ["ticket", "support", "claim", "reply", "resolve"], from: ["/admin/manual/queues#tickets"], deskHref: "/admin/support", deskName: "Support", scopes: ["support", "support_lead"] },
   { key: "payment_dispute", title: "Handle a refund or payment dispute", words: ["refund", "payment", "dispute", "chargeback", "cancel", "money back"], from: ["/admin/manual/queues#refunds", "/admin/manual/queues#other"], deskHref: "/admin/chargebacks", deskName: "Chargebacks and refunds", scopes: ["finance", "support"] },
-  { key: "escalate_case", title: "Escalate a case", words: ["escalate", "escalation", "urgent", "out of hours", "cannot decide", "who answers"], from: ["/admin/manual/escalation#who-answers", "/admin/manual/escalation#urgent", "/admin/manual/escalation#out-of-hours"], deskHref: "/admin/manual/escalation", deskName: "Escalation chapter", scopes: [] },
+  { key: "escalate_case", title: "Escalate a case", words: ["escalate", "escalation", "urgent", "out of hours", "cannot decide", "who answers"], from: ["/admin/manual/escalation#in-the-console", "/admin/manual/escalation#who-answers", "/admin/manual/escalation#urgent", "/admin/manual/escalation#out-of-hours"], deskHref: "/admin/manual/escalation", deskName: "Escalation chapter", scopes: [] },
+  /* Added 15 November 2026 with the product guide (chapter 15). Its steps are
+     the guide's own words: what is open, what each side gets, what to say and
+     what nobody says. Open to every member of staff. */
+  { key: "answer_about_vallo", title: "Answer a prospect or a member about Vallo", words: ["prospect", "pitch", "outreach", "why list", "why should", "benefit", "b2b", "b2c", "what is vallo", "what vallo costs", "is it free", "what to say", "draft a reply", "partner"], from: ["/admin/manual/product-guide#what-to-say", "/admin/manual/product-guide#what-is-open", "/admin/manual/product-guide#for-businesses", "/admin/manual/product-guide#for-people", "/admin/manual/product-guide#never-say"], deskHref: "/admin/manual/product-guide", deskName: "Vallo, feature by feature", scopes: [] },
   { key: "weekly_report", title: "Write the weekly report", words: ["weekly", "report", "proof", "reviewer"], from: ["/admin/manual/weekly-report"], deskHref: "/my-desk", deskName: "My desk", scopes: [] },
 ];
 

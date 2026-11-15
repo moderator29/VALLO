@@ -285,7 +285,7 @@ export function readConnections(input: {
       key: "card",
       title: "Card payments",
       ready: input.cardPayments,
-      meaning: input.cardPayments ? "Card payments can be taken." : "The card processor's key is not set on this deployment.",
+      meaning: input.cardPayments ? "Card payments can be taken." : "The card processor is not connected on this deployment.",
     },
     {
       key: "partner",
@@ -293,22 +293,22 @@ export function readConnections(input: {
       ready: input.paymentPartner && input.paymentPartnerWebhook,
       meaning:
         input.paymentPartner && input.paymentPartnerWebhook
-          ? "The partner's key and webhook secret are set."
+          ? "The partner is connected, and its reports can be confirmed as its own."
           : input.paymentPartner
-            ? "The partner's key is set but its webhook secret is not, so its reports cannot be trusted yet."
-            : "The partner's key is not set. Nothing can be sent to it.",
+            ? "The partner is connected, but its webhook secret is missing, so its reports cannot be trusted yet."
+            : "The partner is not connected. Nothing can be sent to it.",
     },
     {
       key: "email",
       title: "Email",
       ready: input.email,
-      meaning: input.email ? "Emails can be sent." : "The email service key is not set.",
+      meaning: input.email ? "Emails can be sent." : "The email service is not connected.",
     },
     {
       key: "copilot",
       title: "The copilot and the assistant",
       ready: input.copilot,
-      meaning: input.copilot ? "The copilot on each desk can answer." : "The copilot has no key and cannot answer.",
+      meaning: input.copilot ? "The copilot on each desk can answer." : "The copilot is not connected and cannot answer.",
     },
     {
       key: "page",

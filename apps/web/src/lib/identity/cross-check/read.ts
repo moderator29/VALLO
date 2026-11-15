@@ -255,6 +255,7 @@ async function fileChecks(port: CrossCheckPort, subjectId: string, options: Read
       /* A file that cannot be hashed is compared with nothing; its own line above still stands. */
     }
   }
+  mergePlain(out);
   if (loaded.length === 0) return out;
 
   /* Kept first, so the next person reviewed is compared with these. A failed
@@ -280,6 +281,26 @@ async function fileChecks(port: CrossCheckPort, subjectId: string, options: Read
   out.push(await sameFileCheck(port, subjectId, loaded, saved, exactOwners));
   out.push(await similarPictureCheck(port, subjectId, loaded, saved, exactOwners));
   return out;
+}
+
+/**
+ * Several files with nothing to report say so in one line, not one each: the
+ * list is for what needs a reviewer's eye.
+ */
+function mergePlain(out: Finding[]): void {
+  const plain = out.filter((item) => /^file\.[a-z]+\.plain$/.test(item.key));
+  if (plain.length < 2) return;
+  const labels = plain.map((item) => item.title.replace(/ carries no editing mark$/, "").toLowerCase());
+  const last = labels.pop()!;
+  const merged = finding(
+    "file.plain",
+    "ok",
+    `No editing mark on ${labels.join(", ")} or ${last}`,
+    "No editing program is named in these files and none is a screenshot. Marks are easy to remove, so their absence means nothing by itself: still look at the pictures.",
+  );
+  const first = out.indexOf(plain[0]!);
+  for (const item of plain) out.splice(out.indexOf(item), 1);
+  out.splice(first, 0, merged);
 }
 
 async function sameFileCheck(

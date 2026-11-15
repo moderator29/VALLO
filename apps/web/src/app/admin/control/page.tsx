@@ -143,7 +143,7 @@ export default async function ControlRoomPage() {
             </li>
           ))}
         </ul>
-        <p className={`${WORDS} mt-sm`}>Keys are set in Vercel, never here. This page shows only whether each one is present.</p>
+        <p className={`${WORDS} mt-sm`}>Each service is connected in Vercel, never here. This page shows only whether it is connected, never a secret.</p>
       </Panel>
 
       <Panel title="Go to" id="go">

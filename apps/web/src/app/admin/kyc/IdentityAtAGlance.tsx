@@ -1,6 +1,8 @@
 import Link from "next/link";
+import { CrossChecks } from "./CrossChecks";
 import { RequestSelfieWithId } from "./RequestSelfieWithId";
 import type { KycDocumentView, KycSubjectView } from "@/lib/admin/kyc-queries";
+import type { CrossCheckReport } from "@/lib/identity/cross-check/actions";
 
 /**
  * IDENTITY AT A GLANCE (manual verification, 2 November 2026).
@@ -74,7 +76,16 @@ export const REVIEW_CHECKLIST: readonly string[] = [
   "If you cannot confirm it, do not guess: ask for a selfie holding their ID (below), reject with a clear reason, or book a video call from Review calls.",
 ];
 
-export function IdentityAtAGlance({ subject, decidable }: { subject: KycSubjectView; decidable: boolean }) {
+export function IdentityAtAGlance({
+  subject,
+  decidable,
+  crossChecks,
+}: {
+  subject: KycSubjectView;
+  decidable: boolean;
+  /** Findings handed in already (a preview): the panel then makes no server call. */
+  crossChecks?: CrossCheckReport;
+}) {
   const id = newest(subject.documents, "identity");
   const selfie = newest(subject.documents, "selfie");
   if (!id && !selfie) return null;
@@ -82,14 +93,34 @@ export function IdentityAtAGlance({ subject, decidable }: { subject: KycSubjectV
   return (
     <section className="mt-sm rounded-md border border-[var(--nf-border-subtle)] p-sm" aria-label="Identity at a glance" data-testid="identity-at-a-glance">
       <h4 className="text-[length:var(--nf-text-body-sm)] font-semibold text-[var(--nf-content-primary)]">Identity at a glance</h4>
-      <div className="mt-xs grid max-w-md grid-cols-2 gap-sm">
-        <Face doc={id} label={id?.issuingCountry ? `Their ID (issued in ${id.issuingCountry})` : "Their ID"} missing="No ID filed yet." />
-        <Face
-          doc={selfie}
-          label={selfie?.answersRequest ? "Their selfie holding the ID" : "Their selfie"}
-          missing="No selfie. Older sign-ups came without one: approve on the ID only if its photo is clear, or book a video call."
+      {/* The cross-checks sit beside the ID and the selfie (15 November 2026):
+          under them on a phone, to their right where there is room. */}
+      <div className="mt-xs grid items-start gap-sm xl:grid-cols-[minmax(0,24rem)_minmax(0,1fr)]">
+        <div className="grid max-w-md grid-cols-2 gap-sm">
+          <Face doc={id} label={id?.issuingCountry ? `Their ID (issued in ${id.issuingCountry})` : "Their ID"} missing="No ID filed yet." />
+          <Face
+            doc={selfie}
+            label={selfie?.answersRequest ? "Their selfie holding the ID" : "Their selfie"}
+            missing="No selfie. Older sign-ups came without one: approve on the ID only if its photo is clear, or book a video call."
+          />
+          {id?.backMedia ? <Face doc={id} side="back" label="Back of their ID" missing="No back filed." /> : null}
+        </div>
+        <CrossChecks
+          subjectId={subject.userId}
+          displayName={subject.displayName}
+          identityDocumentId={id?.id ?? null}
+          idSubtype={id?.subtype ?? null}
+          issuingCountry={id?.issuingCountry ?? null}
+          names={{
+            onId: subject.identityName,
+            account: subject.namesOnRecord.account,
+            application: subject.namesOnRecord.application,
+            bank: bank?.holder ?? null,
+            business: subject.business?.name ?? null,
+          }}
+          decidable={decidable}
+          {...(crossChecks ? { preloaded: crossChecks } : {})}
         />
-        {id?.backMedia ? <Face doc={id} side="back" label="Back of their ID" missing="No back filed." /> : null}
       </div>
 
       <dl className="mt-sm grid grid-cols-1 gap-sm sm:grid-cols-2">

@@ -66,7 +66,7 @@ describe("the control room's services", () => {
     const partner = (input: Partial<typeof all>) => readConnections({ ...all, ...input }).find((c) => c.key === "partner")!;
     expect(partner({}).ready).toBe(true);
     expect(partner({ paymentPartnerWebhook: false }).ready).toBe(false);
-    expect(partner({ paymentPartnerWebhook: false }).meaning).toContain("webhook secret is not");
+    expect(partner({ paymentPartnerWebhook: false }).meaning).toContain("webhook secret is missing");
     expect(partner({ paymentPartner: false }).ready).toBe(false);
   });
 

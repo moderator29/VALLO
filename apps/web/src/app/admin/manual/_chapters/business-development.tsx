@@ -28,6 +28,7 @@ export const BUSINESS_DEVELOPMENT: ManualBody = {
     "Onboarded and a linked listing are two separate facts. A business can be onboarded with no listing yet.",
     "Listing review is on the Listings desk. A rejection or a request for changes always carries a reason the lister reads.",
     "The table downloads as a spreadsheet whenever you need to share or keep a copy.",
+    "When an ID looks wrong, use the Cross-checks panel on the KYC desk, then escalate. A member's information never leaves Vallo.",
   ],
   sections: [
     ...aboutVallo({
@@ -243,6 +244,67 @@ export const BUSINESS_DEVELOPMENT: ManualBody = {
             , where you review a member&apos;s identity check: the document, the selfie and the name against the
             account. Approve it, or refuse it with a reason the member reads. What you see there is private to the
             member: never copy, photograph or forward it, and never discuss it outside the desk.
+          </p>
+        </>
+      ),
+    },
+    {
+      id: "forged-id",
+      title: "Before you escalate a possible fake ID",
+      body: (
+        <>
+          <p>
+            A name and a photo can both be copied, so they are not enough to approve on when something feels wrong.
+            Everything below is done inside the console, on the person&apos;s row on the KYC desk, in the panel called
+            Cross-checks.
+          </p>
+          <ol>
+            <li>
+              Read the Cross-checks list from the top: a line marked Stop means do not approve, and a line marked Look
+              closer means look at that thing again.
+            </li>
+            <li>If it says the ID number or the same file is on another account, stop there: one ID belongs to one person.</li>
+            <li>
+              For a passport, type the two lines at the bottom of the photo page into Check a passport&apos;s bottom
+              lines; all five check digits should pass, and the name and dates it reads out should match the printed
+              page.
+            </li>
+            <li>
+              For any other ID, type the number printed on it into Check the number printed on the ID, then press
+              Compare with other accounts.
+            </li>
+            <li>Tick through What a real one looks like for that document, by eye.</li>
+            <li>If you still doubt it, press Ask for a selfie holding their ID and say why in plain words.</li>
+            <li>
+              If anything says Stop, or you still doubt it, do not approve: send it back asking for a different
+              government ID, without saying what you suspect.
+            </li>
+            <li>Then press Escalate to Trust and Safety on the same panel and write what you saw.</li>
+          </ol>
+          <DocCallout tone="warning" title="What you must not do">
+            Never take a member&apos;s information outside Vallo. There is no free public place to look up a NIN or a
+            BVN, so do not type an ID number, a name or a date of birth into any outside website, app or chat, and do
+            not download, photograph or forward a document, not even to check it. Never tell the person, or anyone
+            close to them, that you suspect them: say only that the document could not be confirmed.
+          </DocCallout>
+          <p>
+            None of the Cross-checks proves an ID is genuine. They catch common forgeries and an ID used on two
+            accounts. A line marked Fine means that one check found nothing wrong, and a line marked Not run means the
+            check could not run: carry on with the others. The full list of what each line means is in the{" "}
+            <Link href="/admin/kyc/guide#forged" className={A}>
+              reviewer guide
+            </Link>
+            .
+          </p>
+          <p>
+            A business is different. A company&apos;s registration is a public record of a company, not a person&apos;s
+            private information, so you may look a business up on the Corporate Affairs Commission&apos;s public search
+            (search.cac.gov.ng). Search by the business name or the RC number only. Never type a person&apos;s NIN, BVN,
+            ID number or date of birth into it.
+          </p>
+          <p>
+            Escalating a doubt is the right call, not a failure. Nobody is marked down for sending Trust and Safety an
+            ID that turns out to be real. Approving one that turns out to be forged is the mistake.
           </p>
         </>
       ),
