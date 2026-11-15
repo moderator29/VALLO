@@ -25,6 +25,8 @@ export type DeskCapability = {
   desk: string;
   /** Any one of these opens the desk's tools. An empty list means every staff member. */
   scopes: readonly StaffScope[];
+  /** Listed for the super admin alone, whatever scopes anybody else holds. */
+  superAdminOnly?: true;
   href: string;
   can: readonly string[];
   prompts: readonly string[];
@@ -168,6 +170,28 @@ export const COPILOT_CAPABILITIES: readonly DeskCapability[] = [
     prompts: ["Who is holding the most open tickets?", "What are members writing about most?", "Draft a canned reply for deposit questions"],
   },
   {
+    key: "platform",
+    desk: "The platform",
+    scopes: [],
+    superAdminOnly: true,
+    href: "/admin/control",
+    can: [
+      "Read the whole platform in one answer: members, listers, real and example listings, money taken in the last 7 and 30 days, what is waiting on every desk and how each switch stands",
+      "Read the control room: what is waiting on you, which database files are still to run, and which services are connected",
+      "Read who holds staff access, who has acknowledged the handbook, who has been active and which teams have nobody on them",
+      "Read the audit trail in plain words: who did what and when, with the desk each record lives on",
+    ],
+    prompts: ["What needs me today?", "What is waiting across the platform?", "What SQL still has to run?", "Who has access to what?", "What changed this week?"],
+  },
+  {
+    key: "copilot-map",
+    desk: "Finding your way",
+    scopes: [],
+    href: "/admin/copilot",
+    can: ["Say which desk a piece of work is done on, from the console's own menu, and take you there", "Read your own position handbook back to you, section by section"],
+    prompts: ["Where do I do this?", "What does my handbook say about this?"],
+  },
+  {
     key: "coo",
     desk: "COO desk",
     scopes: ["operations"],
@@ -198,9 +222,22 @@ const STARTERS: Partial<Record<StaffScope, readonly string[]>> = {
   support_lead: ["Who is holding the most open tickets?", "What are members writing about most?"],
 };
 
-const GENERIC: readonly string[] = ["What needs me first today?", "What are my open tasks?", "Where do I find how to do this in the manual?"];
+const GENERIC: readonly string[] = ["What needs me first today?", "What are my open tasks?", "Where do I go to do this?", "What does my handbook say?"];
 
-/** Starter chips for a desk. */
-export function starterPromptsFor(scope: StaffScope | null): string[] {
+/**
+ * THE SUPER ADMIN'S OWN CHIPS (16 November 2026): the five questions the
+ * founder actually asks, in their own words.
+ */
+export const SUPER_ADMIN_STARTERS: readonly string[] = [
+  "What needs me today?",
+  "What is waiting across the platform?",
+  "What SQL still has to run?",
+  "Who has access to what?",
+  "What changed this week?",
+];
+
+/** Starter chips for a desk. The super admin gets their own, whatever desk they are on. */
+export function starterPromptsFor(scope: StaffScope | null, viewer?: { isSuperAdmin?: boolean }): string[] {
+  if (viewer?.isSuperAdmin) return [...SUPER_ADMIN_STARTERS];
   return [...((scope && STARTERS[scope]) || GENERIC)];
 }
