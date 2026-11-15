@@ -9,6 +9,7 @@ import { DECISIONS } from "./decisions";
 import { DESKS } from "./desks";
 import { ESCALATION } from "./escalation";
 import { MY_DESK } from "./my-desk";
+import { PRODUCT_GUIDE } from "./product-guide";
 import type { ManualBody } from "./parts";
 import { QUEUES } from "./queues";
 import { RECORDS } from "./records";
@@ -31,4 +32,5 @@ export const MANUAL_BODIES: Record<ManualSlug, ManualBody> = {
   "support-lead": SUPPORT_LEAD,
   "business-development": BUSINESS_DEVELOPMENT,
   "social-media": SOCIAL_MEDIA,
+  "product-guide": PRODUCT_GUIDE,
 };
