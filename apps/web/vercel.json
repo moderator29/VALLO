@@ -46,6 +46,10 @@
       "schedule": "35 * * * *"
     },
     {
+      "path": "/api/cron/escalations-overdue",
+      "schedule": "4,14,24,34,44,54 * * * *"
+    },
+    {
       "path": "/api/cron/complete-stays",
       "schedule": "30 2 * * *"
     },

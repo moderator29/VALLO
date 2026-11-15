@@ -11,6 +11,7 @@ import {
   IdentityBlock,
   type AdminIdentity,
 } from "./AdminNav";
+import type { NavViewer } from "./nav";
 import { ConsoleClock } from "./ConsoleClock";
 import { ConsolePalette, type PaletteCopy } from "./ConsolePalette";
 import { RootFlag } from "@/components/ui/RootFlag";
@@ -31,7 +32,9 @@ export function AdminFrame({
   bellLabel,
   shell,
   back,
+  escalate,
   experience,
+  viewer,
   children,
 }: {
   identity: AdminIdentity;
@@ -51,6 +54,13 @@ export function AdminFrame({
    */
   back?: ReactNode;
   /**
+   * The Escalate button (15 November 2026), mounted by `admin/layout.tsx`
+   * once for every desk: `EscalateButton`, which opens the escalation form
+   * with the open page attached. It sits in the bar beside the bell, so it is
+   * in the same place on every admin page.
+   */
+  escalate?: ReactNode;
+  /**
    * Session 3's console copy (`experienceAdmin`): the palette's words and the
    * one line each desk carries. Optional so a frame drawn without it (a test,
    * an older harness) still renders the rail and the bar exactly as before,
@@ -61,6 +71,14 @@ export function AdminFrame({
     deskLedes: Readonly<Record<string, string | undefined>>;
     waitingTotal: string;
   };
+  /**
+   * WHO IS READING THE MENU (15 November 2026), as the console door answered
+   * for them: the role, and the access areas they hold. The rail and the
+   * phone drawer draw only the rows this person's access opens, so nothing on
+   * the menu leads to a refusal. Optional, so a frame drawn without it (a
+   * preview, a test) still draws the whole menu exactly as before.
+   */
+  viewer?: NavViewer;
   children: ReactNode;
 }) {
   const badges = counts;
@@ -85,9 +103,9 @@ export function AdminFrame({
         <div className="nf-admin-rail__inner">
           <div className="nf-admin-rail__brand">{brand}</div>
           <div className="nf-admin-rail__scroll">
-            <AdminRail counts={badges} labels={navLabels} navLabel={navLabel} shell={shell} />
+            <AdminRail counts={badges} labels={navLabels} navLabel={navLabel} shell={shell} viewer={viewer} />
           </div>
-          <AdminRailFoot identity={identity} counts={badges} shell={shell} />
+          <AdminRailFoot identity={identity} counts={badges} shell={shell} viewer={viewer} />
         </div>
       </aside>
 
@@ -102,6 +120,7 @@ export function AdminFrame({
             brand={brand}
             ledes={experience?.deskLedes}
             waitingText={experience?.waitingTotal}
+            viewer={viewer}
           />
           {back && <span className="nf-admin-bar__back">{back}</span>}
           <span className="nf-admin-bar__brand">{brand}</span>
@@ -111,9 +130,10 @@ export function AdminFrame({
             hint={experience?.palette.shortcut}
           />
           {experience && (
-            <ConsolePalette copy={experience.palette} ledes={experience.deskLedes} counts={badges} shell={shell} />
+            <ConsolePalette copy={experience.palette} ledes={experience.deskLedes} counts={badges} shell={shell} viewer={viewer} />
           )}
           <span className="nf-admin-bar__spacer" />
+          {escalate}
           <ConsoleClock />
           <Link
             href="/notifications"

@@ -2,6 +2,7 @@ import type { MetadataRoute } from "next";
 import { CHROME_COLOUR } from "@/lib/theme/chrome";
 import { SHELL_START } from "@/lib/native/shell";
 import { versioned } from "@/lib/theme/brand-assets";
+import { prefersNativeApp, relatedApplications } from "@/lib/native/store-links";
 
 /**
  * Web app manifest, served by Next at `/manifest.webmanifest`.
@@ -37,6 +38,17 @@ export default function manifest(): MetadataRoute.Manifest {
     id: "/",
     name: "Vallo",
     short_name: "Vallo",
+    /*
+     * THE REAL ANDROID APP, NAMED TO CHROME (15 November 2026, when both apps
+     * went live in every country). Where the Play listing is set, Chrome
+     * offers the app from the store rather than installing this page: the app
+     * carries notifications that arrive when it is closed, the share sheet and
+     * the camera, which an installed page cannot. With no listing set both
+     * values fall away and the installable page behaves exactly as before.
+     * `lib/native/store-links.ts`.
+     */
+    related_applications: relatedApplications(process.env.NEXT_PUBLIC_PLAY_STORE_URL),
+    prefer_related_applications: prefersNativeApp(process.env.NEXT_PUBLIC_PLAY_STORE_URL),
     /*
      * THIS SENTENCE CARRIED THREE FAULTS AND IT IS THE ONE A STORE LISTING
      * QUOTES.

@@ -9,7 +9,7 @@ import { useClientCopyOptional } from "@/lib/i18n/client-copy";
  * THE BUTTON BESIDE THE PHONE GATE'S REFUSAL (founder's FULL GATE ruling,
  * 13 October 2026).
  *
- * Every gated action (a first message, visit, booking, payment or listing,
+ * Every gated action (a first payment or listing since 15 November 2026; before that also a first message, visit or booking,
  * and the first review and report) answers a member with no confirmed phone
  * with the `required` sentence and `gate: "phone"` (`lib/phone-otp/gate.ts`).
  * The screen keeps drawing the sentence where it always drew its error, and

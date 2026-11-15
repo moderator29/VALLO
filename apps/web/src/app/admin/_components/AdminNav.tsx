@@ -13,19 +13,21 @@ import { NavIcon } from "./AdminGlyph";
 import { searchBase } from "./palette";
 import "./admin-material.css";
 import {
-  ADMIN_GROUPS,
   ADMIN_NAV,
   ADMIN_SETTINGS,
   activeGroupKey,
   activeItemKey,
+  canOpen,
   countFor,
   currentDestination,
   groupItems,
+  groupsFor,
   isSectionActive,
   countLabelFor,
   labelFor,
   type ShellCopy,
   type AdminDestination,
+  type NavViewer,
 } from "./nav";
 
 type NavCopy = Dictionary["admin"]["nav"];
@@ -87,12 +89,19 @@ function Row({
  * the queues its desks carry so waiting work is seen with the group shut.
  * Every destination in `nav.ts` is in exactly one group, so no desk is an
  * orphan and the old "All desks" list is no longer needed.
+ *
+ * IT ANSWERS THE VIEWER (15 November 2026). Given a `viewer`, the rail draws
+ * only the rows that person's own access opens (`groupsFor`), and a group
+ * left with nothing in it is not drawn at all: no row that leads to a
+ * refusal, and the Staff desk and the Control room only for the super admin.
+ * Drawn without one, it draws the whole menu, as a preview or a test does.
  */
 export function AdminRail({
   counts,
   navLabel,
   shell,
   ledes,
+  viewer,
 }: {
   counts: Record<string, number>;
   labels?: NavCopy;
@@ -100,14 +109,17 @@ export function AdminRail({
   shell?: ShellCopy;
   /** Desk key to its one line. Passed by the phone drawer only. */
   ledes?: Readonly<Record<string, string | undefined>>;
+  /** Who is reading, as the console door answered for them. */
+  viewer?: NavViewer;
 }) {
   const pathname = usePathname() ?? "/admin";
   const openGroup = activeGroupKey(pathname);
   const litKey = activeItemKey(pathname);
+  const groups = groupsFor(viewer);
   return (
     <nav aria-label={navLabel} className="nf-admin-nav">
       <ul className="nf-admin-nav__list">
-        {ADMIN_GROUPS.map((group) => {
+        {groups.map((group) => {
           const items = groupItems(group);
           const waiting = [...new Set(items.flatMap((item) => item.countKeys ?? []))].reduce(
             (total, key) => total + (counts[key] ?? 0),
@@ -195,15 +207,21 @@ export function AdminRailFoot({
   identity,
   counts = {},
   shell,
+  viewer,
 }: {
   identity: AdminIdentity;
   counts?: Record<string, number>;
   shell?: ShellCopy;
+  /** Who is reading: Settings is an admin's row, so it is not drawn for anybody else. */
+  viewer?: NavViewer;
 }) {
   const pathname = usePathname() ?? "/admin";
+  const settings = !viewer || canOpen(ADMIN_SETTINGS, viewer);
   return (
     <div className="nf-admin-rail__foot">
-      <Row item={ADMIN_SETTINGS} counts={counts} shell={shell} active={isSectionActive(pathname, ADMIN_SETTINGS)} />
+      {settings ? (
+        <Row item={ADMIN_SETTINGS} counts={counts} shell={shell} active={isSectionActive(pathname, ADMIN_SETTINGS)} />
+      ) : null}
       <Link href="/profile" className="nf-admin-rail__me">
         <IdentityBlock identity={identity} />
         <UiIcon name="chevron-right" size={16} className="shrink-0 text-[var(--nf-content-muted)]" />
@@ -277,6 +295,7 @@ export function AdminTabs({
   shell,
   ledes,
   waitingText,
+  viewer,
 }: {
   counts: Record<string, number>;
   labels?: NavCopy;
@@ -288,6 +307,8 @@ export function AdminTabs({
   ledes?: Readonly<Record<string, string | undefined>>;
   /** "{count} waiting", for the line above the desks. */
   waitingText?: string;
+  /** Who is reading: the drawer draws the same rows the rail does. */
+  viewer?: NavViewer;
 }) {
   const closeLabel = shell?.nav.closeMenu ?? "Close the console menu";
   const pathname = usePathname() ?? "/admin";
@@ -363,7 +384,7 @@ export function AdminTabs({
               {waiting > 0 && waitingText ? (
                 <p className="nf-admin-drawer__total nf-numeric">{waitingText.replace("{count}", String(waiting))}</p>
               ) : null}
-              <AdminRail counts={counts} shell={shell} navLabel={navLabel} ledes={ledes} />
+              <AdminRail counts={counts} shell={shell} navLabel={navLabel} ledes={ledes} viewer={viewer} />
             </div>
             {identity && (
               <div
@@ -371,7 +392,7 @@ export function AdminTabs({
                   if ((event.target as HTMLElement).closest("a")) setOpen(false);
                 }}
               >
-                <AdminRailFoot identity={identity} counts={counts} shell={shell} />
+                <AdminRailFoot identity={identity} counts={counts} shell={shell} viewer={viewer} />
               </div>
             )}
           </div>

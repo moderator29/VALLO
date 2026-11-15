@@ -6,6 +6,7 @@ import { getBookingOutcomes, getPriceCheckDemand, getSupplySeries, getThinAreas 
 import { getListingViewTotals } from "@/lib/admin/reads/listing-stats";
 import type { CollectedRange } from "@/lib/admin/reads/shapes";
 import { LiveRefresh } from "../_components/LiveRefresh";
+import { DeskLinks } from "../_components/panels";
 import { AnalyticsView } from "./AnalyticsView";
 import { DeskCopilot } from "@/lib/admin/copilot/contexts/DeskCopilot";
 import { analyticsContext } from "@/lib/admin/copilot/contexts/analytics";
@@ -46,6 +47,11 @@ export default async function AdminAnalyticsPage({
   ]);
   return (
     <>
+      {/* The desks the menu files under this one, as buttons: this desk drew
+          none of them, so reaching the front door funnel or the listing figures meant going back to the menu. */}
+      <div className="nf-console">
+        <DeskLinks deskKey="analytics" label="The other analytics desks" caption="More in this desk" />
+      </div>
       <LiveRefresh />
       <AnalyticsView
         locale={locale}

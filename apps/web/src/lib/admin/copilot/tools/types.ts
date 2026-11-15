@@ -54,8 +54,24 @@ export type CopilotProposal = {
 /** What a propose handler returns; the registry adds the tool name, id, token and expiry. */
 export type ProposalDraft = Omit<CopilotProposal, "id" | "tool" | "token" | "expiresAt"> & { action: ProposalAction | null };
 
+/**
+ * A PLACE THE ANSWER MAY OFFER AS A BUTTON. A tool returns the desks its
+ * answer is about; the registry drops every one the viewer may not open
+ * before the model sees it (`lib/admin/copilot/tools/links.ts`), and the renderer draws only
+ * these as buttons. `scope` names the access area that opens it: leave it out
+ * for a page every member of staff can open.
+ */
+export type ToolLink = {
+  label: string;
+  href: string;
+  /** The access area that opens it. Leave it out for a page every member of staff can open. */
+  scope?: StaffScope;
+  /** A role the page needs on top of the scopes: the COO bundle, an admin, or the super admin alone. */
+  requires?: "coo" | "admin" | "super_admin";
+};
+
 export type ToolResult =
-  | { ok: true; data: unknown; note?: string; proposal?: ProposalDraft }
+  | { ok: true; data: unknown; note?: string; proposal?: ProposalDraft; links?: readonly ToolLink[] }
   | { ok: false; error: string };
 
 /** The writes the act route can run. Each maps to one existing server action. */

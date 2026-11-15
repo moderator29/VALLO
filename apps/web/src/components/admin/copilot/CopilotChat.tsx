@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/Button";
 import { UiIcon } from "@/design-system/icons/UiIcon";
 import { banner } from "@/lib/ui/toast";
 import { COPILOT_ASK_EVENT } from "./CopilotCapabilities";
-import { CopilotMarkdown } from "./markdown-lite";
+import { CopilotAnswer } from "./CopilotAnswer";
 import { ProposalCard } from "./ProposalCard";
 import { useCopilotChat } from "./use-copilot-chat";
 import "./admin-copilot.css";
@@ -123,7 +123,7 @@ export function CopilotChat({
                 <>
                   {turn.text ? (
                     <div className="nf-copilot-turn" data-role="assistant">
-                      <CopilotMarkdown text={turn.text} {...(onNavigate ? { onNavigate } : {})} />
+                      <CopilotAnswer text={turn.text} destinations={turn.destinations ?? []} {...(onNavigate ? { onNavigate } : {})} />
                       {!(pending && i === turns.length - 1) ? (
                         <button type="button" className="nf-copilot-copy nf-tap" onClick={() => void copyAnswer(turn.text)}>
                           Copy answer
@@ -141,8 +141,12 @@ export function CopilotChat({
         )}
         {pending ? (
           <p className="nf-copilot-status" role="status" data-testid="copilot-status">
-            <span className="nf-copilot-status__dot" aria-hidden="true" />
-            {tool ? `${tool.label}...` : writing ? "Thinking..." : "Writing..."}
+            <span className="nf-copilot-typing" aria-hidden="true">
+              <span />
+              <span />
+              <span />
+            </span>
+            {tool ? `${tool.label}` : writing ? "Thinking" : "Writing"}
           </p>
         ) : null}
         <div ref={end} />

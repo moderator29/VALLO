@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { COPILOT_LIMITS } from "./capabilities";
-import { HARD_LIMITS_LINE, HOUSE_RULES, buildAdminSystemPrompt } from "./engine";
+import { HARD_LIMITS_LINE, HOUSE_RULES, SUPER_ADMIN_RULES, buildAdminSystemPrompt } from "./engine";
 
 describe("the admin copilot's system prompt", () => {
   const base = { viewerFirstName: "Ada", positionTitle: "Business Development Executive", roleSummary: "Brings in landlords and agents.", deskName: "Business Development", context: "3 new leads, 1 listing awaiting review.", scopeLabels: ["Business development"] };
@@ -50,5 +50,55 @@ describe("the admin copilot's system prompt", () => {
 
   it("contains no long dash anywhere in what it tells the model", () => {
     expect(buildAdminSystemPrompt(base)).not.toContain("—");
+  });
+});
+
+describe("the destination rules", () => {
+  const rules = HOUSE_RULES.join(" ");
+
+  it("tells the model to end with where to go, in the exact syntax", () => {
+    expect(rules).toContain("END YOUR ANSWER BY OFFERING WHERE TO GO");
+    expect(rules).toContain("[[go:/admin/listings|Open the Listings desk]]");
+    expect(rules).toContain("takeMeThere");
+  });
+
+  it("tells it a destination is only ever an address a tool returned", () => {
+    expect(rules).toMatch(/only ever an address a tool returned THIS turn/);
+    expect(rules).toMatch(/never guess an address/);
+  });
+
+  it("points the way-finding and handbook questions at their own tools", () => {
+    expect(rules).toContain("where_do_i_go");
+    expect(rules).toContain("get_my_handbook");
+  });
+});
+
+describe("the super admin's own prompt", () => {
+  const prompt = (isSuperAdmin: boolean) =>
+    buildAdminSystemPrompt({ viewerFirstName: "Tunde", positionTitle: null, roleSummary: null, deskName: "Console", context: null, isAdmin: true, isSuperAdmin });
+
+  it("names the facts only the founder needs", () => {
+    const text = prompt(true);
+    expect(text).toMatch(/They alone grant, change and withdraw staff access/);
+    expect(text).toContain("/admin/staff");
+    expect(text).toMatch(/SQL is run by them, by hand, in the Supabase SQL editor/);
+    expect(text).toMatch(/You cannot run SQL/);
+    expect(text).toMatch(/goes to the COO, and then to them/);
+    expect(text).toMatch(/switches are read, never set/);
+    expect(text).toContain("/admin/switches");
+  });
+
+  it("asks for short plain sentences with the numbers and a button, not a lecture", () => {
+    expect(prompt(true)).toMatch(/short plain sentences with the numbers in them, then the destination button/);
+    expect(prompt(true)).toMatch(/no lecture/);
+  });
+
+  it("says none of it to anybody else", () => {
+    const ordinary = prompt(false);
+    for (const line of SUPER_ADMIN_RULES) expect(ordinary).not.toContain(line);
+  });
+
+  it("carries no long dash", () => {
+    expect(prompt(true)).not.toContain("\u2014");
   });
 });

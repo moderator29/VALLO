@@ -20,9 +20,9 @@ import type { StaffScope } from "@/lib/admin/guard";
  */
 
 /** The day the chapters were last read against the code. */
-export const MANUAL_UPDATED = "2026-11-14";
+export const MANUAL_UPDATED = "2026-11-15";
 
-export const MANUAL_SLUGS = ["access", "desks", "queues", "decisions", "records", "escalation", "my-desk", "weekly-report", "marketing", "content", "technical", "support-lead", "business-development", "social-media"] as const;
+export const MANUAL_SLUGS = ["access", "desks", "queues", "decisions", "records", "escalation", "my-desk", "weekly-report", "marketing", "content", "technical", "support-lead", "business-development", "social-media", "product-guide", "onboarding-a-lister", "onboarding-a-member"] as const;
 export type ManualSlug = (typeof MANUAL_SLUGS)[number];
 
 export type ManualChapter = {
@@ -132,6 +132,30 @@ export const MANUAL_CHAPTERS: readonly ManualChapter[] = [
     title: "Social Media Manager",
     icon: "camera",
     description: "The content calendar, a post from draft to posted, approval, the media library, what a post may say and the report.",
+  },
+  {
+    slug: "product-guide",
+    number: 15,
+    title: "Vallo, feature by feature",
+    icon: "compass",
+    description: "What Vallo is, every feature, what it gives a business and a person, what it costs, what is open today, and what to say when you are asked.",
+  },
+  /* The two onboarding chapters (the founder, 15 November 2026): the subjects
+     grew too big for a section of chapter 15 and each is now its own chapter,
+     read from the real flows rather than from the documents about them. */
+  {
+    slug: "onboarding-a-lister",
+    number: 16,
+    title: "Onboarding a lister, end to end",
+    icon: "id-card",
+    description: "Every door onto the supply side: what each kind of lister gives, how long each step takes, what the reviewer looks at, what happens when something is missing, and the words to use when asking a business for their papers.",
+  },
+  {
+    slug: "onboarding-a-member",
+    number: 17,
+    title: "Onboarding a member",
+    icon: "user-check",
+    description: "What a new member does and sees from sign up to their first booking, what Vallo asks them for and when, and what staff can see and do about each part of it.",
   },
 ];
 

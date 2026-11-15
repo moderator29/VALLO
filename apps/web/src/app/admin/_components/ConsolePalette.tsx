@@ -8,7 +8,7 @@ import { overlayIsOpen } from "@/lib/ui/overlay-registry";
 import { feedback } from "@/lib/ui/feedback";
 import { CONSOLE_JUMPS } from "@/components/app/desk/desk-keys";
 import { NavIcon } from "./AdminGlyph";
-import { currentDestination, labelFor, type ShellCopy } from "./nav";
+import { currentDestination, labelFor, type ShellCopy, type NavViewer } from "./nav";
 import { deskIndex, paletteActions, rankDesks } from "./palette";
 import "./admin-material.css";
 import { Button } from "@/components/ui/Button";
@@ -90,11 +90,14 @@ export function ConsolePalette({
   ledes,
   counts,
   shell,
+  viewer,
 }: {
   copy: PaletteCopy;
   ledes: Readonly<Record<string, string | undefined>>;
   counts: Record<string, number>;
   shell?: ShellCopy;
+  /** Who is searching, so the palette offers only the desks they can open. */
+  viewer?: NavViewer;
 }) {
   const router = useRouter();
   const pathname = usePathname() ?? "/admin";
@@ -148,7 +151,7 @@ export function ConsolePalette({
   }, []);
 
   const index = useMemo(
-    () => deskIndex({ shell, ledes, counts, jumps: CONSOLE_JUMPS }),
+    () => deskIndex({ shell, ledes, counts, jumps: CONSOLE_JUMPS, ...(viewer ? { viewer } : {}) }),
     [shell, ledes, counts],
   );
   const here = currentDestination(pathname);

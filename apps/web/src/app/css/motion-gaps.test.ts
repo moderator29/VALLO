@@ -145,6 +145,7 @@ describe("principle 10, the marketing and loading loops (Session 3, C1)", () => 
       /* KEPT BY THE LEAD'S RULING (Session 3): live presence signals, like the assistant's
          thinking, each stopped by reduced motion, Calm, Off and data saver. */
       "app/css/motion.css": 1, // the counterpart's typing dots
+      "components/admin/copilot/admin-copilot.css": 1, // the copilot's typing dots, the same exception as the assistant's
       /* VC1: the ring round a calling avatar, a live signal like the typing
          dots, that lasts only while a call rings (45 s at most) and is
          stopped by reduced motion, Calm, Off and data saver. */

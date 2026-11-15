@@ -34,7 +34,9 @@ export default async function AdminCopilotPage() {
     );
   }
   const { viewer } = resolved;
-  const desks = COPILOT_CAPABILITIES.filter((desk) => desk.scopes.length === 0 || holdsAny(viewer, desk.scopes));
+  const desks = COPILOT_CAPABILITIES.filter((desk) =>
+    desk.superAdminOnly ? viewer.isSuperAdmin : desk.scopes.length === 0 || holdsAny(viewer, desk.scopes),
+  );
   const first = viewer.firstName === "there" ? "" : `, ${viewer.firstName}`;
   return (
     <div className="nf-console" data-testid="admin-copilot-page">
@@ -47,7 +49,7 @@ export default async function AdminCopilotPage() {
           scope={null}
           deskName="Console"
           greeting={`Hello${first}. Ask me what needs you first today, or pick a question below.`}
-          starters={starterPromptsFor(viewer.scopes.length === 1 ? (viewer.scopes[0] ?? null) : null)}
+          starters={starterPromptsFor(viewer.scopes.length === 1 ? (viewer.scopes[0] ?? null) : null, viewer)}
           storageKey="vallo.copilot.v2.page"
           variant="page"
         />

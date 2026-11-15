@@ -1,15 +1,36 @@
 import { countOf } from "@vallo/i18n/core";
 import type { Metadata } from "next";
 import { requireCoo, cooRefusal } from "@/lib/admin/overview/guard";
-import { readCooBacklog, listEscalations, listStaffAccessRecommendations } from "@/lib/admin/overview/reads";
+import { readCooBacklog, listEscalations as listCooBoard, listStaffAccessRecommendations } from "@/lib/admin/overview/reads";
 import { PageHead, Panel } from "../_components/panels";
 import { AdminCopilot } from "@/components/admin/copilot/AdminCopilot";
 import { BacklogCards } from "./BacklogCards";
 import { EscalationBoard } from "./EscalationBoard";
 import { StaffAccessRecommendations } from "./StaffAccessRecommendations";
+import { getLocale } from "@/lib/locale";
+import { listEscalations, type EscalationListData, type EscalationRead } from "@/lib/admin/escalations/read";
+import { isClosed } from "@/lib/admin/escalations/types";
+import { WaitingOnYou } from "../escalations/WaitingOnYou";
 
 export const metadata: Metadata = { title: "Overview", robots: { index: false, follow: false } };
 export const dynamic = "force-dynamic";
+
+/** The request's clock, read once so every "due in" on the page agrees. */
+function requestTime(): number {
+  return Date.now();
+}
+
+/**
+ * The escalations that are with the COO now, from the Escalate button on
+ * every desk (`staff_escalations`): raised to the COO, or moved up to the COO
+ * when a team did not answer in time. Read as "all" (this desk is the COO's
+ * and the super admin's) and narrowed to the COO's level, so a super admin
+ * looking at this desk sees the COO's work and not their own.
+ */
+function withTheCoo(read: EscalationRead<EscalationListData>): EscalationRead<EscalationListData> {
+  if (read.state !== "ok") return read;
+  return { state: "ok", data: { ...read.data, rows: read.data.rows.filter((row) => row.level === 1 && !isClosed(row.status)) } };
+}
 
 /**
  * THE COO DESK: cross-desk escalations, staff access recommendations, and
@@ -34,10 +55,12 @@ export default async function OverviewPage() {
     );
   }
 
-  const [backlog, escalationsRead, recommendationsRead] = await Promise.all([
+  const [backlog, escalationsRead, recommendationsRead, locale, routedRead] = await Promise.all([
     readCooBacklog(access.supabase),
-    listEscalations(),
+    listCooBoard(),
     listStaffAccessRecommendations(),
+    getLocale(),
+    listEscalations("all"),
   ]);
 
   const openAlerts =
@@ -61,6 +84,18 @@ export default async function OverviewPage() {
       <Panel title="Backlog across every desk">
         <BacklogCards backlog={backlog} />
       </Panel>
+
+      {/* The escalations raised from every desk's Escalate button that are
+          with the COO now (15 November 2026). The board below is the older
+          one (10 November) and is left as it is. */}
+      <WaitingOnYou
+        read={withTheCoo(routedRead)}
+        now={requestTime()}
+        locale={locale}
+        title="Escalations with the COO"
+        who="the COO"
+        note="These come from the Escalate button on every desk."
+      />
 
       <Panel title="Escalations">
         {escalationsRead.state === "not_set_up" ? (

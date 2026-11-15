@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { banner } from "@/lib/ui/toast";
+import type { Destination } from "@/lib/admin/copilot/destinations";
 import type { CopilotProposal } from "@/lib/admin/copilot/tools/types";
 
 /**
@@ -15,7 +16,14 @@ import type { CopilotProposal } from "@/lib/admin/copilot/tools/types";
 
 export type ProposalStatus = "pending" | "confirming" | "done" | "failed" | "dismissed" | "expired";
 export type ProposalState = { proposal: CopilotProposal; status: ProposalStatus; message?: string; href?: string };
-export type Turn = { id: string; role: "user" | "assistant"; text: string; proposals: ProposalState[] };
+export type Turn = {
+  id: string;
+  role: "user" | "assistant";
+  text: string;
+  proposals: ProposalState[];
+  /** The pages the tools offered this turn. Only these are drawn as buttons. */
+  destinations?: Destination[];
+};
 export type ToolLine = { id: string; label: string };
 
 const MAX_TURNS = 40;
@@ -24,6 +32,7 @@ type StreamEvent =
   | { type: "text"; text: string }
   | { type: "tool"; id: string; name: string; label: string; phase: "start" | "done" | "error" }
   | { type: "proposal"; proposal: CopilotProposal }
+  | { type: "destinations"; links: Destination[] }
   | { type: "done" }
   | { type: "error"; message: string };
 
@@ -35,7 +44,11 @@ function readStored(key: string): Turn[] {
     const raw = window.sessionStorage.getItem(key);
     if (!raw) return [];
     const parsed = JSON.parse(raw) as Turn[];
-    return Array.isArray(parsed) ? parsed.filter((t) => t && (t.role === "user" || t.role === "assistant") && typeof t.text === "string").map((t) => ({ ...t, proposals: Array.isArray(t.proposals) ? t.proposals : [] })) : [];
+    return Array.isArray(parsed)
+      ? parsed
+          .filter((t) => t && (t.role === "user" || t.role === "assistant") && typeof t.text === "string")
+          .map((t) => ({ ...t, proposals: Array.isArray(t.proposals) ? t.proposals : [], destinations: Array.isArray(t.destinations) ? t.destinations : [] }))
+      : [];
   } catch {
     return [];
   }
@@ -83,7 +96,7 @@ export function useCopilotChat({ storageKey, scope, deskName, context }: { stora
       const message = raw.trim();
       if (!message || pending) return;
       const history = turnsRef.current.filter((t) => t.text.trim()).map((t) => ({ role: t.role, text: t.text }));
-      setTurns((t) => [...t, { id: newId(), role: "user", text: message, proposals: [] }, { id: newId(), role: "assistant", text: "", proposals: [] }]);
+      setTurns((t) => [...t, { id: newId(), role: "user", text: message, proposals: [] }, { id: newId(), role: "assistant", text: "", proposals: [], destinations: [] }]);
       setPending(true);
       setTool(null);
       const controller = new AbortController();
@@ -126,6 +139,11 @@ export function useCopilotChat({ storageKey, scope, deskName, context }: { stora
               setTool(event.phase === "start" ? { id: event.id, label: event.label } : null);
             } else if (event.type === "proposal") {
               patchLast((t) => ({ ...t, proposals: [...t.proposals, { proposal: event.proposal, status: "pending" }] }));
+            } else if (event.type === "destinations") {
+              /* The server has already dropped every page this person may not
+                 open. Nothing outside this list is ever drawn as a button. */
+              const links = Array.isArray(event.links) ? event.links.filter((l) => l && typeof l.href === "string" && typeof l.label === "string") : [];
+              if (links.length > 0) patchLast((t) => ({ ...t, destinations: [...(t.destinations ?? []), ...links] }));
             } else if (event.type === "error") {
               banner.error(event.message);
               patchLast((t) => (t.text ? t : { ...t, text: event.message }));

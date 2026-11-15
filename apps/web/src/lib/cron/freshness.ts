@@ -124,6 +124,10 @@ export const WATCHED_JOBS: readonly WatchedJob[] = [
   { job: "complete-stays", schedule: "daily at 02:30 UTC", maxGapHours: 26 },
   /* Offers: expires offers past their date and nudges the side whose answer is waiting. Hourly. */
   { job: "offers-sweep", schedule: "hourly at :35", maxGapHours: 4 },
+  /* Staff escalations: the job that moves an unanswered one up a level. If
+     it stops, an urgent escalation nobody saw stays with a team that is not
+     looking, and nothing says so. */
+  { job: "escalations-overdue", schedule: "every 10 minutes", maxGapHours: 2 },
   { job: "inventory-drift", schedule: "daily at 02:45 UTC", maxGapHours: 26 },
   /* The saved-search alert. Daily, and a quiet day is a normal day for it:
      silence from this job means nobody was told, which is exactly what has to

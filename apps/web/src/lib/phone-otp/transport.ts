@@ -81,6 +81,11 @@ export function otpTransport(): OtpTransport {
  * Termii's keys and every other number Twilio's. The sign-up phone step asks
  * this first, so it never asks for a code that cannot arrive.
  */
+/** Whether a code can reach a number outside Nigeria from this deployment (the international sender is set up). */
+export function canSendAbroad(): boolean {
+  return twilioConfig() !== null;
+}
+
 export function canSendTo(phoneE164: string): boolean {
   return phoneE164.startsWith("+234") ? termiiConfig() !== null : twilioConfig() !== null;
 }

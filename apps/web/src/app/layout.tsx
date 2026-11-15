@@ -3,6 +3,7 @@ import { cookies, headers } from "next/headers";
 import { getDictionary } from "@vallo/i18n";
 import { getLocale } from "@/lib/locale";
 import { localizedAlternates, openGraphLocales } from "@/lib/i18n/public-metadata";
+import { smartBannerContent } from "@/lib/native/store-links";
 import { OG_LOCALE } from "@/lib/i18n/public-locale";
 import { prefersLessData } from "@/lib/save-data";
 import { NONCE_HEADER } from "@/lib/security/csp";
@@ -219,6 +220,19 @@ const baseMetadata: Metadata = {
   },
   other: {
     "apple-mobile-web-app-capable": "yes",
+    /*
+     * THE BANNER SAFARI DRAWS ABOVE THE PAGE ON AN iPHONE (Apple's Smart App
+     * Banner, 15 November 2026, when both apps went live in every country).
+     * One tag; Apple draws the icon, the name, the price line and the Get or
+     * Open button from the listing itself, so it is never a stale copy of the
+     * store. Absent until the App Store address is set, rather than pointing
+     * at a listing that is not there. It is a Safari feature, so the native
+     * shell's web view never draws it and nobody is offered the app they are
+     * already inside. `lib/native/store-links.ts`.
+     */
+    ...(smartBannerContent(process.env.NEXT_PUBLIC_APP_STORE_URL)
+      ? { "apple-itunes-app": smartBannerContent(process.env.NEXT_PUBLIC_APP_STORE_URL)! }
+      : {}),
   },
   /*
    * The platform previously shipped no favicon at all: the smallest declared

@@ -4,7 +4,7 @@ import { getLocale } from "@/lib/locale";
 import { requireAdmin } from "@/lib/admin/guard";
 import { getSupportQueue, getSupportTicketDetail } from "@/lib/admin/support-queue";
 import { isSupportTab } from "@/lib/admin/support-workspace";
-import { CalmNote, PageHead } from "../_components/panels";
+import { CalmNote, DeskLinks, PageHead } from "../_components/panels";
 import { SupportDesk, type SupportDeskProps } from "./SupportDesk";
 import { DeskCopilot } from "@/lib/admin/copilot/contexts/DeskCopilot";
 import { supportContext } from "@/lib/admin/copilot/contexts/support";
@@ -80,6 +80,11 @@ export default async function AdminSupportPage({
 
   return (
     <>
+      {/* The desks the menu files under this one, as buttons: this desk drew
+          none of them, so reaching the member file or account recovery meant going back to the menu. */}
+      <div className="nf-console">
+        <DeskLinks deskKey="tickets" label="The other support desks" caption="More in this desk" />
+      </div>
       <SupportDesk now={now} tab={tab} q={q} queue={queue} selected={selected} missing={missing} copy={t.admin.support} />
       {door.state === "admin" ? (
         <DeskCopilot

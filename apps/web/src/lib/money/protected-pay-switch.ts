@@ -9,38 +9,27 @@ import { createClient } from "../supabase/server";
  * protected payment rail to members. It FAILS CLOSED: a missing flag, a
  * failed read or a kill switch all mean off.
  *
- * Compatibility, until the next deploy settings change and the pending SQL
- * in supabase/migrations/pending (the provider-removal file) has run: the flag is read under its new
- * key first and, only when the new row does not exist, under the old key the
- * live database still holds. The environment stop likewise accepts the new
- * name and the old one. The two lines marked `legacy-name` are the ONLY places the retired
- * provider's name remains in the source; the guard test allows exactly those.
+ * The flag's old key was removed from the live database by the
+ * provider-removal SQL (verified live 15 November 2026: the old row, table and
+ * function are gone), so only the current key is read.
  */
 export const PROTECTED_PAY_FLAG = "payments_protected_pay_on";
-export const LEGACY_PROTECTED_PAY_FLAG = "payments_payluk_on"; // legacy-name: old live flag key, read for compatibility only
 export const PROTECTED_PAY_KILL_ENV = "PAYMENTS_KILL_PROTECTED_PAY";
-export const LEGACY_PROTECTED_PAY_KILL_ENV = "PAYMENTS_KILL_PAYLUK"; // legacy-name: old deploy setting, read for compatibility only
 
-/** The environment stop: either name set to 1 stops the rail with no database. */
+/** The environment stop: set to 1, it stops the rail with no database. */
 export function protectedPayKilled(env: Readonly<Record<string, string | undefined>> = process.env): boolean {
-  return env[PROTECTED_PAY_KILL_ENV] === "1" || env[LEGACY_PROTECTED_PAY_KILL_ENV] === "1";
+  return env[PROTECTED_PAY_KILL_ENV] === "1";
 }
 
-/** Whether the protected-pay switch is on. New key first, old key only when the new row is absent. */
+/** Whether the protected-pay switch is on. */
 export const protectedPaySwitchOn = cache(async (): Promise<boolean> => {
   if (protectedPayKilled()) return false;
   if (!isSupabaseConfigured()) return false;
   try {
     const supabase = await createClient();
-    const { data, error } = await supabase
-      .from("feature_flags")
-      .select("key, enabled")
-      .in("key", [PROTECTED_PAY_FLAG, LEGACY_PROTECTED_PAY_FLAG]);
+    const { data, error } = await supabase.from("feature_flags").select("key, enabled").in("key", [PROTECTED_PAY_FLAG]);
     if (error || !data) return false;
-    const rows = data as { key: string; enabled: boolean }[];
-    const current = rows.find((r) => r.key === PROTECTED_PAY_FLAG);
-    if (current) return current.enabled === true;
-    return rows.find((r) => r.key === LEGACY_PROTECTED_PAY_FLAG)?.enabled === true;
+    return (data as { key: string; enabled: boolean }[]).find((r) => r.key === PROTECTED_PAY_FLAG)?.enabled === true;
   } catch {
     return false;
   }

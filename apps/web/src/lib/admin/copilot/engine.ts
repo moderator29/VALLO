@@ -3,6 +3,7 @@ import { roundWatchdog } from "@/lib/ai/upstream-deadline";
 import { CARD_RAIL_MOVES, GOVERNING_SENTENCE, PROMPT_NO_ESCROW, REFUND_ROUTE } from "@/lib/money/copy";
 import { UNTRUSTED_TOOL_LINE } from "@/lib/assistant/untrusted";
 import { COPILOT_LIMITS } from "./capabilities";
+import { DESTINATION_SYNTAX, MAX_DESTINATIONS, type Destination } from "./destinations";
 import { runCopilotTool, toolDefinitions } from "./tools/registry";
 import type { CopilotProposal, CopilotTool, CopilotViewer } from "./tools/types";
 
@@ -62,15 +63,37 @@ export const HOUSE_RULES: string[] = [
   "If a tool returns nothing, fails, or says it could not be read, say so plainly and stop there. Never fill the gap with an estimate.",
   "Never claim that anything was done, sent, approved or paid unless a tool result in this turn confirms it. A proposal is not a change: until the person presses Confirm, nothing has happened.",
   "Never invent a figure, a case outcome, a member's details or a company policy. For every how-to, 'am I allowed' or 'who decides' question, call search_manual FIRST and answer from the passages, naming the chapter and giving its link. For a named task (approve a listing, a KYC check, a refund or payment dispute, a report, a ticket, escalating a case) call get_playbook and give the steps in order.",
+  "Every staff member, on every desk, can escalate what they cannot or may not decide with the Escalate button at the top of any admin page (or /admin/escalations/new), and has their own escalations at /admin/escalations. For 'what is waiting on me', 'what did I raise' or 'did my escalation get an answer', call get_escalations and give each one's link. For 'how do I escalate this' or 'who do I send this to', call get_escalations and answer from its howToEscalate facts: the steps, where each kind of issue goes and the response times. You cannot raise, answer or close an escalation yourself. Remind them never to paste an ID number or bank detail into one, and never to tell a member they are suspected.",
   "After a how-to answer, offer to open the desk (give its link) or to draft the next step for them to confirm. If the manual has nothing, say so rather than guessing.",
   "If you do not know something, say so and point to the staff manual (/admin/manual) or their lead.",
   "Keep answers short and practical: a staff member is working, not reading an essay. Lead with what matters, then the next steps. Use short lists. Offer to draft or to add a task when it would save them time.",
   "Write in plain words for people in Nigeria. Naira amounts come from tools in kobo: divide by 100 and write them as naira with thousands separators. Dates in the Lagos day.",
   "Never use the long dash character in your own replies. Use a comma, a colon or a full stop instead.",
   "Link to the real desk page for every item you mention, as a markdown link whose address starts with /admin, using the link a tool gave you. Never link anywhere else.",
+  /* TAKE ME THERE (16 November 2026): the answer carries a button. */
+  `END YOUR ANSWER BY OFFERING WHERE TO GO. A tool result carries a takeMeThere list: those are the pages THIS person may open. Write each one you are offering on its own line at the very end, exactly as ${DESTINATION_SYNTAX}, using the address and the words the tool gave. At most ${MAX_DESTINATIONS}, usually one or two, and only the ones that help with what was asked.`,
+  "A destination is only ever an address a tool returned THIS turn. Never write one from memory, never guess an address, and never put one in the middle of a sentence: anything else is shown to the person as plain words with nothing to press, which reads as a mistake. If no tool returned a page, do not offer one.",
+  "For 'where do I do this', 'where is that screen' or 'which desk handles this', call where_do_i_go and answer from the desks it returns, then offer the best one as a destination.",
+  "For 'what does my handbook say', 'what am I responsible for' or 'what may I decide', call get_my_handbook and answer from their own handbook, naming the section.",
   "Never write anything a member of the public might see without first telling the staff member whom to ask before it goes out (their lead, for anything that reads as a company statement). Drafts you write are for the staff member to read and change.",
   `House money wording, to use whenever money comes up: ${CARD_RAIL_MOVES} ${REFUND_ROUTE} ${GOVERNING_SENTENCE} ${PROMPT_NO_ESCROW} The Vallo Guarantee is retired: never offer it, promise it or describe it as live; if it comes up, say it was retired and that any claim made before then is still decided on the Money desk.`,
   UNTRUSTED_TOOL_LINE,
+];
+
+/**
+ * WHAT ONLY THE SUPER ADMIN NEEDS TOLD (16 November 2026). Added to the prompt
+ * for a super admin and nobody else: the facts that are true of them alone,
+ * and the manner the founder asked for, which is short sentences with the
+ * numbers in them and a button at the end.
+ */
+export const SUPER_ADMIN_RULES: readonly string[] = [
+  "You are speaking with the super admin, the founder. They see and decide things nobody else can, so answer at that level: the whole platform, not one desk.",
+  "They alone grant, change and withdraw staff access, on the Staff desk (/admin/staff). Nobody else can, and neither can you. The COO can only leave a recommendation for them.",
+  "SQL is run by them, by hand, in the Supabase SQL editor. You cannot run SQL and you have no database console: when a part of the platform is waiting on a file, name the file to run and say where it is run. Never claim a file has been run.",
+  "An escalation sent to a team that has nobody on it goes to the COO, and then to them. So an empty team is their work: get_staff_overview names the teams with nobody on them.",
+  "The main switches are read, never set, by you: get_platform_pulse and get_control_room give how each one stands now and what it means. A switch is changed on the Switches desk (/admin/switches). Quote a switch position only from one of those results this turn.",
+  "Their questions are usually 'what needs me', 'what is waiting', 'what SQL still has to run', 'who has access to what' and 'what changed'. Call get_platform_pulse, get_control_room, get_staff_overview or get_what_changed, whichever answers it, and answer from the result.",
+  "Answer in short plain sentences with the numbers in them, then the destination button. No preamble, no headings on a three line answer, no lecture, no repeating the question back. If something could not be read, one sentence saying which, and no estimate.",
 ];
 
 /** Stated from the same list the full-page panel prints. */
@@ -87,6 +110,7 @@ export type PromptInput = Pick<AdminCopilotRequest, "positionTitle" | "roleSumma
 
 export function buildAdminSystemPrompt(req: PromptInput): string {
   const lines = [...HOUSE_RULES, HARD_LIMITS_LINE];
+  if (req.isSuperAdmin) lines.push(...SUPER_ADMIN_RULES);
   lines.push(`The staff member you are speaking with is named ${req.viewerFirstName}.`);
   lines.push(
     req.positionTitle
@@ -115,6 +139,12 @@ export type AdminCopilotEvent =
   | { type: "text"; text: string }
   | { type: "tool"; id: string; name: string; label: string; phase: "start" | "done" | "error" }
   | { type: "proposal"; proposal: CopilotProposal }
+  /**
+   * The pages this person may be taken to, as the tools returned them, already
+   * filtered against their own access. The renderer draws a button only for
+   * one of these, so a destination the model invented is drawn as plain words.
+   */
+  | { type: "destinations"; links: Destination[] }
   | { type: "done" }
   | { type: "error"; message: string };
 
@@ -240,6 +270,9 @@ export async function* streamAdminCopilot(
     now: req.now,
   });
   const definitions = toolDefinitions(req.tools);
+  /* Every destination the tools handed back this turn, by address. The client
+     renders a button only for one of these. */
+  const offered = new Map<string, string>();
   const convo: { role: "user" | "assistant"; content: unknown }[] = [
     ...req.history.slice(-20).map((turn) => ({ role: turn.role, content: turn.text })),
     { role: "user", content: req.message },
@@ -280,12 +313,20 @@ export async function* streamAdminCopilot(
         batch.map(async (use) => ({ use, run: await runCopilotTool(String(use.name), use.input, { viewer: req.viewer, now: clock() }, req.tools) })),
       );
       const results: unknown[] = [];
+      const fresh: Destination[] = [];
       for (const { use, run } of ran) {
         const tool = req.tools.find((t) => t.name === use.name);
         yield { type: "tool", id: String(use.id), name: String(use.name), label: tool?.status ?? "Working", phase: run.ok ? "done" : "error" };
         if (run.proposal) yield { type: "proposal", proposal: run.proposal };
+        for (const link of run.destinations ?? []) {
+          if (!offered.has(link.href)) {
+            offered.set(link.href, link.label);
+            fresh.push(link);
+          }
+        }
         results.push({ type: "tool_result", tool_use_id: use.id, content: run.content });
       }
+      if (fresh.length > 0) yield { type: "destinations", links: fresh };
       for (const use of uses.slice(MAX_TOOLS_PER_ROUND)) {
         results.push({ type: "tool_result", tool_use_id: use.id, content: JSON.stringify({ error: "Too many tools at once. Ask for these one round at a time." }) });
       }

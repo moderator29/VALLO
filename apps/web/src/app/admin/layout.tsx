@@ -15,7 +15,7 @@ import type { ReactNode } from "react";
 import { cookies } from "next/headers";
 import { getDictionary } from "@vallo/i18n";
 import { getLocale } from "@/lib/locale";
-import { requireAdmin, requireConsole } from "@/lib/admin/guard";
+import { readStaffAccess, requireAdmin, requireConsole } from "@/lib/admin/guard";
 import { StaffFrame } from "./_components/StaffFrame";
 import { getQueueCounts } from "@/lib/admin/queries";
 import { getCoverageCounts } from "@/lib/admin/desk-reads/extra-counts";
@@ -28,12 +28,16 @@ import { DesktopNote } from "./_components/DesktopNote";
 import { notFound } from "next/navigation";
 import { AdminFrame } from "./_components/AdminFrame";
 import type { AdminIdentity } from "./_components/AdminNav";
+import type { NavViewer } from "./_components/nav";
 import { EntryGate } from "./_components/EntryGate";
 import { BackButton } from "@/components/site/BackButton";
 import { getPersonTiers } from "@/lib/admin/reads/shared";
 import { ENTRY_COOKIE } from "./_components/entry";
 import { PasscodeLayer } from "@/components/passcode/PasscodeLayer";
 import { CallLayerMount } from "@/components/calls/CallLayerMount";
+import { getEscalationCounts } from "@/lib/admin/escalations/read";
+import { EscalateButton } from "./_components/EscalateButton";
+import { NotSetUp as EscalationsNotSetUp } from "./escalations/parts";
 /* The console's stylesheet, loaded by the console alone (B-4): it left
    `globals.css`, where every page paid for it. */
 import "@/app/css/admin.css";
@@ -80,10 +84,22 @@ export default async function AdminLayout({ children }: { children: ReactNode })
        nothing here confirms that a console exists. */
     if (door.state === "not-admin") notFound();
     if (door.state !== "console") return <AccessScreen t={t} state={door.state} />;
-    const shell = await getShellIdentity();
+    /* Escalations (15 November): what waits on this person, and the button
+       that raises one from whatever desk they are on. */
+    const [shell, escalations] = await Promise.all([getShellIdentity(), getEscalationCounts()]);
     const name = shell.userName && shell.userName !== "Guest" ? shell.userName : (door.user.email ?? "Staff");
     return (
-      <StaffFrame staff={door.staff} name={name}>
+      <StaffFrame
+        staff={door.staff}
+        name={name}
+        escalationsWaiting={escalations.state === "ok" ? escalations.data.waiting : 0}
+        escalate={
+          <EscalateButton
+            staffed={escalations.state === "ok" ? escalations.data.staffed : null}
+            {...(escalations.state === "not_set_up" ? { notSetUp: <EscalationsNotSetUp /> } : {})}
+          />
+        }
+      >
         <DesktopNote />
         <PasscodeLayer>{children}</PasscodeLayer>
         <DeskKeys jumps={CONSOLE_JUMPS} jumpWords={CONSOLE_JUMP_WORDS} />
@@ -93,7 +109,7 @@ export default async function AdminLayout({ children }: { children: ReactNode })
     );
   }
 
-  const [counts, shell, jar, tiers, coverage, chargebacks] = await Promise.all([
+  const [counts, shell, jar, tiers, coverage, chargebacks, escalations, own] = await Promise.all([
     getQueueCounts(),
     getShellIdentity(),
     cookies(),
@@ -104,11 +120,21 @@ export default async function AdminLayout({ children }: { children: ReactNode })
     /* Chargebacks not yet decided, read on the operator's own session
        (`staff_chargebacks` checks the finance scope itself). */
     getOpenChargebackCount(access.userClient),
+    /* Escalations waiting on this operator, read on their own session
+       (`staff_escalation_counts`); "not set up" until its SQL has run. */
+    getEscalationCounts(),
+    /* WHO THE MENU IS DRAWN FOR: this operator's own access, read from the
+       database as every other read here is. The rail draws only the rows it
+       opens, so the Staff desk and the Control room are the super admin's
+       alone. It decides what is drawn and nothing else: every desk asks the
+       database again. */
+    readStaffAccess(access.userClient),
   ]);
   /* R-E: has this browser session opened the overview as this operator? */
   const entered = jar.get(ENTRY_COOKIE)?.value === access.user.id;
   const badges: Record<string, number> = { ...(counts.state === "ok" ? counts.data : {}), ...coverage };
   if (chargebacks > 0) badges.chargebacks = chargebacks;
+  if (escalations.state === "ok" && escalations.data.waiting > 0) badges.escalations = escalations.data.waiting;
 
   const email = access.user.email ?? "";
   const name = shell.userName && shell.userName !== "Guest" ? shell.userName : email.split("@")[0] || "Admin";
@@ -120,9 +146,17 @@ export default async function AdminLayout({ children }: { children: ReactNode })
     tier: tiers.get(access.user.id) ?? null,
   };
 
+  const viewer: NavViewer = {
+    isAdmin: true,
+    isSuperAdmin: access.isSuperAdmin,
+    scopes: own?.scopes ?? [],
+    position: own?.position ?? null,
+  };
+
   return (
     <AdminFrame
       identity={identity}
+      viewer={viewer}
       counts={badges}
       unread={shell.unreadNotifications}
       navLabel={t.admin.console.navLabel}
@@ -131,6 +165,13 @@ export default async function AdminLayout({ children }: { children: ReactNode })
       bellLabel={t.uiCommon.console.notifications}
       shell={t.admin.shell}
       back={<BackButton fallback="/admin" surface="round" />}
+      escalate={
+        <EscalateButton
+          compact
+          staffed={escalations.state === "ok" ? escalations.data.staffed : null}
+          {...(escalations.state === "not_set_up" ? { notSetUp: <EscalationsNotSetUp /> } : {})}
+        />
+      }
       experience={{
         palette: t.experienceAdmin.palette,
         deskLedes: t.experienceAdmin.deskLedes,

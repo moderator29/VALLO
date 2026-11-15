@@ -1,0 +1,208 @@
+/*
+ * SAVE AS PDF, FOR A POSITION HANDBOOK (15 November 2026).
+ *
+ * A staff member reads their handbook on a phone or a computer and saves it
+ * to the device. One of the two ways is the browser's own PDF writer, which
+ * needs the page to print as a document rather than as a screenshot of the
+ * console: no rail, no bar, no drawer, no buttons, black ink on white paper,
+ * a page break before each numbered section, and the position and the date on
+ * the foot of every page. There is no second renderer, so the PDF cannot
+ * disagree with the screen.
+ *
+ * HOW, and it is `app/css/print.css` written again for this sheet rather than
+ * shared with it. That sheet keys on `[data-doc-print]` and prints ONE sheet
+ * per page; a handbook is a long article inside the console frame, wants page
+ * breaks of its own and a repeating foot, and `print.css` is imported by
+ * `DocumentSheet` for receipts and statements. Two sheets keyed on the same
+ * attribute would print as one run of both, so this one keys on
+ * `[data-handbook-print]` and is imported by the handbook view alone.
+ *
+ * In print, every element that neither is the handbook, nor sits inside it,
+ * nor contains it is taken out of the flow with `display: none`, not hidden
+ * with `visibility`, which would leave its height behind and print blank
+ * pages. The handbook's ancestors stay, stripped of padding, fill, shadow and
+ * scroll clipping, so the article lands at the top of the first page at full
+ * width.
+ *
+ * Tokens only. Every rule is inside @media print or @layer components, and
+ * every rule whose subject is a class the documentation kit also styles is
+ * written under this article's own `.nf-hbp`, so this sheet reaches nothing
+ * outside the handbook (`scripts/check-css-collisions.mjs` checks exactly
+ * that, and `print.css` needed an allowlist entry because it does not).
+ */
+@layer components {
+  /* The running foot: on screen it is nothing, in print it repeats on every
+     page, because a fixed element is painted once per printed page. */
+  .nf-hbp-foot {
+    display: none;
+  }
+}
+
+@media print {
+  /* The bottom margin is deeper than the others, and that is what keeps the
+     running foot off the last line of each page. Chromium reserves no room
+     for a fixed element in print, so with an even 16mm margin the foot was
+     measured printing over the last two lines of every page; a negative
+     offset into the margin does not work either, because the overflow throws
+     the foot onto the top of the NEXT page (both were tried against a real
+     PDF). A deeper bottom margin with the foot at its edge is what prints
+     cleanly. */
+  @page {
+    size: A4 portrait;
+    margin: 16mm;
+  }
+
+  /* THE PAPER IS WHITE, EVEN WITH BACKGROUND GRAPHICS TURNED ON.
+     `background: none` clears a painted background but not the canvas the
+     browser draws behind the root, and under `color-scheme: dark` (the
+     platform's only theme) that canvas is near-black. With the print dialog's
+     "Background graphics" box ticked, which a person may well tick to keep
+     the tables' rules, the whole handbook printed white on black: unreadable,
+     and a cartridge of ink. Asking the printed document for the light scheme
+     is what makes the canvas white; it needs no colour of its own, so there
+     is no literal here to drift from the tokens. Measured against a real PDF
+     with background graphics both on and off. */
+  html:has([data-handbook-print]) {
+    color-scheme: light !important;
+  }
+
+  html:has([data-handbook-print]),
+  html:has([data-handbook-print]) body {
+    background: none !important;
+    color: var(--nf-content-on-paper) !important;
+  }
+
+  /* Everything that is not the handbook, not inside it and does not contain
+     it: the rail, the bar, the drawer, the dock, the escalate button, the
+     save controls' own wrapper. */
+  body:has([data-handbook-print])
+    *:not([data-handbook-print], [data-handbook-print] *, :has([data-handbook-print])) {
+    display: none !important;
+  }
+
+  body:has([data-handbook-print]) :has([data-handbook-print]) {
+    position: static !important;
+    inset: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    max-width: none !important;
+    width: auto !important;
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+    background: none !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    filter: none !important;
+    transform: none !important;
+    backdrop-filter: none !important;
+  }
+
+  [data-handbook-print] {
+    margin: 0 !important;
+    padding: 0 !important;
+    border-radius: 0 !important;
+    background: none !important;
+    box-shadow: none !important;
+    animation: none !important;
+    transform: none !important;
+    opacity: 1 !important;
+    color: var(--nf-content-on-paper) !important;
+  }
+
+  [data-handbook-print] * {
+    color: var(--nf-content-on-paper) !important;
+    background: none !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+
+  /* The controls, the contents card and the shell's own furniture are screen
+     things: a printed page cannot be pressed. */
+  .nf-hbp .nf-hbp-noprint,
+  .nf-hbp .nf-doc-toc {
+    display: none !important;
+  }
+
+  /* One section per page, which is how a person reads a handbook on paper and
+     finds a section again. */
+  .nf-hbp .nf-doc-section {
+    break-before: page;
+    break-inside: auto;
+  }
+  .nf-hbp .nf-doc-section:first-of-type {
+    break-before: auto;
+  }
+  .nf-hbp .nf-doc-section__title,
+  [data-handbook-print] h3 {
+    break-after: avoid;
+  }
+  [data-handbook-print] li,
+  [data-handbook-print] tr,
+  .nf-hbp .nf-doc-callout,
+  .nf-hbp .nf-doc-summary {
+    break-inside: avoid;
+  }
+
+  /* THE BULLET HAS TO BE A CHARACTER ON PAPER, NOT A PAINTED DOT.
+     The documentation kit draws a list bullet as a small filled square turned
+     into a circle with a background colour. A browser prints background
+     graphics only when the person ticks that box in the print dialog, and it
+     is off by default, so every bullet in a saved PDF was missing (measured,
+     not guessed). In print the dot becomes a real bullet character in ink,
+     which prints whatever the dialog says. */
+  .nf-hbp .nf-doc-section__body ul:not([class]) > li::before {
+    content: "\2022";
+    inset-block-start: 0;
+    inline-size: auto;
+    block-size: auto;
+    border-radius: 0;
+    background: none !important;
+    color: var(--nf-content-on-paper) !important;
+    line-height: inherit;
+  }
+  .nf-hbp .nf-doc-summary__tick,
+  .nf-hbp .nf-doc-callout__icon {
+    color: var(--nf-content-on-paper) !important;
+  }
+
+  /* Tables and callouts keep their rules in ink, so a printed table is still
+     a table. */
+  .nf-hbp .nf-doc-table th,
+  .nf-hbp .nf-doc-table td {
+    border-color: var(--nf-border-on-paper) !important;
+  }
+  .nf-hbp .nf-doc-callout,
+  .nf-hbp .nf-doc-summary {
+    border: 1px solid var(--nf-border-on-paper) !important;
+  }
+
+  /* A link's address is worth having on paper, because a printed link cannot
+     be pressed. */
+  [data-handbook-print] a[href^="/"]::after {
+    content: " (vallospaces.com" attr(href) ")";
+    font-size: 0.85em;
+  }
+
+  /* THE FOOT PRINTS ONCE, AT THE END, AND NOT ON EVERY PAGE.
+     It was `position: fixed`, which in print paints the element once per
+     page: the running foot a long document wants. Chromium places such an
+     element at the foot of the CONTENT box, not inside the page margin, and
+     no amount of margin moves it, because CSS has no way to reserve a band on
+     every page for it (the `@bottom-center` margin box that would is not
+     implemented). So on any page whose text reached the bottom, which is most
+     of them, the foot printed straight through the last two lines. Measured
+     on a real PDF at a 16mm margin and again at 26mm: overlapping both times.
+     A document that identifies itself in its heading and once more at its end
+     is worth more than a running foot that eats a sentence a page. */
+  .nf-hbp-foot {
+    display: block;
+    margin-top: 10mm;
+    padding-top: 3mm;
+    border-top: 1px solid var(--nf-border-on-paper);
+    color: var(--nf-content-on-paper) !important;
+    font-size: 9pt;
+    text-align: center;
+    break-inside: avoid;
+  }
+}

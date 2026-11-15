@@ -6,7 +6,7 @@ import { AreaDecision, ModeratorDecision, PauseToggle } from "./SocialDecisions"
 import { getDictionary } from "@vallo/i18n";
 import { getLocale } from "@/lib/locale";
 import { adminUi } from "../_components/ui";
-import { PageHead } from "../_components/panels";
+import { DeskLinks, PageHead } from "../_components/panels";
 import {
   QueueFilters,
   queueNarrowed,
@@ -116,6 +116,9 @@ export default async function AdminSocialPage({
         lede="Places people asked for, and people who asked to look after one."
         trail={<ui.WaitingBadge count={queue.proposed.length + queue.applications.length} />}
       />
+
+      {/* Every moderation desk the menu files under this one. */}
+      <DeskLinks deskKey="moderation" label="The other moderation desks" />
 
       <QueueFilters
         base="/admin/social"

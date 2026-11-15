@@ -9,6 +9,9 @@ import { DECISIONS } from "./decisions";
 import { DESKS } from "./desks";
 import { ESCALATION } from "./escalation";
 import { MY_DESK } from "./my-desk";
+import { ONBOARDING_A_LISTER } from "./onboarding-a-lister";
+import { ONBOARDING_A_MEMBER } from "./onboarding-a-member";
+import { PRODUCT_GUIDE } from "./product-guide";
 import type { ManualBody } from "./parts";
 import { QUEUES } from "./queues";
 import { RECORDS } from "./records";
@@ -31,4 +34,7 @@ export const MANUAL_BODIES: Record<ManualSlug, ManualBody> = {
   "support-lead": SUPPORT_LEAD,
   "business-development": BUSINESS_DEVELOPMENT,
   "social-media": SOCIAL_MEDIA,
+  "product-guide": PRODUCT_GUIDE,
+  "onboarding-a-lister": ONBOARDING_A_LISTER,
+  "onboarding-a-member": ONBOARDING_A_MEMBER,
 };

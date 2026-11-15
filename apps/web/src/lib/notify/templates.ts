@@ -7,6 +7,7 @@ import {
 } from "../email/agreement-messages";
 import { offerEmail, type OfferTemplate } from "../email/offer-messages";
 import { staffAccessGranted } from "../email/staff-messages";
+import { isEscalationEmailEvent, staffEscalationEmail } from "../email/escalation-messages";
 import { isStaffPosition } from "../admin/staff-positions";
 import {
   inspectionScheduled,
@@ -513,6 +514,26 @@ export const OUTBOX_TEMPLATES: Readonly<Record<string, OutboxTemplate>> = {
         name: context.recipient.name,
         scopeWords,
         position: isStaffPosition(position) ? position : null,
+      });
+    },
+  },
+
+  /* Written by the staff_escalation_* functions (escalations for every admin
+     desk, 15 November 2026). The reference and the clock only: the title and
+     the text stay in the console. */
+  "staff.escalation": {
+    needs: () => ({}),
+    build: (payload, context) => {
+      const event = str(payload, "event");
+      const reference = str(payload, "reference");
+      const escalationId = str(payload, "escalation_id");
+      if (!isEscalationEmailEvent(event) || !reference || !escalationId) return null;
+      return staffEscalationEmail(event, {
+        name: context.recipient.name,
+        reference,
+        escalationId,
+        severity: str(payload, "severity"),
+        dueAt: str(payload, "due_at"),
       });
     },
   },

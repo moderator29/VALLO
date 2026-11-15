@@ -11,6 +11,8 @@ import Link from "next/link";
 import { UiIcon } from "@/design-system/icons/UiIcon";
 import { Sparkline, type SparkTone } from "@/components/agent/charts/Sparkline";
 import { NavIcon, type AdminIcon } from "./AdminGlyph";
+import { childrenOf, deskHref } from "./nav";
+import { ButtonLink } from "@/components/ui/Button";
 import type { Delta } from "./metrics";
 import { Panel as UiPanel, panelClass } from "@/components/ui/Panel";
 import { IconPlate as UiIconPlate, ICON_PLATE_GLYPH } from "@/components/ui/IconPlate";
@@ -121,6 +123,61 @@ export function PanelLink({ href, children }: { href: string; children: ReactNod
       {children}
       <UiIcon name="arrow-right" size={16} />
     </Link>
+  );
+}
+
+/**
+ * THE PAGES A DESK WORKS WITH, AS BUTTONS ON ITS HEAD (15 November 2026).
+ *
+ * The founder's brief: "in each admin desk make all things they have access
+ * to be in their nav and buttons for them to easy navigate". A desk's closely
+ * related pages were on the menu and nowhere on the desk, so reaching the
+ * Chargebacks desk from Money meant going back to the menu.
+ *
+ * The row is READ FROM THE MENU ITSELF (`childrenOf` in `nav.ts`), so a desk's
+ * buttons are exactly the pages the menu files under it and the two cannot
+ * come to disagree. A page not on the menu cannot be added here by hand.
+ * `extra` is for a page that is a view inside this desk rather than a desk of
+ * its own, which the menu names as a sub page (the reviewer guide, say).
+ */
+export function DeskLinks({
+  deskKey,
+  label,
+  caption,
+  extra = [],
+}: {
+  /** The menu key of this desk, whose children the row draws. */
+  deskKey: string;
+  /** What the row is, read out to anybody using a screen reader. */
+  label: string;
+  /** The line above the buttons, where the desk draws its own title elsewhere. */
+  caption?: string;
+  /** Sub pages of this desk, which are not desks of their own. */
+  extra?: readonly { href: string; label: string }[];
+}) {
+  const parent = deskHref(deskKey);
+  const rows = [
+    ...childrenOf(deskKey)
+      /* A child that IS this page (Moderation and Around are one address) is
+         not drawn as a button back to itself. */
+      .filter((item) => item.href !== parent)
+      .map((item) => ({ href: item.href, label: item.label })),
+    ...extra,
+  ];
+  if (rows.length === 0) return null;
+  return (
+    <nav aria-label={label} className="mt-inline">
+      {caption ? <p className="nf-caption text-[var(--nf-content-secondary)]">{caption}</p> : null}
+      <ul className="mt-3xs flex flex-wrap gap-xs list-none p-0">
+        {rows.map((row) => (
+          <li key={row.href}>
+            <ButtonLink href={row.href} variant="secondary" size="sm">
+              {row.label}
+            </ButtonLink>
+          </li>
+        ))}
+      </ul>
+    </nav>
   );
 }
 

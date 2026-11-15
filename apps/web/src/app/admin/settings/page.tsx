@@ -5,7 +5,8 @@ import { getLocale } from "@/lib/locale";
 import { UiIcon } from "@/design-system/icons/UiIcon";
 import { NavIcon } from "../_components/AdminGlyph";
 import { PageHead, Panel } from "../_components/panels";
-import { ADMIN_SETTINGS, labelFor } from "../_components/nav";
+import { ADMIN_SETTINGS, canOpen, labelFor } from "../_components/nav";
+import { requireConsole } from "@/lib/admin/guard";
 import { SampleEmails } from "./SampleEmails";
 import { CONTACT_EMAIL } from "@/lib/support-email";
 
@@ -31,11 +32,24 @@ const LEDES: Record<string, string> = {
 
 export default async function AdminSettingsPage() {
   const shell = getDictionary(await getLocale()).admin.shell;
+  /*
+   * ONLY THE DOORS THIS PERSON CAN OPEN. Every child of Settings was drawn
+   * for every admin, so a plain admin was shown the Staff desk and the
+   * Control room and met a refusal on pressing either: a dead end, and a
+   * card that says what they do not have. The rail is filtered the same way
+   * (`canOpen`), and each desk still asks the database again on opening.
+   */
+  const door = await requireConsole();
+  const viewer =
+    door.state === "console"
+      ? { isAdmin: door.staff.isAdmin, isSuperAdmin: door.staff.isSuperAdmin, scopes: door.staff.scopes, position: door.staff.position ?? null }
+      : null;
+  const desks = (ADMIN_SETTINGS.children ?? []).filter((desk) => !viewer || canOpen(desk, viewer));
   return (
     <div className="nf-admin-stack">
       <PageHead title={shell.settings.title} lede={shell.settings.lede} />
       <div className="nf-admin-grid nf-admin-grid--halves">
-        {(ADMIN_SETTINGS.children ?? []).map((desk) => (
+        {desks.map((desk) => (
           <Panel key={desk.key}>
             <Link href={desk.href} className="nf-admin-hub">
               <IconPlate tone="brand" size="md">

@@ -33,6 +33,11 @@ const ALLOWED = [
   /^apps\/web\/src\/app\/admin\//,
   /^apps\/web\/src\/app\/\(dev\)\//,
   /\.test\.tsx?$/,
+  /* The privacy notice must name who receives personal data (NDPA), as it
+     names Paystack; the founder asked for it on 15 November 2026. */
+  /^apps\/web\/src\/lib\/legal\/privacy\.tsx$/,
+  /* The trust-claims register: internal mechanisms, never drawn. */
+  /^apps\/web\/src\/lib\/trust\/claims\.ts$/,
 ];
 
 /** The provider, the custodian, or the central bank, as words. */

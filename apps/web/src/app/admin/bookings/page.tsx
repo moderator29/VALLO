@@ -8,6 +8,7 @@ import { readPage } from "@/lib/admin/reads/money-derive";
 import { adminUi } from "../_components/ui";
 import { readQueueQuery } from "../_components/QueueFilters";
 import { flatParams } from "../money/_desk/Desk";
+import { DeskLinks } from "../_components/panels";
 import { BookingsDesk } from "./BookingsDesk";
 import "../money/_desk/desk.css";
 
@@ -58,16 +59,23 @@ export default async function AdminBookingsPage({
   const tiers = await getBadgeTiers(desk.state === "ok" ? desk.data.table.rows.map((r) => r.guestId) : []);
 
   return (
-    <BookingsDesk
-      tiers={tiers}
-      desk={desk.state === "ok" ? desk.data : null}
-      t={t}
-      ui={ui}
-      common={t.admin.common}
-      query={query}
-      params={flatParams(params)}
-      locale={locale}
-      waitingTables={waiting.state === "ok" ? waiting.data : null}
-    />
+    <>
+      {/* The desks the menu files under this one, as buttons: this desk drew
+          none of them, so reaching Visits or Reservations meant going back to the menu. */}
+      <div className="nf-console">
+        <DeskLinks deskKey="bookings" label="The other booking desks" caption="More in this desk" />
+      </div>
+      <BookingsDesk
+        tiers={tiers}
+        desk={desk.state === "ok" ? desk.data : null}
+        t={t}
+        ui={ui}
+        common={t.admin.common}
+        query={query}
+        params={flatParams(params)}
+        locale={locale}
+        waitingTables={waiting.state === "ok" ? waiting.data : null}
+      />
+    </>
   );
 }

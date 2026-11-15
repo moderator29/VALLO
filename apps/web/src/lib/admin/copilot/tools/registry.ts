@@ -2,14 +2,19 @@ import "server-only";
 import { randomUUID } from "node:crypto";
 import { z } from "zod";
 import { fenceToolResult } from "@/lib/assistant/untrusted";
+import { DESTINATION_SYNTAX, type Destination } from "../destinations";
 import { sealProposal, proposalKey, PROPOSAL_LIFETIME_MS } from "../proposals";
 import { holdsAny, scrub } from "./common";
+import { offerableLinks } from "./links";
 import { AGREEMENT_TOOLS } from "./agreements";
 import { ANALYTICS_TOOLS } from "./analytics";
 import { BD_TOOLS } from "./business-development";
 import { COMPLIANCE_TOOLS } from "./compliance";
+import { CONTROL_ROOM_TOOLS } from "./control-room";
 import { COO_TOOLS } from "./coo";
+import { HANDBOOK_TOOLS } from "./handbook";
 import { DELETION_REASON_TOOLS } from "./deletion-reasons";
+import { ESCALATION_TOOLS } from "./escalations";
 import { FINANCE_TOOLS } from "./finance";
 import { KYC_TOOLS } from "./kyc";
 import { LISTING_TOOLS } from "./listings";
@@ -17,11 +22,13 @@ import { MANUAL_TOOLS } from "./manual";
 import { MY_TOOLS } from "./me";
 import { MODERATION_TOOLS } from "./moderation";
 import { OPERATIONS_TOOLS } from "./operations";
+import { PLATFORM_TOOLS } from "./platform";
 import { PROPOSE_TOOLS } from "./propose";
 import { SOCIAL_TOOLS } from "./social-media";
 import { STAFF_DESK_TOOLS } from "./staff-desks";
 import { SUPPORT_TOOLS } from "./support";
 import { TRUST_TOOLS } from "./trust";
+import { WAYFINDING_TOOLS } from "./wayfinding";
 import type { CopilotProposal, CopilotTool, CopilotViewer, ProposalDraft, ToolCtx } from "./types";
 
 /**
@@ -29,7 +36,13 @@ import type { CopilotProposal, CopilotTool, CopilotViewer, ProposalDraft, ToolCt
  */
 export const COPILOT_TOOLS: readonly CopilotTool[] = [
   ...MY_TOOLS,
+  /* Escalations (15 November 2026): open to every staff member, on every desk. */
+  ...ESCALATION_TOOLS,
+  /* Where do I go (16 November 2026): the console's own map, every desk. */
+  ...WAYFINDING_TOOLS,
   ...MANUAL_TOOLS,
+  /* The position handbook (16 November 2026): the viewer's own, every desk. */
+  ...HANDBOOK_TOOLS,
   ...LISTING_TOOLS,
   ...KYC_TOOLS,
   ...MODERATION_TOOLS,
@@ -45,6 +58,10 @@ export const COPILOT_TOOLS: readonly CopilotTool[] = [
   ...STAFF_DESK_TOOLS,
   ...DELETION_REASON_TOOLS,
   ...COO_TOOLS,
+  /* The control room (15 November 2026): a super admin only. */
+  ...CONTROL_ROOM_TOOLS,
+  /* The platform, the staff and the audit trail (16 November 2026): a super admin only. */
+  ...PLATFORM_TOOLS,
   ...PROPOSE_TOOLS,
 ];
 
@@ -83,9 +100,19 @@ export type ToolRun = {
   content: string;
   ok: boolean;
   proposal?: CopilotProposal;
+  /** The destinations this viewer may be offered, already filtered by access. */
+  destinations?: Destination[];
 };
 
 const MAX_RESULT_CHARS = 14_000;
+
+/** What the model is told about a result that carries destinations. */
+const DESTINATION_NOTE = `Each entry under takeMeThere is a page this person may open. End your answer by offering the ones that help, each written exactly as ${DESTINATION_SYNTAX} on its own line, using the address and the words given. Offer no other address as a destination.`;
+
+/** Keeps the destination list beside a tool's own fields whatever shape it returned. */
+function asObject(data: unknown): Record<string, unknown> {
+  return data !== null && typeof data === "object" && !Array.isArray(data) ? (data as Record<string, unknown>) : { result: data };
+}
 
 function fence(data: unknown, note?: string): string {
   const text = fenceToolResult(scrub(data), note);
@@ -115,12 +142,18 @@ export async function runCopilotTool(name: string, input: unknown, ctx: ToolCtx,
   try {
     const result = await tool.handler(parsed.data, ctx);
     if (!result.ok) return { ok: false, content: fence({ error: result.error }) };
+    /* THE LINK FILTER. Every destination the tool offered is checked against
+       this viewer's own access here, before the model is shown the result, so
+       a desk they cannot open is dropped rather than left unsaid. */
+    const destinations = offerableLinks(result.links, ctx.viewer);
+    const payload = destinations.length > 0 ? { ...asObject(result.data), takeMeThere: destinations } : result.data;
+    const note = destinations.length > 0 ? `${result.note ? `${result.note} ` : ""}${DESTINATION_NOTE}` : result.note;
     if (tool.kind === "propose" && result.proposal) {
       const proposal = finalizeProposal(tool.name, result.proposal, ctx);
       if (!proposal) return { ok: false, content: fence({ error: "Proposals are not available on this server just now. Tell the person to make the change on the desk." }) };
-      return { ok: true, proposal, content: fence(result.data, result.note) };
+      return { ok: true, proposal, destinations, content: fence(payload, note) };
     }
-    return { ok: true, content: fence(result.data, result.note) };
+    return { ok: true, destinations, content: fence(payload, note) };
   } catch {
     return { ok: false, content: fence({ error: `${name} failed just now. Say it could not be read; do not guess a figure.` }) };
   }

@@ -25,10 +25,9 @@ describe("protected-pay switch", () => {
   });
   afterEach(() => {
     delete process.env[mod.PROTECTED_PAY_KILL_ENV];
-    delete process.env[mod.LEGACY_PROTECTED_PAY_KILL_ENV];
   });
 
-  it("fails closed when both rows are missing", async () => {
+  it("fails closed when the row is missing", async () => {
     expect(await mod.protectedPaySwitchOn()).toBe(false);
   });
 
@@ -41,29 +40,18 @@ describe("protected-pay switch", () => {
     expect(await mod.protectedPaySwitchOn()).toBe(false);
   });
 
-  it("reads the new key first", async () => {
-    db.rows = [
-      { key: mod.PROTECTED_PAY_FLAG, enabled: false },
-      { key: mod.LEGACY_PROTECTED_PAY_FLAG, enabled: true },
-    ];
+  it("is on only while the row is on, and ignores any other key", async () => {
+    db.rows = [{ key: mod.PROTECTED_PAY_FLAG, enabled: false }];
     expect(await mod.protectedPaySwitchOn()).toBe(false);
     db.rows = [{ key: mod.PROTECTED_PAY_FLAG, enabled: true }];
     expect(await mod.protectedPaySwitchOn()).toBe(true);
-  });
-
-  it("falls back to the old key only while the new row does not exist", async () => {
-    db.rows = [{ key: mod.LEGACY_PROTECTED_PAY_FLAG, enabled: true }];
-    expect(await mod.protectedPaySwitchOn()).toBe(true);
-    db.rows = [{ key: mod.LEGACY_PROTECTED_PAY_FLAG, enabled: false }];
+    db.rows = [{ key: "payments_escrowpay_on", enabled: true }];
     expect(await mod.protectedPaySwitchOn()).toBe(false);
   });
 
-  it("either environment stop switches it off with no database", async () => {
+  it("the environment stop switches it off with no database", async () => {
     db.rows = [{ key: mod.PROTECTED_PAY_FLAG, enabled: true }];
     process.env[mod.PROTECTED_PAY_KILL_ENV] = "1";
-    expect(await mod.protectedPaySwitchOn()).toBe(false);
-    delete process.env[mod.PROTECTED_PAY_KILL_ENV];
-    process.env[mod.LEGACY_PROTECTED_PAY_KILL_ENV] = "1";
     expect(await mod.protectedPaySwitchOn()).toBe(false);
   });
 });

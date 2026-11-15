@@ -1,18 +1,25 @@
 import { isValidElement, type ReactNode } from "react";
 import { MANUAL_CHAPTERS } from "@/lib/admin/manual/chapters";
 import type { StaffScope } from "@/lib/admin/guard";
-import { JOB_DESCRIPTIONS, STAFF_POSITIONS } from "@/lib/admin/staff-positions";
+import { JOB_DESCRIPTIONS, STAFF_POSITIONS, type StaffPosition } from "@/lib/admin/staff-positions";
 
 /** Pure passage building and ranking for search_manual; no server imports, so it can be tested alone. */
 
 export type ManualPassage = {
-  source: "manual" | "position" | "docs" | "help" | "money";
+  source: "manual" | "position" | "handbook" | "docs" | "help" | "money";
   title: string;
   heading: string;
   text: string;
   link: string;
   /** Present when the passage belongs to one desk: only a viewer holding one of these scopes (or an admin) is shown its text. */
   scopes?: readonly StaffScope[];
+  /**
+   * Present on a position handbook passage. A handbook belongs to the person
+   * in that position: they are shown their own first, and nobody else's
+   * handbook is read out to them (an admin and a super admin see all of them,
+   * as they do every chapter).
+   */
+  position?: StaffPosition;
 };
 
 /**
@@ -28,13 +35,21 @@ export const SECTION_SCOPES: Readonly<Record<string, readonly StaffScope[]>> = {
 };
 
 /** What the viewer may be shown. Admins and super admins see everything. */
-export function visiblePassages(passages: readonly ManualPassage[], viewer: { isAdmin: boolean; isSuperAdmin: boolean; scopes: readonly StaffScope[] }): ManualPassage[] {
+export function visiblePassages(
+  passages: readonly ManualPassage[],
+  viewer: { isAdmin: boolean; isSuperAdmin: boolean; scopes: readonly StaffScope[]; position?: StaffPosition | null },
+): ManualPassage[] {
   if (viewer.isAdmin || viewer.isSuperAdmin) return [...passages];
-  return passages.filter((p) => !p.scopes || p.scopes.some((s) => viewer.scopes.includes(s)));
+  return passages.filter((p) => {
+    if (p.position && p.position !== viewer.position) return false;
+    return !p.scopes || p.scopes.some((s) => viewer.scopes.includes(s));
+  });
 }
 
 /** The text sources beyond the staff manual, handed in by the caller so this file stays server-free. */
 export type ExtraSources = {
+  /** One entry per position whose handbook is built. Absent when no handbook exists yet. */
+  handbooks?: readonly { position: StaffPosition; title: string; link: string; sections: readonly { id: string; title: string; text: string }[] }[];
   docs?: readonly { slug: string; number: number; title: string; sections: readonly { id: string; heading: string; body: ReactNode }[] }[];
   faqs?: readonly { category: string; q: string; a: string }[];
   facts?: readonly { title: string; text: string; link: string }[];
@@ -110,6 +125,16 @@ export function buildPassages(bodies: ManualBodies, extra: ExtraSources = {}): M
     out.push({ source: "position", title: `Job description: ${job.title}`, heading: "What is expected of you", text: job.expectations.join(" "), link });
     out.push({ source: "position", title: `Job description: ${job.title}`, heading: "Where to take what you cannot decide", text: job.escalate.join(" "), link });
   }
+  /* The position handbooks (16 November 2026), one passage per section. A
+     handbook carries its position, so the reader is shown their own and the
+     search ranks it first for them. */
+  for (const handbook of extra.handbooks ?? []) {
+    for (const section of handbook.sections) {
+      for (const w of windows(squash(section.text))) {
+        out.push({ source: "handbook", title: `Your handbook: ${handbook.title}`, heading: section.title, text: w, link: `${handbook.link}#${section.id}`, position: handbook.position });
+      }
+    }
+  }
   for (const chapter of extra.docs ?? []) {
     for (const section of chapter.sections) {
       for (const w of windows(squash(nodeText(section.body)))) out.push({ source: "docs", title: `Public docs: ${chapter.title}`, heading: section.heading, text: w, link: `/docs/${chapter.slug}#${section.id}` });
@@ -126,8 +151,20 @@ export function tokens(query: string): string[] {
   return [...new Set(query.toLowerCase().split(/[^a-z0-9]+/).filter((t) => t.length >= 3 && !STOP.has(t)))];
 }
 
+/**
+ * How far a passage from the reader's OWN position handbook is lifted. It is
+ * larger than any score the wording can earn, so when their handbook has
+ * something to say on the question it is the first thing they are told.
+ */
+export const OWN_HANDBOOK_BOOST = 100;
+
 /** Best passages for a question, strongest first. Pure over the passage list. */
-export function searchPassages(query: string, passages: readonly ManualPassage[], limit = 4): (ManualPassage & { score: number })[] {
+export function searchPassages(
+  query: string,
+  passages: readonly ManualPassage[],
+  limit = 4,
+  reader: { position?: StaffPosition | null } = {},
+): (ManualPassage & { score: number })[] {
   const words = tokens(query);
   if (words.length === 0) return [];
   const scored = passages.map((p) => {
@@ -142,6 +179,7 @@ export function searchPassages(query: string, passages: readonly ManualPassage[]
       score += Math.min(inBody, 4) + inHead * 3;
     }
     if (hit > 1) score += hit * 2;
+    if (score > 0 && p.position && reader.position && p.position === reader.position) score += OWN_HANDBOOK_BOOST;
     return { ...p, score };
   });
   return scored.filter((p) => p.score > 0).sort((a, b) => b.score - a.score).slice(0, limit);

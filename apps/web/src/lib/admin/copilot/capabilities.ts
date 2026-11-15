@@ -25,6 +25,8 @@ export type DeskCapability = {
   desk: string;
   /** Any one of these opens the desk's tools. An empty list means every staff member. */
   scopes: readonly StaffScope[];
+  /** Listed for the super admin alone, whatever scopes anybody else holds. */
+  superAdminOnly?: true;
   href: string;
   can: readonly string[];
   prompts: readonly string[];
@@ -36,8 +38,8 @@ export const COPILOT_CAPABILITIES: readonly DeskCapability[] = [
     desk: "My Desk",
     scopes: [],
     href: "/admin/my-desk",
-    can: ["Read your tasks, overdue items and announcements", "Add a task to your own list or comment on one", "Answer how-to questions from the staff manual"],
-    prompts: ["What needs me first today?", "Add a task to follow up on the oldest ticket tomorrow", "Where do I take something I cannot decide?"],
+    can: ["Read your tasks, overdue items and announcements", "Read the escalations waiting on you and the ones you raised, and say how to escalate (you press Escalate yourself)", "Add a task to your own list or comment on one", "Answer how-to questions from the staff manual"],
+    prompts: ["What needs me first today?", "What is waiting on me?", "How do I escalate this?", "Add a task to follow up on the oldest ticket tomorrow"],
   },
   {
     key: "listings",
@@ -168,6 +170,28 @@ export const COPILOT_CAPABILITIES: readonly DeskCapability[] = [
     prompts: ["Who is holding the most open tickets?", "What are members writing about most?", "Draft a canned reply for deposit questions"],
   },
   {
+    key: "platform",
+    desk: "The platform",
+    scopes: [],
+    superAdminOnly: true,
+    href: "/admin/control",
+    can: [
+      "Read the whole platform in one answer: members, listers, real and example listings, money taken in the last 7 and 30 days, what is waiting on every desk and how each switch stands",
+      "Read the control room: what is waiting on you, which database files are still to run, and which services are connected",
+      "Read who holds staff access, who has acknowledged the handbook, who has been active and which teams have nobody on them",
+      "Read the audit trail in plain words: who did what and when, with the desk each record lives on",
+    ],
+    prompts: ["What needs me today?", "What is waiting across the platform?", "What SQL still has to run?", "Who has access to what?", "What changed this week?"],
+  },
+  {
+    key: "copilot-map",
+    desk: "Finding your way",
+    scopes: [],
+    href: "/admin/copilot",
+    can: ["Say which desk a piece of work is done on, from the console's own menu, and take you there", "Read your own position handbook back to you, section by section"],
+    prompts: ["Where do I do this?", "What does my handbook say about this?"],
+  },
+  {
     key: "coo",
     desk: "COO desk",
     scopes: ["operations"],
@@ -190,7 +214,7 @@ const STARTERS: Partial<Record<StaffScope, readonly string[]>> = {
   roommates: ["What needs me first today?", "How many verifications are waiting?"],
   circle: ["What needs me first today?", "Which communities need attention?"],
   analyst: ["Give me the headline numbers", "How are bookings doing?"],
-  business_development: ["What needs me first today?", "Which follow-ups are due this week?", "Summarise my pipeline"],
+  business_development: ["What needs me first today?", "Which follow-ups are due this week?", "Summarise my pipeline", "Draft a reply to a business asking why they should list", "What can I tell a prospect about fees?", "How do I tell a forged ID?"],
   social_media: ["What is on the calendar this week?", "Which posts are overdue?"],
   marketing: ["Which campaigns end this week?", "How did referrals do lately?"],
   content: ["What is overdue on the calendar?", "Which help pages are failing members?"],
@@ -198,9 +222,22 @@ const STARTERS: Partial<Record<StaffScope, readonly string[]>> = {
   support_lead: ["Who is holding the most open tickets?", "What are members writing about most?"],
 };
 
-const GENERIC: readonly string[] = ["What needs me first today?", "What are my open tasks?", "Where do I find how to do this in the manual?"];
+const GENERIC: readonly string[] = ["What needs me first today?", "What are my open tasks?", "Where do I go to do this?", "What does my handbook say?"];
 
-/** Starter chips for a desk. */
-export function starterPromptsFor(scope: StaffScope | null): string[] {
+/**
+ * THE SUPER ADMIN'S OWN CHIPS (16 November 2026): the five questions the
+ * founder actually asks, in their own words.
+ */
+export const SUPER_ADMIN_STARTERS: readonly string[] = [
+  "What needs me today?",
+  "What is waiting across the platform?",
+  "What SQL still has to run?",
+  "Who has access to what?",
+  "What changed this week?",
+];
+
+/** Starter chips for a desk. The super admin gets their own, whatever desk they are on. */
+export function starterPromptsFor(scope: StaffScope | null, viewer?: { isSuperAdmin?: boolean }): string[] {
+  if (viewer?.isSuperAdmin) return [...SUPER_ADMIN_STARTERS];
   return [...((scope && STARTERS[scope]) || GENERIC)];
 }

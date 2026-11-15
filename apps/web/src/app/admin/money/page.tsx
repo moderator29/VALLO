@@ -13,7 +13,7 @@ import { DeskSections } from "../_components/DeskSections";
 import { rulingWords } from "../_components/rulings";
 import { DocFigure, DocHead, DocRow, DocRows, DocumentSheet } from "@/components/app/money/DocumentSheet";
 import { readQueueQuery } from "../_components/QueueFilters";
-import { PageHead, Panel } from "../_components/panels";
+import { DeskLinks, PageHead, Panel } from "../_components/panels";
 import { RefundsPanel } from "./MoneyRows";
 import { ReconciliationPanel } from "./_desk/Reconciliation";
 import { RefundClock } from "./RefundClock";
@@ -108,6 +108,9 @@ export default async function AdminMoneyPage({
         title="Money"
         lede="Vallo never holds customer money: every card payment settles at the processor straight to the lister and Vallo in one transaction. This desk watches cautions, refunds to the card, the reconciliation job, and the record of the retired Vallo Guarantee."
       />
+
+      {/* The money desk's own pages, as buttons, read from the console menu. */}
+      <DeskLinks deskKey="money" label="The other money desks" />
 
       {/* One desk, six questions: the glass pull lists them and scrolls to each. */}
       <DeskSections sections={sections} label={x.sections.navLabel} toggleLabel={x.sections.toggle} />

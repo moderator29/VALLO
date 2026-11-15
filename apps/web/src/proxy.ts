@@ -382,6 +382,8 @@ const PUBLIC_API_PATHS = new Set([
   "/api/cron/calendar-sync",
   "/api/cron/complete-stays",
   "/api/cron/offers-sweep",
+  /* Staff escalations past their response time move up a level, behind the cron bearer. */
+  "/api/cron/escalations-overdue",
   /* Crypto payments read back from the provider, behind the cron bearer. */
   "/api/cron/crypto-reconcile",
   /* The display exchange rates (lib/currency/rates-job.ts), behind the cron bearer. */

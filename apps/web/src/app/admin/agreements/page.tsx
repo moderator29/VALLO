@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { formatMoney } from "@vallo/i18n/core";
 import { getDictionary } from "@vallo/i18n";
 import { getLocale } from "@/lib/locale";
@@ -7,7 +6,7 @@ import { rulingWords } from "../_components/rulings";
 import { requireAdmin } from "@/lib/admin/guard";
 import { readAgreementQueue, readGuaranteeDesk, readWatchList } from "@/lib/admin/reads/agreements";
 import { GuaranteeClaims } from "../money/GuaranteeDesk";
-import { PageHead, Panel } from "../_components/panels";
+import { DeskLinks, PageHead, Panel } from "../_components/panels";
 import { AgreementQueue } from "./AgreementQueue";
 import { WatchList } from "./WatchList";
 import { DeskCopilot } from "@/lib/admin/copilot/contexts/DeskCopilot";
@@ -72,9 +71,9 @@ export default async function AgreementsDeskPage() {
         title="Agreements"
         lede="The rail decides the gate (D68d). A protected payment opens as soon as both parties agree, and you watch it while the provider holds it, with the power to pause a release. A direct payment waits here only when a risk signal fires. Both parties read a rejection's reason."
       />
-      <p className="nf-risk-settings__back">
-        <Link href="/admin/agreements/settings">Risk settings: threshold, signals and the incident switch</Link>
-      </p>
+      {/* The pages this desk works with: the risk settings behind the gate, and
+          the offers desk, which had no way in from here at all. */}
+      <DeskLinks deskKey="agreements" label="The pages this desk works with" />
       {queue.state !== "ok" ? (
         <Panel title="Waiting for review">
           <p className="nf-body">The queue could not be read just now. Nothing was changed. Refresh to try again.</p>
