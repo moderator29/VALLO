@@ -278,6 +278,8 @@ const EVERY_PAYLOAD: Record<string, Payload> = {
     reason: "The report shows the water was working; it was not at move-in.",
   },
   "staff.access_granted": { scopes: ["kyc_review", "support"], scope_words: "KYC review, Support" },
+  /* `private.staff_escalation_tell` (staff escalations, 15 November): the event, the ids, the urgency and the clock. */
+  "staff.escalation": { event: "raised", escalation_id: "7e7e7e7e-7e7e-4e7e-8e7e-7e7e7e7e7e7e", reference: "ESC-000123", severity: "high", due_at: "2026-11-15T14:30:00.000Z" },
   "security.password_changed": { at: "2026-09-23T13:05:00.000Z" },
   "security.new_device_sign_in": { at: "2026-09-23T13:05:00.000Z", device: "Chrome on Android" },
   "inspection.scheduled": {

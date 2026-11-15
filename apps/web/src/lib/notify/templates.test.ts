@@ -79,6 +79,8 @@ const TEMPLATES_THE_TRIGGERS_WRITE = [
   "agreement.rejected",
   "guarantee.claim_decided",
   "staff.access_granted",
+  /* 15 November: escalations for every admin desk (supabase/migrations/pending/staff_escalations_2026-11-15.sql). */
+  "staff.escalation",
   "security.password_changed",
   "security.new_device_sign_in",
   "inspection.scheduled",
@@ -123,6 +125,14 @@ const TEMPLATES_THE_TRIGGERS_WRITE = [
   "offer.cancelled",
 ] as const;
 
+const STAFF_ESCALATION_PAYLOAD: Payload = {
+  event: "raised",
+  escalation_id: "7e7e7e7e-7e7e-4e7e-8e7e-7e7e7e7e7e7e",
+  reference: "ESC-000123",
+  severity: "high",
+  due_at: "2026-11-15T14:30:00.000Z",
+};
+
 const OFFER_PAYLOAD: Payload = { agreement_id: AGREEMENT, listing_id: LISTING, reference: "VO-AB12CD34", amount_minor: 8_050_000_000, terms_version: 3 };
 
 
@@ -144,6 +154,8 @@ const PAYLOADS: Record<(typeof TEMPLATES_THE_TRIGGERS_WRITE)[number], Payload> =
   },
   /* `public.admin_grant_staff` (Track K) writes the scopes and their words. */
   "staff.access_granted": { scopes: ["kyc_review", "support"], scope_words: "KYC review, Support" },
+  /* `private.staff_escalation_tell` writes the event, the ids, the urgency and the clock; never the text. */
+  "staff.escalation": STAFF_ESCALATION_PAYLOAD,
   "security.password_changed": { at: "2026-09-23T13:05:00.000Z" },
   "security.new_device_sign_in": {
     at: "2026-09-23T13:05:00.000Z",
@@ -306,6 +318,39 @@ describe("the payment and stay templates (13 October)", () => {
     expect(templateFor("stay.review_request")?.build({ booking_id: "x" }, ctx)).toBeNull();
     expect(templateFor("message.unread")?.build({}, ctx)).toBeNull();
     expect(templateFor("booking.request_closed")?.build({ place: "Flat" }, ctx)).toBeNull();
+  });
+});
+
+describe("the staff escalation template (15 November)", () => {
+  const build = (extra: Payload = {}) =>
+    templateFor("staff.escalation")?.build({ ...STAFF_ESCALATION_PAYLOAD, ...extra }, contextFor(PAYER, "Ada"));
+
+  it("is not a preference: work that lands on a person is always sent", () => {
+    expect(templateFor("staff.escalation")?.channel).toBeUndefined();
+  });
+
+  it("carries the reference, the urgency, the Lagos due time and the record's link, and nothing about the case", () => {
+    const raised = build();
+    expect(raised?.subject).toContain("ESC-000123");
+    expect(raised?.text).toContain("High");
+    expect(raised?.text).toContain("15:30");
+    expect(raised?.html).toContain("/admin/escalations/7e7e7e7e-7e7e-4e7e-8e7e-7e7e7e7e7e7e");
+    /* A title in the payload, should a later change add one, is still never printed. */
+    expect(build({ title: "Ada Balogun sent the same ID twice" })?.text).not.toContain("Balogun");
+  });
+
+  it("says each thing that can happen in its own words, and gives the raiser no clock that is not theirs", () => {
+    expect(build({ event: "bumped" })?.subject).toContain("Overdue");
+    expect(build({ event: "asked" })?.text).toContain("question");
+    expect(build({ event: "resolved" })?.text).toContain("resolved");
+    expect(build({ event: "resolved" })?.text).not.toContain("Answer by");
+    expect(build({ event: "declined" })?.text).toContain("14 days");
+  });
+
+  it("sends nothing rather than a message with a hole in it", () => {
+    expect(build({ event: "invented" })).toBeNull();
+    expect(build({ reference: "" })).toBeNull();
+    expect(build({ escalation_id: null })).toBeNull();
   });
 });
 
