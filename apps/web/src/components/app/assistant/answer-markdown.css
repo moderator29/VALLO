@@ -1,0 +1,198 @@
+/*
+ * THE ASSISTANT'S ANSWER, SET LIKE A GOOD CHAT ANSWER (the founder, 15
+ * November 2026: "look at how ChatGPT's own is clean, headers, styles; make it
+ * more clean and lovely in our way"). Drawn by `AnswerMarkdown`.
+ *
+ * Generous line height, a clear rhythm between blocks, headings that open a
+ * section without shouting, Vallo-blue bullets and step numbers, tables in a
+ * rounded card that scrolls sideways on a phone instead of squeezing, and a
+ * blue bar on a quote. Text keeps its own colours; only the list markers,
+ * links and the quote bar carry the brand. Tokens only, both themes.
+ */
+@layer components {
+  .nf-md {
+    display: grid;
+    gap: var(--nf-space-sm);
+    min-inline-size: 0;
+    /* The answer card keeps the model's line breaks for plain text; laid-out
+       blocks set their own spacing instead. */
+    white-space: normal;
+    color: var(--nf-content-primary);
+    font-size: var(--nf-text-body);
+    line-height: 1.6;
+    overflow-wrap: break-word;
+  }
+  .nf-md > * {
+    margin: 0;
+  }
+
+  .nf-md__p {
+    margin: 0;
+  }
+  .nf-md strong {
+    font-weight: 700;
+  }
+  .nf-md em {
+    font-style: italic;
+  }
+
+  /* Headings open a section: a little more air above than below, so each
+     belongs to what follows it. */
+  .nf-md__h {
+    margin: var(--nf-space-xs) 0 0;
+    color: var(--nf-content-primary);
+    font-weight: 700;
+    line-height: 1.3;
+    letter-spacing: -0.01em;
+  }
+  .nf-md__h:first-child {
+    margin-block-start: 0;
+  }
+  .nf-md__h--1 {
+    font-size: var(--nf-text-h4);
+  }
+  .nf-md__h--2 {
+    font-size: var(--nf-text-body-lg);
+  }
+  .nf-md__h--3 {
+    font-size: var(--nf-text-body);
+  }
+
+  /* Lists: the marker in Vallo blue, the words in the answer's own ink. */
+  /* The base reset takes every list's marker away, so the answer's lists
+     name theirs: a filled dot, or the step's number. */
+  .nf-md__list {
+    display: grid;
+    gap: var(--nf-space-2xs);
+    margin: 0;
+    padding-inline-start: 1.35rem;
+    list-style: disc outside;
+  }
+  .nf-md__list--num {
+    list-style: decimal outside;
+  }
+  .nf-md__list > li {
+    padding-inline-start: var(--nf-space-3xs);
+  }
+  .nf-md__list > li::marker {
+    color: var(--nf-brand-secondary);
+  }
+  .nf-md__list--num > li::marker {
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+  /* A sub-item sits one step in, with a hollow mark, as a nested list would. */
+  .nf-md__list > li.nf-md__sub {
+    margin-inline-start: 1.1rem;
+    list-style-type: circle;
+  }
+  .nf-md__list--num > li.nf-md__sub {
+    list-style-type: circle;
+  }
+
+  .nf-md__code {
+    padding: 0.1em 0.4em;
+    border-radius: var(--nf-radius-sm);
+    background: color-mix(in oklab, var(--nf-brand-primary) 12%, var(--nf-surface-raised));
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 0.9em;
+  }
+  .nf-md__pre {
+    margin: 0;
+    padding: var(--nf-space-sm) var(--nf-space-md);
+    overflow-x: auto;
+    border-radius: var(--nf-radius-md);
+    border: var(--nf-border-width) solid var(--nf-card-border);
+    background: var(--nf-surface-raised);
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-size: var(--nf-text-body-sm);
+    line-height: 1.5;
+    white-space: pre;
+  }
+
+  .nf-md__quote {
+    margin: 0;
+    padding: var(--nf-space-2xs) 0 var(--nf-space-2xs) var(--nf-space-md);
+    border-inline-start: 3px solid var(--nf-brand-primary);
+    color: var(--nf-content-secondary);
+  }
+
+  .nf-md__link {
+    color: var(--nf-content-link);
+    font-weight: 600;
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 3px;
+  }
+
+  .nf-md__hr {
+    margin: var(--nf-space-2xs) 0;
+    border: 0;
+    border-block-start: var(--nf-border-width) solid var(--nf-divider);
+  }
+
+  /* A table is a rounded card that scrolls sideways on a phone rather than
+     squeezing its columns into slivers. */
+  .nf-md__tablewrap {
+    max-inline-size: 100%;
+    overflow-x: auto;
+    border-radius: var(--nf-radius-md);
+    border: var(--nf-border-width) solid color-mix(in oklab, var(--nf-brand-primary) 22%, var(--nf-card-border));
+  }
+  .nf-md__table {
+    inline-size: 100%;
+    border-collapse: collapse;
+    font-size: var(--nf-text-body-sm);
+    line-height: 1.45;
+  }
+  .nf-md__table :is(th, td) {
+    padding: var(--nf-space-xs) var(--nf-space-sm);
+    text-align: start;
+    vertical-align: top;
+    white-space: nowrap;
+  }
+  .nf-md__table th {
+    background: color-mix(in oklab, var(--nf-brand-primary) 12%, transparent);
+    font-weight: 700;
+  }
+  .nf-md__table tbody tr + tr td {
+    border-block-start: var(--nf-border-width) solid var(--nf-divider);
+  }
+
+  /* Follow-ups under the newest answer: a quiet list of next questions, each
+     a whole-row tap, with the brand's turn arrow. */
+  .nf-ai-follow {
+    display: grid;
+    gap: var(--nf-space-3xs);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .nf-ai-follow__btn {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--nf-space-xs);
+    min-block-size: 2.75rem;
+    padding-inline: var(--nf-space-2xs);
+    border-radius: var(--nf-radius-md);
+    color: var(--nf-content-primary);
+    font-size: var(--nf-text-body-sm);
+    font-weight: 600;
+    text-align: start;
+    text-decoration: underline dashed;
+    text-decoration-color: color-mix(in oklab, var(--nf-content-primary) 40%, transparent);
+    text-underline-offset: 5px;
+  }
+  .nf-ai-follow__btn > svg {
+    flex: none;
+    color: var(--nf-brand-secondary);
+  }
+  .nf-ai-follow__btn:hover,
+  .nf-ai-follow__btn:focus-visible {
+    background: color-mix(in oklab, var(--nf-brand-primary) 10%, transparent);
+  }
+  .nf-ai-follow__btn:focus-visible {
+    outline: var(--nf-focus-ring-width) solid var(--nf-focus-ring);
+    outline-offset: var(--nf-focus-ring-offset);
+  }
+}

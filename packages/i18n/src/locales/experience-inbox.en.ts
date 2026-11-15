@@ -470,6 +470,16 @@ export const experienceInboxEn = {
     stop: "Stop",
     copy: "Copy answer",
     copied: "Copied",
+    /* The answer's own actions beside Copy (the founder, 15 November 2026,
+       after the ChatGPT reference): read on this phone, and shared from it. */
+    readAloud: "Read aloud",
+    stopReading: "Stop reading",
+    share: "Share",
+    /* Next questions under the newest answer, each sent as written. */
+    followLabel: "Ask next",
+    followSimpler: "Explain that more simply",
+    followShorter: "Give me the short version",
+    followNext: "What should I do next?",
     statusDone: "Answer complete",
     statusStopped: "Answer stopped",
     statusError: "The answer did not arrive",

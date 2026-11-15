@@ -78,14 +78,56 @@ const THREAD: Thread = {
   ],
 };
 
-export default async function AssistantPreview() {
+/* `?view=rich`: an answer written the way the model writes, with headings,
+   bold leads, a numbered list, a sub-item and a table, so the formatted answer
+   can be seen (the founder's screenshot of 15 November 2026). */
+const RICH: Thread = {
+  ...THREAD,
+  id: "preview-thread-rich",
+  messages: [
+    { id: "r1", role: "user", text: "Why should I use Vallo?", at: at(3) },
+    {
+      id: "r2",
+      role: "assistant",
+      at: at(2),
+      text: [
+        "Good question! A few honest reasons people use Vallo:",
+        "",
+        "## What you get",
+        "",
+        "- **Everything in one place**: rentals, sales, land, shops and offices, plus shortlets, hotels and restaurant bookings.",
+        "- **Free to browse, message, inspect and pay**: no fees for renters or guests at any step.",
+        "- **Transparent trust ladder**: every lister shows exactly what has been checked.",
+        "  - Identity, address and bank account, each shown on its own.",
+        "",
+        "## How to start",
+        "",
+        "1. Open **Stays** or **Property** and set where and when.",
+        "2. Message the lister and book a viewing inside Vallo.",
+        "3. Agree and pay in the app, never outside it.",
+        "",
+        "| Side | What you can do |",
+        "| --- | --- |",
+        "| Property | Rent, buy, land, shops |",
+        "| Stays | Shortlets and hotels |",
+        "",
+        "> Never pay anyone outside Vallo. A real lister never asks you to.",
+        "",
+        "See [Stays](/stays) to start looking.",
+      ].join("\n"),
+    },
+  ],
+};
+
+export default async function AssistantPreview({ searchParams }: { searchParams: Promise<{ view?: string }> }) {
   const locale = await getLocale();
+  const rich = (await searchParams).view === "rich";
   return (
     <main id="main" className="flex h-dvh min-w-0 flex-col overflow-hidden">
       <AssistantChat
         locale={locale}
         viewer={{ initials: PERSON.name.slice(0, 1), avatarUrl: PERSON.avatarUrl }}
-        seed={{ threads: [THREAD], thinking: true }}
+        seed={rich ? { threads: [RICH] } : { threads: [THREAD], thinking: true }}
         t={assistantCopyOf(getDictionary(locale))}
       />
     </main>

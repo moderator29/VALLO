@@ -50,6 +50,8 @@ import { AI_CONSENT_REQUIRED_CODE } from "@/lib/ai/consent";
 import { WORKSPACE_FRAMES, type AssistantWorkspace } from "@/lib/assistant/workspace";
 import { Icon3D } from "@/components/ui/Icon3D";
 import { AIResponse, type AIResponseStatus } from "@/components/ui/AIResponse";
+import { AnswerMarkdown } from "./AnswerMarkdown";
+import { plainAnswer } from "@/lib/text/answer-markdown";
 import { LiveIsland } from "@/components/ui/LiveIsland";
 import "./assistant-answer.css";
 import "@/app/css/home.css";
@@ -249,6 +251,32 @@ export function AssistantChat({
      whether the reader has scrolled away from the newest part of the thread,
      which is when a streaming answer gets its island. */
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  /* Which answer this phone is reading aloud, if any (Web Speech, on the
+     device: nothing is sent anywhere to read it). */
+  const [speakingId, setSpeakingId] = useState<string | null>(null);
+  useEffect(() => () => {
+    try {
+      window.speechSynthesis?.cancel();
+    } catch {
+      /* Nothing was being read. */
+    }
+  }, []);
+  const readAloud = useCallback((id: string, text: string) => {
+    const synth = typeof window !== "undefined" ? window.speechSynthesis : undefined;
+    if (!synth) return;
+    if (speakingId === id) {
+      synth.cancel();
+      setSpeakingId(null);
+      return;
+    }
+    synth.cancel();
+    const utterance = new SpeechSynthesisUtterance(plainAnswer(text));
+    utterance.lang = "en-NG";
+    utterance.onend = () => setSpeakingId((now) => (now === id ? null : now));
+    utterance.onerror = () => setSpeakingId((now) => (now === id ? null : now));
+    setSpeakingId(id);
+    synth.speak(utterance);
+  }, [speakingId]);
   const [awayFromEnd, setAwayFromEnd] = useState(false);
   const answerWords = t.answer;
 
@@ -894,7 +922,7 @@ export function AssistantChat({
                             icon: copiedId === m.id ? "check" : "clipboard-list",
                             onSelect: () => {
                               void navigator.clipboard
-                                ?.writeText(m.text)
+                                ?.writeText(plainAnswer(m.text))
                                 .then(() => {
                                   setCopiedId(m.id);
                                   banner.quick(answerWords.copied);
@@ -903,10 +931,38 @@ export function AssistantChat({
                                 .catch(() => undefined);
                             },
                           },
+                          /* Read on this phone, by the phone's own voice. Offered only where
+                             the phone can do it, so the button never does nothing. */
+                          ...(typeof window !== "undefined" && "speechSynthesis" in window
+                            ? [
+                                {
+                                  id: "read",
+                                  label: speakingId === m.id ? answerWords.stopReading : answerWords.readAloud,
+                                  icon: "volume" as const,
+                                  onSelect: () => readAloud(m.id, m.text),
+                                },
+                              ]
+                            : []),
+                          {
+                            id: "share",
+                            label: answerWords.share,
+                            icon: "share",
+                            onSelect: () => {
+                              const words = plainAnswer(m.text);
+                              if (typeof navigator !== "undefined" && typeof navigator.share === "function") {
+                                void navigator.share({ text: words }).catch(() => undefined);
+                                return;
+                              }
+                              void navigator.clipboard
+                                ?.writeText(words)
+                                .then(() => banner.quick(answerWords.copied))
+                                .catch(() => undefined);
+                            },
+                          },
                         ]}
                         data-testid="assistant-answer"
                       >
-                        {m.error ? null : m.text}
+                        {m.error ? null : <AnswerMarkdown text={m.text} streaming={thisStreaming} />}
                         {status === "stopped" ? (
                           <span className="nf-ai-answer__stopped">{answerWords.stoppedNote}</span>
                         ) : null}
@@ -928,6 +984,20 @@ export function AssistantChat({
                     </Button>
                   )}
                   {m.blocks && m.blocks.length > 0 && <AssistantBlocks blocks={m.blocks} onAsk={(prompt) => send(prompt)} />}
+                  {/* NEXT QUESTIONS, under the newest finished answer only (the
+                      ChatGPT reference): each is sent exactly as it reads. */}
+                  {status === "done" && m.id === lastMessage?.id && m.text.trim() ? (
+                    <ul className="nf-ai-follow" aria-label={answerWords.followLabel} data-testid="assistant-follow">
+                      {[answerWords.followSimpler, answerWords.followShorter, answerWords.followNext].map((prompt) => (
+                        <li key={prompt}>
+                          <button type="button" className="nf-ai-follow__btn" onClick={() => send(prompt)}>
+                            <UiIcon name="arrow-up-right" size={16} />
+                            <span>{prompt}</span>
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : null}
                   {m.listings && m.listings.length > 0 && (
                     <ul className="nf-ai__results" aria-label="Matching listings">
                       {m.listings.map((l, i) => (
