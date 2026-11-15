@@ -40,6 +40,10 @@ Testing, Bug fixing, Re-auditing, Completed.
 
 ## File ownership while S1 to S6 run
 
+HISTORICAL. This was the split for the S1 to S6 round, which is finished.
+Both agents have stopped and every file below is free. The live ownership
+note is the one further down, under THE FULL QUEUE TO DONE.
+
 INPUT: `lib/ui/toast.ts`, `components/ui/ToastHost.tsx`, every composer
 (`app/(app)/messages/[id]/ThreadView.tsx` and `components/app/messages/*`,
 the support composer, the feed composer), `components/ui/Field.tsx`,
@@ -58,13 +62,32 @@ Neither touches `app/admin`. The lead works only in files neither holds
 
 ---
 
-# THE BOARD, 14 November 2026, late evening
+# THE BOARD, 15 November 2026
 
-The founder asked for this session to be planned and organised, so here is
-one board a person can read top to bottom. Two workers at a time plus the
-lead, never in the same file. Nothing is Done until it was run and seen.
+Two workers at a time plus the lead, never in the same file. Nothing is Done
+until it was run and seen.
 
-## DONE AND PUSHED TONIGHT
+## THE DIVERGENCE, READ THIS FIRST
+
+A second session has been working today on branch
+`claude/rentme-v2-platform-audit-xuvg0a`. It built, independently, the same
+four small works this branch built (quick pill, paste tray, count tabs,
+action sheet, keyboard walk: `791a7f9b`, `e4a07f61`) and the website root
+work (`7ea3f5fd`, `78e38414`, `28eb6022`: no landing page at the root, the
+foot under the listings, social icons in their real brand colours).
+
+The founder ruled on the website half: delete this branch's version. Done in
+`67487736`, which reverts `5d6cb242` and `883105f8` and undoes the landing
+rename, so that branch's version merges clean.
+
+The rest is unresolved. A trial merge, thrown away, conflicts in 43 files,
+almost all of them the doubled work. The lead's recommendation to the
+founder: merge that branch in and keep its count tabs, action sheet, paste
+and keyboard work at each conflict, keep this branch's banner and pill
+styling on top since that is the look he signed off. It needs the other
+session to stop pushing first. Waiting on his word.
+
+## DONE AND PUSHED ON THIS BRANCH
 
 | What | Commit |
 |---|---|
@@ -73,38 +96,48 @@ lead, never in the same file. Nothing is Done until it was run and seen.
 | Back is a chevron, every back and close control on the page's line | `f11d35c4` `70455692` |
 | The banner: capsule, small type, brand rail, one circled mark per tone, a processing tone, both marks at one size and stroke | `2c7d7deb` `c102125a` `55e097a3` `3facb325` |
 | Motion: nine of ten already existed, one gap built | `acfd1ea4` |
-| The site root opens on Vallo, landing kept at `/tour` | `5d6cb242` `883105f8` |
 | The database audit, measured, with five SQL files for him | `17bde0ab` `531d0549` `713c013a` `05b42fb6` `f168f32e` |
 | Bugs found and fixed: a realtime crash loop, a mandate rule drift, an unwatched cron job, a 0.239 layout shift | `1094b98f` `d5d08b36` `dbf89b3b` |
+| The in-app help search reads the whole centre, not the FAQ alone | `b22c1aa6` |
+| The site root rebuild, removed as a duplicate | `67487736` |
+
+The four small works and the keyboard pass are duplicates of that other
+branch's own. They were built before this branch knew it existed.
 
 ## WAITING ON THE FOUNDER (nothing is blocked behind these)
 
-1. Five SQL files to run, in order: scoped staff doors (unblocks the BD
+1. Which way the two branches join. The lead's recommendation is above.
+2. Four SQL files to run, in order: scoped staff doors (unblocks the BD
    Director's listings desk, failing now), alerts cleanup, insert limits,
    cascade indexes. Plus one draft (stale sessions) that signs people out.
-2. Supabase dashboard: Authentication, Sessions. No session time limit is set
+3. Supabase dashboard: Authentication, Sessions. No session time limit is set
    at all, which is why 720 of them are still open.
-3. Where the showcase lives: a public address, inside the app, or both.
-4. Whether the back chevron should sit further in than the text line.
+4. Where the showcase lives: a public address, inside the app, or both.
+5. Whether the back chevron should sit further in than the text line.
 
 ## NOW
 
 | Who | Task | Done when |
 |---|---|---|
-| Agent A | The consistency sweep's table: 161 routes, 390 and 1440, both themes, then fix the outliers worst first | The table exists with real numbers and every outlier is fixed or explained |
-| Agent B | The help centre (brief section 12), which has guides but no searchable centre | A person can find an answer to a real question in two taps |
-| Lead | The remaining database work and the founder's reports | Each item measured, each SQL file tested twice |
+| Lead | Hold until the founder rules on the merge, since broad edits now would deepen 43 conflicts | His word |
+
+Both agents have stopped. The consistency sweep's table (M5) is unfinished:
+its script and the back-and-close half are committed, the full 161-route run
+was killed by the five-hour limit before it wrote its JSON.
 
 ## NEXT, IN ORDER
 
-1. The signed-in performance baseline, on the harness, since this sandbox has
+1. The merge, once he rules.
+2. The consistency sweep's table, resumed: the run needs to write its rows as
+   it goes rather than only at the end.
+3. The signed-in performance baseline, on the harness, since this sandbox has
    no database credentials (the correction at the top of the performance
    report explains why the first listing-page number was wrong).
-2. The console: the restricted staff frame, desk tables on a phone, then the
+4. The console: the restricted staff frame, desk tables on a phone, then the
    founder command centre as a proposal with screenshots.
-3. Public areas not yet swept: stays, restaurants, roommates, feed and Circle,
+5. Public areas not yet swept: stays, restaurants, roommates, feed and Circle,
    profile and account.
-4. The second audit, by whichever worker did not build the thing.
+6. The second audit, by whichever worker did not build the thing.
 
 ---
 
@@ -117,16 +150,19 @@ and seen.
 
 **Who holds what, so two workers never meet in a file.** The lead holds
 `app/admin/**`, every SQL file, `app/css/chrome.css`, and all of `docs`
-except the files named against an agent below. Agent INPUT holds the
-performance work and whatever it names in its report. Agent SHEETS holds the
-consistency audit, its sweep script and `docs/handoff/CONSISTENCY_AUDIT.md`.
+except the files named against an agent below. Agent INPUT held the
+performance work and the help centre. Agent SHEETS holds the consistency
+audit, its sweep script, `docs/handoff/CONSISTENCY_AUDIT.md` and, released to
+it by the lead, `app/css/chrome.css`. Both have stopped; their files are free
+again. `components/app/MobileTabBar.tsx` is unowned and worth knowing about:
+the front door's rule for which tab `/` lights lives there.
 
 ## P. PERFORMANCE (brief section 8, handoff phase 6)
 
 | # | Task | Proof it is done |
 |---|---|---|
-| P1 | The listing page: its largest paint is decorative artwork, not the property. 4.81 s against a 2.5 s target | Before and after on the same throttled profile |
-| P2 | The listing route's 559 KB of JavaScript, the heaviest measured | The same, plus the per-kind transfer table |
+| P1 | WITHDRAWN. The 4.81 s and the wrong LCP element were measured on the not-found screen, because this sandbox has no database credentials. The real listing page has never been measured. See the correction at the top of the performance report | A measurement on the harness, signed in, before any claim |
+| P2 | WITHDRAWN with P1: the 559 KB was that same not-found screen. What is real is BR-25, the shell's own weight | Per-route sizes measured where the page actually renders |
 | P3 | `/stays`, same wrong LCP element, 3.14 s | Before and after |
 | P4 | The landing hero at 2.67 s, just over target | Before and after |
 | P5 | The signed-in baseline: home, inbox, a thread, the feed, profile, the agent dashboard, the console overview, on the preview harness or the QA member | The table in the performance report, same profile |
