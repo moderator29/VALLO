@@ -51,6 +51,8 @@ export const ESCROWPAY_PATHS = {
   paymentAccounts: (transactionId: string) => `${V1}/transactions/${id(transactionId)}/payment-accounts`,
   checkoutSessions: (transactionId: string) => `${V1}/transactions/${id(transactionId)}/checkout-sessions`,
   feeEstimates: `${V1}/fees/estimates`,
+  payout: (payoutId: string) => `${V1}/payouts/${id(payoutId)}`,
+  payoutsSince: (sinceIso: string) => `${V1}/payouts?created_from=${id(sinceIso)}&page_size=100`,
   release: (transactionId: string) => `${V1}/transactions/${id(transactionId)}/releases`,
   releasesOf: (transactionId: string) => `${V1}/releases?transaction_id=${id(transactionId)}&page_size=20`,
   refund: (transactionId: string) => `${V1}/transactions/${id(transactionId)}/refunds`,

@@ -187,3 +187,38 @@ export function readFeeEstimate(value: unknown): FeeEstimate | null {
   if (fee === null || fee < 0 || (payer !== "payer" && payer !== "business")) return null;
   return { feeMinor: fee, payer };
 }
+
+/**
+ * A payout to a lister's bank, as the provider reports it. Shape seen on the
+ * sandbox on 14 November 2026: `POT_...`, `status` "completed", the
+ * transaction it settles, the amount and the payout fee, `completed_at`.
+ */
+export type ProviderPayout = {
+  id: string;
+  status: string | null;
+  transactionId: string | null;
+  amountMinor: number | null;
+  feeMinor: number | null;
+  completedAt: string | null;
+};
+
+function payoutOf(record: Json | null): ProviderPayout | null {
+  const id = str(record?.id);
+  if (!record || !id || !id.startsWith("POT_")) return null;
+  return {
+    id,
+    status: str(record.status)?.toLowerCase() ?? null,
+    transactionId: str(record.transaction_id),
+    amountMinor: int(record.amount_minor),
+    feeMinor: int(record.fee_minor),
+    completedAt: str(record.completed_at),
+  };
+}
+
+export function readPayout(value: unknown): ProviderPayout | null {
+  return payoutOf(obj(envelopeData(value)));
+}
+
+export function readPayoutList(value: unknown): ProviderPayout[] {
+  return items(value).map(payoutOf).filter((p): p is ProviderPayout => p !== null);
+}

@@ -51,6 +51,7 @@ const COPY = {
   reconcile: "Last reconcile",
   reason: "Review reason",
   paused: "Release paused",
+  payout: "Transfer to the lister's bank",
   source: "from",
 } as const;
 
@@ -127,6 +128,7 @@ function ArrangementRow({
     { label: COPY.reconcile, value: row.lastReconcileResult ? `${when(row.lastReconcileAt)}, ${row.lastReconcileResult}` : when(row.lastReconcileAt) },
     ...(row.reviewReason ? [{ label: COPY.reason, value: row.reviewReason }] : []),
     ...(row.releasePausedAt ? [{ label: COPY.paused, value: when(row.releasePausedAt) }] : []),
+    ...(row.payoutStatus ? [{ label: COPY.payout, value: `${row.payoutStatus}, ${when(row.payoutAt)}` }] : []),
   ];
   return (
     <li className="nf-row flex-wrap items-start" data-testid="arrangement-row" data-status={row.status}>

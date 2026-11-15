@@ -1763,6 +1763,29 @@ export const PROTECTED_ADD_PAYOUT = "Add a payout account";
 export function protectedLastConfirmed(time: string): string {
   return `Last confirmed ${time}`;
 }
+/**
+ * After the release, the transfer to the lister's own bank account (the
+ * founder's automatic payout, 15 November 2026), from the payment partner's
+ * own report of it. "On its way" until the partner says it completed; never
+ * "paid" before that.
+ */
+export const PROTECTED_LISTER_PAYOUT = {
+  processing: "The bank released the payment. It is on its way to your bank account; banks usually show it the same day.",
+  paid: "Paid to your bank account on {date}.",
+  failed:
+    "The bank released the payment, but the transfer to your bank account did not go through. Vallo is following it up with the payment partner. Check that your bank account on Vallo is correct.",
+  reversed:
+    "The transfer to your bank account was returned by your bank. Vallo is following it up with the payment partner. Check that your bank account on Vallo is correct.",
+} as const;
+export const PROTECTED_LISTER_PAYOUT_CAPTION = {
+  processing: "On its way to your bank account.",
+  paid: "This reached your bank account.",
+  /** When the partner reported the amount it sent, which may be less its transfer fee. */
+  paidAmount: "{amount} reached your bank account, after the payment partner's transfer fee.",
+  failed: "Released to you. The transfer to your bank is being followed up.",
+  reversed: "Released to you. The transfer to your bank is being followed up.",
+} as const;
+
 /** The lister's line beside the payer's delay, in the lister's words. */
 export const PROTECTED_LISTER_ISSUE = {
   partner_unavailable: "We can't reach the payment partner just now. Below is the last status we confirmed; nothing has moved because of this.",

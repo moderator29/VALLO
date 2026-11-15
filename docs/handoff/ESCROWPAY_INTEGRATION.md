@@ -54,7 +54,6 @@ In Vercel, for Production (server only, never `NEXT_PUBLIC_`):
 | `ESCROWPAY_API_KEY` | the secret key from the dashboard, Developers, API keys (`sk_test_...` now, `sk_live_...` after KYB) |
 | `ESCROWPAY_WEBHOOK_SECRET` | the `whsec_...` signing secret, shown once when the endpoint is created |
 | `ESCROWPAY_ENVIRONMENT` | `sandbox` with a test key, `production` with a live key |
-| `ESCROWPAY_PAYOUT_PREFERENCE` | optional; leave unset (automatic) unless decision 1 in section 6 says `manual` |
 
 In the provider's dashboard, Developers, Webhooks, Add endpoint:
 
@@ -122,6 +121,32 @@ Not reached on the sandbox: a real webhook delivery (no endpoint is
 registered yet; the signature check is tested against the documented scheme
 with real HMACs), the `expired` state, and the automatic payout itself.
 
+## 3b. The payout to the lister (automatic, 15 November 2026)
+
+After the bank releases a payment, the provider sends it to the lister's
+bank by itself. Vallo records that step from the provider's own word, on its
+own columns (pending SQL `protected_payout_to_lister_2026-11-15.sql`), never
+as the payment's state:
+
+- the provider's `payout.created`, `payout.processing`, `payout.completed`,
+  `payout.failed` and `payout.reversed` webhooks, matched to the payment by
+  the transaction they settle (`lib/money/protected-payout.ts`);
+- a read-back in the reconcile job for a release whose payout is not yet
+  known to have completed: by the payout's id when a webhook named it,
+  otherwise from the payouts made since the release (the provider's list has
+  no transaction filter, so Vallo matches it);
+- a step only forward (paid is left only for reversed; a failed transfer
+  may be retried), never over a write somebody else made in between;
+- the lister's screen says "on its way to your bank account" until the
+  provider says paid, then the date it reached them; a failed or returned
+  transfer is said plainly, staff are alerted, and the database tells the
+  lister once.
+
+Not yet seen on the sandbox: automatic payout is switched off on Vallo's
+account there. The shape of a payout (`POT_...`, `completed`, the
+transaction, amount, fee, `completed_at`) was seen on the sandbox from a
+payout made by hand on 14 November.
+
 ## 4. What is built
 
 | Piece | File | State |
@@ -137,6 +162,7 @@ with real HMACs), the `expired` state, and the automatic payout itself.
 | Identity and start actions | `lib/money/protected-actions.ts` | Tested |
 | Start screen (review, identity, open) on the funding page | `components/money/protected-rail/ProtectedStart.tsx`, `IdentityCheck.tsx` | Seen in a browser at phone width through `/preview/protected?screen=identity` |
 | Lister readiness card on Settings, Payments | `ProtectedSetup.tsx` | Seen in a browser through `/preview/protected?screen=setup` |
+| The payout to the lister: webhooks, read-back, the lister's screen, the staff desk | `lib/money/protected-payout.ts`, `ListerProtectedView.tsx`, `app/admin/arrangements` | Tested; the SQL tested on a local Postgres (`supabase/tests/protected_payout`); the lister's screen seen in a browser through `/preview/protected?screen=lister-paying`, `lister-paid`, `lister-payout-failed` |
 | Webhook route | `app/api/escrowpay/webhook/route.ts` | On the real signature; 18 tests post signed deliveries through the handler itself |
 | The dispute desk: one payment's record, its trail with both statements, and the two decisions (refund the payer, release to the lister) | `app/admin/arrangements/[id]`, `ArrangementRecord.tsx`, `lib/admin/arrangement-actions.ts` | Tested; seen and driven in a browser through `/preview/protected/staff`. Finance door, a reason of 20 characters, the audit line written before the instruction |
 | The choice between the protected transfer and card | `components/money/pay-choice/PayChoiceCard.tsx` on the agreement page (already live in its switched-off form) | Leads to the funding page, which now starts the payment |
@@ -171,15 +197,15 @@ functions and the webhook event store were applied on 10 November.
 
 ## 6. Decisions that are the founder's
 
-1. **How a lister is paid after a release.** Vallo asks for automatic payout,
-   so that a release goes straight to the lister's bank and Vallo's balance
-   at the provider never carries a member's money. The provider has that
-   switched off on the account, so today nothing can open. Either ask the
-   provider to switch automatic payout on (and to say how the payout fee is
-   then taken), or set `ESCROWPAY_PAYOUT_PREFERENCE=manual`, under which a
-   release waits in Vallo's balance at the provider and staff pay it out from
-   the provider's dashboard. The second is a custody question for counsel:
-   Vallo's standing position is that it never holds customer money.
+1. **How a lister is paid after a release: DECIDED, automatic** (the
+   founder, 15 November 2026). A release goes straight on to the lister's own
+   bank account, and Vallo's balance at the provider never carries a member's
+   money. There is no setting for anything else. The provider has automatic
+   payout switched off on Vallo's account today, so it refuses every
+   transaction and nothing can open: the founder asks the provider to switch
+   it on (test and live) and to say how the payout fee is charged. The
+   sandbox test then runs without `ESCROWPAY_SANDBOX_PAYOUT=manual` and checks
+   the payout reaches the lister.
 2. **Who bears the money-in fee.** The provider charges the payer, on top of
    the amount, unless the account is set to "business". Vallo's ruling of 9
    November is that the lister pays. Until that is settled the screens tell

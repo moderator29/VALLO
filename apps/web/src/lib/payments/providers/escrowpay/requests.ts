@@ -17,8 +17,8 @@ import { ESCROWPAY_PATHS, type EscrowPayCall } from "./client";
  *    6, "no unexpected automatic release countdown");
  *  - `payout_preference: "automatic"` with the lister's verified payout
  *    account: a release goes on to the lister's bank with no second step.
- *    Only where the deployment is set to `manual` does a release wait in
- *    Vallo's balance at the provider for staff to pay out.
+ *    Always, in every deployment (config.ts); "manual" is reachable only
+ *    from the sandbox test.
  */
 
 export type IdentityKind = "nin" | "bvn";
@@ -134,6 +134,20 @@ export function checkoutSessionCall(input: { reference: string; transactionId: s
     idempotencyKey: `${input.reference}:checkout:${input.attempt}`,
     body: {},
   };
+}
+
+/** `GET /payouts/{id}`: one payout, by the provider's own id. */
+export function payoutReadCall(payoutId: string): EscrowPayCall {
+  return { method: "GET", path: ESCROWPAY_PATHS.payout(payoutId) };
+}
+
+/**
+ * `GET /payouts?created_from=`: the payouts made since a moment, for finding
+ * the one a release produced when no webhook named it. The list has no
+ * transaction filter, so the caller matches `transaction_id` itself.
+ */
+export function payoutsSinceCall(sinceIso: string): EscrowPayCall {
+  return { method: "GET", path: ESCROWPAY_PATHS.payoutsSince(sinceIso) };
 }
 
 /** FeeEstimateRequest: the provider's own figure for the money-in fee, and who bears it. */

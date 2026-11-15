@@ -496,7 +496,7 @@ describe("the webhook", () => {
 
   it("an event Vallo does not act on moves nothing and reads nothing", async () => {
     const { d, db, observed } = deps();
-    expect(await rail.applyProtectedWebhook(d, event({ event: "payout.completed", object: "payout" }))).toBe("unmapped");
+    expect(await rail.applyProtectedWebhook(d, event({ event: "wallet.debited", object: "wallet" }))).toBe("unmapped");
     expect(await rail.applyProtectedWebhook(d, event({ event: "something.new" }))).toBe("unmapped");
     expect(db.calls).toHaveLength(0);
     expect(observed()).toHaveLength(0);
@@ -509,10 +509,10 @@ describe("the webhook", () => {
     expect(observed()).toHaveLength(0);
   });
 
-  it("a failed payout to the lister's bank alerts a person and moves nothing", async () => {
-    const { d, observed, alert } = deps({ row: { ...ROW, status: "released" } });
-    expect(await rail.applyProtectedWebhook(d, event({ event: "payout.failed", object: "payout", objectId: "PAY_1" }))).toBe("unmapped");
-    expect(alert).toHaveBeenCalledWith("protected_rail.payout_trouble", expect.objectContaining({ event: "payout.failed" }));
+  it("a payout event goes to the payout record and never touches the payment's own state", async () => {
+    const { d, observed } = deps({ row: { ...ROW, status: "released" } });
+    await rail.applyProtectedWebhook(d, event({ event: "payout.failed", object: "payout", objectId: "POT_1" }));
+    await rail.applyProtectedWebhook(d, event({ event: "payout.completed", object: "payout", objectId: "POT_1" }));
     expect(observed()).toHaveLength(0);
   });
 });

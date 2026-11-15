@@ -4,12 +4,14 @@ import type { JobVerdict } from "../../bookings/lifecycle";
 import type { AdminClient } from "../rpc";
 import { recordAlert } from "../../alerts";
 import type { Db } from "../../money/member-wallet";
+import { reconcilePayouts } from "../../money/protected-payout";
 import { protectedRailDeps, providerReachable, reconcileProtected, type ProtectedReconcileSummary as ReconcileSummary } from "../../money/protected-rail";
 
 /**
  * The escrow webhook's safety net. Every arrangement still waiting on the
  * payment partner's word (preparing, unknown, payment processing, release
- * asked, disputed) is read back, at most three a run (the provider's rate allowance is shared across everything), and the partner's answer is recorded
+ * asked, disputed) is read back, and so is every released one whose transfer
+ * to the lister's bank is not yet known to have completed, at most three a run (the provider's rate allowance is shared across everything), and the partner's answer is recorded
  * through the same door the webhook uses (`provider_arrangement_observe`).
  * Recording only: never gated by the protected-pay switches.
  * With no key for this deployment there is nothing to ask, and the run says so.
@@ -33,6 +35,14 @@ export async function arrangementsReconcile(admin: AdminClient): Promise<JobVerd
      while the provider is undocumented it reads nothing. */
   const deps = protectedRailDeps(admin as unknown as Db, alert);
   const configured = providerReachable(deps);
-  const summary = configured ? await reconcileProtected(deps, 3) : empty;
+  const states = configured ? await reconcileProtected(deps, 3) : empty;
+  /* Then the transfers to listers' banks after a release (automatic payout). */
+  const payouts = configured ? await reconcilePayouts(deps, 3) : empty;
+  const summary: ReconcileSummary = {
+    read: states.read + payouts.read,
+    moved: states.moved + payouts.moved,
+    skipped: states.skipped + payouts.skipped,
+    failed: states.failed + payouts.failed,
+  };
   return arrangementsVerdict(summary, configured);
 }

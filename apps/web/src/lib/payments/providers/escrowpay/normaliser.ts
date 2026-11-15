@@ -82,3 +82,57 @@ export function normaliseEscrowPayStatus(word: unknown): ArrangementStatus | nul
 export function normaliseEscrowPayEvent(event: unknown): ArrangementStatus | null {
   return lookup(ESCROWPAY_EVENT_STATES, event);
 }
+
+/**
+ * THE PAYOUT TO THE LISTER, in Vallo's words (the founder's automatic payout,
+ * 15 November 2026). It is a step after the release, recorded on its own
+ * columns, never as the arrangement's state.
+ */
+export type PayoutState = "processing" | "paid" | "failed" | "reversed";
+
+/** The provider's payout events onto the payout state (its webhook guide's closed set). */
+export const ESCROWPAY_PAYOUT_EVENTS: Readonly<Record<string, PayoutState>> = Object.freeze({
+  "payout.created": "processing",
+  "payout.processing": "processing",
+  "payout.completed": "paid",
+  "payout.failed": "failed",
+  "payout.reversed": "reversed",
+});
+
+/**
+ * A payout's own status word. "completed" was seen on the sandbox; the
+ * waiting words are the ones the provider's dashboard reads as in progress.
+ * An unknown word is null and records nothing.
+ */
+export const ESCROWPAY_PAYOUT_WORDS: Readonly<Record<string, PayoutState>> = Object.freeze({
+  completed: "paid",
+  pending: "processing",
+  processing: "processing",
+  reserved: "processing",
+  scheduled: "processing",
+  failed: "failed",
+  reversed: "reversed",
+});
+
+export function normalisePayoutEvent(event: unknown): PayoutState | null {
+  if (typeof event !== "string" || !Object.prototype.hasOwnProperty.call(ESCROWPAY_PAYOUT_EVENTS, event)) return null;
+  return ESCROWPAY_PAYOUT_EVENTS[event]!;
+}
+
+export function normalisePayoutWord(word: unknown): PayoutState | null {
+  if (typeof word !== "string") return null;
+  const key = word.trim().toLowerCase();
+  return Object.prototype.hasOwnProperty.call(ESCROWPAY_PAYOUT_WORDS, key) ? ESCROWPAY_PAYOUT_WORDS[key]! : null;
+}
+
+/**
+ * Where a payout may go next, whatever order the reports arrive in. Paid is
+ * left only for reversed; a failed or reversed payout may be retried.
+ */
+export function payoutStepOk(from: PayoutState | null, to: PayoutState): boolean {
+  if (from === to) return false;
+  if (from === null) return true;
+  if (from === "processing") return to !== "processing";
+  if (from === "paid") return to === "reversed";
+  return to === "processing" || to === "paid";
+}

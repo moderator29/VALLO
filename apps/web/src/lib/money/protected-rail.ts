@@ -17,6 +17,7 @@ import type { EscrowPayWebhook } from "../payments/providers/escrowpay/webhooks"
 import type { ArrangementStatus } from "./arrangement-states";
 import { PROTECTED_SANDBOX_BANK } from "./copy";
 import type { Db } from "./member-wallet";
+import { applyPayoutWebhook, isPayoutEvent } from "./protected-payout";
 import { ensurePayoutAccount, findParty, provablyNothing, protectedRailOpen, providerReachable, type ProtectedRailDeps } from "./protected-provider";
 import { releaseGate } from "./release-gate";
 
@@ -613,9 +614,6 @@ export async function askNewTransferDetails(deps: ProtectedRailDeps, input: { ar
 
 export type ProtectedWebhookOutcome = Verdict | "unmapped" | "unknown_arrangement" | "malformed";
 
-/** The events that say a payout to the lister's bank did not arrive: nothing moves, a person is told. */
-const PAYOUT_TROUBLE = new Set(["payout.failed", "payout.reversed"]);
-
 /**
  * A delivery the route has already verified and stored raw. The event's
  * meaning is the provider's (`normaliseEscrowPayEvent`); the arrangement is
@@ -624,9 +622,10 @@ const PAYOUT_TROUBLE = new Set(["payout.failed", "payout.reversed"]);
  * is never recorded as the whole: it goes to a person.
  */
 export async function applyProtectedWebhook(deps: ProtectedRailDeps, event: EscrowPayWebhook): Promise<ProtectedWebhookOutcome> {
+  /* The transfer to the lister's bank after a release: its own record (protected-payout.ts). */
+  if (isPayoutEvent(event.event)) return applyPayoutWebhook(deps, event);
   const mapped = normaliseEscrowPayEvent(event.event);
-  const trouble = PAYOUT_TROUBLE.has(event.event);
-  if (!mapped && !trouble) return "unmapped";
+  if (!mapped) return "unmapped";
   if (!event.transactionId) return "unknown_arrangement";
   const { data, error } = await (deps.db as unknown as {
     from: (t: string) => { select: (s: string) => { eq: (c: string, v: string) => { eq: (c: string, v: string) => { maybeSingle: () => PromiseLike<{ data: unknown; error: unknown }> } } } };
@@ -639,10 +638,6 @@ export async function applyProtectedWebhook(deps: ProtectedRailDeps, event: Escr
   if (error) return "error";
   if (!data) return "unknown_arrangement";
   const row = { ...(data as Row), amount_minor: Number((data as Row).amount_minor) };
-  if (trouble) {
-    await deps.alert("protected_rail.payout_trouble", { arrangement_id: row.id, reference: row.reference, event: event.event, event_key: event.key });
-    return "unmapped";
-  }
   let to = mapped as ArrangementStatus;
   /* A late or repeated "funded" for money Vallo already knows is held. */
   if (to === "protected" && ON_TOP_OF_HELD.has(row.status)) return "same";

@@ -20,6 +20,7 @@
      ?screen=partner-unavailable  wrong-amount  late-transfer  duplicate-transfer
      ?screen=release-delayed  refund-delayed   the bank has not confirmed yet
      ?screen=lister-payout  lister-review      the lister's side of a problem
+     ?screen=lister-paying  lister-paid  lister-payout-failed   after the release, the transfer to the lister's bank
      ?screen=receipt                           the protected receipt, with help
      ?screen=problem                           raising a problem (the sheet)
    The start of a payment (14 November):
@@ -58,6 +59,9 @@ const SCREENS = [
   "refund-delayed",
   "lister-payout",
   "lister-review",
+  "lister-paying",
+  "lister-paid",
+  "lister-payout-failed",
   "receipt",
   "problem",
   "identity",
@@ -84,7 +88,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ s
           </a>
         ))}
       </nav>
-      {screen === "lister" || screen === "lister-payout" || screen === "lister-review" ? (
+      {screen === "lister" || screen.startsWith("lister-") ? (
         <ListerProtectedView deal={screen === "lister" ? PREVIEW_DEALS.protected! : PREVIEW_DEALS[screen]!} now={PREVIEW_NOW} locale={locale} />
       ) : screen === "receipt" ? (
         <div className="grid gap-lg">

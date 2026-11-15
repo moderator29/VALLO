@@ -44,6 +44,8 @@ export function eventNotes(detail: unknown): string[] {
   if (str(d.release_refused)) notes.push("The partner refused the release instruction.");
   if (str(d.refund_refused)) notes.push("The partner refused the refund instruction.");
   if (str(d.partial_of)) notes.push(`The partner reported only part of the amount as ${str(d.partial_of)}.`);
+  const payout = str(d.payout);
+  if (payout) notes.push(`The partner reported the transfer to the lister's bank as ${payout}.`);
   if (str(d.refused)) notes.push(`Not recorded: ${String(d.refused).replace(/_/g, " ")}.`);
   return notes;
 }

@@ -92,3 +92,16 @@ its time), with RLS on and no grant to `anon` or `authenticated`. Safe to run
 twice. The read-back at its foot asks each role with `has_table_privilege`.
 Until it runs, every page shows naira only and the twice-daily rates job
 records nothing; no price, payment or booking is affected either way.
+
+## The payout to the lister (15 November 2026)
+
+`protected_payout_to_lister_2026-11-15.sql`. NOT APPLIED. Additive only: six
+`payout_*` columns on `public.provider_arrangements` (the transfer to the
+lister's own bank after a protected payment is released, as the payment
+partner reports it) and a trigger that tells the lister once when it is paid,
+failed or returned. No function is replaced, no row changes (the table is
+empty today), members still cannot write it. Safe to run twice. Tested on a
+local Postgres 16 against a stub of the live tables:
+`supabase/tests/protected_payout/run.sh` applies it twice and ends `E2E_OK`.
+Until it runs, the app records no payout and the lister reads "on its way to
+your bank account" after a release; nothing fails.

@@ -28,6 +28,8 @@ const COPY = {
   state: "Vallo's record",
   provider: "Partner said",
   providerRef: "Partner reference",
+  payout: "Transfer to the lister's bank",
+  payoutUnknown: "Not reported yet",
   unnamed: "Not named",
   notReported: "Not reported",
   trail: "The trail",
@@ -71,6 +73,7 @@ export function ArrangementRecord({ read, locale }: { read: ArrangementRecordRea
     { label: COPY.lister, value: read.listerName ?? COPY.unnamed },
     { label: COPY.state, value: `${row.status.replace(/_/g, " ")}${row.statusSource ? `, from ${row.statusSource.replace(/_/g, " ")}, ${ui.when(row.statusObservedAt)}` : ""}` },
     { label: COPY.provider, value: [row.providerState, row.providerStatus].filter(Boolean).join(" / ") || COPY.notReported },
+    ...(row.status === "released" ? [{ label: COPY.payout, value: row.payoutStatus ? `${row.payoutStatus}, ${ui.when(row.payoutAt)}` : COPY.payoutUnknown }] : []),
     ...(row.providerReference ? [{ label: COPY.providerRef, value: <span className="font-mono break-words">{row.providerReference}</span> }] : []),
   ];
   return (

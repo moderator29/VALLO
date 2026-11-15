@@ -115,6 +115,16 @@ function readFunding(row: RowLike): ProtectedDeal["funding"] {
   return { bank, accountName, accountNumber, expiresAt: str(row.funding_expires_at) ?? str(f.expires_at), amountMinor: total !== null && total > 0 ? total : null };
 }
 
+const PAYOUT_STATES = ["processing", "paid", "failed", "reversed"] as const;
+
+/** The transfer to the lister's bank, from the payout columns (pending SQL); absent while they are not there or empty. */
+function readPayoutState(row: RowLike): ProtectedDeal["payout"] {
+  const status = row.payout_status;
+  if (typeof status !== "string" || !(PAYOUT_STATES as readonly string[]).includes(status)) return null;
+  const sent = num(row.payout_amount_minor);
+  return { status: status as (typeof PAYOUT_STATES)[number], completedAt: str(row.payout_completed_at), amountMinor: sent !== null && sent > 0 ? sent : null };
+}
+
 function dayOf(iso: string): string | null {
   const at = new Date(iso);
   if (Number.isNaN(at.getTime())) return null;
@@ -269,6 +279,7 @@ export async function buildProtectedDeal(
       },
       issue,
       listerPayoutMissing: missing,
+      payout: readPayoutState(arr),
       partnerMark: mark_,
       receipt: {
         providerReference: str(arr.provider_reference) ?? str(arr.provider_arrangement_id),

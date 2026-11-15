@@ -67,10 +67,10 @@ describe("configuration", () => {
     expect(escrowPayConfig({ ...SANDBOX, ESCROWPAY_API_KEY: "sk_live_0000.abc" })).toBeNull();
   });
 
-  it("pays out automatically unless the deployment says manual, and refuses any other word", () => {
-    expect(escrowPayConfig({ ...SANDBOX, ESCROWPAY_PAYOUT_PREFERENCE: "manual" })?.payoutPreference).toBe("manual");
-    expect(escrowPayConfig({ ...SANDBOX, ESCROWPAY_PAYOUT_PREFERENCE: " Automatic " })?.payoutPreference).toBe("automatic");
-    expect(escrowPayConfig({ ...SANDBOX, ESCROWPAY_PAYOUT_PREFERENCE: "retain_in_wallet" })).toBeNull();
+  it("always pays out automatically: no setting can make a release wait in Vallo's balance", () => {
+    expect(escrowPayConfig(SANDBOX)?.payoutPreference).toBe("automatic");
+    expect(escrowPayConfig({ ...SANDBOX, ESCROWPAY_PAYOUT_PREFERENCE: "manual" })?.payoutPreference).toBe("automatic");
+    expect(escrowPayConfig({ ...LIVE, VERCEL_ENV: "production", ESCROWPAY_PAYOUT_PREFERENCE: "manual" })?.payoutPreference).toBe("automatic");
   });
 
   it("refuses a key whose book is not the one the marker names", () => {
@@ -348,7 +348,7 @@ describe("status words and events", () => {
     expect(from("refunded")).toEqual(["refund.completed"]);
   });
 
-  it("a payout or a wallet event moves no arrangement", () => {
+  it("a payout or a wallet event moves no arrangement's own state (a payout is recorded on its own columns)", () => {
     for (const event of ["payout.completed", "wallet.credited", "transaction.created", "charge.succeeded", "release.created"]) {
       expect(normaliseEscrowPayEvent(event)).toBeNull();
     }
@@ -428,6 +428,8 @@ const ALLOWED_IMPORTERS = new Set([
   "lib/money/protected-rail.test.ts",
   /* The rail's door to the provider: the dependencies, the parties, the payout account (server-only). */
   "lib/money/protected-provider.ts",
+  "lib/money/protected-payout.ts",
+  "lib/money/protected-payout.test.ts",
   "lib/money/protected-provider.test.ts",
   "lib/money/protected-identity-actions.ts",
   "lib/money/protected-start.ts",

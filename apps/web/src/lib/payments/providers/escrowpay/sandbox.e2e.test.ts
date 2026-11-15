@@ -45,6 +45,7 @@ const { sendEscrowPay } = await import("./client");
 const { failureCode } = await import("./errors");
 const rail = await import("@/lib/money/protected-rail");
 const provider = await import("@/lib/money/protected-provider");
+const payouts = await import("@/lib/money/protected-payout");
 
 const PAYER = "vallo-e2e-payer";
 const LISTER = "vallo-e2e-lister";
@@ -70,12 +71,14 @@ function world(name: string) {
   const journey: string[] = ["preparing"];
   const db = fakeSupabase({
     provider_arrangements: {
-      select: () => ({ data: { ...row } }),
+      /* A list read (the payout read-back) gets the one row as a list. */
+      select: (call) => ({ data: call.filters.some((f) => f[0] === "or") ? [{ ...row }] : { ...row } }),
       update: (call) => {
         Object.assign(row, call.values as object);
-        return { data: null };
+        return { data: [{ id: row.id }] };
       },
     },
+    provider_arrangement_events: { insert: { data: null } },
     deal_agreements: { select: { data: { renter_id: PAYER, owner_id: LISTER, named_payer_id: null, named_payer_by_renter_at: null, named_payer_accepted_at: null, listing_id: null } } },
     bank_accounts: { select: { data: [{ bank_code: "058", bank_name: "GTBank", account_number: "0123456781", resolved_account_name: "E2E LISTER", is_default: true }] } },
     protected_payment_open: { rpc: () => ({ data: { status: "ok", id: row.id } }) },
@@ -89,6 +92,8 @@ function world(name: string) {
         if (row.status === v.p_to_status) return { data: "same" };
         if (!stepAllowed(row.status, v.p_to_status)) return { data: "refused" };
         row.status = v.p_to_status;
+        /* The stamp the live trigger writes, which the payout read-back looks from. */
+        if (v.p_to_status === "release_requested") row.release_requested_at = new Date().toISOString();
         row.provider_arrangement_id = row.provider_arrangement_id ?? v.p_provider_arrangement_id;
         journey.push(`${v.p_to_status} (${v.p_source})`);
         return { data: "changed" };
@@ -97,12 +102,13 @@ function world(name: string) {
   });
   /* The real send, keeping each answer so the test checkout can be found. */
   const answers: { call: EscrowPayCall; result: RailResult<unknown> }[] = [];
-  const config = escrowPayConfig({
+  const configured = escrowPayConfig({
     ESCROWPAY_API_BASE_URL: "https://production-business-api.escrowpay.app",
     ESCROWPAY_API_KEY: KEY,
     ESCROWPAY_ENVIRONMENT: "sandbox",
-    ESCROWPAY_PAYOUT_PREFERENCE: PAYOUT,
   });
+  /* The test alone may ask for the provider's other mode, to run on an account where automatic payout is switched off. */
+  const config = configured && PAYOUT === "manual" ? { ...configured, payoutPreference: "manual" as const } : configured;
   const alerts: string[] = [];
   const deps = {
     db: db.client as never,
@@ -194,6 +200,21 @@ run("the protected rail against the provider's sandbox", () => {
     expect(await rail.refreshProtectedPayment(w.deps, actor(w, LISTER))).toEqual({ outcome: "read", status: "released", moved: true });
 
     expect(w.journey).toEqual(["preparing", "awaiting_payment (provider_response)", "protected (provider_readback)", "release_requested (vallo)", "released (provider_readback)"]);
+
+    /* Automatic payout: the partner sends the released money straight on to
+       the lister's bank, and Vallo records it from the partner's own word. */
+    if (PAYOUT !== "manual") {
+      let paid = false;
+      for (let i = 0; i < 6 && !paid; i += 1) {
+        await payouts.reconcilePayouts(w.deps, 3);
+        paid = w.row.payout_status === "paid";
+        if (!paid) await new Promise((r) => setTimeout(r, 2_000));
+      }
+      expect(w.row.payout_status, "the transfer to the lister's bank completed").toBe("paid");
+      expect(String(w.row.payout_reference)).toMatch(/^POT_/);
+      expect(Number(w.row.payout_amount_minor)).toBeGreaterThan(0);
+      expect(w.row.payout_completed_at).toBeTruthy();
+    }
     expect(w.alerts).toEqual([]);
   }, 120_000);
 

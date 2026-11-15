@@ -22,17 +22,13 @@ import "server-only";
  *                             optional, only during a rotation: the provider
  *                             signs with either secret for 24 hours.
  *   ESCROWPAY_ENVIRONMENT     "sandbox" (a test key) or "production" (a live key).
- *   ESCROWPAY_PAYOUT_PREFERENCE
- *                             optional. Unset or "automatic": a release goes
- *                             straight on to the lister's bank, and Vallo's
- *                             own balance at the provider never carries a
- *                             member's money. "manual": a release lands in
- *                             Vallo's balance at the provider and staff pay
- *                             it out from the provider's dashboard. The
- *                             provider refuses "automatic" on an account
- *                             where it is switched off (seen on the sandbox),
- *                             and then nothing opens. Any other value is not
- *                             configured.
+ *
+ * HOW A RELEASE REACHES THE LISTER: always straight to their own bank
+ * (`payout_preference: "automatic"`, the founder's ruling of 15 November
+ * 2026), so Vallo's balance at the provider never carries a member's money.
+ * There is no setting for anything else. The provider refuses a transaction
+ * asking for it on an account where it is switched off, and then nothing
+ * opens: that is the safe failure.
  *
  * The rules:
  *  - the key's book must be the one the marker names. A live key marked
@@ -53,7 +49,11 @@ export type EscrowPayConfig = {
   webhookSecret: string | null;
   webhookSecretPrevious: string | null;
   environment: EscrowPayEnvironment;
-  /** How a release reaches the lister: straight to their bank, or through staff. */
+  /**
+   * How a release reaches the lister. Always "automatic" from the
+   * environment; "manual" exists only for the sandbox test to run on an
+   * account where automatic payout is switched off (sandbox.e2e.test.ts).
+   */
   payoutPreference: "automatic" | "manual";
   /** Whether this configuration may open, release or refund a member's payment. */
   startsMoney: boolean;
@@ -85,8 +85,6 @@ export function escrowPayConfig(env: Readonly<Record<string, string | undefined>
   if (marker === "production" && !LIVE_KEY.test(apiKey)) return null;
   const productionDeployment = vercelEnv === "" || vercelEnv === "production";
   if (marker === "production" && !productionDeployment) return null;
-  const payout = (env.ESCROWPAY_PAYOUT_PREFERENCE ?? "").trim().toLowerCase() || "automatic";
-  if (payout !== "automatic" && payout !== "manual") return null;
   const secret = (env.ESCROWPAY_WEBHOOK_SECRET ?? "").trim();
   const previous = (env.ESCROWPAY_WEBHOOK_SECRET_PREVIOUS ?? "").trim();
   return {
@@ -95,7 +93,7 @@ export function escrowPayConfig(env: Readonly<Record<string, string | undefined>
     webhookSecret: secret || null,
     webhookSecretPrevious: previous || null,
     environment: marker,
-    payoutPreference: payout,
+    payoutPreference: "automatic",
     startsMoney: !(marker === "sandbox" && vercelEnv === "production"),
   };
 }

@@ -43,6 +43,11 @@ export type ProtectedDeal = {
    * state, or absent. Drawn in place of the ordinary screen for the state.
    */
   issue?: ProtectedIssue | null;
+  /**
+   * The transfer to the lister's bank after the release, as the payment
+   * partner reported it. Absent until it reports anything.
+   */
+  payout?: { status: "processing" | "paid" | "failed" | "reversed"; completedAt: string | null; amountMinor?: number | null } | null;
   /** The lister has no payout account on Vallo (read under their own session). */
   listerPayoutMissing?: boolean;
   /** The partner mark beside the pay button: `partnerMarkReady` and `protected_partner_mark_on`, read on the server. */

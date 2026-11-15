@@ -138,6 +138,36 @@ describe("the screens nobody asks for", () => {
     expect(text).toMatch(/Last confirmed 10 Nov/);
   });
 
+  it("after the release the lister is told the transfer is on its way, never paid, until the partner says so", () => {
+    const paying = words(renderToStaticMarkup(<ListerProtectedView deal={PREVIEW_DEALS["lister-paying"]!} now={PREVIEW_NOW} locale="en" />));
+    expect(paying).toContain("It is on its way to your bank account");
+    expect(paying).not.toMatch(/Paid to your bank|reached your bank/);
+    expect(paying).not.toContain("not a balance you can spend");
+  });
+
+  it("once the partner reports the transfer complete, the lister sees when it reached their bank", () => {
+    const out = renderToStaticMarkup(<ListerProtectedView deal={PREVIEW_DEALS["lister-paid"]!} now={PREVIEW_NOW} locale="en" />);
+    expect(out).toContain('data-payout="paid"');
+    expect(words(out)).toMatch(/Paid to your bank account on 10 Nov/);
+    /* The amount the partner reported sending, after its transfer fee, never the deal amount as if it all arrived. */
+    expect(words(out)).toMatch(/179,930 reached your bank account, after the payment partner's transfer fee\./);
+    const exact = renderToStaticMarkup(<ListerProtectedView deal={{ ...PREVIEW_DEALS["lister-paid"]!, payout: { status: "paid", completedAt: "2026-11-10T09:57:00Z", amountMinor: 180_000_00 } }} now={PREVIEW_NOW} locale="en" />);
+    expect(words(exact)).toContain("This reached your bank account.");
+  });
+
+  it("a transfer that did not go through is said plainly, with what the lister can check", () => {
+    const text = words(renderToStaticMarkup(<ListerProtectedView deal={PREVIEW_DEALS["lister-payout-failed"]!} now={PREVIEW_NOW} locale="en" />));
+    expect(text).toContain("did not go through");
+    expect(text).toContain("Check that your bank account on Vallo is correct.");
+    expect(text).not.toMatch(/Paid to your bank/);
+  });
+
+  it("before the release, no payout line is drawn at all", () => {
+    const out = renderToStaticMarkup(<ListerProtectedView deal={{ ...PREVIEW_DEALS.protected!, payout: { status: "paid", completedAt: "2026-11-10T09:57:00Z" } }} now={PREVIEW_NOW} locale="en" />);
+    expect(out).not.toContain("data-payout");
+    expect(words(out)).toContain("not a balance you can spend");
+  });
+
   it("the lister is told to add a payout account, and sees a review in their own words", () => {
     const payout = renderToStaticMarkup(<ListerProtectedView deal={PREVIEW_DEALS["lister-payout"]!} now={PREVIEW_NOW} locale="en" />);
     expect(words(payout)).toContain("Add a payout account to be paid");
