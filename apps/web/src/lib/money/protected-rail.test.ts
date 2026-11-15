@@ -167,9 +167,12 @@ describe("opening a protected payment", () => {
 
     const writes = db.of("provider_arrangements", "update").map((c) => c.values as Record<string, unknown>);
     expect(writes[0]).toEqual({ buyer_customer_id: "PAR_payer", seller_customer_id: "PAR_lister", environment: "sandbox" });
-    expect(writes[1]).toEqual({ provider_arrangement_id: "TXN_1" });
+    /* The share this payment carries, written on its own so a database without
+       the sweep SQL still records the three above. */
+    expect(writes[1]).toEqual({ vallo_commission_bps: VALLO_FEE_BPS });
+    expect(writes[2]).toEqual({ provider_arrangement_id: "TXN_1" });
     /* The total the payer transfers is the provider's own: the amount plus its fee. */
-    expect(writes[2]).toEqual({
+    expect(writes[3]).toEqual({
       funding_instructions: {
         bank_name: "Rubies MFB",
         bank_code: "090175",
@@ -258,7 +261,12 @@ describe("opening a protected payment", () => {
     const offList = { "GET /api/v1/banks": ok({ banks: [{ bank_code: "000013", bank_name: "GTBANK PLC" }] }) };
     const sandbox = deps({ row: PREPARING, send: provider(offList) });
     expect(await rail.openProtectedPayment(sandbox.d, OPEN)).toMatchObject({ outcome: "opened" });
-    const stored = sandbox.db.of("provider_arrangements", "update").map((c) => c.values as Record<string, Record<string, unknown>>)[2]!;
+    /* By what it holds rather than by its place in the order, so adding a
+       stamp to the open never moves this test's ground. */
+    const stored = sandbox.db
+      .of("provider_arrangements", "update")
+      .map((c) => c.values as Record<string, Record<string, unknown>>)
+      .find((values) => values.funding_instructions)!;
     expect(stored.funding_instructions!.bank_name).toBe("Test bank (sandbox)");
     const live = deps({ row: PREPARING, send: provider(offList), config: { ...CONFIG, environment: "production" as never } });
     expect(await rail.openProtectedPayment(live.d, OPEN)).toMatchObject({ outcome: "unknown" });

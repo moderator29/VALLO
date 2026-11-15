@@ -1095,6 +1095,7 @@ a fall is emerald. The line is alerts raised per day.
 | complete-stays | Vercel Cron `30 2 * * *` | daily 03:30 | 26 h | completes stays whose check-out has passed |
 | offers-sweep | Vercel Cron `35 * * * *` | hourly :35 | 4 h | expires sale offers past their date and reminds the side whose answer is waiting |
 | escalations-overdue | Vercel Cron `4,14,24,34,44,54 * * * *` | every 10 min | 2 h | moves a staff escalation nobody answered in time up a level (team, COO, super admin), reminds once a day at the top, and reminds a raiser with a question waiting; a clean run that says "not set up" until its SQL is applied (`lib/cron/jobs/escalations-overdue.ts`, section 15.25) |
+| revenue-sweep | Vercel Cron `40 4 * * *` | daily 05:40 | 26 h | moves Vallo's own earnings from its wallet at the payment partner to Vallo's bank: one payout at a time, never while an earlier one is unaccounted for, nothing at all until the switch `payments_escrowpay_sweep_on` is on and `ESCROWPAY_SWEEP_PAYOUT_ACCOUNT_ID` is set; a clean run that says "not set up" until its SQL is applied (`lib/cron/jobs/revenue-sweep.ts`) |
 | inventory-drift | Vercel Cron `45 2 * * *` | daily 03:45 | 26 h | checks room inventory against bookings |
 | account-purge | Vercel Cron `15 3 * * *` | daily 04:15 | 26 h | honours account deletions after thirty days |
 | saved-search-alerts | Vercel Cron `40 7 * * *` | daily 08:40 | 26 h | tells people about new matches for saved searches |
@@ -1152,7 +1153,7 @@ a fall is emerald. The line is alerts raised per day.
 | vallo_send_feature_notices | pg_cron `10 17 * * *` | daily 18:10 | | sends the daily feature notices to members who opted in, one topic at a time (A5, `private.send_feature_notices`) |
 | vallo_send_gentle_nudges | pg_cron `20 10 * * *` | daily 11:20 | | sends the gentle nudges to members who opted in, never more than the opt-in allows (A6, `private.send_gentle_nudges`) |
 
-25 Vercel Cron jobs and 42 pg_cron jobs in all. The numbers are derived,
+26 Vercel Cron jobs and 42 pg_cron jobs in all. The numbers are derived,
 not remembered: the Vercel list is `VERCEL_JOBS` in
 `lib/admin/reads/jobs.ts`, held equal to `vercel.json` by a test, and the
 database list is `PG_CRON_JOBS` in the same file, held equal by

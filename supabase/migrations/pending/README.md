@@ -8,10 +8,14 @@ records it in `APPLIED.txt`.
 > **Checked against the live database on 15 November 2026 (read-only).** Every
 > table, function and column that the files in this folder create is on live,
 > and the rent partner fee row of 10 November is in place. So every file here
-> has been run, **except these two, which are waiting for the founder:**
+> has been run, **except the ones waiting for the founder.** On 15 November
+> 2026 the founder ran `staff_escalations_2026-11-15.sql`,
+> `identity_cross_check_2026-11-15.sql` and
+> `tomi_business_development_2026-11-15.sql`, all three confirmed live. What
+> is left waiting:
 >
-> 1. `staff_escalations_2026-11-15.sql`
-> 2. `identity_cross_check_2026-11-15.sql`
+> 1. `revenue_sweep_2026-11-15.sql` (Vallo's own earnings: recorded when a
+>    protected payment is released, and the daily sweep to Vallo's bank)
 >
 > Rows below that still say NOT APPLIED were written before that check and
 > are out of date. The destructive files (`rt01`, `rt02`) and the newsletter

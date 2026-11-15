@@ -57,6 +57,12 @@ export const ESCROWPAY_PATHS = {
   releasesOf: (transactionId: string) => `${V1}/releases?transaction_id=${id(transactionId)}&page_size=20`,
   refund: (transactionId: string) => `${V1}/transactions/${id(transactionId)}/refunds`,
   refundsOf: (transactionId: string) => `${V1}/refunds?transaction_id=${id(transactionId)}&page_size=20`,
+  /* Vallo's OWN money at the provider: the business wallet its marketplace
+     commission is credited to, and the payout that moves it to Vallo's bank.
+     Nothing here touches a member's money. */
+  wallets: (currency: string) => `${V1}/wallets?currency=${id(currency)}&page_size=20`,
+  walletBalances: (walletId: string) => `${V1}/wallets/${id(walletId)}/balances`,
+  walletPayouts: (walletId: string) => `${V1}/wallets/${id(walletId)}/payouts`,
 } as const;
 
 const TIMEOUT_MS = 15_000;

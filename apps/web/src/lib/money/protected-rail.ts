@@ -314,6 +314,13 @@ export async function openProtectedPayment(
   const row = await loadRow(deps.db, opened.id);
   if (!row) return { outcome: "refused", reason: "store_unavailable" };
   await stamp(deps.db, row.id, { buyer_customer_id: payer.partyId, seller_customer_id: lister.partyId, environment: deps.config?.environment ?? null });
+  /* THE SHARE THIS PAYMENT CARRIES, on the record of the payment itself, so
+     the revenue it earns can be worked out later from what was actually sent
+     rather than from whatever the schedule says next year. Written on its own
+     and not with the three above, because a database that has not yet had
+     `revenue_sweep_2026-11-15.sql` run has no such column, and a deployment
+     in that state must still record the three above. */
+  await stamp(deps.db, row.id, { vallo_commission_bps: VALLO_FEE_BPS });
 
   const created = await deps.send(
     deps.config,

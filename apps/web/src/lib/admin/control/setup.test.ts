@@ -54,7 +54,7 @@ describe("the control room's switches", () => {
 });
 
 describe("the control room's services", () => {
-  const all = { codesNigeria: true, codesAbroad: true, paymentPartner: true, paymentPartnerWebhook: true, cardPayments: true, email: true, copilot: true, onCallPage: true };
+  const all = { codesNigeria: true, codesAbroad: true, paymentPartner: true, paymentPartnerWebhook: true, sweepDestination: false, cardPayments: true, email: true, copilot: true, onCallPage: true };
 
   it("says members abroad are not asked for a phone while no code can be sent abroad", () => {
     const abroad = readConnections({ ...all, codesAbroad: false }).find((c) => c.key === "codes_abroad")!;

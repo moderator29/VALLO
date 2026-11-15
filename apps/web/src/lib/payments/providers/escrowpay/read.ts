@@ -222,3 +222,69 @@ export function readPayout(value: unknown): ProviderPayout | null {
 export function readPayoutList(value: unknown): ProviderPayout[] {
   return items(value).map(payoutOf).filter((p): p is ProviderPayout => p !== null);
 }
+
+/* ---------------------------------------------------------------------------
+ * VALLO'S OWN WALLET AT THE PROVIDER.
+ *
+ * Unlike every reader above, these two were NOT run against the sandbox: the
+ * wallet endpoints were not exercised on 14 November 2026, and the OpenAPI
+ * document types their answers as free-form. So they read widely and judge
+ * strictly, and they are built to refuse rather than to guess, because what
+ * they feed is a decision to move money.
+ *
+ * `readAvailableMinor` answers a figure ONLY when the answer plainly carries
+ * an available balance in the currency asked for. A shape it has not seen, a
+ * figure that is not a whole number of kobo, two candidate figures that
+ * disagree, or a currency it did not ask about, all answer null, and the
+ * sweep then moves nothing and says the balance could not be read.
+ * ------------------------------------------------------------------------- */
+
+export type ProviderWallet = { id: string; currency: string | null; status: string | null };
+
+function walletOf(record: Json | null): ProviderWallet | null {
+  const id = str(record?.id) ?? str(record?.wallet_id);
+  if (!record || !id) return null;
+  return { id, currency: str(record.currency)?.toUpperCase() ?? null, status: str(record.status)?.toLowerCase() ?? null };
+}
+
+/** `GET /wallets?currency=`: the business's own wallets. A single wallet answer reads too. */
+export function readWallets(value: unknown): ProviderWallet[] {
+  const listed = items(value).map(walletOf).filter((w): w is ProviderWallet => w !== null);
+  if (listed.length > 0) return listed;
+  const single = walletOf(obj(envelopeData(value)));
+  return single ? [single] : [];
+}
+
+/** The keys the provider might spell an available balance with, widest first. */
+const AVAILABLE_KEYS = ["available_minor", "available_balance_minor", "available_amount_minor", "balance_available_minor"] as const;
+
+function availableOf(record: Json): number | null {
+  const figures = AVAILABLE_KEYS.map((key) => int(record[key])).filter((n): n is number => n !== null);
+  if (figures.length === 0) return null;
+  /* Two spellings that disagree is a shape nobody has read yet: refuse. */
+  if (figures.some((n) => n !== figures[0])) return null;
+  return figures[0]! >= 0 ? figures[0]! : null;
+}
+
+function currencyOf(record: Json): string | null {
+  return str(record.currency)?.toUpperCase() ?? null;
+}
+
+/**
+ * `GET /wallets/{id}/balances`: what may be paid out today, in kobo, for one
+ * currency. Null when the answer cannot be read plainly.
+ */
+export function readAvailableMinor(value: unknown, currency: string): number | null {
+  const want = currency.toUpperCase();
+  const data = envelopeData(value);
+  const rows = items(value);
+  const top = obj(data);
+  /* A list of per-currency lines, which is the commonest shape for balances. */
+  const lines = rows.length > 0 ? rows : top ? [top] : [];
+  const matching = lines.filter((line) => {
+    const found = currencyOf(line);
+    return found === null ? lines.length === 1 : found === want;
+  });
+  if (matching.length !== 1) return null;
+  return availableOf(matching[0]!);
+}

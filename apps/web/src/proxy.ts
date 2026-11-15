@@ -384,6 +384,8 @@ const PUBLIC_API_PATHS = new Set([
   "/api/cron/offers-sweep",
   /* Staff escalations past their response time move up a level, behind the cron bearer. */
   "/api/cron/escalations-overdue",
+  /* Vallo's own earnings moved from the payment partner to Vallo's bank, behind the cron bearer. */
+  "/api/cron/revenue-sweep",
   /* Crypto payments read back from the provider, behind the cron bearer. */
   "/api/cron/crypto-reconcile",
   /* The display exchange rates (lib/currency/rates-job.ts), behind the cron bearer. */

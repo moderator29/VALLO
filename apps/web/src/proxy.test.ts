@@ -431,6 +431,8 @@ const EXPECTED_PUBLIC = new Set([
   "/api/cron/display-rates",
   /* Escrow arrangements read back from the payment partner, behind the cron bearer. */
   "/api/cron/arrangements-reconcile",
+  /* Vallo's own earnings moved from the payment partner to Vallo's bank, behind the cron bearer. */
+  "/api/cron/revenue-sweep",
   "/api/cron/saved-search-alerts",
   "/api/cron/store-readiness",
   "/api/cron/new-match-alerts",

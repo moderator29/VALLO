@@ -58,6 +58,8 @@ export const VERCEL_JOBS: readonly VercelJob[] = [
   { name: "offers-sweep", cron: "35 * * * *", schedule: "Hourly at :35", maxGapHours: 4, audit: { entityType: "cron_job", term: "offers-sweep" } },
   /* Staff escalations past their response time move up a level: team, COO, super admin (lib/cron/jobs/escalations-overdue.ts). */
   { name: "escalations-overdue", cron: "4,14,24,34,44,54 * * * *", schedule: "Every 10 minutes", maxGapHours: 2, audit: { entityType: "cron_job", term: "escalations-overdue" } },
+  /* Vallo's own share of protected payments, moved from the partner's wallet to Vallo's bank (lib/cron/jobs/revenue-sweep.ts). */
+  { name: "revenue-sweep", cron: "40 4 * * *", schedule: "Daily at 05:40", maxGapHours: 26, audit: { entityType: "cron_job", term: "revenue-sweep" } },
   { name: "complete-stays", cron: "30 2 * * *", schedule: "Daily at 03:30", maxGapHours: 26, audit: { entityType: "cron_job", term: "complete-stays" } },
   { name: "inventory-drift", cron: "45 2 * * *", schedule: "Daily at 03:45", maxGapHours: 26, audit: { entityType: "cron_job", term: "inventory-drift" } },
   { name: "account-purge", cron: "15 3 * * *", schedule: "Daily at 04:15", maxGapHours: 26, audit: { entityType: "cron_job", term: "account-purge" } },

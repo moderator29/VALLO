@@ -477,6 +477,12 @@ const ALLOWED_IMPORTERS = new Set([
   "app/api/escrowpay/webhook/route.ts",
   /* The staff provider check reads whether its settings are present (no network). */
   "lib/admin/provider-checks.ts",
+  /* Moving Vallo's OWN earnings out of its own wallet at the provider. It
+     reaches the adapter for three calls only, none of which can touch a
+     member's money: list the business wallets, read one balance, pay out to
+     Vallo's own account (server-only). */
+  "lib/money/revenue-sweep-run.ts",
+  "lib/money/revenue-sweep-run.test.ts",
 ]);
 
 describe("only the rail's server entry points reach the adapter", () => {

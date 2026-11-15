@@ -1,9 +1,9 @@
 import Link from "next/link";
 import type { ControlRoom } from "@/lib/admin/control/read";
-import { setupFileHref, type SetupState } from "@/lib/admin/control/setup";
+import { earningsSentence, setupFileHref, type SetupState } from "@/lib/admin/control/setup";
 import { Badge, type BadgeTone } from "../_components/Badge";
 import { PageHead, Panel } from "../_components/panels";
-import { plural } from "@vallo/i18n/core";
+import { formatMoney, plural } from "@vallo/i18n/core";
 
 /**
  * THE CONTROL ROOM, DRAWN (the founder, 15 November 2026). Takes what
@@ -152,6 +152,47 @@ export function ControlRoomView({ room }: { room: Extract<ControlRoom, { state: 
         </ul>
         <p className={`${WORDS} mt-sm`}>Each service is connected in Vercel, never here. This page shows only whether it is connected, never a secret.</p>
       </Panel>
+
+      {room.earnings ? (
+        <Panel title="Vallo's own earnings" id="earnings">
+          <ul role="list" data-testid="control-earnings">
+            <li className={ROW}>
+              <div className="flex flex-wrap items-center gap-x-sm gap-y-2xs">
+                <p className={TITLE}>Still at the payment partner</p>
+                <Badge tone={room.earnings.stuck ? "pending" : "info"} data-testid="control-earnings-at-partner">
+                  {formatMoney(room.earnings.atPartnerMinor, "en")}
+                </Badge>
+              </div>
+              <p className={WORDS}>
+                {earningsSentence(
+                  room.earnings,
+                  room.switches.find((s) => s.note.key === "payments_escrowpay_sweep_on")?.state === "on",
+                  room.connections.find((c) => c.key === "sweep_destination")?.ready === true,
+                )}
+              </p>
+              <p className={WORDS}>This is Vallo&apos;s own money, never a member&apos;s. A lister is paid straight to their own bank when a payment is released.</p>
+            </li>
+            <li className={ROW}>
+              <p className={TITLE}>Moved to the bank in the last 30 days</p>
+              <p className={WORDS} data-testid="control-earnings-30d">
+                {formatMoney(room.earnings.swept30dMinor, "en")}
+              </p>
+            </li>
+            <li className={ROW} data-testid="control-earnings-last">
+              <p className={TITLE}>The last sweep</p>
+              {room.earnings.last ? (
+                <p className={WORDS}>
+                  {formatMoney(room.earnings.last.amountMinor, "en")}, {room.earnings.last.status}
+                  {room.earnings.last.settledAt ? `, ${room.earnings.last.settledAt.slice(0, 10)}` : ""}.
+                  {room.earnings.last.failure ? ` ${room.earnings.last.failure}` : ""}
+                </p>
+              ) : (
+                <p className={WORDS}>Nothing has been swept yet.</p>
+              )}
+            </li>
+          </ul>
+        </Panel>
+      ) : null}
 
       <Panel title="Go to" id="go">
         <ul role="list" className="grid gap-xs sm:grid-cols-2">

@@ -2,7 +2,7 @@ import { getDictionary } from "@vallo/i18n";
 import { ControlRoomView } from "@/app/admin/control/ControlRoomView";
 import { getLocale } from "@/lib/locale";
 import type { ControlRoom } from "@/lib/admin/control/read";
-import { SETUP_ITEMS, orderSetup, readConnections, readReach, readSwitches } from "@/lib/admin/control/setup";
+import { SETUP_ITEMS, orderSetup, readConnections, readEarnings, readReach, readSwitches } from "@/lib/admin/control/setup";
 import { ConsoleFrame } from "../bd/ConsoleFrame";
 
 /**
@@ -25,6 +25,7 @@ export default async function PreviewControlRoom({ searchParams }: { searchParam
     switches: readSwitches([
       { key: "payments_protected_pay_on", enabled: false },
       { key: "payments_escrowpay_on", enabled: false },
+      { key: "payments_escrowpay_sweep_on", enabled: quiet },
       { key: "phone_confirmation", enabled: true },
       { key: "wallet", enabled: false },
       { key: "crypto_payments", enabled: false },
@@ -39,12 +40,21 @@ export default async function PreviewControlRoom({ searchParams }: { searchParam
       codesAbroad: quiet,
       paymentPartner: quiet,
       paymentPartnerWebhook: quiet,
+      sweepDestination: quiet,
       cardPayments: true,
       email: true,
       copilot: true,
       onCallPage: quiet,
     }),
     reach: readReach(quiet),
+    earnings: readEarnings({
+      at_partner_minor: quiet ? 0 : 412_350_00,
+      swept_30d_minor: quiet ? 1_480_000_00 : 0,
+      unsettled: !quiet,
+      last: quiet
+        ? { amount_minor: 760_000_00, status: "sent", settled_at: "2026-11-14T05:41:02Z", failure: null }
+        : { amount_minor: 412_350_00, status: "unknown", settled_at: null, failure: "No readable answer from the partner: unknown." },
+    }),
     waiting: quiet
       ? []
       : [

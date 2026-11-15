@@ -209,3 +209,47 @@ export function refundCall(input: { reference: string; transactionId: string; am
     body: { amount_minor: input.amountMinor, source: "escrow_held", reason: input.reason.slice(0, 500) },
   };
 }
+
+/* ---------------------------------------------------------------------------
+ * VALLO'S OWN MONEY AT THE PROVIDER.
+ *
+ * The marketplace commission Vallo names on each transaction is credited to
+ * Vallo's own wallet at the provider, and sits there until it is paid out to
+ * Vallo's bank. None of it is a member's money, and none of these three calls
+ * can touch a member's: a wallet payout names a payout account owned by the
+ * business, never a party.
+ *
+ * `GET /wallets` and `GET /wallets/{id}/balances` answer with shapes the
+ * provider's OpenAPI document does not type, so `read.ts` reads them
+ * defensively and the sweep refuses to move anything it cannot read plainly.
+ * `PayoutCreate` IS typed: `amount_minor` (integer, above zero),
+ * `payout_account_id`, and the optional `schedule_type`, `transaction_id` and
+ * `reason`. `schedule_type` is left to the provider's default, because its
+ * documented default (`immediate_after_release`) describes a transaction
+ * payout and the document gives no list of the others.
+ * ------------------------------------------------------------------------- */
+
+/** `GET /wallets?currency=`: the business's own wallets in one currency. */
+export function walletsCall(currency: string): EscrowPayCall {
+  return { method: "GET", path: ESCROWPAY_PATHS.wallets(currency) };
+}
+
+/** `GET /wallets/{id}/balances`: what is in one wallet. */
+export function walletBalancesCall(walletId: string): EscrowPayCall {
+  return { method: "GET", path: ESCROWPAY_PATHS.walletBalances(walletId) };
+}
+
+/**
+ * `POST /wallets/{id}/payouts`: money out of Vallo's own wallet to Vallo's
+ * own bank. The idempotency key is the sweep's own id, so a run that fails
+ * after the request left Vallo asks again with the same key and the provider
+ * answers with the one payout rather than making a second.
+ */
+export function walletPayoutCall(input: { walletId: string; payoutAccountId: string; amountMinor: number; sweepId: string; reason: string }): EscrowPayCall {
+  return {
+    method: "POST",
+    path: ESCROWPAY_PATHS.walletPayouts(input.walletId),
+    idempotencyKey: `vallo-sweep:${input.sweepId}`,
+    body: { amount_minor: input.amountMinor, payout_account_id: input.payoutAccountId, reason: input.reason.slice(0, 500) },
+  };
+}

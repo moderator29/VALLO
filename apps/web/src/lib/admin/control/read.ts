@@ -19,6 +19,8 @@ import {
   type ReachReading,
   type SetupReading,
   type SwitchReading,
+  readEarnings,
+  type EarningsReading,
 } from "./setup";
 
 /**
@@ -68,6 +70,7 @@ export type ControlRoom =
       switches: SwitchReading[];
       connections: ConnectionReading[];
       reach: ReachReading;
+      earnings: EarningsReading | null;
       waiting: WaitingLine[];
     };
 
@@ -136,10 +139,22 @@ export async function readControlRoom(env: Readonly<Record<string, string | unde
     return { state: "unavailable" };
   }
   const present = (name: string) => (env[name] ?? "").trim() !== "";
-  const [setup, flags, waiting] = await Promise.all([
+  const [setup, flags, waiting, sweep] = await Promise.all([
     readSetup(probeWith(db)),
     db.from("feature_flags").select("key, enabled"),
     readWaiting(db, access.user.id),
+    /* Where Vallo's own earnings stand at the payment partner. Absent until
+       the sweep SQL has been run, which the setup list already says. */
+    (async () => {
+      try {
+        const { data, error } = await (db as unknown as {
+          rpc: (fn: string, args: Record<string, unknown>) => PromiseLike<{ data: unknown; error: unknown }>;
+        }).rpc("revenue_sweep_state", { p_provider: "escrowpay", p_environment: env.ESCROWPAY_ENVIRONMENT === "production" ? "production" : "sandbox" });
+        return error ? null : data;
+      } catch {
+        return null;
+      }
+    })(),
   ]);
   return {
     state: "ok",
@@ -151,12 +166,14 @@ export async function readControlRoom(env: Readonly<Record<string, string | unde
       /* Presence only. The rail itself decides whether the settings are usable (its own config). */
       paymentPartner: present("ESCROWPAY_API_KEY") && present("ESCROWPAY_API_BASE_URL"),
       paymentPartnerWebhook: present("ESCROWPAY_WEBHOOK_SECRET"),
+      sweepDestination: present("ESCROWPAY_SWEEP_PAYOUT_ACCOUNT_ID"),
       cardPayments: present("PAYSTACK_SECRET_KEY") || present("PAYSTACK_TEST_SECRET_KEY"),
       email: isEmailConfigured(),
       copilot: present("ANTHROPIC_API_KEY"),
       onCallPage: present("OPS_ALERT_EMAIL") || present("OPS_ALERT_WEBHOOK_URL"),
     }),
     reach: readReach(publicCatalogueEnabled(env as Record<string, string | undefined>)),
+    earnings: readEarnings(sweep),
     waiting,
   };
 }

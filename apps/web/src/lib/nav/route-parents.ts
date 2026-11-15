@@ -830,6 +830,7 @@ export const NON_NAVIGABLE: Readonly<Record<string, string>> = {
   "/api/cron/crypto-reconcile": "scheduled job, bearer token.",
   "/api/cron/arrangements-reconcile": "scheduled job, bearer token.",
   "/api/cron/escalations-overdue": "scheduled job, bearer token: moves staff escalations past their response time up a level.",
+  "/api/cron/revenue-sweep": "scheduled job, bearer token: moves Vallo's own earnings from the payment partner to Vallo's bank.",
   "/api/cron/email-outbox": "scheduled job, bearer token.",
   "/api/cron/hold-sweep": "scheduled job, bearer token.",
   "/api/cron/rent-share-refunds": "scheduled job, bearer token.",

@@ -28,8 +28,9 @@ describe("the control room tool", () => {
       state: "ok",
       setup: SETUP_ITEMS.map((item) => ({ item, state: item.key === "staff_escalations" ? ("waiting" as const) : ("ready" as const) })),
       switches: readSwitches([{ key: "phone_confirmation", enabled: true }]),
-      connections: readConnections({ codesNigeria: true, codesAbroad: false, paymentPartner: false, paymentPartnerWebhook: false, cardPayments: true, email: true, copilot: true, onCallPage: false }),
+      connections: readConnections({ codesNigeria: true, codesAbroad: false, paymentPartner: false, paymentPartnerWebhook: false, sweepDestination: false, cardPayments: true, email: true, copilot: true, onCallPage: false }),
       reach: readReach(true),
+    earnings: null,
       waiting: [{ key: "escalations", count: 1, words: "1 escalation is waiting on you.", href: "/admin/escalations" }],
     });
     const out = await getControlRoom.handler({}, ctx(true));

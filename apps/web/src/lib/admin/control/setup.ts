@@ -42,6 +42,13 @@ export const SETUP_ITEMS: readonly SetupItem[] = [
     marker: { table: "kyc_document_fingerprints" },
   },
   {
+    key: "revenue_sweep",
+    title: "Vallo's own earnings, recorded and swept",
+    unlocks: "Recording Vallo's share when a protected payment is released, and the daily job that moves it from the partner's wallet to Vallo's bank.",
+    file: "pending/revenue_sweep_2026-11-15.sql",
+    marker: { table: "provider_revenue_sweeps" },
+  },
+  {
     key: "payout_to_lister",
     title: "Payout to the lister on protected payments",
     unlocks: "Recording when the payment partner has paid a lister, and telling the lister.",
@@ -199,6 +206,12 @@ export const SWITCH_NOTES: readonly SwitchNote[] = [
     off: "Nothing is sent to the payment partner to start a payment.",
   },
   {
+    key: "payments_escrowpay_sweep_on",
+    title: "Vallo's own earnings move to the bank by themselves",
+    on: "Once a day Vallo's own share, held in its wallet at the payment partner, is paid out to Vallo's bank account. Never a member's money.",
+    off: "Vallo's share stays in its wallet at the payment partner until somebody moves it there by hand.",
+  },
+  {
     key: "phone_confirmation",
     title: "Phone confirmation",
     on: "A member confirms a mobile number before their first payment and before publishing their first listing. Nothing else asks.",
@@ -290,6 +303,7 @@ export function readConnections(input: {
   codesAbroad: boolean;
   paymentPartner: boolean;
   paymentPartnerWebhook: boolean;
+  sweepDestination: boolean;
   cardPayments: boolean;
   email: boolean;
   copilot: boolean;
@@ -328,6 +342,14 @@ export function readConnections(input: {
             : "The partner is not connected. Nothing can be sent to it.",
     },
     {
+      key: "sweep_destination",
+      title: "Where Vallo's own earnings are paid",
+      ready: input.sweepDestination,
+      meaning: input.sweepDestination
+        ? "Vallo's own bank destination at the payment partner is set, so the daily sweep has somewhere to send Vallo's share."
+        : "No destination is set, so Vallo's share stays in its wallet at the partner. Set ESCROWPAY_SWEEP_PAYOUT_ACCOUNT_ID in the deploy settings to Vallo's own payout account at the partner.",
+    },
+    {
       key: "email",
       title: "Email",
       ready: input.email,
@@ -346,4 +368,62 @@ export function readConnections(input: {
       meaning: input.onCallPage ? "A critical alert pages a person." : "Nobody is paged on a critical alert. Set an alert email or webhook.",
     },
   ];
+}
+
+/* ---------------------------------------------------------------- earnings */
+
+/**
+ * VALLO'S OWN EARNINGS AT THE PAYMENT PARTNER (the founder, 15 November
+ * 2026). Vallo's share of a protected payment is credited to its own wallet
+ * at the partner and moved to the bank once a day by the revenue sweep. This
+ * is the super admin's reading of that: how much is still there, when it last
+ * moved, and whether anything is stuck.
+ *
+ * Pure: it shapes what `revenue_sweep_state` answered and nothing else. Null
+ * when that function is not there yet, which is the state until the sweep SQL
+ * has been run.
+ */
+export type EarningsReading = {
+  atPartnerMinor: number;
+  swept30dMinor: number;
+  stuck: boolean;
+  last: { amountMinor: number; status: string; settledAt: string | null; failure: string | null } | null;
+};
+
+const bigNumber = (value: unknown): number => {
+  const n = typeof value === "string" && value.trim() !== "" ? Number(value) : value;
+  return typeof n === "number" && Number.isSafeInteger(n) ? n : 0;
+};
+
+export function readEarnings(raw: unknown): EarningsReading | null {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return null;
+  const answer = raw as Record<string, unknown>;
+  const last = answer.last && typeof answer.last === "object" && !Array.isArray(answer.last) ? (answer.last as Record<string, unknown>) : null;
+  return {
+    atPartnerMinor: bigNumber(answer.at_partner_minor),
+    swept30dMinor: bigNumber(answer.swept_30d_minor),
+    stuck: answer.unsettled === true,
+    last: last
+      ? {
+          amountMinor: bigNumber(last.amount_minor),
+          status: typeof last.status === "string" ? last.status : "unknown",
+          settledAt: typeof last.settled_at === "string" ? last.settled_at : null,
+          failure: typeof last.failure === "string" && last.failure.trim() !== "" ? last.failure : null,
+        }
+      : null,
+  };
+}
+
+/** The one sentence the control room says about where Vallo's own money stands. */
+export function earningsSentence(reading: EarningsReading, sweepOn: boolean, destinationSet: boolean): string {
+  if (reading.stuck) {
+    return "A sweep has neither succeeded nor failed. Nothing new will be sent until it is accounted for, and the daily job asks the partner about it again on its next run.";
+  }
+  if (!destinationSet) {
+    return "Vallo's share is building up at the payment partner, and there is nowhere to send it yet. Set the destination in the deploy settings.";
+  }
+  if (!sweepOn) {
+    return "Vallo's share is building up at the payment partner. The daily sweep is switched off, so it stays there until somebody moves it by hand.";
+  }
+  return "Vallo's share is moved to Vallo's bank once a day, when there is enough there to be worth a transfer.";
 }

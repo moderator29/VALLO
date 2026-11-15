@@ -65,6 +65,7 @@ const room = {
   switches: readSwitches([{ key: "phone_confirmation", enabled: true }]),
   connections: [],
   reach: readReach(true),
+      earnings: null,
   waiting: [{ key: "escalations", count: 1, words: "1 escalation is waiting on you.", href: "/admin/escalations" }],
 };
 const supply = {

@@ -112,6 +112,10 @@
     {
       "path": "/api/cron/display-rates",
       "schedule": "50 0,12 * * *"
+    },
+    {
+      "path": "/api/cron/revenue-sweep",
+      "schedule": "40 4 * * *"
     }
   ]
 }
