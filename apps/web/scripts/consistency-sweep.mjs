@@ -40,10 +40,21 @@
  * both passes really render in different themes rather than both rendering
  * the default and the script claiming otherwise.
  *
+ * IT WRITES EVERY ROW AS IT IS MEASURED, and can be killed. The first run of
+ * this script lost 146 measured rows to a five-hour limit because it wrote
+ * its JSON only at the end. Now each row is appended to `<json>.jsonl` the
+ * moment it is taken, and on a restart every job already in that file is
+ * skipped. So a sweep of 644 page loads can be run in pieces, across
+ * sessions, and nothing measured is ever measured twice.
+ *
  *   node scripts/consistency-sweep.mjs --base http://localhost:3300 \
  *     --routes /tmp/routes.txt --json /tmp/out.json [--widths 390,1440]
+ *
+ * To resume: run it again with the same `--json`. To start over: delete the
+ * `.jsonl` beside it. `--only-missing` prints what is left and measures
+ * nothing, so a person can see how much of the job remains.
  */
-import { readFileSync, writeFileSync, existsSync } from "node:fs";
+import { appendFileSync, readFileSync, writeFileSync, existsSync } from "node:fs";
 import { join } from "node:path";
 import { createRequire } from "node:module";
 
@@ -228,12 +239,61 @@ const MEASURE = () => {
   };
 };
 
-const jobs = [];
-for (const theme of themes) for (const width of widths) for (const route of routes) jobs.push({ theme, width, route });
+/* ---------------------------------------------------------------------------
+   RESUME. Rows live in a JSONL file beside the JSON: one measured row per
+   line, appended as it is taken. A row is identified by route, width and
+   theme together, so the same route at another width is still owed.
+   --------------------------------------------------------------------------- */
+const jsonlOut = jsonOut.replace(/\.json$/, "") + ".jsonl";
+const key = (j) => `${j.route}\u0000${j.width}\u0000${j.theme}`;
 
 const rows = [];
 const failures = [];
+const alreadyHave = new Set();
+if (existsSync(jsonlOut)) {
+  for (const line of readFileSync(jsonlOut, "utf8").split("\n")) {
+    if (!line.trim()) continue;
+    let row;
+    try {
+      row = JSON.parse(line);
+    } catch {
+      continue; /* A line cut in half by a kill. Measure that job again. */
+    }
+    if (row.error) {
+      failures.push(row);
+      /* NOT marked as had: a job that failed is owed, and a later run tries
+         it again. Fifteen routes failed in the first run when the server fell
+         over under four browsers; that is a sandbox fact, not a verdict. */
+    } else {
+      rows.push(row);
+      alreadyHave.add(key(row));
+    }
+  }
+  console.log(`resuming: ${alreadyHave.size} of this sweep's jobs already measured in ${jsonlOut}`);
+}
+
+const allJobs = [];
+for (const theme of themes) for (const width of widths) for (const route of routes) allJobs.push({ theme, width, route });
+const jobs = allJobs.filter((j) => !alreadyHave.has(key(j)));
+
+if (process.argv.includes("--only-missing")) {
+  console.log(`${allJobs.length} jobs in this sweep, ${alreadyHave.size} measured, ${jobs.length} left.`);
+  for (const j of jobs.slice(0, 40)) console.log(`  owed: ${j.route} ${j.width} ${j.theme}`);
+  if (jobs.length > 40) console.log(`  ... and ${jobs.length - 40} more`);
+  process.exit(0);
+}
+
+if (jobs.length === 0) {
+  console.log(`nothing left to measure: all ${allJobs.length} jobs are in ${jsonlOut}.`);
+}
+
 let done = 0;
+
+/* One line per row, flushed immediately, so a kill at any moment costs at
+   most the row being measured when it landed. */
+function appendRow(row) {
+  appendFileSync(jsonlOut, JSON.stringify(row) + "\n");
+}
 
 const browser = await chromium.launch({ executablePath: CHROME });
 
@@ -261,20 +321,24 @@ async function worker(queue) {
       const redirected = finalUrl !== job.route;
       const needsSession = redirected && /^\/(sign-in|sign-up|start|$)/.test(finalUrl);
       const measured = await page.evaluate(MEASURE);
-      rows.push({
+      const row = {
         ...job,
         status: response?.status() ?? 0,
         finalUrl,
         redirected,
         needsSession,
         ...measured,
-      });
+      };
+      rows.push(row);
+      appendRow(row);
     } catch (error) {
-      failures.push({ ...job, error: String(error).split("\n")[0] });
+      const row = { ...job, error: String(error).split("\n")[0] };
+      failures.push(row);
+      appendRow(row);
     } finally {
       await ctx.close();
       done += 1;
-      if (done % 25 === 0) process.stderr.write(`  ... ${done}/${jobs.length}\n`);
+      if (done % 10 === 0) process.stderr.write(`  ... ${done}/${jobs.length} this run\n`);
     }
   }
 }
@@ -303,11 +367,17 @@ function statesFor(route) {
 }
 for (const row of rows) row.states = statesFor(row.route);
 
-writeFileSync(jsonOut, JSON.stringify({ rows, failures, base, widths, themes }, null, 2));
-for (const failure of failures) {
+/* A job that failed once and was measured later is not a failure. */
+const measuredKeys = new Set(rows.map(key));
+const realFailures = failures.filter((f) => !measuredKeys.has(key(f)));
+
+writeFileSync(jsonOut, JSON.stringify({ rows, failures: realFailures, base, widths, themes }, null, 2));
+for (const failure of realFailures) {
   console.error(`  could not load ${failure.route} (${failure.theme}, ${failure.width}): ${failure.error}`);
 }
 console.log(
-  `consistency sweep: ${rows.length} measured, ${failures.length} failed, ` +
-    `${rows.filter((r) => r.needsSession).length} need a session. Written to ${jsonOut}`,
+  `consistency sweep: ${rows.length} measured, ${realFailures.length} failed, ` +
+    `${rows.filter((r) => r.needsSession).length} need a session. ` +
+    `Written to ${jsonOut}, row by row in ${jsonlOut}. ` +
+    `${allJobs.length - rows.length} of ${allJobs.length} jobs still owed.`,
 );
