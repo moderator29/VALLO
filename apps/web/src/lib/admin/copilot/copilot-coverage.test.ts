@@ -65,7 +65,7 @@ describe("every desk on the rail is something the copilot knows", () => {
     const thin = DESK_MAP.filter((desk) => desk.purpose.trim().length < 25 || desk.words.length === 0).map((desk) => desk.key);
     expect(thin, `these desk notes are too thin to answer with: ${thin.join(", ")}. Give each a full sentence of purpose and at least one search word.`).toEqual([]);
     for (const desk of DESK_MAP) {
-      expect(desk.purpose, desk.key).not.toContain("—");
+      expect(desk.purpose, desk.key).not.toContain("\u2014");
       expect(desk.purpose.endsWith("."), desk.key).toBe(true);
     }
   });

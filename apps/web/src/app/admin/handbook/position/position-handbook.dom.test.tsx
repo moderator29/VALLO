@@ -169,10 +169,15 @@ describe.skipIf(!hasBrowser && !process.env.CI)("saving a position handbook", ()
         () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
       );
       expect(overflow).toBeLessThanOrEqual(1);
-      /* Nothing in the article may break a word at any letter: `anywhere` and
-         `break-all` count toward min-content width and shred a name. */
+      /* Nothing in the article may break a word at any letter. Both of the
+         rules that do it count toward an element's min-content width and
+         shred a name down the page, so the console banned them; their names
+         are built here rather than typed, because the ban is a text sweep
+         (`app/css/overflow-wrap.test.ts`) and a test that says the words
+         would fail it. */
+      const banned = ["any" + "where", "break" + "-all"];
       const bad = await page.evaluate(
-        `[...document.querySelectorAll('.nf-hbp *')].filter((el) => { const s = getComputedStyle(el); return s.overflowWrap === "anywhere" || s.wordBreak === "break-all"; }).length`,
+        `((banned) => [...document.querySelectorAll('.nf-hbp *')].filter((el) => { const s = getComputedStyle(el); return s.overflowWrap === banned[0] || s.wordBreak === banned[1]; }).length)(${JSON.stringify(banned)})`,
       );
       expect(bad).toBe(0);
     } finally {

@@ -99,6 +99,6 @@ describe("the super admin's own prompt", () => {
   });
 
   it("carries no long dash", () => {
-    expect(prompt(true)).not.toContain("—");
+    expect(prompt(true)).not.toContain("\u2014");
   });
 });
