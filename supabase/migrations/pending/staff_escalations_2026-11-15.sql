@@ -1227,6 +1227,7 @@ begin
   if not private.staff_escalation_is_route('compliance') then
     raise exception 'the identity fallback is not a staff scope';
   end if;
+  raise notice 'staff_escalations_2026-11-15: self-check passed';
 end
 $check$;
 
