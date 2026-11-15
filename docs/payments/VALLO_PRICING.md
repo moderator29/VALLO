@@ -291,22 +291,51 @@ collect. Note that at `guarantee_bps = 0` the reserve leg is skipped entirely
 (`if (split.guaranteeMinor > 0)`), which is the evidence that the
 `PAYSTACK_GUARANTEE_SUBACCOUNT` blocker should lift. **Session 2 verifies it.**
 
-**the retired provider rail: not automatic, and this needs a job.** the retired provider's own documentation:
-*"plus your own commission, if you set one in your merchant settings ... credited
-to your merchant wallet as a `commission` transaction"*, and *"Commission is
-charged once, as on a completion."*
+**The protected rail (EscrowPay): named on every payment, and it needs a sweep.**
+Updated 15 November 2026, when the founder ruled that Vallo's 2 percent rides on
+the payment itself.
 
-So Vallo's 2 percent on escrow is **a setting in the retired provider's merchant dashboard**, not
-a value passed per transaction, and it **accrues inside Vallo's the retired provider merchant
-wallet** until somebody withdraws it. That difference is a real operational risk:
-Paystack revenue arrives on its own, the retired provider revenue piles up somewhere nobody is
-watching.
+The provider's own schema (`TransactionCreate`, Merchant API 0.1.0, read from
+`docs.escrowpay.app`) carries:
 
-**Required:** a scheduled sweep that reads the merchant balance
-(`GET` merchant balance), withdraws to Vallo's bank, records the movement in the
-ledger as **Vallo revenue** and never as customer funds, and an admin surface
-showing the merchant balance, the last sweep and anything that failed. Paced
-against the ten-requests-per-minute limit.
+> `marketplace_commission_bps` - "Optional marketplace commission for this
+> transaction (basis points). When set, overrides the business default from
+> PATCH /fees/configuration. Omit or null to inherit the business default."
+> Integer, 0 to 10000.
+
+So Vallo has a choice the retired provider did not offer: an account-wide default
+(`PATCH /api/v1/fees/configuration`) or a figure on each transaction. **Vallo sends
+it on each transaction**, from `VALLO_FEE_BPS` in `apps/web/src/lib/money/fee-schedule.ts`
+through `openProtectedPayment` in `lib/money/protected-rail.ts`. Two reasons:
+
+1. the share that applied is in the record of that payment, so a receipt can be
+   explained a year later;
+2. changing the account default cannot silently reprice a payment two people
+   already agreed.
+
+**Together that is the published 3.5 percent**: Vallo's 2 percent as the
+marketplace commission, and the provider's own fee of about 1.5 percent, which the
+provider charges and keeps. Neither figure is typed anywhere but `fee-schedule.ts`.
+
+**What still needs confirming on the sandbox before go-live**, because the
+provider's OpenAPI document types these responses as free-form:
+
+- that the commission is credited to Vallo's own wallet at the provider
+  (`GET /api/v1/wallets`, `GET /api/v1/wallets/{id}/ledger-entries`), and under
+  what entry name;
+- whether it is taken at funding or at release;
+- whether it comes out of the lister's share or is added to what the payer
+  transfers. Vallo's published position is that the lister bears the fee and a
+  renter or guest pays exactly the listed price, so if the provider adds it to the
+  payer's total instead, either the schedule or
+  `PATCH /api/v1/fees/configuration` (`payer`: `payer` or `business`) has to move.
+
+**Required, exactly as it was for the retired provider:** a scheduled sweep that
+reads the wallet balance, pays out to Vallo's bank
+(`POST /api/v1/wallets/{id}/payouts`), records the movement in the ledger as
+**Vallo revenue** and never as customer funds, and an admin surface showing the
+balance, the last sweep and anything that failed. Paystack revenue arrives on its
+own; this revenue piles up at the provider until somebody moves it.
 
 ---
 

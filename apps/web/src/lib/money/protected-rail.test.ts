@@ -5,6 +5,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { fakeSupabase, type Call } from "../testing/fake-supabase";
 import type { RailResult } from "../payments/provider";
+import { VALLO_FEE_BPS } from "./fee-schedule";
 import type { EscrowPayCall } from "../payments/providers/escrowpay/client";
 import type { EscrowPayWebhook } from "../payments/providers/escrowpay/webhooks";
 
@@ -156,6 +157,10 @@ describe("opening a protected payment", () => {
     const create = send.mock.calls[3]![1];
     expect(create.idempotencyKey).toBe("vallo-pp-1:create");
     expect(create.body).toMatchObject({ amount_minor: AMOUNT, external_reference: "vallo-pp-1", payer: { party_id: "PAR_payer" }, beneficiary: { party_id: "PAR_lister" }, payout_account_id: "PAC_1", payout_preference: "automatic", funding_mode: "exact", release_policy: "manual_only" });
+    /* Vallo's own share rides on the transaction: 2 percent in basis points,
+       the same figure every fee sentence reads, never a number typed here. */
+    expect(create.body).toMatchObject({ marketplace_commission_bps: VALLO_FEE_BPS });
+    expect(VALLO_FEE_BPS).toBe(200);
     expect(send.mock.calls[4]![1].body).toEqual({ version: 1 });
     expect(send.mock.calls[5]![1].body).toMatchObject({ expected_amount_minor: AMOUNT, type: "transaction_temporary" });
     expect(send.mock.calls[6]![1]).toMatchObject({ idempotencyKey: "vallo-pp-1:checkout:1", body: {} });

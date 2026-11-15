@@ -30,6 +30,7 @@
  */
 import { describe, expect, it, vi } from "vitest";
 import { stepAllowed, type ArrangementStatus } from "@/lib/money/arrangement-states";
+import { VALLO_FEE_BPS } from "@/lib/money/fee-schedule";
 import { fakeSupabase } from "@/lib/testing/fake-supabase";
 import type { RailResult } from "../../provider";
 import type { EscrowPayCall } from "./client";
@@ -240,6 +241,11 @@ run("the protected rail against the provider's sandbox", () => {
     await people(w);
     expect((await rail.openProtectedPayment(w.deps, { agreementId: String(w.row.agreement_id), acceptedVersion: 1, actorUserId: PAYER })).outcome).toBe("opened");
     const create = w.answers.find((a) => a.call.path === "/api/v1/transactions" && a.call.method === "POST")!;
+    /* The provider accepted Vallo's own share on the transaction. Where it is
+       then credited is read off the wallet ledger by hand at go-live; the
+       provider types that response as free-form. */
+    expect(create.call.body).toMatchObject({ marketplace_commission_bps: VALLO_FEE_BPS });
+    expect(create.result.ok).toBe(true);
     const again = await sendEscrowPay(w.deps.config, create.call);
     expect(again.ok).toBe(true);
     const id = (r: RailResult<unknown>) => (r.ok ? (r.value as { data: { id: string } }).data.id : null);

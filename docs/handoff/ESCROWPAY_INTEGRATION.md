@@ -20,7 +20,8 @@ guides at docs.escrowpay.app.
    name check.
 3. **A transaction is made as a draft** (`POST /transactions`, exact amount,
    manual release, manual refund, automatic payout to the lister's account,
-   Vallo's reference as `external_reference`), then **activated**.
+   Vallo's reference as `external_reference`, **and Vallo's own commission in
+   basis points**), then **activated**.
 4. **Transfer details are issued** for that one transaction: a payment
    account good for the whole 48 hour window
    (`POST /transactions/{id}/payment-accounts`), then a checkout session
@@ -206,22 +207,37 @@ functions and the webhook event store were applied on 10 November.
    it on (test and live) and to say how the payout fee is charged. The
    sandbox test then runs without `ESCROWPAY_SANDBOX_PAYOUT=manual` and checks
    the payout reaches the lister.
-2. **Who bears the money-in fee.** The provider charges the payer, on top of
+2. **Vallo's own commission: DECIDED, named on every transaction** (the
+   founder, 15 November 2026). The provider's `TransactionCreate` schema
+   carries `marketplace_commission_bps`: "Optional marketplace commission for
+   this transaction (basis points). When set, overrides the business default
+   from PATCH /fees/configuration. Omit or null to inherit the business
+   default." Integer, 0 to 10000. Vallo sends `VALLO_FEE_BPS` from
+   `lib/money/fee-schedule.ts` on every transaction, rather than setting an
+   account default, so the share that applied is in the record of that
+   payment. **Three things are still unknown and must be read off the sandbox
+   before go-live**, because the provider types these responses as free-form:
+   where the commission is credited (`GET /wallets/{id}/ledger-entries`),
+   whether it is taken at funding or at release, and whether it comes out of
+   the lister's share or is added to the payer's total. The last one decides
+   whether item 3 below moves. Vallo also needs a sweep that moves the
+   balance to the bank: `docs/payments/VALLO_PRICING.md` section 7.
+3. **Who bears the money-in fee.** The provider charges the payer, on top of
    the amount, unless the account is set to "business". Vallo's ruling of 9
    November is that the lister pays. Until that is settled the screens tell
    the payer the truth as the provider has it: the total includes the fee.
-3. **The identity check.** Every payer and every lister gives a NIN or BVN
+4. **The identity check.** Every payer and every lister gives a NIN or BVN
    and a date of birth before a first protected payment. Vallo passes it on
    and keeps none of it, and the member consents on the screen. Counsel
    should see the screen's wording and the privacy policy line before go-live
    (SPECS Part 8: "never collect NIN or BVN without a verified security and
    compliance design").
-4. **The identity fee** (₦80 per successful live check) and **the payout
+5. **The identity fee** (₦80 per successful live check) and **the payout
    fee** are charged to the business by default.
-5. **Who may decide a dispute.** One member of staff holding the finance
+6. **Who may decide a dispute.** One member of staff holding the finance
    scope can instruct a refund or a release, with a written reason and an
    audit line. If a second person should approve, that is not built.
-6. **Two switches, both off today:** `payments_protected_pay_on` (whether the
+7. **Two switches, both off today:** `payments_protected_pay_on` (whether the
    protected rail is offered at all) and `payments_escrowpay_on` (whether
    this provider may be asked). Both must be on, and a category approved in
    `protected_payment_categories`, before a member sees anything.

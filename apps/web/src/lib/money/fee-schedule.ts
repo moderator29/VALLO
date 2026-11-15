@@ -25,6 +25,16 @@
  * until the founder runs it). The lister bears the fee; a renter or guest
  * pays exactly the listed price.
  *
+ * HOW VALLO'S 2 PERCENT IS ACTUALLY COLLECTED ON A PROTECTED PAYMENT (the
+ * founder, 15 November 2026): `VALLO_FEE_BPS` is sent to the payment partner
+ * on the transaction itself, as `marketplace_commission_bps`
+ * (`lib/money/protected-rail.ts`, through the adapter's
+ * `createTransactionCall`). It is not an account setting and not a figure
+ * worked out twice: this constant is the only place it is written. The
+ * partner's own 1.5 percent is charged by the partner and never passes
+ * through Vallo. Where the commission then sits, and the sweep that moves it
+ * to the bank, are in `docs/payments/VALLO_PRICING.md` section 7.
+ *
  * Integer basis points, as everywhere (PRODUCT.md). Client-safe and pure.
  */
 

@@ -18,7 +18,17 @@ import { ESCROWPAY_PATHS, type EscrowPayCall } from "./client";
  *  - `payout_preference: "automatic"` with the lister's verified payout
  *    account: a release goes on to the lister's bank with no second step.
  *    Always, in every deployment (config.ts); "manual" is reachable only
- *    from the sandbox test.
+ *    from the sandbox test;
+ *  - `marketplace_commission_bps`: Vallo's own share of the payment, in
+ *    basis points, named on the transaction itself. The provider's schema
+ *    (`TransactionCreate`, Merchant API 0.1.0) describes it as "Optional
+ *    marketplace commission for this transaction (basis points). When set,
+ *    overrides the business default from PATCH /fees/configuration. Omit or
+ *    null to inherit the business default." It is an integer from 0 to
+ *    10000. Vallo sends it on every transaction rather than relying on the
+ *    account default, so the share is in the record of the payment and a
+ *    change to the account later cannot silently reprice work already
+ *    agreed. The caller decides the figure; this module holds no policy.
  */
 
 export type IdentityKind = "nin" | "bvn";
@@ -71,7 +81,11 @@ export function createTransactionCall(input: {
   fundingDeadline: string;
   description: string;
   metadata: Record<string, string>;
+  /** Vallo's share of this payment, in basis points. Omitted from the body when null. */
+  marketplaceCommissionBps?: number | null;
 }): EscrowPayCall {
+  const commission = input.marketplaceCommissionBps;
+  const sendsCommission = typeof commission === "number" && Number.isSafeInteger(commission) && commission >= 0 && commission <= 10_000;
   return {
     method: "POST",
     path: ESCROWPAY_PATHS.create,
@@ -91,6 +105,7 @@ export function createTransactionCall(input: {
       external_reference: input.reference,
       description: input.description.slice(0, 500),
       metadata: input.metadata,
+      ...(sendsCommission ? { marketplace_commission_bps: commission } : {}),
     },
   };
 }

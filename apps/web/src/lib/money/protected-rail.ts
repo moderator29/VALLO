@@ -16,6 +16,7 @@ import {
 import type { EscrowPayWebhook } from "../payments/providers/escrowpay/webhooks";
 import type { ArrangementStatus } from "./arrangement-states";
 import { PROTECTED_SANDBOX_BANK } from "./copy";
+import { VALLO_FEE_BPS } from "./fee-schedule";
 import type { Db } from "./member-wallet";
 import { applyPayoutWebhook, isPayoutEvent } from "./protected-payout";
 import { ensurePayoutAccount, findParty, provablyNothing, protectedRailOpen, providerReachable, type ProtectedRailDeps } from "./protected-provider";
@@ -326,6 +327,14 @@ export async function openProtectedPayment(
       fundingDeadline: new Date(deps.now() + PROTECTED_FUNDING_WINDOW_HOURS * 3_600_000).toISOString(),
       description: `Vallo payment ${row.reference}`,
       metadata: { vallo_arrangement_id: row.id, vallo_agreement_id: row.agreement_id },
+      /* VALLO'S SHARE, NAMED ON THE PAYMENT ITSELF (the founder, 15 November
+       * 2026). The provider charges its own fee separately; the two together
+       * are the published schedule, which only `fee-schedule.ts` states.
+       * Sent on every transaction rather than left to the account default, so
+       * the share that applied is in the record of that payment and a later
+       * change to the account cannot reprice a payment already agreed. The
+       * figure is read from `fee-schedule.ts`, never typed here. */
+      marketplaceCommissionBps: VALLO_FEE_BPS,
     }),
   );
   if (!created.ok) {

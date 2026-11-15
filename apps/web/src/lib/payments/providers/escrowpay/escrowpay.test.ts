@@ -206,6 +206,44 @@ describe("the requests Vallo sends", () => {
     });
   });
 
+  it("carries the marketplace commission when the caller names one, as whole basis points", () => {
+    const base = {
+      reference: "vallo-pp-1",
+      amountMinor: 180_000_00,
+      payerPartyId: "PAR_a",
+      beneficiaryPartyId: "PAR_b",
+      payoutAccountId: "PAC_b",
+      payoutPreference: "automatic" as const,
+      fundingDeadline: "2026-11-16T10:00:00.000Z",
+      description: "d",
+      metadata: {},
+    };
+    expect(requests.createTransactionCall({ ...base, marketplaceCommissionBps: 200 }).body).toMatchObject({ marketplace_commission_bps: 200 });
+    /* Both ends of the provider's range are sendable. */
+    expect(requests.createTransactionCall({ ...base, marketplaceCommissionBps: 0 }).body).toMatchObject({ marketplace_commission_bps: 0 });
+    expect(requests.createTransactionCall({ ...base, marketplaceCommissionBps: 10_000 }).body).toMatchObject({ marketplace_commission_bps: 10_000 });
+  });
+
+  it("leaves the commission out of the body rather than sending a figure the provider would refuse", () => {
+    const base = {
+      reference: "vallo-pp-1",
+      amountMinor: 180_000_00,
+      payerPartyId: "PAR_a",
+      beneficiaryPartyId: "PAR_b",
+      payoutAccountId: "PAC_b",
+      payoutPreference: "automatic" as const,
+      fundingDeadline: "2026-11-16T10:00:00.000Z",
+      description: "d",
+      metadata: {},
+    };
+    /* Omitted or null means "inherit the business default", which is the
+       provider's own wording; the key must then be absent, not null. */
+    for (const commission of [undefined, null, -1, 10_001, 1.5, Number.NaN]) {
+      const body = requests.createTransactionCall({ ...base, marketplaceCommissionBps: commission as number | null | undefined }).body as Record<string, unknown>;
+      expect(Object.keys(body), String(commission)).not.toContain("marketplace_commission_bps");
+    }
+  });
+
   it("gives every money step its own idempotency key, and new details a new one", () => {
     const base = { reference: "vallo-pp-1", transactionId: "TXN_1" };
     expect(requests.activateTransactionCall({ ...base, version: 1 }).idempotencyKey).toBe("vallo-pp-1:activate");
