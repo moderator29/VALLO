@@ -23,8 +23,14 @@
  *                top of the first content below it
  *   cardRadius   the border radius of the first card surface on the page
  *   overflow     `scrollWidth - clientWidth` on the document (the rule: 0)
- *   smallTargets every interactive element painted under 44 by 44, counted,
- *                with the three worst named
+ *   smallTargets every interactive element whose TARGET is under 44 by 44,
+ *                counted, with the three worst named. The target is the
+ *                painted box, or a child or pseudo-element hit area that
+ *                overflows it: this platform grows a target without moving a
+ *                pixel (`.nf-tap::after`, `.nf-btn--sm::before`), and a
+ *                sweep that cannot see those reports the whole platform as
+ *                broken. A link inside a sentence is counted separately
+ *                (`inlineSmallCount`), the exemption WCAG 2.5.8 writes down.
  *
  * WHAT IT DOES NOT MEASURE, and why. Loading, empty and error states are
  * facts about a route's FILES (`loading.tsx`, `error.tsx`) and about states a
@@ -197,32 +203,88 @@ const MEASURE = () => {
      element with no painted box (a hidden input behind a styled label). */
   const SELECTOR =
     'a[href],button:not([disabled]),input:not([type="hidden"]):not([disabled]),select,textarea,summary,[role="button"],[role="tab"],[role="radio"],[role="switch"],[tabindex]:not([tabindex="-1"])';
+
+  /*
+   * THE TARGET A FINGER GETS, WHICH IS NOT ALWAYS THE BOX THAT PAINTS.
+   *
+   * This platform grows a target without moving a pixel, on purpose and in
+   * two places: `.nf-tap::after` is `max(100%, 44px)` in both axes
+   * (`app/css/base.css`) and `.nf-btn--sm::before` is `max(--nf-btn-h,
+   * 2.75rem)` tall (`app/css/buttons.css`), which is how the button ladder
+   * can paint the compact rung at 40px (the founder, 7 November 2026: "fix
+   * our button size, they are too wide, they are too big") and still hand a
+   * thumb 44. A pseudo-element is NOT a child node, so the first version of
+   * this sweep could not see either one and reported 509 of 640 rows as
+   * failing: 356 of them the compact button, 167 of them `.nf-tap`. Every
+   * one of those was the measurement being wrong, not the page.
+   *
+   * Chromium resolves a pseudo-element's `width` and `height` to used pixels,
+   * so they can simply be read. An area stretched with `left: 0; right: 0`
+   * reports its width as `auto`, and its used width is then the element's
+   * own, which is what the two rules above intend.
+   */
+  const pseudoHit = (el, which, ownWidth) => {
+    const s = getComputedStyle(el, which);
+    if (!s) return null;
+    if (s.content === "none" || s.content === "normal") return null;
+    if (s.position !== "absolute" && s.position !== "fixed") return null;
+    const h = Number.parseFloat(s.height);
+    let w = Number.parseFloat(s.width);
+    if (!Number.isFinite(w) && s.left !== "auto" && s.right !== "auto") w = ownWidth;
+    if (!Number.isFinite(h) || !Number.isFinite(w)) return null;
+    return { w, h };
+  };
+
+  /*
+   * A LINK INSIDE A LINE OF TYPE IS NOT A BUTTON, and the rule says so: WCAG
+   * 2.5.8 exempts a target "in a sentence or whose size is otherwise
+   * constrained by the line-height of non-target text". An `inline` box is
+   * constrained by its line-height by definition, which is the whole of the
+   * test: a legal page's prose links are 16px tall because that is what a
+   * line of type is, and growing one would move the words around it. They
+   * are counted apart (`inlineSmallCount`) rather than excused silently, so
+   * the number stays arguable. Anything that is a BLOCK of its own, an
+   * inline-flex row or a field, is judged by the 44px rule as before.
+   */
+  const inSentence = (el) => getComputedStyle(el).display === "inline";
+
   const small = [];
+  const inlineSmall = [];
   for (const el of document.querySelectorAll(SELECTOR)) {
     if (!visible(el)) continue;
     const r = el.getBoundingClientRect();
+    /* A box clipped to a pixel is a screen-reader node behind a styled
+       label (`.sr-only`), not a target anybody aims at. */
+    if (r.width <= 2 && r.height <= 2) continue;
     /* The painted box OR a hit area that overflows it (the chip's own trick,
        an absolutely positioned child taller than its parent). */
     let h = r.height;
     let w = r.width;
     /* A hit area that overflows its own box is the chip's own trick, so a
        control that already passes needs no second look; only one that fails
-       is asked about its children. */
+       is asked about its children and its own pseudo-elements. */
     if (h < 43.5 || w < 43.5) {
       for (const child of el.children) {
         const cr = child.getBoundingClientRect();
         if (cr.height > h) h = cr.height;
         if (cr.width > w) w = cr.width;
       }
+      for (const which of ["::before", "::after"]) {
+        const hit = pseudoHit(el, which, r.width);
+        if (!hit) continue;
+        if (hit.h > h) h = hit.h;
+        if (hit.w > w) w = hit.w;
+      }
     }
     if (h < 43.5 || w < 43.5) {
-      small.push({
+      const found = {
         tag: el.tagName.toLowerCase(),
         cls: (el.className?.baseVal ?? el.className ?? "").toString().split(" ").slice(0, 2).join(" ").slice(0, 44),
         label: (el.getAttribute("aria-label") ?? el.textContent ?? "").trim().slice(0, 24),
         w: px(w),
         h: px(h),
-      });
+      };
+      (inSentence(el) ? inlineSmall : small).push(found);
     }
   }
 
@@ -235,6 +297,8 @@ const MEASURE = () => {
     overflow,
     smallCount: small.length,
     small: small.slice(0, 3),
+    inlineSmallCount: inlineSmall.length,
+    inlineSmall: inlineSmall.slice(0, 3),
     title: document.title.slice(0, 60),
   };
 };
@@ -313,14 +377,65 @@ async function worker(queue) {
         (async () => {
           const r = await page.goto(base + job.route, { waitUntil: "domcontentloaded", timeout: 25_000 });
           await page.waitForTimeout(400);
+          /*
+           * LET THE ENTRANCE FINISH BEFORE READING THE GEOMETRY.
+           *
+           * The document pages run a reveal on arrival, and 400ms landed in
+           * the middle of it: a 44px control inside a block still being
+           * scaled measured 42.2, and the audit's first pass reported that
+           * as four pages failing the touch rule when nothing was wrong
+           * with any of them. A page caught mid-animation is not the page.
+           *
+           * Bounded at two seconds, and an endless animation (a spinner, a
+           * pulse) is not waited for, or a page with one would never be
+           * measured at all.
+           */
+          await page.evaluate(async () => {
+            const deadline = Date.now() + 2_000;
+            for (;;) {
+              const running = document.getAnimations().filter((a) => {
+                if (a.playState !== "running") return false;
+                const timing = a.effect?.getComputedTiming?.();
+                return !timing || timing.iterations !== Infinity;
+              });
+              if (running.length === 0 || Date.now() > deadline) return;
+              await new Promise((resolve) => setTimeout(resolve, 100));
+            }
+          });
           return r;
         })(),
         new Promise((_, reject) => setTimeout(() => reject(new Error("did not settle in 35s")), 35_000)),
       ]);
+      /*
+       * MEASURE, WITH A BOUND, AND ONCE MORE IF THE PAGE MOVED UNDER IT.
+       *
+       * `page.evaluate` takes no timeout of its own. A route that navigates
+       * on the client after it paints (the circle pages do) either destroys
+       * the execution context mid-read, which throws, or leaves the promise
+       * unsettled, which hangs the worker for good: two workers sat on
+       * `/circle` and `/circle/ask` for six minutes and measured nothing
+       * until they were killed. So the read is raced against 10 seconds,
+       * and a context destroyed by a navigation is simply the page arriving
+       * somewhere else: let it land and read THAT page, which is the one a
+       * person would see. The address is taken after the read for the same
+       * reason, so the row names what was actually measured.
+       */
+      const readOnce = () =>
+        Promise.race([
+          page.evaluate(MEASURE),
+          new Promise((_, reject) => setTimeout(() => reject(new Error("measure did not return in 10s")), 10_000)),
+        ]);
+      let measured;
+      try {
+        measured = await readOnce();
+      } catch (first) {
+        if (!/context was destroyed|Execution context|navigation/i.test(String(first))) throw first;
+        await page.waitForTimeout(1_200);
+        measured = await readOnce();
+      }
       const finalUrl = new URL(page.url()).pathname;
       const redirected = finalUrl !== job.route;
       const needsSession = redirected && /^\/(sign-in|sign-up|start|$)/.test(finalUrl);
-      const measured = await page.evaluate(MEASURE);
       const row = {
         ...job,
         status: response?.status() ?? 0,
