@@ -34,6 +34,8 @@ import { getPersonTiers } from "@/lib/admin/reads/shared";
 import { ENTRY_COOKIE } from "./_components/entry";
 import { PasscodeLayer } from "@/components/passcode/PasscodeLayer";
 import { CallLayerMount } from "@/components/calls/CallLayerMount";
+import { getEscalationCounts } from "@/lib/admin/escalations/read";
+import { EscalateButton } from "./_components/EscalateButton";
 /* The console's stylesheet, loaded by the console alone (B-4): it left
    `globals.css`, where every page paid for it. */
 import "@/app/css/admin.css";
@@ -80,10 +82,22 @@ export default async function AdminLayout({ children }: { children: ReactNode })
        nothing here confirms that a console exists. */
     if (door.state === "not-admin") notFound();
     if (door.state !== "console") return <AccessScreen t={t} state={door.state} />;
-    const shell = await getShellIdentity();
+    /* Escalations (15 November): what waits on this person, and the button
+       that raises one from whatever desk they are on. */
+    const [shell, escalations] = await Promise.all([getShellIdentity(), getEscalationCounts()]);
     const name = shell.userName && shell.userName !== "Guest" ? shell.userName : (door.user.email ?? "Staff");
     return (
-      <StaffFrame staff={door.staff} name={name}>
+      <StaffFrame
+        staff={door.staff}
+        name={name}
+        escalationsWaiting={escalations.state === "ok" ? escalations.data.waiting : 0}
+        escalate={
+          <EscalateButton
+            staffed={escalations.state === "ok" ? escalations.data.staffed : null}
+            setUp={escalations.state !== "not_set_up"}
+          />
+        }
+      >
         <DesktopNote />
         <PasscodeLayer>{children}</PasscodeLayer>
         <DeskKeys jumps={CONSOLE_JUMPS} jumpWords={CONSOLE_JUMP_WORDS} />
@@ -93,7 +107,7 @@ export default async function AdminLayout({ children }: { children: ReactNode })
     );
   }
 
-  const [counts, shell, jar, tiers, coverage, chargebacks] = await Promise.all([
+  const [counts, shell, jar, tiers, coverage, chargebacks, escalations] = await Promise.all([
     getQueueCounts(),
     getShellIdentity(),
     cookies(),
@@ -104,11 +118,15 @@ export default async function AdminLayout({ children }: { children: ReactNode })
     /* Chargebacks not yet decided, read on the operator's own session
        (`staff_chargebacks` checks the finance scope itself). */
     getOpenChargebackCount(access.userClient),
+    /* Escalations waiting on this operator, read on their own session
+       (`staff_escalation_counts`); "not set up" until its SQL has run. */
+    getEscalationCounts(),
   ]);
   /* R-E: has this browser session opened the overview as this operator? */
   const entered = jar.get(ENTRY_COOKIE)?.value === access.user.id;
   const badges: Record<string, number> = { ...(counts.state === "ok" ? counts.data : {}), ...coverage };
   if (chargebacks > 0) badges.chargebacks = chargebacks;
+  if (escalations.state === "ok" && escalations.data.waiting > 0) badges.escalations = escalations.data.waiting;
 
   const email = access.user.email ?? "";
   const name = shell.userName && shell.userName !== "Guest" ? shell.userName : email.split("@")[0] || "Admin";
@@ -131,6 +149,13 @@ export default async function AdminLayout({ children }: { children: ReactNode })
       bellLabel={t.uiCommon.console.notifications}
       shell={t.admin.shell}
       back={<BackButton fallback="/admin" surface="round" />}
+      escalate={
+        <EscalateButton
+          compact
+          staffed={escalations.state === "ok" ? escalations.data.staffed : null}
+          setUp={escalations.state !== "not_set_up"}
+        />
+      }
       experience={{
         palette: t.experienceAdmin.palette,
         deskLedes: t.experienceAdmin.deskLedes,

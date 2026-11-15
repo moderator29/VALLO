@@ -31,6 +31,7 @@ export function AdminFrame({
   bellLabel,
   shell,
   back,
+  escalate,
   experience,
   children,
 }: {
@@ -50,6 +51,13 @@ export function AdminFrame({
    * It leads the top bar, where the render's rhythm puts the first control.
    */
   back?: ReactNode;
+  /**
+   * The Escalate button (15 November 2026), mounted by `admin/layout.tsx`
+   * once for every desk: `EscalateButton`, which opens the escalation form
+   * with the open page attached. It sits in the bar beside the bell, so it is
+   * in the same place on every admin page.
+   */
+  escalate?: ReactNode;
   /**
    * Session 3's console copy (`experienceAdmin`): the palette's words and the
    * one line each desk carries. Optional so a frame drawn without it (a test,
@@ -114,6 +122,7 @@ export function AdminFrame({
             <ConsolePalette copy={experience.palette} ledes={experience.deskLedes} counts={badges} shell={shell} />
           )}
           <span className="nf-admin-bar__spacer" />
+          {escalate}
           <ConsoleClock />
           <Link
             href="/notifications"

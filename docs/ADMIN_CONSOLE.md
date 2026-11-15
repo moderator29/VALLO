@@ -1094,6 +1094,7 @@ a fall is emerald. The line is alerts raised per day.
 | pg-cron-watch | Vercel Cron `20 * * * *` | hourly at :20 | 3 h | watches the database's own jobs and raises failures |
 | complete-stays | Vercel Cron `30 2 * * *` | daily 03:30 | 26 h | completes stays whose check-out has passed |
 | offers-sweep | Vercel Cron `35 * * * *` | hourly :35 | 4 h | expires sale offers past their date and reminds the side whose answer is waiting |
+| escalations-overdue | Vercel Cron `4,14,24,34,44,54 * * * *` | every 10 min | 2 h | moves a staff escalation nobody answered in time up a level (team, COO, super admin), reminds once a day at the top, and reminds a raiser with a question waiting; a clean run that says "not set up" until its SQL is applied (`lib/cron/jobs/escalations-overdue.ts`, section 15.25) |
 | inventory-drift | Vercel Cron `45 2 * * *` | daily 03:45 | 26 h | checks room inventory against bookings |
 | account-purge | Vercel Cron `15 3 * * *` | daily 04:15 | 26 h | honours account deletions after thirty days |
 | saved-search-alerts | Vercel Cron `40 7 * * *` | daily 08:40 | 26 h | tells people about new matches for saved searches |
@@ -1151,7 +1152,7 @@ a fall is emerald. The line is alerts raised per day.
 | vallo_send_feature_notices | pg_cron `10 17 * * *` | daily 18:10 | | sends the daily feature notices to members who opted in, one topic at a time (A5, `private.send_feature_notices`) |
 | vallo_send_gentle_nudges | pg_cron `20 10 * * *` | daily 11:20 | | sends the gentle nudges to members who opted in, never more than the opt-in allows (A6, `private.send_gentle_nudges`) |
 
-24 Vercel Cron jobs and 42 pg_cron jobs in all. The numbers are derived,
+25 Vercel Cron jobs and 42 pg_cron jobs in all. The numbers are derived,
 not remembered: the Vercel list is `VERCEL_JOBS` in
 `lib/admin/reads/jobs.ts`, held equal to `vercel.json` by a test, and the
 database list is `PG_CRON_JOBS` in the same file, held equal by
@@ -1762,6 +1763,69 @@ any desk that passes a tier), it keeps one slot, `PersonTier`, fed from
 staff) by `getPersonTiers`. Session A owns the badge's artwork and component;
 until that lands the slot draws nothing, so no badge appears anywhere in
 the console yet.
+
+### 15.25 Escalations (Overview > Escalations, `/admin/escalations`)
+
+Added 15 November 2026 at the founder's ask. Any member of staff, on any admin
+desk, can escalate what they cannot or may not decide. It lands with one clear
+owner, runs on a response clock, and the person who raised it is told the
+outcome. The SQL is `supabase/migrations/pending/staff_escalations_2026-11-15.sql`
+and is NOT APPLIED: until the founder runs it every screen below says
+"Escalations are not set up yet" and nothing fails.
+
+- **The Escalate button** is in the console shell, once, so it is on every
+  admin page (the operator's bar and the staff frame). It opens a sheet: what
+  kind of issue, how urgent, a short title, what happened, what you need from
+  them. The page it was opened on travels as the attached record. The form
+  refuses a run of ten or more digits and a card-like number, with "Link the
+  record instead of pasting an ID or account number."
+- **Where it goes.** The category picks the team; nothing is ever routed to a
+  team with nobody on it (the fallback is the COO, then the super admin).
+
+  | Kind of issue | Goes to |
+  |---|---|
+  | Identity or fraud | Trust and Safety, then Compliance if nobody holds it |
+  | Money | Finance |
+  | Safety | Trust and Safety |
+  | A listing | Listings (listing approval) |
+  | Something is broken | Technical |
+  | A policy decision | the COO |
+  | Staff access | the super admin |
+  | A member complaint | the Support lead |
+  | Something else | the COO |
+
+  The same table is `private.staff_escalation_route` in the SQL and `ROUTING`
+  in `lib/admin/escalations/types.ts`; `types.test.ts` fails if they differ.
+- **The clock.** Urgent 1 hour, high 4 hours, normal 24 hours, low 72 hours. An
+  urgent one also tells the super admin at once and opens a critical alert
+  (`escalation.urgent`), so the on-call page fires.
+- **`/admin/escalations`** has three views: Waiting on me, Raised by me, and All
+  (the COO and the super admin). Overdue rows first.
+- **`/admin/escalations/<id>`** is the record as a brief, with its timeline and
+  the actions the viewer may take: I have seen this, Take it, Add a note, Ask
+  the raiser a question, Send to another team (with a reason), Give it to
+  somebody (the COO and the super admin), Resolve (a closing note of 10
+  characters or more), Decline (with a reason). The raiser can answer a
+  question and reopen within 14 days. Nobody works their own escalation.
+- **`/admin/escalations/new?category=&record=&label=`** is the same form as a
+  page. Other desks link to it with a record attached; `record` must be a path
+  beginning `/admin/`.
+- **Overdue.** The `escalations-overdue` job (section 13) moves an unanswered
+  one up a level with half the window again, never under an hour, and reminds
+  once a day at the top. While a question is with the raiser nothing moves up;
+  the raiser is reminded once a day.
+- **Who is told.** The receivers on raise, on a move up, on a reroute and when
+  the raiser answers; the raiser on seen, on a question, on resolved and on
+  declined. Each is a notice in the app and an email (`staff.escalation`). The
+  email carries the reference, the urgency and the due time only. The member
+  is never told anything through this path.
+- **Where else it shows.** A count on the Escalations row of the rail, a
+  "Waiting on you" card on the overview for the super admin and the COO, and
+  "Escalations with the COO" at the top of the COO desk. The older board on the
+  COO desk (`coo_escalations`, 10 November) is unchanged.
+- **Written down.** Every action is a line on the record's own timeline, which
+  cannot be edited or removed, and a line in the audit log
+  (`staff_escalation.*`).
 
 ## 16. Everyday procedures
 

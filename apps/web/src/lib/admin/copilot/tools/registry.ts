@@ -10,6 +10,7 @@ import { BD_TOOLS } from "./business-development";
 import { COMPLIANCE_TOOLS } from "./compliance";
 import { COO_TOOLS } from "./coo";
 import { DELETION_REASON_TOOLS } from "./deletion-reasons";
+import { ESCALATION_TOOLS } from "./escalations";
 import { FINANCE_TOOLS } from "./finance";
 import { KYC_TOOLS } from "./kyc";
 import { LISTING_TOOLS } from "./listings";
@@ -29,6 +30,8 @@ import type { CopilotProposal, CopilotTool, CopilotViewer, ProposalDraft, ToolCt
  */
 export const COPILOT_TOOLS: readonly CopilotTool[] = [
   ...MY_TOOLS,
+  /* Escalations (15 November 2026): open to every staff member, on every desk. */
+  ...ESCALATION_TOOLS,
   ...MANUAL_TOOLS,
   ...LISTING_TOOLS,
   ...KYC_TOOLS,

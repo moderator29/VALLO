@@ -76,6 +76,17 @@ export const ADMIN_PRIMARY: AdminDestination[] = [
          every one of the COO's scopes (`requireCoo`), not a single scope,
          so it is not badged by any one desk's own count. */
       { key: "coo-overview", href: "/admin/overview", icon: ui("trending-up"), label: "COO overview" },
+      /* Escalations (15 November 2026): what any member of staff could not or
+         may not decide, sent to the team that can. The badge is what waits
+         on the viewer (`staff_escalation_counts`), never a team's total. */
+      {
+        key: "escalations",
+        href: "/admin/escalations",
+        icon: ui("flag"),
+        label: "Escalations",
+        countKeys: ["escalations"],
+        countLabel: "escalations waiting on you",
+      },
     ],
   },
   {
@@ -322,7 +333,7 @@ function pick(...keys: string[]): AdminDestination[] {
 }
 
 export const ADMIN_GROUPS: AdminGroup[] = [
-  { key: "g-overview", label: "Overview", icon: glyph("home-solid"), sections: [{ key: "overview", label: null, items: pick("overview", "queue", "lookup", "coo-overview") }] },
+  { key: "g-overview", label: "Overview", icon: glyph("home-solid"), sections: [{ key: "overview", label: null, items: pick("overview", "escalations", "queue", "lookup", "coo-overview") }] },
   { key: "g-my-desk", label: "My Desk", icon: ui("user"), sections: [{ key: "my-desk", label: null, items: pick("my-desk", "my-tasks", "announcements", "weekly-report", "copilot") }] },
   { key: "g-staff", label: "Staff and Access", icon: ui("users"), sections: [{ key: "staff", label: null, items: pick("staff", "oversight", "weekly-reports") }] },
   {

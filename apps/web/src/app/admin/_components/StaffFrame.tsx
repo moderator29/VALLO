@@ -81,7 +81,25 @@ export const POSITION_GUIDE: Partial<Record<StaffPosition, ManualSlug>> = {
   customer_support_lead: "support-lead",
 };
 
-export function StaffFrame({ staff, name, children }: { staff: StaffAccess; name: string; children: ReactNode }) {
+export function StaffFrame({
+  staff,
+  name,
+  escalate,
+  escalationsWaiting = 0,
+  children,
+}: {
+  staff: StaffAccess;
+  name: string;
+  /**
+   * The Escalate button (15 November 2026), mounted by `admin/layout.tsx`:
+   * the same one the operator's bar carries, so a staff member on any desk
+   * can hand up what they cannot or may not decide.
+   */
+  escalate?: ReactNode;
+  /** How many escalations wait on this person, for the count on the Escalations link. */
+  escalationsWaiting?: number;
+  children: ReactNode;
+}) {
   return (
     <div className="nf-console nf-staff-frame" data-testid="staff-console">
       <header className="nf-panel nf-panel--card block p-card">
@@ -91,12 +109,13 @@ export function StaffFrame({ staff, name, children }: { staff: StaffAccess; name
             desk buttons below and the browser. */}
         <div className="flex items-center gap-sm">
           <BackButton fallback="/admin" surface="round" />
-          <div className="min-w-0">
+          <div className="min-w-0 flex-1">
             <p className="nf-caption text-[var(--nf-content-secondary)]">
               Vallo console · {staff.position ? JOB_DESCRIPTIONS[staff.position].title : "staff"}
             </p>
             <p className="font-semibold">{name}</p>
           </div>
+          {staff.handbookAcknowledged ? escalate : null}
         </div>
         <nav aria-label="Your desks" className="mt-inline">
           <ul className="flex flex-wrap gap-xs">
@@ -110,6 +129,23 @@ export function StaffFrame({ staff, name, children }: { staff: StaffAccess; name
                 Console
               </Link>
             </li>
+            {staff.handbookAcknowledged ? (
+              <li>
+                <Link
+                  className="nf-btn nf-btn--glass nf-btn--sm"
+                  href="/admin/escalations"
+                  data-testid="staff-escalations-link"
+                  aria-label={escalationsWaiting > 0 ? `Escalations, ${escalationsWaiting} waiting on you` : "Escalations"}
+                >
+                  Escalations
+                  {escalationsWaiting > 0 ? (
+                    <span className="nf-admin-nav__count" aria-hidden="true">
+                      {escalationsWaiting}
+                    </span>
+                  ) : null}
+                </Link>
+              </li>
+            ) : null}
             <li>
               <Link className="nf-btn nf-btn--glass nf-btn--sm" href="/admin/handbook">
                 Handbook

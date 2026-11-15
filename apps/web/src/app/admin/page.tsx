@@ -14,6 +14,10 @@ import { LiveRefresh } from "./_components/LiveRefresh";
 import { safeDesk } from "./_components/entry";
 import { OverviewView } from "./_components/OverviewView";
 import { YourDesks } from "./_components/YourDesks";
+import { listEscalations } from "@/lib/admin/escalations/read";
+import { JOB_DESCRIPTIONS } from "@/lib/admin/staff-positions";
+import type { StaffAccess } from "@/lib/admin/guard";
+import { WaitingOnYou } from "./escalations/WaitingOnYou";
 
 export const dynamic = "force-dynamic";
 
@@ -22,6 +26,12 @@ const RANGES: readonly CollectedRange[] = ["30d", "90d", "12m"];
 /** The request's clock, read once so every "12m ago" on the page agrees. */
 function requestTime(): number {
   return Date.now();
+}
+
+/** The COO: the position, or every one of its scopes (the rule `requireCoo` uses). */
+function isCoo(staff: StaffAccess | null): boolean {
+  if (!staff) return false;
+  return staff.position === "coo" || JOB_DESCRIPTIONS.coo.scopes.every((scope) => staff.scopes.includes(scope));
 }
 
 /**
@@ -45,7 +55,18 @@ export default async function AdminOverviewPage({
   const operator = await requireAdmin();
   if (operator.state !== "admin") {
     const door = await requireConsole();
-    return door.state === "console" ? <StaffHome staff={door.staff} /> : null;
+    if (door.state !== "console") return null;
+    /* A COO who holds no admin role lands here: their escalations first. */
+    if (!isCoo(door.staff) || !door.staff.handbookAcknowledged) return <StaffHome staff={door.staff} />;
+    const [staffLocale, waitingOnCoo] = await Promise.all([getLocale(), listEscalations("for_me")]);
+    return (
+      <div className="nf-admin-stack">
+        <StaffHome staff={door.staff} />
+        <div className="nf-console">
+          <WaitingOnYou read={waitingOnCoo} now={requestTime()} locale={staffLocale} />
+        </div>
+      </div>
+    );
   }
   /* An operator who also holds a named position sees that position's desks first. */
   const door = await requireConsole();
@@ -55,7 +76,9 @@ export default async function AdminOverviewPage({
   const range = RANGES.find((r) => r === params.range) ?? "12m";
   const now = requestTime();
 
-  const [pulse, collected, supply, byRole, jobs, counts, alerts] = await Promise.all([
+  /* "Waiting on you" (escalations, 15 November): for the super admin and the COO. */
+  const showWaiting = operator.isSuperAdmin || isCoo(staff);
+  const [pulse, collected, supply, byRole, jobs, counts, alerts, waiting] = await Promise.all([
     getConsolePulse(now),
     getCollectedSeries(range, now),
     getSupplyByType(),
@@ -63,6 +86,7 @@ export default async function AdminOverviewPage({
     getJobHealth(now),
     getQueueCounts(),
     getRiskAlerts(),
+    showWaiting ? listEscalations("for_me") : null,
   ]);
   const ok = <T,>(read: { state: "ok"; data: T } | { state: "unavailable" }): T | null =>
     read.state === "ok" ? read.data : null;
@@ -73,6 +97,11 @@ export default async function AdminOverviewPage({
       {staff && staff.scopes.length > 0 ? (
         <div className="nf-console mb-block">
           <YourDesks staff={staff} />
+        </div>
+      ) : null}
+      {waiting ? (
+        <div className="nf-console mb-block">
+          <WaitingOnYou read={waiting} now={now} locale={locale} />
         </div>
       ) : null}
       <OverviewView

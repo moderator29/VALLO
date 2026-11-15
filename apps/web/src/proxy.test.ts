@@ -410,6 +410,8 @@ const EXPECTED_PUBLIC = new Set([
   "/api/cron/email-outbox",
   "/api/cron/hold-sweep",
   "/api/cron/offers-sweep",
+  /* Staff escalations past their response time, behind the cron bearer. */
+  "/api/cron/escalations-overdue",
   "/api/cron/rent-share-refunds",
   "/api/cron/reservation-deposit-refunds",
   /* D51/D62: the Rewards Balance payout sweep, behind the cron bearer. */

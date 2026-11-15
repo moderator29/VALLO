@@ -36,8 +36,8 @@ export const COPILOT_CAPABILITIES: readonly DeskCapability[] = [
     desk: "My Desk",
     scopes: [],
     href: "/admin/my-desk",
-    can: ["Read your tasks, overdue items and announcements", "Add a task to your own list or comment on one", "Answer how-to questions from the staff manual"],
-    prompts: ["What needs me first today?", "Add a task to follow up on the oldest ticket tomorrow", "Where do I take something I cannot decide?"],
+    can: ["Read your tasks, overdue items and announcements", "Read the escalations waiting on you and the ones you raised, and say how to escalate (you press Escalate yourself)", "Add a task to your own list or comment on one", "Answer how-to questions from the staff manual"],
+    prompts: ["What needs me first today?", "What is waiting on me?", "How do I escalate this?", "Add a task to follow up on the oldest ticket tomorrow"],
   },
   {
     key: "listings",

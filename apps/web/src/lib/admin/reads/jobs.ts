@@ -56,6 +56,8 @@ export const VERCEL_JOBS: readonly VercelJob[] = [
   },
   { name: "pg-cron-watch", cron: "20 * * * *", schedule: "Hourly at :20", maxGapHours: 3, audit: { entityType: "cron_job", term: "pg-cron-watch" } },
   { name: "offers-sweep", cron: "35 * * * *", schedule: "Hourly at :35", maxGapHours: 4, audit: { entityType: "cron_job", term: "offers-sweep" } },
+  /* Staff escalations past their response time move up a level: team, COO, super admin (lib/cron/jobs/escalations-overdue.ts). */
+  { name: "escalations-overdue", cron: "4,14,24,34,44,54 * * * *", schedule: "Every 10 minutes", maxGapHours: 2, audit: { entityType: "cron_job", term: "escalations-overdue" } },
   { name: "complete-stays", cron: "30 2 * * *", schedule: "Daily at 03:30", maxGapHours: 26, audit: { entityType: "cron_job", term: "complete-stays" } },
   { name: "inventory-drift", cron: "45 2 * * *", schedule: "Daily at 03:45", maxGapHours: 26, audit: { entityType: "cron_job", term: "inventory-drift" } },
   { name: "account-purge", cron: "15 3 * * *", schedule: "Daily at 04:15", maxGapHours: 26, audit: { entityType: "cron_job", term: "account-purge" } },

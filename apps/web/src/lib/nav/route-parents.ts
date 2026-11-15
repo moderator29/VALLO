@@ -542,6 +542,10 @@ export const ROUTE_PARENTS: Readonly<Record<string, ParentRoute>> = {
   /* Protected payments: the read-only arrangement operations desk (BUILD 7.11). */
   "/admin/arrangements": "/admin",
   "/admin/arrangements/[id]": "/admin/arrangements",
+  /* Escalations for every admin desk (15 November 2026): the desk, one record, and the form as a page. */
+  "/admin/escalations": "/admin",
+  "/admin/escalations/[id]": "/admin/escalations",
+  "/admin/escalations/new": "/admin/escalations",
   "/admin/chargebacks/[chargebackId]": "/admin/chargebacks",
   "/admin/people": "/admin",
   /*
@@ -822,6 +826,7 @@ export const NON_NAVIGABLE: Readonly<Record<string, string>> = {
   "/api/cron/offers-sweep": "scheduled job, bearer token: expires sale offers and sends reminders.",
   "/api/cron/crypto-reconcile": "scheduled job, bearer token.",
   "/api/cron/arrangements-reconcile": "scheduled job, bearer token.",
+  "/api/cron/escalations-overdue": "scheduled job, bearer token: moves staff escalations past their response time up a level.",
   "/api/cron/email-outbox": "scheduled job, bearer token.",
   "/api/cron/hold-sweep": "scheduled job, bearer token.",
   "/api/cron/rent-share-refunds": "scheduled job, bearer token.",

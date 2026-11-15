@@ -35,6 +35,7 @@ const SUB_PAGES: Record<string, string> = {
   "/admin/handbook/position": "the staff member's own role, linked from the handbook and the staff frame",
   "/admin/handbook/manual": "the staff manual, linked from the handbook",
   "/admin/kyc/guide": "the reviewer guide, linked from the verification desk and from every person's checklist",
+  "/admin/escalations/new": "the escalation form as a page, opened from the escalations desk and linked from other desks with a record attached",
 };
 
 const routes = pages(ADMIN_DIR).map(routeOf);
@@ -90,5 +91,6 @@ describe("the console map and the route tree agree", () => {
     expect(keysOf("/admin/restaurant-fees")).toEqual(["seatings"]);
     expect(keysOf("/admin/account-recovery")).toEqual(["recovery"]);
     expect(keysOf("/admin/money")).toEqual(["claims", "referrals", "payouts", "chargebacks"]);
+    expect(keysOf("/admin/escalations")).toEqual(["escalations"]);
   });
 });
