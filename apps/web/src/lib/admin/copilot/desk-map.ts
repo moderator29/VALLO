@@ -74,6 +74,9 @@ export const DESK_NOTES: Readonly<Record<string, DeskNote>> = {
   visits: { purpose: "Inspection requests as a week or month calendar.", scopes: ["operations"], words: ["visit", "inspection", "viewing", "calendar", "appointment"] },
   reservations: { purpose: "Restaurant reservations and how each table went.", scopes: ["operations", "support"], words: ["restaurant", "table", "reservation", "diner", "seating"] },
   "restaurant-fees": { purpose: "What a seated table owes, and the seatings the restaurant and the diner disagree about.", scopes: ["finance", "operations"], words: ["restaurant fee", "seating", "cover", "disagree"] },
+  /* The rail's Moderation row and its Around child are the same page, so the
+     row's own note is the one the map carries. */
+  moderation: { purpose: "Moderation: the feed members post to, and what is held or reported in it.", scopes: ["moderation", "circle"], words: ["moderation", "around", "feed", "post", "held", "timeline"] },
   social: { purpose: "Around: the feed members post to, and what is held or reported in it.", scopes: ["moderation", "circle"], words: ["around", "feed", "post", "social", "timeline"] },
   cases: { purpose: "One case per thing reported, from every part of the platform, with its timeline and what was decided.", scopes: ["trust_safety", "moderation"], words: ["case", "report", "abuse", "trust", "safety", "investigation"] },
   trust: { purpose: "The Trust and Safety overview: how cases, restrictions and appeals are trending.", scopes: ["trust_safety", "analyst"], words: ["trust overview", "safety figures", "restrictions trend"] },

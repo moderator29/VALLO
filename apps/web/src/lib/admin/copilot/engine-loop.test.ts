@@ -131,3 +131,78 @@ describe("the copilot tool loop", () => {
     expect(events[0]).toMatchObject({ type: "error" });
   });
 });
+
+/**
+ * TAKE ME THERE, THROUGH THE LOOP. The destinations the tools returned are
+ * streamed as their own event, already filtered against this viewer's access,
+ * so the client knows exactly which addresses it may draw as a button.
+ */
+const linkTool = defineTool({
+  name: "where_do_i_go",
+  description: "d",
+  kind: "read",
+  scopes: ["support"],
+  status: "Reading the console map",
+  input: z.object({}),
+  handler: async () => ({
+    ok: true,
+    data: { matched: [{ desk: "Support" }] },
+    links: [
+      { label: "Open Support", href: "/admin/support" },
+      { label: "Open the Money desk", href: "/admin/money", scope: "finance" },
+      { label: "Open the Staff desk", href: "/admin/staff", requires: "super_admin" },
+    ],
+  }),
+});
+
+describe("the destinations an answer may offer", () => {
+  const twoRounds = (text: string) => {
+    const replies = [toolReply("where_do_i_go", {}), textReply(text)];
+    return vi.fn(async () => replies.shift()!) as unknown as typeof fetch;
+  };
+
+  it("streams only the pages this viewer can open, once each", async () => {
+    const events = await collect(
+      streamAdminCopilot("key", req({ tools: [linkTool], message: "where do I answer a member?" }), new AbortController().signal, {
+        fetch: twoRounds("Support is the desk.\n\n[[go:/admin/support|Open Support]]"),
+      }),
+    );
+    const offered = events.filter((e): e is Extract<AdminCopilotEvent, { type: "destinations" }> => e.type === "destinations");
+    expect(offered).toHaveLength(1);
+    expect(offered[0]!.links).toEqual([{ label: "Open Support", href: "/admin/support" }]);
+  });
+
+  it("gives a super admin the pages that are theirs alone", async () => {
+    const boss: CopilotViewer = { userId: "u2", firstName: "Tunde", isAdmin: true, isSuperAdmin: true, scopes: [], position: null };
+    const events = await collect(
+      streamAdminCopilot("key", req({ viewer: boss, tools: [linkTool], message: "where do I grant access?" }), new AbortController().signal, {
+        fetch: twoRounds("The Staff desk.\n\n[[go:/admin/staff|Open the Staff desk]]"),
+      }),
+    );
+    const offered = events.find((e) => e.type === "destinations");
+    expect(offered && offered.type === "destinations" ? offered.links.map((l) => l.href) : []).toEqual(["/admin/support", "/admin/money", "/admin/staff"]);
+  });
+
+  it("sends no destinations event when the tools returned none", async () => {
+    const replies = [toolReply("get_support_queue", {}), textReply("7 tickets are open.")];
+    const events = await collect(
+      streamAdminCopilot("key", req(), new AbortController().signal, { fetch: vi.fn(async () => replies.shift()!) as unknown as typeof fetch }),
+    );
+    expect(events.some((e) => e.type === "destinations")).toBe(false);
+  });
+
+  it("tells the model the exact syntax and only the addresses it may use", async () => {
+    const bodies: Record<string, unknown>[] = [];
+    const replies = [toolReply("where_do_i_go", {}), textReply("Support.")];
+    const fetchImpl = vi.fn(async (_url: unknown, init?: RequestInit) => {
+      bodies.push(JSON.parse(String(init?.body)) as Record<string, unknown>);
+      return replies.shift()!;
+    });
+    await collect(streamAdminCopilot("key", req({ tools: [linkTool] }), new AbortController().signal, { fetch: fetchImpl as unknown as typeof fetch }));
+    const second = JSON.stringify(bodies[1]);
+    expect(second).toContain("takeMeThere");
+    expect(second).toContain("[[go:");
+    expect(second).toContain("/admin/support");
+    expect(second).not.toContain("/admin/staff");
+  });
+});
