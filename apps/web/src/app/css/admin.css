@@ -127,6 +127,8 @@
     display: inline-flex;
     align-items: center;
     gap: var(--nf-space-xs);
+    /* A 44px tap target: the phone bar's mark is drawn at 34px. */
+    min-block-size: 2.75rem;
     border-radius: var(--nf-radius-sm);
   }
   /* The render sets "Vallo" as white type beside the mark, 28px bold

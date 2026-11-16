@@ -193,7 +193,9 @@ const CASES: Case[] = [
   ...[PHONE, { width: 768, height: 1024 }].map<Case>((viewport) => ({
     name: `5. the console header's home link at ${viewport.width} (bd/refunds)`,
     page: () => RefundsPreview(),
-    selector: `header a[aria-label="${t.a11y.logoHome}"]`,
+    /* The preview draws the real console frame (AdminFrame) since 16 November
+       2026; its home link is the brand link in the bar. */
+    selector: "header .nf-admin-brand",
     count: 1,
     viewport,
     sheets: ["app/css/admin.css"],
