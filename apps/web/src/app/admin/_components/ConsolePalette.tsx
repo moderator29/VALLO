@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useId, useMemo, useRef, useState, useSyncExternalStore } from "react";
+import { createPortal } from "react-dom";
 import { usePathname, useRouter } from "next/navigation";
 import { UiIcon } from "@/design-system/icons/UiIcon";
 import { useOverlay } from "@/lib/ui/use-overlay";
@@ -239,7 +240,10 @@ export function ConsolePalette({
       >
         <UiIcon name="search" size={20} />
       </button>
-      {open && (
+      {/* Drawn on the page itself, not in the console bar: the bar is frosted
+          glass, and a frosted box is the frame its fixed children are placed
+          in, so on a phone the palette was clipped to the bar's 60px. */}
+      {open && typeof document !== "undefined" && createPortal(
         <div className="nf-admin-palette" data-testid="console-palette">
           <button type="button" className="nf-admin-palette__scrim" aria-label={copy.close} tabIndex={-1} onClick={close} />
           <div ref={panel} className="nf-admin-palette__panel nf-island" role="dialog" aria-modal="true" aria-label={copy.title}>
@@ -339,7 +343,8 @@ export function ConsolePalette({
               <span className="nf-admin-palette__where">{mac ? copy.shortcutMac : copy.shortcut}</span>
             </p>
           </div>
-        </div>
+        </div>,
+        document.body,
       )}
     </>
   );
