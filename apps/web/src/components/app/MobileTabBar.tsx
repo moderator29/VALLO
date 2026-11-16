@@ -487,7 +487,13 @@ export function MobileTabBar({
                   <span className="nf-tab__icon" data-glyph={tab.icon}>
                     {/* The search disc draws its lens inside a ring, so at the shared size it
                         read smaller than its neighbours (founder, 9 October): one rung up. */}
-                    <UiIcon name={tab.icon} size={tab.icon === "search-disc" ? "lg" : "md"} filled weight="bold" />
+                    <UiIcon name={tab.icon} size={tab.icon === "search-disc" ? "lg" : "md"} filled weight="bold" className="nf-tab__solid" />
+                    {/* The line twin, drawn only in the dark theme at rest
+                        (`night-icons.css`): the solid's cut details showed
+                        the dark dock through a white silhouette and read as
+                        black glyphs (the founder, 15 November 2026). Hidden
+                        in light, so daylight draws exactly what it did. */}
+                    <UiIcon name={tab.icon} size={tab.icon === "search-disc" ? "lg" : "md"} weight="bold" className="nf-tab__line" />
                   </span>
                 </span>
               </HoldTabLink>

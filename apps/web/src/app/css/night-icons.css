@@ -1,0 +1,157 @@
+@layer theme, base, components, utilities;
+
+/*
+ * NIGHT ICONS ARE WHITE (the founder, 15 November 2026: "only work on those
+ * icon that's grey / black color like in agent workspace dashboard ...
+ * anywhere it's like that change it to white", and "any icon that have that
+ * color in dark mode to be changed to white that's all").
+ *
+ * WHAT CHANGES. In the dark theme only, a glyph drawn in one of the grey inks
+ * (`--nf-content-secondary`, `-subtle`, `-muted`, `-muted-on-tint`, the
+ * neutral plate's mist ink) is drawn in the white the words already use,
+ * `--nf-content-primary`. Nothing else moves: no word changes colour, and a
+ * glyph in the brand blue, in a state ink (error, success, warning) or on a
+ * light plate keeps its own ink, because those never name a grey token.
+ *
+ * WHY THE TOKENS ARE REDIRECTED RATHER THAN THE COLOUR SET. Most glyphs are
+ * grey because their own rule (or a utility on them) says
+ * `color: var(--nf-content-muted)`. Re-pointing the grey tokens ON THE GLYPH
+ * makes that same declaration resolve to white, while every state rule that
+ * names another token (the chosen row's brand ink, a pressed like, an armed
+ * swipe, an error tone) still wins exactly as it did. Re-pointing a token on
+ * an element changes only that element and what it holds, so a glyph's
+ * neighbouring words are untouched. The same redirect sits on a few wrappers
+ * that hold a glyph and nothing else (an icon-only button, a glyph slot).
+ *
+ * WHERE THE GLYPH INHERITS ITS GREY from a line of text (a tile head, a row's
+ * end, a tab with its label), the token cannot be caught on the glyph: the
+ * parent's colour arrives already computed. Those are named in section 3
+ * and set to the white directly, each at rest only, so a chosen or pressed
+ * state keeps its brand ink. A line inked by a grey utility
+ * (`text-[var(--nf-content-muted)]` and its two siblings) is matched by that
+ * utility, so any such line's leading glyph is caught without naming it.
+ *
+ * LIGHT MODE IS UNTOUCHED. Every rule is gated on the root NOT being light,
+ * which is exactly the dark theme (`lib/theme/theme.ts` writes
+ * `data-theme="light"` for Light, and for System on a light device). A night
+ * island inside a light page (`[data-theme="dark"]`) is daylight's business
+ * and is left as it is.
+ *
+ * DOCS AND LEGAL PAGES ARE UNTOUCHED, in either theme: a page that carries
+ * the docs shell or a legal sheet opts out as a whole, header included.
+ */
+
+/*
+ * 1. THE NEUTRAL PLATE'S GLYPH. `IconPlate`'s neutral tone inks its glyph
+ * with `--nf-plate-neutral-ink`, mist (#E4EAFF) at night. Unlayered for the
+ * reason brand-glass.css section 4 gives: tokens.css is unlayered and a
+ * layered custom property would lose to it. Restated on night subtrees,
+ * which redeclare the palette for themselves.
+ */
+:root:not([data-theme="light"]):not(:has(.nf-doc-shell, .nf-legal, .nf-legal-sheet, .nf-legal-short, .nf-policy)),
+:root:not([data-theme="light"]):not(:has(.nf-doc-shell, .nf-legal, .nf-legal-sheet, .nf-legal-short, .nf-policy)) [data-theme="dark"] {
+  --nf-plate-neutral-ink: var(--nf-content-primary);
+}
+
+@layer components {
+  /*
+   * 2. EVERY GLYPH, AND THE SLOTS THAT HOLD ONLY A GLYPH: the grey tokens
+   * resolve to the white here, so a grey rule on the glyph draws it white.
+   */
+  :root:not([data-theme="light"]):not(:has(.nf-doc-shell, .nf-legal, .nf-legal-sheet, .nf-legal-short, .nf-policy))
+    :is(
+      .nf-ui-icon,
+      .nf-nav__glyph,
+      .nf-srow__icon,
+      .nf-srow__chev,
+      .nf-kpi__door,
+      .nf-media-pill__chev,
+      .nf-swipe-reply__glyph,
+      .nf-visit-hero__glyph,
+      .nf-rmd-search__glyph,
+      .nf-rmfd__glyph,
+      .nf-system__search-glyph,
+      .nf-admin-row__kebab,
+      .nf-notif__archive-btn,
+      .nf-post__kebab,
+      .nf-pf-avatar__badge--quiet,
+      .nf-toast__close,
+      .nf-paste__close,
+      .nf-shelf-field__go,
+      .nf-admin-pager__page,
+      .nf-inbox-more,
+      .wsd-tile__door,
+      .wsd-feat__photo--none
+    ) {
+    --nf-content-secondary: var(--nf-content-primary);
+    --nf-content-subtle: var(--nf-content-primary);
+    --nf-content-muted: var(--nf-content-primary);
+    --nf-content-muted-on-tint: var(--nf-content-primary);
+  }
+
+  /*
+   * 3. GLYPHS THAT TAKE THEIR GREY FROM A LINE OF TEXT. The glyph alone turns
+   * white; its words keep their ink. At rest only where the control has a
+   * chosen state, so the chosen state's ink still shows. A post card's
+   * actions (`.nf-pc`) draw a liked or saved glyph in the same grey as the
+   * rest, the state being the solid shape (feed-v2.css), so both turn white.
+   */
+  :root:not([data-theme="light"]):not(:has(.nf-doc-shell, .nf-legal, .nf-legal-sheet, .nf-legal-short, .nf-policy))
+    :is(
+      .wsd-tile__head,
+      .wsd-row__end,
+      .nf-pf-tab,
+      .nf-reply-bar,
+      .nf-thread__safety,
+      .nf-inbox-row__context,
+      .nf-meta-strip__lead,
+      .nf-post__meta-views,
+      .nf-visit-prop__fact,
+      .nf-visit__month,
+      .nf-admin-row__sub,
+      .nf-chip:not(.nf-chip--active, [aria-pressed="true"], [aria-current="page"]),
+      .nf-viewtoggle__link:not([data-on="true"]),
+      .nf-call-event:not([data-missed]) .nf-call-event__glyph,
+      [class*="text-[var(--nf-content-secondary)]"],
+      [class*="text-[var(--nf-content-subtle)]"],
+      [class*="text-[var(--nf-content-muted)]"]
+    )
+    > .nf-ui-icon,
+  :root:not([data-theme="light"]):not(:has(.nf-doc-shell, .nf-legal, .nf-legal-sheet, .nf-legal-short, .nf-policy))
+    :is(.nf-act-pill:not([aria-pressed="true"]), .nf-pc .nf-act-pill)
+    > .nf-act-pill__glyph,
+  :root:not([data-theme="light"]):not(:has(.nf-doc-shell, .nf-legal, .nf-legal-sheet, .nf-legal-short, .nf-policy))
+    .nf-msg__ticks:not(.nf-msg__ticks--read)
+    > svg {
+    color: var(--nf-content-primary);
+  }
+
+  /*
+   * 4. THE DOCK AT REST. Each dock tab draws its glyph's solid twin, a white
+   * silhouette with its details cut out (`UiIcon`, "THE FILLED TWINS"). On the
+   * night dock those cuts show the dark ground through the white, so the
+   * door, the magnifier and the card's slots read as black glyphs on a white
+   * plate. At rest in the dark theme the tab draws the glyph's line twin
+   * instead, in the same white, so every mark in it is white. The chosen tab
+   * keeps its solid brand silhouette, and light draws the solid as before.
+   */
+  .nf-tab__line {
+    display: none;
+  }
+  :root:not([data-theme="light"])
+    :is(
+      .nf-tab__link:not([aria-current="page"], [data-on]),
+      .nf-dockrow[data-dock-pending] .nf-tab__link[aria-current="page"]:not([data-on])
+    )
+    .nf-tab__solid {
+    display: none;
+  }
+  :root:not([data-theme="light"])
+    :is(
+      .nf-tab__link:not([aria-current="page"], [data-on]),
+      .nf-dockrow[data-dock-pending] .nf-tab__link[aria-current="page"]:not([data-on])
+    )
+    .nf-tab__line {
+    display: block;
+  }
+}

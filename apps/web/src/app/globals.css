@@ -218,6 +218,10 @@
    states that point, the waits). After every partial whose states it warms,
    before the motion setting so "off" still wins. */
 @import "./css/spark.css";
+/* Night icons are white (the founder, 15 November 2026): in the dark theme a
+   glyph in a grey ink takes the white the words use. After every partial
+   whose glyph inks it re-points, dark only, so daylight is untouched. */
+@import "./css/night-icons.css";
 /* Track M: the motion setting (cinematic, standard, calm, off). Last, so
    "off" wins over every partial above it. */
 @import "./css/motion-pref.css";
