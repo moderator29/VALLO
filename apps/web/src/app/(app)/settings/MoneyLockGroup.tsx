@@ -126,7 +126,10 @@ export function MoneyLockGroup({ list, locale }: { list: MoneyCredentialList; lo
     void platformLockAvailable().then((can) => {
       if (live) setSupported(can);
     });
-    void readKeys();
+    /* Through a microtask, like the probe above it: `readKeys` only ever
+       sets state after awaiting the server, so neither call is the cascading
+       render the lint rule is about, and this shape says so. */
+    void Promise.resolve().then(readKeys);
     return () => {
       live = false;
     };
@@ -294,7 +297,7 @@ export function MoneyLockGroup({ list, locale }: { list: MoneyCredentialList; lo
            it, and nothing below contradicts it. */
         <RowValue
           icon="phone"
-          label={copy.thisPhoneLabel}
+          label={copy.thisPhone}
           sub={enrolledHere ? copy.thisPhoneOnBody : copy.thisPhoneOffBody}
           value={enrolledHere ? copy.thisPhoneOn : copy.thisPhoneOff}
           testId="money-lock-this-phone"
@@ -305,16 +308,16 @@ export function MoneyLockGroup({ list, locale }: { list: MoneyCredentialList; lo
           key={row.id}
           icon="key"
           danger
-          /* A row is named for the phone it is, not for the phone reading it:
-             only one phone can be "This phone", and only when this phone is
-             the one key the account holds. */
-          label={enrolledHere && rows.length === 1 ? (row.label ?? copy.thisPhone) : (row.label ?? copy.aPhone)}
+          /* A row label is a verb, and it names the phone it acts on only
+             when it can: only one row can be "this phone", and only when this
+             phone is the one key the account holds. The status row above has
+             already said where this phone stands, so the label does not say
+             it a second time. */
+          label={row.label ?? (enrolledHere && rows.length === 1 ? copy.settingsRemove : copy.settingsRemoveOther)}
           /* Two sentences, joined as two. A bare space ran them together as
              "Added 1 Oct 2026 Removing a phone asks for the same proof as
              sending money." */
           sub={`${copy.added.replace("{when}", formatDate(new Date(row.createdAt), locale, { day: "numeric", month: "short", year: "numeric", timeZone: "Africa/Lagos" }))}. ${copy.settingsRemoveNeedsProof}`}
-          value={copy.settingsRemove}
-          chevron={false}
           disabled={pending}
           onClick={() => setTurningOff(row.id)}
           testId="money-lock-phone"

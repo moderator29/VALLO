@@ -461,12 +461,14 @@ export const platformEn = {
     settingsUnknown: "We could not read which phones lock your money just now. Try again in a moment.",
     settingsRemoveNeedsProof: "Removing a phone asks for the same proof as sending money.",
     added: "Added {when}",
-    /* A phone the account holds a key for that is NOT the phone in the
-       reader's hand. Every row read "This phone" whatever device it was made
-       on, which is half of why the screen contradicted itself (the founder,
-       14 November 2026, from his own screenshot of "Money is locked with 1
-       phone" sitting directly above "Add this phone"). */
-    aPhone: "A phone you added",
+    /* A ROW LABEL IS A VERB, and it names the phone it acts on only when it
+       can. Every row read "This phone" whatever device the key was made on
+       (`label` is always null), which is half of why the screen contradicted
+       itself (the founder, 14 November 2026, from his own screenshot of
+       "Money is locked with 1 phone" sitting directly above "Add this
+       phone"). `settingsRemove` is used when this phone is the one key the
+       account holds, which is the only time that can be said. */
+    settingsRemoveOther: "Remove a phone you added",
 
     /* -------------------------------------------------------------------
        THE TWO TAPS, SAID AS TWO STEPS (the founder, 14 November 2026: "it's
@@ -499,7 +501,6 @@ export const platformEn = {
        ONE STATE AT A TIME. The screen may say this phone locks the money, or
        offer to add this phone, never both in the same breath.
        ------------------------------------------------------------------- */
-    thisPhoneLabel: "This phone",
     thisPhoneOn: "On",
     thisPhoneOff: "Not added",
     thisPhoneOnBody:

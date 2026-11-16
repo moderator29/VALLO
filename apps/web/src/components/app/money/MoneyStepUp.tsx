@@ -137,8 +137,34 @@ export function useMoneyStepUp(
     /* Unknown or unlocked: go ahead and let the server decide. */
     if (!fresh || !fresh.needed) return "none";
     setError(null);
-    setMode(sensor ? "sensor" : "fallback");
-    setOpen(true);
+    /*
+     * THE SHEET OPENS NOW, NOT WHEN THE CALLER'S ACTION FINISHES (14 November
+     * 2026, found while rebuilding the money lock's own screen).
+     *
+     * Every call site asks for the proof from inside a transition:
+     * `start(async () => { const stepUp = await lock.prove(...) })`. In React
+     * 19 a `startTransition` with an async function is an ACTION, and the
+     * state updates made in its synchronous head are entangled with it: they
+     * are not committed until the action settles. `prove()` settles only when
+     * the person answers the sheet. So `setOpen(true)` waited for the sheet
+     * the sheet was supposed to open, the action never finished, and the
+     * screen sat with every control disabled and nothing to answer. That is
+     * `/settings/privacy/money-lock`, Remove this phone, for anybody who had
+     * actually enrolled a phone, and it is also the staff account's second
+     * key, Add bank account and the host wizard's payout account.
+     *
+     * It was invisible to everybody who had NOT enrolled, because `prove`
+     * answers "" at once when no proof is needed, which is almost every
+     * account and every test that came before this one.
+     *
+     * `flushSync` commits these two updates inside the tap instead, the same
+     * escape `release` below already uses. The pending state a caller shows
+     * while the sheet is up is its own business.
+     */
+    flushSync(() => {
+      setMode(sensor ? "sensor" : "fallback");
+      setOpen(true);
+    });
     return "shown";
   };
 
@@ -188,10 +214,13 @@ export function useMoneyStepUp(
           }
           askedKnowing.current = true;
           setError(null);
-          setMode(sensor ? "sensor" : "fallback");
           if (!form.current) settle.current = resolve;
           else resolve(null);
-          setOpen(true);
+          /* Same reason as `ask` above: the caller is inside its action. */
+          flushSync(() => {
+            setMode(sensor ? "sensor" : "fallback");
+            setOpen(true);
+          });
         });
     });
   };

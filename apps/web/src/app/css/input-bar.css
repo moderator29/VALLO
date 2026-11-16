@@ -141,8 +141,25 @@
   border: 0;
   background: transparent;
 }
+/*
+ * AND SO DOES THE FIELD BESIDE IT (the consistency sweep, 16 November 2026).
+ *
+ * The note below this one gave the send disc the 44pt floor and left the
+ * field it sits next to at 40.8px: measured on `/assistant`,
+ * `/agent/assistant` and `/host/assistant` in Chromium at 390 with a touch
+ * screen and at 1440, both themes, 268 x 40.8 and 582 x 40.8. One composer,
+ * two controls, one of them 44 and the other not, which is the whole of what
+ * this audit is looking for.
+ *
+ * It reads the compact rung the same way the disc does, so the two cannot
+ * disagree: change the rung and both follow. The field grows by 3.2px and
+ * nothing else moves, because the well around it is a `min-block-size` that
+ * this clears rather than a fixed height.
+ */
 :root .nf-ai__composer.nf-ai__composer .nf-ai__input {
+  --nf-btn-h: 2.75rem;
   padding-block: var(--nf-space-xs);
+  min-block-size: var(--nf-btn-h);
 }
 /*
  * THE SEND DISC KEEPS THE 44pt FLOOR (11 November 2026).

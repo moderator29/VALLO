@@ -263,15 +263,61 @@ const MEASURE = () => {
   /*
    * A LINK INSIDE A LINE OF TYPE IS NOT A BUTTON, and the rule says so: WCAG
    * 2.5.8 exempts a target "in a sentence or whose size is otherwise
-   * constrained by the line-height of non-target text". An `inline` box is
-   * constrained by its line-height by definition, which is the whole of the
-   * test: a legal page's prose links are 16px tall because that is what a
-   * line of type is, and growing one would move the words around it. They
-   * are counted apart (`inlineSmallCount`) rather than excused silently, so
-   * the number stays arguable. Anything that is a BLOCK of its own, an
-   * inline-flex row or a field, is judged by the 44px rule as before.
+   * constrained by the line-height of non-target text". That second clause
+   * is the test, and it is measurable: a box laid out in the line, with no
+   * padding and no floor of its own, whose height is its own line-height, is
+   * one line of type. A legal page's prose links are 16px tall because that
+   * is what a line of type is; the home page's "Sign in" is 25.6 because its
+   * line is; and growing either would put an invisible 44px target over the
+   * words above and below it and steal their taps.
+   *
+   * This is NOT a licence for any small link. `.nf-site-footer-link` is a
+   * padded row and fails the test, which is right: it is a list of
+   * destinations, not a sentence, and the product gives it 44px on a touch
+   * screen. A field, a button or anything with its own box is judged by the
+   * 44px rule as before. The count is kept separately
+   * (`inlineSmallCount`) rather than thrown away, so the number stays
+   * arguable rather than hidden.
    */
-  const inSentence = (el) => getComputedStyle(el).display === "inline";
+  const inSentence = (el) => {
+    /* A FIELD OR A BUTTON IS NEVER A WORD IN A SENTENCE, whatever its size.
+       The exemption is about runs of text; a control with its own box is
+       held to the 44px rule. */
+    if (/^(input|textarea|select|button)$/.test(el.tagName.toLowerCase())) return false;
+    const s = getComputedStyle(el);
+    /* No padding and no floor: anything with either has been given a box on
+       purpose and is a control, not a run of words. */
+    if (["paddingTop", "paddingBottom"].some((k) => Number.parseFloat(s[k]) > 0.5)) return false;
+    if (Number.parseFloat(s.minHeight) > 0.5) return false;
+    /* And no line of it is taller than the text it sits in, which is the
+       spec's own phrase. The PARENT's line-height is the non-target text;
+       each client rect is one line box, so a link that wraps across two
+       lines is two lines of type rather than one 38px control. */
+    const parent = el.parentElement;
+    if (!parent) return false;
+    const line = Number.parseFloat(getComputedStyle(parent).lineHeight);
+    if (!Number.isFinite(line)) return false;
+    let tallest = 0;
+    for (const rect of el.getClientRects()) if (rect.height > tallest) tallest = rect.height;
+    if (tallest === 0 || tallest > line * 1.1 + 0.5) return false;
+    /*
+     * FIRST CLAUSE: "the target is in a sentence". Words on the same line
+     * that are NOT the target settle it, and they have to be looked for
+     * rather than inferred from the display, because a sentence laid out
+     * with `flex` so that a button can sit inside it has its link
+     * BLOCKIFIED: "Or email us at <a>hello@vallospaces.com</a> <CopyButton>"
+     * on `/help` is one sentence, and it was the only one of that page's
+     * twenty cross links reported, purely because its parent is a flex row.
+     */
+    for (const node of parent.childNodes) {
+      if (node === el) continue;
+      if (node.nodeType === 3 && (node.textContent ?? "").trim().length > 0) return true;
+      if (node.nodeType === 1 && !node.matches(SELECTOR) && (node.textContent ?? "").trim().length > 0) return true;
+    }
+    /* SECOND CLAUSE: no words beside it, but it is still laid out in the
+       line and no taller than that line. */
+    return /^inline($|-flex$|-block$)/.test(s.display);
+  };
 
   const small = [];
   const inlineSmall = [];
@@ -299,6 +345,32 @@ const MEASURE = () => {
         if (!hit) continue;
         if (hit.h > h) h = hit.h;
         if (hit.w > w) w = hit.w;
+      }
+      /*
+       * A CHECKBOX'S TARGET IS ITS LABEL, and this product says so in a
+       * comment above the markup: "`nf-tap` makes each row a 44px target
+       * without moving it: the 20px box alone was too small to hit reliably,
+       * and the label is the control, so a tap anywhere on the expanded row
+       * toggles it" (`components/auth/AcceptTerms.tsx`). A tap on a label
+       * activates the control it names, so the label's target IS the
+       * control's. Reading only the input reported the three boxes on
+       * `/sign-up/email` as failures when each one already sits inside a
+       * 44px row. The label's own pseudo area counts, because that is where
+       * this platform puts the 44.
+       */
+      const label = el.closest("label") ?? (el.id ? document.querySelector(`label[for="${CSS.escape(el.id)}"]`) : null);
+      if (label) {
+        const lr = label.getBoundingClientRect();
+        let lh = lr.height;
+        let lw = lr.width;
+        for (const which of ["::before", "::after"]) {
+          const hit = pseudoHit(label, which, lr.width);
+          if (!hit) continue;
+          if (hit.h > lh) lh = hit.h;
+          if (hit.w > lw) lw = hit.w;
+        }
+        if (lh > h) h = lh;
+        if (lw > w) w = lw;
       }
     }
     if (h < 43.5 || w < 43.5) {
