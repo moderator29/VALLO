@@ -21,7 +21,10 @@
  *   primary      where the first `.nf-btn--primary` sits, if any
  *   headerGap    the gap in CSS px between the bottom of the header and the
  *                top of the first content below it
- *   cardRadius   the border radius of the first card surface on the page
+ *   cardRadius   the border radius of the first card surface on the page,
+ *                with `cardRadii` carrying every distinct corner on it and
+ *                the class that draws each, so a page is not judged by
+ *                whichever card happened to come first in its markup
  *   overflow     `scrollWidth - clientWidth` on the document (the rule: 0)
  *   smallTargets every interactive element whose TARGET is under 44 by 44,
  *                counted, with the three worst named. The target is the
@@ -45,6 +48,10 @@
  * HOW THE THEME IS CHOSEN. The `nf_theme` cookie, which the server reads, so
  * both passes really render in different themes rather than both rendering
  * the default and the script claiming otherwise.
+ *
+ * HOW THE POINTER IS CHOSEN. The narrow pass runs with a touch screen and the
+ * wide pass with a mouse, because the 44px rule is a touch rule and this
+ * product keeps it with `@media (pointer: coarse)`. See the context below.
  *
  * IT WRITES EVERY ROW AS IT IS MEASURED, and can be killed. The first run of
  * this script lost 146 measured rows to a five-hour limit because it wrote
@@ -190,10 +197,28 @@ const MEASURE = () => {
     if (found) headerGap = px(found.top - bottom);
   }
 
-  /* THE FIRST CARD's corner. The card tier is 18px (`--nf-radius-card`). */
-  const cardEl =
-    [...document.querySelectorAll(".nf-panel--card, .nf-card, [data-card], .nf-list-group")].find(visible) ?? null;
-  const cardRadius = cardEl ? px(Number.parseFloat(getComputedStyle(cardEl).borderTopLeftRadius)) : null;
+  /*
+   * EVERY CARD's corner, not just the first one. The card tier is 18px
+   * (`--nf-radius-card`).
+   *
+   * The first version read only the first card surface it found, and which
+   * surface that is depends on the width: on `/stays/search` the 14px tile
+   * is first at 390 and a 18px switch is first at 1440, so the same page
+   * failed at one width and passed at the other for no reason that had
+   * anything to do with the page. The distinct values are collected with
+   * the class that carries each, so an off-tier corner is named and can be
+   * argued with; `cardRadius` stays the first one so the table's column is
+   * unchanged.
+   */
+  const cardEls = [...document.querySelectorAll(".nf-panel--card, .nf-card, [data-card], .nf-list-group")].filter(visible);
+  const cardRadius = cardEls.length ? px(Number.parseFloat(getComputedStyle(cardEls[0]).borderTopLeftRadius)) : null;
+  const radiiSeen = new Map();
+  for (const el of cardEls) {
+    const r = px(Number.parseFloat(getComputedStyle(el).borderTopLeftRadius));
+    if (!Number.isFinite(r) || radiiSeen.has(r)) continue;
+    radiiSeen.set(r, (el.className?.baseVal ?? el.className ?? "").toString().split(" ").slice(0, 3).join(" ").slice(0, 52));
+  }
+  const cardRadii = [...radiiSeen.entries()].map(([r, cls]) => ({ r, cls }));
 
   /* SIDEWAYS SCROLL on the document. The rule is zero. */
   const overflow = px(document.documentElement.scrollWidth - document.documentElement.clientWidth);
@@ -294,6 +319,7 @@ const MEASURE = () => {
     primary,
     headerGap,
     cardRadius,
+    cardRadii,
     overflow,
     smallCount: small.length,
     small: small.slice(0, 3),
@@ -365,7 +391,27 @@ async function worker(queue) {
   for (;;) {
     const job = queue.shift();
     if (!job) break;
-    const ctx = await browser.newContext({ viewport: { width: job.width, height: 900 } });
+    /*
+     * THE PHONE WIDTH IS MEASURED AS A PHONE, which it was not, and that one
+     * omission made the touch column wrong on every page.
+     *
+     * The 44px rule is a TOUCH rule (`docs/RESPONSIVE_RESEARCH.md` section
+     * 7, Apple's 44pt), and this product keeps it with media queries that
+     * ask about the POINTER, not the width: the site footer's links are
+     * `min-height: 2.75rem` and drop to 2.25rem only inside
+     * `@media (hover: hover) and (pointer: fine)` ("a mouse does not need the
+     * finger's 44px row", `app/css/site.css`). A headless Chromium at a 390px
+     * viewport still reports a fine pointer, so the sweep took the mouse
+     * branch of a touch rule and reported 297 rows of a 36px footer link that
+     * is 44px on every phone that will ever load it.
+     *
+     * So the narrow pass gets a touch screen and the wide pass keeps its
+     * mouse, which is what the two widths are for. `hasTouch` alone, not
+     * `isMobile`: the pointer is the thing being corrected, and `isMobile`
+     * would change the layout as well and make the two passes incomparable.
+     */
+    const touch = job.width <= 430;
+    const ctx = await browser.newContext({ viewport: { width: job.width, height: 900 }, hasTouch: touch });
     await ctx.addCookies([{ name: "nf_theme", value: job.theme, url: base }]);
     /* The cookie bar covers the foot of every signed-out page and would be
        measured as content. It is answered once per context, as a person
@@ -391,7 +437,7 @@ async function worker(queue) {
            * measured at all.
            */
           await page.evaluate(async () => {
-            const deadline = Date.now() + 2_000;
+            const deadline = Date.now() + 1_200;
             for (;;) {
               const running = document.getAnimations().filter((a) => {
                 if (a.playState !== "running") return false;
@@ -438,6 +484,7 @@ async function worker(queue) {
       const needsSession = redirected && /^\/(sign-in|sign-up|start|$)/.test(finalUrl);
       const row = {
         ...job,
+        pointer: touch ? "coarse" : "fine",
         status: response?.status() ?? 0,
         finalUrl,
         redirected,
@@ -451,7 +498,15 @@ async function worker(queue) {
       failures.push(row);
       appendRow(row);
     } finally {
-      await ctx.close();
+      /*
+       * CLOSING IS BOUNDED TOO. A wedged renderer makes `context.close()`
+       * hang, and then the worker never takes another job: two of them sat
+       * there with 39 of 644 rows measured and no error to show for it,
+       * because the hang is in the cleanup rather than in the measurement.
+       * A context that will not close is left to the `browser.close()` at
+       * the end rather than allowed to stop the run.
+       */
+      await Promise.race([ctx.close(), new Promise((resolve) => setTimeout(resolve, 5_000))]).catch(() => {});
       done += 1;
       if (done % 10 === 0) process.stderr.write(`  ... ${done}/${jobs.length} this run\n`);
     }

@@ -10,6 +10,8 @@
  *   card radius    18px, the card tier             tokens.css --nf-radius-card
  *   overflow       scrollWidth equals clientWidth  RESPONSIVE_RESEARCH 2
  *   targets        44 by 44 on touch               RESPONSIVE_RESEARCH 7
+ *                  (judged on the touch pass only: the narrow width runs
+ *                  with a touch screen, the wide one with a mouse)
  *
  * `--md` prints the document's tables; without it, a summary.
  */
@@ -20,6 +22,12 @@ const md = process.argv.includes("--md");
 const { rows, failures } = JSON.parse(readFileSync(file, "utf8"));
 
 const CARD_RADIUS = 18;
+/** A surface that wears the card's material but is not a card. Name and reason. */
+const CARD_EXEMPT = [
+  /* A place type, a cancellation policy, a price band: a control carrying
+     text, so the control corner, stated in `app/css/catalogue.css`. */
+  "nf-stays-tile",
+];
 /* The gap under a large title, as the shared frame draws it. Measured from
    the frame's own pages rather than asserted, so the rule is what the
    majority of framed pages actually do; an outlier is a page that differs
@@ -53,10 +61,32 @@ function verdict(row) {
     if (b.w < 43.5 || b.h < 43.5) out.push(`back ${b.w} by ${b.h}`);
     if (row.header && b.y > row.header.box.y + row.header.box.h + 8) out.push("back below the header");
   }
-  if (row.cardRadius !== null && Math.abs(row.cardRadius - CARD_RADIUS) > 0.6 && row.cardRadius !== 0) {
-    out.push(`card radius ${row.cardRadius}`);
+  /*
+   * EVERY CARD on the page, against the card tier. 0 is a square surface
+   * (a full-bleed band) and is not an off-tier corner.
+   *
+   * A CLASS THAT IS WEARING THE CARD'S MATERIAL IS NOT ALWAYS A CARD, and
+   * one case is written down in the stylesheet rather than guessed at here:
+   * `.nf-stays-tile` is a place type or a cancellation policy, a CONTROL you
+   * pick, and `app/css/catalogue.css` states the shape law it follows ("it
+   * carries text, so `--nf-radius-control`") above the rule that draws it.
+   * It carries `.nf-panel--card` for the shared fill and edge, not for the
+   * corner. An exemption is listed by name with its reason so it can be
+   * argued with; anything not on this list is reported.
+   */
+  for (const card of row.cardRadii ?? (row.cardRadius === null ? [] : [{ r: row.cardRadius, cls: "" }])) {
+    if (card.r === 0 || Math.abs(card.r - CARD_RADIUS) <= 0.6) continue;
+    if (CARD_EXEMPT.some((name) => card.cls.includes(name))) continue;
+    out.push(`card radius ${card.r}${card.cls ? ` on \`${card.cls.split(" ").pop()}\`` : ""}`);
   }
-  if (row.smallCount > 0) out.push(`${row.smallCount} under 44`);
+  /*
+   * THE 44PX RULE IS A TOUCH RULE, so it is a verdict only on the pass that
+   * had a touch screen. A 36px row in a footer is right for a mouse and the
+   * product says so in a media query; counting it as a failure at 1440 would
+   * be reporting a deliberate decision as a defect. The number is still
+   * recorded at both widths, it is just not held against the wide one.
+   */
+  if (row.smallCount > 0 && row.pointer !== "fine") out.push(`${row.smallCount} under 44`);
   const want = GAP[row.width];
   if (row.header?.kind === "frame" && want !== null && row.headerGap !== null && Math.abs(row.headerGap - want) > 8) {
     out.push(`header gap ${row.headerGap} (system ${want})`);
