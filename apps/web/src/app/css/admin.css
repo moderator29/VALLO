@@ -645,8 +645,9 @@
     border-color: var(--nf-selected-edges);
     box-shadow: var(--nf-selected-shadow);
   }
-  /* The count reads in the tab's own ink: at 0.85 opacity it fell under
-     4.5:1 on the light segmented track (axe, a11y-desks, light 390 and 1440). */
+  /* The count is never faded: at 0.85 opacity it fell under 4.5:1 on the
+     light segmented track (axe, a11y-desks, light 390 and 1440). Its ink and
+     plate are set with the tab row further down. */
   .nf-admin-tab__count {
     font-variant-numeric: tabular-nums;
   }
@@ -3209,9 +3210,18 @@
     padding: 0 var(--nf-space-2xs);
     border-radius: var(--nf-radius-badge);
     background: var(--nf-tier-plate-press);
+    /* Secondary ink, not the tab's muted ink: on its own plate over the light
+       segmented track the muted figure read 4.35:1, under 4.5 at 12px (axe
+       color-contrast, a11y-desks, /preview/f5/admin-queue light 1440). */
+    color: var(--nf-content-secondary);
     font-size: var(--nf-text-overline);
     font-weight: 600;
     line-height: 1.5;
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .nf-admin-tab:not(.nf-admin-tab--on):hover .nf-admin-tab__count {
+      color: inherit;
+    }
   }
   .nf-admin-tab--on .nf-admin-tab__count {
     background: var(--nf-brand-tint-2);

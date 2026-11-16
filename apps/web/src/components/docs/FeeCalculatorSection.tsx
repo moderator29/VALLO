@@ -1,6 +1,6 @@
 import { readListerFees } from "@/lib/site/lister-fees";
 import { DocCallout } from "./DocCallout";
-import { FeeCalculator } from "./FeeCalculator";
+import { FeeCalculator } from "./lazy";
 
 /**
  * THE FEE CALCULATOR, ON A PAGE. A server component: it reads the current

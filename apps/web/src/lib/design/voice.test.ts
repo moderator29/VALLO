@@ -122,7 +122,11 @@ describe("the State kit and the old families", () => {
   });
 
   it("announces every shared loading shell through the kit", () => {
-    expect(src("components/app/ScreenSkeleton.tsx")).toContain('<State kind="loading" title={label}');
+    /* The kit's loading drawing lives in `StateLoading` (so a loading screen
+       does not carry the kit's glyphs and actions), and `State` draws its own
+       loading kind by calling it: still one drawing, reached two ways. */
+    expect(src("components/app/ScreenSkeleton.tsx")).toContain("<StateLoading title={label}");
+    expect(src("components/ui/State.tsx")).toMatch(/if \(kind === "loading"\) \{[\s\S]*?<StateLoading title=\{title\}/);
     expect(src("components/social/profile/LoadingPeople.tsx")).toContain('<State kind="loading"');
   });
 });

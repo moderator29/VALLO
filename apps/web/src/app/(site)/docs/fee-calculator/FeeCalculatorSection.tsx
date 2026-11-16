@@ -1,5 +1,5 @@
 import { readFeeCalcConfig } from "./config";
-import { FeeCalculator } from "./FeeCalculator";
+import { FeeCalculator } from "./FeeCalculatorLazy";
 
 /**
  * The calculator with its rates: read on the server (`config.ts`), handed to

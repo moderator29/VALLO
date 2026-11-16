@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { panelClass } from "@/components/ui/Panel";
-import { State } from "@/components/ui/State";
+import { StateLoading } from "@/components/ui/StateLoading";
 
 /**
  * The pieces every `loading.tsx` is assembled from.
@@ -32,11 +32,14 @@ export function LoadingShell({
   children: ReactNode;
 }) {
   /* V-97: the one loading state. The route keeps its own skeleton; the kit
-     supplies the announcement, so every loading screen says it the same way. */
+     supplies the announcement, so every loading screen says it the same way.
+     `StateLoading` is that kit's loading drawing on its own, so a loading
+     screen (and `SignalHold` in every error boundary) does not carry the
+     kit's glyphs and actions with it. */
   return (
-    <State kind="loading" title={label} {...(className ? { className } : {})}>
+    <StateLoading title={label} {...(className ? { className } : {})}>
       {children}
-    </State>
+    </StateLoading>
   );
 }
 

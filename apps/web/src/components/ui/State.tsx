@@ -8,7 +8,7 @@ import { IconPlate } from "@/components/ui/IconPlate";
 import type { Icon3DName } from "@/components/ui/icon-3d";
 import { stateArtFor, stateGlyphFor } from "@/components/ui/state-art";
 import { glyphSrc } from "@/design-system/icons/glyphs";
-import { SkeletonText } from "@/components/ui/Skeleton";
+import { StateLoading } from "@/components/ui/StateLoading";
 import { STATE_TONE, stateRole, type StateKind } from "@/lib/design/voice";
 
 /**
@@ -147,22 +147,12 @@ export function State({
   const glyph = asked ? stateGlyphFor(undefined, asked) : undefined;
 
   if (kind === "loading") {
-    /* The title is read out, not shown: a live region announces its text, and
-       an aria-label on a status region is not reliably spoken. A route that
-       draws its own skeleton (the shape of the page that is coming) passes it
-       as children; without one, three lines stand in. */
+    /* One drawing, in its own module so a loading screen can reach it without
+       the glyphs, plates and actions below (`StateLoading.tsx`). */
     return (
-      <div
-        data-testid={testId}
-        data-state-kind="loading"
-        role={role}
-        aria-busy="true"
-        aria-live="polite"
-        className={children ? className : `flex flex-col px-lg py-section ${className ?? ""}`}
-      >
-        <span className="sr-only">{title}</span>
-        {children ?? <SkeletonText lines={3} />}
-      </div>
+      <StateLoading title={title} className={className} data-testid={testId}>
+        {children}
+      </StateLoading>
     );
   }
 

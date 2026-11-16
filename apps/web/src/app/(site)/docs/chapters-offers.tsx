@@ -1,9 +1,8 @@
 import Link from "next/link";
-import { DocButtons } from "@/components/docs/DocButton";
+import { DocButtons, StepGuide } from "@/components/docs/lazy";
 import { DocCallout } from "@/components/docs/DocCallout";
 import { DocTable, type DocTone } from "@/components/docs/DocTable";
 import { FeeCalculatorSection } from "@/components/docs/FeeCalculatorSection";
-import { StepGuide } from "@/components/docs/StepGuide";
 import { differenceOf, formatPct, nairaFull } from "@/lib/offers/format";
 import {
   AGREED_IS_NOT_SALE,
