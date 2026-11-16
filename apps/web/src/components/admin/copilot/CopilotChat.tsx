@@ -8,6 +8,7 @@ import { followUpsFor } from "@/lib/admin/copilot/follow-ups";
 import { useDictation } from "@/components/app/assistant/use-dictation";
 import { COPILOT_ASK_EVENT } from "./CopilotCapabilities";
 import { CopilotAnswer } from "./CopilotAnswer";
+import { CopilotFormCard } from "./CopilotFormCard";
 import { ProposalCard } from "./ProposalCard";
 import { DEFAULT_SETTINGS, LONG_CHAT_TURNS, readSettings, useCopilotChat, writeSettings, type CopilotSettings, type ThreadSummary } from "./use-copilot-chat";
 import "./admin-copilot.css";
@@ -126,7 +127,7 @@ export function CopilotChat({
 }) {
   const [settings, setSettings] = useState<CopilotSettings>(DEFAULT_SETTINGS);
   const chat = useCopilotChat({ storageKey, scope, deskName, context: context ?? null, settings });
-  const { turns, pending, tool, send, stop, askAgain, confirm, dismiss, newChat, threadId, history, threads, listing, loadThreads, openThread, deleteThread, renameThread, carry, startFreshWithSummary, takeBackLast } = chat;
+  const { turns, pending, tool, send, stop, askAgain, confirm, dismiss, newChat, threadId, history, threads, listing, loadThreads, openThread, deleteThread, renameThread, carry, startFreshWithSummary, takeBackLast, answerForm, skipForm } = chat;
   const [pins, setPins] = useState<string[]>([]);
   const [mine, setMine] = useState<CopilotCommand[]>([]);
   const [historyQuery, setHistoryQuery] = useState("");
@@ -376,7 +377,8 @@ export function CopilotChat({
   const newestAnswer = !pending && last?.role === "assistant" && last.text ? last : null;
   const askedLast = [...turns].reverse().find((t) => t.role === "user")?.text.trim().toLowerCase() ?? "";
   /* Never offer the question just asked as the next one. */
-  const nextQuestions = newestAnswer ? followUpsFor((newestAnswer.tools ?? []).map((t) => t.name), 4).filter((q) => q.toLowerCase() !== askedLast).slice(0, 3) : [];
+  const cardOpen = turns.some((t) => (t.forms ?? []).some((f) => f.status === "open"));
+  const nextQuestions = newestAnswer && !cardOpen ? followUpsFor((newestAnswer.tools ?? []).map((t) => t.name), 4).filter((q) => q.toLowerCase() !== askedLast).slice(0, 3) : [];
 
   return (
     <div className="nf-copilot" data-variant={variant}>
@@ -651,6 +653,9 @@ export function CopilotChat({
                           ) : null}
                         </div>
                       ) : null}
+                      {(turn.forms ?? []).map((f) => (
+                        <CopilotFormCard key={f.form.id} state={f} busy={pending} onSubmit={(answers) => answerForm(f.form.id, answers)} onSkip={() => skipForm(f.form.id)} />
+                      ))}
                       {turn.proposals.map((p) => (
                         <ProposalCard key={p.proposal.id} state={p} onConfirm={(typed) => void confirm(p.proposal, typed)} onDismiss={() => dismiss(p.proposal.id)} {...(onNavigate ? { onNavigate } : {})} />
                       ))}

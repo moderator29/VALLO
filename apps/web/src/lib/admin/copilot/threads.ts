@@ -12,6 +12,8 @@
  * still waiting is shown as expired: it can be asked for again, never pressed.
  */
 
+import { copilotFormSchema, type CopilotForm } from "./forms";
+
 export const MAX_STORED_TURNS = 80;
 export const MAX_TURN_TEXT = 8000;
 export const MAX_THREADS_LISTED = 30;
@@ -42,6 +44,8 @@ export type StoredTurn = {
   destinations: { label: string; href: string }[];
   /** What the copilot read for this answer, for the steps line and the next questions. */
   tools?: { name: string; label: string }[];
+  /** Question cards, with what became of each. A card read back that was still open shows as skipped. */
+  forms?: { form: CopilotForm; status: "open" | "sent" | "skipped"; answers?: Record<string, string | string[] | number | null> }[];
 };
 
 export type ThreadSummary = { id: string; title: string; desk: string; updatedAt: string };
@@ -122,8 +126,28 @@ export function cleanTurns(raw: unknown, { loading = false }: { loading?: boolea
           .slice(0, 12)
           .map((x) => ({ name: x.name, label: x.label.slice(0, 80) }))
       : [];
-    if (!text && proposals.length === 0) continue;
-    out.push({ id: str(t.id, 40) || `s${out.length}`, role: t.role, text, proposals, destinations, ...(tools.length ? { tools } : {}) });
+    const forms: NonNullable<StoredTurn["forms"]> = [];
+    for (const raw of Array.isArray(t.forms) ? t.forms.slice(0, 3) : []) {
+      if (!isObj(raw) || !isObj(raw.form)) continue;
+      const checked = copilotFormSchema.safeParse(raw.form);
+      const id = str((raw.form as Record<string, unknown>).id, 80);
+      if (!checked.success || !id) continue;
+      let status: "open" | "sent" | "skipped" = raw.status === "sent" ? "sent" : raw.status === "skipped" ? "skipped" : "open";
+      if (loading && status === "open") status = "skipped";
+      const answers: Record<string, string | string[] | number | null> = {};
+      if (isObj(raw.answers)) {
+        for (const f of checked.data.fields) {
+          const v = (raw.answers as Record<string, unknown>)[f.id];
+          if (typeof v === "string") answers[f.id] = v.slice(0, 200);
+          else if (typeof v === "number" && Number.isFinite(v)) answers[f.id] = v;
+          else if (Array.isArray(v)) answers[f.id] = v.filter((x): x is string => typeof x === "string").slice(0, 8).map((x) => x.slice(0, 60));
+          else answers[f.id] = null;
+        }
+      }
+      forms.push({ form: { ...checked.data, id }, status, ...(status === "sent" ? { answers } : {}) });
+    }
+    if (!text && proposals.length === 0 && forms.length === 0) continue;
+    out.push({ id: str(t.id, 40) || `s${out.length}`, role: t.role, text, proposals, destinations, ...(tools.length ? { tools } : {}), ...(forms.length ? { forms } : {}) });
   }
   return out;
 }

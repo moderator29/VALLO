@@ -1,6 +1,7 @@
 import type { z } from "zod";
 import type { StaffScope } from "@/lib/admin/guard";
 import type { StaffPosition } from "@/lib/admin/staff-positions";
+import type { CopilotForm } from "../forms";
 
 /**
  * ONE SHAPE FOR EVERY ADMIN COPILOT TOOL (copilot v2, 10 November 2026).
@@ -83,7 +84,7 @@ export type ToolLink = {
 };
 
 export type ToolResult =
-  | { ok: true; data: unknown; note?: string; proposal?: ProposalDraft; links?: readonly ToolLink[] }
+  | { ok: true; data: unknown; note?: string; proposal?: ProposalDraft; links?: readonly ToolLink[]; form?: CopilotForm }
   | { ok: false; error: string };
 
 /** The writes the act route can run. Each maps to one existing server action. */

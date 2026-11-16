@@ -32,12 +32,16 @@ import { SUPPORT_TOOLS } from "./support";
 import { TRUST_TOOLS } from "./trust";
 import { WAYFINDING_TOOLS } from "./wayfinding";
 import type { CopilotProposal, CopilotTool, CopilotViewer, ProposalDraft, ToolCtx } from "./types";
+import { copilotFormSchema, type CopilotForm } from "../forms";
+import { ASK_TOOLS } from "./ask";
 
 /**
  * THE COPILOT'S TOOLS, IN ONE LIST. Order is the order the model is shown them.
  */
 export const COPILOT_TOOLS: readonly CopilotTool[] = [
   ...MY_TOOLS,
+  /* Question cards (16 November 2026): every desk asks for details with a card to tap. */
+  ...ASK_TOOLS,
   /* Escalations (15 November 2026): open to every staff member, on every desk. */
   ...ESCALATION_TOOLS,
   /* Where do I go (16 November 2026): the console's own map, every desk. */
@@ -111,6 +115,8 @@ export type ToolRun = {
   proposal?: CopilotProposal;
   /** The destinations this viewer may be offered, already filtered by access. */
   destinations?: Destination[];
+  /** A question card for the person's screen (`ask_form`), checked against the schema again here. */
+  form?: CopilotForm;
 };
 
 const MAX_RESULT_CHARS = 14_000;
@@ -161,6 +167,11 @@ export async function runCopilotTool(name: string, input: unknown, ctx: ToolCtx,
       const proposal = finalizeProposal(tool.name, result.proposal, ctx);
       if (!proposal) return { ok: false, content: fence({ error: "Proposals are not available on this server just now. Tell the person to make the change on the desk." }) };
       return { ok: true, proposal, destinations, content: fence(payload, note) };
+    }
+    if (result.form) {
+      const checked = copilotFormSchema.safeParse(result.form);
+      if (!checked.success) return { ok: false, content: fence({ error: "That card does not pass the checks. Ask in a sentence instead." }) };
+      return { ok: true, destinations, form: { ...checked.data, id: result.form.id }, content: fence(payload, note) };
     }
     return { ok: true, destinations, content: fence(payload, note) };
   } catch {

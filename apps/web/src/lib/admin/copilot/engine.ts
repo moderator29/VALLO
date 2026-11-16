@@ -6,6 +6,7 @@ import { COPILOT_LIMITS } from "./capabilities";
 import { DESTINATION_SYNTAX, MAX_DESTINATIONS, type Destination } from "./destinations";
 import { runCopilotTool, toolDefinitions } from "./tools/registry";
 import type { CopilotProposal, CopilotTool, CopilotViewer } from "./tools/types";
+import type { CopilotForm } from "./forms";
 
 /**
  * THE ADMIN COPILOT, SHARED ENGINE (v2, 10 November 2026).
@@ -72,6 +73,7 @@ export const HOUSE_RULES: string[] = [
   "Address them by their first name once, naturally, not in every reply.",
   "Prefer calling a tool over guessing. Quote a number, a date, a name or a count only if a tool returned it THIS turn, and say which desk or read it came from (for example 'from the support queue'). Figures in the desk summary are fine to repeat as 'on this desk today'.",
   "If a tool returns nothing, fails, or says it could not be read, say so plainly and stop there. Never fill the gap with an estimate.",
+  "When you need two or more details before you can answer or act, ask with ask_form: a card of choices they tap, never a paragraph of questions they must type answers to. Offer choices you read from the desks, suggest a default, word the button as what happens next, then stop. Their answers come back as their next message, beginning with the card's title.",
   "Never claim that anything was done, sent, approved or paid unless a tool result in this turn confirms it. A proposal is not a change: until the person presses Confirm, nothing has happened.",
   "Never invent a figure, a case outcome, a member's details or a company policy. For every how-to, 'am I allowed' or 'who decides' question, call search_manual FIRST and answer from the passages, naming the chapter and giving its link. For a named task (approve a listing, a KYC check, a refund or payment dispute, a report, a ticket, escalating a case) call get_playbook and give the steps in order.",
   "Every staff member, on every desk, can escalate what they cannot or may not decide with the Escalate button at the top of any admin page (or /admin/escalations/new), and has their own escalations at /admin/escalations. For 'what is waiting on me', 'what did I raise' or 'did my escalation get an answer', call get_escalations and give each one's link. For 'how do I escalate this' or 'who do I send this to', call get_escalations and answer from its howToEscalate facts: the steps, where each kind of issue goes and the response times. You cannot raise, answer or close an escalation yourself. Remind them never to paste an ID number or bank detail into one, and never to tell a member they are suspected.",
@@ -162,6 +164,8 @@ export type AdminCopilotEvent =
   | { type: "text"; text: string }
   | { type: "tool"; id: string; name: string; label: string; phase: "start" | "done" | "error" }
   | { type: "proposal"; proposal: CopilotProposal }
+  /** A question card (`ask_form`): choices to tap and one button; the answers come back as the next message. */
+  | { type: "form"; form: CopilotForm }
   /**
    * The pages this person may be taken to, as the tools returned them, already
    * filtered against their own access. The renderer draws a button only for
@@ -342,6 +346,7 @@ export async function* streamAdminCopilot(
         const tool = req.tools.find((t) => t.name === use.name);
         yield { type: "tool", id: String(use.id), name: String(use.name), label: tool?.status ?? "Working", phase: run.ok ? "done" : "error" };
         if (run.proposal) yield { type: "proposal", proposal: run.proposal };
+        if (run.form) yield { type: "form", form: run.form };
         for (const link of run.destinations ?? []) {
           if (!offered.has(link.href)) {
             offered.set(link.href, link.label);

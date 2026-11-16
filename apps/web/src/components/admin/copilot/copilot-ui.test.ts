@@ -69,4 +69,24 @@ describe("copilot UI", () => {
     expect(html).toContain("What I will not do");
     expect(html).toContain("I never move money");
   });
+  it("draws a question card: each question with its choices, the card's own button and Skip, and locks with the answers once sent", async () => {
+    const html = await render(`
+      import { CopilotFormCard } from "@/components/admin/copilot/CopilotFormCard";
+      const form = { id: "f1", title: "Travel month", submit: "Find Qatar flights", fields: [
+        { id: "month", label: "Travel month", kind: "single", options: ["December 2026", "January 2027"], initial: "December 2026" },
+        { id: "stay", label: "How long will you stay?", kind: "scale", lowLabel: "Short", highLabel: "Long" },
+      ] };
+      export const html = () => renderToStaticMarkup(<div>
+        <CopilotFormCard state={{ form, status: "open" }} busy={false} onSubmit={() => {}} onSkip={() => {}} />
+        <CopilotFormCard state={{ form: { ...form, id: "f2" }, status: "sent", answers: { month: "January 2027", stay: 4 } }} busy={false} onSubmit={() => {}} onSkip={() => {}} />
+      </div>);
+    `);
+    expect(html).toContain("December 2026");
+    expect(html).toContain("Find Qatar flights");
+    expect(html).toContain("Skip");
+    expect(html).toContain('type="radio"');
+    expect(html).toContain("<legend");
+    expect(html).toContain("4 out of 5");
+    expect(html).toContain("Sent");
+  });
 });

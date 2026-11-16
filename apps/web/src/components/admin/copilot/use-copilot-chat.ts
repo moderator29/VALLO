@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { banner } from "@/lib/ui/toast";
 import type { Destination } from "@/lib/admin/copilot/destinations";
 import type { CopilotProposal } from "@/lib/admin/copilot/tools/types";
+import { answersToMessage, type CopilotForm, type FormAnswers } from "@/lib/admin/copilot/forms";
 
 /**
  * The copilot's conversation state, shared by the desk sheet and the full
@@ -25,7 +26,12 @@ export type Turn = {
   destinations?: Destination[];
   /** What the copilot read or prepared for this answer, by tool name and by its plain label. */
   tools?: { name: string; label: string }[];
+  /** Question cards the copilot put on screen in this answer, and what became of each. */
+  forms?: FormState[];
 };
+
+/** A question card and its fate: still open, sent with these answers, or skipped. */
+export type FormState = { form: CopilotForm; status: "open" | "sent" | "skipped"; answers?: FormAnswers };
 
 /**
  * THE PERSON'S OWN COPILOT SETTINGS (16 November 2026), kept on this device:
@@ -71,6 +77,7 @@ type StreamEvent =
   | { type: "text"; text: string }
   | { type: "tool"; id: string; name: string; label: string; phase: "start" | "done" | "error" }
   | { type: "proposal"; proposal: CopilotProposal }
+  | { type: "form"; form: CopilotForm }
   | { type: "destinations"; links: Destination[] }
   | { type: "done" }
   | { type: "error"; message: string };
@@ -264,6 +271,9 @@ export function useCopilotChat({ storageKey, scope, deskName, context, settings 
                 const step = { name: String(event.name ?? ""), label: String(event.label ?? "") };
                 patchLast((t) => ((t.tools ?? []).some((x) => x.name === step.name) ? t : { ...t, tools: [...(t.tools ?? []), step] }));
               }
+            } else if (event.type === "form") {
+              const card = event.form;
+              if (card && typeof card.id === "string" && Array.isArray(card.fields)) patchLast((t) => ({ ...t, forms: [...(t.forms ?? []), { form: card, status: "open" }] }));
             } else if (event.type === "proposal") {
               patchLast((t) => ({ ...t, proposals: [...t.proposals, { proposal: event.proposal, status: "pending" }] }));
             } else if (event.type === "destinations") {
@@ -346,6 +356,24 @@ export function useCopilotChat({ storageKey, scope, deskName, context, settings 
       banner.error("Could not reach the console just now.");
       return false;
     }
+  }, []);
+
+  /** Send a question card's answers as the person's next message; the card locks showing them. */
+  const answerForm = useCallback(
+    (formId: string, answers: FormAnswers) => {
+      if (pending) return;
+      const owner = turnsRef.current.find((t) => (t.forms ?? []).some((f) => f.form.id === formId));
+      const state = owner?.forms?.find((f) => f.form.id === formId);
+      if (!state || state.status !== "open") return;
+      setTurns((all) => all.map((t) => ({ ...t, forms: t.forms?.map((f) => (f.form.id === formId ? { ...f, status: "sent" as const, answers } : f)) })));
+      void send(answersToMessage(state.form, answers));
+    },
+    [pending, send],
+  );
+
+  /** Set a card aside without answering it. */
+  const skipForm = useCallback((formId: string) => {
+    setTurns((all) => all.map((t) => ({ ...t, forms: t.forms?.map((f) => (f.form.id === formId && f.status === "open" ? { ...f, status: "skipped" as const } : f)) })));
   }, []);
 
   /** Stop the answer being written. What has arrived stays on screen. */
@@ -492,5 +520,5 @@ export function useCopilotChat({ storageKey, scope, deskName, context, settings 
     [newChat],
   );
 
-  return { turns, pending, tool, send, stop, askAgain, confirm, dismiss, newChat, threadId, history, threads, listing, loadThreads, openThread, deleteThread, renameThread, carry, startFreshWithSummary, takeBackLast };
+  return { turns, pending, tool, send, stop, askAgain, confirm, dismiss, newChat, threadId, history, threads, listing, loadThreads, openThread, deleteThread, renameThread, carry, startFreshWithSummary, takeBackLast, answerForm, skipForm };
 }
