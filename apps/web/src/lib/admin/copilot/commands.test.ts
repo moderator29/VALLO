@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { COPILOT_COMMANDS, commandsFor, matchCommands } from "./commands";
+import { COPILOT_COMMANDS, commandKeyFor, commandsFor, matchCommands } from "./commands";
 import { followUpsFor } from "./follow-ups";
 
 describe("the copilot's quick commands", () => {
@@ -35,5 +35,14 @@ describe("what to ask next", () => {
     expect(followUpsFor(["get_support_queue"])).toEqual(["Reply to the oldest ticket", "Which tickets are past the promised time?", "What should I do next?"]);
     expect(followUpsFor([])).toHaveLength(3);
     expect(new Set(followUpsFor(["get_support_queue", "get_support_ticket"])).size).toBe(3);
+  });
+});
+
+describe("your own commands", () => {
+  it("names a saved question by its first words, never one already taken", () => {
+    expect(commandKeyFor("Which tickets are late today?", [])).toBe("whichtickets");
+    expect(commandKeyFor("Which tickets are late today?", ["whichtickets"])).toBe("whichtickets2");
+    expect(commandKeyFor("?? !!", [])).toBe("mine");
+    expect(commandKeyFor("Today please", COPILOT_COMMANDS.map((c) => c.key))).toBe("todayplease");
   });
 });

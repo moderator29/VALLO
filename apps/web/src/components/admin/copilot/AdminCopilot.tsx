@@ -17,6 +17,9 @@ import "./admin-copilot.css";
  * about who the person is. The conversation is the shared `CopilotChat`, so
  * the sheet and the full page behave the same.
  */
+/** The copilot on the page that answers Ctrl or Cmd and J. */
+let shortcutOwner: object | null = null;
+
 export function AdminCopilot({
   scope,
   deskName,
@@ -45,6 +48,25 @@ export function AdminCopilot({
   const [open, setOpen] = useState(false);
   const launchRef = useRef<HTMLButtonElement>(null);
   const wasOpen = useRef(false);
+
+  /* Ctrl or Cmd and J opens the copilot from any desk (16 November 2026).
+     One copilot answers per page: the first one mounted claims the key. */
+  useEffect(() => {
+    if (shortcutOwner) return;
+    const me = {};
+    shortcutOwner = me;
+    const onKey = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && !e.altKey && !e.shiftKey && e.key.toLowerCase() === "j") {
+        e.preventDefault();
+        setOpen(true);
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      if (shortcutOwner === me) shortcutOwner = null;
+    };
+  }, []);
 
   useEffect(() => {
     /* Focus goes back to the button only after the sheet was open, never on the first paint. */

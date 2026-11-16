@@ -41,7 +41,10 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
   const row = { title: threadTitle(turns), desk: cleanDesk(body.desk), turns, updated_at: new Date().toISOString() };
 
   if (isThreadId(body.id)) {
-    const { data, error } = await door.db.from("copilot_threads").update(row).eq("id", body.id).select("id").maybeSingle();
+    /* An update keeps the conversation's name: the person may have renamed it. */
+    const { title: _title, ...kept } = row;
+    void _title;
+    const { data, error } = await door.db.from("copilot_threads").update(kept).eq("id", body.id).select("id").maybeSingle();
     if (error) return notSetUp(error) ? NextResponse.json(NOT_SET_UP_BODY, { status: 200, headers: NO_STORE }) : NextResponse.json({ ok: false, message: "This conversation could not be saved just now." }, { status: 502, headers: NO_STORE });
     /* Updated: done. No row: it was deleted elsewhere, or is not theirs, so it is saved as a new one. */
     if (data) return NextResponse.json({ ok: true, id: body.id }, { headers: NO_STORE });

@@ -3,7 +3,7 @@ import { cleanTurns, isThreadId } from "@/lib/admin/copilot/threads";
 import { isSameOriginRequest } from "@/lib/security/request-origin";
 import { NOT_SET_UP_BODY, NO_STORE, notSetUp, threadsDoor } from "../store";
 
-/** One saved conversation: open it (GET) or delete it (DELETE). Only the owner's own, by the table's policies. */
+/** One saved conversation: open it (GET), rename it (PATCH) or delete it (DELETE). Only the owner's own, by the table's policies. */
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
@@ -28,4 +28,23 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
   const { error } = await door.db.from("copilot_threads").delete().eq("id", id);
   if (error) return notSetUp(error) ? NextResponse.json(NOT_SET_UP_BODY, { status: 200, headers: NO_STORE }) : NextResponse.json({ ok: false, message: "That conversation could not be deleted just now." }, { status: 502, headers: NO_STORE });
   return NextResponse.json({ ok: true }, { headers: NO_STORE });
+}
+
+export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }): Promise<NextResponse> {
+  if (!isSameOriginRequest(request)) return NextResponse.json({ ok: false, message: "That request did not come from the console." }, { status: 403 });
+  const { id } = await params;
+  if (!isThreadId(id)) return NextResponse.json({ ok: false, message: "That conversation could not be found." }, { status: 404, headers: NO_STORE });
+  let title = "";
+  try {
+    title = String(((await request.json()) as { title?: unknown }).title ?? "").replace(/\s+/g, " ").trim().slice(0, 120);
+  } catch {
+    return NextResponse.json({ ok: false, message: "That request could not be read." }, { status: 400 });
+  }
+  if (!title) return NextResponse.json({ ok: false, message: "Give it a name first." }, { status: 400, headers: NO_STORE });
+  const door = await threadsDoor();
+  if (!door.ok) return NextResponse.json({ ok: false, message: door.message }, { status: door.status, headers: NO_STORE });
+  const { data, error } = await door.db.from("copilot_threads").update({ title }).eq("id", id).select("id").maybeSingle();
+  if (error) return notSetUp(error) ? NextResponse.json(NOT_SET_UP_BODY, { status: 200, headers: NO_STORE }) : NextResponse.json({ ok: false, message: "That conversation could not be renamed just now." }, { status: 502, headers: NO_STORE });
+  if (!data) return NextResponse.json({ ok: false, message: "That conversation could not be found." }, { status: 404, headers: NO_STORE });
+  return NextResponse.json({ ok: true, title }, { headers: NO_STORE });
 }

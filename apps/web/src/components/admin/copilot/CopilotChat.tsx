@@ -3,12 +3,13 @@
 import { useEffect, useId, useMemo, useRef, useState, type KeyboardEvent } from "react";
 import { UiIcon } from "@/design-system/icons/UiIcon";
 import { banner } from "@/lib/ui/toast";
-import { COPILOT_COMMANDS, matchCommands, type CopilotCommand } from "@/lib/admin/copilot/commands";
+import { COPILOT_COMMANDS, commandKeyFor, matchCommands, type CopilotCommand } from "@/lib/admin/copilot/commands";
 import { followUpsFor } from "@/lib/admin/copilot/follow-ups";
+import { useDictation } from "@/components/app/assistant/use-dictation";
 import { COPILOT_ASK_EVENT } from "./CopilotCapabilities";
 import { CopilotAnswer } from "./CopilotAnswer";
 import { ProposalCard } from "./ProposalCard";
-import { DEFAULT_SETTINGS, readSettings, useCopilotChat, writeSettings, type CopilotSettings, type ThreadSummary } from "./use-copilot-chat";
+import { DEFAULT_SETTINGS, LONG_CHAT_TURNS, readSettings, useCopilotChat, writeSettings, type CopilotSettings, type ThreadSummary } from "./use-copilot-chat";
 import "./admin-copilot.css";
 
 /**
@@ -57,6 +58,28 @@ function deskLabel(desk: string): string {
   return words ? words.charAt(0).toUpperCase() + words.slice(1) : "Console";
 }
 
+/* ------------------------------------------------ kept on this device */
+
+const PINS_KEY = "vallo.copilot.pins.v1";
+const MINE_KEY = "vallo.copilot.mine.v1";
+const MAX_MINE = 12;
+
+function readJson<T>(key: string, fallback: T): T {
+  try {
+    const raw = window.localStorage.getItem(key);
+    return raw ? (JSON.parse(raw) as T) : fallback;
+  } catch {
+    return fallback;
+  }
+}
+function writeJson(key: string, value: unknown): void {
+  try {
+    window.localStorage.setItem(key, JSON.stringify(value));
+  } catch {
+    /* Blocked storage: it holds for this visit. */
+  }
+}
+
 /** Until the server answers, only the commands every member of staff holds. */
 const EVERYONE: readonly CopilotCommand[] = COPILOT_COMMANDS.filter((c) => !c.scopes && !c.superAdmin);
 
@@ -103,7 +126,18 @@ export function CopilotChat({
 }) {
   const [settings, setSettings] = useState<CopilotSettings>(DEFAULT_SETTINGS);
   const chat = useCopilotChat({ storageKey, scope, deskName, context: context ?? null, settings });
-  const { turns, pending, tool, send, stop, askAgain, confirm, dismiss, newChat, threadId, history, threads, listing, loadThreads, openThread, deleteThread } = chat;
+  const { turns, pending, tool, send, stop, askAgain, confirm, dismiss, newChat, threadId, history, threads, listing, loadThreads, openThread, deleteThread, renameThread, carry, startFreshWithSummary, takeBackLast } = chat;
+  const [pins, setPins] = useState<string[]>([]);
+  const [mine, setMine] = useState<CopilotCommand[]>([]);
+  const [historyQuery, setHistoryQuery] = useState("");
+  const [renaming, setRenaming] = useState<{ id: string; title: string } | null>(null);
+  const [speakingId, setSpeakingId] = useState<string | null>(null);
+  const [canSpeak, setCanSpeak] = useState(false);
+  const dictationBase = useRef("");
+  const dictation = useDictation({
+    onText: (spoken) => setDraft(`${dictationBase.current}${dictationBase.current && spoken ? " " : ""}${spoken}`),
+    onRefused: () => banner.error("Allow the microphone to dictate."),
+  });
   const [draft, setDraft] = useState("");
   const [panel, setPanel] = useState<Panel>("chat");
   const [now, setNow] = useState(0);
@@ -116,9 +150,79 @@ export function CopilotChat({
   const end = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- read once from this device after mount
+    /* eslint-disable react-hooks/set-state-in-effect -- read once from this device after mount */
     setSettings(readSettings());
+    setPins(readJson<string[]>(PINS_KEY, []).filter((x) => typeof x === "string").slice(0, 50));
+    setMine(
+      readJson<{ key: string; prompt: string }[]>(MINE_KEY, [])
+        .filter((c) => c && typeof c.key === "string" && typeof c.prompt === "string")
+        .slice(0, MAX_MINE)
+        .map((c) => ({ key: c.key, prompt: c.prompt, hint: c.prompt, group: "Yours" as const })),
+    );
+    setCanSpeak(typeof window !== "undefined" && "speechSynthesis" in window);
+    /* eslint-enable react-hooks/set-state-in-effect */
   }, []);
+
+  useEffect(() => () => {
+    if (typeof window !== "undefined" && "speechSynthesis" in window) window.speechSynthesis.cancel();
+  }, []);
+
+  const togglePin = (id: string) => {
+    setPins((all) => {
+      const next = all.includes(id) ? all.filter((x) => x !== id) : [id, ...all];
+      writeJson(PINS_KEY, next);
+      return next;
+    });
+  };
+
+  const saveAsCommand = (prompt: string) => {
+    setMine((all) => {
+      if (all.some((c) => c.prompt === prompt)) {
+        banner.quick("Already one of your commands");
+        return all;
+      }
+      const key = commandKeyFor(prompt, [...all.map((c) => c.key), ...COPILOT_COMMANDS.map((c) => c.key)]);
+      const next = [{ key, prompt, hint: prompt, group: "Yours" as const }, ...all].slice(0, MAX_MINE);
+      writeJson(MINE_KEY, next.map((c) => ({ key: c.key, prompt: c.prompt })));
+      banner.quick(`Saved as /${key}`);
+      return next;
+    });
+  };
+
+  const forgetCommand = (key: string) => {
+    setMine((all) => {
+      const next = all.filter((c) => c.key !== key);
+      writeJson(MINE_KEY, next.map((c) => ({ key: c.key, prompt: c.prompt })));
+      return next;
+    });
+  };
+
+  const readAloud = (id: string, text: string) => {
+    if (!("speechSynthesis" in window)) return;
+    const synth = window.speechSynthesis;
+    if (speakingId === id) {
+      synth.cancel();
+      setSpeakingId(null);
+      return;
+    }
+    synth.cancel();
+    const utterance = new SpeechSynthesisUtterance(text.replace(/[*#>`|]/g, " ").replace(/\s+/g, " "));
+    utterance.lang = "en-NG";
+    utterance.onend = () => setSpeakingId((cur) => (cur === id ? null : cur));
+    utterance.onerror = () => setSpeakingId((cur) => (cur === id ? null : cur));
+    setSpeakingId(id);
+    synth.speak(utterance);
+  };
+
+  const copyConversation = async () => {
+    const text = turns.map((t) => `${t.role === "user" ? "You" : "Copilot"}: ${t.text.replace(/\*\*/g, "")}`).join("\n\n");
+    try {
+      await navigator.clipboard.writeText(text);
+      banner.quick("Conversation copied");
+    } catch {
+      banner.error("Could not copy. Select the text and copy it by hand.");
+    }
+  };
 
   /* The commands this person's own desks open, from the server. */
   useEffect(() => {
@@ -173,7 +277,7 @@ export function CopilotChat({
     submitRef.current = submit;
   });
 
-  const menu = useMemo(() => (menuClosed ? null : matchCommands(draft, commands)), [draft, commands, menuClosed]);
+  const menu = useMemo(() => (menuClosed ? null : matchCommands(draft, [...mine, ...commands])), [draft, commands, mine, menuClosed]);
   const menuOpen = Boolean(menu && menu.length > 0);
 
   /* The clock for "2 h ago", read once each time History opens. */
@@ -270,7 +374,9 @@ export function CopilotChat({
   const last = turns[turns.length - 1];
   const writing = pending && last?.role === "assistant" && last.text === "";
   const newestAnswer = !pending && last?.role === "assistant" && last.text ? last : null;
-  const nextQuestions = newestAnswer ? followUpsFor((newestAnswer.tools ?? []).map((t) => t.name)) : [];
+  const askedLast = [...turns].reverse().find((t) => t.role === "user")?.text.trim().toLowerCase() ?? "";
+  /* Never offer the question just asked as the next one. */
+  const nextQuestions = newestAnswer ? followUpsFor((newestAnswer.tools ?? []).map((t) => t.name), 4).filter((q) => q.toLowerCase() !== askedLast).slice(0, 3) : [];
 
   return (
     <div className="nf-copilot" data-variant={variant}>
@@ -333,22 +439,67 @@ export function CopilotChat({
           ) : history !== "off" && threads.length === 0 ? (
             <p className="nf-copilot-history__note">{listing === "ready" ? "Nothing saved yet. Every conversation is kept here after the first answer." : "Loading your conversations"}</p>
           ) : history !== "off" ? (
-            <ul className="nf-copilot-history__list">
-              {threads.map((thread) => (
-                <li key={thread.id} className="nf-copilot-history__item" data-current={thread.id === threadId || undefined}>
-                  <button type="button" className="nf-copilot-history__open nf-tap" onClick={() => void pick(thread)}>
-                    <span className="nf-copilot-history__name">{thread.title}</span>
-                    <span className="nf-copilot-history__meta">
-                      {deskLabel(thread.desk)}
-                      {now ? ` · ${ago(thread.updatedAt, now)}` : ""}
-                    </span>
-                  </button>
-                  <button type="button" className="nf-copilot-history__delete nf-tap" onClick={() => void deleteThread(thread.id)} aria-label={`Delete "${thread.title}"`}>
-                    <UiIcon name="trash" size={18} weight="lean" />
-                  </button>
-                </li>
-              ))}
-            </ul>
+            <>
+              <label className="nf-copilot-history__search">
+                <UiIcon name="search" size={18} weight="lean" />
+                <span className="sr-only">Search your conversations</span>
+                <input type="search" value={historyQuery} onChange={(e) => setHistoryQuery(e.target.value)} placeholder="Search your conversations" data-testid="copilot-history-search" />
+              </label>
+              <ul className="nf-copilot-history__list">
+                {[...threads]
+                  .filter((t) => !historyQuery.trim() || `${t.title} ${t.desk}`.toLowerCase().includes(historyQuery.trim().toLowerCase()))
+                  .sort((a, b) => Number(pins.includes(b.id)) - Number(pins.includes(a.id)))
+                  .map((thread) => {
+                    const pinned = pins.includes(thread.id);
+                    const isRenaming = renaming?.id === thread.id;
+                    return (
+                      <li key={thread.id} className="nf-copilot-history__item" data-current={thread.id === threadId || undefined} data-pinned={pinned || undefined}>
+                        {isRenaming ? (
+                          <form
+                            className="nf-copilot-history__rename"
+                            onSubmit={async (e) => {
+                              e.preventDefault();
+                              if (await renameThread(thread.id, renaming.title)) setRenaming(null);
+                            }}
+                          >
+                            <label className="sr-only" htmlFor={`rename-${thread.id}`}>
+                              New name
+                            </label>
+                            <input id={`rename-${thread.id}`} value={renaming.title} maxLength={120} autoFocus onChange={(e) => setRenaming({ id: thread.id, title: e.target.value })} onKeyDown={(e) => e.key === "Escape" && setRenaming(null)} />
+                            <button type="submit" className="nf-copilot-history__icon nf-tap" aria-label="Save the name">
+                              <UiIcon name="check" size={18} weight="lean" />
+                            </button>
+                          </form>
+                        ) : (
+                          <button type="button" className="nf-copilot-history__open nf-tap" onClick={() => void pick(thread)}>
+                            <span className="nf-copilot-history__name">
+                              {pinned ? <UiIcon name="pin" size={14} weight="lean" /> : null}
+                              {thread.title}
+                            </span>
+                            <span className="nf-copilot-history__meta">
+                              {deskLabel(thread.desk)}
+                              {now ? ` · ${ago(thread.updatedAt, now)}` : ""}
+                            </span>
+                          </button>
+                        )}
+                        {!isRenaming ? (
+                          <span className="nf-copilot-history__tools">
+                            <button type="button" className="nf-copilot-history__icon nf-tap" onClick={() => togglePin(thread.id)} aria-pressed={pinned} aria-label={pinned ? `Unpin "${thread.title}"` : `Pin "${thread.title}"`}>
+                              <UiIcon name="pin" size={18} weight="lean" />
+                            </button>
+                            <button type="button" className="nf-copilot-history__icon nf-tap" onClick={() => setRenaming({ id: thread.id, title: thread.title })} aria-label={`Rename "${thread.title}"`}>
+                              <UiIcon name="pencil" size={18} weight="lean" />
+                            </button>
+                            <button type="button" className="nf-copilot-history__delete nf-tap" onClick={() => void deleteThread(thread.id)} aria-label={`Delete "${thread.title}"`}>
+                              <UiIcon name="trash" size={18} weight="lean" />
+                            </button>
+                          </span>
+                        ) : null}
+                      </li>
+                    );
+                  })}
+              </ul>
+            </>
           ) : null}
         </section>
       ) : panel === "settings" ? (
@@ -368,10 +519,46 @@ export function CopilotChat({
           <Toggle on={settings.showSteps} onChange={(showSteps) => changeSettings({ showSteps })} label="Show the steps it took" hint="What it read or prepared, under each answer" testId="copilot-setting-steps" />
           <Toggle on={settings.saveHistory} onChange={(saveHistory) => changeSettings({ saveHistory })} label="Save conversations" hint="Kept in History, on every device you sign in on" testId="copilot-setting-history" />
           <Toggle on={settings.enterSends} onChange={(enterSends) => changeSettings({ enterSends })} label="Enter sends" hint="Off: Enter starts a new line and the arrow sends" testId="copilot-setting-enter" />
-          <p className="nf-copilot-history__note">Type / in the message box for quick commands. Every change I offer shows a preview first and happens only when you press its button.</p>
+          {mine.length > 0 ? (
+            <div className="nf-copilot-mine">
+              <p className="nf-copilot-seg__legend">Your commands</p>
+              <ul className="nf-copilot-history__list">
+                {mine.map((c) => (
+                  <li key={c.key} className="nf-copilot-history__item">
+                    <span className="nf-copilot-history__open">
+                      <span className="nf-copilot-history__name">/{c.key}</span>
+                      <span className="nf-copilot-history__meta">{c.prompt}</span>
+                    </span>
+                    <button type="button" className="nf-copilot-history__delete nf-tap" onClick={() => forgetCommand(c.key)} aria-label={`Forget /${c.key}`}>
+                      <UiIcon name="trash" size={18} weight="lean" />
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
+          {turns.length > 0 ? (
+            <button type="button" className="nf-copilot-toggle nf-tap" onClick={() => void copyConversation()} data-testid="copilot-copy-all">
+              <span className="nf-copilot-toggle__words">
+                <span className="nf-copilot-toggle__label">Copy this conversation</span>
+                <span className="nf-copilot-toggle__hint">Every question and answer, as plain words</span>
+              </span>
+              <UiIcon name="clipboard-list" size={20} weight="lean" />
+            </button>
+          ) : null}
+          <p className="nf-copilot-history__note">Type / in the message box for quick commands. Save any question you ask often as your own command from the bookmark under it. Ctrl or Cmd and J opens me from any desk. Every change I offer shows a preview first and happens only when you press its button.</p>
         </section>
       ) : (
         <div className="nf-copilot-thread" aria-live="polite" aria-busy={pending} data-testid="admin-copilot-thread">
+          {carry ? (
+            <details className="nf-copilot-carry" data-testid="copilot-carry">
+              <summary>
+                <UiIcon name="history" size={16} weight="lean" />
+                Carrying a summary of your last conversation
+              </summary>
+              <p>{carry}</p>
+            </details>
+          ) : null}
           {turns.length === 0 ? (
             <div className="nf-copilot-empty">
               <span className="nf-copilot-empty__mark" aria-hidden="true">
@@ -395,9 +582,35 @@ export function CopilotChat({
               return (
                 <div key={turn.id} className="nf-copilot-row" data-role={turn.role}>
                   {turn.role === "user" ? (
-                    <p className="nf-copilot-turn" data-role="user">
-                      {turn.text}
-                    </p>
+                    <>
+                      <p className="nf-copilot-turn" data-role="user">
+                        {turn.text}
+                      </p>
+                      {!pending ? (
+                        <div className="nf-copilot-acts nf-copilot-acts--mine">
+                          {i >= turns.length - 2 ? (
+                            <button
+                              type="button"
+                              className="nf-copilot-act nf-tap"
+                              onClick={() => {
+                                const text = takeBackLast();
+                                if (text !== null) {
+                                  setDraft(text);
+                                  window.requestAnimationFrame(() => input.current?.focus({ preventScroll: true }));
+                                }
+                              }}
+                              aria-label="Edit this question"
+                              data-testid="copilot-edit-last"
+                            >
+                              <UiIcon name="pencil" size={16} weight="lean" />
+                            </button>
+                          ) : null}
+                          <button type="button" className="nf-copilot-act nf-tap" onClick={() => saveAsCommand(turn.text)} aria-label="Save as my command">
+                            <UiIcon name="bookmark" size={16} weight="lean" />
+                          </button>
+                        </div>
+                      ) : null}
+                    </>
                   ) : (
                     <>
                       {turn.text ? (
@@ -422,6 +635,12 @@ export function CopilotChat({
                                 <UiIcon name="clipboard-list" size={16} weight="lean" />
                                 Copy
                               </button>
+                              {canSpeak ? (
+                                <button type="button" className="nf-copilot-act nf-tap" onClick={() => readAloud(turn.id, turn.text)} aria-pressed={speakingId === turn.id}>
+                                  <UiIcon name="volume" size={16} weight="lean" />
+                                  {speakingId === turn.id ? "Stop" : "Read"}
+                                </button>
+                              ) : null}
                               {isNewest ? (
                                 <button type="button" className="nf-copilot-act nf-tap" onClick={askAgain} data-testid="copilot-ask-again">
                                   <UiIcon name="repost-loop" size={16} weight="lean" />
@@ -462,6 +681,16 @@ export function CopilotChat({
                 </li>
               ))}
             </ul>
+          ) : null}
+          {!pending && turns.length >= LONG_CHAT_TURNS ? (
+            <section className="nf-copilot-long" data-testid="copilot-long-chat">
+              <p className="nf-copilot-long__title">This conversation is getting long</p>
+              <p className="nf-copilot-long__body">I read only the newest messages, so the start is fading for me. Start fresh with a summary and nothing is lost.</p>
+              <button type="button" className="nf-copilot-long__btn nf-tap" onClick={() => void startFreshWithSummary()}>
+                <UiIcon name="repost-loop" size={18} weight="lean" />
+                Start fresh with a summary
+              </button>
+            </section>
           ) : null}
           <div ref={end} />
         </div>
@@ -517,6 +746,20 @@ export function CopilotChat({
             aria-controls={menuOpen ? menuId : undefined}
             aria-autocomplete="list"
           />
+          {dictation.supported && !pending ? (
+            <button
+              type="button"
+              className="nf-copilot-mic nf-tap"
+              aria-label={dictation.listening ? "Stop dictating" : "Dictate"}
+              aria-pressed={dictation.listening}
+              onClick={() => {
+                if (!dictation.listening) dictationBase.current = draft.trim();
+                dictation.toggle();
+              }}
+            >
+              <UiIcon name={dictation.listening ? "mic-off" : "mic"} size={20} weight="lean" />
+            </button>
+          ) : null}
           {pending ? (
             <button type="submit" className="nf-copilot-send nf-tap" aria-label="Stop the answer" data-testid="copilot-stop">
               <span className="nf-copilot-send__stop" aria-hidden="true" />

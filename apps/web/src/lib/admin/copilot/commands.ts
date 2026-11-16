@@ -31,11 +31,12 @@ export type CopilotCommand = {
   /** The super admin alone. */
   superAdmin?: true;
   /** How the menu groups it. */
-  group: "Today" | "Your desks" | "Do something" | "Platform" | "Chat";
+  group: "Yours" | "Today" | "Your desks" | "Do something" | "Platform" | "Chat";
 };
 
 export const COPILOT_COMMANDS: readonly CopilotCommand[] = [
   { key: "today", group: "Today", hint: "What needs you first today", prompt: "What needs me first today?" },
+  { key: "brief", group: "Today", hint: "Your morning brief, across everything you hold", prompt: "Give me my morning brief: what is waiting on me, what is overdue, what changed since yesterday, and the three things I should do first." },
   { key: "tasks", group: "Today", hint: "Your open tasks and what is overdue", prompt: "What are my open tasks, and what is overdue?" },
   { key: "escalations", group: "Today", hint: "Escalations waiting on you", prompt: "What escalations are waiting on me, most urgent first?" },
   { key: "news", group: "Today", hint: "The latest staff announcements", prompt: "What are the latest staff announcements?" },
@@ -99,4 +100,12 @@ export function matchCommands(draft: string, list: readonly CopilotCommand[]): C
   const contains = list.filter((c) => !c.key.startsWith(q) && c.key.includes(q));
   const hints = list.filter((c) => !c.key.includes(q) && c.hint.toLowerCase().includes(q));
   return [...starts, ...contains, ...hints];
+}
+
+/** A short name for a question saved as the person's own command: its first two words, letters only, never one already taken. */
+export function commandKeyFor(prompt: string, taken: readonly string[]): string {
+  const base = prompt.toLowerCase().replace(/[^a-z ]/g, " ").split(/\s+/).filter((w) => w.length > 2).slice(0, 2).join("").slice(0, 14) || "mine";
+  let key = base;
+  for (let n = 2; taken.includes(key); n += 1) key = `${base}${n}`;
+  return key;
 }

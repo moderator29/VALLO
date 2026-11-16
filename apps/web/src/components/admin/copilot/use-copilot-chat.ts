@@ -75,6 +75,15 @@ type StreamEvent =
   | { type: "done" }
   | { type: "error"; message: string };
 
+/** The desk's own context, with a carried summary in front of it, within the route's 2,000 characters. */
+export function withCarry(carry: string | null, context: string | null): string | null {
+  const parts = [carry ? `Summary of the conversation before this one: ${carry}` : null, context].filter((p): p is string => Boolean(p));
+  return parts.length ? parts.join("\n").slice(0, 2000) : null;
+}
+
+/** Past this many turns the copilot no longer reads the start (it reads the newest twenty). */
+export const LONG_CHAT_TURNS = 18;
+
 let counter = 0;
 const newId = () => `t${Date.now().toString(36)}${(counter++).toString(36)}`;
 
@@ -133,6 +142,9 @@ export function useCopilotChat({ storageKey, scope, deskName, context, settings 
   const [history, setHistory] = useState<HistoryState>("unknown");
   const [threads, setThreads] = useState<ThreadSummary[]>([]);
   const [listing, setListing] = useState<"idle" | "loading" | "ready" | "failed">("idle");
+  /** The summary a fresh conversation carries from a long one, if any. */
+  const [carry, setCarry] = useState<string | null>(null);
+  const carryRef = useRef<string | null>(null);
   const abortRef = useRef<AbortController | null>(null);
   const turnsRef = useRef<Turn[]>([]);
   turnsRef.current = turns;
@@ -201,9 +213,10 @@ export function useCopilotChat({ storageKey, scope, deskName, context, settings 
   }, []);
 
   const send = useCallback(
-    async (raw: string) => {
+    async (raw: string): Promise<string> => {
       const message = raw.trim();
-      if (!message || pending) return;
+      if (!message || pending) return "";
+      let full = "";
       const history = turnsRef.current.filter((t) => t.text.trim()).map((t) => ({ role: t.role, text: t.text }));
       setTurns((t) => [...t, { id: newId(), role: "user", text: message, proposals: [] }, { id: newId(), role: "assistant", text: "", proposals: [], destinations: [], tools: [] }]);
       setPending(true);
@@ -214,14 +227,14 @@ export function useCopilotChat({ storageKey, scope, deskName, context, settings 
         const res = await fetch("/api/admin/copilot", {
           method: "POST",
           headers: { "content-type": "application/json" },
-          body: JSON.stringify({ scope, deskName, context, history, message, style: settings.style }),
+          body: JSON.stringify({ scope, deskName, context: withCarry(carryRef.current, context), history, message, style: settings.style }),
           signal: controller.signal,
         });
         if (!res.ok || !res.body) {
           const reason = res.status === 429 ? "You have asked a lot in the last hour. Try again a little later." : res.status === 403 ? "Your access does not include the copilot. Check with your lead." : "The assistant is not available just now. Try again in a moment.";
           banner.error(reason);
           patchLast((t) => ({ ...t, text: reason }));
-          return;
+          return "";
         }
         const reader = res.body.getReader();
         const decoder = new TextDecoder();
@@ -243,6 +256,7 @@ export function useCopilotChat({ storageKey, scope, deskName, context, settings 
               continue;
             }
             if (event.type === "text") {
+              full += event.text;
               patchLast((t) => ({ ...t, text: t.text + event.text }));
             } else if (event.type === "tool") {
               setTool(event.phase === "start" ? { id: event.id, label: event.label } : null);
@@ -272,9 +286,67 @@ export function useCopilotChat({ storageKey, scope, deskName, context, settings 
         setPending(false);
         setTool(null);
       }
+      return full;
     },
     [pending, scope, deskName, context, patchLast, settings.style],
   );
+
+  /**
+   * A LONG CONVERSATION, CARRIED OVER (the founder's "context window full"
+   * reference, 16 November 2026). The copilot reads only the newest twenty
+   * turns, so past that it quietly forgets the start. Instead the person can
+   * start fresh with a summary: the copilot writes one, a new conversation
+   * begins, and the summary rides along with every question in it as context.
+   */
+  const startFreshWithSummary = useCallback(async (): Promise<boolean> => {
+    if (pending) return false;
+    const summary = (await send("Summarise this conversation so far in at most six short lines: what I asked, what you found, what was done, and what is still open. No headings.")).trim();
+    if (!summary) return false;
+    abortRef.current?.abort();
+    setTurns([]);
+    setThreadId(null);
+    savedSig.current = "";
+    writeThreadId(storageKey, null);
+    carryRef.current = summary.slice(0, 1500);
+    setCarry(carryRef.current);
+    try {
+      window.sessionStorage.removeItem(storageKey);
+    } catch {
+      /* ignore */
+    }
+    return true;
+  }, [pending, send, storageKey]);
+
+  /** Take back the newest question: it returns to the composer, and its answer goes. */
+  const takeBackLast = useCallback((): string | null => {
+    if (pending) return null;
+    const all = turnsRef.current;
+    let lastUser = -1;
+    for (let i = all.length - 1; i >= 0; i -= 1) if (all[i]!.role === "user") { lastUser = i; break; }
+    if (lastUser < 0) return null;
+    const text = all[lastUser]!.text;
+    turnsRef.current = all.slice(0, lastUser);
+    setTurns(all.slice(0, lastUser));
+    return text;
+  }, [pending]);
+
+  /** Rename a saved conversation. */
+  const renameThread = useCallback(async (id: string, title: string): Promise<boolean> => {
+    try {
+      const res = await fetch(`/api/admin/copilot/threads/${encodeURIComponent(id)}`, { method: "PATCH", headers: { "content-type": "application/json" }, body: JSON.stringify({ title }) });
+      const out = (await res.json().catch(() => null)) as { ok?: boolean; title?: string } | null;
+      if (!res.ok || !out?.ok || !out.title) {
+        banner.error("That conversation could not be renamed just now.");
+        return false;
+      }
+      const named = out.title;
+      setThreads((all) => all.map((t) => (t.id === id ? { ...t, title: named } : t)));
+      return true;
+    } catch {
+      banner.error("Could not reach the console just now.");
+      return false;
+    }
+  }, []);
 
   /** Stop the answer being written. What has arrived stays on screen. */
   const stop = useCallback(() => {
@@ -335,6 +407,8 @@ export function useCopilotChat({ storageKey, scope, deskName, context, settings 
 
   const newChat = useCallback(() => {
     abortRef.current?.abort();
+    carryRef.current = null;
+    setCarry(null);
     setTurns([]);
     setPending(false);
     setTool(null);
@@ -384,6 +458,8 @@ export function useCopilotChat({ storageKey, scope, deskName, context, settings 
         }
         const loaded = out.thread.turns.map((t) => ({ ...t, proposals: Array.isArray(t.proposals) ? t.proposals : [], destinations: Array.isArray(t.destinations) ? t.destinations : [] }));
         abortRef.current?.abort();
+        carryRef.current = null;
+        setCarry(null);
         savedSig.current = JSON.stringify(forStore(loaded));
         setTurns(loaded);
         setThreadId(out.thread.id);
@@ -416,5 +492,5 @@ export function useCopilotChat({ storageKey, scope, deskName, context, settings 
     [newChat],
   );
 
-  return { turns, pending, tool, send, stop, askAgain, confirm, dismiss, newChat, threadId, history, threads, listing, loadThreads, openThread, deleteThread };
+  return { turns, pending, tool, send, stop, askAgain, confirm, dismiss, newChat, threadId, history, threads, listing, loadThreads, openThread, deleteThread, renameThread, carry, startFreshWithSummary, takeBackLast };
 }

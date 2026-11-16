@@ -187,6 +187,11 @@
     padding-block: var(--nf-space-sm);
   }
 
+  /* Whatever the thread scrolls to stops above the floating composer. */
+  .nf-copilot-thread > * {
+    scroll-margin-block-end: 7rem;
+  }
+
   /* An empty conversation: the mark, a greeting, what it can do, and the
      questions to start from, each a whole-row tap. */
   .nf-copilot-empty {
@@ -1076,6 +1081,187 @@
   .nf-copilot-toggle[aria-checked="true"] .nf-copilot-toggle__thumb {
     background: var(--nf-content-on-brand);
     transform: translateX(18px);
+  }
+
+  /* Under your own question: edit (the newest) and save as your command. */
+  .nf-copilot-acts--mine {
+    justify-self: end;
+    margin-top: calc(-1 * var(--nf-space-2xs));
+  }
+
+  /* The microphone in the composer, where the browser can take dictation. */
+  .nf-copilot-mic {
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: 44px;
+    height: 44px;
+    border: 0;
+    border-radius: var(--nf-radius-circle);
+    background: none;
+    color: var(--nf-brand-secondary);
+    cursor: pointer;
+  }
+
+  .nf-copilot-mic[aria-pressed="true"] {
+    background: color-mix(in oklab, var(--nf-brand-primary) 18%, transparent);
+  }
+
+  .nf-copilot-mic:focus-visible,
+  .nf-copilot-long__btn:focus-visible,
+  .nf-copilot-history__icon:focus-visible {
+    outline: var(--nf-focus-ring-width) solid var(--nf-focus-ring);
+    outline-offset: var(--nf-focus-ring-offset);
+  }
+
+  /* HISTORY: search, and pin, rename and delete on each conversation. */
+  .nf-copilot-history__search {
+    display: flex;
+    align-items: center;
+    gap: var(--nf-space-xs);
+    min-height: 48px;
+    padding-inline: var(--nf-space-md);
+    border: var(--nf-border-width) solid var(--nf-brand-edge-soft);
+    border-radius: var(--nf-radius-pill);
+    background: var(--nf-surface-elevated);
+    color: var(--nf-brand-secondary);
+  }
+
+  .nf-copilot-history__search input {
+    flex: 1;
+    min-width: 0;
+    border: 0;
+    background: none;
+    color: var(--nf-content-primary);
+    font-size: var(--nf-text-body);
+    outline: none;
+  }
+
+  .nf-copilot-history__search:focus-within {
+    border-color: var(--nf-brand-primary);
+  }
+
+  .nf-copilot-history__tools {
+    display: flex;
+    align-items: center;
+  }
+
+  .nf-copilot-history__icon {
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 44px;
+    border: 0;
+    border-radius: var(--nf-radius-circle);
+    background: none;
+    color: var(--nf-content-secondary);
+    cursor: pointer;
+  }
+
+  .nf-copilot-history__icon[aria-pressed="true"] {
+    color: var(--nf-brand-secondary);
+  }
+
+  .nf-copilot-history__name > svg {
+    display: inline;
+    margin-inline-end: var(--nf-space-2xs);
+    color: var(--nf-brand-secondary);
+    vertical-align: -2px;
+  }
+
+  .nf-copilot-history__rename {
+    display: flex;
+    align-items: center;
+    gap: var(--nf-space-xs);
+    min-width: 0;
+    padding: var(--nf-space-2xs) var(--nf-space-2xs) var(--nf-space-2xs) var(--nf-space-md);
+    grid-column: 1 / -1;
+  }
+
+  .nf-copilot-history__rename input {
+    flex: 1;
+    min-width: 0;
+    min-height: 40px;
+    border: 0;
+    border-block-end: 2px solid var(--nf-brand-primary);
+    background: none;
+    color: var(--nf-content-primary);
+    font-size: var(--nf-text-body-sm);
+    outline: none;
+  }
+
+  .nf-copilot-mine {
+    display: grid;
+    gap: var(--nf-space-xs);
+  }
+
+  /* THE SUMMARY A FRESH CONVERSATION CARRIES. */
+  .nf-copilot-carry {
+    padding: var(--nf-space-xs) var(--nf-space-md);
+    border: var(--nf-border-width) dashed var(--nf-brand-edge-soft);
+    border-radius: var(--nf-radius-card-sm);
+    color: var(--nf-content-secondary);
+    font-size: var(--nf-text-caption);
+  }
+
+  .nf-copilot-carry > summary {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--nf-space-2xs);
+    min-height: 32px;
+    font-weight: 600;
+    cursor: pointer;
+    list-style: none;
+  }
+
+  .nf-copilot-carry > summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .nf-copilot-carry > summary > svg {
+    color: var(--nf-brand-secondary);
+  }
+
+  .nf-copilot-carry > p {
+    margin: var(--nf-space-2xs) 0 0;
+    white-space: pre-wrap;
+    line-height: 1.5;
+  }
+
+  /* A LONG CONVERSATION: start fresh with a summary, nothing lost. */
+  .nf-copilot-long {
+    display: grid;
+    gap: var(--nf-space-xs);
+    padding: var(--nf-space-md);
+    border: var(--nf-border-width) solid var(--nf-brand-edge-soft);
+    border-radius: var(--nf-radius-card);
+    background: color-mix(in oklab, var(--nf-brand-primary) 10%, var(--nf-surface-elevated));
+  }
+
+  .nf-copilot-long__title {
+    margin: 0;
+    color: var(--nf-content-primary);
+    font-weight: 700;
+  }
+
+  .nf-copilot-long__body {
+    margin: 0;
+    color: var(--nf-content-secondary);
+    font-size: var(--nf-text-body-sm);
+  }
+
+  .nf-copilot-long__btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--nf-space-xs);
+    min-height: 48px;
+    border: 0;
+    border-radius: var(--nf-radius-control);
+    background: var(--nf-gradient-brand-ink);
+    color: var(--nf-content-on-brand);
+    font-weight: 700;
+    cursor: pointer;
   }
 
   /* The word to type before a change that is hard to take back. */
