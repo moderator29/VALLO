@@ -24,12 +24,13 @@ import {
 import type { DiscoverResponse, IntelligenceResult, IntelligenceTab, SearchResponse, Suggestion } from "@/lib/intelligence/contract";
 import { IntelField } from "./IntelField";
 import { IntelDiscover, type DiscoverView } from "./IntelDiscover";
+import { IntelCategory, IntelCategoryBody } from "./IntelCategory";
 import { IntelResults, type SearchView } from "./IntelResults";
 import { IntelFilters } from "./IntelFilters";
 import { IntelAssist } from "./IntelAssist";
 import { Aurora } from "./IntelArt";
-import { mayAskModel, understoodChips, type IntelligenceCopy } from "./model";
-import { useOnline, usePastTop } from "./use-intel";
+import { isExploreTab, mayAskModel, understoodChips, type ExploreTab, type IntelligenceCopy } from "./model";
+import { runFlow, useOnline, usePastTop } from "./use-intel";
 import "./intelligence.css";
 
 /**
@@ -53,7 +54,12 @@ function keep(key: string, value: Kept) {
 /** The analytics route is live (POST /api/intelligence/event); flip off to silence it. */
 const EVENTS_LIVE = true;
 
-const CATEGORY_TABS = ["property", "stay", "restaurant", "roommate", "person"] as const satisfies readonly IntelligenceTab[];
+/** The tile a category grows out of, and the header it grows into. */
+const tileOf = (tab: IntelligenceTab) => document.querySelector<HTMLElement>(`[data-intel-tile="${tab}"]`);
+const catheadOf = () => document.querySelector<HTMLElement>("[data-intel-cathead]");
+
+/** Where the discovery home was scrolled to when a category opened, for the way back. */
+let homeScrollY = 0;
 
 /**
  * VALLO INTELLIGENCE, THE SCREEN (the founder's direction, 16 November 2026).
@@ -92,9 +98,13 @@ export function IntelligenceScreen({
   const [filtersOpen, setFiltersOpen] = useState(false);
   const key = searchKey(url);
   const keyRef = useRef(key);
+  const urlRef = useRef(url);
   useEffect(() => {
     keyRef.current = key;
-  }, [key]);
+    urlRef.current = url;
+  }, [key, url]);
+  /* The category page was opened from a tile on this visit, so its own back is the browser's. */
+  const pushedCategory = useRef(false);
 
   /* -------------------------------------------------------- the address */
   const navigate = useCallback((next: IntelUrlState, options: { replace?: boolean } = {}) => {
@@ -127,8 +137,26 @@ export function IntelligenceScreen({
     const onPop = () => {
       if (window.location.pathname !== INTEL_PATH) return;
       const next = parseIntelUrl(new URLSearchParams(window.location.search));
-      setUrl(next);
-      setInput(next.q);
+      const prev = urlRef.current;
+      const apply = () => {
+        setUrl(next);
+        setInput(next.q);
+      };
+      /* Between the home and a category's page: the header folds back into its tile (or out of it, going forward). */
+      if (!prev.q && !next.q && prev.tab !== next.tab) {
+        const closing = prev.tab !== "all" && next.tab === "all";
+        if (closing) pushedCategory.current = false;
+        runFlow(
+          () => {
+            apply();
+            window.scrollTo({ top: closing ? homeScrollY : 0 });
+          },
+          closing ? catheadOf() : tileOf(next.tab),
+          () => (closing ? tileOf(prev.tab) : catheadOf()),
+        );
+        return;
+      }
+      apply();
     };
     window.addEventListener("popstate", onPop);
     return () => window.removeEventListener("popstate", onPop);
@@ -264,9 +292,9 @@ export function IntelligenceScreen({
   };
 
   /* --------------------------------------------------------------- acts */
-  const runQuery = useCallback(
-    (q: string) => {
-      const next: IntelUrlState = { q, tab: url.tab, filters: {}, drop: [] };
+  /* A search the person asked for: a submitted search, so its first read says so. */
+  const runState = useCallback(
+    (next: IntelUrlState) => {
       submitted.current = searchKey(next);
       setAsked(searchKey(next));
       navigate(next);
@@ -276,8 +304,9 @@ export function IntelligenceScreen({
         /* Keep the caret. */
       }
     },
-    [navigate, url.tab],
+    [navigate],
   );
+  const runQuery = useCallback((q: string) => runState({ q, tab: url.tab, filters: {}, drop: [] }), [runState, url.tab]);
 
   const onPick = (suggestion: Suggestion) => {
     if (suggestion.href) {
@@ -328,17 +357,45 @@ export function IntelligenceScreen({
     });
   };
 
-  const chooseCategory = (tab: IntelligenceTab) => {
-    const next: IntelUrlState = { ...url, tab: url.tab === tab ? "all" : tab };
-    navigate(next, { replace: !url.q });
-    if (!url.q) inputRef.current?.focus({ preventScroll: true });
+  /* ------------------------------------------------- the category pages */
+  const openCategory = (tab: ExploreTab, tile: HTMLElement) => {
+    homeScrollY = window.scrollY;
+    runFlow(
+      () => {
+        navigate({ q: "", tab, filters: {}, drop: [] });
+        pushedCategory.current = true;
+        window.scrollTo({ top: 0 });
+      },
+      tile,
+      catheadOf,
+    );
+  };
+
+  const closeCategory = () => {
+    if (pushedCategory.current) {
+      /* Opened from a tile: the browser's own Back, so the history stays one step. */
+      window.history.back();
+      return;
+    }
+    const from = url.tab;
+    runFlow(
+      () => {
+        navigate({ ...url, tab: "all" }, { replace: true });
+        window.scrollTo({ top: 0 });
+      },
+      catheadOf(),
+      () => tileOf(from),
+    );
   };
 
   /* ------------------------------------------------------------ drawing */
   const empty = !url.q;
+  const category = empty && isExploreTab(url.tab) ? url.tab : null;
+  const sentinelRef = useRef<HTMLDivElement | null>(null);
+  const condensed = usePastTop(sentinelRef);
   const data = view.status === "ready" ? view.data : null;
   const chips = useMemo(() => (data ? understoodChips(data.understood, copy, locale, url.tab) : []), [data, copy, locale, url.tab]);
-  const examples = copy.examples;
+  const examples = category ? copy.category.examples[category] : copy.examples;
   /* Honest thinking: only while a just-submitted search waits, and only when
      the engine may be handing the words to the model (`mayAskModel`). */
   const thinking = view.status === "loading" && asked === key && Boolean(url.q) && mayAskModel(url.q);
@@ -347,7 +404,7 @@ export function IntelligenceScreen({
   const drawerCurrent = { ...(data?.understood ?? {}), ...url.filters };
 
   return (
-    <div className="nf-intel" data-state={empty ? "empty" : "results"} data-testid="intel-screen">
+    <div className="nf-intel" data-state={category ? "category" : empty ? "empty" : "results"} data-testid="intel-screen">
       <header className="nf-intel-top" ref={headerRef}>
         <span className="nf-intel-top__brand">
           <LogoWordmark width={wordmarkWidth(15)} height={15} className="nf-intel-top__word" />
@@ -367,15 +424,11 @@ export function IntelligenceScreen({
         </button>
       </header>
 
-      {empty ? (
+      {category ? (
+        <IntelCategory tab={category} view={discover} copy={copy} locale={locale} onBack={closeCategory} />
+      ) : empty ? (
         <div className="nf-intel-hero" data-testid="intel-hero">
           <Aurora />
-          <p className="nf-intel-mark">
-            <span className="nf-intel-mark__glyph" aria-hidden="true">
-              <UiIcon name="spark" size={20} />
-            </span>
-            <span>{copy.mark}</span>
-          </p>
           {greeting ? (
             <p className="nf-intel-hero__greet" data-testid="intel-greeting">
               {greeting}
@@ -388,17 +441,21 @@ export function IntelligenceScreen({
         <h1 className="sr-only">{copy.name}</h1>
       )}
 
-      <IntelField
-        copy={copy}
-        value={input}
-        onValueChange={setInput}
-        onSubmit={runQuery}
-        onPick={onPick}
-        tab={url.tab}
-        inputRef={inputRef}
-        examples={examples}
-        autoFocus={focusOnOpen}
-      />
+      {/* The field sticks under the top of the screen and condenses once the page moves under it. */}
+      <div className="nf-intel-sentinel" ref={sentinelRef} aria-hidden="true" />
+      <div className="nf-intel-dock" data-condensed={condensed ? "true" : undefined} data-intel-flow-field="" data-testid="intel-dock">
+        <IntelField
+          copy={copy}
+          value={input}
+          onValueChange={setInput}
+          onSubmit={runQuery}
+          onPick={onPick}
+          tab={url.tab}
+          inputRef={inputRef}
+          examples={examples}
+          autoFocus={focusOnOpen}
+        />
+      </div>
 
       {thinking ? (
         <div className="nf-intel-thinking" role="status" data-testid="intel-thinking">
@@ -410,26 +467,18 @@ export function IntelligenceScreen({
         </div>
       ) : null}
 
-      {empty ? (
-        <div className="nf-intel-cats" role="group" aria-label={copy.categoriesLabel} data-testid="intel-categories">
-          {CATEGORY_TABS.map((tab) => (
-            <button
-              key={tab}
-              type="button"
-              className={`nf-chip nf-intel-chip${url.tab === tab ? " nf-chip--active" : ""}`}
-              aria-pressed={url.tab === tab}
-              onClick={() => chooseCategory(tab)}
-              data-testid={`intel-cat-${tab}`}
-            >
-              {copy.categories[tab]}
-            </button>
-          ))}
-        </div>
-      ) : null}
-
-      <hr className="nf-intel-rule" />
-
-      {empty ? (
+      {category ? (
+        <IntelCategoryBody
+          tab={category}
+          view={discover}
+          copy={copy}
+          locale={locale}
+          signedIn={signedIn}
+          url={url}
+          runQuery={runQuery}
+          onSearch={runState}
+        />
+      ) : empty ? (
         <IntelDiscover
           view={discover}
           copy={copy}
@@ -437,6 +486,7 @@ export function IntelligenceScreen({
           signedIn={signedIn}
           url={url}
           runQuery={runQuery}
+          onChooseCategory={openCategory}
           onRemoveRecent={onRemoveRecent}
           onClearRecent={onClearRecent}
         />

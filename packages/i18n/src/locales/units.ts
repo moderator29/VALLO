@@ -120,6 +120,8 @@ export const unitsEn = {
     other: "{count} example properties",
   },
   liveListings: { one: "1 live listing", other: "{count} live listings" },
+  newThisWeek: { one: "1 new this week", other: "{count} new this week" },
+  newThisMonth: { one: "1 new this month", other: "{count} new this month" },
   earlierStops: { one: "One earlier stop", other: "{count} earlier stops" },
   minutesAgo: { one: "1 minute ago", other: "{count} minutes ago" },
   daysAgo: { one: "yesterday", other: "{count} days ago" },

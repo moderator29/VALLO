@@ -1,9 +1,9 @@
 import { countOf, formatDate, formatMoney, formatNumber, plural, type Dictionary, type Locale, type PluralForms, type UnitNoun } from "@vallo/i18n/core";
-import type { IntelligenceKind, IntelligenceResult, IntelligenceTab, Suggestion, Understood } from "@/lib/intelligence/contract";
+import type { CategoryFacts, ForYouReason, IntelligenceKind, IntelligenceResult, IntelligenceTab, Suggestion, Understood } from "@/lib/intelligence/contract";
 import type { UiIconName } from "@/design-system/icons/UiIcon";
 import type { FilterKey, IntelFilters } from "@/lib/intelligence/client";
 import { parseDiscoveryQuery, toSearchHref } from "@/lib/listings/search-params";
-import { understand } from "@/lib/intelligence/understand";
+import { addDays, thisWeekend, understand } from "@/lib/intelligence/understand";
 import { placeFromLabel } from "@/lib/intelligence/places";
 import { AMENITY_WORDS, KIND_WORDS } from "@/lib/intelligence/vocabulary";
 import type { ListingKind } from "@/lib/listings/types";
@@ -506,4 +506,135 @@ export function whyParts(why: string | undefined | null): string[] {
     .map((part) => part.trim())
     .filter(Boolean)
     .slice(0, 4);
+}
+
+/* ------------------------------------------------- round 3: the flow */
+
+/** The categories with a tile and a page of their own, in the order the grid draws them. */
+export const EXPLORE_TABS = ["property", "stay", "restaurant", "roommate", "person"] as const satisfies readonly IntelligenceTab[];
+export type ExploreTab = (typeof EXPLORE_TABS)[number];
+
+export function isExploreTab(tab: IntelligenceTab): tab is ExploreTab {
+  return (EXPLORE_TABS as readonly string[]).includes(tab);
+}
+
+/** Today on the Lagos calendar, as an ISO day. */
+export function lagosToday(now: Date = new Date()): string {
+  return new Intl.DateTimeFormat("en-CA", { timeZone: "Africa/Lagos", year: "numeric", month: "2-digit", day: "2-digit" }).format(now);
+}
+
+/** "15 Nov", for a moment (an ISO time), on the Lagos calendar. */
+export function dayOf(iso: string, locale: Locale): string | null {
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return null;
+  return formatDate(date, locale, { day: "numeric", month: "short", timeZone: "Africa/Lagos" });
+}
+
+/** The three stay windows a person picks from: tonight, this weekend, next weekend (Lagos calendar). */
+export function stayWindows(today: string): Record<"tonight" | "weekend" | "nextWeekend", { checkIn: string; checkOut: string }> {
+  const weekend = thisWeekend(today);
+  return {
+    tonight: { checkIn: today, checkOut: addDays(today, 1) },
+    weekend,
+    nextWeekend: { checkIn: addDays(weekend.checkIn, 7), checkOut: addDays(weekend.checkOut, 7) },
+  };
+}
+
+/** The budget ceilings offered as quick picks, in naira: a year's rent, or a price to buy. Thresholds, not data. */
+export const BUDGET_PICKS = {
+  rent: [1_000_000, 2_500_000, 5_000_000, 10_000_000],
+  buy: [50_000_000, 100_000_000, 250_000_000, 500_000_000],
+} as const;
+export const BEDROOM_PICKS = [1, 2, 3, 4] as const;
+export const GUEST_PICKS = [1, 2, 3, 4] as const;
+
+/** A short naira figure for a chip: "₦2.5m". */
+export function shortNaira(amount: number, locale: Locale): string {
+  return formatMoney(Math.round(amount) * 100, locale, "NGN", { compact: amount >= 1_000_000 });
+}
+
+/** A tile's freshness line, only from a real count: "3 new this week", else "12 live listings", else nothing. */
+export function tileLine(facts: CategoryFacts | undefined, locale: Locale): string | null {
+  if (!facts) return null;
+  if (facts.newThisWeek > 0) return countOf(facts.newThisWeek, "newThisWeek", locale);
+  if (facts.live > 0) return countOf(facts.live, "liveListings", locale);
+  return null;
+}
+
+/** The next "nice" budget above this one, about a quarter more at least: 5m to 7.5m, 2m to 2.5m. */
+export function biggerBudget(max: number): number {
+  const target = max * 1.25;
+  const steps = [1, 1.5, 2, 2.5, 3, 4, 5, 6, 7.5, 8, 10];
+  const scale = 10 ** Math.floor(Math.log10(Math.max(1, target)));
+  for (const step of steps) {
+    const value = step * scale;
+    if (value >= target) return Math.round(value);
+  }
+  return Math.round(10 * scale);
+}
+
+export type RefineChip = { id: string; label: string; icon: UiIconName; set: IntelFilters };
+
+const LISTING_TABS: readonly IntelligenceTab[] = ["property", "stay", "restaurant"];
+
+/**
+ * QUICK REFINEMENTS UNDER THE RESULTS, from what the search really understood:
+ * a bigger budget when it had one, one more bedroom or guest when it named
+ * them, the whole city when it named an area in it, this weekend for a stay
+ * with no dates, furnished for a home that did not say, and the newest. Each
+ * is a filter the engine reads, never a promise of results. Four at most.
+ */
+export function refineChips(u: Understood, tab: IntelligenceTab, today: string, copy: IntelligenceCopy, locale: Locale): RefineChip[] {
+  const kind = tab !== "all" ? tab : u.kind;
+  const listing = kind ? LISTING_TABS.includes(kind as IntelligenceTab) : Boolean(u.place || u.bedrooms || u.maxPrice);
+  if (!listing) return [];
+  const stay = kind === "stay" || u.intent === "stay";
+  const chips: RefineChip[] = [];
+  if (u.maxPrice !== undefined && u.maxPrice > 0) {
+    const more = biggerBudget(u.maxPrice);
+    chips.push({ id: "budget", icon: "wallet", label: fill(copy.refine.upTo, { price: shortNaira(more, locale) }), set: { maxPrice: more } });
+  }
+  if (u.bedrooms !== undefined && kind !== "restaurant" && u.bedrooms < 10) {
+    chips.push({ id: "beds", icon: "bed", label: plural(u.bedrooms + 1, copy.understood.bedrooms as PluralForms, locale), set: { bedrooms: u.bedrooms + 1 } });
+  }
+  if (u.place && u.place.includes(",")) {
+    const city = u.place.split(",").pop()!.trim();
+    if (city) chips.push({ id: "city", icon: "location", label: fill(copy.refine.anywhereIn, { city }), set: { place: city } });
+  }
+  if (stay && !u.checkIn) {
+    const weekend = thisWeekend(today);
+    chips.push({ id: "weekend", icon: "calendar-check", label: copy.refine.thisWeekend, set: { checkIn: weekend.checkIn, checkOut: weekend.checkOut } });
+  }
+  if (stay && u.guests !== undefined && u.guests < 30) {
+    chips.push({ id: "guests", icon: "users", label: plural(u.guests + 1, copy.understood.guests as PluralForms, locale), set: { guests: u.guests + 1 } });
+  }
+  if (!stay && kind !== "restaurant" && u.furnished === undefined) {
+    chips.push({ id: "furnished", icon: "house", label: copy.refine.furnished, set: { furnished: true } });
+  }
+  if (!u.addedSince) {
+    chips.push({ id: "new", icon: "clock", label: copy.refine.newThisWeek, set: { addedSince: addDays(today, -7) } });
+  }
+  return chips.slice(0, 4);
+}
+
+/** A "For you" reason, in the reader's words. */
+export function forYouReasonText(reason: ForYouReason, copy: IntelligenceCopy, locale: Locale): string {
+  const r = copy.forYou.reasons;
+  switch (reason.key) {
+    case "areaBudget":
+    case "areaSaved":
+    case "nearSaved":
+      return fill(r[reason.key], { area: reason.area });
+    case "budget":
+    case "saved":
+      return r[reason.key];
+    case "kind": {
+      const noun = copy.listingKinds[reason.kind];
+      return fill(r.kind, { kind: noun ? noun.toLocaleLowerCase(locale) : copy.forYou.kindFallback });
+    }
+    case "lastSearch":
+      return fill(r.lastSearch, { query: reason.query });
+    case "newSince":
+      return fill(r.newSince, { date: dayOf(reason.since, locale) ?? "" });
+  }
 }

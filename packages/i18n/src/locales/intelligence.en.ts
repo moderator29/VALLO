@@ -13,8 +13,6 @@ export const intelligenceEn = {
   wordmark: "Vallo",
   title: "What are you looking for?",
   lede: "Search across everything VALLO.",
-  /* The small mark over the title. */
-  mark: "VALLO Intelligence",
   /* Over the title for a member with a first name, by the Lagos daypart. */
   greeting: {
     morning: "Good morning, {name}.",
@@ -77,8 +75,7 @@ export const intelligenceEn = {
   shortcutOther: "Ctrl K",
   shortcutLabel: "Keyboard shortcut",
 
-  /* The category chips under the field. */
-  categoriesLabel: "Search in",
+  /* A category's name, as the tabs and the explore tiles say it. */
   categories: {
     property: "Properties",
     stay: "Stays",
@@ -147,6 +144,149 @@ export const intelligenceEn = {
     didYouMean: "Did you mean {query}?",
   },
 
+  /* The explore grid under the field (round 3): one tile per side of Vallo. */
+  explore: {
+    title: "Explore Vallo",
+    tiles: {
+      property: { title: "Properties", sub: "Rent, buy and discover" },
+      stay: { title: "Stays", sub: "A few nights, anywhere" },
+      restaurant: { title: "Restaurants", sub: "Find a table" },
+      roommate: { title: "Roommates", sub: "Find your match" },
+      person: { title: "People and Circle", sub: "Agents, landlords, hosts and communities" },
+    },
+  },
+
+  /* A category's own page, opened from its tile. */
+  category: {
+    back: "All of Vallo",
+    backLabel: "Back to everything on Vallo",
+    /* The rotating example in the field while a category is open. */
+    examples: {
+      property: ["2-bedroom flat in Yaba...", "Duplex for sale in Lekki...", "Furnished apartment in Ikeja..."],
+      stay: ["Short let in Lekki this weekend...", "Hotel in Abuja for two...", "Serviced apartment in VI..."],
+      restaurant: ["Restaurants in Victoria Island...", "Dinner in Ikeja tonight...", "Brunch in Lekki..."],
+      roommate: ["Roommate around Yaba...", "Shared flat near Unilag...", "Room to share in Ikeja..."],
+      person: ["Agents in Lekki...", "Landlords in Ibadan...", "Hosts in Abuja..."],
+    },
+    areas: {
+      property: "Areas with homes",
+      stay: "Areas with stays",
+      restaurant: "Areas with restaurants",
+    },
+    inArea: {
+      property: "Homes in {area}",
+      stay: "Stays in {area}",
+      restaurant: "Restaurants in {area}",
+    },
+    latest: {
+      property: "Newest homes",
+      stay: "Newest stays",
+      restaurant: "Newest restaurants",
+    },
+    property: {
+      market: "Looking to",
+      rent: "Rent",
+      buy: "Buy",
+      bedrooms: "Bedrooms",
+      budget: "Budget",
+      any: "Any",
+      under: "Under {price}",
+      show: "Show homes",
+      queryRent: "Homes to rent",
+      queryBuy: "Homes to buy",
+    },
+    stay: {
+      when: "When",
+      tonight: "Tonight",
+      weekend: "This weekend",
+      nextWeekend: "Next weekend",
+      guests: "Guests",
+      show: "Show stays",
+      query: "Stays",
+    },
+    restaurant: {
+      browse: { title: "All restaurants", sub: "Menus, tables and opening hours" },
+      tonight: { title: "Dinner tonight", sub: "Search tables for this evening" },
+      tonightQuery: "restaurants tonight",
+    },
+    roommate: {
+      find: { title: "Find a roommate", sub: "People looking to share a home" },
+      post: { title: "Post a room, or yourself", sub: "Say what you have or what you need" },
+      safety: { title: "Before you share", sub: "How to meet, check and agree" },
+    },
+    person: {
+      find: { title: "Find people", sub: "Agents, landlords and hosts on Vallo" },
+      circle: { title: "Vallo Circle", sub: "Ask the community about homes and areas" },
+    },
+    /* When a side has no real places yet: said plainly, with a way forward. */
+    waiting: {
+      property: {
+        title: "The first real homes are on their way",
+        body: "Vallo only shows homes that are real and published. Tell listers what you need, and the ones who have it can answer with a place.",
+        act: "Post what you need",
+        lister: "List your property",
+      },
+      stay: {
+        title: "The first real stays are on their way",
+        body: "Vallo only shows stays that are real and published. Hosts are setting up now.",
+        act: "Look around Stays",
+        lister: "Host on Vallo",
+      },
+      restaurant: {
+        title: "The first real restaurants are on their way",
+        body: "Vallo only shows restaurants that are real and published. Kitchens are setting up now.",
+        act: "Look around Restaurants",
+        lister: "Bring your restaurant",
+      },
+    },
+  },
+
+  /* The member's own trail. */
+  continue: {
+    title: "Continue where you left off",
+    lastSearch: "Pick up your search",
+    searchedOn: "You searched this on {date}",
+    opened: "Opened on this device",
+    openedTitle: "Recently opened",
+  },
+
+  /* Recommendations for a member, each with the reason it is there. */
+  forYou: {
+    title: "For you",
+    rails: {
+      matches: "Picked from what you saved",
+      lastSearch: "More like “{query}”",
+      newSince: "New since you last looked",
+    },
+    reasons: {
+      areaBudget: "In {area}, within your saved budget",
+      areaSaved: "In {area}, like your saved search",
+      nearSaved: "Because you saved a home in {area}",
+      budget: "Within your saved search's budget",
+      saved: "Matches your saved search",
+      kind: "Because you said you want {kind}",
+      lastSearch: "Like your search “{query}”",
+      newSince: "Listed since your search on {date}",
+    },
+    kindFallback: "places like this",
+  },
+
+  /* Areas with the most new real listings. */
+  trending: {
+    title: "Trending areas",
+    hint: "The most new listings in the last 30 days",
+  },
+
+  /* Quick changes under the results, from what the search understood. */
+  refine: {
+    title: "Refine",
+    upTo: "Up to {price}",
+    anywhereIn: "Anywhere in {city}",
+    thisWeekend: "This weekend",
+    newThisWeek: "New this week",
+    furnished: "Furnished only",
+  },
+
   /* The empty screen. */
   recent: {
     title: "Recent searches",
@@ -156,25 +296,10 @@ export const intelligenceEn = {
     cleared: "Recent searches cleared.",
     removeFailed: "That did not work. Try again.",
   },
-  suggested: {
-    title: "Suggested for you",
-    exploreAll: "Explore all",
-    showFewer: "Show fewer",
-    rows: {
-      rent: { title: "Homes to rent", sub: "Flats, duplexes and rooms across Nigeria" },
-      weekend: { title: "Stays this weekend", sub: "Short lets and hotels for a few nights" },
-      roommate: { title: "Find a roommate", sub: "Share a home and split the costs" },
-      restaurants: { title: "Restaurants", sub: "Places to eat, by area" },
-      circle: { title: "Vallo Circle", sub: "Ask the community about homes and areas" },
-      people: { title: "Find people", sub: "Agents, landlords and hosts on Vallo" },
-    },
-    weekendQuery: "stays this weekend",
-  },
   trySearching: {
     title: "Try searching",
-    examples: ["2-bed in Lekki", "Hotels this weekend", "Restaurants near me"],
   },
-  popular: { title: "Popular searches" },
+  popular: { title: "Popular on Vallo", hint: "What people search for most" },
   fresh: { title: "Fresh on Vallo", hint: "The newest listings, stays and restaurants" },
   people: {
     title: "People to follow",

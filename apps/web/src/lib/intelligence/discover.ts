@@ -4,6 +4,8 @@ import { catalogueReader } from "@/lib/catalogue/listings";
 import { isSocialEnabled } from "@/lib/social/flag";
 import type { DiscoverResponse } from "./contract";
 import { readPopularQueries, readRecentSearches } from "./analytics";
+import { readForYou } from "./for-you";
+import { categoryFacts, trendingAreas } from "./recommend";
 import type { EngineDeps } from "./engine";
 import { runSearch } from "./engine";
 import { listingResult, sideOf } from "./sources/listings";
@@ -20,6 +22,14 @@ import type { Viewer } from "./viewer";
  *   fresh     the newest published listings that are not examples;
  *   people    the platform's "People to follow" (signed in), never the viewer;
  *   examples  searches that return results today, each run before it is offered.
+ *
+ * Round 3 (16 November 2026), each field optional on the wire:
+ *
+ *   categories  the explore tiles' facts per listing side (`recommend.ts`):
+ *               real listings only, so a catalogue of examples, or none,
+ *               gives zeros and the tiles print no count;
+ *   trending    areas with two or more real listings new in 30 days;
+ *   forYou      a member's own rails (`for-you.ts`), through their own session.
  */
 
 /* Candidate example searches. Each is offered only after it returns at least one result. */
@@ -36,6 +46,10 @@ export const EXAMPLE_CANDIDATES = [
   "office space in Lagos",
   "homes in Port Harcourt",
   "how to list a property",
+  /* Help and screens: they answer even on a day the catalogue is empty. */
+  "how to find a roommate",
+  "how does escrow work",
+  "verify my identity",
 ] as const;
 
 let exampleCache: { at: number; value: string[] } | null = null;
@@ -69,16 +83,21 @@ export async function verifiedExamples(deps: EngineDeps, viewer: Viewer, nowMs =
 }
 
 export async function discover(viewer: Viewer, deps: EngineDeps): Promise<DiscoverResponse> {
-  const [popular, recent, catalogue, people, examples] = await Promise.all([
+  const now = deps.now?.() ?? new Date();
+  const [popular, recent, read, people, examples] = await Promise.all([
     readPopularQueries(8).catch(() => []),
     readRecentSearches(viewer, 8).catch(() => []),
-    catalogueReader().search({}).catch(() => []),
+    catalogueReader()
+      .search({})
+      .catch(() => null),
     (async () => {
       if (!viewer.signedIn || !viewer.db || !(await isSocialEnabled())) return [];
       return peopleToFollow(viewer.db, viewer.userId, null, 6);
     })().catch(() => []),
     verifiedExamples(deps, viewer).catch(() => []),
   ]);
+  const catalogue = read ?? [];
+  const forYou = await readForYou(viewer, catalogue, recent, now).catch(() => []);
   const fresh = catalogue
     .filter((l) => !l.isDemo && l.publishedAt)
     .sort((a, b) => (b.publishedAt ?? "").localeCompare(a.publishedAt ?? ""))
@@ -90,5 +109,16 @@ export async function discover(viewer: Viewer, deps: EngineDeps): Promise<Discov
     fresh,
     people: people.filter((p) => !p.person?.isYou),
     examples,
+    /* No facts when the catalogue could not be read: zeros would be a claim. */
+    ...(read
+      ? {
+          categories: categoryFacts(catalogue, sideOf, now.getTime()).map((facts) => ({
+            ...facts,
+            latest: facts.latest.map((l) => listingResult(l, { raw: "", via: "rules" }, viewer, facts.tab)),
+          })),
+          trending: trendingAreas(catalogue, now.getTime()),
+        }
+      : {}),
+    ...(viewer.signedIn ? { forYou } : {}),
   };
 }

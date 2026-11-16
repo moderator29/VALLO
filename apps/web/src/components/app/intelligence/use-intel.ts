@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { flushSync } from "react-dom";
 import { cleanWords, fetchSuggest } from "@/lib/intelligence/client";
 import type { IntelligenceTab, Suggestion } from "@/lib/intelligence/contract";
 import { motionQuiet } from "@/lib/motion/gate";
@@ -174,4 +175,72 @@ export function usePastTop(ref: { current: Element | null }): boolean {
     return () => observer.disconnect();
   }, [ref]);
   return past;
+}
+
+/* ------------------------------------------------- the shared-element flow */
+
+/** The one name lent for the flow: a tile and the category header it grows into. */
+export const FLOW_NAME = "nf-intel-cat";
+/** The field glides to its new place with it. */
+export const FLOW_FIELD_NAME = "nf-intel-field";
+/** Names come back after this long even if the browser never says the flow finished. */
+const FLOW_CEILING_MS = 1500;
+
+type ViewTransitionLike = { finished: Promise<void> };
+type DocumentWithTransitions = Document & { startViewTransition?: (update: () => void) => ViewTransitionLike };
+
+/**
+ * ONE STEP OF THE SCREEN'S FLOW, AS A SHARED-ELEMENT TRANSITION WHERE THE
+ * BROWSER CAN (round 3).
+ *
+ * The tile that was tapped (`from`) is lent `FLOW_NAME`; the browser captures
+ * the page; the state changes (`update`, flushed so the new page is in the
+ * document); the element it grows into (`to()`) is lent the same name; the
+ * browser animates the pair, once, over the root's short crossfade
+ * (`intelligence.css`, the rules under `:root[data-intel-flow]`). Names are
+ * lent, never kept: they come off when the flow finishes, or at a ceiling.
+ *
+ * Without the View Transitions API, for a reader who asked for less motion,
+ * or if anything throws, the state simply changes and the new view's own
+ * one-shot entrance (CSS) carries it.
+ */
+export function runFlow(update: () => void, from?: HTMLElement | null, to?: () => HTMLElement | null): void {
+  const doc = typeof document === "undefined" ? null : (document as DocumentWithTransitions);
+  if (!doc || typeof doc.startViewTransition !== "function" || motionQuiet()) {
+    update();
+    return;
+  }
+  const lent = new Set<HTMLElement>();
+  const lend = (el: HTMLElement | null | undefined, name: string) => {
+    if (!el) return;
+    el.style.setProperty("view-transition-name", name);
+    lent.add(el);
+  };
+  const field = () => doc.querySelector<HTMLElement>("[data-intel-flow-field]");
+  const settle = () => {
+    for (const el of lent) el.style.removeProperty("view-transition-name");
+    lent.clear();
+    delete doc.documentElement.dataset.intelFlow;
+  };
+  lend(from, FLOW_NAME);
+  lend(field(), FLOW_FIELD_NAME);
+  doc.documentElement.dataset.intelFlow = "on";
+  try {
+    const transition = doc.startViewTransition(() => {
+      /* The old page is captured: take the names off it before the new one draws. */
+      for (const el of lent) el.style.removeProperty("view-transition-name");
+      lent.clear();
+      flushSync(update);
+      lend(to?.() ?? null, FLOW_NAME);
+      lend(field(), FLOW_FIELD_NAME);
+    });
+    const ceiling = window.setTimeout(settle, FLOW_CEILING_MS);
+    void transition.finished.catch(() => undefined).finally(() => {
+      window.clearTimeout(ceiling);
+      settle();
+    });
+  } catch {
+    settle();
+    update();
+  }
 }

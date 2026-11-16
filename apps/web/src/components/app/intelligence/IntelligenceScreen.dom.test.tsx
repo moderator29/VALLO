@@ -14,7 +14,12 @@
  *     Follow stays inside its row;
  *   - the field names its keyboard (search) and is 16px or more, and the
  *     screen's own controls are 44px targets on a phone;
- *   - the caret goes to the field only when a launcher asked for it.
+ *   - the caret goes to the field only when a launcher asked for it;
+ *   - round 3: the explore grid is two by two with one wide tile, and a tile
+ *     prints a count only when the engine counted something real; a tile
+ *     opens its category's page, whose picks become an ordinary search
+ *     address, and whose side with no real places says so with a way
+ *     forward; "For you" says why; refine chips set real filters.
  */
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import { BROWSER_TEST_TIMEOUT, closeBrowser, hasBrowser, mountInBrowser, warmBrowser } from "@/lib/testing/mount-in-browser";
@@ -65,7 +70,22 @@ const STUB = `
     const url = new URL(String(input), location.origin);
     window.__fetches.push({ path: url.pathname, search: url.search, method: (init && init.method) || "GET" });
     if (url.pathname === "/api/intelligence/discover") {
-      return json({ popular: [], recent: [{ query: "2 bed in yaba", at: "2026-11-15T10:00:00Z" }], fresh: [], people: PEOPLE, examples: [] });
+      return json({
+        popular: [],
+        recent: [{ query: "2 bed in yaba", at: "2026-11-15T10:00:00Z" }],
+        fresh: [],
+        people: PEOPLE,
+        examples: [],
+        categories: [
+          { tab: "property", live: 3, newThisWeek: 2, areas: [{ name: "Yaba", city: "Lagos" }], latest: [] },
+          { tab: "stay", live: 0, newThisWeek: 0, areas: [], latest: [] },
+          { tab: "restaurant", live: 0, newThisWeek: 0, areas: [], latest: [] },
+        ],
+        trending: [],
+        forYou: [
+          { id: "matches", items: [{ result: { key: "property:fy1", kind: "property", title: "Fixture flat near your saved one", href: "/listing/fixture-fy1", place: "Yaba, Lagos" }, reason: { key: "nearSaved", area: "Yaba" } }] },
+        ],
+      });
     }
     if (url.pathname === "/api/intelligence/suggest") {
       const q = url.searchParams.get("q");
@@ -314,7 +334,7 @@ describe.skipIf(!hasBrowser && !process.env.CI)("VALLO Intelligence", () => {
   it("names the search keyboard, is 16px or more, and gives a phone 44px targets", async () => {
     const { page, close } = await mounted({ touch: true });
     try {
-      await page.getByTestId("intel-suggested").waitFor();
+      await page.getByTestId("intel-explore").waitFor();
       const field = await page.evaluate(() => {
         const input = document.querySelector<HTMLInputElement>("[data-testid='intel-input']")!;
         return {
@@ -336,11 +356,10 @@ describe.skipIf(!hasBrowser && !process.env.CI)("VALLO Intelligence", () => {
           "[data-testid='intel-assist-open']",
           "[data-testid='intel-go']",
           "[data-testid^='intel-cat-']",
-          "[data-testid='intel-explore-all']",
+          "[data-testid='intel-pickup']",
           "[data-testid='intel-try-chip']",
           "[data-testid='intel-recent-remove']",
           "[data-testid='intel-recent-clear']",
-          "[data-testid^='intel-suggested-'] a",
         ]
           .flatMap((selector) => [...document.querySelectorAll<HTMLElement>(selector)].map((el) => ({ selector, box: el.getBoundingClientRect() })))
           .filter(({ box }) => box.height < 43.5 || box.width < 43.5)
@@ -355,7 +374,7 @@ describe.skipIf(!hasBrowser && !process.env.CI)("VALLO Intelligence", () => {
   it("puts the caret in the field only when a launcher asked, and then tidies the address", async () => {
     const plain = await mounted();
     try {
-      await plain.page.getByTestId("intel-suggested").waitFor();
+      await plain.page.getByTestId("intel-explore").waitFor();
       expect(await plain.page.evaluate(() => document.activeElement?.getAttribute("data-testid"))).not.toBe("intel-input");
     } finally {
       await plain.close();
@@ -366,6 +385,121 @@ describe.skipIf(!hasBrowser && !process.env.CI)("VALLO Intelligence", () => {
       await launched.page.waitForFunction(() => !location.search.includes("focus"));
     } finally {
       await launched.close();
+    }
+  });
+
+  it("explore: two by two with People wide under them; a count only where the engine counted one", async () => {
+    const { page, close } = await mounted({ touch: true });
+    try {
+      await page.getByTestId("intel-explore").waitFor();
+      await page.getByTestId("intel-tile-line").first().waitFor();
+      /* The tiles rise in once; measure where they settle. */
+      await page.evaluate(() => Promise.all(document.getAnimations().map((a) => a.finished.catch(() => undefined))));
+      const tiles = await page.$$eval("[data-intel-tile]", (els) =>
+        els.map((el) => {
+          const box = el.getBoundingClientRect();
+          return { tab: el.getAttribute("data-intel-tile"), top: Math.round(box.top), left: Math.round(box.left), width: Math.round(box.width), line: el.querySelector("[data-testid='intel-tile-line']")?.textContent ?? null };
+        }),
+      );
+      expect(tiles.map((t) => t.tab)).toEqual(["property", "stay", "restaurant", "roommate", "person"]);
+      const [a, b, c, d, wide] = tiles;
+      expect(a!.top).toBe(b!.top);
+      expect(c!.top).toBe(d!.top);
+      expect(c!.top).toBeGreaterThan(a!.top);
+      expect(a!.left).toBe(c!.left);
+      expect(Math.abs(a!.width - b!.width)).toBeLessThanOrEqual(1);
+      expect(wide!.width).toBeGreaterThan(a!.width * 1.8);
+      expect(a!.line).toBe("2 new this week");
+      expect([b!.line, c!.line, d!.line, wide!.line]).toEqual([null, null, null, null]);
+      expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+    } finally {
+      await close();
+    }
+  });
+
+  it("a tile opens its category's page; its picks are a search address; an empty side says so; Back comes home", async () => {
+    const { page, close } = await mounted({ touch: true });
+    try {
+      await page.getByTestId("intel-cat-stay").click();
+      await page.getByTestId("intel-cathead").waitFor();
+      expect(new URL(page.url()).searchParams.get("tab")).toBe("stay");
+      expect(await page.getByTestId("intel-cathead").textContent()).toContain("Stays");
+      /* No real stays: said plainly, with a way forward, and no empty card. */
+      await page.getByTestId("intel-waiting").waitFor();
+      expect(await page.getByTestId("intel-waiting").textContent()).toContain("The first real stays are on their way");
+      expect(await page.getByTestId("intel-waiting-lister").getAttribute("href")).toBe("/host/apply");
+      expect(await page.locator("[data-testid='intel-category-latest']").count()).toBe(0);
+      await page.getByTestId("intel-when-weekend").click();
+      await page.getByTestId("intel-guests-2").click();
+      await page.getByTestId("intel-stay-show").click();
+      await page.getByTestId("intel-results").waitFor();
+      const params = new URL(page.url()).searchParams;
+      expect(params.get("q")).toBe("Stays");
+      expect(params.get("tab")).toBe("stay");
+      expect(params.get("guests")).toBe("2");
+      expect(params.get("in")).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+      expect(params.get("out")! > params.get("in")!).toBe(true);
+      /* Back: the category's page again, then its own back control brings the home. */
+      await page.goBack();
+      await page.getByTestId("intel-cathead").waitFor();
+      await page.getByTestId("intel-category-back").click();
+      await page.getByTestId("intel-explore").waitFor();
+      expect(new URL(page.url()).searchParams.get("tab")).toBeNull();
+    } finally {
+      await close();
+    }
+  });
+
+  it("the Properties page offers rent or buy, bedrooms and a budget, and the areas that really have homes", async () => {
+    const { page, close } = await mounted();
+    try {
+      await page.getByTestId("intel-cat-property").click();
+      await page.getByTestId("intel-property-picks").waitFor();
+      await page.getByTestId("intel-category-area").first().waitFor();
+      expect(await page.getByTestId("intel-category-area").allTextContents()).toEqual(["Yaba"]);
+      await page.getByTestId("intel-market-buy").click();
+      await page.getByTestId("intel-beds-3").click();
+      await page.getByTestId("intel-budget-100000000").click();
+      await page.getByTestId("intel-property-show").click();
+      await page.getByTestId("intel-results").waitFor();
+      const params = new URL(page.url()).searchParams;
+      expect({ q: params.get("q"), tab: params.get("tab"), intent: params.get("intent"), beds: params.get("beds"), max: params.get("max") }).toEqual({
+        q: "Homes to buy",
+        tab: "property",
+        intent: "buy",
+        beds: "3",
+        max: "100000000",
+      });
+    } finally {
+      await close();
+    }
+  });
+
+  it("For you says why each card is there", async () => {
+    const { page, close } = await mounted();
+    try {
+      await page.getByTestId("intel-foryou").waitFor();
+      const text = await page.getByTestId("intel-foryou").textContent();
+      expect(text).toContain("Fixture flat near your saved one");
+      expect(text).toContain("Because you saved a home in Yaba");
+    } finally {
+      await close();
+    }
+  });
+
+  it("refine chips under the results come from what was understood, and each sets a real filter", async () => {
+    const { page, close } = await mounted({ url: "http://vallo.test/intelligence?q=2+bed+in+lekki+under+5m" });
+    try {
+      await page.getByTestId("intel-refine").waitFor();
+      const ids = await page.$$eval("[data-testid^='intel-refine-']", (els) => els.map((el) => el.getAttribute("data-testid")));
+      expect(ids).toEqual(["intel-refine-budget", "intel-refine-beds", "intel-refine-city", "intel-refine-furnished"]);
+      expect(await page.getByTestId("intel-refine-beds").textContent()).toContain("3 bedrooms");
+      expect(await page.getByTestId("intel-refine-city").textContent()).toContain("Anywhere in Lagos");
+      await page.getByTestId("intel-refine-budget").click();
+      await page.waitForFunction(() => new URLSearchParams(location.search).get("max") === "7500000");
+      expect(new URL(page.url()).searchParams.get("q")).toBe("2 bed in lekki under 5m");
+    } finally {
+      await close();
     }
   });
 });

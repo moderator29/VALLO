@@ -21,7 +21,7 @@ import {
 import type { IntelligenceKind, IntelligenceResult, IntelligenceTab, SearchResponse } from "@/lib/intelligence/contract";
 import { IntelResultItem, listClassFor } from "./IntelResultItem";
 import { OpenDoor } from "./IntelArt";
-import { CHIP_ICON, fill, propertiesSearchHref, understoodChips, wordOrigin, type IntelligenceCopy } from "./model";
+import { CHIP_ICON, fill, lagosToday, propertiesSearchHref, refineChips, understoodChips, wordOrigin, type IntelligenceCopy } from "./model";
 import "@/components/ui/underline-tabs.css";
 
 export type SearchView =
@@ -395,6 +395,9 @@ export function IntelResults({
         </div>
       )}
 
+      {/* ------------------------------------------------------- refine */}
+      {!nothing ? <Refine url={url} data={data} copy={copy} locale={locale} navigate={navigate} /> : null}
+
       {view.next ? (
         <div className="nf-intel-more">
           <Button variant="secondary" full loading={view.loadingMore} onClick={onShowMore} data-testid="intel-show-more">
@@ -403,6 +406,58 @@ export function IntelResults({
         </div>
       ) : null}
     </div>
+  );
+}
+
+/**
+ * QUICK REFINEMENTS, from what this search understood (`refineChips`): a
+ * bigger budget, one more bedroom, the whole city, this weekend. Each is a
+ * new address with that filter set, so Back undoes it.
+ */
+function Refine({
+  url,
+  data,
+  copy,
+  locale,
+  navigate,
+}: {
+  url: IntelUrlState;
+  data: SearchResponse;
+  copy: IntelligenceCopy;
+  locale: Locale;
+  navigate: (next: IntelUrlState) => void;
+}) {
+  const chips = refineChips({ ...data.understood, ...url.filters }, url.tab, lagosToday(), copy, locale);
+  if (chips.length === 0) return null;
+  return (
+    <section className="nf-intel-refine" aria-labelledby="intel-refine" data-testid="intel-refine">
+      <h2 id="intel-refine" className="nf-intel-overline">
+        {copy.refine.title}
+      </h2>
+      <ul className="nf-intel-chiprow nf-intel-chiprow--rail" role="list">
+        {chips.map((chip) => {
+          const next = withFilters(url, chip.set);
+          return (
+            <li key={chip.id}>
+              <a
+                href={intelHref(next)}
+                className="nf-chip nf-intel-chip nf-intel-chip--refine"
+                data-testid={`intel-refine-${chip.id}`}
+                onClick={(event) => {
+                  if (!plainClick(event)) return;
+                  event.preventDefault();
+                  navigate(next);
+                }}
+              >
+                <UiIcon name={chip.icon} size={14} className="nf-intel-chip__glyph" />
+                <span>{chip.label}</span>
+                <UiIcon name="plus" size={14} className="nf-intel-chip__glyph" />
+              </a>
+            </li>
+          );
+        })}
+      </ul>
+    </section>
   );
 }
 

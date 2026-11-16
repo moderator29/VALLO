@@ -30,6 +30,13 @@ import {
   understoodChips,
   whyParts,
   wordOrigin,
+  biggerBudget,
+  dayOf,
+  forYouReasonText,
+  lagosToday,
+  refineChips,
+  stayWindows,
+  tileLine,
 } from "./model";
 
 const copy = getDictionary("en").intelligence;
@@ -252,5 +259,69 @@ describe("why it matches, as pills", () => {
     expect(whyParts("2 bedrooms · Lekki · under ₦5m")).toEqual(["2 bedrooms", "Lekki", "under ₦5m"]);
     expect(whyParts(undefined)).toEqual([]);
     expect(whyParts("")).toEqual([]);
+  });
+});
+
+describe("round 3: the flow's own decisions", () => {
+  it("today is the Lagos calendar's, not the device's", () => {
+    /* 23:30 UTC on the 15th is 00:30 on the 16th in Lagos. */
+    expect(lagosToday(new Date("2026-11-15T23:30:00Z"))).toBe("2026-11-16");
+    expect(lagosToday(new Date("2026-11-16T10:00:00Z"))).toBe("2026-11-16");
+    expect(dayOf("2026-11-15T23:30:00Z", "en")).toBe("16 Nov");
+    expect(dayOf("not a date", "en")).toBeNull();
+  });
+
+  it("stay windows: tonight, this weekend and the next, Friday to Sunday", () => {
+    /* Monday 16 November 2026. */
+    expect(stayWindows("2026-11-16")).toEqual({
+      tonight: { checkIn: "2026-11-16", checkOut: "2026-11-17" },
+      weekend: { checkIn: "2026-11-20", checkOut: "2026-11-22" },
+      nextWeekend: { checkIn: "2026-11-27", checkOut: "2026-11-29" },
+    });
+  });
+
+  it("a tile's line is a real count or nothing", () => {
+    expect(tileLine(undefined, "en")).toBeNull();
+    expect(tileLine({ tab: "stay", live: 0, newThisWeek: 0, areas: [], latest: [] }, "en")).toBeNull();
+    expect(tileLine({ tab: "stay", live: 12, newThisWeek: 0, areas: [], latest: [] }, "en")).toBe("12 live listings");
+    expect(tileLine({ tab: "stay", live: 12, newThisWeek: 1, areas: [], latest: [] }, "en")).toBe("1 new this week");
+  });
+
+  it("a bigger budget is the next round figure at least a quarter up", () => {
+    expect(biggerBudget(5_000_000)).toBe(7_500_000);
+    expect(biggerBudget(2_000_000)).toBe(2_500_000);
+    expect(biggerBudget(80_000)).toBe(100_000);
+    expect(biggerBudget(900_000_000)).toBe(1_500_000_000);
+  });
+
+  it("refine chips come only from what was understood, four at most, each a filter", () => {
+    const u: Understood = { raw: "2 bed in lekki under 5m", via: "rules", kind: "property", bedrooms: 2, place: "Lekki, Lagos", maxPrice: 5_000_000 };
+    const chips = refineChips(u, "all", "2026-11-16", copy, "en");
+    expect(chips.map((c) => [c.id, c.set])).toEqual([
+      ["budget", { maxPrice: 7_500_000 }],
+      ["beds", { bedrooms: 3 }],
+      ["city", { place: "Lagos" }],
+      ["furnished", { furnished: true }],
+    ]);
+    expect(chips[1]!.label).toBe("3 bedrooms");
+    expect(chips[2]!.label).toBe("Anywhere in Lagos");
+  });
+
+  it("a stay with no dates is offered this weekend; people, guides and a bare search get no refine chips", () => {
+    const stay = refineChips({ raw: "stays in lekki", via: "rules", kind: "stay", place: "Lekki, Lagos", guests: 2 }, "stay", "2026-11-16", copy, "en");
+    expect(stay.map((c) => c.id)).toEqual(["city", "weekend", "guests", "new"]);
+    expect(stay[1]!.set).toEqual({ checkIn: "2026-11-20", checkOut: "2026-11-22" });
+    expect(refineChips({ raw: "agents in lekki", via: "rules", kind: "person", place: "Lekki, Lagos" }, "all", "2026-11-16", copy, "en")).toEqual([]);
+    expect(refineChips({ raw: "how to list", via: "rules" }, "guide", "2026-11-16", copy, "en")).toEqual([]);
+    expect(refineChips({ raw: "hello", via: "rules" }, "all", "2026-11-16", copy, "en")).toEqual([]);
+  });
+
+  it("each For you reason reads as a short line", () => {
+    expect(forYouReasonText({ key: "nearSaved", area: "Yaba" }, copy, "en")).toBe("Because you saved a home in Yaba");
+    expect(forYouReasonText({ key: "lastSearch", query: "2 bed in yaba" }, copy, "en")).toBe("Like your search “2 bed in yaba”");
+    expect(forYouReasonText({ key: "newSince", since: "2026-11-15T10:00:00Z" }, copy, "en")).toBe("Listed since your search on 15 Nov");
+    expect(forYouReasonText({ key: "kind", kind: "shortlet" }, copy, "en")).toBe("Because you said you want short lets");
+    expect(forYouReasonText({ key: "kind", kind: "something-new" }, copy, "en")).toBe("Because you said you want places like this");
+    expect(forYouReasonText({ key: "saved" }, copy, "en")).toBe("Matches your saved search");
   });
 });

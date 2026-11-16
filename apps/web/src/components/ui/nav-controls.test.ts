@@ -68,6 +68,9 @@ const REMOVES_AN_ITEM = new Set([
   "app/(app)/roommates/profile/_parts/ProfileFlow.tsx", // removes a photo
   "app/(app)/roommates/new/_parts/PostFlow.tsx", // removes a photo
   "app/(app)/messages/[id]/ThreadView.tsx", // drops a reply or an attachment
+  "components/app/intelligence/IntelField.tsx", // clears the search field it sits in
+  "components/app/intelligence/IntelResults.tsx", // takes one understood filter chip off the search
+  "components/app/intelligence/IntelRails.tsx", // removes one recent search from the list
 ]);
 
 const files = sources(SRC).map((full) => ({

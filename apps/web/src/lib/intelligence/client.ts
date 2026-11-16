@@ -1,6 +1,9 @@
 import {
   INTELLIGENCE_TABS,
+  type CategoryFacts,
   type DiscoverResponse,
+  type ForYouRail,
+  type TrendingArea,
   type IntelligenceKind,
   type IntelligenceTab,
   type SearchResponse,
@@ -309,6 +312,10 @@ export async function fetchDiscover(signal?: AbortSignal): Promise<DiscoverRespo
     fresh: asArray(body.fresh),
     people: asArray(body.people),
     examples: asArray<string>(body.examples).filter((x) => typeof x === "string"),
+    /* Round 3, optional: kept only when the engine sent them. */
+    ...(Array.isArray(body.categories) ? { categories: asArray<CategoryFacts>(body.categories).filter((c) => c && typeof c.tab === "string") } : {}),
+    ...(Array.isArray(body.trending) ? { trending: asArray<TrendingArea>(body.trending).filter((t) => t && typeof t.area === "string" && typeof t.newListings === "number") } : {}),
+    ...(Array.isArray(body.forYou) ? { forYou: asArray<ForYouRail>(body.forYou).filter((r) => r && Array.isArray(r.items) && r.items.length > 0) } : {}),
   };
 }
 

@@ -62,6 +62,12 @@
       background-color var(--nf-duration-fast) var(--nf-ease-standard),
       scale var(--nf-duration-press) var(--nf-ease-press);
   }
+  /* The spark draws itself in once on arrival: the page's one mark. */
+  .nf-intel-spark svg path {
+    stroke-dasharray: 72;
+    stroke-dashoffset: 0;
+    animation: nf-intel-draw var(--nf-duration-cinematic) var(--nf-ease-entrance) both;
+  }
   .nf-intel-spark:active {
     scale: var(--nf-press-scale);
   }
@@ -156,39 +162,6 @@
     mix-blend-mode: soft-light;
   }
 
-  /* The mark over the title: the spark, drawn in once, on a small glass bead. */
-  .nf-intel-mark {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--nf-space-xs);
-    margin: 0 0 var(--nf-space-xs);
-    color: var(--nf-content-link);
-    font-size: var(--nf-text-overline);
-    font-weight: 700;
-    letter-spacing: 0.12em;
-    line-height: 1.3;
-    text-transform: uppercase;
-  }
-  .nf-intel-mark__glyph {
-    display: grid;
-    place-items: center;
-    inline-size: 2.25rem;
-    block-size: 2.25rem;
-    border: var(--nf-border-width) solid color-mix(in oklab, var(--nf-brand-primary) 34%, transparent);
-    border-radius: var(--nf-radius-circle);
-    background: color-mix(in oklab, var(--nf-brand-primary) 14%, transparent);
-    box-shadow: var(--nf-glow-accent);
-  }
-  .nf-intel-mark__glyph path {
-    stroke-dasharray: 72;
-    stroke-dashoffset: 0;
-    animation: nf-intel-draw var(--nf-duration-cinematic) var(--nf-ease-entrance) both;
-  }
-  /* Once, each time the field takes the caret: the mark breathes in. */
-  .nf-intel:has(.nf-intel-field__input:focus) .nf-intel-mark__glyph {
-    animation: nf-intel-breathe var(--nf-duration-deliberate) var(--nf-ease-standard) 1;
-  }
-
   .nf-intel-hero__greet {
     margin: 0;
     color: var(--nf-content-link);
@@ -234,6 +207,9 @@
     background: color-mix(in oklab, var(--nf-brand-primary) 7%, var(--nf-surface-primary));
     box-shadow: var(--nf-elevation-raised);
     scroll-margin-block-start: calc(var(--nf-space-md) + env(safe-area-inset-top, 0px));
+    transition:
+      background-color var(--nf-duration-fast) var(--nf-ease-standard),
+      box-shadow var(--nf-duration-fast) var(--nf-ease-standard);
   }
   .nf-intel-field__glyph {
     flex: none;
@@ -424,28 +400,6 @@
   }
 
   /* ===================================================== chips and heads */
-  .nf-intel-cats {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--nf-space-xs);
-  }
-  /* A sideways row on a phone, edge to edge, never a second line. */
-  @media (max-width: 39.999rem) {
-    .nf-intel-cats {
-      flex-wrap: nowrap;
-      margin-inline: calc(var(--nf-pad-shell) * -1);
-      padding-inline: var(--nf-pad-shell);
-      overflow-x: auto;
-      overscroll-behavior-x: contain;
-      scrollbar-width: none;
-    }
-    .nf-intel-cats::-webkit-scrollbar {
-      display: none;
-    }
-    .nf-intel-cats > * {
-      flex: none;
-    }
-  }
   .nf-intel-chiprow {
     display: flex;
     flex-wrap: wrap;
@@ -610,17 +564,9 @@
     background: var(--nf-surface-primary);
     transition: background-color var(--nf-duration-fast) var(--nf-ease-standard);
   }
-  /* Suggested for you: list rows on the page itself, no card around each. */
-  .nf-intel-rows--flush .nf-intel-row {
-    border-color: transparent;
-    background: transparent;
-  }
   @media (hover: hover) {
     .nf-intel-row:hover {
       background: color-mix(in oklab, var(--nf-brand-primary) 7%, var(--nf-surface-primary));
-    }
-    .nf-intel-rows--flush .nf-intel-row:hover {
-      background: color-mix(in oklab, var(--nf-brand-primary) 8%, transparent);
     }
   }
   .nf-intel-row__link {
@@ -632,9 +578,6 @@
     border-radius: var(--nf-radius-xl);
     color: var(--nf-content-primary);
     text-decoration: none;
-  }
-  .nf-intel-rows--flush .nf-intel-row__link {
-    padding-inline: var(--nf-space-2xs);
   }
   .nf-intel-row__link:focus-visible {
     outline: var(--nf-focus-ring-width) solid var(--nf-focus-ring);
@@ -1345,6 +1288,547 @@
     --nf-tier-sheet-edge: color-mix(in oklab, var(--nf-brand-primary) 22%, transparent);
   }
 
+  /* ==================================================== the dock (round 3)
+     The field sticks under the top of the screen. Once the page moves under
+     it (a sentinel above it has scrolled away, `usePastTop`), it condenses:
+     a little shorter, on the app's frosted glass, lifted one rung. */
+  .nf-intel-sentinel {
+    block-size: 0;
+    margin-block-end: calc(var(--nf-space-md) * -1);
+  }
+  .nf-intel-dock {
+    position: sticky;
+    z-index: 20;
+    /* Under the app's own sticky bar (`AppShell`, 60px on a phone, 72px from 640px up). */
+    inset-block-start: calc(env(safe-area-inset-top, 0px) + var(--nf-header-height-sm) + var(--nf-space-xs));
+  }
+  @media (min-width: 40rem) {
+    .nf-intel-dock {
+      inset-block-start: calc(env(safe-area-inset-top, 0px) + var(--nf-header-height) + var(--nf-space-xs));
+    }
+  }
+  /* A band of the page's own ground behind the condensed field, so what
+     scrolls under it fades out rather than showing round its edges. */
+  .nf-intel-dock::before {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    inset-inline: calc(var(--nf-pad-shell) * -1);
+    inset-block: calc(var(--nf-space-xs) * -1) calc(var(--nf-space-md) * -1);
+    background: linear-gradient(to bottom, var(--nf-surface-canvas) 72%, transparent);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--nf-duration-fast) var(--nf-ease-standard);
+  }
+  .nf-intel-dock[data-condensed]::before {
+    opacity: 1;
+  }
+  .nf-intel-dock[data-condensed] .nf-intel-field {
+    block-size: 3.25rem;
+    background: color-mix(in oklab, var(--nf-surface-primary) 84%, transparent);
+    -webkit-backdrop-filter: blur(var(--nf-glass-blur-strong)) saturate(var(--nf-glass-saturate));
+    backdrop-filter: blur(var(--nf-glass-blur-strong)) saturate(var(--nf-glass-saturate));
+    box-shadow: var(--nf-elevation-floating);
+  }
+
+  /* ============================================== explore vallo (round 3)
+     Two by two, then one wide tile. The brand's door glass: the same
+     material as the Get started choice tiles, so a tile reads as a door. */
+  .nf-intel-tiles {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--nf-space-sm);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .nf-intel-tiles > li {
+    min-inline-size: 0;
+    animation: nf-intel-rise var(--nf-duration-base) var(--nf-ease-entrance) both;
+    animation-delay: calc(var(--nf-intel-i, 0) * 40ms);
+  }
+  .nf-intel-tiles > li[data-wide] {
+    grid-column: 1 / -1;
+  }
+  .nf-intel-tilecard {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    align-content: start;
+    gap: var(--nf-space-sm);
+    inline-size: 100%;
+    block-size: 100%;
+    min-block-size: 8.5rem;
+    margin: 0;
+    padding: var(--nf-space-md);
+    border: var(--nf-border-width) solid var(--nf-door-glass-rim);
+    border-radius: var(--nf-radius-card);
+    background: var(--nf-door-glass-fill);
+    box-shadow: var(--nf-door-glass-depth);
+    color: var(--nf-content-primary);
+    font: inherit;
+    text-align: start;
+    text-decoration: none;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition:
+      transform var(--nf-duration-fast) var(--nf-ease-standard),
+      border-color var(--nf-duration-fast) var(--nf-ease-standard),
+      scale var(--nf-duration-press) var(--nf-ease-press);
+  }
+  .nf-intel-tilecard__icon {
+    display: grid;
+    flex: none;
+    place-items: center;
+    inline-size: 2.75rem;
+    block-size: 2.75rem;
+    border: var(--nf-border-width) solid color-mix(in oklab, var(--nf-brand-primary) 26%, transparent);
+    border-radius: var(--nf-radius-control);
+    background: color-mix(in oklab, var(--nf-brand-primary) 15%, transparent);
+    color: var(--nf-content-link);
+  }
+  .nf-intel-tilecard__text {
+    display: grid;
+    gap: var(--nf-space-3xs);
+    min-inline-size: 0;
+  }
+  .nf-intel-tilecard__title {
+    color: var(--nf-content-primary);
+    font-family: var(--nf-font-display);
+    font-size: var(--nf-text-body-lg);
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    line-height: 1.2;
+  }
+  .nf-intel-tilecard__sub {
+    display: -webkit-box;
+    overflow: hidden;
+    color: var(--nf-content-muted);
+    font-size: var(--nf-text-body-sm);
+    line-height: 1.35;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+  .nf-intel-tilecard__line {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--nf-space-2xs);
+    margin-block-start: var(--nf-space-3xs);
+    color: var(--nf-content-link);
+    font-size: var(--nf-text-caption);
+    font-weight: 600;
+  }
+  .nf-intel-tilecard__line::before {
+    content: "";
+    inline-size: 0.375rem;
+    block-size: 0.375rem;
+    border-radius: var(--nf-radius-circle);
+    background: currentColor;
+  }
+  .nf-intel-tilecard__go {
+    position: absolute;
+    inset-block-start: var(--nf-space-md);
+    inset-inline-end: var(--nf-space-sm);
+    color: var(--nf-content-muted);
+  }
+  /* The wide tile, the entry rows and every tile from a tablet up: the glyph beside the words. */
+  .nf-intel-tiles > li[data-wide] .nf-intel-tilecard,
+  .nf-intel-tilecard--row {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    min-block-size: 4.75rem;
+  }
+  .nf-intel-tiles > li[data-wide] .nf-intel-tilecard__go,
+  .nf-intel-tilecard--row .nf-intel-tilecard__go {
+    position: static;
+  }
+  @media (min-width: 40rem) {
+    .nf-intel-tiles > li:not([data-wide]) .nf-intel-tilecard {
+      grid-template-columns: auto minmax(0, 1fr);
+      align-items: center;
+      min-block-size: 6.5rem;
+      padding: var(--nf-space-md) var(--nf-space-lg) var(--nf-space-md) var(--nf-space-md);
+    }
+    .nf-intel-tilecard__icon {
+      inline-size: 3.25rem;
+      block-size: 3.25rem;
+    }
+    .nf-intel-tiles > li:not([data-wide]) .nf-intel-tilecard__go {
+      inset-block-start: 50%;
+      translate: 0 -50%;
+    }
+  }
+  @media (hover: hover) {
+    .nf-intel-tilecard:hover {
+      border-color: color-mix(in oklab, var(--nf-brand-primary) 55%, var(--nf-door-glass-rim));
+      transform: translate3d(0, -2px, 0);
+    }
+  }
+  .nf-intel-tilecard:active {
+    scale: var(--nf-press-scale);
+  }
+  .nf-intel-tilecard:focus-visible {
+    outline: var(--nf-focus-ring-width) solid var(--nf-focus-ring);
+    outline-offset: var(--nf-focus-ring-offset);
+  }
+
+  /* ============================================= a category's own page */
+  .nf-intel-category {
+    display: grid;
+    gap: var(--nf-space-xs);
+    margin-block-start: var(--nf-space-xs);
+  }
+  .nf-intel-back {
+    display: inline-flex;
+    order: -1;
+    align-items: center;
+    justify-self: start;
+    gap: var(--nf-space-2xs);
+    min-block-size: 2.75rem;
+    min-inline-size: 2.75rem;
+    padding-inline: var(--nf-space-2xs) var(--nf-space-sm);
+    border: 0;
+    border-radius: var(--nf-radius-control);
+    background: none;
+    color: var(--nf-content-link);
+    font-size: var(--nf-text-body-sm);
+    font-weight: 600;
+    cursor: pointer;
+  }
+  @media (hover: hover) {
+    .nf-intel-back:hover {
+      background: var(--nf-brand-tint-1);
+    }
+  }
+  .nf-intel-back:focus-visible {
+    outline: var(--nf-focus-ring-width) solid var(--nf-focus-ring);
+    outline-offset: -2px;
+  }
+  /* The tile, grown: the same glass, with the brand's light gathering at its corner. */
+  .nf-intel-cathead {
+    display: flex;
+    align-items: center;
+    gap: var(--nf-space-md);
+    padding: var(--nf-space-lg) var(--nf-space-md);
+    border: var(--nf-border-width) solid var(--nf-door-glass-rim);
+    border-radius: var(--nf-radius-card);
+    background:
+      radial-gradient(90% 120% at 100% 0%, color-mix(in oklab, var(--nf-brand-accent) 16%, transparent), transparent 65%),
+      var(--nf-door-glass-fill);
+    box-shadow: var(--nf-door-glass-depth);
+    animation: nf-intel-rise var(--nf-duration-base) var(--nf-ease-entrance) both;
+  }
+  .nf-intel-cathead__icon {
+    inline-size: 3.5rem;
+    block-size: 3.5rem;
+  }
+  .nf-intel-cathead__text {
+    display: grid;
+    gap: var(--nf-space-3xs);
+    min-inline-size: 0;
+  }
+  .nf-intel-cathead__title {
+    margin: 0;
+    color: var(--nf-content-primary);
+    font-family: var(--nf-font-display);
+    font-size: var(--nf-text-h2);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+  }
+  .nf-intel-cathead__sub {
+    color: var(--nf-content-muted);
+    font-size: var(--nf-text-body);
+    line-height: 1.4;
+  }
+
+  /* The quick picks: one calm card of choices, then one button. */
+  .nf-intel-picks {
+    display: grid;
+    gap: var(--nf-space-md);
+    padding: var(--nf-space-md);
+    border: var(--nf-border-width) solid color-mix(in oklab, var(--nf-brand-primary) 16%, var(--nf-card-border));
+    border-radius: var(--nf-radius-card);
+    background: color-mix(in oklab, var(--nf-brand-primary) 4%, var(--nf-surface-primary));
+  }
+  .nf-intel-seg {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--nf-space-3xs);
+    padding: var(--nf-space-3xs);
+    border: var(--nf-border-width) solid var(--nf-panel-hair);
+    border-radius: var(--nf-radius-pill);
+    background: color-mix(in oklab, var(--nf-brand-primary) 6%, var(--nf-surface-primary));
+  }
+  .nf-intel-seg__opt {
+    min-block-size: 2.75rem;
+    border: 0;
+    border-radius: var(--nf-radius-pill);
+    background: none;
+    color: var(--nf-content-secondary);
+    font: inherit;
+    font-size: var(--nf-text-body-sm);
+    font-weight: 600;
+    cursor: pointer;
+    transition:
+      background-color var(--nf-duration-fast) var(--nf-ease-standard),
+      color var(--nf-duration-fast) var(--nf-ease-standard);
+  }
+  .nf-intel-seg__opt[aria-checked="true"] {
+    background: var(--nf-brand-primary);
+    color: var(--nf-content-on-brand);
+  }
+  .nf-intel-seg__opt:focus-visible {
+    outline: var(--nf-focus-ring-width) solid var(--nf-focus-ring);
+    outline-offset: 2px;
+  }
+  .nf-intel-pick {
+    display: grid;
+    gap: var(--nf-space-xs);
+  }
+  .nf-intel-pick__label {
+    margin: 0;
+    color: var(--nf-content-secondary);
+    font-size: var(--nf-text-body-sm);
+    font-weight: 600;
+  }
+  .nf-intel-pick__row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--nf-space-xs);
+  }
+  .nf-intel-pickchip {
+    min-block-size: 2.75rem;
+  }
+  .nf-intel-pickchip__two {
+    display: grid;
+    line-height: 1.15;
+    text-align: start;
+  }
+  .nf-intel-pickchip__small {
+    font-size: var(--nf-text-caption);
+    font-weight: 400;
+    opacity: 0.8;
+  }
+
+  .nf-intel-entries {
+    display: grid;
+    gap: var(--nf-space-xs);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  /* No real places on this side yet: said plainly, the way forward under it. */
+  .nf-intel-waiting {
+    display: grid;
+    justify-items: center;
+    gap: var(--nf-space-xs);
+    padding: var(--nf-space-xl) var(--nf-space-md);
+    border: var(--nf-border-width) solid color-mix(in oklab, var(--nf-brand-primary) 18%, var(--nf-card-border));
+    border-radius: var(--nf-radius-card);
+    background:
+      radial-gradient(70% 60% at 50% 0%, color-mix(in oklab, var(--nf-brand-primary) 12%, transparent), transparent 70%),
+      var(--nf-surface-primary);
+    text-align: center;
+    animation: nf-intel-rise var(--nf-duration-base) var(--nf-ease-entrance) both;
+  }
+  .nf-intel-waiting__glyph {
+    display: grid;
+    place-items: center;
+    inline-size: 3.5rem;
+    block-size: 3.5rem;
+    margin-block-end: var(--nf-space-2xs);
+    border: var(--nf-border-width) solid color-mix(in oklab, var(--nf-brand-primary) 30%, transparent);
+    border-radius: var(--nf-radius-circle);
+    background: color-mix(in oklab, var(--nf-brand-primary) 14%, transparent);
+    color: var(--nf-content-link);
+  }
+  .nf-intel-waiting__title {
+    margin: 0;
+    color: var(--nf-content-primary);
+    font-family: var(--nf-font-display);
+    font-size: var(--nf-text-h4);
+    font-weight: 700;
+    line-height: 1.25;
+    text-wrap: balance;
+  }
+  .nf-intel-waiting__body {
+    max-inline-size: 30rem;
+    margin: 0;
+    color: var(--nf-content-muted);
+    font-size: var(--nf-text-body-sm);
+    line-height: 1.5;
+    text-wrap: pretty;
+  }
+  .nf-intel-waiting__acts {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--nf-space-xs);
+    margin-block-start: var(--nf-space-xs);
+  }
+
+  /* ============================================== continue, for you, etc. */
+  .nf-intel-recentwrap {
+    display: grid;
+    gap: var(--nf-space-2xs);
+  }
+  .nf-intel-pickup {
+    display: flex;
+    align-items: center;
+    gap: var(--nf-space-2xs);
+    padding-inline-end: var(--nf-space-2xs);
+    border: var(--nf-border-width) solid var(--nf-door-glass-rim);
+    border-radius: var(--nf-radius-card);
+    background: var(--nf-door-glass-fill);
+    box-shadow: var(--nf-door-glass-depth);
+  }
+  .nf-intel-pickup__run {
+    display: flex;
+    flex: 1;
+    align-items: center;
+    gap: var(--nf-space-sm);
+    min-inline-size: 0;
+    min-block-size: 4.75rem;
+    padding: var(--nf-space-sm) var(--nf-space-xs) var(--nf-space-sm) var(--nf-space-md);
+    border-radius: var(--nf-radius-card);
+    color: var(--nf-content-primary);
+    text-decoration: none;
+  }
+  .nf-intel-pickup__run:focus-visible {
+    outline: var(--nf-focus-ring-width) solid var(--nf-focus-ring);
+    outline-offset: -2px;
+  }
+  .nf-intel-pickup__text {
+    display: grid;
+    gap: var(--nf-space-3xs);
+    flex: 1;
+    min-inline-size: 0;
+  }
+  .nf-intel-pickup__over {
+    color: var(--nf-content-link);
+    font-size: var(--nf-text-caption);
+    font-weight: 600;
+  }
+  .nf-intel-pickup__q {
+    overflow: hidden;
+    font-size: var(--nf-text-body-lg);
+    font-weight: 700;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .nf-intel-pickup__when {
+    color: var(--nf-content-muted);
+    font-size: var(--nf-text-caption);
+  }
+  .nf-intel-pickup__go {
+    flex: none;
+    color: var(--nf-content-link);
+  }
+  .nf-intel-subrail {
+    display: grid;
+    gap: var(--nf-space-2xs);
+  }
+  .nf-intel-subhead {
+    display: flex;
+    align-items: center;
+    gap: var(--nf-space-2xs);
+    margin: 0;
+    color: var(--nf-content-secondary);
+    font-size: var(--nf-text-body-sm);
+    font-weight: 600;
+  }
+
+  .nf-intel-trend {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr));
+    gap: var(--nf-space-xs);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .nf-intel-trend__item {
+    display: flex;
+    align-items: center;
+    gap: var(--nf-space-sm);
+    min-block-size: 3.75rem;
+    padding: var(--nf-space-xs) var(--nf-space-sm);
+    border: var(--nf-border-width) solid color-mix(in oklab, var(--nf-brand-primary) 16%, var(--nf-card-border));
+    border-radius: var(--nf-radius-xl);
+    background: var(--nf-surface-primary);
+    color: var(--nf-content-primary);
+    text-decoration: none;
+    transition: scale var(--nf-duration-press) var(--nf-ease-press);
+  }
+  .nf-intel-trend__item:active {
+    scale: var(--nf-press-scale);
+  }
+  .nf-intel-trend__item:focus-visible {
+    outline: var(--nf-focus-ring-width) solid var(--nf-focus-ring);
+    outline-offset: var(--nf-focus-ring-offset);
+  }
+  .nf-intel-trend__rank {
+    display: grid;
+    flex: none;
+    place-items: center;
+    inline-size: 2.25rem;
+    block-size: 2.25rem;
+    border-radius: var(--nf-radius-circle);
+    background: color-mix(in oklab, var(--nf-brand-primary) 14%, transparent);
+    color: var(--nf-content-link);
+    font-weight: 700;
+  }
+  .nf-intel-trend__text {
+    display: grid;
+    flex: 1;
+    min-inline-size: 0;
+  }
+  .nf-intel-trend__name {
+    font-weight: 600;
+  }
+  .nf-intel-trend__meta {
+    overflow: hidden;
+    color: var(--nf-content-muted);
+    font-size: var(--nf-text-caption);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .nf-intel-trend__go {
+    flex: none;
+    color: var(--nf-content-link);
+  }
+
+  /* ================================================= refine, under results */
+  .nf-intel-refine {
+    display: grid;
+    gap: var(--nf-space-xs);
+    padding-block-start: var(--nf-space-md);
+    border-block-start: var(--nf-border-width) solid var(--nf-panel-hair);
+  }
+  .nf-intel-chip--refine {
+    border-style: dashed;
+  }
+  @media (max-width: 39.999rem) {
+    .nf-intel-chiprow--rail {
+      flex-wrap: nowrap;
+      margin-inline: calc(var(--nf-pad-shell) * -1);
+      padding-inline: var(--nf-pad-shell);
+      overflow-x: auto;
+      overscroll-behavior-x: contain;
+      scroll-snap-type: x proximity;
+      scroll-padding-inline: var(--nf-pad-shell);
+      scrollbar-width: none;
+    }
+    .nf-intel-chiprow--rail::-webkit-scrollbar {
+      display: none;
+    }
+    .nf-intel-chiprow--rail > li {
+      flex: none;
+      scroll-snap-align: start;
+    }
+  }
+
   /* ============================================================ motion */
   @keyframes nf-intel-rise {
     from {
@@ -1401,20 +1885,21 @@
     .nf-intel-fade,
     .nf-intel-launch__hint,
     .nf-intel-aurora__bloom,
-    .nf-intel-mark__glyph,
-    .nf-intel-mark__glyph path,
+    .nf-intel-spark svg path,
+    .nf-intel-tiles > li,
+    .nf-intel-cathead,
+    .nf-intel-waiting,
     .nf-intel-hero__greet,
     .nf-intel-thinking,
     .nf-intel-thinking__beam,
     .nf-intel-cards.nf-arrive-list > li img {
       animation: none;
     }
-    .nf-intel:has(.nf-intel-field__input:focus) .nf-intel-mark__glyph {
-      animation: none;
-    }
     .nf-intel-askpill,
     .nf-intel-mood,
-    .nf-intel-postcard__art {
+    .nf-intel-postcard__art,
+    .nf-intel-tilecard,
+    .nf-intel-field {
       transition: none;
     }
   }
@@ -1427,8 +1912,10 @@
       .nf-intel-fade,
       .nf-intel-launch__hint,
       .nf-intel-aurora__bloom,
-      .nf-intel-mark__glyph,
-      .nf-intel-mark__glyph path,
+      .nf-intel-spark svg path,
+      .nf-intel-tiles > li,
+      .nf-intel-cathead,
+      .nf-intel-waiting,
       .nf-intel-hero__greet,
       .nf-intel-thinking,
       .nf-intel-thinking__beam,
@@ -1436,16 +1923,59 @@
     ) {
     animation: none;
   }
-  :root[data-motion="off"] .nf-intel:has(.nf-intel-field__input:focus) .nf-intel-mark__glyph {
-    animation: none;
+  :root[data-motion="off"] :is(.nf-intel-askpill, .nf-intel-mood, .nf-intel-tilecard, .nf-intel-field) {
+    transition: none;
   }
-  :root[data-motion="calm"] :is(.nf-intel, .nf-intel-section, .nf-intel-suggest, .nf-intel-hero__greet, .nf-intel-aurora__bloom) {
+  :root[data-motion="calm"] :is(.nf-intel, .nf-intel-section, .nf-intel-suggest, .nf-intel-hero__greet, .nf-intel-aurora__bloom, .nf-intel-tiles > li, .nf-intel-cathead, .nf-intel-waiting) {
     animation-name: nf-intel-fade;
   }
-  :root[data-motion="calm"] :is(.nf-intel-mark__glyph path, .nf-intel-cards.nf-arrive-list > li img) {
+  :root[data-motion="calm"] :is(.nf-intel-spark svg path, .nf-intel-cards.nf-arrive-list > li img) {
     animation: none;
   }
-  :root[data-motion="calm"] .nf-intel:has(.nf-intel-field__input:focus) .nf-intel-mark__glyph {
-    animation: none;
+}
+
+/*
+ * THE SCREEN'S OWN FLOW (round 3), outside the layer on purpose: the route
+ * transitions (`app/css/route-motion.css`) style the root's view transition
+ * unlayered, and these must win while the root says `data-intel-flow`
+ * (`use-intel.ts`, `runFlow`, which sets it only for the length of one flow).
+ *
+ * A tile grows into its category's header and folds back into it; the field
+ * glides to its new place; the rest of the page crossfades quickly rather
+ * than sliding like a new screen, because it is the same screen. Once, on
+ * the motion ladder's own durations. A reader who asked for less motion never
+ * starts a flow (`runFlow` checks `motionQuiet`), and `base.css` already stops
+ * every view transition for them.
+ */
+@supports (view-transition-name: none) {
+  :root[data-intel-flow]::view-transition-old(root) {
+    animation: nf-intel-vt-out var(--nf-duration-fast) var(--nf-ease-standard) both;
+  }
+  :root[data-intel-flow]::view-transition-new(root) {
+    animation: nf-intel-vt-in var(--nf-duration-base) var(--nf-ease-entrance) both;
+  }
+  :root[data-intel-flow]::view-transition-group(nf-intel-cat),
+  :root[data-intel-flow]::view-transition-group(nf-intel-field) {
+    animation-duration: var(--nf-duration-slow);
+    animation-timing-function: var(--nf-ease-entrance);
+  }
+  /* The tile and the header are different shapes: each image fills the box in flight, never squashed. */
+  :root[data-intel-flow]::view-transition-old(nf-intel-cat),
+  :root[data-intel-flow]::view-transition-new(nf-intel-cat) {
+    block-size: 100%;
+    inline-size: 100%;
+    object-fit: cover;
+    object-position: left top;
+  }
+}
+@keyframes nf-intel-vt-out {
+  to {
+    opacity: 0;
+  }
+}
+@keyframes nf-intel-vt-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 8px, 0);
   }
 }

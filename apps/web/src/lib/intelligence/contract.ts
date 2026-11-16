@@ -167,4 +167,62 @@ export interface DiscoverResponse {
   people: IntelligenceResult[];
   /** Example searches that are known to return results today. */
   examples: string[];
+  /**
+   * Added 16 November 2026 (round 3), backward compatible: every field below
+   * is optional, and a screen built before it simply never reads them.
+   *
+   * The explore tiles' real facts, per listing side. Counts and areas come
+   * from published listings that are NOT examples, so a catalogue of
+   * examples (or none) gives zeros and no areas, and the screen prints no
+   * count at all. Absent when the catalogue could not be read.
+   */
+  categories?: CategoryFacts[];
+  /** Areas with the most new real listings in the last 30 days (two or more each). Empty when none. */
+  trending?: TrendingArea[];
+  /**
+   * For a signed-in member only, built from their own records read through
+   * their own session (saved homes, saved searches, stated interests, their
+   * last search). Each item says why it is there; a rail with nothing in it
+   * is left out, and a visitor never gets the field.
+   */
+  forYou?: ForYouRail[];
+}
+
+/** One explore tile's facts (round 3). Zero is a real answer: the screen prints no count for it. */
+export interface CategoryFacts {
+  tab: "property" | "stay" | "restaurant";
+  /** Published listings on this side that are not examples. */
+  live: number;
+  /** Of those, published in the last seven days. */
+  newThisWeek: number;
+  /** Areas holding at least one of them, most first. */
+  areas: { name: string; city: string }[];
+  /** The newest of them, newest first. */
+  latest: IntelligenceResult[];
+}
+
+/** An area that is busy right now: `newListings` real listings published there in the last 30 days. */
+export interface TrendingArea {
+  area: string;
+  city: string;
+  newListings: number;
+}
+
+/**
+ * Why a "For you" item is there, as data; the screen says it in words.
+ * The first six are `lib/search/best-matches.ts`'s own reasons.
+ */
+export type ForYouReason =
+  | { key: "areaBudget" | "areaSaved" | "nearSaved"; area: string }
+  | { key: "budget" | "saved" }
+  | { key: "kind"; kind: string }
+  | { key: "lastSearch"; query: string }
+  | { key: "newSince"; since: string };
+
+/** One "For you" rail. `query` names the last search, `since` is when it was made (ISO). */
+export interface ForYouRail {
+  id: "matches" | "lastSearch" | "newSince";
+  query?: string;
+  since?: string;
+  items: { result: IntelligenceResult; reason: ForYouReason }[];
 }
