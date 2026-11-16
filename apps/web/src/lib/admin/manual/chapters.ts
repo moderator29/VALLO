@@ -22,7 +22,7 @@ import type { StaffScope } from "@/lib/admin/guard";
 /** The day the chapters were last read against the code. */
 export const MANUAL_UPDATED = "2026-11-16";
 
-export const MANUAL_SLUGS = ["access", "desks", "queues", "decisions", "records", "escalation", "my-desk", "weekly-report", "marketing", "content", "technical", "support-lead", "business-development", "social-media", "product-guide", "onboarding-a-lister", "onboarding-a-member", "copilot"] as const;
+export const MANUAL_SLUGS = ["access", "desks", "queues", "decisions", "records", "escalation", "my-desk", "weekly-report", "marketing", "content", "technical", "support-lead", "business-development", "social-media", "product-guide", "onboarding-a-lister", "onboarding-a-member", "copilot", "money", "offers-and-deals"] as const;
 export type ManualSlug = (typeof MANUAL_SLUGS)[number];
 
 export type ManualChapter = {
@@ -167,7 +167,49 @@ export const MANUAL_CHAPTERS: readonly ManualChapter[] = [
     icon: "bot",
     description: "Opening it, reading an answer, quick commands, history and settings, how a card works, the desk work it can do, the super admin's powers, and what it never does.",
   },
+  /* The old staff manual at /admin/handbook/manual was retired (the founder,
+     16 November 2026). What it said that no chapter held yet moved here: the
+     money desks and the Offers and deals desk became chapters of their own,
+     added at the end so no earlier chapter number moves. */
+  {
+    slug: "money",
+    number: 19,
+    title: "Working the money desks",
+    icon: "coins",
+    description: "The rules about money that never bend, deciding a disputed payment the partner holds, working a chargeback, changing a fee rate, and destroying records past retention.",
+  },
+  {
+    slug: "offers-and-deals",
+    number: 20,
+    title: "The Offers and deals desk",
+    icon: "scale",
+    description: "Offers on homes for sale: the overview figures and what each means, the deals table, reading a deal, the three things staff may do, and what to say to a member.",
+  },
 ];
+
+/**
+ * WHERE THE RETIRED STAFF MANUAL'S PAGES WENT. The old manual lived at
+ * `/admin/handbook/manual/<page>`; each of its nine pages now redirects to
+ * the chapter (and section) that holds what it said. An address not listed
+ * here goes to the index. `app/admin/manual/manual.test.ts` checks every
+ * target is a real chapter and a real section.
+ */
+export const RETIRED_MANUAL_PAGES: Readonly<Record<string, string>> = {
+  "desks-and-access": "/admin/manual/access",
+  "identity-and-applications": "/admin/manual/queues#identity",
+  "listings-and-supply": "/admin/manual/queues#listings",
+  "agreements-and-bookings": "/admin/manual/queues#agreements",
+  "money-and-fees": "/admin/manual/money",
+  "cases-and-safety": "/admin/manual/queues#reports",
+  "support-desk": "/admin/manual/queues#tickets",
+  "offers-and-deals-desk": "/admin/manual/offers-and-deals",
+  "operations-and-tools": "/admin/manual/desks#take-care",
+};
+
+/** The address a retired manual page now lives at; the index for anything unknown. */
+export function retiredManualTarget(page: string): string {
+  return Object.hasOwn(RETIRED_MANUAL_PAGES, page) ? RETIRED_MANUAL_PAGES[page]! : "/admin/manual";
+}
 
 export function isManualSlug(value: unknown): value is ManualSlug {
   return typeof value === "string" && (MANUAL_SLUGS as readonly string[]).includes(value);

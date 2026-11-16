@@ -2,7 +2,7 @@ import { readFileSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { BANNED_EVERYWHERE, SCHEDULE_PROMISES, firstBannedPhrase } from "@/lib/copy/banned-phrases";
-import { MANUAL_AREA_LABEL, MANUAL_CHAPTERS, MANUAL_SLUGS } from "@/lib/admin/manual/chapters";
+import { MANUAL_AREA_LABEL, MANUAL_CHAPTERS, MANUAL_SLUGS, RETIRED_MANUAL_PAGES, isManualSlug, retiredManualTarget } from "@/lib/admin/manual/chapters";
 import { STAFF_SCOPE_LABEL } from "@/lib/admin/guard";
 import { CONTACT_EMAIL } from "@/lib/support-email";
 import { unbackedClaim } from "@/lib/trust/claims";
@@ -100,6 +100,29 @@ describe("the staff manual", () => {
     expect(MANUAL_CHAPTERS.map((c) => c.slug)).toEqual([...MANUAL_SLUGS]);
     expect(MANUAL_CHAPTERS.map((c) => c.number)).toEqual(MANUAL_SLUGS.map((_, i) => i + 1));
   });
+
+  /*
+   * The retired staff manual (`/admin/handbook/manual`, retired 16 November
+   * 2026) redirects each of its nine pages into this one. Every target must be
+   * a chapter that exists and, where it names one, a section that chapter has.
+   */
+  it("sends every page of the retired staff manual to a real chapter and section", async () => {
+    expect(Object.keys(RETIRED_MANUAL_PAGES).sort()).toEqual(
+      ["agreements-and-bookings", "cases-and-safety", "desks-and-access", "identity-and-applications", "listings-and-supply", "money-and-fees", "offers-and-deals-desk", "operations-and-tools", "support-desk"],
+    );
+    for (const [page, target] of Object.entries(RETIRED_MANUAL_PAGES)) {
+      expect(retiredManualTarget(page)).toBe(target);
+      const [path, section] = target.split("#") as [string, string | undefined];
+      const slug = path.replace(/^\/admin\/manual\//, "");
+      expect(isManualSlug(slug), target).toBe(true);
+      if (section) {
+        const html = await render(`<ManualChapterView slug="${slug}" />`);
+        expect(html, target).toContain(`<section id="${section}"`);
+      }
+    }
+    expect(retiredManualTarget("no-such-page")).toBe("/admin/manual");
+    expect(retiredManualTarget("constructor")).toBe("/admin/manual");
+  }, 120_000);
 
   it("names the access areas exactly as the console does", () => {
     expect(MANUAL_AREA_LABEL).toEqual(STAFF_SCOPE_LABEL);

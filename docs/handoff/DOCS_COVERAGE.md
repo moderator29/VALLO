@@ -111,15 +111,30 @@ Every page in the app (298 at the time of writing, 275 in the ledger).
 | `/agent/analytics`, `/agent/analytics/[metric]`, `/agent/analytics/listings/[listingId]`, `/agent/bookings`, `/agent/dashboard`, `/agent/earnings`, `/agent/firm`, `/agent/inspections`, `/agent/list`, `/agent/listings`, `/agent/listings/[listingId]/arrival`, `/agent/listings/[listingId]/board`, `/agent/listings/[listingId]/calendar`, `/agent/listings/[listingId]/health`, `/agent/listings/[listingId]/mandate`, `/agent/listings/[listingId]/promotion`, `/agent/listings/[listingId]/sharing`, `/agent/listings/[listingId]/status`, `/agent/portfolio`, `/agent/promotion`, `/agent/reviews`, `/agent/settings` | documented | `/docs/agent-workspace` |
 | `/pay/crypto/[reference]` | KNOWN GAP | Crypto payment pages exist for notification deep links; no member flow in the docs offers it. Not documented until the founder says whether it is offered. |
 | `/calls/reviews`, `/calls/reviews/[id]` | KNOWN GAP | Review call invitations for the person a case is about; needs a short section in Trust and safety. |
-| `/admin`, `/admin/handbook`, `/admin/handbook/position`, `/admin/handbook/manual`, `/admin/handbook/manual/[slug]`, `/admin/lookup`, `/admin/staff`, `/admin/audit`, `/admin/oversight`, `/admin/queue` | documented | `/admin/handbook/manual/desks-and-access` |
-| `/admin/kyc`, `/admin/kyc/guide`, `/admin/agents`, `/admin/businesses`, `/admin/review-calls`, `/admin/review-calls/[id]`, `/admin/account-recovery` | documented | `/admin/handbook/manual/identity-and-applications` |
-| `/admin/listings`, `/admin/listings/[id]`, `/admin/examples`, `/admin/supply`, `/admin/people`, `/admin/people/[id]`, `/admin/stops`, `/admin/reference` | documented | `/admin/handbook/manual/listings-and-supply` |
-| `/admin/agreements`, `/admin/agreements/settings`, `/admin/bookings`, `/admin/bookings/[bookingId]`, `/admin/bookings/reservations`, `/admin/bookings/visits` | documented | `/admin/handbook/manual/agreements-and-bookings` |
-| `/admin/money`, `/admin/payments`, `/admin/chargebacks`, `/admin/chargebacks/[chargebackId]`, `/admin/fees`, `/admin/restaurant-fees`, `/admin/referrals` | documented | `/admin/handbook/manual/money-and-fees` |
-| `/admin/trust`, `/admin/cases`, `/admin/cases/[id]`, `/admin/alerts`, `/admin/appeals`, `/admin/standing`, `/admin/weight-withheld`, `/admin/blocked-terms`, `/admin/circle`, `/admin/social`, `/admin/roommates` | documented | `/admin/handbook/manual/cases-and-safety` |
-| `/admin/support` | documented | `/admin/handbook/manual/support-desk` |
-| `/admin/offers`, `/admin/offers/[id]` | documented | `/admin/handbook/manual/offers-and-deals-desk` |
-| `/admin/operations`, `/admin/operations/providers`, `/admin/crashes`, `/admin/field-speed`, `/admin/call-usage`, `/admin/analytics`, `/admin/front-door`, `/admin/retention`, `/admin/compliance`, `/admin/switches`, `/admin/settings` | documented | `/admin/handbook/manual/operations-and-tools` |
+| `/admin/handbook/manual`, `/admin/handbook/manual/[slug]` | needs none | The retired staff manual's addresses: each redirects to the chapter of /admin/manual that now holds its page. |
+| `/admin/handbook`, `/admin/handbook/position`, `/admin/handbook/position/[position]`, `/admin/staff` | documented | `/admin/manual/access` |
+| `/admin`, `/admin/lookup`, `/admin/overview`, `/admin/control`, `/admin/examples`, `/admin/supply`, `/admin/stops`, `/admin/reference`, `/admin/businesses`, `/admin/trust`, `/admin/standing`, `/admin/weight-withheld`, `/admin/blocked-terms`, `/admin/circle`, `/admin/social`, `/admin/roommates`, `/admin/account-deletions`, `/admin/alerts`, `/admin/people`, `/admin/people/[id]`, `/admin/bookings`, `/admin/bookings/[bookingId]`, `/admin/bookings/reservations`, `/admin/bookings/visits`, `/admin/restaurant-fees`, `/admin/referrals`, `/admin/money`, `/admin/payments` | documented | `/admin/manual/desks` |
+| `/admin/operations`, `/admin/operations/providers`, `/admin/crashes`, `/admin/field-speed`, `/admin/call-usage`, `/admin/analytics`, `/admin/analytics/listings`, `/admin/analytics/listings/[listingId]`, `/admin/front-door`, `/admin/compliance`, `/admin/switches`, `/admin/settings` | documented | `/admin/manual/desks#take-care` |
+| `/admin/queue` | documented | `/admin/manual/queues` |
+| `/admin/kyc`, `/admin/kyc/guide`, `/admin/agents`, `/admin/review-calls`, `/admin/review-calls/[id]` | documented | `/admin/manual/queues#identity` |
+| `/admin/listings`, `/admin/listings/[id]` | documented | `/admin/manual/queues#listings` |
+| `/admin/agreements`, `/admin/agreements/settings` | documented | `/admin/manual/queues#agreements` |
+| `/admin/cases`, `/admin/cases/[id]`, `/admin/appeals` | documented | `/admin/manual/queues#reports` |
+| `/admin/support`, `/admin/doc-feedback` | documented | `/admin/manual/queues#tickets` |
+| `/admin/account-recovery` | documented | `/admin/manual/decisions#two-people` |
+| `/admin/audit`, `/admin/oversight` | documented | `/admin/manual/records` |
+| `/admin/escalations`, `/admin/escalations/[id]`, `/admin/escalations/new` | documented | `/admin/manual/escalation` |
+| `/admin/my-desk`, `/admin/my-desk/announcements`, `/admin/my-desk/tasks` | documented | `/admin/manual/my-desk` |
+| `/admin/my-desk/weekly`, `/admin/reports/weekly` | documented | `/admin/manual/weekly-report` |
+| `/admin/marketing` | documented | `/admin/manual/marketing` |
+| `/admin/content` | documented | `/admin/manual/content` |
+| `/admin/technical` | documented | `/admin/manual/technical` |
+| `/admin/support-lead` | documented | `/admin/manual/support-lead` |
+| `/admin/business-development` | documented | `/admin/manual/business-development` |
+| `/admin/social-media` | documented | `/admin/manual/social-media` |
+| `/admin/copilot` | documented | `/admin/manual/copilot` |
+| `/admin/chargebacks`, `/admin/chargebacks/[chargebackId]`, `/admin/fees`, `/admin/arrangements`, `/admin/arrangements/[id]`, `/admin/retention` | documented | `/admin/manual/money` |
+| `/admin/offers`, `/admin/offers/[id]` | documented | `/admin/manual/offers-and-deals` |
 
 ## Documentation pages added
 
@@ -130,7 +145,12 @@ Member (`/docs/...`): `how-offers-work`, `making-an-offer`, `receiving-offers`,
 `agent-workspace`, `tenancy-and-move-in`, `tools-without-an-account`,
 `profiles-and-passport`.
 
-Staff (`/admin/handbook/manual/...`, behind the console): `desks-and-access`,
-`identity-and-applications`, `listings-and-supply`, `agreements-and-bookings`,
-`money-and-fees`, `cases-and-safety`, `support-desk`, `offers-and-deals-desk`,
-`operations-and-tools`.
+Staff: the nine pages first written at `/admin/handbook/manual/...`
+(`desks-and-access`, `identity-and-applications`, `listings-and-supply`,
+`agreements-and-bookings`, `money-and-fees`, `cases-and-safety`,
+`support-desk`, `offers-and-deals-desk`, `operations-and-tools`) were retired
+on 16 November 2026 and folded into the staff manual at `/admin/manual`. What
+they said that no chapter held moved into chapters 2 to 4 and two new
+chapters, `money` (19) and `offers-and-deals` (20). The old addresses redirect
+to the chapter that holds each page (`RETIRED_MANUAL_PAGES` in
+`apps/web/src/lib/admin/manual/chapters.ts`).

@@ -1731,6 +1731,17 @@ proposal, and the card says so.
   A staff member's desks unlock when they acknowledge it. **Your role**
   (`/admin/handbook/position`) shows what the position is, what you are
   responsible for, what is expected of you and when to escalate.
+- **Staff manual** (Settings > Staff manual, `/admin/manual`, and
+  `/admin/manual/<chapter>`) is the one manual for staff: twenty chapters on
+  how each desk works, open to everybody the console admits. The chapter list
+  is `lib/admin/manual/chapters.ts` and the words are in
+  `app/admin/manual/_chapters/`. An older, shorter manual of nine desk guides
+  at `/admin/handbook/manual` was retired on 16 November 2026: what it said
+  that no chapter held moved into chapters 2 to 4 and two new chapters,
+  Working the money desks (19, `/admin/manual/money`) and The Offers and deals
+  desk (20, `/admin/manual/offers-and-deals`). Its addresses still answer, for
+  staff only, by redirecting each old page to the chapter that holds it
+  (`RETIRED_MANUAL_PAGES`); an unknown page goes to the index.
 - **Settings** (`/admin/settings`) reads nothing. It is one door to the desks
   under it: a panel per desk (Switches, Reference data, Examples, Staff, Staff
   handbook, Help and support), each a link.

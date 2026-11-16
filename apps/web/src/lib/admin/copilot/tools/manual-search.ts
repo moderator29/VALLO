@@ -32,6 +32,13 @@ export type ManualPassage = {
 export const SECTION_SCOPES: Readonly<Record<string, readonly StaffScope[]>> = {
   "queues#identity": ["kyc_review"],
   "queues#refunds": ["finance", "support"],
+  "queues#agreements": ["agreements"],
+  "money#disputed-payments": ["finance"],
+  "money#chargebacks": ["finance"],
+  "money#rates": ["finance"],
+  "money#retention": ["finance"],
+  "offers-and-deals#inspect": ["agreements"],
+  "offers-and-deals#intervene": ["agreements"],
 };
 
 /** What the viewer may be shown. Admins and super admins see everything. */

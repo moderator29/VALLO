@@ -46,11 +46,7 @@ export default async function HandbookPage() {
           <Link href="/admin/manual" className="font-semibold text-[var(--nf-content-link)] hover:underline">
             Open the staff manual
           </Link>
-          . The shorter desk guides are{" "}
-          <Link href="/admin/handbook/manual" className="font-semibold text-[var(--nf-content-link)] hover:underline">
-            here
-          </Link>
-          . Where any of these and the rules above disagree, the rules above are what you agreed to.
+          . Where the manual and the rules above disagree, the rules above are what you agreed to.
         </p>
       </Panel>
       <Panel title="Working with the AI copilot">

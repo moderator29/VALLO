@@ -4,6 +4,8 @@ import { BUSINESS_DEVELOPMENT } from "./business-development";
 import { CONTENT } from "./content";
 import { COPILOT } from "./copilot";
 import { MARKETING } from "./marketing";
+import { MONEY } from "./money";
+import { OFFERS_AND_DEALS } from "./offers-and-deals";
 import { SUPPORT_LEAD } from "./support-lead";
 import { TECHNICAL } from "./technical";
 import { DECISIONS } from "./decisions";
@@ -39,4 +41,6 @@ export const MANUAL_BODIES: Record<ManualSlug, ManualBody> = {
   "onboarding-a-lister": ONBOARDING_A_LISTER,
   "onboarding-a-member": ONBOARDING_A_MEMBER,
   copilot: COPILOT,
+  money: MONEY,
+  "offers-and-deals": OFFERS_AND_DEALS,
 };

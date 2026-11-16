@@ -317,8 +317,9 @@ const NAMES: Readonly<Record<string, string>> = {
   "/admin/handbook/position/[position]": "the position handbook",
   "/admin/manual": "the staff manual",
   "/admin/manual/[chapter]": "the chapter",
+  /* The retired staff manual's addresses: each only redirects into /admin/manual. */
   "/admin/handbook/manual": "the staff manual",
-  "/admin/handbook/manual/[slug]": "the manual page",
+  "/admin/handbook/manual/[slug]": "the staff manual",
   "/admin/account-recovery": "Account recovery",
   "/admin/field-speed": "Field speed",
   "/admin/blocked-terms": "Blocked terms",

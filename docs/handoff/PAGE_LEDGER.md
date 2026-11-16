@@ -38,8 +38,8 @@ Columns: Frame (on PageFrame or StepFrame), Light, Dark, 360, Notes.
 | `/admin/field-speed` | FE | PageHead |  |  |  | PageHead (AD-01). Not seen: needs a staff session |
 | `/admin/front-door` | FE | PageHead |  |  |  | PageHead (AD-01). Not seen: needs a staff session |
 | `/admin/handbook` | FE | PageHead |  |  |  | PageHead (AD-01); own loading added. Not seen: needs a staff session |
-| `/admin/handbook/manual` | DOCS | DocShell |  |  |  | DOCS: staff manual on the document kit. Not seen: needs a staff session (type-checked, linted, route covered by coverage test). |
-| `/admin/handbook/manual/[slug]` | DOCS | DocShell |  |  |  | DOCS: staff manual on the document kit. Not seen: needs a staff session (type-checked, linted, route covered by coverage test). |
+| `/admin/handbook/manual` | DOCS | redirect |  |  |  | Retired 16 November 2026: redirects staff to the staff manual at `/admin/manual`. |
+| `/admin/handbook/manual/[slug]` | DOCS | redirect |  |  |  | Retired 16 November 2026: redirects staff to the chapter of `/admin/manual` that holds the old page (`RETIRED_MANUAL_PAGES`), or to the index. |
 | `/admin/handbook/position` | FE | PageHead |  |  |  | PageHead (AD-01); own loading added. Not seen: needs a staff session |
 | `/admin/kyc` | PAGES | PageHead |  |  |  | PageHead (AD-01: the one console header; DeskHeads wrap it). Not seen: needs a staff session |
 | `/admin/kyc/guide` | PAGES | PageHead |  |  |  | PageHead (AD-01: the one console header; DeskHeads wrap it). Not seen: needs a staff session |

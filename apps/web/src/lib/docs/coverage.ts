@@ -6,7 +6,8 @@
  *
  *   - a documentation entry: the address of the page that explains it
  *     (`/docs/<chapter>`, `/guides/...`, `/help`, a legal page, or a page of the
- *     staff manual at `/admin/handbook/manual/<page>`);
+ *     staff manual at `/admin/manual/<chapter>`, with its section where one
+ *     section is the desk);
  *   - `needsNone`: an explicit, written reason it needs no documentation of its
  *     own (it IS a document, it is plumbing, it is internal);
  *   - `gap`: a feature that is real and not yet documented. A gap is allowed
@@ -27,7 +28,8 @@ export type CoverageGroup =
   | { gap: string; routes: readonly string[] };
 
 const D = (slug: string) => `/docs/${slug}`;
-const M = (slug: string) => `/admin/handbook/manual/${slug}`;
+/** A chapter of the staff manual, and the section within it when one section is the desk. */
+const M = (slug: string, section?: string) => `/admin/manual/${slug}${section ? `#${section}` : ""}`;
 
 export const COVERAGE: readonly CoverageGroup[] = [
   /* ---------------------------------------------------- the documents themselves */
@@ -122,15 +124,31 @@ export const COVERAGE: readonly CoverageGroup[] = [
   { gap: "Crypto payment pages exist for notification deep links; no member flow in the docs offers it. Not documented until the founder says whether it is offered.", routes: ["/pay/crypto/[reference]"] },
   { gap: "Review call invitations for the person a case is about; needs a short section in Trust and safety.", routes: ["/calls/reviews", "/calls/reviews/[id]"] },
   /* ------------------------------------------------------------ staff manual */
-  { doc: M("desks-and-access"), routes: ["/admin", "/admin/handbook", "/admin/handbook/position", "/admin/handbook/position/[position]", "/admin/handbook/manual", "/admin/handbook/manual/[slug]", "/admin/lookup", "/admin/staff", "/admin/audit", "/admin/oversight", "/admin/queue", "/admin/overview", "/admin/my-desk", "/admin/my-desk/announcements", "/admin/my-desk/tasks", "/admin/my-desk/weekly", "/admin/reports/weekly", "/admin/business-development", "/admin/marketing", "/admin/social-media", "/admin/content", "/admin/technical", "/admin/escalations", "/admin/escalations/[id]", "/admin/escalations/new", "/admin/control"] },
-  { doc: M("identity-and-applications"), routes: ["/admin/kyc", "/admin/kyc/guide", "/admin/agents", "/admin/businesses", "/admin/review-calls", "/admin/review-calls/[id]", "/admin/account-recovery"] },
-  { doc: M("listings-and-supply"), routes: ["/admin/listings", "/admin/listings/[id]", "/admin/examples", "/admin/supply", "/admin/people", "/admin/people/[id]", "/admin/stops", "/admin/reference"] },
-  { doc: M("agreements-and-bookings"), routes: ["/admin/agreements", "/admin/agreements/settings", "/admin/bookings", "/admin/bookings/[bookingId]", "/admin/bookings/reservations", "/admin/bookings/visits"] },
-  { doc: M("money-and-fees"), routes: ["/admin/money", "/admin/payments", "/admin/chargebacks", "/admin/chargebacks/[chargebackId]", "/admin/fees", "/admin/restaurant-fees", "/admin/referrals", "/admin/arrangements", "/admin/arrangements/[id]"] },
-  { doc: M("cases-and-safety"), routes: ["/admin/trust", "/admin/cases", "/admin/cases/[id]", "/admin/alerts", "/admin/appeals", "/admin/standing", "/admin/weight-withheld", "/admin/blocked-terms", "/admin/circle", "/admin/social", "/admin/roommates", "/admin/account-deletions"] },
-  { doc: M("support-desk"), routes: ["/admin/support", "/admin/support-lead", "/admin/doc-feedback"] },
-  { doc: M("offers-and-deals-desk"), routes: ["/admin/offers", "/admin/offers/[id]"] },
-  { doc: M("operations-and-tools"), routes: ["/admin/operations", "/admin/operations/providers", "/admin/crashes", "/admin/field-speed", "/admin/call-usage", "/admin/analytics", "/admin/analytics/listings", "/admin/analytics/listings/[listingId]", "/admin/front-door", "/admin/retention", "/admin/compliance", "/admin/switches", "/admin/settings", "/admin/copilot"] },
+  /* The retired staff manual's addresses (16 November 2026) only redirect into the manual. */
+  { needsNone: "The retired staff manual's addresses: each redirects to the chapter of /admin/manual that now holds its page.", routes: ["/admin/handbook/manual", "/admin/handbook/manual/[slug]"] },
+  { doc: M("access"), routes: ["/admin/handbook", "/admin/handbook/position", "/admin/handbook/position/[position]", "/admin/staff"] },
+  { doc: M("desks"), routes: ["/admin", "/admin/lookup", "/admin/overview", "/admin/control", "/admin/examples", "/admin/supply", "/admin/stops", "/admin/reference", "/admin/businesses", "/admin/trust", "/admin/standing", "/admin/weight-withheld", "/admin/blocked-terms", "/admin/circle", "/admin/social", "/admin/roommates", "/admin/account-deletions", "/admin/alerts", "/admin/people", "/admin/people/[id]", "/admin/bookings", "/admin/bookings/[bookingId]", "/admin/bookings/reservations", "/admin/bookings/visits", "/admin/restaurant-fees", "/admin/referrals", "/admin/money", "/admin/payments"] },
+  { doc: M("desks", "take-care"), routes: ["/admin/operations", "/admin/operations/providers", "/admin/crashes", "/admin/field-speed", "/admin/call-usage", "/admin/analytics", "/admin/analytics/listings", "/admin/analytics/listings/[listingId]", "/admin/front-door", "/admin/compliance", "/admin/switches", "/admin/settings"] },
+  { doc: M("queues"), routes: ["/admin/queue"] },
+  { doc: M("queues", "identity"), routes: ["/admin/kyc", "/admin/kyc/guide", "/admin/agents", "/admin/review-calls", "/admin/review-calls/[id]"] },
+  { doc: M("queues", "listings"), routes: ["/admin/listings", "/admin/listings/[id]"] },
+  { doc: M("queues", "agreements"), routes: ["/admin/agreements", "/admin/agreements/settings"] },
+  { doc: M("queues", "reports"), routes: ["/admin/cases", "/admin/cases/[id]", "/admin/appeals"] },
+  { doc: M("queues", "tickets"), routes: ["/admin/support", "/admin/doc-feedback"] },
+  { doc: M("decisions", "two-people"), routes: ["/admin/account-recovery"] },
+  { doc: M("records"), routes: ["/admin/audit", "/admin/oversight"] },
+  { doc: M("escalation"), routes: ["/admin/escalations", "/admin/escalations/[id]", "/admin/escalations/new"] },
+  { doc: M("my-desk"), routes: ["/admin/my-desk", "/admin/my-desk/announcements", "/admin/my-desk/tasks"] },
+  { doc: M("weekly-report"), routes: ["/admin/my-desk/weekly", "/admin/reports/weekly"] },
+  { doc: M("marketing"), routes: ["/admin/marketing"] },
+  { doc: M("content"), routes: ["/admin/content"] },
+  { doc: M("technical"), routes: ["/admin/technical"] },
+  { doc: M("support-lead"), routes: ["/admin/support-lead"] },
+  { doc: M("business-development"), routes: ["/admin/business-development"] },
+  { doc: M("social-media"), routes: ["/admin/social-media"] },
+  { doc: M("copilot"), routes: ["/admin/copilot"] },
+  { doc: M("money"), routes: ["/admin/chargebacks", "/admin/chargebacks/[chargebackId]", "/admin/fees", "/admin/arrangements", "/admin/arrangements/[id]", "/admin/retention"] },
+  { doc: M("offers-and-deals"), routes: ["/admin/offers", "/admin/offers/[id]"] },
 ];
 
 /**

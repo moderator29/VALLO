@@ -34,7 +34,7 @@ const routeOf = (file: string) => {
 /** Pages that are a view inside a desk the rail already opens, named so a new one cannot hide here. */
 const SUB_PAGES: Record<string, string> = {
   "/admin/handbook/position": "the staff member's own role, linked from the handbook and the staff frame",
-  "/admin/handbook/manual": "the staff manual, linked from the handbook",
+  "/admin/handbook/manual": "the retired staff manual's address, which only redirects to the staff manual at /admin/manual",
   "/admin/kyc/guide": "the reviewer guide, linked from the verification desk and from every person's checklist",
   "/admin/escalations/new": "the escalation form as a page, opened from the escalations desk and linked from other desks with a record attached",
 };

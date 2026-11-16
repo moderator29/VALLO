@@ -12,8 +12,8 @@
 
 ## Gates actually run
 - vitest: 60 tests pass across lib/offers, offers dom tests, deal-room model, offer-action.
-- eslint on all my files: clean. no-em-dash: clean. valuation-words: clean (when last run). css-tokens: no fault in my files (one unresolved comment path in `admin/handbook/manual/manual-content.tsx`, not mine).
-- tsc: no errors in my files. Remaining errors are others': `(site)/docs/chapters-platform.tsx`, `admin/handbook/manual/manual-content.tsx`, `lib/offers/actions.ts(155)`.
+- eslint on all my files: clean. no-em-dash: clean. valuation-words: clean (when last run). css-tokens: no fault in my files (one unresolved comment path in the old staff manual content file, not mine; that file was deleted on 16 November 2026 when the old manual was retired).
+- tsc: no errors in my files. Remaining errors are others': `(site)/docs/chapters-platform.tsx`, the old staff manual content file (deleted 16 November 2026), `lib/offers/actions.ts(155)`.
 - Seen through Playwright against fixtures: flow (390/360, light/dark), blocked flow, confirmation, My offers, Deal Room (390, 360, 1280, both themes), admin desk 1280. No horizontal overflow measured.
 - A wider vitest run (admin/_components) had 7 timeouts under machine load; not re-run in isolation. Re-run `nav-coverage.test.ts`.
 

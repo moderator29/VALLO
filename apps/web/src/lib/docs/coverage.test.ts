@@ -3,6 +3,7 @@ import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { DOC_SLUGS } from "@/app/(site)/docs/slugs";
 import { GUIDE_SLUGS } from "@/lib/guides/slugs";
+import { MANUAL_SLUGS } from "@/lib/admin/manual/chapters";
 import { DOC_DESTINATIONS } from "./destinations";
 import { COVERAGE, MAX_KNOWN_GAPS, RETIRED_IN_LEDGER, findStale, findUncovered, hrefResolves, manifestRoutes } from "./coverage";
 
@@ -68,14 +69,20 @@ describe("documentation coverage", () => {
   });
 
   it("points every documentation entry at a page that exists", () => {
-    const manualSlugs = [...readFileSync(join(APP, "admin", "handbook", "manual", "manual-content.tsx"), "utf8").matchAll(/^ {2}slug: "([a-z0-9-]+)",/gm)].map((m) => m[1]);
     const docs = new Set<string>([
       ...DOC_SLUGS.map((s) => `/docs/${s}`),
       ...GUIDE_SLUGS.map((s) => `/guides/${s}`),
-      ...manualSlugs.map((s) => `/admin/handbook/manual/${s}`),
+      ...MANUAL_SLUGS.map((s) => `/admin/manual/${s}`),
     ]);
     for (const group of COVERAGE) {
-      if ("doc" in group) expect(docs.has(group.doc), `${group.doc} is not a documentation page`).toBe(true);
+      if (!("doc" in group)) continue;
+      const [page, section] = group.doc.split("#") as [string, string | undefined];
+      expect(docs.has(page), `${group.doc} is not a documentation page`).toBe(true);
+      /* A manual section named in the manifest is a real section of that chapter. */
+      if (section && page.startsWith("/admin/manual/")) {
+        const chapter = readFileSync(join(APP, "admin", "manual", "_chapters", `${page.slice("/admin/manual/".length)}.tsx`), "utf8");
+        expect(chapter.includes(`id: "${section}",`), `${group.doc} names a section the chapter does not have`).toBe(true);
+      }
     }
   });
 
@@ -98,8 +105,8 @@ describe("documentation coverage", () => {
   });
 
   it("sends every staff manual desk link to a route that exists", () => {
-    const source = readFileSync(join(APP, "admin", "handbook", "manual", "manual-content.tsx"), "utf8");
-    const hrefs = [...source.matchAll(/\{ href: "(\/admin[^"]*)", label:/g)].map((m) => m[1] as string);
+    const source = readFileSync(join(APP, "admin", "manual", "_chapters", "desks.tsx"), "utf8");
+    const hrefs = [...source.matchAll(/\{ href: "(\/admin[^"]*)", name:/g)].map((m) => m[1] as string);
     expect(hrefs.length).toBeGreaterThan(20);
     for (const href of hrefs) expect(hrefResolves(href, ROUTES), href).toBe(true);
   });

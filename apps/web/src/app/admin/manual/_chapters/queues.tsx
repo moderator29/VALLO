@@ -13,6 +13,18 @@ import { A, ScreenshotSlot, type ManualBody } from "./parts";
  * the case engine's SQL, `bookings-actions.ts` and
  * `lib/after-gate/refund-decision-actions.ts` (refunds), and
  * `lib/trust/standards.ts` (the published promises).
+ *
+ * What the retired staff manual (`/admin/handbook/manual`, 16 November 2026)
+ * said about identity, listings, agreements, cases and support that this
+ * chapter did not, read again against the code: the reviewer guide
+ * (`app/admin/kyc/guide/guide-content.ts`), the listings queue and review
+ * page (`app/admin/listings/page.tsx`, `[id]/section-links.ts`), mandates
+ * (`decideListingMandate` in `lib/compliance/beneficial-ownership-actions.ts`,
+ * the words in `packages/i18n/src/locales/compliance-17.en.ts`), the
+ * agreement gate (`app/admin/agreements/page.tsx`, `agreements-actions.ts`),
+ * the case page (`app/admin/cases/[id]/page.tsx`), the support desk
+ * (`app/admin/support/page.tsx`, `lib/docs/helpful-actions.ts`) and email
+ * recovery (`lib/admin/email-recovery-actions.ts`).
  */
 
 export const QUEUES: ManualBody = {
@@ -102,6 +114,28 @@ export const QUEUES: ManualBody = {
             You cannot review your own listing. A listing that is a draft, already rejected, or with the lister for
             changes cannot be decided until it comes back.
           </p>
+          <p>
+            The queue has a tab for every state, with search and a date range, and pages forty at a time. A row opens the
+            listing under review and carries your place in the queue, so the page knows which listing comes next. The
+            page leads with the decision. Under it, each part of the evidence is a row of its own: Photos, Property
+            details, Location, the move-in or purchase costs, Lister, Checklist, Fee terms, Same property and Notes.
+            Notes are for staff only; the member never sees them.
+          </p>
+          <p>
+            An example listing carries an Example tag in the queue, and the queue&apos;s counts leave examples out. An
+            example is never real supply. The set of examples is on{" "}
+            <Link href="/admin/examples" className={A}>
+              Examples
+            </Link>
+            .
+          </p>
+          <p>
+            <strong>Owners&apos; mandates.</strong> An agent or firm listing goes live only once Vallo has confirmed the
+            owner who instructed the lister. The Mandates panel on Listings shows every mandate waiting. Open one to see
+            the owner&apos;s number, and ring it, or meet or call the owner another way, to confirm they asked this lister.
+            Approving records how you confirmed them, against your name. You may note an ID document you saw by its
+            reference, but never a NIN. Refusing needs a reason of at least eight characters, which the lister reads.
+          </p>
           <ScreenshotSlot desk="a listing under review" />
         </>
       ),
@@ -120,8 +154,22 @@ export const QUEUES: ManualBody = {
             <Link href="/admin/kyc/guide" className={A}>
               reviewer guide
             </Link>{" "}
-            before your first decision.
+            before your first decision. You confirm that the people who list and get paid on Vallo are who they say
+            they are. Renters and buyers are never asked for documents.
           </p>
+          <ol role="list">
+            <li>Open the person. Identity at a glance shows their ID beside their selfie, and the names to compare.</li>
+            <li>Check the ID, then the selfie, against the checklists in the reviewer guide.</li>
+            <li>
+              Approve the ID by typing the name exactly as printed on it. That name becomes their confirmed identity, and
+              their bank account must match it.
+            </li>
+            <li>Approve the selfie if it is the same person, live. Then check the proof of address.</li>
+            <li>
+              Anything you cannot accept, send back with a reason they can act on. They replace just that document, and it
+              comes back to the queue.
+            </li>
+          </ol>
           <ul role="list">
             <li>
               <strong>Documents.</strong> Open each one in the console&apos;s own viewer, never a raw link. Every opening
@@ -216,6 +264,15 @@ export const QUEUES: ManualBody = {
               reported are told the outcome in plain words.
             </li>
           </ol>
+          <p>
+            A case shows what was reported, read by the database. A private thread beyond the reported item is never
+            shown, and you do not look for it another way. Write the reason the member reads in plain words, and put what
+            a colleague needs in the internal notes, never in a message to the member.
+          </p>
+          <DocCallout tone="warning" title="Report these to your lead the same day">
+            A request for money off the platform, anybody asking for an inspection fee, and a fake listing. A report about
+            being asked to pay outside Vallo runs on the 4 hour promise.
+          </DocCallout>
           <ScreenshotSlot desk="a case with its timeline" />
         </>
       ),
@@ -232,6 +289,11 @@ export const QUEUES: ManualBody = {
             opens on lanes: All open, New, Waiting on us, Waiting on member, Escalated, Mine and Done. Late tickets come
             first. The clock runs from the member&apos;s oldest unanswered message; once we have written last, no clock
             runs.
+          </p>
+          <p>
+            A ticket is filed by a signed-in member or through the contact form, and each carries a VAL-SUP reference a
+            member can read out. Read the ticket and anything attached to it. A member can also link one of their own
+            bookings or payments to it.
           </p>
           <ol role="list">
             <li>
@@ -259,6 +321,28 @@ export const QUEUES: ManualBody = {
             ticket runs on a 3 day clock. Everything else runs on a 1 day clock. Compliance is never a hand-off target: if you suspect a
             compliance matter, hand it to Safety and say why.
           </p>
+          <p>
+            A ticket handed to another desk can be opened by a person on that desk through its link. They see that one
+            ticket and no queue.
+          </p>
+          <p>
+            <strong>Feedback on a help page.</strong> When a signed-in reader marks a help page as not helpful, it arrives
+            here as an ordinary ticket whose first line is &quot;Documentation feedback&quot; and names the page. Treat it
+            as a request to fix that page and pass it to whoever owns the help pages. The totals per page are on{" "}
+            <Link href="/admin/doc-feedback" className={A}>
+              Pages that fail
+            </Link>
+            .
+          </p>
+          <p>
+            The response times are the ones printed on the public{" "}
+            <Link href="/standards" className={A}>
+              standards page
+            </Link>
+            , the same numbers the desk works its due times from. If you are close to a due time, tell your lead. Contact a
+            member only inside Vallo, or on the contact address they gave the form. Never ask for or pass on an account
+            number, and never tell a member Vallo is holding their money.
+          </p>
           <p>Keys: j and k move between tickets, n opens the next one nobody holds, r replies, m opens saved replies, ? lists them all.</p>
           <p>
             The copilot on this desk can write a reply for you. Type /reply, or ask &quot;Reply to the oldest
@@ -271,6 +355,48 @@ export const QUEUES: ManualBody = {
             .
           </p>
           <ScreenshotSlot desk="the Support desk with a ticket open" />
+        </>
+      ),
+    },
+    {
+      id: "agreements",
+      title: "Agreements waiting for review",
+      body: (
+        <>
+          <p>
+            <Link href="/admin/agreements" className={A}>
+              Agreements
+            </Link>{" "}
+            is the gate between an agreement and payment, for the Agreement approval area. An agreement reaches the queue
+            only when the inspection report was submitted with its photos (for a rental) or the host accepted the stay,
+            and both parties confirmed the same version of the terms. Payment cannot start for anybody until a reviewer
+            approves it.
+          </p>
+          <ol role="list">
+            <li>Decide on what was agreed, and on the inspection report and its photographs.</li>
+            <li>
+              <strong>Approve</strong>, or <strong>send it back</strong> with a reason of at least ten characters, which both
+              parties read.
+            </li>
+            <li>Both parties are told by notification and by email. The decision is in the audit log with your name.</li>
+          </ol>
+          <p>
+            If you or anybody close to you is a party, leave it for a colleague; the database already refuses a decision by
+            a party to the agreement. Nothing on this desk takes or moves money: approving lets payment start, it does not
+            make a payment.
+          </p>
+          <p>
+            The review threshold, the risk signals and the incident switch behind the gate are on{" "}
+            <Link href="/admin/agreements/settings" className={A}>
+              Risk settings
+            </Link>
+            , for the same area. The database checks each change and writes it to the audit log. Offers on homes for sale
+            have their own desk and chapter:{" "}
+            <Link href="/admin/manual/offers-and-deals" className={A}>
+              The Offers and deals desk
+            </Link>
+            .
+          </p>
         </>
       ),
     },
@@ -353,20 +479,21 @@ export const QUEUES: ManualBody = {
               { key: "know", label: "What to know" },
             ]}
             rows={[
-              { id: "agreements", icon: "file-check", cells: { queue: "Agreements waiting for review", who: "Agreement approval", know: "Approve, or send back with a reason of at least ten characters both parties read. You cannot decide an agreement you are a party to." } },
               { id: "claims", icon: "history", cells: { queue: "Guarantee claims made before 9 November 2026", who: "Guarantee claims", know: "The Guarantee is retired. Decide each old claim against the inspection report and the agreement. The claimant reads your reason." } },
-              { id: "chargebacks", icon: "credit-card", cells: { queue: "Chargebacks", who: "Finance", know: "Each move and note is written to the chargeback's history and the audit log, and the lister is told." } },
+              { id: "chargebacks", icon: "credit-card", cells: { queue: "Chargebacks and disputed payments", who: "Finance", know: "Each move and note is written to the chargeback's history and the audit log, and the lister is told. See Working the money desks." } },
               { id: "appeals", icon: "scale", cells: { queue: "Appeals", who: "Trust and Safety", know: "Somebody other than the person who made the decision decides. Overturning lifts the restriction and tells the member." } },
               { id: "reservations", icon: "utensils", cells: { queue: "Restaurant reservations", who: "Operations", know: "Accept or decline on the restaurant's behalf; the guest is told." } },
               { id: "alerts", icon: "bell", cells: { queue: "Alerts", who: "Operations reads, admins resolve", know: "A critical alert also goes to a person outside the console." } },
               { id: "referrals", icon: "hand-coins", cells: { queue: "Referrals and reward payouts", who: "Admins", know: "Approve or refuse each with a reason." } },
-              { id: "recovery", icon: "key", cells: { queue: "Account recovery", who: "Super admins", know: "Two different super admins and a 72 hour wait. See the next chapter." } },
+              { id: "recovery", icon: "key", cells: { queue: "Account recovery", who: "Super admins", know: "The NIN the person gives must match an approved identity on file, and the old address is told at once. Then a 72 hour wait, during which any admin or the owner can cancel. A super admin other than the one who opened it moves the address. A move signs the account out everywhere and holds money leaving it for 7 days." } },
               { id: "compliance", icon: "shield-lock", cells: { queue: "Compliance lanes", who: "Compliance", know: "Every decision needs a second member of staff. Never tell anybody they are the subject of a check or a report." } },
             ]}
           />
           <p>
             What needs a second person, and what only an admin decides, is in{" "}
-            <DocCrossLink href="/admin/manual/decisions">What you may decide alone</DocCrossLink>.
+            <DocCrossLink href="/admin/manual/decisions">What you may decide alone</DocCrossLink>. Disputed payments,
+            chargebacks, fee rates and record retention are worked step by step in{" "}
+            <DocCrossLink href="/admin/manual/money">Working the money desks</DocCrossLink>.
           </p>
         </>
       ),

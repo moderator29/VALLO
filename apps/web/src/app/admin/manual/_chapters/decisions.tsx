@@ -11,7 +11,10 @@ import type { ManualBody } from "./parts";
  * sanctions lanes), email recovery (`email-recovery-actions.ts`), the key
  * roster (`key-roster-actions.ts`), the case engine
  * (`admin_restrict_member`, `admin_decide_appeal`), fee rates
- * (`money-actions.ts`) and retention (`lib/admin/desk-reads/retention-actions.ts`).
+ * (`money-actions.ts`) and retention (`lib/admin/desk-reads/retention-actions.ts`),
+ * and, since the retired staff manual moved here (16 November 2026), mandates
+ * (`decideListingMandate`), disputed payments (`arrangement-actions.ts`) and
+ * deals (`adminIntervene` in `lib/offers/actions.ts`).
  */
 
 type Row = { id: string; icon: UiIconName; decision: string; who: string; rule: string };
@@ -29,7 +32,10 @@ const ALONE: Row[] = [
   { id: "ticket", icon: "headset", decision: "Reply to, resolve or close a ticket, or hand it to another desk", who: "Support", rule: "Closing needs a note. A hand-off needs a reason of eight characters or more." },
   { id: "agreement", icon: "file-check", decision: "Approve an agreement or send it back", who: "Agreement approval", rule: "Sending back needs a reason of ten characters or more. Never one you are a party to." },
   { id: "restrict", icon: "block", decision: "Restrict a member for up to 30 days: a warning, messaging, posting or roommates", who: "The area that owns the case's module, or Trust and Safety", rule: "A reason of ten characters or more, which the member reads." },
-  { id: "chargeback", icon: "credit-card", decision: "Open a chargeback, move it, add a note", who: "Finance", rule: "Written to the chargeback's history and the audit log in the same step." },
+  { id: "mandate", icon: "user-check", decision: "Approve or refuse an owner's mandate behind an agent or firm listing", who: "Listing approval", rule: "Approving records how you confirmed the owner. A refusal needs a reason of eight characters or more, which the lister reads." },
+  { id: "chargeback", icon: "credit-card", decision: "Open a chargeback, move it, add a note", who: "Finance", rule: "A reason of twelve characters or more, written to the chargeback's history and the audit log in the same step." },
+  { id: "disputed-payment", icon: "receipt", decision: "Refund a held payment to the payer, or release a disputed one to the lister", who: "Finance", rule: "A reason of 20 characters or more. It only sends an instruction: the record changes when the partner reports it." },
+  { id: "deal", icon: "file-check", decision: "Add a note to a deal on a home for sale, flag or resolve a dispute, or cancel the deal", who: "Agreement approval", rule: "A reason of ten characters or more. Agreed terms, amounts and versions can never be changed." },
 ];
 
 const SECOND: Row[] = [
