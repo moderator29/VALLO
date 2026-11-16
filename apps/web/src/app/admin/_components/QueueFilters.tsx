@@ -10,6 +10,8 @@ export { queueHref, type QueueQuery };
 import { QueueFilterSheet } from "./QueueFilterSheet";
 import "./admin-material.css";
 import { Button } from "@/components/ui/Button";
+import { LanePicker, type LaneOption } from "./LanePicker";
+import { QueueTabs } from "./QueueTable";
 
 /**
  * The console's one queue frame: find a row, narrow to it, page through.
@@ -124,6 +126,7 @@ export async function QueueFilters({
   dateable = true,
   searchLabel,
   searchPlaceholder,
+  lanes,
 }: {
   /** The queue's own path, e.g. "/admin/bookings". */
   base: string;
@@ -169,6 +172,13 @@ export async function QueueFilters({
   /** Only where the queue's own noun genuinely beats "Search this queue". */
   searchLabel?: string;
   searchPlaceholder?: string;
+  /**
+   * The queue desk's lanes (Everything, Late, Mine, Nobody has it), drawn
+   * here so they sit with the search rather than as a second tab strip under
+   * the queue tabs: one chip on a phone (`LanePicker`), the segmented row
+   * from 1024px up.
+   */
+  lanes?: { label: string; options: LaneOption[] };
 }) {
   const narrowed = queueNarrowed(query);
   const f = common.filters;
@@ -287,6 +297,18 @@ export async function QueueFilters({
             drop the chip the operator already chose. */}
         {query.status && <input type="hidden" name="status" value={query.status} />}
       </form>
+
+      {lanes && (
+        <div className="nf-admin-lanes">
+          <LanePicker
+            label={lanes.label}
+            options={lanes.options}
+            action={formTarget(base).action}
+            keep={[...formTarget(base).keep, ...(query.q ? ([["q", query.q]] as [string, string][]) : [])]}
+          />
+          <QueueTabs label={lanes.label} tabs={lanes.options} />
+        </div>
+      )}
 
       {statuses && statuses.length > 0 && (
         /* Links rather than a control, for the same reason the search is a GET:

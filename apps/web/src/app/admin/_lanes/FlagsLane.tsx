@@ -1,4 +1,4 @@
-import { getDictionary, type Dictionary } from "@vallo/i18n";
+import { getDictionary, type Dictionary, type Locale } from "@vallo/i18n";
 import { getLocale } from "@/lib/locale";
 import { UiIcon } from "@/design-system/icons/UiIcon";
 import { getMessageFlags, type FlagView, type PartyRole } from "@/lib/admin/queries";
@@ -14,8 +14,10 @@ import {
   QueuePager,
   queueNarrowed,
   readQueueQuery,
+  type QueueQuery,
   type QueueStatusOption,
 } from "../_components/QueueFilters";
+import type { LaneOption } from "../_components/LanePicker";
 import { Constants } from "@/lib/supabase/database.types";
 import { dueChip } from "../_components/due";
 
@@ -182,13 +184,15 @@ function statusFilters(ui: AdminUi): readonly QueueStatusOption[] {
 
 export async function FlagsLane({
   params,
+  lanes,
 }: {
   params: Record<string, string | string[] | undefined>;
+  /** The queue desk's lanes, drawn with the search (`QueueFilters`). */
+  lanes?: { label: string; options: LaneOption[] };
 }) {
   const locale = await getLocale();
   const t = getDictionary(locale);
   const copy = t.admin.flags;
-  const common = t.admin.common;
   const ui = adminUi(t, locale);
 
   /* The shared queue frame. The search is over what the safety scan matched,
@@ -211,7 +215,31 @@ export async function FlagsLane({
     );
   }
 
-  const rows = flags.data.rows;
+  return <FlagsDesk rows={flags.data.rows} full={flags.data.full} query={query} locale={locale} {...(lanes ? { lanes } : {})} />;
+}
+
+/**
+ * The flags desk drawn from rows already read: what `FlagsLane` renders once
+ * the read has answered. Apart from the read so the preview harness can draw
+ * the real desk on fixture flags (`/preview/f5/admin-queue?tab=flags`).
+ */
+export function FlagsDesk({
+  rows,
+  full,
+  query,
+  locale,
+  lanes,
+}: {
+  rows: FlagView[];
+  full: boolean;
+  query: QueueQuery;
+  locale: Locale;
+  lanes?: { label: string; options: LaneOption[] };
+}) {
+  const t = getDictionary(locale);
+  const copy = t.admin.flags;
+  const common = t.admin.common;
+  const ui = adminUi(t, locale);
   const open = rows.filter((flag) => flag.status === "open");
   const reviewed = rows.filter((flag) => flag.status !== "open");
   /* A page past the first counts as narrowed for the empty copy. Landing on
@@ -231,6 +259,7 @@ export async function FlagsLane({
         query={query}
         common={common}
         statuses={statusFilters(ui)}
+        {...(lanes ? { lanes } : {})}
       />
 
       {rows.length === 0 ? (
@@ -263,7 +292,7 @@ export async function FlagsLane({
 
       {reviewed.length > 0 && (
         <section className="mt-xl">
-          <h2 className="nf-h3 mb-sm text-[length:var(--nf-text-body)]">{common.recentlyReviewed}</h2>
+          <h2 className="nf-admin-section-title">{common.recentlyReviewed}</h2>
           <QueueTable
           heads={t.uiCommon.console.table}
           label="Message flags"
@@ -290,7 +319,7 @@ export async function FlagsLane({
         base={BASE}
         query={query}
         pageSize={QUEUE_PAGE_SIZE}
-        full={flags.data.full}
+        full={full}
         count={rows.length}
       />
     </div>

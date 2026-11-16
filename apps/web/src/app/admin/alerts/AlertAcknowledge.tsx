@@ -38,7 +38,7 @@ export function AlertAcknowledge({ alertId }: { alertId: string }) {
   }
 
   return (
-    <div className="mt-md">
+    <div className="nf-admin-actrow">
       <Button
         variant="secondary"
         leadingIcon="user-check"

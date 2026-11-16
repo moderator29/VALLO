@@ -13,7 +13,7 @@ export function ConsiderStr({ from, id, subject }: { from: StrSource; id: string
   return (
     <Link
       href={considerStrHref(from, id, subject)}
-      className="nf-btn nf-btn--glass nf-btn--sm mt-row inline-flex"
+      className="nf-btn nf-btn--glass nf-btn--sm nf-admin-str inline-flex"
       data-testid="consider-str"
     >
       {copy.consider}

@@ -104,7 +104,7 @@ export function SupportKeys({
     <>
       <button
         type="button"
-        className="nf-admin-seg__item"
+        className="nf-admin-seg__item nf-admin-keyhint"
         aria-haspopup="dialog"
         aria-expanded={help}
         onClick={() => setHelp((v) => !v)}

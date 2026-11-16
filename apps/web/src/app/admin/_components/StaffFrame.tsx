@@ -6,6 +6,7 @@ import type { ManualSlug } from "@/lib/admin/manual/chapters";
 import { JOB_DESCRIPTIONS, type StaffPosition } from "@/lib/admin/staff-positions";
 import { groupsFor, labelFor, type AdminGroup, type NavViewer } from "./nav";
 import { PageHead } from "./panels";
+import { ScrollRow } from "./ScrollRow";
 
 /**
  * TRACK K: THE RESTRICTED CONSOLE A STAFF MEMBER SEES.
@@ -118,7 +119,10 @@ export function StaffFrame({
           </div>
           {staff.handbookAcknowledged ? escalate : null}
         </div>
-        <nav aria-label="Your desks" className="mt-inline">
+        {/* One sideways row on a phone (`ScrollRow`, the fade says it goes
+            on); the wrapping cloud of buttons it was took half the screen
+            above every desk. From 1024 it wraps as before. */}
+        <ScrollRow label="Your desks" className="nf-admin-deskrow mt-inline">
           <ul className="flex flex-wrap gap-xs">
             <li>
               <Link className="nf-btn nf-btn--glass nf-btn--sm" href="/admin/my-desk">
@@ -184,15 +188,18 @@ export function StaffFrame({
                 ])
               : null}
           </ul>
-        </nav>
+        </ScrollRow>
         {!staff.handbookAcknowledged ? (
           <p className="nf-body mt-inline" role="status">
             Read and acknowledge the staff handbook to unlock your desks.
           </p>
         ) : null}
       </header>
+      {/* On a phone the full map of what this access opens follows the desk
+          (`.nf-staff-frame` in admin.css) rather than standing between the
+          operator and the work; from 1024 it stays above, as it was. */}
       {staff.handbookAcknowledged ? <StaffMenu staff={staff} /> : null}
-      <div className="mt-block">{children}</div>
+      <div className="nf-staff-frame__work mt-block">{children}</div>
     </div>
   );
 }
@@ -228,7 +235,7 @@ function StaffMenu({ staff }: { staff: StaffAccess }) {
   const groups: AdminGroup[] = groupsFor(viewerFor(staff));
   if (groups.length === 0) return null;
   return (
-    <nav aria-label="Everything your access opens" className="nf-panel nf-panel--card block mt-block p-card" data-testid="staff-menu">
+    <nav aria-label="Everything your access opens" className="nf-staff-menu nf-panel nf-panel--card block mt-block p-card" data-testid="staff-menu">
       <h2 className="nf-h4">Everything your access opens</h2>
       <p className="nf-caption text-[var(--nf-content-secondary)]">
         Every desk your access areas open, in the order the console lists them. A desk you cannot open is not here.

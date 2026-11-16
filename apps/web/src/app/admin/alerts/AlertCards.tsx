@@ -92,20 +92,24 @@ export function AlertCard({
         </p>
       )}
 
-      {/* SCUML item 6: open an STR case from this alert. */}
-      <ConsiderStr from="risk_alert" id={alert.id} />
-
+      {/* The card's actions in one place at its foot: who has it, resolve,
+          then the STR door (SCUML item 6). On a phone they are one column of
+          full-width buttons; they were three loose buttons down the card. */}
       {alert.status === "open" ? (
-        <>
+        <div className="nf-admin-cardfoot">
           <AlertAcknowledgement alert={alert} ui={ui} />
           <AlertResolve alertId={alert.id} copy={copy} common={common} />
-        </>
+          <ConsiderStr from="risk_alert" id={alert.id} />
+        </div>
       ) : (
-        <p className="mt-sm text-[length:var(--nf-text-overline)] text-[var(--nf-content-muted)]">
-          {fill(copy.resolvedWhen, { when: ui.when(alert.resolvedAt) })}{" "}
-          {fill(common.resolvedBy, { who: alert.resolvedByName ?? common.someone })}.{" "}
-          {common.noteInAuditLog}
-        </p>
+        <div className="nf-admin-cardfoot">
+          <p className="text-[length:var(--nf-text-overline)] text-[var(--nf-content-muted)]">
+            {fill(copy.resolvedWhen, { when: ui.when(alert.resolvedAt) })}{" "}
+            {fill(common.resolvedBy, { who: alert.resolvedByName ?? common.someone })}.{" "}
+            {common.noteInAuditLog}
+          </p>
+          <ConsiderStr from="risk_alert" id={alert.id} />
+        </div>
       )}
     </li>
   );
@@ -122,7 +126,7 @@ export function AlertAcknowledgement({ alert, ui }: { alert: AlertView; ui: Admi
   if (alert.acknowledgedAt) {
     const when = ui.when(alert.acknowledgedAt);
     return (
-      <p className="mt-sm flex items-start gap-inline text-[length:var(--nf-text-caption)] text-[var(--nf-content-secondary)]">
+      <p className="flex items-start gap-inline text-[length:var(--nf-text-caption)] text-[var(--nf-content-secondary)]">
         <UiIcon name="user-check" size={16} />
         <span className="min-w-0">
           {alert.acknowledgedByName
@@ -198,7 +202,9 @@ export function DriftCard({
           </div>
         )}
       </dl>
-      <AlertResolve alertId={alert.id} copy={copy} common={common} />
+      <div className="nf-admin-cardfoot">
+        <AlertResolve alertId={alert.id} copy={copy} common={common} />
+      </div>
     </li>
   );
 }

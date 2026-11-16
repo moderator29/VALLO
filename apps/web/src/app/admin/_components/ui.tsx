@@ -6,6 +6,7 @@ import { toneForStatus, type StatusTone } from "@/components/ui/StatusPill";
 import { ConsoleStatus } from "./chip-state";
 import { QUEUE_EMPTY_MARK, queueEmptyKind, type QueueEmptyKind } from "./queue-empty";
 import { fill, type AdminCommon } from "./copy";
+import { PageLede } from "./PageLede";
 import { CopyValue } from "@/components/ui/CopyButton";
 
 /** Labels whose value people copy: a reference, id, email, case, ticket or number. */
@@ -303,7 +304,7 @@ export function adminUi(t: Dictionary, locale: Locale) {
           <h1 className="nf-admin-head__title">{title}</h1>
           {typeof count === "number" && <WaitingBadge count={count} />}
         </div>
-        <p className="nf-admin-head__sub">{lede}</p>
+        <PageLede text={lede} />
       </header>
     );
   }
@@ -333,7 +334,11 @@ export function adminUi(t: Dictionary, locale: Locale) {
           <h2 className="nf-h4">{title}</h2>
           {action}
         </div>
-        {hint && <p className="nf-body-sm mt-inline-tight max-w-[68ch] text-content-2">{hint}</p>}
+        {hint && (
+          <div className="mt-inline-tight">
+            <PageLede text={hint} className="nf-body-sm max-w-[68ch] text-content-2" />
+          </div>
+        )}
         <div className="mt-heading">{children}</div>
       </section>
     );

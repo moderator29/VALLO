@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { UiIcon } from "@/design-system/icons/UiIcon";
 import type { ControlRoom } from "@/lib/admin/control/read";
 import { earningsSentence, setupFileHref, type SetupState } from "@/lib/admin/control/setup";
 import { Badge, type BadgeTone } from "../_components/Badge";
@@ -56,15 +57,14 @@ export function ControlRoomView({ room }: { room: Extract<ControlRoom, { state: 
             Nothing is waiting on you right now.
           </p>
         ) : (
-          <ul role="list" data-testid="control-waiting">
+          /* Each line is the way to what it counts: one row, tapped anywhere. */
+          <ul role="list" className="nf-admin-linkrows" data-testid="control-waiting">
             {room.waiting.map((line) => (
-              <li key={line.key} className={ROW}>
-                <p className={TITLE}>{line.words}</p>
-                <p className={WORDS}>
-                  <Link href={line.href} className={LINK}>
-                    Open them
-                  </Link>
-                </p>
+              <li key={line.key}>
+                <Link href={line.href} className="nf-admin-linkrow">
+                  <span className="nf-admin-linkrow__label">{line.words}</span>
+                  <UiIcon name="chevron-right" size={18} className="nf-admin-linkrow__chev" />
+                </Link>
               </li>
             ))}
           </ul>
@@ -195,7 +195,7 @@ export function ControlRoomView({ room }: { room: Extract<ControlRoom, { state: 
       ) : null}
 
       <Panel title="Go to" id="go">
-        <ul role="list" className="grid gap-xs sm:grid-cols-2">
+        <ul role="list" className="nf-admin-linkrows">
           {[
             { href: "/admin/escalations", label: "Escalations" },
             { href: "/admin/staff", label: "Staff access" },
@@ -205,8 +205,9 @@ export function ControlRoomView({ room }: { room: Extract<ControlRoom, { state: 
             { href: "/admin/copilot", label: "Copilot" },
           ].map((link) => (
             <li key={link.href}>
-              <Link href={link.href} className={LINK}>
-                {link.label}
+              <Link href={link.href} className="nf-admin-linkrow">
+                <span className="nf-admin-linkrow__label">{link.label}</span>
+                <UiIcon name="chevron-right" size={18} className="nf-admin-linkrow__chev" />
               </Link>
             </li>
           ))}

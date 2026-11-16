@@ -508,7 +508,7 @@ export default async function AdminAgentsPage({
 
       {decided.length > 0 && (
         <section className="mt-xl">
-          <h2 className="nf-h3 mb-sm text-[length:var(--nf-text-body)]">{common.recentlyDecided}</h2>
+          <h2 className="nf-admin-section-title">{common.recentlyDecided}</h2>
           <QueueTable
           heads={t.uiCommon.console.table}
           label="Agent applications"

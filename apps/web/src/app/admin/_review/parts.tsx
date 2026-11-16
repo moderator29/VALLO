@@ -6,6 +6,7 @@ import { toneForStatus, type StatusTone } from "@/components/ui/StatusPill";
 import { Sparkline } from "@/components/agent/charts/Sparkline";
 import { CalmNote, PageHead } from "../_components/panels";
 import { donutArcs, pagerPages, share } from "./metrics";
+import { ScrollRow } from "../_components/ScrollRow";
 
 /**
  * The review desks' furniture, server-safe and data-free.
@@ -92,7 +93,9 @@ export type TabItem = {
 
 export function Tabs({ items, label }: { items: TabItem[]; label: string }) {
   return (
-    <nav aria-label={label}>
+    /* `ScrollRow`: on a phone the row scrolls sideways with the live tab
+       placed in view and a fade at the end that has more. */
+    <ScrollRow label={label} className="nf-rv-tabs-nav">
       <ul className="nf-rv-tabs" role="list">
         {items.map((item) => (
           <li key={item.key}>
@@ -110,7 +113,7 @@ export function Tabs({ items, label }: { items: TabItem[]; label: string }) {
           </li>
         ))}
       </ul>
-    </nav>
+    </ScrollRow>
   );
 }
 

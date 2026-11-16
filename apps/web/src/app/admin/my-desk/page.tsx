@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { UiIcon } from "@/design-system/icons/UiIcon";
 
 import { AdminCopilot } from "@/components/admin/copilot/AdminCopilot";
 import { STAFF_SCOPE_LABEL } from "@/lib/admin/guard";
@@ -97,40 +98,48 @@ export default async function MyDeskPage() {
       </Panel>
 
       <Panel title="Needs your attention">
-        <ul className="grid gap-xs" data-testid="my-desk-attention">
-          <li className="flex flex-wrap items-center gap-xs">
-            <Link href="/admin/my-desk/tasks" className="font-semibold text-[var(--nf-content-link)] hover:underline">
-              Your tasks
+        {/* Each line is one tappable row to its desk, the figures on the
+            right and a chevron, the way a member's settings rows read: on a
+            phone a bare link word was a 20px target. */}
+        <ul className="nf-admin-linkrows" data-testid="my-desk-attention">
+          <li>
+            <Link href="/admin/my-desk/tasks" className="nf-admin-linkrow">
+              <span className="nf-admin-linkrow__label">Your tasks</span>
+              <span className="nf-admin-linkrow__meta">
+                {tasksOpen ? (
+                  <>
+                    <span>Open: {totals.open}</span>
+                    {totals.overdue > 0 ? <Badge tone="error">Overdue: {totals.overdue}</Badge> : <span>Overdue: 0</span>}
+                  </>
+                ) : (
+                  <span>{tasksRead.state === "not-open" ? "Not set up yet" : "Could not be read"}</span>
+                )}
+              </span>
+              <UiIcon name="chevron-right" size={18} className="nf-admin-linkrow__chev" />
             </Link>
-            {tasksOpen ? (
-              <>
-                <span className="nf-body-sm">Open: {totals.open}</span>
-                {totals.overdue > 0 ? <Badge tone="error">Overdue: {totals.overdue}</Badge> : <span className="nf-body-sm">Overdue: 0</span>}
-              </>
-            ) : (
-              <span className="nf-body-sm text-[var(--nf-content-secondary)]">{tasksRead.state === "not-open" ? "Not set up yet" : "Could not be read"}</span>
-            )}
           </li>
-          <li className="flex flex-wrap items-center gap-xs">
-            <Link href="/admin/my-desk/announcements" className="font-semibold text-[var(--nf-content-link)] hover:underline">
-              Announcements
+          <li>
+            <Link href="/admin/my-desk/announcements" className="nf-admin-linkrow">
+              <span className="nf-admin-linkrow__label">Announcements</span>
+              <span className="nf-admin-linkrow__meta">
+                {unread !== null ? (
+                  <span>Unread: {unread}</span>
+                ) : (
+                  <span>{announcementsRead.state === "not-open" ? "Not set up yet" : "Could not be read"}</span>
+                )}
+              </span>
+              <UiIcon name="chevron-right" size={18} className="nf-admin-linkrow__chev" />
             </Link>
-            {unread !== null ? (
-              <span className="nf-body-sm">Unread: {unread}</span>
-            ) : (
-              <span className="nf-body-sm text-[var(--nf-content-secondary)]">{announcementsRead.state === "not-open" ? "Not set up yet" : "Could not be read"}</span>
-            )}
           </li>
           {rows.map((row) => (
-            <li key={row.scope} className="flex flex-wrap items-center gap-xs">
-              <Link href={row.href} className="font-semibold text-[var(--nf-content-link)] hover:underline">
-                {STAFF_SCOPE_LABEL[row.scope]}
+            <li key={row.scope}>
+              <Link href={row.href} className="nf-admin-linkrow">
+                <span className="nf-admin-linkrow__label">{STAFF_SCOPE_LABEL[row.scope]}</span>
+                <span className="nf-admin-linkrow__meta">
+                  {row.count !== null ? <span>Waiting: {row.count}</span> : <span>Open the desk</span>}
+                </span>
+                <UiIcon name="chevron-right" size={18} className="nf-admin-linkrow__chev" />
               </Link>
-              {row.count !== null ? (
-                <span className="nf-body-sm">Waiting: {row.count}</span>
-              ) : (
-                <span className="nf-body-sm text-[var(--nf-content-secondary)]">Open the desk</span>
-              )}
             </li>
           ))}
         </ul>
@@ -191,22 +200,19 @@ export default async function MyDeskPage() {
       )}
 
       <Panel title="Where to find guidance">
-        <ul className="grid gap-xs">
-          <li>
-            <Link href="/admin/handbook/position" className="font-semibold text-[var(--nf-content-link)] hover:underline">
-              Your position page
-            </Link>
-          </li>
-          <li>
-            <Link href="/admin/handbook" className="font-semibold text-[var(--nf-content-link)] hover:underline">
-              The staff handbook
-            </Link>
-          </li>
-          <li>
-            <Link href="/admin/manual/my-desk" className="font-semibold text-[var(--nf-content-link)] hover:underline">
-              Staff manual: My desk, tasks and announcements
-            </Link>
-          </li>
+        <ul className="nf-admin-linkrows">
+          {[
+            { href: "/admin/handbook/position", label: "Your position page" },
+            { href: "/admin/handbook", label: "The staff handbook" },
+            { href: "/admin/manual/my-desk", label: "Staff manual: My desk, tasks and announcements" },
+          ].map((link) => (
+            <li key={link.href}>
+              <Link href={link.href} className="nf-admin-linkrow">
+                <span className="nf-admin-linkrow__label">{link.label}</span>
+                <UiIcon name="chevron-right" size={18} className="nf-admin-linkrow__chev" />
+              </Link>
+            </li>
+          ))}
         </ul>
         <p className="nf-body mt-sm">Stuck? Open the copilot with the button at the corner of this page and ask it in plain words.</p>
       </Panel>

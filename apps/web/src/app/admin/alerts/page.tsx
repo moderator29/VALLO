@@ -116,6 +116,9 @@ export default async function AdminAlertsPage({
         </p>
       )}
 
+      {/* The general queue under its own quiet title, so the drift above and
+          the search below read as two sections rather than one run. */}
+      <h2 className="nf-admin-section-title mt-xl">All alerts</h2>
       <QueueFilters
         base="/admin/alerts"
         query={query}
@@ -141,7 +144,7 @@ export default async function AdminAlertsPage({
 
           {resolved.length > 0 && (
             <section className="mt-xl">
-              <h2 className="nf-h3 mb-sm text-[length:var(--nf-text-body)]">{common.recentlyResolved}</h2>
+              <h2 className="nf-admin-section-title">{common.recentlyResolved}</h2>
               <ul className="nf-queue-list">
                 {resolved.map((alert) => (
                   <AlertCard key={alert.id} alert={alert} copy={copy} common={common} ui={ui} />

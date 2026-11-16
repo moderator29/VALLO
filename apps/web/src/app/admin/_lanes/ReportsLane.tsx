@@ -13,6 +13,7 @@ import {
   readQueueQuery,
   type QueueStatusOption,
 } from "../_components/QueueFilters";
+import type { LaneOption } from "../_components/LanePicker";
 import { Constants } from "@/lib/supabase/database.types";
 import { ReportDecision } from "../_components/AdminActions";
 import { fill, type AdminCommon, type AdminCopy } from "../_components/copy";
@@ -152,8 +153,11 @@ function statusFilters(ui: AdminUi): readonly QueueStatusOption[] {
 
 export async function ReportsLane({
   params,
+  lanes,
 }: {
   params: Record<string, string | string[] | undefined>;
+  /** The queue desk's lanes, drawn with the search (`QueueFilters`). */
+  lanes?: { label: string; options: LaneOption[] };
 }) {
   const locale = await getLocale();
   const t = getDictionary(locale);
@@ -272,6 +276,7 @@ export async function ReportsLane({
         query={query}
         common={common}
         statuses={statusFilters(ui)}
+        {...(lanes ? { lanes } : {})}
       />
 
       {rows.length === 0 ? (
@@ -302,7 +307,7 @@ export async function ReportsLane({
 
           {closed.length > 0 && (
             <section className="mt-xl">
-              <h2 className="nf-h3 mb-sm text-[length:var(--nf-text-body)]">{common.recentlyClosed}</h2>
+              <h2 className="nf-admin-section-title">{common.recentlyClosed}</h2>
               <QueueTable
           heads={t.uiCommon.console.table}
           label="Reports"

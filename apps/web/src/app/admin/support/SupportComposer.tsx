@@ -69,7 +69,7 @@ export function SupportComposer({
         <label id="support-reply-label" htmlFor="support-reply" className="nf-label">
           Reply to the member
         </label>
-        <span className="nf-caption text-[var(--nf-content-muted)]">
+        <span className="nf-admin-keyhint nf-caption text-[var(--nf-content-muted)]">
           <kbd className="nf-numeric">r</kbd> to write, <kbd className="nf-numeric">m</kbd> for saved replies
         </span>
       </div>

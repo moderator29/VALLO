@@ -125,7 +125,7 @@ export function StandingDesk({
 
       {/* -------------------------------------------------------- record */}
       <section>
-        <h2 className="nf-h3 mb-sm text-[length:var(--nf-text-body)]">Every grant, and who signed for it</h2>
+        <h2 className="nf-admin-section-title">Every grant, and who signed for it</h2>
         {filters}
         {grants.length === 0 && empty ? (
           empty

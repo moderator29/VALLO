@@ -156,8 +156,10 @@ function ActionSheet({
   );
 }
 
+/* On a phone the row is a column of full-width 44px buttons (admin.css,
+   `.nf-admin-actrow`); from 640 it is the wrapping row it always was. */
 function Row({ children }: { children: ReactNode }) {
-  return <div className="mt-md flex flex-wrap gap-xs">{children}</div>;
+  return <div className="nf-admin-actrow">{children}</div>;
 }
 
 /** ------------------------------------------------------------ message flags */

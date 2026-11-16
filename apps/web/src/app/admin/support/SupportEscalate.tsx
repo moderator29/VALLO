@@ -61,7 +61,7 @@ export function SupportEscalate({
     <details id="support-escalate" className="nf-panel nf-panel--card mt-md p-md" data-testid="support-escalate">
       <summary className="flex min-h-11 cursor-pointer items-center justify-between gap-xs font-semibold">
         <span>Hand to another desk</span>
-        <kbd className="nf-badge nf-badge--neutral nf-numeric px-xs py-3xs">e</kbd>
+        <kbd className="nf-admin-keyhint nf-badge nf-badge--neutral nf-numeric px-xs py-3xs">e</kbd>
       </summary>
       {!installed ? (
         <p className="mt-xs nf-body-sm text-[var(--nf-content-secondary)]" role="note">

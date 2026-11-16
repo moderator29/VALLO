@@ -191,6 +191,15 @@ export default async function AdminQueuePage({
           }
         : null,
     );
+    const deskLanes = {
+      label: desk.lanesLabel,
+      options: LANES.filter((key) => key !== "spam" || tab === "all" || tab === "tickets").map((key) => ({
+        key,
+        label: desk.lanes[key],
+        href: viewHref({ tab, q: query.q || undefined, lane: key === "all" ? undefined : key }),
+        on: key === "all",
+      })),
+    };
     return (
       <>
         <div className="nf-console">
@@ -204,22 +213,13 @@ export default async function AdminQueuePage({
               on: entry.key === tab,
             }))}
           />
-          {tab !== "held" && (
-            <QueueTabs
-              label={desk.lanesLabel}
-              tabs={LANES.filter((key) => key !== "spam" || tab === "all" || tab === "tickets").map((key) => ({
-                key,
-                label: desk.lanes[key],
-                href: viewHref({ tab, q: query.q || undefined, lane: key === "all" ? undefined : key }),
-                on: key === "all",
-              }))}
-            />
-          )}
         </div>
+        {/* The lanes ride with the lane's own search (`QueueFilters`): one
+            chip on a phone rather than a second strip under the tabs. */}
         {tab === "reports" ? (
-          <ReportsLane params={params} />
+          <ReportsLane params={params} lanes={deskLanes} />
         ) : tab === "flags" ? (
-          <FlagsLane params={params} />
+          <FlagsLane params={params} lanes={deskLanes} />
         ) : (
           <HeldLane params={params} />
         )}
@@ -505,18 +505,22 @@ export default async function AdminQueuePage({
         }))}
       />
 
-      <QueueFilters base={tab === "all" ? "/admin/queue" : `/admin/queue?tab=${tab}`} query={query} common={t.admin.common} dateable={false} />
-
-      {/* V-89: lanes. */}
-      <QueueTabs
-        label={desk.lanesLabel}
-        tabs={LANES.filter((key) => key !== "spam" || tab === "all" || tab === "tickets").map((key) => ({
-          key,
-          label: desk.lanes[key],
-          href: viewHref({ tab: keep.tab || undefined, q: keep.q || undefined, lane: key === "all" ? undefined : key }),
-          ...(key === "spam" ? { count: spamCount } : {}),
-          on: key === lane,
-        }))}
+      {/* V-89: the lanes ride with the search, one chip on a phone. */}
+      <QueueFilters
+        base={tab === "all" ? "/admin/queue" : `/admin/queue?tab=${tab}`}
+        query={query}
+        common={t.admin.common}
+        dateable={false}
+        lanes={{
+          label: desk.lanesLabel,
+          options: LANES.filter((key) => key !== "spam" || tab === "all" || tab === "tickets").map((key) => ({
+            key,
+            label: desk.lanes[key],
+            href: viewHref({ tab: keep.tab || undefined, q: keep.q || undefined, lane: key === "all" ? undefined : key }),
+            ...(key === "spam" ? { count: spamCount } : {}),
+            on: key === lane,
+          })),
+        }}
       />
       {lane === "spam" && <p className="nf-caption mt-inline">{desk.spamNote}</p>}
 
@@ -633,8 +637,8 @@ export default async function AdminQueuePage({
       </p>
 
       {/* V-89: saved views, the operator's own and the desk's shared ones. */}
-      <section className="mt-block" aria-label={desk.viewsLabel}>
-        <p className="nf-overline">{desk.viewsLabel}</p>
+      <section className="mt-xl" aria-label={desk.viewsLabel}>
+        <h2 className="nf-admin-section-title">{desk.viewsLabel}</h2>
         {reads.views.length === 0 ? (
           <p className="nf-caption mt-3xs">{desk.viewsNone}</p>
         ) : (
@@ -683,7 +687,7 @@ export default async function AdminQueuePage({
               <Link href={entry.href} className="nf-admin-tab">
                 <UiIcon name={entry.icon} size={16} />
                 {copy.label}
-                <span className="nf-admin-tab__count nf-numeric">({count})</span>
+                <span className="nf-admin-tab__count nf-numeric">{count}</span>
               </Link>
             </li>
           );

@@ -4,6 +4,7 @@ import { DEFAULT_LOCALE, getDictionary, type Dictionary } from "@vallo/i18n";
 import { UiIcon, type UiIconName } from "@/design-system/icons/UiIcon";
 import { toneForStatus, type StatusTone } from "@/components/ui/StatusPill";
 import { ConsoleStatus } from "./chip-state";
+import { ScrollRow } from "./ScrollRow";
 
 /**
  * The console's dense row table, built once (278CC66A at 390px, CDA4B82B at
@@ -31,6 +32,7 @@ import { ConsoleStatus } from "./chip-state";
  * detail as View, so it is never a menu of nothing.
  *
  * Server-safe: no hooks, so a desk keeps rendering its rows on the server.
+ * The tab strip's scroll placement is the one client piece (`ScrollRow`).
  */
 
 export type QueueRowData = {
@@ -140,19 +142,28 @@ export function QueueTable({
 }
 
 function RowGrid({ row, view: viewWord = DEFAULT_WORDS.view }: { row: QueueRowData; view?: string }) {
+  /* On a phone the word is read out but drawn as a chevron, and a View link
+     stretches over its whole card, so the card is the tap target (the
+     `--card` rules in admin.css). A fold's summary is already the card. */
+  const viewFace = (
+    <>
+      <span className="nf-admin-row__view-word">{viewWord}</span>
+      <UiIcon name="chevron-right" size={20} className="nf-admin-row__view-chev" />
+    </>
+  );
   const view = row.href ? (
-    <Link href={row.href} className="nf-admin-row__view">
-      {viewWord}
+    <Link href={row.href} className="nf-admin-row__view nf-admin-row__view--link">
+      {viewFace}
     </Link>
   ) : (
     <span className="nf-admin-row__view" aria-hidden="true">
-      {viewWord}
+      {viewFace}
     </span>
   );
   return (
-    <div className="nf-admin-row__grid">
+    <div className={`nf-admin-row__grid${row.lead ? " nf-admin-row__grid--lead" : ""}`}>
       <span className="nf-admin-row__type">
-        {row.lead}
+        {row.lead && <span className="nf-admin-row__lead">{row.lead}</span>}
         <span className="nf-admin-row__tile" aria-hidden="true">
           <UiIcon name={row.icon} size={20} />
         </span>
@@ -182,7 +193,12 @@ function RowGrid({ row, view: viewWord = DEFAULT_WORDS.view }: { row: QueueRowDa
           title on a phone, three of the render's columns on desktop (the
           wrapper is `display: contents` there). */}
       <span className="nf-admin-row__meta">
-        <span className="nf-admin-row__id nf-numeric">{row.reference}</span>
+        {/* The kind in a word, on the phone's meta line (the word under the
+            tile is the desktop's). One of the two is ever drawn. */}
+        <span className="nf-admin-row__ref">
+          <span className="nf-admin-row__kind">{row.type}</span>
+          <span className="nf-admin-row__id nf-numeric">{row.reference}</span>
+        </span>
         <span className="nf-admin-row__status">
           <ConsoleStatus tone={row.tone ?? toneForStatus(row.status)} size="xs">
             {row.statusLabel}
@@ -201,7 +217,8 @@ function RowGrid({ row, view: viewWord = DEFAULT_WORDS.view }: { row: QueueRowDa
 }
 
 /**
- * The count tabs above a queue: "All (42)", "Listings (18)", each a link
+ * The count tabs above a queue: "All 42", "Listings 18" (the count on its
+ * own small plate), each a link
  * into the desk that clears it, with the live count beside it. A count is
  * only printed when the read gave one; nothing here invents a number.
  */
@@ -214,8 +231,10 @@ export type QueueTab = {
 };
 
 export function QueueTabs({ tabs, label }: { tabs: QueueTab[]; label: string }) {
+  /* One sideways row on a phone, with the live tab placed in view and a fade
+     at whichever end still has more (`ScrollRow`). */
   return (
-    <nav aria-label={label} className="nf-admin-tabs">
+    <ScrollRow label={label} className="nf-admin-tabs">
       {tabs.map((tab) => (
         <Link
           key={tab.key}
@@ -225,11 +244,11 @@ export function QueueTabs({ tabs, label }: { tabs: QueueTab[]; label: string }) 
         >
           {tab.label}
           {typeof tab.count === "number" && (
-            <span className="nf-admin-tab__count nf-numeric">({tab.count})</span>
+            <span className="nf-admin-tab__count nf-numeric">{tab.count}</span>
           )}
         </Link>
       ))}
-    </nav>
+    </ScrollRow>
   );
 }
 

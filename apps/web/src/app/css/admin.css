@@ -3124,3 +3124,536 @@
     }
   }
 }
+
+/* ---------------------------------------------------------------------------
+   THE DESK ON A PHONE (16 November 2026, the founder's /admin/queue shot at
+   393px: two stacked tab strips running off the edge, a four-line grey
+   explainer, rows with a captioned icon column and View and the kebab
+   squeezed on the right). One calm column instead: one sideways tab row with
+   a fade at the end that still has more, the explainer on one line with
+   More, the lanes as one chip beside the search, and every row a card you
+   tap anywhere on, with its glyph inline and one meta line under the title.
+   From 1024px up the table is the render's seven columns, untouched.
+   --------------------------------------------------------------------------- */
+@layer components {
+  /* ------------------------------------------------------------ the head */
+  /* The title side of the head takes the line, so the lede under it is
+     measured against the page and not against the title. */
+  .nf-admin-page-head__main {
+    flex: 1 1 auto;
+  }
+  .nf-admin-lede {
+    display: flex;
+    align-items: baseline;
+    gap: var(--nf-space-xs);
+    min-width: 0;
+  }
+  .nf-admin-lede > p {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+  .nf-admin-lede__more {
+    position: relative;
+    flex: none;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--nf-content-link);
+    font-size: var(--nf-text-caption);
+    font-weight: 600;
+    cursor: pointer;
+  }
+  /* A 44px target around a caption word, without a 44px line. */
+  .nf-admin-lede__more::after {
+    content: "";
+    position: absolute;
+    inset: calc(var(--nf-space-sm) * -1) calc(var(--nf-space-xs) * -1);
+  }
+  .nf-admin-lede__more:focus-visible {
+    outline: var(--nf-focus-ring-width) solid var(--nf-focus-ring);
+    outline-offset: 2px;
+    border-radius: var(--nf-radius-xs);
+  }
+  @media (max-width: 639.98px) {
+    /* The one-line fold must never be what sizes its column: a nowrap line
+       in a grid or flex item would otherwise push the page wider than the
+       phone. With its inline size contained, the fold takes the width it is
+       given. */
+    .nf-admin-lede {
+      contain: inline-size;
+    }
+    .nf-admin-lede:not(.nf-admin-lede--open) > p {
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+    .nf-admin-lede--open {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: var(--nf-space-2xs);
+    }
+    .nf-admin-page-head {
+      margin-bottom: var(--nf-space-md);
+    }
+  }
+
+  /* ------------------------------------------------------- the tab row */
+  /* The live tab's count reads on its own small plate rather than in
+     brackets, so "Flags 4" scans as a label and a number. */
+  .nf-admin-tab__count {
+    display: inline-grid;
+    place-items: center;
+    min-width: 1.25rem;
+    padding: 0 var(--nf-space-2xs);
+    border-radius: var(--nf-radius-badge);
+    background: var(--nf-tier-plate-press);
+    font-size: var(--nf-text-overline);
+    font-weight: 600;
+    line-height: 1.5;
+  }
+  .nf-admin-tab--on .nf-admin-tab__count {
+    background: var(--nf-brand-tint-2);
+    color: var(--nf-content-primary);
+  }
+  @media (max-width: 1023.98px) {
+    .nf-admin-tabs {
+      width: 100%;
+      margin-bottom: var(--nf-space-md);
+      scroll-padding-inline: var(--nf-space-lg);
+    }
+    .nf-admin-tab {
+      padding-inline: var(--nf-space-sm);
+    }
+    /* A row of desk buttons (the staff frame's desks, a desk's sub-desks):
+       one sideways row, not a cloud of buttons. */
+    .nf-admin-deskrow {
+      overflow-x: auto;
+      scrollbar-width: none;
+      margin-inline: calc(var(--nf-space-xs) * -1);
+      padding: var(--nf-space-3xs) var(--nf-space-xs);
+    }
+    .nf-admin-deskrow::-webkit-scrollbar {
+      display: none;
+    }
+    .nf-admin-deskrow > ul {
+      flex-wrap: nowrap;
+      width: max-content;
+    }
+    .nf-admin-deskrow .nf-btn {
+      min-height: 2.75rem;
+      white-space: nowrap;
+    }
+    /* The map of every desk this access opens follows the desk on a phone. */
+    .nf-staff-frame {
+      display: flex;
+      flex-direction: column;
+    }
+    .nf-staff-frame > .nf-staff-menu {
+      order: 1;
+    }
+    /* Link tabs (`TabRow`): one sideways row, not two lines of pills. */
+    .nf-admin-seg {
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      scrollbar-width: none;
+      margin-inline: calc(var(--nf-space-xs) * -1);
+      padding: var(--nf-space-3xs) var(--nf-space-xs);
+    }
+    .nf-admin-seg::-webkit-scrollbar {
+      display: none;
+    }
+    .nf-admin-seg > .nf-admin-seg__item {
+      flex: none;
+      white-space: nowrap;
+    }
+    /* The fade says the row goes on, at whichever end still has more. */
+    .nf-admin-seg[data-more-end],
+    .nf-admin-deskrow[data-more-end],
+    .nf-admin-tabs[data-more-end] {
+      -webkit-mask-image: linear-gradient(90deg, var(--nf-content-primary) calc(100% - var(--nf-space-xl)), transparent);
+      mask-image: linear-gradient(90deg, var(--nf-content-primary) calc(100% - var(--nf-space-xl)), transparent);
+    }
+    .nf-admin-seg[data-more-start],
+    .nf-admin-deskrow[data-more-start],
+    .nf-admin-tabs[data-more-start] {
+      -webkit-mask-image: linear-gradient(90deg, transparent, var(--nf-content-primary) var(--nf-space-xl));
+      mask-image: linear-gradient(90deg, transparent, var(--nf-content-primary) var(--nf-space-xl));
+    }
+    .nf-admin-seg[data-more-start][data-more-end],
+    .nf-admin-deskrow[data-more-start][data-more-end],
+    .nf-admin-tabs[data-more-start][data-more-end] {
+      -webkit-mask-image: linear-gradient(90deg, transparent, var(--nf-content-primary) var(--nf-space-xl), var(--nf-content-primary) calc(100% - var(--nf-space-xl)), transparent);
+      mask-image: linear-gradient(90deg, transparent, var(--nf-content-primary) var(--nf-space-xl), var(--nf-content-primary) calc(100% - var(--nf-space-xl)), transparent);
+    }
+  }
+
+  /* ---------------------------------------------------------- the lanes */
+  .nf-admin-lanes {
+    display: flex;
+    align-items: center;
+    min-width: 0;
+  }
+  .nf-admin-lanes > .nf-admin-tabs {
+    display: none;
+    margin-bottom: 0;
+  }
+  @media (min-width: 1024px) {
+    .nf-admin-lanes > .nf-admin-tabs {
+      display: flex;
+    }
+    .nf-admin-lanes > .nf-admin-lanepick {
+      display: none;
+    }
+  }
+  .nf-admin-lanepick {
+    display: flex;
+    align-items: center;
+    gap: var(--nf-space-xs);
+    min-width: 0;
+  }
+  .nf-admin-lanepick__chip {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--nf-space-xs);
+    min-width: 0;
+    min-height: 2.75rem;
+    padding-inline: var(--nf-space-sm);
+    border-radius: var(--nf-radius-control);
+    border: var(--nf-border-width) solid var(--nf-btn-glass-edge);
+    background: var(--nf-btn-glass-fill);
+    color: var(--nf-content-primary);
+  }
+  .nf-admin-lanepick__label {
+    flex: none;
+    font-size: var(--nf-text-caption);
+    font-weight: 600;
+    color: var(--nf-content-muted);
+  }
+  .nf-admin-lanepick__chip select {
+    min-width: 0;
+    min-height: 2.75rem;
+    padding: 0 var(--nf-space-lg) 0 0;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    font-size: var(--nf-text-body-sm);
+    font-weight: 600;
+    appearance: none;
+    cursor: pointer;
+  }
+  .nf-admin-lanepick__chip select:focus-visible {
+    outline: none;
+  }
+  .nf-admin-lanepick__chip:focus-within {
+    outline: var(--nf-focus-ring-width) solid var(--nf-focus-ring);
+    outline-offset: 2px;
+  }
+  .nf-admin-lanepick__chev {
+    position: absolute;
+    inset-inline-end: var(--nf-space-sm);
+    color: var(--nf-content-muted);
+    pointer-events: none;
+  }
+
+  /* ------------------------------------------------ a card's actions */
+  /* Every action a desk card offers, gathered at its foot under one hairline
+     instead of strewn down the card. The pieces bring their own top margins
+     from when they stood alone; inside the foot the foot's gap spaces them. */
+  .nf-admin-cardfoot {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--nf-space-xs);
+    margin-top: var(--nf-space-md);
+    padding-top: var(--nf-space-sm);
+    border-top: var(--nf-border-width) solid var(--nf-brand-edge-soft);
+  }
+  /* A desk card's row of decision buttons (`Row` in AdminActions), and the
+     STR door, which sits on cards across the console. */
+  .nf-admin-actrow {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--nf-space-xs);
+    margin-top: var(--nf-space-md);
+  }
+  .nf-admin-str {
+    margin-top: var(--nf-gap-row);
+  }
+  .nf-admin-cardfoot > *,
+  .nf-admin-cardfoot > * > .nf-admin-actrow,
+  .nf-admin-cardfoot .nf-admin-actrow,
+  .nf-admin-cardfoot .nf-admin-str {
+    margin-top: 0;
+  }
+  @media (max-width: 639.98px) {
+    .nf-admin-cardfoot {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .nf-admin-cardfoot .nf-btn {
+      width: 100%;
+      min-height: 2.75rem;
+    }
+  }
+
+  /* Keyboard shortcuts ("c takes it", "r to write", the Keys sheet) are for
+     a desk with a keyboard. On a touch phone they are words about keys the
+     operator does not have, so they step aside. */
+  @media (hover: none) and (pointer: coarse) {
+    .nf-admin-keyhint {
+      display: none;
+    }
+  }
+
+  /* ------------------------------------------------ rows that go somewhere */
+  /* A list of places, each a whole-row link at least 44px tall: the label,
+     its figures to the right, a chevron. The member app's settings rows,
+     in the console's hairlines. */
+  .nf-admin-linkrows {
+    display: grid;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .nf-admin-linkrows > li + li {
+    border-top: var(--nf-border-width) solid var(--nf-brand-edge-soft);
+  }
+  .nf-admin-linkrow {
+    display: flex;
+    align-items: center;
+    gap: var(--nf-space-sm);
+    min-height: 2.75rem;
+    padding-block: var(--nf-space-xs);
+    color: var(--nf-content-primary);
+  }
+  .nf-admin-linkrow__label {
+    flex: 1 1 auto;
+    min-width: 0;
+    font-weight: 600;
+    overflow-wrap: break-word;
+  }
+  .nf-admin-linkrow__meta {
+    display: inline-flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    align-items: center;
+    gap: var(--nf-space-xs);
+    font-size: var(--nf-text-body-sm);
+    color: var(--nf-content-secondary);
+    text-align: end;
+  }
+  .nf-admin-linkrow__meta > * {
+    white-space: nowrap;
+  }
+  .nf-admin-linkrow__chev {
+    flex: none;
+    color: var(--nf-content-muted);
+  }
+  @media (hover: hover) {
+    .nf-admin-linkrow:hover .nf-admin-linkrow__label {
+      color: var(--nf-content-link);
+    }
+  }
+  .nf-admin-linkrow:focus-visible {
+    outline: var(--nf-focus-ring-width) solid var(--nf-focus-ring);
+    outline-offset: 2px;
+    border-radius: var(--nf-radius-xs);
+  }
+
+  /* ----------------------------------------------- a section under a desk */
+  /* "Recently reviewed", "Recently closed": the second thing on a desk, so it
+     reads as second. A quiet label and a hairline running to the edge. */
+  .nf-admin-section-title {
+    display: flex;
+    align-items: center;
+    gap: var(--nf-space-sm);
+    margin-bottom: var(--nf-space-sm);
+    font-size: var(--nf-text-body-sm);
+    font-weight: 600;
+    color: var(--nf-content-secondary);
+  }
+  .nf-admin-section-title::after {
+    content: "";
+    flex: 1 1 auto;
+    border-top: var(--nf-border-width) solid var(--nf-brand-edge-soft);
+  }
+
+  /* ------------------------------------------------ the row, as a card */
+  .nf-admin-row__kind,
+  .nf-admin-row__view-chev {
+    display: none;
+  }
+  .nf-admin-row__lead {
+    display: inline-flex;
+  }
+  /* The kind and the reference travel as one: a wrapper on the phone's meta
+     line, nothing at all in the desktop's columns. */
+  .nf-admin-row__ref {
+    display: contents;
+  }
+  @media (max-width: 1023.98px) {
+    .nf-admin-row {
+      position: relative;
+    }
+    .nf-admin-row__grid {
+      grid-template-columns: 2rem minmax(0, 1fr) 2.75rem;
+      grid-template-areas:
+        "tile title actions"
+        "tile meta actions";
+      align-items: start;
+      column-gap: var(--nf-space-sm);
+      row-gap: var(--nf-space-xs);
+      min-height: 4.5rem;
+      padding: var(--nf-space-sm) var(--nf-space-2xs) var(--nf-space-sm) var(--nf-space-md);
+    }
+    /* The select box's column is the tile's width; its 44px target overhangs
+       into the gutter rather than taking a column of its own. */
+    .nf-admin-row__grid--lead {
+      grid-template-columns: 2rem 2rem minmax(0, 1fr) 2.75rem;
+      column-gap: var(--nf-space-xs);
+      grid-template-areas:
+        "lead tile title actions"
+        "lead tile meta actions";
+      padding-inline-start: var(--nf-space-2xs);
+    }
+    /* The type cell dissolves so its pieces take their own places. */
+    .nf-admin-row__type {
+      display: contents;
+    }
+    .nf-admin-row__lead {
+      grid-area: lead;
+      align-self: center;
+      position: relative;
+      z-index: 1;
+    }
+    .nf-admin-row__lead {
+      justify-self: center;
+    }
+    .nf-admin-row__lead > label {
+      margin: 0 calc(var(--nf-space-xs) * -1);
+    }
+    .nf-admin-row__tile {
+      grid-area: tile;
+      width: 2rem;
+      height: 2rem;
+    }
+    .nf-admin-row__type-word {
+      display: none;
+    }
+    .nf-admin-row__name {
+      font-size: var(--nf-text-body);
+      line-height: 1.3;
+      padding-top: var(--nf-space-3xs);
+    }
+    /* The meta line: the status first, then the kind and the reference with
+       a quiet dot between them, then the stamp. */
+    .nf-admin-row__meta {
+      column-gap: var(--nf-space-2xs);
+      row-gap: var(--nf-space-2xs);
+    }
+    .nf-admin-row__status {
+      order: -1;
+      margin-inline-end: var(--nf-space-2xs);
+    }
+    .nf-admin-row__ref {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--nf-space-2xs);
+      white-space: nowrap;
+    }
+    .nf-admin-row__kind {
+      display: inline;
+      font-size: var(--nf-text-overline);
+      font-weight: 600;
+      color: var(--nf-content-secondary);
+    }
+    .nf-admin-row__id,
+    .nf-admin-row__when {
+      display: inline;
+    }
+    .nf-admin-row__id::before {
+      content: "\00B7";
+      margin-inline-end: var(--nf-space-2xs);
+      color: var(--nf-content-muted);
+    }
+    /* The stamp keeps to itself: when the line is full it drops whole to the
+       next one, never with a stray dot in front of it. */
+    .nf-admin-row__when {
+      margin-inline-start: var(--nf-space-2xs);
+      white-space: nowrap;
+      color: var(--nf-content-muted);
+    }
+    .nf-admin-row__actions {
+      align-self: center;
+    }
+    .nf-admin-row__kebab {
+      display: none;
+    }
+    /* View is a chevron: the word is still read out. */
+    .nf-admin-row__view,
+    .nf-admin-row[open] .nf-admin-row__view {
+      width: 2.75rem;
+      min-height: 2.75rem;
+      padding: 0;
+      border: 0;
+      background: transparent;
+      box-shadow: none;
+      color: var(--nf-content-muted);
+    }
+    .nf-admin-row__view-word {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip-path: inset(50%);
+      white-space: nowrap;
+    }
+    .nf-admin-row__view-chev {
+      display: block;
+      transition: rotate var(--nf-duration-fast) var(--nf-ease-standard);
+    }
+    .nf-admin-row[open] .nf-admin-row__view-chev {
+      rotate: 90deg;
+    }
+    /* A row with its own page: the whole card is the link. Anything else
+       live on the card (the select box, Take) sits above the stretch. */
+    .nf-admin-row__view--link::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+    }
+    .nf-admin-row__title :is(a, button, label, input, select, form) {
+      position: relative;
+      z-index: 1;
+    }
+    .nf-admin-row__body {
+      padding: var(--nf-space-xs) var(--nf-space-sm) var(--nf-space-md);
+    }
+    /* The desk's card opened under its row is already inside the table's
+       card: on a phone it drops its own frame rather than nest a card in a
+       card, and keeps its content on the row's left edge. */
+    .nf-admin-row__body > .nf-queue-list > .nf-panel {
+      padding: var(--nf-space-xs) 0 0;
+      border-color: transparent;
+      background: transparent;
+      box-shadow: none;
+    }
+  }
+  @media (max-width: 639.98px) {
+    .nf-admin-actrow {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+    }
+    .nf-admin-actrow > .nf-btn {
+      width: 100%;
+      min-height: 2.75rem;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .nf-admin-row__view-chev {
+      transition: none;
+    }
+  }
+}

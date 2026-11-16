@@ -2,6 +2,7 @@ import { getDictionary } from "@vallo/i18n";
 import { getLocale } from "@/lib/locale";
 import { QueueFilters, QueuePager } from "@/app/admin/_components/QueueFilters";
 import { adminUi } from "@/app/admin/_components/ui";
+import { PageHead } from "@/app/admin/_components/panels";
 import {
   AlertCard,
   alertStatusFilters,
@@ -33,7 +34,7 @@ export default async function PreviewAlerts() {
 
   return (
     <ConsoleFrame t={t}>
-      <ui.QueueHeader title={copy.title} lede={copy.lede} count={open.length} />
+      <PageHead title={copy.title} lede={copy.lede} trail={<ui.WaitingBadge count={open.length} />} />
 
       <ui.Section {...driftSectionCopy(DRIFT_ALERTS.length)}>
         <ul className="nf-queue-list">
@@ -43,6 +44,7 @@ export default async function PreviewAlerts() {
         </ul>
       </ui.Section>
 
+      <h2 className="nf-admin-section-title mt-xl">All alerts</h2>
       <QueueFilters base={BASE} query={{}} common={common} statuses={alertStatusFilters(ui)} />
 
       <ul className="nf-queue-list">
@@ -52,7 +54,7 @@ export default async function PreviewAlerts() {
       </ul>
 
       <section className="mt-xl">
-        <h2 className="nf-h3 mb-sm text-[length:var(--nf-text-body)]">{common.recentlyResolved}</h2>
+        <h2 className="nf-admin-section-title">{common.recentlyResolved}</h2>
         <ul className="nf-queue-list">
           {resolved.map((alert) => (
             <AlertCard key={alert.id} alert={alert} copy={copy} common={common} ui={ui} />

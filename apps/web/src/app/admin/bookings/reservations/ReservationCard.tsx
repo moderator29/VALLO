@@ -108,7 +108,7 @@ export function ReservationGroup({
   if (rows.length === 0) return null;
   return (
     <section className="mt-xl first:mt-0">
-      <h2 className="nf-h3 mb-sm text-[length:var(--nf-text-body)]">{title}</h2>
+      <h2 className="nf-admin-section-title">{title}</h2>
       <ul className="nf-queue-list">
         {rows.map((row) => (
           <TableCard key={row.id} row={row} ui={ui} guestsWord={guestsWord} />

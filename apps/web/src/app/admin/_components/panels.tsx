@@ -1,6 +1,8 @@
 import type { ReactNode } from "react";
 import { Badge, type BadgeTone } from "./Badge";
 import { PersonTier } from "./PersonTier";
+import { PageLede } from "./PageLede";
+import { ScrollRow } from "./ScrollRow";
 
 export { Badge, type BadgeTone };
 import type { PersonTier as PersonTierValue } from "@/lib/admin/reads/shapes";
@@ -50,13 +52,13 @@ export function PageHead({
 }) {
   return (
     <header className="nf-admin-page-head">
-      <div className="min-w-0">
+      <div className="nf-admin-page-head__main min-w-0">
         {lead}
         <div className="flex min-w-0 flex-wrap items-center gap-x-sm gap-y-2xs">
           <h1 className="nf-admin-page-head__title break-words">{title}</h1>
           {trail}
         </div>
-        {lede ? <p className="nf-admin-page-head__lede">{lede}</p> : null}
+        {lede ? <PageLede text={lede} /> : null}
       </div>
       {action}
     </header>
@@ -165,19 +167,24 @@ export function DeskLinks({
     ...extra,
   ];
   if (rows.length === 0) return null;
+  /* One sideways row on a phone, with a fade at the end that has more
+     (`ScrollRow`, `.nf-admin-deskrow` in admin.css); it wrapped into a cloud
+     of buttons that pushed the desk itself down. From 1024 it wraps. */
   return (
-    <nav aria-label={label} className="mt-inline">
+    <div className="mt-inline">
       {caption ? <p className="nf-caption text-[var(--nf-content-secondary)]">{caption}</p> : null}
-      <ul className="mt-3xs flex flex-wrap gap-xs list-none p-0">
-        {rows.map((row) => (
-          <li key={row.href}>
-            <ButtonLink href={row.href} variant="secondary" size="sm">
-              {row.label}
-            </ButtonLink>
-          </li>
-        ))}
-      </ul>
-    </nav>
+      <ScrollRow label={label} className="nf-admin-deskrow mt-3xs">
+        <ul className="flex flex-wrap gap-xs list-none p-0">
+          {rows.map((row) => (
+            <li key={row.href}>
+              <ButtonLink href={row.href} variant="secondary" size="sm">
+                {row.label}
+              </ButtonLink>
+            </li>
+          ))}
+        </ul>
+      </ScrollRow>
+    </div>
   );
 }
 
@@ -485,8 +492,10 @@ export function TabRow({
   items: readonly { key: string; href: string; label: string; active: boolean; count?: number }[];
   label: string;
 }) {
+  /* One sideways row on a phone (`ScrollRow`): the live tab in view, a fade
+     at the end that has more. It wrapped onto a second and third line. */
   return (
-    <nav className="nf-admin-seg" aria-label={label}>
+    <ScrollRow label={label} className="nf-admin-seg">
       {items.map((item) => (
         <Link
           key={item.key}
@@ -501,7 +510,7 @@ export function TabRow({
           )}
         </Link>
       ))}
-    </nav>
+    </ScrollRow>
   );
 }
 

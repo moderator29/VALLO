@@ -28,6 +28,7 @@ import { ReviewCallAction } from "@/components/calls/admin/ReviewCallAction";
 import { SupportComposer } from "./SupportComposer";
 import { ReturnEscalation, SupportEscalate } from "./SupportEscalate";
 import { SupportKeys } from "./SupportKeys";
+import { ScrollRow } from "../_components/ScrollRow";
 
 /**
  * THE SUPPORT DESK (29 September 2026): where a support agent lands and
@@ -154,7 +155,7 @@ function Tiles({ rows, q, now }: { rows: SupportQueueRow[]; q: string; now: numb
 function Tabs({ rows, tab, q }: { rows: SupportQueueRow[]; tab: SupportTab; q: string }) {
   const counts = tabCounts(rows.map((r) => ({ lane: r.lane, claimedByMe: r.claim?.mine === true })));
   return (
-    <nav aria-label="Support lanes" className="nf-admin-seg mt-md flex-nowrap overflow-x-auto pb-3xs">
+    <ScrollRow label="Support lanes" className="nf-admin-seg mt-md flex-nowrap overflow-x-auto pb-3xs">
       {SUPPORT_TABS.map((t) => (
         <Link
           key={t}
@@ -167,7 +168,7 @@ function Tabs({ rows, tab, q }: { rows: SupportQueueRow[]; tab: SupportTab; q: s
           {counts[t] > 0 && t !== "done" ? <span className="nf-admin-seg__count nf-numeric">{counts[t]}</span> : null}
         </Link>
       ))}
-    </nav>
+    </ScrollRow>
   );
 }
 
@@ -442,7 +443,7 @@ function Ticket({
         {supportMode && open ? (
           <div className="mt-sm flex flex-wrap items-center gap-xs">
             <TicketClaim ticketId={row.id} holder={row.claim} />
-            <span className="nf-caption text-[var(--nf-content-muted)]">
+            <span className="nf-admin-keyhint nf-caption text-[var(--nf-content-muted)]">
               <kbd className="nf-numeric">c</kbd> takes it
             </span>
           </div>
