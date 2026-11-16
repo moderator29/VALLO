@@ -285,6 +285,11 @@
     white-space: pre-wrap;
   }
 
+  /* At night the question is a deep Vallo navy, as on the member assistant. */
+  :root:not([data-theme="light"]) .nf-copilot-turn[data-role="user"] {
+    background: color-mix(in oklab, var(--nf-brand-primary) 55%, var(--nf-surface-canvas));
+  }
+
   /* The answer: on the page itself, full width, as a chat answer reads. */
   .nf-copilot-turn[data-role="assistant"] {
     justify-self: stretch;

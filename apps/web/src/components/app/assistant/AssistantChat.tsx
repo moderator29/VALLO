@@ -946,6 +946,20 @@ export function AssistantChat({
                     {copy.emptyBody}
                   </p>
                 </div>
+                {/* A person, in words, on every new chat (the founder, 16
+                    November 2026): the headset in the bar is one tap away, but
+                    an icon alone is not enough for somebody who needs help. */}
+                <ButtonLink
+                  href="/assistant/person"
+                  variant="secondary"
+                  size="sm"
+                  leadingIcon="headset"
+                  className="nf-rise nf-rise-5"
+                  data-testid="assistant-person-intro"
+                  onClick={handOff}
+                >
+                  {PERSON_WORDS.label}
+                </ButtonLink>
                 {picks.length > 0 ? (
                   <div className="w-full text-left" data-testid="assistant-picks">
                     <AssistantBlocks blocks={[{ type: "cards", title: "Picked for you by VALLO AI", items: picks }]} onAsk={(prompt) => send(prompt)} />
@@ -1029,7 +1043,16 @@ export function AssistantChat({
                         {...(m.error ? { errorMessage: m.text } : {})}
                         data-testid="assistant-answer"
                       >
-                        {m.error ? null : <AnswerMarkdown text={m.text} streaming={thisStreaming} />}
+                        {m.error ? null : (
+                          <AnswerMarkdown
+                            text={m.text}
+                            streaming={thisStreaming}
+                            onEditMessage={(words) => {
+                              setDraft(words);
+                              window.requestAnimationFrame(() => inputRef.current?.focus());
+                            }}
+                          />
+                        )}
                         {status === "stopped" ? (
                           <span className="nf-ai-answer__stopped">{answerWords.stoppedNote}</span>
                         ) : null}
@@ -1249,7 +1272,20 @@ export function AssistantChat({
                   aria-pressed={dictation.listening}
                   data-testid="assistant-dictate"
                   onClick={() => {
-                    if (!dictation.listening) dictationBase.current = draft.trim();
+                    if (!dictation.listening) {
+                      dictationBase.current = draft.trim();
+                      /* Once per device: where the words come from (the founder
+                         kept the microphone in Chrome, 16 November 2026, on
+                         the condition that people are told). */
+                      try {
+                        if (!window.localStorage.getItem("nf_ai_mic_note")) {
+                          window.localStorage.setItem("nf_ai_mic_note", "1");
+                          banner.info(answerWords.micNote);
+                        }
+                      } catch {
+                        /* Blocked storage: the note may show again next time, which is harmless. */
+                      }
+                    }
                     dictation.toggle();
                   }}
                 >

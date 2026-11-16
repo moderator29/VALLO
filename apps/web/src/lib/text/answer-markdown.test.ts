@@ -111,3 +111,20 @@ describe("an answer still arriving", () => {
     expect(tidyStreaming(FROM_THE_SCREENSHOT)).toBe(FROM_THE_SCREENSHOT);
   });
 });
+
+describe("a message drafted for the member to send", () => {
+  it("is its own block, its words only, and not a block of code", () => {
+    const blocks = parseAnswer("Here is one you can send:\n\n```message\nHello, is the flat still free?\nThanks, Ada\n```");
+    expect(blocks.map((b) => b.kind)).toEqual(["p", "message"]);
+    expect(blocks[1]).toEqual({ kind: "message", text: "Hello, is the flat still free?\nThanks, Ada" });
+  });
+
+  it("is drawn as a card while it is still arriving, and never flashes as code while its fence opens", () => {
+    expect(parseAnswer("Try this:\n```message\nHello, is it", { streaming: true }).at(-1)).toEqual({ kind: "message", text: "Hello, is it" });
+    expect(parseAnswer("Try this:\n```mes", { streaming: true }).some((b) => b.kind === "code")).toBe(false);
+  });
+
+  it("copies as its plain words", () => {
+    expect(plainAnswer("```message\nHello there\n```")).toBe("Hello there");
+  });
+});

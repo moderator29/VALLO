@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { UiIcon } from "@/design-system/icons/UiIcon";
+import { banner } from "@/lib/ui/toast";
 import { inlineRuns, parseAnswer } from "@/lib/text/answer-markdown";
 import "./answer-markdown.css";
 
@@ -48,7 +50,57 @@ function Inline({ text, keyBase }: { text: string; keyBase: string }) {
 /* An answer sits under the page's own headings, so its levels start at h3. */
 const HEADING_TAG = { 1: "h3", 2: "h4", 3: "h5" } as const;
 
-export function AnswerMarkdown({ text, streaming = false }: { text: string; streaming?: boolean }) {
+/**
+ * A MESSAGE DRAFTED FOR THE MEMBER TO SEND (the founder's ChatGPT references,
+ * 16 November 2026): a card named Message, the words as they will be sent,
+ * and Edit (into the composer, to change it there), Copy and Share. Nothing
+ * here sends anything; the member does, wherever they choose.
+ */
+function MessageCard({ text, onEdit }: { text: string; onEdit?: ((text: string) => void) | undefined }) {
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(text);
+      banner.quick("Message copied");
+    } catch {
+      banner.error("Could not copy. Select the words and copy them by hand.");
+    }
+  };
+  const share = async () => {
+    const nav = navigator as Navigator & { share?: (data: { text: string }) => Promise<void> };
+    if (typeof nav.share === "function") {
+      try {
+        await nav.share({ text });
+        return;
+      } catch {
+        /* Closed by the person, or refused: fall back to copying. */
+      }
+    }
+    await copy();
+  };
+  return (
+    <figure className="nf-md__msg" data-testid="answer-message">
+      <figcaption className="nf-md__msg-head">
+        <span>Message</span>
+        <span className="nf-md__msg-acts">
+          {onEdit ? (
+            <button type="button" className="nf-md__msg-btn nf-tap" onClick={() => onEdit(text)} aria-label="Edit this message" title="Edit">
+              <UiIcon name="pencil" size={18} />
+            </button>
+          ) : null}
+          <button type="button" className="nf-md__msg-btn nf-tap" onClick={() => void copy()} aria-label="Copy this message" title="Copy">
+            <UiIcon name="clipboard-list" size={18} />
+          </button>
+          <button type="button" className="nf-md__msg-btn nf-tap" onClick={() => void share()} aria-label="Share this message" title="Share">
+            <UiIcon name="send" size={18} />
+          </button>
+        </span>
+      </figcaption>
+      <p className="nf-md__msg-text">{text}</p>
+    </figure>
+  );
+}
+
+export function AnswerMarkdown({ text, streaming = false, onEditMessage }: { text: string; streaming?: boolean; onEditMessage?: (text: string) => void }) {
   const blocks = parseAnswer(text, { streaming });
   return (
     <div className="nf-md" data-testid="answer-markdown">
@@ -80,6 +132,8 @@ export function AnswerMarkdown({ text, streaming = false }: { text: string; stre
               </ol>
             );
           }
+          case "message":
+            return <MessageCard key={key} text={block.text} onEdit={streaming ? undefined : onEditMessage} />;
           case "code":
             return (
               <pre key={key} className="nf-md__pre">

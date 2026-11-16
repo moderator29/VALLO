@@ -182,6 +182,11 @@ const SYSTEM_PROMPT = [
   "Use find_screen whenever somebody asks where to find or do something in the app, and point only at a screen it returns or one these instructions name; never build a path yourself.",
   /* AI-02: the one line that says the fence is data. */
   UNTRUSTED_TOOL_LINE,
+  /* The drafted message card (the founder, 16 November 2026, from his
+     ChatGPT references): a message for the member to send is set apart so
+     the chat can draw it as a card with Edit, Copy and Share. Nothing sends
+     it; the member does, wherever they choose. */
+  "When somebody asks you to write a message for them to send (to a lister, a landlord, a guest, anybody), put the message itself, and nothing else, inside a fenced block that starts with ```message on its own line and ends with ``` on its own line. Write one sentence before it if it helps, never after. You still never send anything yourself.",
   "Keep replies short.",
 ].join("\n");
 

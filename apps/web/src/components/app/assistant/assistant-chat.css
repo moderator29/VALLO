@@ -40,6 +40,15 @@
     line-height: 1.45;
   }
 
+  /* AT NIGHT THE BUBBLE IS A DEEP VALLO NAVY (the founder's ChatGPT
+     references, 16 November 2026): the bright blue was the loudest thing on
+     a dark screen and pulled the eye off the answer. Half the brand blue into
+     the night canvas keeps it ours and calm, white words at well over 7:1.
+     Daylight keeps the brand blue. */
+  :root:not([data-theme="light"]) .nf-assistant .nf-ai__turn--mine .nf-ai__bubble--mine {
+    background: color-mix(in oklab, var(--nf-brand-primary) 55%, var(--nf-surface-canvas));
+  }
+
   /* THE ANSWER'S NAME stays for a screen reader (the article is named Vallo
      AI) and leaves the screen while there are words to read. Thinking keeps
      its orb and word; a failed answer keeps its warning. */

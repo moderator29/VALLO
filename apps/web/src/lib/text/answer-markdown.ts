@@ -30,6 +30,8 @@ export type AnswerBlock =
   | { kind: "ul"; items: ListItem[] }
   | { kind: "ol"; start: number; items: ListItem[] }
   | { kind: "code"; text: string }
+  /** A message drafted for the member to send themselves (a ```message fence), drawn as a card. */
+  | { kind: "message"; text: string }
   | { kind: "quote"; text: string }
   | { kind: "table"; head: string[]; rows: string[][] }
   | { kind: "hr" };
@@ -77,6 +79,9 @@ export function tidyStreaming(text: string): string {
   }
   /* A link still being written: "[label](/list" shows as its label. */
   last = last.replace(/\[([^\]\n]*)\]\([^)\n]*$/, "$1").replace(/\[([^\]\n]*)$/, "$1");
+  /* A fence still being opened ("```mes"): wait for its line to end, so a
+     message card never flashes as a block of code first. */
+  if (/^\s*```[A-Za-z]*$/.test(last)) last = "";
   /* A lone marker that has not become a bullet or a heading yet. */
   if (/^\s*(?:[-*•]|#{1,6}|\d+[.)])\s*$/.test(last)) last = "";
   lines[lines.length - 1] = last;
@@ -108,6 +113,7 @@ export function parseAnswer(source: string, options: { streaming?: boolean } = {
   let paragraph: string[] = [];
   let list: { kind: "ul"; items: ListItem[] } | { kind: "ol"; start: number; items: ListItem[] } | null = null;
   let fence: string[] | null = null;
+  let fenceIsMessage = false;
 
   const flushParagraph = () => {
     if (paragraph.length) blocks.push({ kind: "p", text: paragraph.join(" ") });
@@ -129,7 +135,7 @@ export function parseAnswer(source: string, options: { streaming?: boolean } = {
     const fenceMark = /^\s*```+\s*[A-Za-z0-9_+-]*\s*$/.test(line);
     if (fence) {
       if (fenceMark) {
-        blocks.push({ kind: "code", text: fence.join("\n") });
+        blocks.push(fenceIsMessage ? { kind: "message", text: fence.join("\n").trim() } : { kind: "code", text: fence.join("\n") });
         fence = null;
       } else {
         fence.push(raw);
@@ -139,6 +145,7 @@ export function parseAnswer(source: string, options: { streaming?: boolean } = {
     if (fenceMark) {
       flush();
       fence = [];
+      fenceIsMessage = /^\s*```+\s*message\s*$/i.test(line);
       continue;
     }
 
@@ -231,7 +238,8 @@ export function parseAnswer(source: string, options: { streaming?: boolean } = {
     flushList();
     paragraph.push(line.trim());
   }
-  if (fence) blocks.push({ kind: "code", text: fence.join("\n") });
+  /* A message still being written is drawn as its card while it arrives. */
+  if (fence) blocks.push(fenceIsMessage ? { kind: "message", text: fence.join("\n").trim() } : { kind: "code", text: fence.join("\n") });
   flush();
   return blocks;
 }
@@ -283,6 +291,7 @@ export function plainAnswer(source: string): string {
             .join("\n");
         }
         case "code":
+        case "message":
           return block.text;
         case "table":
           return [block.head, ...block.rows].map((row) => row.map(runs).join(" | ")).join("\n");

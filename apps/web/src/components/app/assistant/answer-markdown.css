@@ -110,6 +110,55 @@
     white-space: pre;
   }
 
+  /* A MESSAGE FOR THE MEMBER TO SEND: a raised card, the name small at the
+     top left, Edit, Copy and Share at the top right, the words as sent. */
+  .nf-md__msg {
+    display: grid;
+    gap: var(--nf-space-xs);
+    margin: 0;
+    padding: var(--nf-space-sm) var(--nf-space-md) var(--nf-space-md);
+    border: var(--nf-border-width) solid var(--nf-card-border);
+    border-radius: var(--nf-radius-card);
+    background: var(--nf-surface-raised);
+  }
+  .nf-md__msg-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--nf-space-sm);
+    color: var(--nf-content-secondary);
+    font-size: var(--nf-text-body-sm);
+    font-weight: 600;
+  }
+  .nf-md__msg-acts {
+    display: flex;
+    gap: var(--nf-space-3xs);
+  }
+  .nf-md__msg-btn {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border: 0;
+    border-radius: var(--nf-radius-circle);
+    background: none;
+    color: var(--nf-brand-secondary);
+    cursor: pointer;
+  }
+  .nf-md__msg-btn:hover {
+    background: color-mix(in oklab, var(--nf-brand-primary) 12%, transparent);
+  }
+  .nf-md__msg-btn:focus-visible {
+    outline: var(--nf-focus-ring-width) solid var(--nf-focus-ring);
+    outline-offset: var(--nf-focus-ring-offset);
+  }
+  .nf-md__msg-text {
+    margin: 0;
+    color: var(--nf-content-primary);
+    white-space: pre-wrap;
+    line-height: 1.6;
+  }
+
   .nf-md__quote {
     margin: 0;
     padding: var(--nf-space-2xs) 0 var(--nf-space-2xs) var(--nf-space-md);

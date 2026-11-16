@@ -491,6 +491,7 @@ export const experienceInboxEn = {
     dictate: "Dictate",
     stopDictating: "Stop dictating",
     micBlocked: "Allow the microphone to dictate.",
+    micNote: "Your browser turns your voice into words. On some browsers, Chrome among them, the sound goes to the browser's maker to do it. Nothing is sent until you press send.",
     stopAnswer: "Stop answering",
     send: "Send message",
     latest: "Go to the newest message",
