@@ -6,6 +6,11 @@ import { cleanWords } from "@/lib/intelligence/client";
 import type { IntelligenceTab, Suggestion } from "@/lib/intelligence/contract";
 import { fill, groupSuggestions, moveActive, type IntelligenceCopy } from "./model";
 import { useFinePointer, useIsMac, useRotatingHint, useSuggest } from "./use-intel";
+import { useDictation } from "@/components/app/assistant/use-dictation";
+import { banner } from "@/lib/ui/toast";
+
+/** Once per device: that the browser, not Vallo, turns the voice into words (`lib/consent/inventory.ts`). */
+const MIC_NOTE_KEY = "nf_intel_mic_note";
 
 const SUGGESTION_ICON: Record<Suggestion["kind"], UiIconName> = {
   query: "search",
@@ -69,6 +74,33 @@ export function IntelField({
   const mac = useIsMac();
   const fine = useFinePointer();
   const hint = useRotatingHint(examples.length, focused || value.length > 0);
+
+  /* Speaking a search, where the browser can turn speech into words itself
+     (the assistant's own hook). What is heard is added after what was
+     typed, and nothing is searched until the person presses Search. */
+  const spokenBase = useRef("");
+  const dictation = useDictation({
+    onText: (spoken) => {
+      const base = spokenBase.current;
+      onValueChange((base && spoken ? `${base} ${spoken}` : base || spoken).slice(0, 160));
+    },
+    onRefused: () => banner.error(copy.voice.blocked),
+  });
+  const toggleVoice = () => {
+    if (!dictation.listening) {
+      spokenBase.current = value.trim();
+      try {
+        if (!window.localStorage.getItem(MIC_NOTE_KEY)) {
+          window.localStorage.setItem(MIC_NOTE_KEY, "1");
+          banner.info(copy.voice.note);
+        }
+      } catch {
+        /* Blocked storage: the note may show again next time, which is harmless. */
+      }
+    }
+    dictation.toggle();
+    inputRef.current?.focus({ preventScroll: true });
+  };
 
   const suggest = useSuggest(value, tab, focused && !dismissed);
   const { groups, flat } = groupSuggestions(suggest.suggestions);
@@ -148,7 +180,7 @@ export function IntelField({
   const example = examples[hint] ?? examples[0] ?? "";
 
   return (
-    <div className="nf-intel-combo" data-open={open || undefined}>
+    <div className="nf-intel-combo" data-open={open || undefined} data-listening={dictation.listening || undefined}>
       <form
         ref={formRef}
         action="/intelligence"
@@ -160,6 +192,7 @@ export function IntelField({
           event.preventDefault();
           setDismissed(true);
           setActive(-1);
+          if (dictation.listening) dictation.stop();
           if (words) onSubmit(words);
         }}
       >
@@ -197,13 +230,25 @@ export function IntelField({
             data-intel-field=""
           />
           {value.length === 0 ? (
-            <span className="nf-intel-field__hint" aria-hidden="true" key={hint} data-testid="intel-hint">
-              {example}
+            <span className="nf-intel-field__hint" aria-hidden="true" key={dictation.listening ? "listening" : hint} data-testid="intel-hint">
+              {dictation.listening ? copy.voice.listening : example}
             </span>
           ) : null}
         </span>
+        {dictation.supported ? (
+          <button
+            type="button"
+            className="nf-intel-mic nf-tap"
+            aria-label={dictation.listening ? copy.voice.stop : copy.voice.start}
+            aria-pressed={dictation.listening}
+            data-testid="intel-voice"
+            onClick={toggleVoice}
+          >
+            <UiIcon name={dictation.listening ? "mic-off" : "mic"} size={20} />
+          </button>
+        ) : null}
         {value.length === 0 ? (
-          fine ? (
+          fine && !dictation.listening ? (
             <kbd className="nf-intel-kbd" aria-label={copy.shortcutLabel}>
               {mac ? copy.shortcutMac : copy.shortcutOther}
             </kbd>

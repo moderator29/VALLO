@@ -154,3 +154,24 @@ function readFine(): boolean {
 export function useFinePointer(): boolean {
   return useSyncExternalStore(noSubscribe, readFine, () => false);
 }
+
+/**
+ * Whether this element has scrolled up out of view (and not merely been
+ * left below the fold): the "Ask VALLO Intelligence" pill rises only then,
+ * so it never doubles the header's own control while that is on screen.
+ * One IntersectionObserver, no scroll listener.
+ */
+export function usePastTop(ref: { current: Element | null }): boolean {
+  const [past, setPast] = useState(false);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el || typeof IntersectionObserver === "undefined") return;
+    const observer = new IntersectionObserver(([entry]) => {
+      if (!entry) return;
+      setPast(!entry.isIntersecting && entry.boundingClientRect.top < 0);
+    });
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [ref]);
+  return past;
+}

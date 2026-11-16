@@ -31,6 +31,7 @@ const query = z
   .transform((s) => cleanQuery(s));
 
 const ISO = /^\d{4}-\d{2}-\d{2}$/;
+/* A code: an amenity ("wifi") or a listing kind ("shortlet"). */
 const AMENITY = /^[a-z][a-z0-9_-]{0,23}$/;
 
 export const suggestParams = z.object({
@@ -62,6 +63,10 @@ export const searchParams = z.object({
   out: z.string().regex(ISO).optional().catch(undefined),
   guests: z.coerce.number().int().min(1).max(30).optional().catch(undefined),
   since: z.string().regex(ISO).optional().catch(undefined),
+  /** Marketplace listing kinds the person kept or set ("hotel,shortlet"); each source keeps only the kinds it knows. */
+  types: z.string().max(200).optional(),
+  /** The leftover words the person kept as text (the "words" chip). */
+  words: z.string().max(MAX_QUERY_LENGTH * 4).optional(),
 });
 
 export type SearchParamsIn = z.infer<typeof searchParams>;
@@ -87,6 +92,14 @@ export function filtersSet(p: SearchParamsIn): Partial<Understood> | undefined {
   }
   if (p.guests !== undefined) set.guests = p.guests;
   if (p.since) set.addedSince = p.since;
+  if (p.types) {
+    const kinds = [...new Set(p.types.split(",").map((k) => k.trim().toLowerCase()).filter((k) => AMENITY.test(k)))].slice(0, 8);
+    if (kinds.length > 0) set.listingKinds = kinds;
+  }
+  if (p.words) {
+    const text = cleanQuery(p.words).slice(0, 80);
+    if (text) set.text = text;
+  }
   return Object.keys(set).length > 0 ? set : undefined;
 }
 

@@ -31,16 +31,11 @@ function Field({ field, value, onChange, otherText, onOther, disabled }: { field
           const on = chosen.includes(opt);
           return (
             <label key={opt} className="nf-cform__opt nf-tap" data-on={on || undefined}>
-              <input
-                type={many ? "checkbox" : "radio"}
-                name={name}
-                checked={on}
-                disabled={disabled}
-                onChange={() => {
-                  if (!many) onChange(opt);
-                  else onChange(on ? chosen.filter((c) => c !== opt) : [...chosen, opt]);
-                }}
-              />
+              {many ? (
+                <input type="checkbox" name={name} checked={on} disabled={disabled} onChange={() => onChange(on ? chosen.filter((c) => c !== opt) : [...chosen, opt])} />
+              ) : (
+                <input type="radio" name={name} checked={on} disabled={disabled} onChange={() => onChange(opt)} />
+              )}
               <span className="nf-cform__mark" data-kind={many ? "multi" : "single"} aria-hidden="true">
                 {on && many ? <UiIcon name="check" size={14} weight="bold" /> : null}
               </span>
@@ -80,6 +75,8 @@ function Field({ field, value, onChange, otherText, onOther, disabled }: { field
         className="nf-field nf-cform__text"
         type="number"
         inputMode="decimal"
+        enterKeyHint="done"
+        autoComplete="off"
         value={typeof value === "number" ? value : ""}
         min={field.min}
         max={field.max}
@@ -93,6 +90,9 @@ function Field({ field, value, onChange, otherText, onOther, disabled }: { field
     <input
       className="nf-field nf-cform__text"
       type={field.kind === "date" ? "date" : "text"}
+      autoComplete="off"
+      autoCapitalize="sentences"
+      enterKeyHint="done"
       value={typeof value === "string" ? value : ""}
       placeholder={field.placeholder}
       maxLength={200}

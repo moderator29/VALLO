@@ -1,11 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { useState, type MouseEvent, type ReactNode } from "react";
+import { useLayoutEffect, useRef, useState, type MouseEvent, type ReactNode, type RefObject } from "react";
 import { formatNumber, type Locale } from "@vallo/i18n/core";
 import { UiIcon } from "@/design-system/icons/UiIcon";
 import { Button, ButtonLink } from "@/components/ui/Button";
 import { State } from "@/components/ui/State";
+import { motionQuiet } from "@/lib/motion/gate";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { ResultListSkeleton } from "@/components/app/search/ResultSkeleton";
 import {
@@ -19,7 +20,8 @@ import {
 } from "@/lib/intelligence/client";
 import type { IntelligenceKind, IntelligenceResult, IntelligenceTab, SearchResponse } from "@/lib/intelligence/contract";
 import { IntelResultItem, listClassFor } from "./IntelResultItem";
-import { fill, propertiesSearchHref, understoodChips, type IntelligenceCopy } from "./model";
+import { OpenDoor } from "./IntelArt";
+import { CHIP_ICON, fill, propertiesSearchHref, understoodChips, wordOrigin, type IntelligenceCopy } from "./model";
 import "@/components/ui/underline-tabs.css";
 
 export type SearchView =
@@ -86,6 +88,8 @@ export function IntelResults({
   onRetry,
   onOpenFilters,
   onOpen,
+  fieldRef,
+  flyChipsFor = null,
 }: {
   url: IntelUrlState;
   view: SearchView;
@@ -97,8 +101,30 @@ export function IntelResults({
   onRetry: () => void;
   onOpenFilters: () => void;
   onOpen: (result: IntelligenceResult, position: number) => void;
+  /** The field, so the understood chips can rise from the words they were read from. */
+  fieldRef?: RefObject<HTMLInputElement | null>;
+  /** The search key whose chips should fly in (a search just submitted), or null. */
+  flyChipsFor?: string | null;
 }) {
   const [keptSpelling, setKeptSpelling] = useState<string | null>(null);
+  const chipRow = useRef<HTMLUListElement | null>(null);
+  const flown = useRef<string | null>(null);
+  const ready = view.status === "ready" ? view.data : null;
+
+  /* THE SIGNATURE MOMENT: the chips come out of the sentence. Each one starts
+     at the word it was read from (measured in the field's own font) and
+     settles into its place, 30ms apart, in the base duration on the entrance
+     curve (both read from the tokens). Transform and opacity only, once per
+     submitted search, never for a reader who asked for less motion. */
+  useLayoutEffect(() => {
+    if (!ready || !flyChipsFor || flown.current === flyChipsFor) return;
+    const row = chipRow.current;
+    const input = fieldRef?.current;
+    if (!row || !input) return;
+    flown.current = flyChipsFor;
+    if (motionQuiet() || typeof row.animate !== "function") return;
+    flyChips(row, input, ready.understood);
+  }, [ready, flyChipsFor, fieldRef]);
 
   if (view.status === "offline") {
     return (
@@ -181,19 +207,28 @@ export function IntelResults({
       {/* ------------------------------------------- Search understood */}
       {chips.length > 0 ? (
         <section className="nf-intel-understood" aria-labelledby="intel-understood" data-testid="intel-understood">
-          <h2 id="intel-understood" className="nf-intel-overline">
-            {copy.understood.title}
-          </h2>
-          <ul className="nf-intel-chiprow" role="list">
+          <div className="nf-intel-understood__head">
+            <h2 id="intel-understood" className="nf-intel-overline">
+              {copy.understood.title}
+            </h2>
+            {understood.via === "model" ? (
+              <span className="nf-intel-readby" data-testid="intel-read-by-model">
+                <UiIcon name="spark" size={12} />
+                {copy.thinking.readBy}
+              </span>
+            ) : null}
+          </div>
+          <ul className="nf-intel-chiprow" role="list" ref={chipRow}>
             {chips.map((chip) => (
-              <li key={chip.id}>
+              <li key={chip.id} data-chip={chip.id}>
                 <button
                   type="button"
-                  className="nf-chip nf-chip--active nf-intel-chip"
+                  className="nf-chip nf-chip--active nf-intel-chip nf-intel-chip--read"
                   aria-label={fill(copy.understood.remove, { filter: chip.label })}
                   data-testid={`intel-chip-${chip.id}`}
                   onClick={() => navigate(withoutFilters(url, chip.keys))}
                 >
+                  <UiIcon name={CHIP_ICON[chip.id] ?? "check"} size={14} className="nf-intel-chip__glyph" />
                   <span>{chip.label}</span>
                   <UiIcon name="close" size={14} />
                 </button>
@@ -344,7 +379,7 @@ export function IntelResults({
                     </Link>
                   ) : null}
                 </div>
-                <ul className={listClassFor(kind)} role="list">
+                <ul className={`${listClassFor(kind)} nf-arrive-list`} role="list">
                   {group.results.map((r, i) => item(r, gi === 0 && i === 0, true))}
                 </ul>
                 {kind === "property" ? <SeeAllProperties url={url} data={data} copy={copy} /> : null}
@@ -390,7 +425,7 @@ function FlatList({
   return (
     <div className="nf-intel-groups" data-tab={tab}>
       {runs.map((run, ri) => (
-        <ul key={`${run.kind}-${ri}`} className={listClassFor(run.kind)} role="list">
+        <ul key={`${run.kind}-${ri}`} className={`${listClassFor(run.kind)} nf-arrive-list`} role="list">
           {run.results.map((r, i) => item(r, ri === 0 && i === 0))}
         </ul>
       ))}
@@ -406,49 +441,104 @@ function SeeAllProperties({ url, data, copy }: { url: IntelUrlState; data: Searc
   );
 }
 
-/** Nothing matched: the engine's real ways forward, then the catalogue. */
+/** Nothing matched: a door left open, a warm line, the engine's real ways forward, then the catalogue. */
 function NoResults({ url, data, copy, navigate }: { url: IntelUrlState; data: SearchResponse; copy: IntelligenceCopy; navigate: (next: IntelUrlState) => void }) {
   const alternatives = (data.alternatives ?? []).filter((a) => a.query || a.href);
   return (
-    <div className="nf-intel-empty" data-testid="intel-empty">
-      <State
-        kind="empty"
-        title={fill(copy.emptyTitle, { query: url.q })}
-        body={alternatives.length > 0 ? copy.emptyBody : copy.emptyNoAlternatives}
-        action={
-          <div className="nf-intel-empty__acts">
-            {alternatives.length > 0 ? (
-              <ul className="nf-intel-chiprow" role="list">
-                {alternatives.map((alt) => (
-                  <li key={`${alt.label}|${alt.query ?? alt.href}`}>
-                    {alt.query ? (
-                      <a
-                        href={intelHref({ ...url, q: alt.query, filters: {}, drop: [] })}
-                        className="nf-chip nf-intel-chip"
-                        data-testid="intel-alternative"
-                        onClick={(event) => {
-                          if (!plainClick(event)) return;
-                          event.preventDefault();
-                          navigate({ ...url, q: alt.query!, filters: {}, drop: [] });
-                        }}
-                      >
-                        {alt.label}
-                      </a>
-                    ) : (
-                      <Link href={alt.href!} className="nf-chip nf-intel-chip" data-testid="intel-alternative">
-                        {alt.label}
-                      </Link>
-                    )}
-                  </li>
-                ))}
-              </ul>
-            ) : null}
-            <ButtonLink href="/search" variant="secondary" data-testid="intel-browse-popular">
-              {copy.browsePopular}
-            </ButtonLink>
-          </div>
-        }
-      />
+    <div className="nf-intel-empty" role="status" data-testid="intel-empty">
+      <OpenDoor />
+      <p className="nf-intel-empty__title">{fill(copy.emptyTitle, { query: url.q })}</p>
+      <p className="nf-intel-empty__warm">{copy.emptyWarm}</p>
+      <p className="nf-intel-empty__body">{alternatives.length > 0 ? copy.emptyBody : copy.emptyNoAlternatives}</p>
+      <div className="nf-intel-empty__acts">
+        {alternatives.length > 0 ? (
+          <ul className="nf-intel-chiprow nf-intel-chiprow--center" role="list">
+            {alternatives.map((alt) => (
+              <li key={`${alt.label}|${alt.query ?? alt.href}`}>
+                {alt.query ? (
+                  <a
+                    href={intelHref({ ...url, q: alt.query, filters: {}, drop: [] })}
+                    className="nf-chip nf-intel-chip"
+                    data-testid="intel-alternative"
+                    onClick={(event) => {
+                      if (!plainClick(event)) return;
+                      event.preventDefault();
+                      navigate({ ...url, q: alt.query!, filters: {}, drop: [] });
+                    }}
+                  >
+                    <UiIcon name="arrow-up-right" size={14} />
+                    {alt.label}
+                  </a>
+                ) : (
+                  <Link href={alt.href!} className="nf-chip nf-intel-chip" data-testid="intel-alternative">
+                    <UiIcon name="arrow-up-right" size={14} />
+                    {alt.label}
+                  </Link>
+                )}
+              </li>
+            ))}
+          </ul>
+        ) : null}
+        <ButtonLink href="/search" variant="secondary" data-testid="intel-browse-popular">
+          {copy.browsePopular}
+        </ButtonLink>
+      </div>
     </div>
   );
 }
+
+/* ------------------------------------------------------- the chips' flight */
+
+function tokenMs(name: string, fallback: number): number {
+  const raw = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  const n = parseFloat(raw);
+  if (!Number.isFinite(n)) return fallback;
+  return raw.endsWith("ms") ? n : raw.endsWith("s") ? n * 1000 : n;
+}
+
+let measureCtx: CanvasRenderingContext2D | null = null;
+
+/** The x of a character in the field, in the page, measured in the field's own font. */
+function caretX(input: HTMLInputElement, index: number): number {
+  const box = input.getBoundingClientRect();
+  if (index <= 0) return box.left;
+  try {
+    measureCtx ??= document.createElement("canvas").getContext("2d");
+    if (!measureCtx) return box.left;
+    const style = getComputedStyle(input);
+    measureCtx.font = `${style.fontWeight} ${style.fontSize} ${style.fontFamily}`;
+    const width = measureCtx.measureText(input.value.slice(0, index)).width;
+    return Math.min(box.right - 8, box.left + width - input.scrollLeft);
+  } catch {
+    return box.left;
+  }
+}
+
+function flyChips(row: HTMLUListElement, input: HTMLInputElement, understood: SearchResponse["understood"]) {
+  const field = input.getBoundingClientRect();
+  if (field.bottom < 0 || field.top > window.innerHeight) return;
+  const duration = tokenMs("--nf-duration-base", 240);
+  /* The fallback is the token's own value, never the browser's keyword. */
+  const easing = getComputedStyle(document.documentElement).getPropertyValue("--nf-ease-entrance").trim() || "cubic-bezier(0.16, 1, 0.3, 1)";
+  const items = [...row.querySelectorAll<HTMLLIElement>(":scope > li[data-chip]")];
+  /* Read every box first, then write: one layout read, no thrash. */
+  const plans = items.map((li) => {
+    const box = li.getBoundingClientRect();
+    const at = wordOrigin(input.value, li.dataset.chip ?? "", understood);
+    const fromX = caretX(input, Math.max(0, at));
+    const fromY = field.top + field.height / 2;
+    return { li, dx: fromX - box.left, dy: fromY - (box.top + box.height / 2) };
+  });
+  plans.forEach(({ li, dx, dy }, i) => {
+    /* Far away (the field scrolled off), a short rise reads better than a long flight. */
+    const far = Math.abs(dy) > 320;
+    li.animate(
+      [
+        { transform: far ? "translate3d(0, 12px, 0)" : `translate3d(${dx}px, ${dy}px, 0) scale(0.6)`, opacity: 0 },
+        { transform: "none", opacity: 1 },
+      ],
+      { duration, delay: Math.min(i, 5) * 30, easing, fill: "backwards" },
+    );
+  });
+}
+

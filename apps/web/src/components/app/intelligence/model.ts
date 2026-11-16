@@ -3,6 +3,9 @@ import type { IntelligenceKind, IntelligenceResult, IntelligenceTab, Suggestion,
 import type { UiIconName } from "@/design-system/icons/UiIcon";
 import type { FilterKey, IntelFilters } from "@/lib/intelligence/client";
 import { parseDiscoveryQuery, toSearchHref } from "@/lib/listings/search-params";
+import { understand } from "@/lib/intelligence/understand";
+import { placeFromLabel } from "@/lib/intelligence/places";
+import { AMENITY_WORDS, KIND_WORDS } from "@/lib/intelligence/vocabulary";
 import type { ListingKind } from "@/lib/listings/types";
 import type { PersonCardData } from "@/components/social/find/PersonCards";
 
@@ -28,6 +31,22 @@ export type UnderstoodChip = {
   label: string;
   /** What removing this chip takes away. */
   keys: FilterKey[];
+};
+
+/** The small glyph each kind of chip wears, so a reader sees what was read at a glance. */
+export const CHIP_ICON: Record<string, UiIconName> = {
+  kind: "search",
+  types: "building-apartment",
+  intent: "key",
+  beds: "bed",
+  place: "location",
+  price: "banknote",
+  furnished: "house",
+  amenities: "check",
+  dates: "calendar-check",
+  guests: "users",
+  since: "clock",
+  words: "search",
 };
 
 const NAIRA = (amount: number, locale: Locale) => formatMoney(Math.round(amount) * 100, locale);
@@ -362,4 +381,129 @@ export function assistRows({
   }
   rows.push({ id: "where", icon: "compass", title: a.whereFind, sub: a.whereFindSub, href: assistantHref(`${a.whereFindAsk}${q}`.trim()) });
   return rows;
+}
+
+/* --------------------------------------------------- the model step, honestly */
+
+/**
+ * Whether a submitted search is one the engine may hand to the model: the
+ * engine's own gate (`shouldAskModel` in `lib/intelligence/model.ts`, server
+ * side because that file carries zod), read here from the same rules
+ * (`understand`). Six words or more, no kind the rules could name, and less
+ * than 40 per cent of the words read. A plain search ("2 bed in lekki") is
+ * never one, so the "Reading your words" line never shows for it.
+ * `model.test.ts` holds the two gates to the same answers.
+ */
+export function mayAskModel(words: string): boolean {
+  if (!words.trim()) return false;
+  try {
+    const { understood, hints } = understand(words);
+    return hints.wordCount >= 6 && !understood.kind && hints.readShare < 0.4;
+  } catch {
+    return false;
+  }
+}
+
+/* --------------------------------------------------------- city postcards */
+
+/** The cities a postcard is drawn for (each has its own line drawing). */
+export const POSTCARD_CITIES = ["Lagos", "Abuja", "Port Harcourt", "Ibadan", "Enugu"] as const;
+export type PostcardCity = (typeof POSTCARD_CITIES)[number];
+
+/** The city a result's place line names ("Lekki Phase 1, Lagos" is Lagos), when it is one with a postcard. */
+export function postcardCityOf(place: string | undefined | null): PostcardCity | null {
+  if (!place) return null;
+  const parts = place.split(",").map((p) => p.trim()).filter(Boolean).reverse();
+  for (const part of parts) {
+    const hit = placeFromLabel(part);
+    if (!hit) continue;
+    const city = hit.isCity ? hit.name : hit.city;
+    return (POSTCARD_CITIES as readonly string[]).includes(city) ? (city as PostcardCity) : null;
+  }
+  return null;
+}
+
+/**
+ * The postcards worth drawing: only cities a real, newest record sits in
+ * (so a tap always finds at least that one), in the order they first
+ * appear, each once. No record, no postcard; nothing is padded out.
+ */
+export function postcardCities(results: readonly IntelligenceResult[]): PostcardCity[] {
+  const seen: PostcardCity[] = [];
+  for (const r of results) {
+    const city = postcardCityOf(r.place) ?? postcardCityOf(r.subtitle);
+    if (city && !seen.includes(city)) seen.push(city);
+  }
+  return seen;
+}
+
+/* ------------------------------------------------------- the chips' flight */
+
+const NUMBER_WORD = "(?:\\d+|one|two|three|four|five|six)";
+
+/** Where in the words a chip was read from (a character index), or -1 when it cannot be found. */
+export function wordOrigin(words: string, chipId: string, u: Understood): number {
+  const text = words.toLowerCase();
+  const find = (re: RegExp) => {
+    const m = re.exec(text);
+    return m ? m.index : -1;
+  };
+  /* The earliest of these words, whole (KIND_WORDS keys are letters, spaces and hyphens). */
+  const anyKey = (keys: readonly string[]) => {
+    let best = -1;
+    for (const key of keys) {
+      if (!/^[a-z -]+$/.test(key)) continue;
+      const at = find(new RegExp(`\\b${key}\\b`));
+      if (at >= 0 && (best < 0 || at < best)) best = at;
+    }
+    return best;
+  };
+  switch (chipId) {
+    case "beds":
+      return find(new RegExp(`${NUMBER_WORD}\\s*-?\\s*(?:bed|br\\b|bdr)`));
+    case "guests":
+      return find(new RegExp(`${NUMBER_WORD}\\s*(?:guest|people|adult|person)`));
+    case "place": {
+      const name = (u.place ?? "").split(",")[0]?.trim().toLowerCase() ?? "";
+      const at = name ? text.indexOf(name.split(" ")[0]!) : -1;
+      return at;
+    }
+    case "price":
+      return find(/(?:under|below|less than|max|over|above|between|from|budget|₦)\s*₦?\s*\d|\d+(?:\.\d+)?\s*(?:k|m|million|thousand)\b/);
+    case "kind":
+    case "types":
+      return anyKey(Object.keys(KIND_WORDS).filter((k) => KIND_WORDS[k]!.kind === u.kind));
+    case "intent":
+      return find(/\b(?:rent|buy|sale|let|lease|stay|purchase)/);
+    case "furnished":
+      return find(/\b(?:un)?furnish/);
+    case "amenities": {
+      let best = -1;
+      for (const [re] of AMENITY_WORDS) {
+        const at = find(new RegExp(re.source));
+        if (at >= 0 && (best < 0 || at < best)) best = at;
+      }
+      return best;
+    }
+    case "dates":
+      return find(/\b(?:this weekend|weekend|tonight|tomorrow|today|next week|\d{1,2}(?:st|nd|rd|th)?\s+(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec))/);
+    case "since":
+      return find(/\b(?:new|newest|latest|this week|recent)/);
+    case "words":
+      return u.text ? text.indexOf(u.text.toLowerCase().split(" ")[0]!) : -1;
+    default:
+      return -1;
+  }
+}
+
+/* -------------------------------------------------------- why it matches */
+
+/** The engine's "why" line ("2 bedrooms · Lekki · under ₦5m") as its parts, for small pills. */
+export function whyParts(why: string | undefined | null): string[] {
+  if (!why) return [];
+  return why
+    .split(/\s*[·•|]\s*/)
+    .map((part) => part.trim())
+    .filter(Boolean)
+    .slice(0, 4);
 }

@@ -38,7 +38,7 @@ export function IntelAssist({
   const rows = assistRows({ q, chips, results, place, copy });
   const tries = (alternatives ?? []).filter((alt) => alt.query).slice(0, 4);
   return (
-    <Sheet open={open} onOpenChange={onOpenChange} title={a.title} description={q ? a.lede : a.ledeEmpty} detents={[0.66]} closeLabel={copy.close} testId="intel-assist">
+    <Sheet open={open} onOpenChange={onOpenChange} title={a.title} description={q ? a.lede : a.ledeEmpty} detents={[0.66]} closeLabel={copy.close} className="nf-intel-sheet" testId="intel-assist">
       <div className="nf-intel-assist">
         <ul className="nf-intel-assist__card" role="list" data-testid="intel-assist-rows">
           {rows.map((row) => (

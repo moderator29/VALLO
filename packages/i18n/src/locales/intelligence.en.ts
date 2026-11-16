@@ -13,6 +13,52 @@ export const intelligenceEn = {
   wordmark: "Vallo",
   title: "What are you looking for?",
   lede: "Search across everything VALLO.",
+  /* The small mark over the title. */
+  mark: "VALLO Intelligence",
+  /* Over the title for a member with a first name, by the Lagos daypart. */
+  greeting: {
+    morning: "Good morning, {name}.",
+    afternoon: "Good afternoon, {name}.",
+    evening: "Good evening, {name}.",
+    night: "Good evening, {name}.",
+  },
+
+  /* Speaking a search, where the browser can turn speech into words. */
+  voice: {
+    start: "Search by voice",
+    stop: "Stop listening",
+    listening: "Listening...",
+    blocked: "Allow the microphone to search by voice.",
+    note: "Your browser turns your voice into words. On some browsers, Chrome among them, the sound goes to the browser's maker to do it. Nothing is searched until you press search.",
+  },
+
+  /* The model step, shown only while Vallo AI is reading a long search. */
+  thinking: {
+    reading: "Reading your words",
+    readBy: "Read with Vallo AI",
+  },
+
+  /* Moods: each is a search the engine reads into real filters. */
+  moods: {
+    title: "Start with a mood",
+    items: {
+      work: { label: "Work from home", query: "homes with wifi and a workspace" },
+      family: { label: "Room for family", query: "3 bedroom homes" },
+      weekend: { label: "A weekend away", query: "shortlets this weekend" },
+      pool: { label: "Pool days", query: "homes with a pool" },
+      power: { label: "Light all day", query: "homes with a generator" },
+    },
+  },
+
+  /* City postcards: only cities the newest listings are in. */
+  cities: {
+    title: "Where the new places are",
+    open: "Explore {city}",
+    explore: "Explore",
+  },
+
+  /* The pill over the tab bar on a phone. */
+  askPill: "Ask VALLO Intelligence",
 
   /* The field. */
   fieldLabel: "Search VALLO",
@@ -186,6 +232,7 @@ export const intelligenceEn = {
   goTo: "Go to",
   guide: "Guide",
   verified: "Verified",
+  whyLabel: "Why it matches",
   per: { month: "a month", year: "a year", night: "a night", once: "one-off" },
   counted: {
     follower: { one: "{count} follower", other: "{count} followers" },
@@ -205,6 +252,7 @@ export const intelligenceEn = {
   offlineTitle: "You are offline",
   offlineBody: "Search needs a connection. It will work again once you are back online.",
   emptyTitle: "No results for “{query}”",
+  emptyWarm: "Every door opens somewhere. Let us try another way in.",
   emptyBody: "Try a broader search, or one of these.",
   emptyNoAlternatives: "Try fewer words, a nearby area or a higher budget.",
   browsePopular: "Browse popular",

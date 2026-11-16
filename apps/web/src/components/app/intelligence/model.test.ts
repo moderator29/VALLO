@@ -11,7 +11,26 @@ import {
   withoutFilters,
   EMPTY_STATE,
 } from "@/lib/intelligence/client";
-import { assistRows, countPhrase, filtersOfDraft, FILTER_FIELDS, groupSuggestions, moveActive, personCardOf, priceOf, propertiesSearchHref, understoodChips } from "./model";
+import { understand } from "@/lib/intelligence/understand";
+import { shouldAskModel } from "@/lib/intelligence/model";
+import {
+  assistRows,
+  CHIP_ICON,
+  countPhrase,
+  filtersOfDraft,
+  FILTER_FIELDS,
+  groupSuggestions,
+  mayAskModel,
+  moveActive,
+  personCardOf,
+  postcardCities,
+  postcardCityOf,
+  priceOf,
+  propertiesSearchHref,
+  understoodChips,
+  whyParts,
+  wordOrigin,
+} from "./model";
 
 const copy = getDictionary("en").intelligence;
 
@@ -155,5 +174,83 @@ describe("the small decisions", () => {
       cleared: ["bedrooms", "minPrice", "furnished"],
     });
     expect(filtersOfDraft(draft, FILTER_FIELDS.restaurant)).toEqual({ set: { place: "Yaba" }, cleared: [] });
+  });
+});
+
+/* ------------------------------------------------ the creative pass, held */
+
+describe("moods are real filters", () => {
+  const read = (q: string) => understand(q, { now: new Date("2026-11-16T09:00:00+01:00") }).understood;
+  it("every mood's words read into the filters it promises, through the engine's own rules", () => {
+    const m = copy.moods.items;
+    expect(read(m.work.query)).toMatchObject({ kind: "property", amenities: expect.arrayContaining(["wifi", "workspace"]) });
+    expect(read(m.family.query)).toMatchObject({ kind: "property", bedrooms: 3 });
+    const weekend = read(m.weekend.query);
+    expect(weekend).toMatchObject({ kind: "stay", listingKinds: ["shortlet"] });
+    expect(weekend.checkIn && weekend.checkOut).toBeTruthy();
+    expect(read(m.pool.query)).toMatchObject({ kind: "property", amenities: ["pool"] });
+    expect(read(m.power.query)).toMatchObject({ kind: "property", amenities: ["generator"] });
+  });
+});
+
+describe("the thinking line is the engine's model gate, read on the screen", () => {
+  it("agrees with the engine's own gate on plain and long searches", () => {
+    const queries = [
+      "2 bed in lekki under 5m",
+      "hotels in abuja this weekend",
+      "somewhere quiet and green where my kids can play safely outside",
+      "i want a calm place close to my office with good light",
+      "restaurants with live music for a birthday dinner for ten people",
+      "lekki",
+      "",
+    ];
+    for (const q of queries) {
+      const { understood, hints } = understand(q);
+      expect(mayAskModel(q), q).toBe(q ? shouldAskModel(understood, hints) : false);
+    }
+    expect(mayAskModel("2 bed in lekki under 5m")).toBe(false);
+    expect(mayAskModel("somewhere quiet and green where my kids can play safely outside")).toBe(true);
+  });
+});
+
+describe("city postcards are drawn only for cities a real record is in", () => {
+  it("reads the city from a place line, once each, in order, and nothing else", () => {
+    expect(postcardCityOf("Lekki Phase 1, Lagos")).toBe("Lagos");
+    expect(postcardCityOf("Wuse 2, Abuja")).toBe("Abuja");
+    expect(postcardCityOf("GRA Phase 2")).toBe("Port Harcourt");
+    expect(postcardCityOf("Somewhere, Kano")).toBeNull();
+    expect(postcardCityOf(undefined)).toBeNull();
+    const fresh = [
+      { key: "a", kind: "property", title: "A", href: "/a", place: "Yaba, Lagos" },
+      { key: "b", kind: "stay", title: "B", href: "/b", place: "Lekki, Lagos" },
+      { key: "c", kind: "restaurant", title: "C", href: "/c", subtitle: "Bodija, Ibadan" },
+      { key: "d", kind: "property", title: "D", href: "/d" },
+    ] as IntelligenceResult[];
+    expect(postcardCities(fresh)).toEqual(["Lagos", "Ibadan"]);
+    expect(postcardCities([])).toEqual([]);
+  });
+});
+
+describe("the chips fly from the words they were read from", () => {
+  const words = "2 bed flat in lekki under 5m";
+  const u = understand(words).understood;
+  it("finds each chip's word, and -1 when it is not there", () => {
+    expect(wordOrigin(words, "beds", u)).toBe(0);
+    expect(wordOrigin(words, "kind", u)).toBe(words.indexOf("flat"));
+    expect(wordOrigin(words, "place", u)).toBe(words.indexOf("lekki"));
+    expect(wordOrigin(words, "price", u)).toBe(words.indexOf("under"));
+    expect(wordOrigin(words, "guests", u)).toBe(-1);
+  });
+  it("gives every chip the screen draws a glyph", () => {
+    const chips = understoodChips({ raw: "x", via: "rules", kind: "stay", intent: "stay", bedrooms: 2, place: "Lekki, Lagos", maxPrice: 1, furnished: true, amenities: ["pool"], checkIn: "2026-12-01", checkOut: "2026-12-03", guests: 2, addedSince: "2026-11-01", listingKinds: ["hotel"], text: "sea view" }, copy, "en");
+    for (const chip of chips) expect(CHIP_ICON[chip.id], chip.id).toBeTruthy();
+  });
+});
+
+describe("why it matches, as pills", () => {
+  it("splits the engine's line on its dots, and draws nothing for nothing", () => {
+    expect(whyParts("2 bedrooms · Lekki · under ₦5m")).toEqual(["2 bedrooms", "Lekki", "under ₦5m"]);
+    expect(whyParts(undefined)).toEqual([]);
+    expect(whyParts("")).toEqual([]);
   });
 });

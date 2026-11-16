@@ -27,8 +27,9 @@ import { IntelDiscover, type DiscoverView } from "./IntelDiscover";
 import { IntelResults, type SearchView } from "./IntelResults";
 import { IntelFilters } from "./IntelFilters";
 import { IntelAssist } from "./IntelAssist";
-import { understoodChips, type IntelligenceCopy } from "./model";
-import { useOnline } from "./use-intel";
+import { Aurora } from "./IntelArt";
+import { mayAskModel, understoodChips, type IntelligenceCopy } from "./model";
+import { useOnline, usePastTop } from "./use-intel";
 import "./intelligence.css";
 
 /**
@@ -69,12 +70,15 @@ export function IntelligenceScreen({
   copy,
   locale,
   signedIn,
+  greeting = null,
   initial,
   focusOnOpen = false,
 }: {
   copy: IntelligenceCopy;
   locale: Locale;
   signedIn: boolean;
+  /** "Good morning, Ada.", for a member with a first name; null for everyone else. */
+  greeting?: string | null;
   initial: IntelUrlState;
   /** Arrived from a search launcher (Home, Cmd/Ctrl+K): the caret goes straight to the field. */
   focusOnOpen?: boolean;
@@ -181,6 +185,10 @@ export function IntelligenceScreen({
   const searchController = useRef<AbortController | null>(null);
   /* The search the person just submitted: its first read says so (`submit=1`). */
   const submitted = useRef<string | null>(null);
+  /* The same, kept for drawing: the model's "Reading your words" line and the
+     chips' flight from the words both belong to a search just submitted, never
+     to a tab switch, a chip removed or a way Back. */
+  const [asked, setAsked] = useState<string | null>(null);
   const [retry, setRetry] = useState(0);
   const kept = url.q ? KEPT.get(key) : undefined;
   const view: SearchView =
@@ -260,6 +268,7 @@ export function IntelligenceScreen({
     (q: string) => {
       const next: IntelUrlState = { q, tab: url.tab, filters: {}, drop: [] };
       submitted.current = searchKey(next);
+      setAsked(searchKey(next));
       navigate(next);
       try {
         if (window.matchMedia("(pointer: coarse)").matches) inputRef.current?.blur();
@@ -330,11 +339,16 @@ export function IntelligenceScreen({
   const data = view.status === "ready" ? view.data : null;
   const chips = useMemo(() => (data ? understoodChips(data.understood, copy, locale, url.tab) : []), [data, copy, locale, url.tab]);
   const examples = copy.examples;
+  /* Honest thinking: only while a just-submitted search waits, and only when
+     the engine may be handing the words to the model (`mayAskModel`). */
+  const thinking = view.status === "loading" && asked === key && Boolean(url.q) && mayAskModel(url.q);
+  const headerRef = useRef<HTMLElement | null>(null);
+  const pastTop = usePastTop(headerRef);
   const drawerCurrent = { ...(data?.understood ?? {}), ...url.filters };
 
   return (
     <div className="nf-intel" data-state={empty ? "empty" : "results"} data-testid="intel-screen">
-      <header className="nf-intel-top">
+      <header className="nf-intel-top" ref={headerRef}>
         <span className="nf-intel-top__brand">
           <LogoWordmark width={wordmarkWidth(15)} height={15} className="nf-intel-top__word" />
           <span className="sr-only">{copy.wordmark}</span>
@@ -354,7 +368,19 @@ export function IntelligenceScreen({
       </header>
 
       {empty ? (
-        <div className="nf-intel-hero">
+        <div className="nf-intel-hero" data-testid="intel-hero">
+          <Aurora />
+          <p className="nf-intel-mark">
+            <span className="nf-intel-mark__glyph" aria-hidden="true">
+              <UiIcon name="spark" size={20} />
+            </span>
+            <span>{copy.mark}</span>
+          </p>
+          {greeting ? (
+            <p className="nf-intel-hero__greet" data-testid="intel-greeting">
+              {greeting}
+            </p>
+          ) : null}
           <h1 className="nf-intel-hero__title">{copy.title}</h1>
           <p className="nf-intel-hero__lede">{copy.lede}</p>
         </div>
@@ -373,6 +399,16 @@ export function IntelligenceScreen({
         examples={examples}
         autoFocus={focusOnOpen}
       />
+
+      {thinking ? (
+        <div className="nf-intel-thinking" role="status" data-testid="intel-thinking">
+          <span className="nf-intel-thinking__beam" aria-hidden="true" />
+          <span className="nf-intel-thinking__step">
+            <UiIcon name="spark" size={14} />
+            {copy.thinking.reading}
+          </span>
+        </div>
+      ) : null}
 
       {empty ? (
         <div className="nf-intel-cats" role="group" aria-label={copy.categoriesLabel} data-testid="intel-categories">
@@ -416,8 +452,24 @@ export function IntelligenceScreen({
           onRetry={onRetry}
           onOpenFilters={() => setFiltersOpen(true)}
           onOpen={onOpen}
+          fieldRef={inputRef}
+          flyChipsFor={asked === key ? key : null}
         />
       )}
+
+      {/* On a phone, once the header has scrolled away: the panel, one tap up. */}
+      <button
+        type="button"
+        className="nf-intel-askpill"
+        data-shown={pastTop && !assistOpen && !filtersOpen ? "true" : undefined}
+        aria-hidden={pastTop ? undefined : true}
+        tabIndex={pastTop ? undefined : -1}
+        onClick={() => setAssistOpen(true)}
+        data-testid="intel-askpill"
+      >
+        <UiIcon name="spark" size={16} />
+        <span>{copy.askPill}</span>
+      </button>
 
       <IntelFilters
         open={filtersOpen}

@@ -10,7 +10,8 @@ import { PersonRowItem } from "@/components/social/find/PersonCards";
 import { intelHref, type IntelUrlState } from "@/lib/intelligence/client";
 import type { DiscoverResponse, IntelligenceResult } from "@/lib/intelligence/contract";
 import { KIND_ICON } from "./IntelResultItem";
-import { fill, personCardOf, priceOf, type IntelligenceCopy } from "./model";
+import { CitySkyline } from "./IntelArt";
+import { fill, personCardOf, postcardCities, priceOf, type IntelligenceCopy } from "./model";
 import "@/components/app/search/search-v2.css";
 
 export type DiscoverView = { status: "loading" } | { status: "ready"; data: DiscoverResponse } | { status: "unavailable" };
@@ -29,6 +30,20 @@ function suggestedRows(copy: IntelligenceCopy): SuggestedRow[] {
     { id: "people", icon: "users", title: r.people.title, sub: r.people.sub, href: "/around/people" },
   ];
 }
+
+/**
+ * MOODS: a feeling, as a search the engine reads into real filters (wifi and
+ * a workspace, three bedrooms, this weekend's stays, a pool, a generator).
+ * `model.test.ts` holds every one to the filters it must produce, so a mood
+ * that stopped meaning a real filter fails there, not on a member's screen.
+ */
+const MOODS: { id: keyof IntelligenceCopy["moods"]["items"]; icon: UiIconName }[] = [
+  { id: "work", icon: "wifi" },
+  { id: "family", icon: "users" },
+  { id: "weekend", icon: "bed" },
+  { id: "pool", icon: "pool" },
+  { id: "power", icon: "bolt" },
+];
 
 /** How many suggested rows show before "Explore all". */
 const SUGGESTED_FIRST = 3;
@@ -66,7 +81,10 @@ export function IntelDiscover({
   const data = view.status === "ready" ? view.data : null;
   const rows = suggestedRows(copy);
   const shownRows = explore ? rows : rows.slice(0, SUGGESTED_FIRST);
-  const examples = data && data.examples.length > 0 ? data.examples.slice(0, 4) : copy.trySearching.examples;
+  /* Only the engine's own examples, known to return results today; the moods
+     above carry the fixed starting points. */
+  const examples = data ? data.examples.slice(0, 4) : [];
+  const cities = data ? postcardCities(data.fresh) : [];
   const queryLink = (q: string) => ({
     href: intelHref({ ...url, q, filters: {}, drop: [] }),
     onClick: (event: MouseEvent<HTMLAnchorElement>) => {
@@ -105,6 +123,53 @@ export function IntelDiscover({
                 >
                   <UiIcon name="close" size={16} />
                 </button>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
+
+      {/* ------------------------------------------------------------ moods */}
+      <section className="nf-intel-section" aria-labelledby="intel-moods" data-testid="intel-moods">
+        <h2 id="intel-moods" className="nf-intel-overline">
+          {copy.moods.title}
+        </h2>
+        <ul className="nf-intel-moods" role="list">
+          {MOODS.map((mood) => {
+            const m = copy.moods.items[mood.id];
+            return (
+              <li key={mood.id}>
+                <a className="nf-intel-mood" data-testid={`intel-mood-${mood.id}`} {...queryLink(m.query)}>
+                  <span className="nf-intel-mood__icon" aria-hidden="true">
+                    <UiIcon name={mood.icon} size={18} />
+                  </span>
+                  <span className="nf-intel-mood__label">{m.label}</span>
+                </a>
+              </li>
+            );
+          })}
+        </ul>
+      </section>
+
+      {/* ------------------------------------------- where the new places are */}
+      {cities.length > 0 ? (
+        <section className="nf-intel-section" aria-labelledby="intel-cities" data-testid="intel-cities">
+          <h2 id="intel-cities" className="nf-intel-overline">
+            {copy.cities.title}
+          </h2>
+          <ul className="nf-intel-postcards" role="list" data-count={cities.length}>
+            {cities.map((city) => (
+              <li key={city}>
+                <a className="nf-intel-postcard" aria-label={fill(copy.cities.open, { city })} data-testid="intel-postcard" data-city={city} {...queryLink(city)}>
+                  <CitySkyline city={city} />
+                  <span className="nf-intel-postcard__foot">
+                    <span className="nf-intel-postcard__name">{city}</span>
+                    <span className="nf-intel-postcard__go">
+                      {copy.cities.explore}
+                      <UiIcon name="arrow-right" size={14} />
+                    </span>
+                  </span>
+                </a>
               </li>
             ))}
           </ul>
@@ -156,6 +221,7 @@ export function IntelDiscover({
       </section>
 
       {/* ----------------------------------------------------- try searching */}
+      {examples.length > 0 ? (
       <section className="nf-intel-section" aria-labelledby="intel-try" data-testid="intel-try">
         <h2 id="intel-try" className="nf-intel-overline">
           {copy.trySearching.title}
@@ -171,6 +237,7 @@ export function IntelDiscover({
           ))}
         </ul>
       </section>
+      ) : null}
 
       {view.status === "loading" ? (
         <div className="nf-intel-section" aria-busy="true" data-testid="intel-discover-loading">

@@ -8,7 +8,23 @@ import { RemoteImage } from "@/components/ui/RemoteImage";
 import { SpaceCard } from "@/components/ui/space-card/SpaceCard";
 import { PersonRowItem } from "@/components/social/find/PersonCards";
 import type { IntelligenceKind, IntelligenceResult, ResultAction } from "@/lib/intelligence/contract";
-import { countPhrase, fill, personCardOf, priceOf, type IntelligenceCopy } from "./model";
+import { countPhrase, fill, personCardOf, priceOf, whyParts, type IntelligenceCopy } from "./model";
+
+/** Why it matched, as the engine said it, in small pills ("2 bedrooms", "Lekki", "under ₦5m"). */
+function WhyPills({ why, label }: { why: string | undefined; label: string }) {
+  const parts = whyParts(why);
+  if (parts.length === 0) return null;
+  return (
+    /* Spans, not a list element: a row puts these inside its link. */
+    <span className="nf-intel-why" role="list" aria-label={label} data-testid="intel-why">
+      {parts.map((part) => (
+        <span key={part} role="listitem" className="nf-intel-why__pill">
+          {part}
+        </span>
+      ))}
+    </span>
+  );
+}
 
 export const KIND_ICON: Record<IntelligenceKind, UiIconName> = {
   place: "location",
@@ -120,16 +136,18 @@ export function IntelResultItem({
           price={price ? { amount: <span className="nf-numeric">{price.amount}</span>, unit: price.unit } : null}
           facts={facts}
           factsIcon={result.kind === "stay" ? "bed" : "house"}
-          reason={result.why ?? null}
-          reasonIcon="search"
+          reason={null}
           extra={
-            /* The record's own line ("Example listing. Not available."), said
-               plainly under the facts whenever the place took the place line. */
-            result.subtitle && result.place && result.subtitle !== result.place ? (
-              <p className="nf-sc__sub" data-testid="intel-result-sub">
-                {result.subtitle}
-              </p>
-            ) : null
+            <>
+              {/* The record's own line ("Example listing. Not available."), said
+                  plainly under the facts whenever the place took the place line. */}
+              {result.subtitle && result.place && result.subtitle !== result.place ? (
+                <p className="nf-sc__sub" data-testid="intel-result-sub">
+                  {result.subtitle}
+                </p>
+              ) : null}
+              <WhyPills why={result.why} label={copy.whyLabel} />
+            </>
           }
           footer={extraActions(result).length > 0 ? <Actions result={result} /> : null}
           eager={eager}
@@ -168,7 +186,7 @@ export function IntelResultItem({
           </span>
           {result.subtitle ? <span className="nf-intel-row__sub">{result.subtitle}</span> : null}
           {meta.length > 0 ? <span className="nf-intel-row__meta nf-numeric">{meta.join(" · ")}</span> : null}
-          {result.why ? <span className="nf-intel-row__why">{result.why}</span> : null}
+          <WhyPills why={result.why} label={copy.whyLabel} />
         </span>
         <UiIcon name="chevron-right" size={18} className="nf-intel-row__chevron" />
       </Link>

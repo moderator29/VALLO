@@ -86,6 +86,7 @@ export const STORAGE_INVENTORY: readonly StorageItem[] = [
   { id: "ai-prefs", name: "nf_ai_prefs", kind: "localStorage", category: "necessary", purpose: "Your assistant settings on this device.", lifetime: DEVICE },
   { id: "ai-handoff", name: "nf_ai_handoff", kind: "sessionStorage", category: "necessary", purpose: "Carries your question from one screen to the assistant.", lifetime: SESSION },
   { id: "ai-mic-note", name: "nf_ai_mic_note", kind: "localStorage", category: "necessary", purpose: "That you have seen the note about speaking to the assistant, so it shows once.", lifetime: DEVICE },
+  { id: "intel-mic-note", name: "nf_intel_mic_note", kind: "localStorage", category: "necessary", purpose: "That you have seen the note about searching by voice on VALLO Intelligence, so it shows once.", lifetime: DEVICE },
   { id: "people-recent", name: "nf_people_recent", kind: "localStorage", category: "necessary", purpose: "Your recent searches on Find people, on this device only.", lifetime: DEVICE },
   { id: "copilot-chat", name: "vallo.copilot.*", kind: "sessionStorage", category: "necessary", purpose: "Staff only: the console copilot conversation open in this tab.", lifetime: SESSION },
   { id: "copilot-prefs", name: "vallo.copilot.*", kind: "localStorage", category: "necessary", purpose: "Staff only: the console copilot's settings, pinned chats and own quick commands.", lifetime: DEVICE },

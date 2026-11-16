@@ -13,6 +13,8 @@
 @layer components {
   /* ============================================================ the page */
   .nf-intel {
+    position: relative;
+    isolation: isolate;
     display: grid;
     gap: var(--nf-space-md);
     inline-size: 100%;
@@ -73,10 +75,128 @@
     outline-offset: var(--nf-focus-ring-offset);
   }
 
+  /* ======================================================== the hero
+     The signature: the brand's light behind the title. Three soft blooms
+     (radial gradients of the brand's own blues, never a picture) and a film
+     of grain, masked so the light has no edges; they drift into place once
+     on arrival and then hold still. Over it, the spark draws itself in. */
   .nf-intel-hero {
+    position: relative;
+    isolation: isolate;
     display: grid;
     gap: var(--nf-space-2xs);
-    margin-block-start: var(--nf-space-lg);
+    margin-block-start: var(--nf-space-md);
+    padding-block: var(--nf-space-lg) var(--nf-space-xs);
+  }
+  .nf-intel-aurora {
+    --nf-intel-glow-a: color-mix(in oklab, var(--nf-brand-primary) 46%, transparent);
+    --nf-intel-glow-b: color-mix(in oklab, var(--nf-brand-accent) 30%, transparent);
+    --nf-intel-glow-c: color-mix(in oklab, var(--nf-brand-quiet) 26%, transparent);
+    position: absolute;
+    z-index: -1;
+    inset-block: calc(var(--nf-space-3xl) * -1.5) calc(var(--nf-space-xl) * -1);
+    inset-inline: calc(var(--nf-pad-shell) * -1);
+    overflow: clip;
+    pointer-events: none;
+    /* Feathered to nothing at every edge, so the light never shows a box. */
+    -webkit-mask-image: radial-gradient(closest-side at 46% 50%, var(--nf-content-primary) 35%, transparent);
+    mask-image: radial-gradient(closest-side at 46% 50%, var(--nf-content-primary) 35%, transparent);
+  }
+  /* Wide screens have room beside the column: the light spreads into it. */
+  @media (min-width: 64rem) {
+    .nf-intel-aurora {
+      inset-inline: -6rem;
+    }
+  }
+  :root[data-theme="light"] .nf-intel-aurora {
+    --nf-intel-glow-a: color-mix(in oklab, var(--nf-brand-primary) 17%, transparent);
+    --nf-intel-glow-b: color-mix(in oklab, var(--nf-brand-accent) 12%, transparent);
+    --nf-intel-glow-c: color-mix(in oklab, var(--nf-brand-quiet) 12%, transparent);
+  }
+  .nf-intel-aurora__bloom {
+    position: absolute;
+    aspect-ratio: 1.6;
+    border-radius: var(--nf-radius-circle);
+    animation: nf-intel-drift var(--nf-duration-cinematic) var(--nf-ease-entrance) both;
+  }
+  .nf-intel-aurora__bloom--a {
+    inset-block-start: 14%;
+    inset-inline-start: 6%;
+    inline-size: 64%;
+    background: radial-gradient(closest-side, var(--nf-intel-glow-a), transparent);
+    --nf-intel-from: translate3d(-8%, 6%, 0) scale(0.9);
+  }
+  .nf-intel-aurora__bloom--b {
+    inset-block-start: 6%;
+    inset-inline-end: 6%;
+    inline-size: 52%;
+    background: radial-gradient(closest-side, var(--nf-intel-glow-b), transparent);
+    --nf-intel-from: translate3d(10%, -4%, 0) scale(0.92);
+    animation-delay: 60ms;
+  }
+  .nf-intel-aurora__bloom--c {
+    inset-block-end: 4%;
+    inset-inline-start: 24%;
+    inline-size: 58%;
+    background: radial-gradient(closest-side, var(--nf-intel-glow-c), transparent);
+    --nf-intel-from: translate3d(0, 10%, 0) scale(0.94);
+    animation-delay: 120ms;
+  }
+  /* The film: a tiny tile of fractal noise, the same recipe as the app's grain. */
+  .nf-intel-aurora__grain {
+    position: absolute;
+    inset: 0;
+    opacity: 0.09;
+    mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-size: 140px 140px;
+  }
+  :root[data-theme="light"] .nf-intel-aurora__grain {
+    opacity: 0.05;
+    mix-blend-mode: soft-light;
+  }
+
+  /* The mark over the title: the spark, drawn in once, on a small glass bead. */
+  .nf-intel-mark {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--nf-space-xs);
+    margin: 0 0 var(--nf-space-xs);
+    color: var(--nf-content-link);
+    font-size: var(--nf-text-overline);
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    line-height: 1.3;
+    text-transform: uppercase;
+  }
+  .nf-intel-mark__glyph {
+    display: grid;
+    place-items: center;
+    inline-size: 2.25rem;
+    block-size: 2.25rem;
+    border: var(--nf-border-width) solid color-mix(in oklab, var(--nf-brand-primary) 34%, transparent);
+    border-radius: var(--nf-radius-circle);
+    background: color-mix(in oklab, var(--nf-brand-primary) 14%, transparent);
+    box-shadow: var(--nf-glow-accent);
+  }
+  .nf-intel-mark__glyph path {
+    stroke-dasharray: 72;
+    stroke-dashoffset: 0;
+    animation: nf-intel-draw var(--nf-duration-cinematic) var(--nf-ease-entrance) both;
+  }
+  /* Once, each time the field takes the caret: the mark breathes in. */
+  .nf-intel:has(.nf-intel-field__input:focus) .nf-intel-mark__glyph {
+    animation: nf-intel-breathe var(--nf-duration-deliberate) var(--nf-ease-standard) 1;
+  }
+
+  .nf-intel-hero__greet {
+    margin: 0;
+    color: var(--nf-content-link);
+    font-family: var(--nf-font-display);
+    font-size: var(--nf-text-body-lg);
+    font-weight: 600;
+    line-height: 1.35;
+    animation: nf-intel-rise var(--nf-duration-slow) var(--nf-ease-entrance) both;
   }
   .nf-intel-hero__title {
     margin: 0;
@@ -168,6 +288,7 @@
     }
   }
   .nf-intel-clear,
+  .nf-intel-mic,
   .nf-intel-go {
     display: grid;
     flex: none;
@@ -182,20 +303,34 @@
       background-color var(--nf-duration-fast) var(--nf-ease-standard),
       scale var(--nf-duration-press) var(--nf-ease-press);
   }
-  .nf-intel-clear {
+  .nf-intel-clear,
+  .nf-intel-mic {
     background: transparent;
     color: var(--nf-content-muted);
+  }
+  .nf-intel-mic {
+    color: var(--nf-content-link);
+  }
+  .nf-intel-mic[aria-pressed="true"] {
+    background: var(--nf-brand-primary);
+    color: var(--nf-content-on-brand);
+  }
+  /* Listening: the field glows with the brand's light (not a focus edge). */
+  .nf-intel-combo[data-listening] .nf-intel-field {
+    box-shadow: var(--nf-glow-accent);
   }
   .nf-intel-go {
     background: var(--nf-brand-primary);
     color: var(--nf-content-on-brand);
   }
   .nf-intel-clear:active,
+  .nf-intel-mic:active,
   .nf-intel-go:active {
     scale: var(--nf-press-scale);
   }
   @media (hover: hover) {
-    .nf-intel-clear:hover {
+    .nf-intel-clear:hover,
+    .nf-intel-mic:not([aria-pressed="true"]):hover {
       background: var(--nf-brand-tint-1);
     }
     .nf-intel-go:hover {
@@ -203,6 +338,7 @@
     }
   }
   .nf-intel-clear:focus-visible,
+  .nf-intel-mic:focus-visible,
   .nf-intel-go:focus-visible {
     outline: var(--nf-focus-ring-width) solid var(--nf-focus-ring);
     outline-offset: var(--nf-focus-ring-offset);
@@ -326,6 +462,17 @@
   .nf-intel-chip > span {
     overflow: hidden;
     text-overflow: ellipsis;
+  }
+  .nf-intel-chip__glyph {
+    flex: none;
+    opacity: 0.85;
+  }
+  .nf-intel-chiprow > li {
+    min-inline-size: 0;
+    max-inline-size: 100%;
+  }
+  .nf-intel-chiprow--center {
+    justify-content: center;
   }
 
   .nf-intel-rule {
@@ -557,11 +704,6 @@
     text-overflow: ellipsis;
     white-space: nowrap;
   }
-  .nf-intel-row__why {
-    color: var(--nf-content-link);
-    font-size: var(--nf-text-caption);
-    line-height: 1.35;
-  }
   .nf-intel-row__chevron {
     flex: none;
     color: var(--nf-content-muted);
@@ -589,6 +731,24 @@
   .nf-intel-understood {
     display: grid;
     gap: var(--nf-space-xs);
+  }
+  .nf-intel-understood__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--nf-space-xs);
+  }
+  .nf-intel-readby {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--nf-space-3xs);
+    padding: var(--nf-space-3xs) var(--nf-space-xs);
+    border-radius: var(--nf-radius-pill);
+    background: color-mix(in oklab, var(--nf-brand-primary) 12%, transparent);
+    color: var(--nf-content-link);
+    font-size: var(--nf-text-caption);
+    font-weight: 600;
   }
   .nf-intel-understood__acts {
     display: flex;
@@ -673,9 +833,46 @@
   .nf-intel-more {
     padding-block-start: var(--nf-space-xs);
   }
+  /* Nothing matched: the open door, a warm line, and the real ways forward. */
+  .nf-intel-empty {
+    display: grid;
+    justify-items: center;
+    gap: var(--nf-space-2xs);
+    padding-block: var(--nf-space-lg) var(--nf-space-md);
+    text-align: center;
+  }
+  .nf-intel-empty__art {
+    inline-size: min(13rem, 70%);
+    block-size: auto;
+    margin-block-end: var(--nf-space-sm);
+    color: var(--nf-content-link);
+  }
+  .nf-intel-empty__title {
+    margin: 0;
+    color: var(--nf-content-primary);
+    font-family: var(--nf-font-display);
+    font-size: var(--nf-text-h3);
+    font-weight: 700;
+    line-height: 1.25;
+    text-wrap: balance;
+    overflow-wrap: break-word;
+  }
+  .nf-intel-empty__warm {
+    margin: 0;
+    color: var(--nf-content-link);
+    font-size: var(--nf-text-body);
+    font-weight: 600;
+  }
+  .nf-intel-empty__body {
+    margin: 0;
+    color: var(--nf-content-muted);
+    font-size: var(--nf-text-body-sm);
+  }
   .nf-intel-empty__acts {
     display: grid;
+    justify-items: center;
     gap: var(--nf-space-sm);
+    margin-block-start: var(--nf-space-sm);
   }
   .nf-intel-fade {
     animation: nf-intel-fade var(--nf-duration-base) var(--nf-ease-entrance) both;
@@ -793,6 +990,361 @@
     color: var(--nf-content-link);
   }
 
+  /* ================================================ thinking (model only)
+     A slim line of brand light under the field and the real step, shown
+     only while a long search waits on the model (`mayAskModel`). It waits a
+     beat before it shows, so an answer that comes quickly never flashes it,
+     and the light grows most of the way across once, like a page loading;
+     it never loops. */
+  .nf-intel-thinking {
+    display: grid;
+    gap: var(--nf-space-2xs);
+    margin-block-start: calc(var(--nf-space-xs) * -1);
+    animation: nf-intel-fade var(--nf-duration-fast) var(--nf-ease-entrance) 250ms both;
+  }
+  .nf-intel-thinking__beam {
+    display: block;
+    block-size: 2px;
+    border-radius: var(--nf-radius-pill);
+    background: linear-gradient(90deg, transparent, var(--nf-brand-primary) 30%, var(--nf-brand-accent) 80%, transparent);
+    transform-origin: left center;
+    animation: nf-intel-beam calc(var(--nf-duration-cinematic) * 7) var(--nf-ease-entrance) both;
+  }
+  .nf-intel-thinking__step {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--nf-space-2xs);
+    color: var(--nf-content-link);
+    font-size: var(--nf-text-caption);
+    font-weight: 600;
+  }
+
+  /* ================================================================ moods */
+  .nf-intel-moods {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--nf-space-xs);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  @media (max-width: 39.999rem) {
+    .nf-intel-moods {
+      flex-wrap: nowrap;
+      margin-inline: calc(var(--nf-pad-shell) * -1);
+      padding-inline: var(--nf-pad-shell);
+      overflow-x: auto;
+      overscroll-behavior-x: contain;
+      scrollbar-width: none;
+    }
+    .nf-intel-moods::-webkit-scrollbar {
+      display: none;
+    }
+    .nf-intel-moods > li {
+      flex: none;
+    }
+  }
+  .nf-intel-mood {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--nf-space-xs);
+    min-block-size: 2.75rem;
+    padding-inline: var(--nf-space-3xs) var(--nf-space-sm);
+    border: var(--nf-border-width) solid color-mix(in oklab, var(--nf-brand-primary) 22%, var(--nf-card-border));
+    border-radius: var(--nf-radius-pill);
+    background: linear-gradient(135deg, color-mix(in oklab, var(--nf-brand-primary) 12%, var(--nf-surface-primary)), var(--nf-surface-primary));
+    color: var(--nf-content-primary);
+    font-size: var(--nf-text-body-sm);
+    font-weight: 600;
+    text-decoration: none;
+    white-space: nowrap;
+    transition:
+      transform var(--nf-duration-fast) var(--nf-ease-standard),
+      scale var(--nf-duration-press) var(--nf-ease-press);
+  }
+  .nf-intel-mood__icon {
+    display: grid;
+    place-items: center;
+    inline-size: 2.25rem;
+    block-size: 2.25rem;
+    flex: none;
+    border-radius: var(--nf-radius-circle);
+    background: color-mix(in oklab, var(--nf-brand-primary) 16%, transparent);
+    color: var(--nf-content-link);
+  }
+  /* Wide: five small tiles in one row, the glyph over the words. */
+  @media (min-width: 40rem) {
+    .nf-intel-moods {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+    }
+    .nf-intel-mood {
+      flex-direction: column;
+      justify-content: center;
+      gap: var(--nf-space-2xs);
+      inline-size: 100%;
+      min-block-size: 5.5rem;
+      padding: var(--nf-space-sm) var(--nf-space-xs);
+      border-radius: var(--nf-radius-card);
+      background: linear-gradient(160deg, color-mix(in oklab, var(--nf-brand-primary) 14%, var(--nf-surface-primary)), var(--nf-surface-primary) 75%);
+      text-align: center;
+      white-space: normal;
+    }
+  }
+  @media (hover: hover) {
+    .nf-intel-mood:hover {
+      transform: translate3d(0, -2px, 0);
+    }
+  }
+  .nf-intel-mood:active {
+    scale: var(--nf-press-scale);
+  }
+  .nf-intel-mood:focus-visible {
+    outline: var(--nf-focus-ring-width) solid var(--nf-focus-ring);
+    outline-offset: var(--nf-focus-ring-offset);
+  }
+
+  /* ======================================================== city postcards
+     A small picture of each city the newest listings are in, drawn in the
+     brand's ink on a sky of the brand's own light. */
+  .nf-intel-postcards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(13.5rem, 1fr));
+    gap: var(--nf-space-sm);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  @media (max-width: 39.999rem) {
+    .nf-intel-postcards {
+      display: flex;
+      margin-inline: calc(var(--nf-pad-shell) * -1);
+      padding-inline: var(--nf-pad-shell);
+      overflow-x: auto;
+      overscroll-behavior-x: contain;
+      scroll-snap-type: x mandatory;
+      scroll-padding-inline: var(--nf-pad-shell);
+      scrollbar-width: none;
+    }
+    .nf-intel-postcards::-webkit-scrollbar {
+      display: none;
+    }
+    .nf-intel-postcards > li {
+      flex: none;
+      inline-size: min(16rem, 72vw);
+      scroll-snap-align: start;
+    }
+    .nf-intel-postcards[data-count="1"] > li {
+      inline-size: 100%;
+    }
+  }
+  .nf-intel-postcard {
+    position: relative;
+    isolation: isolate;
+    display: grid;
+    overflow: clip;
+    border: var(--nf-border-width) solid color-mix(in oklab, var(--nf-brand-primary) 24%, var(--nf-card-border));
+    border-radius: var(--nf-radius-card);
+    background:
+      radial-gradient(90% 70% at 80% 0%, color-mix(in oklab, var(--nf-brand-accent) 18%, transparent), transparent 70%),
+      linear-gradient(180deg, color-mix(in oklab, var(--nf-brand-primary) 16%, var(--nf-surface-primary)), var(--nf-surface-primary));
+    color: var(--nf-content-link);
+    text-decoration: none;
+    transition: scale var(--nf-duration-press) var(--nf-ease-press);
+  }
+  .nf-intel-postcard::after {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    inset: 0;
+    border-radius: inherit;
+    box-shadow: var(--nf-glow-accent);
+    opacity: 0;
+    transition: opacity var(--nf-duration-fast) var(--nf-ease-standard);
+    pointer-events: none;
+  }
+  .nf-intel-postcard__art {
+    display: block;
+    inline-size: 100%;
+    block-size: auto;
+    aspect-ratio: 2;
+    padding: var(--nf-space-sm) var(--nf-space-sm) 0;
+    transition: transform var(--nf-duration-slow) var(--nf-ease-standard);
+  }
+  .nf-intel-postcard__foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--nf-space-xs);
+    min-block-size: 2.75rem;
+    padding: var(--nf-space-2xs) var(--nf-space-md) var(--nf-space-sm);
+    border-block-start: var(--nf-border-width) solid var(--nf-panel-hair);
+  }
+  .nf-intel-postcard__name {
+    color: var(--nf-content-primary);
+    font-family: var(--nf-font-display);
+    font-size: var(--nf-text-body-lg);
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+  .nf-intel-postcard__go {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--nf-space-3xs);
+    color: var(--nf-content-link);
+    font-size: var(--nf-text-caption);
+    font-weight: 600;
+  }
+  @media (hover: hover) {
+    .nf-intel-postcard:hover::after {
+      opacity: 1;
+    }
+    .nf-intel-postcard:hover .nf-intel-postcard__art {
+      transform: translate3d(0, -3px, 0) scale(1.02);
+    }
+  }
+  .nf-intel-postcard:active {
+    scale: var(--nf-press-scale);
+  }
+  .nf-intel-postcard:focus-visible {
+    outline: var(--nf-focus-ring-width) solid var(--nf-focus-ring);
+    outline-offset: var(--nf-focus-ring-offset);
+  }
+  .nf-intel-postcard:focus-visible::after {
+    opacity: 1;
+  }
+
+  /* The drawings' inks: the line, a quieter line, a wash, the sun. */
+  .nf-intel-art {
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .nf-intel-art__ink {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.5;
+  }
+  .nf-intel-art__soft {
+    fill: none;
+    stroke: color-mix(in oklab, currentColor 45%, transparent);
+    stroke-width: 1.25;
+  }
+  .nf-intel-art__fill {
+    fill: color-mix(in oklab, var(--nf-brand-primary) 16%, transparent);
+    stroke: none;
+  }
+  .nf-intel-art__sun {
+    fill: color-mix(in oklab, var(--nf-brand-accent) 26%, transparent);
+    stroke: var(--nf-brand-accent);
+    stroke-width: 1.25;
+  }
+
+  /* ===================================================== results, the art */
+  /* Why it matched: the engine's own words, as small pills. */
+  .nf-intel-why {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--nf-space-3xs);
+    margin-block-start: var(--nf-space-2xs);
+  }
+  .nf-intel-why__pill {
+    padding: var(--nf-space-3xs) var(--nf-space-xs);
+    border-radius: var(--nf-radius-pill);
+    background: color-mix(in oklab, var(--nf-brand-primary) 12%, transparent);
+    color: var(--nf-content-link);
+    font-size: var(--nf-text-caption);
+    font-weight: 600;
+    line-height: 1.3;
+    white-space: nowrap;
+  }
+
+  /* The card under the pointer or the keyboard wears the brand's light. */
+  .nf-intel-cards > li {
+    position: relative;
+    isolation: isolate;
+  }
+  .nf-intel-cards > li::after {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    inset: 0;
+    border-radius: var(--nf-radius-island);
+    box-shadow: var(--nf-glow-accent);
+    opacity: 0;
+    transition: opacity var(--nf-duration-fast) var(--nf-ease-standard);
+    pointer-events: none;
+  }
+  .nf-intel-cards > li:focus-within::after {
+    opacity: 1;
+  }
+  @media (hover: hover) {
+    .nf-intel-cards > li:hover::after {
+      opacity: 1;
+    }
+  }
+  /* The photos develop a beat after their card lands, in the list's own order. */
+  .nf-intel-cards.nf-arrive-list > li img {
+    animation: nf-intel-develop var(--nf-duration-slow) var(--nf-ease-entrance) both;
+    animation-delay: calc(80ms + var(--nf-arrive-i, 5) * 40ms);
+  }
+
+  /* ============================================ the pill over the tab bar */
+  .nf-intel-askpill {
+    position: fixed;
+    z-index: 30;
+    inset-inline-start: 50%;
+    bottom: calc(var(--nf-tabbar-clearance, calc(var(--nf-space-md) + env(safe-area-inset-bottom, 0px))) + var(--nf-space-2xs));
+    display: inline-flex;
+    align-items: center;
+    gap: var(--nf-space-xs);
+    min-block-size: 2.75rem;
+    padding-inline: var(--nf-space-md);
+    border: var(--nf-border-width) solid color-mix(in oklab, var(--nf-content-on-brand) 22%, transparent);
+    border-radius: var(--nf-radius-pill);
+    background: linear-gradient(135deg, var(--nf-brand-primary), var(--nf-brand-primary-strong));
+    color: var(--nf-content-on-brand);
+    font-size: var(--nf-text-body-sm);
+    font-weight: 600;
+    white-space: nowrap;
+    box-shadow: var(--nf-glow-accent);
+    cursor: pointer;
+    opacity: 0;
+    pointer-events: none;
+    transform: translate3d(-50%, 12px, 0);
+    transition:
+      opacity var(--nf-duration-base) var(--nf-ease-standard),
+      transform var(--nf-duration-base) var(--nf-ease-entrance);
+  }
+  .nf-intel-askpill[data-shown="true"] {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translate3d(-50%, 0, 0);
+  }
+  .nf-intel-askpill:focus-visible {
+    outline: var(--nf-focus-ring-width) solid var(--nf-focus-ring);
+    outline-offset: var(--nf-focus-ring-offset);
+  }
+  @media (min-width: 40rem) {
+    .nf-intel-askpill {
+      display: none;
+    }
+  }
+  :root[data-keyboard="open"] .nf-intel-askpill {
+    display: none;
+  }
+
+  /* ==================================== the two sheets, on Paper (light)
+     The app's sheet is plain white on Paper; these two wear the brand's
+     light instead: a faint blue morning at the top, settling into the page.
+     Tokens only, scoped to these sheets. Night keeps its navy glass. */
+  :root[data-theme="light"] .nf-intel-sheet {
+    --nf-panel-fill:
+      radial-gradient(120% 55% at 100% 0%, color-mix(in oklab, var(--nf-brand-primary) 13%, transparent), transparent 70%),
+      radial-gradient(80% 40% at 0% 0%, color-mix(in oklab, var(--nf-brand-accent) 8%, transparent), transparent 70%),
+      linear-gradient(color-mix(in oklab, var(--nf-brand-primary) 5%, var(--nf-surface-primary)), var(--nf-surface-primary) 60%);
+    --nf-tier-sheet-edge: color-mix(in oklab, var(--nf-brand-primary) 22%, transparent);
+  }
+
   /* ============================================================ motion */
   @keyframes nf-intel-rise {
     from {
@@ -811,20 +1363,89 @@
       transform: translate3d(0, -4px, 0);
     }
   }
+  @keyframes nf-intel-drift {
+    from {
+      opacity: 0;
+      transform: var(--nf-intel-from, none);
+    }
+  }
+  @keyframes nf-intel-draw {
+    from {
+      stroke-dashoffset: 72;
+    }
+  }
+  @keyframes nf-intel-breathe {
+    50% {
+      transform: scale(1.14);
+    }
+  }
+  @keyframes nf-intel-beam {
+    from {
+      transform: scaleX(0.04);
+    }
+    to {
+      transform: scaleX(0.92);
+    }
+  }
+  @keyframes nf-intel-develop {
+    from {
+      opacity: 0;
+      transform: scale(1.04);
+    }
+  }
   @media (prefers-reduced-motion: reduce) {
     .nf-intel,
     .nf-intel-section,
     .nf-intel-field__hint,
     .nf-intel-suggest,
     .nf-intel-fade,
-    .nf-intel-launch__hint {
+    .nf-intel-launch__hint,
+    .nf-intel-aurora__bloom,
+    .nf-intel-mark__glyph,
+    .nf-intel-mark__glyph path,
+    .nf-intel-hero__greet,
+    .nf-intel-thinking,
+    .nf-intel-thinking__beam,
+    .nf-intel-cards.nf-arrive-list > li img {
       animation: none;
     }
+    .nf-intel:has(.nf-intel-field__input:focus) .nf-intel-mark__glyph {
+      animation: none;
+    }
+    .nf-intel-askpill,
+    .nf-intel-mood,
+    .nf-intel-postcard__art {
+      transition: none;
+    }
   }
-  :root[data-motion="off"] :is(.nf-intel, .nf-intel-section, .nf-intel-field__hint, .nf-intel-suggest, .nf-intel-fade, .nf-intel-launch__hint) {
+  :root[data-motion="off"]
+    :is(
+      .nf-intel,
+      .nf-intel-section,
+      .nf-intel-field__hint,
+      .nf-intel-suggest,
+      .nf-intel-fade,
+      .nf-intel-launch__hint,
+      .nf-intel-aurora__bloom,
+      .nf-intel-mark__glyph,
+      .nf-intel-mark__glyph path,
+      .nf-intel-hero__greet,
+      .nf-intel-thinking,
+      .nf-intel-thinking__beam,
+      .nf-intel-cards.nf-arrive-list > li img
+    ) {
     animation: none;
   }
-  :root[data-motion="calm"] :is(.nf-intel, .nf-intel-section, .nf-intel-suggest) {
+  :root[data-motion="off"] .nf-intel:has(.nf-intel-field__input:focus) .nf-intel-mark__glyph {
+    animation: none;
+  }
+  :root[data-motion="calm"] :is(.nf-intel, .nf-intel-section, .nf-intel-suggest, .nf-intel-hero__greet, .nf-intel-aurora__bloom) {
     animation-name: nf-intel-fade;
+  }
+  :root[data-motion="calm"] :is(.nf-intel-mark__glyph path, .nf-intel-cards.nf-arrive-list > li img) {
+    animation: none;
+  }
+  :root[data-motion="calm"] .nf-intel:has(.nf-intel-field__input:focus) .nf-intel-mark__glyph {
+    animation: none;
   }
 }

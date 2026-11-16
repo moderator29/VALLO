@@ -88,6 +88,12 @@ describe("search", () => {
     expect(input.drop).toEqual(["bedrooms", "place"]);
     expect(input.set).toEqual({ bedrooms: 3, maxPrice: 5_000_000, place: "Victoria Island, Lagos", amenities: ["pool"] });
   });
+
+  it("reads the listing kinds (`types`) and the kept words (`words`) the screen sends, cleaned", async () => {
+    await search(new Request(`https://x.test/api/intelligence/search?q=hotels&types=hotel,Shortlet,${encodeURIComponent("DROP TABLE")}&words=${encodeURIComponent("sea\u0000 view")}`));
+    const input = runSearch.mock.calls[0]![0] as unknown as { set: Record<string, unknown> };
+    expect(input.set).toEqual({ listingKinds: ["hotel", "shortlet"], text: "sea view" });
+  });
 });
 
 describe("suggest", () => {

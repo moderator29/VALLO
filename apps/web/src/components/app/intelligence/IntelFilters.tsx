@@ -63,6 +63,7 @@ export function IntelFilters({
           onOpenChange(false);
         },
       }}
+      className="nf-intel-sheet"
       testId="intel-filters"
     >
       <div className="nf-intel-filters">
