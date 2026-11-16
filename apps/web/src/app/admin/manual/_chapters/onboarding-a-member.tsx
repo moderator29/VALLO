@@ -18,6 +18,9 @@ import { A, type ManualBody } from "./parts";
  * routes under `app/(auth)`, the profile and settings routes, the phone gate
  * (`lib/phone-otp/core.ts` and `gate.ts`, whose rule is quoted here), the
  * stays and table flows, and the member documents in `app/(site)/docs`.
+ * On 16 November 2026 VALLO Intelligence was added from its own code
+ * (`app/(app)/intelligence`, `components/app/intelligence`, `lib/intelligence`)
+ * and its four ways in.
  */
 
 /**
@@ -101,6 +104,7 @@ export const ONBOARDING_A_MEMBER: ManualBody = {
     "A member outside Nigeria is not asked for a phone at all while codes cannot be sent out of the country. Nothing blocks them.",
     "Naira is the price. Other currencies are a reading guide beside it, never what anybody pays.",
     "Marketing messages are off until a member turns them on.",
+    "A member who cannot find something starts in VALLO Intelligence: the menu, the + Create sheet, Home, or Ctrl K on a computer.",
     "Never tell one member anything about another. Use a reference or a count.",
   ],
   sections: [
@@ -116,7 +120,7 @@ export const ONBOARDING_A_MEMBER: ManualBody = {
               { icon: "user", title: "Sign up", href: "/sign-up", outcome: "Email and a password, or Google. Apple where it is switched on." },
               { icon: "mail", title: "Open the email", outcome: "With email, they confirm from the message we send. The account is then ready." },
               { icon: "user-pen", title: "Their profile", href: "/profile", outcome: "Name, phone number, photograph, state and local government, and what they do." },
-              { icon: "house", title: "Looking", href: "/search", outcome: "Search, the map, saved places, compare, the assistant, Around, Circle and Roommates." },
+              { icon: "house", title: "Looking", href: "/search", outcome: "Search, VALLO Intelligence, the map, saved places, compare, the assistant, Around, Circle and Roommates." },
             ]}
           />
           <ul role="list">
@@ -137,6 +141,38 @@ export const ONBOARDING_A_MEMBER: ManualBody = {
             <li>
               <strong>A handle</strong> is optional: three to twenty lowercase letters, digits or underscores, starting
               with a letter. It gives them a public page, and they choose what shows on it under Privacy.
+            </li>
+          </ul>
+          <h3 className="nf-h4">Finding things: VALLO Intelligence</h3>
+          <p>
+            Once they are in, the quickest way to anything is{" "}
+            <Link href="/intelligence" className={A}>
+              VALLO Intelligence
+            </Link>
+            , one search across homes, stays, restaurants, roommates, people, communities, help and their own records.
+            Show a new member the four ways in: VALLO Intelligence near the top of the menu, the row directly below
+            Post to story in the + Create sheet, the Search everything VALLO bar on Home, and Ctrl K (Cmd K on a Mac)
+            on a computer.
+          </p>
+          <ul role="list">
+            <li>
+              They type it the way they would say it: &quot;2 bedroom in Yaba under 2m&quot;, &quot;hotels in Abuja this
+              weekend&quot;, &quot;change my email&quot;. Nicknames such as VI, Lekki ph 1, PH and FCT are understood.
+            </li>
+            <li>
+              What search took from the words shows as chips under Search understood. A wrong chip is removed with a
+              tap. A misspelling is offered as a question, never changed behind their back.
+            </li>
+            <li>
+              Start with a mood gives them a first search without typing, and the microphone lets them speak one where
+              their browser can turn speech into words. Nothing is searched until they press Search.
+            </li>
+            <li>
+              The Yours tab finds their own saved homes, offers, bookings, conversations and saved searches, read
+              through their own account. Their recent searches are theirs alone, and they can remove them.
+            </li>
+            <li>
+              A result that says Example listing. Not available. is an example, not a place they can book.
             </li>
           </ul>
           <DocCallout tone="note" title="The first run of one feature">
@@ -257,6 +293,16 @@ export const ONBOARDING_A_MEMBER: ManualBody = {
             that worth anything is to keep the conversation and the payment inside Vallo.
           </li>
           <li>
+            <strong>&quot;I cannot find what I am looking for.&quot;</strong> Point them to VALLO Intelligence and ask
+            them to type it the way they would say it. Then ask them to read the Search understood chips and remove any
+            that are wrong. If it still finds nothing, Vallo may not have it yet. Say so, and do not promise it will.
+          </li>
+          <li>
+            <strong>&quot;Can Vallo see what I search for?&quot;</strong> Their recent searches are kept for them alone,
+            and they can remove them. For Vallo&apos;s own figures a search is kept without their account id or address,
+            and no desk shows what one member searched.
+          </li>
+          <li>
             <strong>&quot;I live abroad. Can I use it?&quot;</strong> Yes. Nothing blocks a member outside Nigeria, and
             they are not asked for a phone number while codes cannot be sent out of the country. A lister still needs a
             Nigerian bank account to be paid.
@@ -291,7 +337,8 @@ export const ONBOARDING_A_MEMBER: ManualBody = {
           </ul>
           <DocCallout tone="warning" title="What you do not do">
             You do not change a member&apos;s email or password for them, confirm a phone number on their behalf, turn
-            marketing on for them, or tell one member anything about another. Every file you open and every decision
+            marketing on for them, or tell one member anything about another. No desk shows what a member searched
+            for, so never say you can see it. Every file you open and every decision
             you make is written to the audit log with your name.
           </DocCallout>
           <p>

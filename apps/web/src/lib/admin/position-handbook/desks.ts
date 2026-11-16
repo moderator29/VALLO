@@ -118,6 +118,7 @@ export const SCOPE_DESKS: Record<StaffScope, readonly HandbookDesk[]> = {
   ],
   analyst: [
     { href: "/admin/trust", name: "Trust overview, numbers only", what: "The counts across cases and restrictions.", you: "Read the numbers. This area never opens what a case says." },
+    { href: "/admin/search", name: "Search", what: "What people look for in VALLO Intelligence over 7 or 30 days, as counts, and the search aliases. Words show only once three different visits searched them.", you: "Read the figures. You can see the aliases but not change them." },
   ],
   business_development: [
     { href: "/admin/business-development", name: "Business development", what: "The landlords, agents, hotels and restaurants being brought onto Vallo, and the pipeline that tracks them.", you: "Add a prospect, log every contact, set the next follow-up date, and move a prospect through the stages." },
@@ -128,9 +129,11 @@ export const SCOPE_DESKS: Record<StaffScope, readonly HandbookDesk[]> = {
   marketing: [
     { href: "/admin/marketing", name: "Marketing", what: "Campaigns and promotions with approval, tracked links, the numbers you log, acquisition and referral figures, briefs and the monthly report.", you: "Plan each campaign, build its tracked link, send it for approval, and log its real numbers. The desk never connects to an advertising platform." },
     { href: "/admin/account-deletions", name: "Account deletions", what: "Why members delete their account, as counts and shares.", you: "Read the reasons ranked, to see what is driving people away. The free-text notes are for a super admin alone." },
+    { href: "/admin/search", name: "Search", what: "What people look for in VALLO Intelligence over 7 or 30 days, as counts, and the aliases that teach search a spelling or a nickname. Words show only once three different visits searched them.", you: "Read what people search for and what found nothing. Add, change or switch off an alias; each change is written to the audit log with your name." },
   ],
   content: [
     { href: "/admin/content", name: "Content", what: "Guides, announcements and articles through an approval step, the editorial calendar, requests, style and search checklists, translations and help gaps.", you: "Keep the calendar, write and edit, send each item for approval, and record the link once it is published." },
+    { href: "/admin/search", name: "Search", what: "What people look for in VALLO Intelligence over 7 or 30 days, as counts, and the aliases that teach search a spelling or a nickname. Words show only once three different visits searched them.", you: "Read what people search for and what found nothing. Add, change or switch off an alias; each change is written to the audit log with your name." },
   ],
   technical: [
     { href: "/admin/technical", name: "Technical", what: "Read-only platform health and error trends, the incident log, runbooks, release notes, expiry reminders and post-incident reviews.", you: "Read health every morning, declare and update incidents, and write the runbooks. It shows no key or credential and changes no infrastructure." },

@@ -3,7 +3,7 @@ import { DocCallout } from "@/components/docs/DocArticle";
 import { DocFlow } from "@/components/docs/DocFlow";
 import { DocTable } from "@/components/docs/DocTable";
 import { A, type ManualBody } from "./parts";
-import { aboutVallo } from "./role-shared";
+import { aboutVallo, searchDeskBody } from "./role-shared";
 
 /**
  * Chapter 10. Read from `app/admin/content`, `lib/admin/content` and
@@ -27,6 +27,7 @@ export const CONTENT: ManualBody = {
     "Feed moderation is shown to you as counts. You cannot open the queue, and the decisions stay with moderation.",
     "Nothing on the desk publishes anything: you record where a piece went live and the link.",
     "Every action shows one banner, and those that can be reversed carry Undo.",
+    "You also open Search, under Intelligence: what people look for in VALLO Intelligence, and the aliases. Adding or switching off an alias is yours to decide, and it is audited.",
   ],
   sections: [
     ...aboutVallo({
@@ -188,6 +189,20 @@ export const CONTENT: ManualBody = {
           </p>
         </>
       ),
+    },
+    {
+      id: "search-desk",
+      title: "What people search for, and teaching search a word",
+      body: searchDeskBody({
+        use: (
+          <>
+            For content it is a second list of help gaps. A help question on the zero-result list is a page to write. A
+            word people type that search does not understand, such as a local name for a place or a common misspelling
+            it does not fix, is an alias to add. Read it each week with Help gaps, and say in your weekly report which
+            aliases you added or switched off and why.
+          </>
+        ),
+      }),
     },
     {
       id: "feed",

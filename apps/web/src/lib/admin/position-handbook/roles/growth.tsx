@@ -10,7 +10,9 @@ import type { RoleWords } from "../types";
  * and 11), read from the desks' own code on 15 November 2026. The steps below
  * use the real tab and control names those chapters record. Four of these five
  * positions hold no access to listings, support, moderation or member data,
- * and their handbooks say so plainly.
+ * and their handbooks say so plainly. On 16 November 2026 the Search desk
+ * (`/admin/search`) was added for Marketing and Content, read from
+ * `app/admin/search` and `lib/admin/search-alias-actions.ts`.
  */
 
 export const BUSINESS_DEVELOPMENT_EXECUTIVE: RoleWords = {
@@ -229,6 +231,7 @@ export const BUSINESS_DEVELOPMENT_EXECUTIVE: RoleWords = {
     "\"Vallo uses regulated payment partners to process eligible payments. Vallo does not hold customer funds.\"",
     "\"I will come back to you on that.\" Where a term is not written down.",
     "\"We cannot publish this yet because X. Here is what would fix it.\"",
+    "\"Once it is live, people find your listing on Search and in VALLO Intelligence, the one search across Vallo.\" Never a number of people who will.",
   ],
   wordsNever: [
     "Never a fee, a discount or a commission that is not written down.",
@@ -486,7 +489,7 @@ export const MARKETING_MANAGER: RoleWords = {
     </p>
   ),
   glance: [
-    "Your access area is Marketing. It opens the Marketing desk and the account deletion reasons, and nothing else.",
+    "Your access area is Marketing. It opens the Marketing desk, the account deletion reasons and Search (what people look for in VALLO Intelligence, and the search aliases), and nothing else.",
     "A campaign goes live only after it is approved, and spends only what its approved budget says.",
     "Every number you log carries its source. Never round a figure up, and never fill a gap with a guess.",
     "This role has no access to listings, support, moderation or any member's data.",
@@ -530,6 +533,14 @@ export const MARKETING_MANAGER: RoleWords = {
     <>Log last week&apos;s numbers on Results, each with its source, and read the spend per logged sign-up.</>,
     <>Write one creative brief for the Social Media Manager and one for the Content Manager.</>,
     <>Read the Calendar for channel clashes, and fix any two campaigns using the same channel on overlapping dates.</>,
+    <>
+      Read{" "}
+      <Link href="/admin/search" className={A}>
+        Search
+      </Link>{" "}
+      over 30 days: the places people ask for, and the searches that found nothing. It is the plainest record of demand
+      Vallo has.
+    </>,
   ],
   alone: [
     "Plan a campaign as a draft: name, channel, audience, dates and, where authorised, a budget.",
@@ -538,6 +549,7 @@ export const MARKETING_MANAGER: RoleWords = {
     "Read the acquisition and referral figures the console already holds.",
     "Write a creative brief, a segment note, a market note, and the A and B test log.",
     "Draft the monthly report from your campaigns and logged results.",
+    "Add, change, switch off or switch back on a search alias on the Search desk. Each change is written to the audit log with your name.",
   ],
   withSomebody: [
     "A campaign going live: the COO or an admin approves it first.",
@@ -627,6 +639,33 @@ export const MARKETING_MANAGER: RoleWords = {
       ],
     },
     {
+      id: "search",
+      title: "Read what people search for",
+      steps: [
+        <>
+          Open{" "}
+          <Link href="/admin/search" className={A}>
+            Search
+          </Link>{" "}
+          and choose Last 30 days.
+        </>,
+        <>Read Places searched and What the words pointed at: where people look, and for what.</>,
+        <>Read Searches that found nothing. Never plan a campaign that sends people to look for something on that list.</>,
+        <>
+          Where people type a nickname or a spelling search does not understand, add an alias under{" "}
+          <strong>Aliases</strong>, then try it yourself in VALLO Intelligence. Agree it with the Content Manager first,
+          so the two of you do not undo each other.
+        </>,
+        <>In a report, a count here is searches, not people who will rent or book. Say so.</>,
+      ],
+      note: (
+        <p>
+          A word shows on the desk only once three different visits searched it, and no search is tied to a person.
+          Never try to work out who searched for something.
+        </p>
+      ),
+    },
+    {
       id: "monthly",
       title: "The monthly report",
       steps: [
@@ -698,7 +737,7 @@ export const CONTENT_MANAGER: RoleWords = {
     </p>
   ),
   glance: [
-    "Your access area is Content. It opens the Content desk and nothing else.",
+    "Your access area is Content. It opens the Content desk and Search (what people look for in VALLO Intelligence, and the search aliases), and nothing else.",
     "Nothing about a member, a payment, a legal matter or an internal decision is published without approval.",
     "You read the moderation counts on the Feed tab. The decisions stay with moderation.",
     "Images and video belong in the social media library. This desk holds text and links only.",
@@ -746,6 +785,14 @@ export const CONTENT_MANAGER: RoleWords = {
     </>,
     <>Update the Translations tab honestly: not started, drafting, reviewed or live, for English, Hausa, Yoruba and Igbo.</>,
     <>Retire two items that are out of date. Stale content is worse than no content.</>,
+    <>
+      Read{" "}
+      <Link href="/admin/search" className={A}>
+        Search
+      </Link>{" "}
+      with Help gaps: a help question that found nothing is a page to write, and a word search does not understand is
+      an alias to add.
+    </>,
     <>Write your weekly report from the calendar and the gaps.</>,
   ],
   alone: [
@@ -755,6 +802,7 @@ export const CONTENT_MANAGER: RoleWords = {
     "Publish an approved item, and record its link.",
     "Retire an item that is out of date.",
     "Keep the brand library, the editorial calendar and the translation status.",
+    "Add, change, switch off or switch back on a search alias on the Search desk. Each change is written to the audit log with your name.",
   ],
   withSomebody: [
     "Publishing anything: the COO or an admin approves it first.",
@@ -828,6 +876,42 @@ export const CONTENT_MANAGER: RoleWords = {
         <>Rewrite the page, run the checklists, and send it for approval.</>,
         <>Watch the page over the next month. A gap you closed that is still failing is still a gap.</>,
       ],
+    },
+    {
+      id: "alias",
+      title: "Teach search a word (an alias)",
+      steps: [
+        <>
+          Open{" "}
+          <Link href="/admin/search" className={A}>
+            Search
+          </Link>{" "}
+          and read Searches that found nothing and Most searched. Look for a word people really type that search does not
+          understand: a local name for a place, a common misspelling, a Nigerian word for a thing.
+        </>,
+        <>
+          Under <strong>Aliases</strong>, write it in <strong>When people type</strong> and what it means in{" "}
+          <strong>Read it as</strong>. Each side is 1 to 60 characters.
+        </>,
+        <>
+          Choose the <strong>Kind</strong>. Word reads one set of words as another (buka as restaurant). Place points a
+          nickname at a place Vallo already knows (Lekki 1 as Lekki Phase 1); one that points anywhere else is ignored.
+        </>,
+        <>
+          Press <strong>Save alias</strong>, wait up to five minutes, and search it yourself in VALLO Intelligence.
+        </>,
+        <>
+          If it makes results worse, press <strong>Switch off</strong>. Nothing is deleted, and every change is written
+          to the audit log with your name.
+        </>,
+        <>Say in your weekly report which aliases you added or switched off, and why.</>,
+      ],
+      note: (
+        <p>
+          An alias changes every member&apos;s search. Never use one to push a listing, a lister or a place up the results,
+          and never put a person&apos;s name or a number into one.
+        </p>
+      ),
     },
     {
       id: "translations",

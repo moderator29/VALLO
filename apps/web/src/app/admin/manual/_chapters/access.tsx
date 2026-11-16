@@ -35,12 +35,12 @@ const AREA_OPENS: Record<StaffScope, string> = {
   trust_safety: "Cases in every module, Trust overview, Appeals, Roommates and Circle.",
   roommates: "The Roommates desk and Roommates cases.",
   circle: "The Circle desk, and Circle and feed cases.",
-  analyst: "Trust overview: the numbers only, never what a case says.",
+  analyst: "Trust overview: the numbers only, never what a case says. Search: what people look for in VALLO Intelligence, as counts, with the aliases to read.",
   business_development:
     "The Business Development desk: partnerships, the pipeline, and listing review (through the listing_approval scope every Business Development Director also holds).",
   social_media: "The Social Media desk: the content calendar, drafts, campaigns, the media library and approvals. No listing, moderation or member data.",
-  marketing: "The Marketing desk: campaigns, UTM links, results you log, acquisition figures and approvals. No listing, moderation or member data.",
-  content: "The Content desk: the editorial calendar, drafts, approvals and the brand library, with counts from the moderation queue. No access to the queue itself.",
+  marketing: "The Marketing desk: campaigns, UTM links, results you log, acquisition figures and approvals. Search, where you can also add or switch off an alias. No listing, moderation or member data.",
+  content: "The Content desk: the editorial calendar, drafts, approvals and the brand library, with counts from the moderation queue. Search, where you can also add or switch off an alias. No access to the queue itself.",
   technical: "The Technical desk: read-only health, error counts and the incident log. No secret, credential or infrastructure control.",
   support_lead: "The Support Lead desk: team workload, assignment, escalations, quality reviews, support figures and policy notes. Opens beside the Support area.",
 };
@@ -108,6 +108,18 @@ export const ACCESS: ManualBody = {
               first.
             </li>
           </ol>
+          <p>
+            The handbook has six parts: what your access is, money, deciding well, working with the AI copilot,
+            people&apos;s information, and what happens if it is broken. The part on the copilot says that a card you
+            press is your decision, recorded under your name, and that you never paste an ID number, a bank or card
+            number, a password or a document into it.
+          </p>
+          <p>
+            The handbook has a version, shown on its page. When the version changes, your desks lock again until you
+            read the new one, tick that you have read it and press <strong>Acknowledge and unlock my desks</strong>.
+            The version moved to 16 November 2026, when the copilot part was added, so everybody who had acknowledged
+            an earlier version accepts it again.
+          </p>
           <p>
             A staff member does not see the operator&apos;s rail. You see a short frame with My desk, Console, Handbook, Your
             role, Staff manual and Help and support, then one button for each desk your access opens. My desk is your own

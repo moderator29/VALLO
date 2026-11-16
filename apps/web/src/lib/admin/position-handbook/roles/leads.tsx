@@ -385,7 +385,7 @@ export const COMPLIANCE_OFFICER: RoleWords = {
       title: "Clear a politically exposed person",
       steps: [
         <>Open the lane and the person waiting.</>,
-        <>Record the source of funds, in the person's own evidence, not in your summary of it.</>,
+        <>Record the source of funds, in the person&apos;s own evidence, not in your summary of it.</>,
         <>Write what makes them exposed and what the risk is.</>,
         <>Propose the clearance. A second approves it.</>,
         <>Where you cannot clear them, record why, and the hold stays. The member sees only a neutral line.</>,
@@ -419,7 +419,7 @@ export const COMPLIANCE_OFFICER: RoleWords = {
       title: "Answer a regulator",
       steps: [
         <>Write down what was asked, by whom, and the date, before you touch a record.</>,
-        <>Tell the CEO the same day. A regulator's enquiry is not a desk matter.</>,
+        <>Tell the CEO the same day. A regulator&apos;s enquiry is not a desk matter.</>,
         <>
           Export only what was asked for, from{" "}
           <Link href="/admin/audit" className={A}>
@@ -1165,6 +1165,7 @@ export const CUSTOMER_SUPPORT_LEAD: RoleWords = {
     "\"Here is the sentence to send.\" A policy note that gives the words saves an hour a week.",
     "\"This is in force from Monday.\" Name the day, every time.",
     "\"I am handing this to Money with the booking attached, and I will tell you what they say.\"",
+    "\"Type it into VALLO Intelligence the way you would say it, then remove any chip under Search understood that is wrong.\" The first answer to a member who cannot find something.",
   ],
   wordsNever: [
     "Never score an agent as a person. Score the answer.",
@@ -1194,6 +1195,7 @@ export const CUSTOMER_SUPPORT_LEAD: RoleWords = {
     { what: "A member who says they are in danger", who: "Head of Trust and Safety and the COO, immediately" },
     { what: "A pattern of late tickets you cannot clear", who: "Chief Operating Officer" },
     { what: "A help page that is wrong or missing", who: "Content Manager" },
+    { what: "A word or a place nickname VALLO Intelligence does not understand", who: "Content Manager or Marketing Manager, who add aliases on the Search desk" },
     { what: "An identity or a document", who: "KYC Reviewer, by handing the ticket to Verification" },
   ],
 };

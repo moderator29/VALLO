@@ -128,7 +128,7 @@ export const COVERAGE: readonly CoverageGroup[] = [
   { needsNone: "The retired staff manual's addresses: each redirects to the chapter of /admin/manual that now holds its page.", routes: ["/admin/handbook/manual", "/admin/handbook/manual/[slug]"] },
   { doc: M("access"), routes: ["/admin/handbook", "/admin/handbook/position", "/admin/handbook/position/[position]", "/admin/staff"] },
   { doc: M("desks"), routes: ["/admin", "/admin/lookup", "/admin/overview", "/admin/control", "/admin/examples", "/admin/supply", "/admin/stops", "/admin/reference", "/admin/businesses", "/admin/trust", "/admin/standing", "/admin/weight-withheld", "/admin/blocked-terms", "/admin/circle", "/admin/social", "/admin/roommates", "/admin/account-deletions", "/admin/alerts", "/admin/people", "/admin/people/[id]", "/admin/bookings", "/admin/bookings/[bookingId]", "/admin/bookings/reservations", "/admin/bookings/visits", "/admin/restaurant-fees", "/admin/referrals", "/admin/money", "/admin/payments"] },
-  { doc: M("desks", "take-care"), routes: ["/admin/operations", "/admin/operations/providers", "/admin/crashes", "/admin/field-speed", "/admin/call-usage", "/admin/analytics", "/admin/analytics/listings", "/admin/analytics/listings/[listingId]", "/admin/search", "/admin/front-door", "/admin/compliance", "/admin/switches", "/admin/settings"] },
+  { doc: M("desks", "take-care"), routes: ["/admin/operations", "/admin/operations/providers", "/admin/crashes", "/admin/field-speed", "/admin/call-usage", "/admin/analytics", "/admin/analytics/listings", "/admin/analytics/listings/[listingId]", "/admin/front-door", "/admin/compliance", "/admin/switches", "/admin/settings"] },
   { doc: M("queues"), routes: ["/admin/queue"] },
   { doc: M("queues", "identity"), routes: ["/admin/kyc", "/admin/kyc/guide", "/admin/agents", "/admin/review-calls", "/admin/review-calls/[id]"] },
   { doc: M("queues", "listings"), routes: ["/admin/listings", "/admin/listings/[id]"] },
@@ -142,6 +142,8 @@ export const COVERAGE: readonly CoverageGroup[] = [
   { doc: M("weekly-report"), routes: ["/admin/my-desk/weekly", "/admin/reports/weekly"] },
   { doc: M("marketing"), routes: ["/admin/marketing"] },
   { doc: M("content"), routes: ["/admin/content"] },
+  /* The Search desk (16 November 2026): the how-to, the figures and the aliases. Marketing carries the same section. */
+  { doc: M("content", "search-desk"), routes: ["/admin/search"] },
   { doc: M("technical"), routes: ["/admin/technical"] },
   { doc: M("support-lead"), routes: ["/admin/support-lead"] },
   { doc: M("business-development"), routes: ["/admin/business-development"] },

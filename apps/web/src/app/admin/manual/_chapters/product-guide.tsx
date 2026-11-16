@@ -37,7 +37,10 @@ import { A, type ManualBody } from "./parts";
  * drift), and the live switches, on 15 November 2026. On 16 November 2026
  * the held payment's fee and Vallo's own earnings sweep were added
  * (`fee-schedule.ts`, `lib/cron/jobs/revenue-sweep.ts`, the Control room's
- * earnings panel). Where a feature is
+ * earnings panel), and VALLO Intelligence
+ * (`app/(app)/intelligence`, `components/app/intelligence`, `lib/intelligence`,
+ * the four ways in in `nav-model.ts`, `CreateDock.tsx`, `HomeScreen.tsx` and
+ * `lib/nav/member-keys.ts`). Where a feature is
  * built but not open, this chapter says so plainly. When the product
  * changes, this chapter changes with it.
  */
@@ -66,6 +69,7 @@ const PART = { state: "Partly open", tone: "info" } as const;
 
 const STATUS: DocTableRow[] = [
   { id: "search", cells: { feature: "Search, filters, the map, saved places and compare", status: OPEN, say: "Anybody with an account can search homes, land, shops, offices, stays and restaurants." } },
+  { id: "intelligence", cells: { feature: "VALLO Intelligence, one search across Vallo", status: OPEN, say: "One box for homes, stays, restaurants, roommates, people, communities, help and a member's own records. Every result is a real record or a real screen." } },
   { id: "listing", cells: { feature: "Listing a property, a stay or a restaurant", status: OPEN, say: "Free. A person at Vallo reviews the lister and the listing before it goes up." } },
   { id: "viewings", cells: { feature: "Viewings, in person or by video", status: OPEN, say: "Free. Vallo charges no inspection fee." } },
   { id: "messages", cells: { feature: "Messages and calls", status: OPEN, say: "A member can message any lister, host or restaurant from the listing." } },
@@ -172,6 +176,8 @@ const SAY_THIS: DocTableRow[] = [
   { id: "review", cells: { asked: "Why do you ask for my ID?", say: "Because every lister on Vallo is reviewed by a person before they go up. It is what lets a stranger trust your listing. Your documents are seen only by the review team and are never shown to other members." } },
   { id: "agent", cells: { asked: "Are you cutting out agents?", say: "No. Vallo does not remove the agent. It removes the runaround: people see who they are dealing with and what they will pay before they call." } },
   { id: "safe", cells: { asked: "Can you promise I will not be scammed?", say: "No, and we never say so. What we do is review every lister and listing, show what has been confirmed and what has not, keep viewings free, and tell everybody to pay only inside Vallo after a viewing. A badge is not a promise." } },
+  { id: "find", cells: { asked: "I cannot find what I am looking for.", say: "Open VALLO Intelligence from the menu, or press Ctrl K on a computer. Type it the way you would say it, then read the chips under Search understood and remove any that are wrong. If it still finds nothing, Vallo may not have it yet, and I will not promise it will." } },
+  { id: "search-kept", cells: { asked: "Does Vallo keep what I search for?", say: "Your recent searches are kept on your account for you alone, and you can remove them or clear them all. For Vallo's own figures a search is kept without your account id or your address, and words with a long number in them are not kept at all." } },
   { id: "value", cells: { asked: "Can Vallo tell me what price to put on my property?", say: "No. Vallo does not put a price on anybody's property. Price Check shows what similar properties near a spot are currently asking on Vallo, how many it found, and how sure it is. If it has too few to be sure, it says so instead of guessing." } },
 ];
 
@@ -248,6 +254,27 @@ const MONEY_IN_FULL: DocTableRow[] = [
 ];
 
 /**
+ * VALLO INTELLIGENCE'S TABS (16 November 2026), read from
+ * `lib/intelligence/contract.ts` (the tabs), `lib/intelligence/rank.ts`
+ * (which kinds each tab holds) and the sources under
+ * `lib/intelligence/sources` (who may see each: people, communities and posts
+ * are signed in only and need Around switched on; Yours is the member's own,
+ * read through their own session; roommate people need an active roommate
+ * profile of the member's own).
+ */
+const INTELLIGENCE_TABS: DocTableRow[] = [
+  { id: "all", cells: { tab: "All", what: "A few of each kind, grouped, best first, with See all for each.", who: "Everybody who can open it" } },
+  { id: "property", cells: { tab: "Properties", what: "Homes, land, shops and offices to rent or buy, from the same listings as Search.", who: "Everybody who can open it" } },
+  { id: "stay", cells: { tab: "Stays", what: "Hotels, shortlets and serviced apartments.", who: "Everybody who can open it" } },
+  { id: "restaurant", cells: { tab: "Restaurants", what: "Restaurants to book a table at.", who: "Everybody who can open it" } },
+  { id: "roommate", cells: { tab: "Roommates", what: "Rooms on offer, and people open to matching.", who: "Rooms: everybody. People: a member with an active roommate profile of their own" } },
+  { id: "person", cells: { tab: "People", what: "Profiles found by handle or name, never by job or place. Blocked people never show.", who: "Signed-in members, while Around is switched on" } },
+  { id: "community", cells: { tab: "Communities", what: "Public Circle communities, and public posts.", who: "Signed-in members, while Around is switched on" } },
+  { id: "guide", cells: { tab: "Guides", what: "Help answers and guides, and screens of Vallo: change my email goes to the right setting.", who: "Everybody who can open it" } },
+  { id: "personal", cells: { tab: "Yours", what: "Their own saved homes, offers, bookings, conversations and saved searches, and an agent's own listings.", who: "The member alone" } },
+];
+
+/**
  * EVERY PART OF THE PRODUCT, WITH THE STAFF HALF ADDED (15 November 2026).
  * The member side is the published documents; the staff side names the desk
  * where that part is read and decided. A desk named here is on the console
@@ -268,6 +295,14 @@ const FOR_STAFF: DocTableRow[] = [
       part: "Search, the map, saved places and compare",
       member: "Search by city, area or kind of place, narrow by light, water and the gate, switch to the map, save a place or a search, and put up to four side by side.",
       staff: "The front door funnel and the listing figures on Analytics: who arrives, who signs up, what is being viewed, saved and enquired about, by listing and by area.",
+    },
+  },
+  {
+    id: "s-intelligence",
+    cells: {
+      part: "VALLO Intelligence",
+      member: "Types what they want in their own words, sees what search understood as chips they can remove, and gets real results by kind, with their own saved homes, offers, bookings and conversations under Yours.",
+      staff: "Search, under Intelligence in the console menu, for Read-only analyst, Content and Marketing: what people look for as counts, never as people, and the aliases that teach search a word. No desk shows what one member searched.",
     },
   },
   {
@@ -431,7 +466,7 @@ export const PRODUCT_GUIDE: ManualBody = {
     "Every lister and every listing is reviewed by a person at Vallo before it goes up. That is the reason to choose Vallo, for both sides.",
     "It is free to join, search, message, view and list. Vallo earns only on a completed, paid deal, from the lister's or host's share.",
     "Vallo never holds customer money. Card payments go to the owner, agent or host through the payment processor.",
-    "Open today: search, listing, viewings, messages, agreements, offers on homes for sale, stays and hotel rooms paid by card, table bookings, Roommates, Circle, Around, the assistant and Price Check.",
+    "Open today: search, VALLO Intelligence, listing, viewings, messages, agreements, offers on homes for sale, stays and hotel rooms paid by card, table bookings, Roommates, Circle, Around, the assistant and Price Check.",
     "Not open yet: paying rent through Vallo, the wallet, paying a restaurant bill, the Pro plan. Never promise these.",
     "Never promise a number of customers, a price for somebody's property, a refund, or that a deal carries no risk. Say what Vallo does.",
     "Naira is the price of record. Other currencies are a reading guide beside it, and never what anybody pays.",
@@ -590,6 +625,11 @@ export const PRODUCT_GUIDE: ManualBody = {
             shops, offices, land and more. Sort by recommended, top rated or price. Light, water and the gate are
             filters, not small print. Switch to the map, save a place with the heart, save a search, and put up to four
             places side by side to compare.
+          </p>
+          <h3 className="nf-h4">VALLO Intelligence</h3>
+          <p>
+            One search across everything Vallo holds, in the member&apos;s own words. It has its own section below,
+            because it is the first place to send a member who cannot find something.
           </p>
           <h3 className="nf-h4">Reading a listing</h3>
           <p>
@@ -766,6 +806,155 @@ export const PRODUCT_GUIDE: ManualBody = {
             English, Yoruba, Hausa and Igbo. Vallo runs in any web browser and as the app for Android phones and
             iPhones, from Google Play and the App Store, on the same account.
           </p>
+        </>
+      ),
+    },
+    {
+      id: "intelligence",
+      title: "VALLO Intelligence: one search across Vallo",
+      body: (
+        <>
+          <p>
+            VALLO Intelligence is one search across everything Vallo holds. A member types what they want in their own
+            words, such as &quot;2 bedroom in Lekki under 5m&quot; or &quot;hotels in Abuja this weekend&quot;, and gets
+            real results grouped by kind. Every result is a real record or a real screen of Vallo. Nothing in the
+            results is written by an AI. It lives at{" "}
+            <Link href="/intelligence" className={A}>
+              /intelligence
+            </Link>
+            .
+          </p>
+          <h3 className="nf-h4">Four ways in</h3>
+          <ul role="list">
+            <li>
+              <strong>The menu.</strong> VALLO Intelligence, near the top of the side menu. On a phone it is the first
+              row of the menu.
+            </li>
+            <li>
+              <strong>The + Create sheet.</strong> VALLO Intelligence sits directly below Post to story. Where there is
+              no story to post to, it is first.
+            </li>
+            <li>
+              <strong>Home.</strong> A bar that reads Search everything VALLO, with example searches turning over in
+              it. It opens VALLO Intelligence with the cursor in the box. The search box in Home&apos;s top banner is a
+              different thing: it searches the marketplace, the same as Search.
+            </li>
+            <li>
+              <strong>The keyboard.</strong> On a computer, Ctrl K (Cmd K on a Mac) opens it from anywhere in the app,
+              even from inside a box. Inside the console the same keys open Search the console instead.
+            </li>
+          </ul>
+          <h3 className="nf-h4">What it searches</h3>
+          <DocTable
+            caption="The tabs on VALLO Intelligence, and who sees each"
+            columns={[
+              { key: "tab", label: "Tab" },
+              { key: "what", label: "What is in it" },
+              { key: "who", label: "Who sees it" },
+            ]}
+            rows={INTELLIGENCE_TABS}
+          />
+          <p>
+            A tab with nothing in it for a search is not shown. When a place is named, a card for that place leads the
+            results, with what Vallo holds there.
+          </p>
+          <h3 className="nf-h4">How it reads the words</h3>
+          <ul role="list">
+            <li>
+              <strong>Search understood.</strong> Above the results, chips say what search took from the words: rent or
+              buy, the place, bedrooms, a budget, furnished, amenities, dates and guests. Tapping a chip removes that
+              filter and searches again. Edit filters opens the same filters as a form, and Clear removes them all.
+            </li>
+            <li>
+              <strong>Spelling.</strong> A misspelling is offered, never applied without saying so. For
+              &quot;resturants&quot; the screen asks Searching for restaurants? If the words as typed found nothing and
+              the fix finds something, it shows those results and says so: Showing results for restaurants, with a link
+              to search the words as typed instead.
+            </li>
+            <li>
+              <strong>Place nicknames.</strong> It knows how people write places: VI for Victoria Island, Lekki ph 1 for
+              Lekki Phase 1, PH for Port Harcourt, FCT for Abuja, Lasgidi for Lagos. It only knows places on Vallo&apos;s
+              own list. A place it does not know is searched as plain words, never guessed. Staff on the Search desk can
+              add more nicknames and spellings (chapter 10).
+            </li>
+            <li>
+              <strong>A long question.</strong> When somebody types a long sentence the rules cannot read, such as
+              &quot;somewhere quiet for my mum near her church in Surulere&quot;, Vallo AI may be asked to turn the words
+              into the same filters. That happens only when they press Search, only if they agreed to use Vallo AI, and
+              only the words are sent. The screen says Read with Vallo AI. The results still come from Vallo&apos;s own
+              records.
+            </li>
+            <li>
+              <strong>Nothing found.</strong> The screen offers other ways in, such as any budget, all of Lagos or the
+              spelling fix, and each one is tried first so it only appears when it finds something.
+            </li>
+          </ul>
+          <h3 className="nf-h4">The empty screen, moods and voice</h3>
+          <ul role="list">
+            <li>
+              Before a search, the screen is a quiet page to start from. A signed-in member sees their own recent
+              searches first, each one removable, with Clear all. Then Start with a mood, the cities the newest places
+              are in, Suggested for you, a few searches to try, popular searches (only words at least three different
+              visits searched in 30 days), the newest listings, and people to follow. A list with nothing real in it is
+              left out.
+            </li>
+            <li>
+              <strong>Start with a mood</strong> turns a feeling into a real search: Work from home (wifi and a
+              workspace), Room for family (3 bedrooms), A weekend away (shortlets this weekend), Pool days (a pool) and
+              Light all day (a generator).
+            </li>
+            <li>
+              <strong>Search by voice.</strong> The microphone button lets a member speak instead of typing, where their
+              browser can turn speech into words. The browser does that, not Vallo; on some browsers, Chrome among them,
+              the sound goes to the browser&apos;s maker. The words land in the box and nothing is searched until they
+              press Search. The first time on a device, a note on screen says all of this.
+            </li>
+            <li>
+              <strong>The Intelligence button</strong> opens a short panel: suggest filters, explain these filters,
+              compare two results, nearby areas, where do I find. Each one opens Vallo AI with the search written into
+              the question. Nothing is sent until the member sends it.
+            </li>
+          </ul>
+          <h3 className="nf-h4">Example listings</h3>
+          <p>
+            Example listings can appear in results, after the real ones. Each says Example listing. Not available. It
+            carries no trust mark and offers nothing but opening it. If a member asks why they cannot book one, that is
+            why.
+          </p>
+          <h3 className="nf-h4">Signed in, and signed out</h3>
+          <p>
+            Like Search, VALLO Intelligence needs an account while the catalogue is closed to visitors, and a visitor
+            is asked to sign in. If the founder opens the catalogue to visitors, a visitor can use it too, but sees only
+            places, properties, stays, restaurants, rooms offered by roommates, screens and help. People, communities,
+            posts, recent searches and the Yours tab are for signed-in members only.
+          </p>
+          <h3 className="nf-h4">Privacy</h3>
+          <ul role="list">
+            <li>
+              A member&apos;s own records under Yours are read through their own account, so they see only what is
+              theirs. No desk in the console shows another member&apos;s results.
+            </li>
+            <li>
+              Recent searches are kept for the member alone: their last 20, which they can remove one by one or all at
+              once. They go when the account is deleted. No desk in the console shows them.
+            </li>
+            <li>
+              For the Search desk, Vallo keeps each search as the words, what kind of thing they pointed at, how many
+              results came back and how long it took. It keeps no account id and no address. The visit is kept only as
+              a code that cannot be turned back into who it was. Words carrying a long run of digits, such as a phone or
+              account number, are dropped and never kept.
+            </li>
+            <li>
+              The desk shows counts, and shows words only once three different visits searched them. No search on the
+              desk is tied to a person.
+            </li>
+          </ul>
+          <DocCallout tone="note" title="When a member cannot find something">
+            Ask them what they typed, and try the same words in VALLO Intelligence yourself. Read the Search
+            understood chips: a wrong place or a budget they did not mean is the usual cause, and tapping the chip
+            removes it. If a word is not understood, tell the Content desk, which can add it as an alias. If nothing on
+            Vallo matches, say so plainly. Never promise that a listing will appear.
+          </DocCallout>
         </>
       ),
     },
@@ -1115,6 +1304,9 @@ export const PRODUCT_GUIDE: ManualBody = {
           <ul role="list">
             <li>
               <Link href="/docs/what-vallo-is" className={A}>What Vallo is</Link>, for anybody new.
+            </li>
+            <li>
+              <Link href="/intelligence" className={A}>VALLO Intelligence</Link>, for anybody who cannot find something.
             </li>
             <li>
               <Link href="/docs/what-vallo-costs" className={A}>What Vallo costs</Link>, for every fee.

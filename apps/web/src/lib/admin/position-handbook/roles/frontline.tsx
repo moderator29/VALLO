@@ -463,6 +463,35 @@ export const SUPPORT_AGENT: RoleWords = {
       ),
     },
     {
+      id: "cannot-find",
+      title: "A member who cannot find something",
+      steps: [
+        <>Ask what they typed, and where: Search, or VALLO Intelligence.</>,
+        <>
+          Type the same words into{" "}
+          <Link href="/intelligence" className={A}>
+            VALLO Intelligence
+          </Link>{" "}
+          yourself, and read the chips under Search understood.
+        </>,
+        <>
+          A place they did not mean, a budget or a bedroom count is the usual cause. Tell them which chip to tap to
+          remove it, or a shorter way to say it.
+        </>,
+        <>
+          Where a word or a nickname is not understood, note it on the ticket and tell the Content Manager, who can add
+          it as an alias.
+        </>,
+        <>Where nothing on Vallo matches, say so plainly. Never promise that a listing will appear.</>,
+      ],
+      note: (
+        <p>
+          You cannot see what a member searched, and no desk shows it. Work only from what they tell you. Chapter 15 of
+          the staff manual says how VALLO Intelligence works.
+        </p>
+      ),
+    },
+    {
       id: "danger",
       title: "A member who says they are in danger",
       steps: [
@@ -492,6 +521,7 @@ export const SUPPORT_AGENT: RoleWords = {
     "\"I have passed this to the team who decide it. I will write to you as soon as they answer.\"",
     "\"We never ask for a password, a card number or a one-time code. If anybody asks you for one, it is not us.\"",
     "\"Vallo asks for no inspection fee. If somebody asked you for one, tell us and we will look at it.\"",
+    "\"Try VALLO Intelligence from the menu, or Ctrl K on a computer, and type it the way you would say it.\"",
   ],
   wordsNever: [
     "Never \"your money is with us\", \"we are holding it\" or anything about a balance or a wallet.",

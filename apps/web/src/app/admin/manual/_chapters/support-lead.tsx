@@ -310,6 +310,7 @@ export const SUPPORT_LEAD: ManualBody = {
             { id: "danger", cells: { situation: "A member says they are in danger.", answer: "Head of Trust and Safety and the COO at once, then stay with the member in the ticket until a person has taken it." } },
             { id: "agent", cells: { situation: "An agent made a mistake that cost a member time.", answer: "Fix it first, apologise to the member, then coach the agent about the process, privately, with an example and what better looks like." } },
             { id: "pressure", cells: { situation: "You are asked to approve your own policy note.", answer: "You cannot. Ask the COO or an admin to read and approve it." } },
+            { id: "cannot-find", cells: { situation: "Several members write that they cannot find something they know is on Vallo.", answer: "Try their words in VALLO Intelligence and read the Search understood chips. If a nickname or spelling is not understood, ask the Content Manager to add an alias on the Search desk. If a listing that is live does not show, press Escalate, choose Something is broken, and give the words and the listing reference. If the question keeps coming, add it to your knowledge-base gaps so the Content Manager sees it." } },
             { id: "spike", cells: { situation: "One topic doubled this week.", answer: "Ask whether it is a page, a bug or a policy. Tell the Content Manager, Technical or the COO accordingly, with the counts." } },
           ]}
         />

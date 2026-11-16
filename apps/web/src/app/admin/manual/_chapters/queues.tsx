@@ -343,6 +343,18 @@ export const QUEUES: ManualBody = {
             member only inside Vallo, or on the contact address they gave the form. Never ask for or pass on an account
             number, and never tell a member Vallo is holding their money.
           </p>
+          <p>
+            <strong>A member who cannot find something.</strong> Ask what they typed, and type the same words into{" "}
+            <Link href="/intelligence" className={A}>
+              VALLO Intelligence
+            </Link>{" "}
+            yourself. Read the chips under Search understood: a place they did not mean, a budget or a bedroom count is
+            the usual cause, and a tap on the chip removes it. Tell them which chip to remove, or a shorter way to say
+            it. If a word or a nickname is not understood, note it on the ticket and tell the Content desk, which can
+            add it as an alias. If nothing on Vallo matches, say so plainly and never promise that a listing will
+            appear. You cannot see what a member searched; work only from what they tell you. Chapter 15 says how
+            VALLO Intelligence works.
+          </p>
           <p>Keys: j and k move between tickets, n opens the next one nobody holds, r replies, m opens saved replies, ? lists them all.</p>
           <p>
             The copilot on this desk can write a reply for you. Type /reply, or ask &quot;Reply to the oldest

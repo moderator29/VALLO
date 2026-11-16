@@ -14,7 +14,9 @@ import type { ManualBody } from "./parts";
  * (`money-actions.ts`) and retention (`lib/admin/desk-reads/retention-actions.ts`),
  * and, since the retired staff manual moved here (16 November 2026), mandates
  * (`decideListingMandate`), disputed payments (`arrangement-actions.ts`) and
- * deals (`adminIntervene` in `lib/offers/actions.ts`).
+ * deals (`adminIntervene` in `lib/offers/actions.ts`), and on 16 November 2026
+ * search aliases (`lib/admin/search-alias-actions.ts`, `admin_search_alias_put`
+ * and `admin_search_alias_set_active`).
  */
 
 type Row = { id: string; icon: UiIconName; decision: string; who: string; rule: string };
@@ -36,6 +38,7 @@ const ALONE: Row[] = [
   { id: "chargeback", icon: "credit-card", decision: "Open a chargeback, move it, add a note", who: "Finance", rule: "A reason of twelve characters or more, written to the chargeback's history and the audit log in the same step." },
   { id: "disputed-payment", icon: "receipt", decision: "Refund a held payment to the payer, or release a disputed one to the lister", who: "Finance", rule: "A reason of 20 characters or more. It only sends an instruction: the record changes when the partner reports it." },
   { id: "deal", icon: "file-check", decision: "Add a note to a deal on a home for sale, flag or resolve a dispute, or cancel the deal", who: "Agreement approval", rule: "A reason of ten characters or more. Agreed terms, amounts and versions can never be changed." },
+  { id: "search-alias", icon: "search", decision: "Add, change, switch off or switch back on a search alias: a spelling or nickname VALLO Intelligence should understand", who: "Content or Marketing", rule: "Each side 1 to 60 characters, the two sides different, no long number. A place alias that names a place Vallo does not know is ignored. Nothing is deleted, and every change is written to the audit log with what it said before." },
 ];
 
 const SECOND: Row[] = [

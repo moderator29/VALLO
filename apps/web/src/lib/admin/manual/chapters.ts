@@ -96,14 +96,14 @@ export const MANUAL_CHAPTERS: readonly ManualChapter[] = [
     number: 9,
     title: "Marketing Manager",
     icon: "price-tag",
-    description: "Campaigns, tracked links, results, acquisition and referral figures, briefs and the monthly report, for the Marketing Manager.",
+    description: "Campaigns, tracked links, results, acquisition and referral figures, what people search for, briefs and the monthly report, for the Marketing Manager.",
   },
   {
     slug: "content",
     number: 10,
     title: "Content Manager",
     icon: "file-text",
-    description: "The editorial calendar, approvals, requests, style and SEO checklists, translations and help gaps, for the Content Manager.",
+    description: "The editorial calendar, approvals, requests, style and SEO checklists, translations, help gaps and search aliases, for the Content Manager.",
   },
   {
     slug: "technical",
@@ -138,7 +138,7 @@ export const MANUAL_CHAPTERS: readonly ManualChapter[] = [
     number: 15,
     title: "Vallo, feature by feature",
     icon: "compass",
-    description: "What Vallo is, every feature, what it gives a business and a person, what it costs, what is open today, and what to say when you are asked.",
+    description: "What Vallo is, every feature including VALLO Intelligence, what it gives a business and a person, what it costs, what is open today, and what to say when you are asked.",
   },
   /* The two onboarding chapters (the founder, 15 November 2026): the subjects
      grew too big for a section of chapter 15 and each is now its own chapter,

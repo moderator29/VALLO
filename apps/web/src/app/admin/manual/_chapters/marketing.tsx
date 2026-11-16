@@ -3,7 +3,7 @@ import { DocCallout } from "@/components/docs/DocArticle";
 import { DocFlow } from "@/components/docs/DocFlow";
 import { DocTable } from "@/components/docs/DocTable";
 import { A, type ManualBody } from "./parts";
-import { aboutVallo } from "./role-shared";
+import { aboutVallo, searchDeskBody } from "./role-shared";
 
 /**
  * Chapter 9. Read from `app/admin/marketing`, `lib/admin/marketing` and
@@ -26,6 +26,7 @@ export const MARKETING: ManualBody = {
     "A figure the console cannot read says Not available. It is never shown as zero, and you never write one as zero.",
     "You see no member's name, no listing, no ticket and no payment. Acquisition and referral figures are counts only.",
     "Every action you take shows one banner at the top of the screen, and the ones that can be reversed carry an Undo.",
+    "You also open Search, under Intelligence: what people look for in VALLO Intelligence, as counts, and the aliases that teach search new words.",
   ],
   sections: [
     ...aboutVallo({
@@ -183,6 +184,20 @@ export const MARKETING: ManualBody = {
           </DocCallout>
         </>
       ),
+    },
+    {
+      id: "search-desk",
+      title: "What people search for: the Search desk",
+      body: searchDeskBody({
+        use: (
+          <>
+            For marketing it is the plainest record of demand Vallo has: the places people ask for, the kinds of place
+            they want, and the searches that found nothing. Read it before you plan a campaign for an area, and never
+            send people to look for something the zero-result list says Vallo does not have yet. A count here is a
+            count of searches, not of people who will rent or book, so say that in a report.
+          </>
+        ),
+      }),
     },
     {
       id: "notes-and-briefs",

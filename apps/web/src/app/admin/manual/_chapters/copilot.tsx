@@ -23,8 +23,12 @@ import { A, type ManualBody } from "./parts";
  * `lib/admin/copilot/tools/super-admin.ts` (what a card can do and the typed words),
  * `capabilities.ts` (`COPILOT_LIMITS`, drawn here as it stands) and
  * `engine.ts` (the super admin's limits), and the chat history SQL
- * (`supabase/migrations/pending/copilot_threads_2026-11-16.sql`: owner only,
- * ninety days). When any of those changes, this chapter changes with it.
+ * (`copilot_threads_2026-11-16.sql`, applied live on 16 November 2026: owner
+ * only; `private.copilot_threads_cleanup()` removes conversations idle for
+ * ninety days, and is not on a schedule yet, so the chapter does not promise
+ * the deletion happens on the day). History, pins and renaming were read
+ * again from `CopilotChat.tsx` the same day. When any of those changes, this
+ * chapter changes with it.
  */
 
 const GROUP_ORDER: readonly CopilotCommand["group"][] = ["Today", "Your desks", "Do something", "Platform", "Chat"];
@@ -297,20 +301,20 @@ export const COPILOT: ManualBody = {
         <>
           <p>
             Press <strong>History</strong> at the top of the copilot to see your conversations, newest first, each with
-            the desk it was on and when. Open one to carry on where you left off, or press the bin to delete it.
-            Press <strong>New chat</strong> to start afresh.
+            the desk it was on and when. Open one to carry on where you left off. Press the pin to keep one at the top
+            of the list (pins are kept on this device), the pencil to rename it, or the bin to delete it. Press{" "}
+            <strong>New chat</strong> to start afresh.
           </p>
           <ul role="list">
             <li>Each conversation is saved to your own account after every answer, so it is there on any device you sign in on.</li>
             <li>Only you can read your conversations. Nobody else can, not your lead, not an admin and not the super admin.</li>
-            <li>A conversation is kept for 90 days after its last message, then deleted.</li>
+            <li>
+              A conversation untouched for 90 days after its last message is due to be cleared out. Do not rely on an
+              old one still being there, and delete one yourself with the bin when you no longer need it.
+            </li>
             <li>
               A card read back from history can no longer be pressed. It shows as expired. Ask again, or make the change
               on the desk.
-            </li>
-            <li>
-              If saved history is not switched on for the console yet, the History panel says so, and a conversation is
-              kept only until you close the browser.
             </li>
           </ul>
         </>

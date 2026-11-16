@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import Link from "next/link";
 import { DocCallout } from "@/components/docs/DocArticle";
 import { DocTable, type DocTableRow } from "@/components/docs/DocTable";
@@ -21,6 +22,103 @@ const MEMBERS: DocTableRow[] = [
   { id: "hosts", cells: { who: "Hosts", what: "People who let a room, flat or house for short stays.", need: "Guests who arrive as described, and payouts that make sense." } },
   { id: "restaurants", cells: { who: "Restaurants", what: "Places that take table reservations through Vallo.", need: "Diners who turn up, and clear rules on deposits and fees." } },
   { id: "students", cells: { who: "Students", what: "Students looking for rooms and flatmates near their school, through Roommates.", need: "A place near campus, flatmates they can trust, and no surprises." } },
+];
+
+/**
+ * THE SEARCH DESK, HOW TO WORK IT (16 November 2026). Read from
+ * `app/admin/search/page.tsx` and `AliasForms.tsx`, `lib/admin/search-desk.ts`,
+ * `lib/admin/search-alias-actions.ts`, `lib/intelligence/analytics.ts` (the
+ * five minute alias cache) and the SQL `intelligence_search_2026-11-16.sql`
+ * (applied live): `private.search_desk_reader` admits Read-only analyst,
+ * Content and Marketing, `private.search_desk_writer` admits Content and
+ * Marketing, `admin_search_overview` keeps the floor of three visits, and the
+ * two alias functions write `public.audit_log`.
+ *
+ * The section's id is written in each chapter that uses this body, so the
+ * docs coverage check can read it there.
+ */
+export function searchDeskBody(role: { use: ReactNode }): ReactNode {
+  return (
+    <>
+      <p>
+        <Link href="/admin/search" className={A}>
+          Search
+        </Link>{" "}
+        shows what people look for in VALLO Intelligence, the one search members use across Vallo. It sits under
+        Intelligence in the console menu. Read-only analyst, Content and Marketing open it, and so does an admin. Content
+        and Marketing can also change the aliases. A read-only analyst sees them and cannot change them.
+      </p>
+      <p>{role.use}</p>
+      <DocTable
+        caption="The Search desk, figure by figure"
+        columns={[
+          { key: "figure", label: "Figure" },
+          { key: "means", label: "What it means" },
+        ]}
+        rows={SEARCH_FIGURES}
+      />
+      <DocCallout tone="note" title="The privacy floor">
+        A word shows on either list only once at least three different visits searched it in the range. Below that
+        it is not shown at all, so one person&apos;s search never appears here. No search is kept with an account id
+        or an address, and words carrying a long run of digits, such as a phone or account number, are dropped before
+        they are kept. The desk has no way to show who searched for anything, and you never try to work it out.
+      </DocCallout>
+      <h3 className="nf-h4">Adding a spelling or a nickname (an alias)</h3>
+      <p>
+        An alias teaches search a word people really use. There are two kinds. A <strong>word</strong> alias reads one
+        set of words as another: buka as restaurant. A <strong>place</strong> alias points a nickname at a place Vallo
+        already knows: Lekki 1 as Lekki Phase 1. A place alias that points at a name Vallo does not know is ignored.
+      </p>
+      <ol role="list">
+        <li>
+          Open Search and scroll to <strong>Aliases</strong>.
+        </li>
+        <li>
+          In <strong>When people type</strong>, write the words as people type them. In <strong>Read it as</strong>,
+          write what they mean. Each side is 1 to 60 characters.
+        </li>
+        <li>
+          Choose the <strong>Kind</strong>: Word or Place.
+        </li>
+        <li>
+          Press <strong>Save alias</strong>. Saving words that already have an alias of the same kind changes where it
+          points and switches it on again.
+        </li>
+        <li>
+          Search it yourself in VALLO Intelligence. It can take up to five minutes to reach every search.
+        </li>
+      </ol>
+      <p>
+        To stop an alias, press <strong>Switch off</strong> on its row. Nothing is ever deleted: a switched off alias
+        stays on the list, and <strong>Switch on</strong> brings it back. The database refuses an alias whose two sides
+        are the same, or that carries a long number, and the banner says why. Every add, change, switch off and switch
+        on is written to the{" "}
+        <Link href="/admin/audit" className={A}>
+          audit log
+        </Link>{" "}
+        with your name, and what the alias said before.
+      </p>
+      <DocCallout tone="warning" title="What an alias is not">
+        An alias changes how every member&apos;s search is read, so add one only for a word you have seen people
+        type, on this desk or in tickets. Never use one to push a listing, a lister or a place up the results, never
+        write a person&apos;s name or a phone number into one, and switch off any alias that makes results worse.
+      </DocCallout>
+    </>
+  );
+}
+
+const SEARCH_FIGURES: DocTableRow[] = [
+  { id: "range", cells: { figure: "Range", means: "Last 7 days or last 30 days, chosen at the top right. Every figure on the page reads the same range." } },
+  { id: "searches", cells: { figure: "Searches", means: "How many searches were run." } },
+  { id: "visits", cells: { figure: "Visits that searched", means: "How many different visits ran at least one search. A visit is counted, never named." } },
+  { id: "zero", cells: { figure: "Found nothing", means: "The share of searches that came back with no result at all." } },
+  { id: "ctr", cells: { figure: "Opened a result", means: "Results opened as a share of searches, with the count under it." } },
+  { id: "median", cells: { figure: "Median server time", means: "How long the server took to answer half of all searches, with the time 9 in 10 came in under." } },
+  { id: "top", cells: { figure: "Most searched", means: "The words searched most, with searches, visits and how many of those found nothing." } },
+  { id: "zero-words", cells: { figure: "Searches that found nothing", means: "The words that found nothing: what people want that Vallo does not have yet, or a word search does not understand yet." } },
+  { id: "places", cells: { figure: "Places searched", means: "The places named most, from the list of places Vallo knows." } },
+  { id: "tabs", cells: { figure: "Tabs, and what the words pointed at", means: "Which tab people searched in, and which kind of thing the words were about: homes, stays, restaurants, people, help and so on." } },
+  { id: "opened", cells: { figure: "What was opened", means: "Which kind of result people actually opened." } },
 ];
 
 export function aboutVallo(role: { who: string; keeps: string }): ManualSection[] {
@@ -58,6 +156,10 @@ export function aboutVallo(role: { who: string; keeps: string }): ManualSection[
             <li>
               <strong>Around and the feed.</strong> Posts, stories and local events, so Vallo is a place people come back
               to, not only a place they come once.
+            </li>
+            <li>
+              <strong>VALLO Intelligence.</strong> One search across all of it: homes, stays, restaurants, roommates,
+              people, communities, help and a member&apos;s own records. Chapter 15 says how it works.
             </li>
           </ul>
           <p>
