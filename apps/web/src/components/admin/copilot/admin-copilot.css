@@ -155,7 +155,7 @@
     flex: none;
     border-radius: var(--nf-radius-circle);
     background: var(--nf-brand-primary);
-    animation: nf-copilot-pulse 1.2s var(--nf-ease-standard) infinite;
+    animation: nf-copilot-pulse 1.2s var(--nf-ease-standard) 10;
   }
 
   .nf-copilot-thread {
@@ -566,7 +566,8 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .nf-copilot-status__dot {
+    .nf-copilot-status__dot,
+    .nf-copilot-dot {
       animation: none;
     }
   }
@@ -728,7 +729,7 @@
     padding: var(--nf-space-2xs) var(--nf-space-2xs) var(--nf-space-2xs) var(--nf-space-md);
     margin-block-end: calc(var(--nf-space-xs) + env(safe-area-inset-bottom, 0px));
     border: var(--nf-border-width) solid var(--nf-brand-edge-soft);
-    border-radius: 1.75rem;
+    border-radius: var(--nf-radius-island);
     background: var(--nf-tier-island-fill);
     -webkit-backdrop-filter: blur(var(--nf-tier-island-blur));
     backdrop-filter: blur(var(--nf-tier-island-blur));
