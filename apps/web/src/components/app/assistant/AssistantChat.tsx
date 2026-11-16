@@ -6,6 +6,7 @@ import { useOverlay } from "@/lib/ui/use-overlay";
 import { banner } from "@/lib/ui/toast";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { LogoMark, LogoWordmark, wordmarkWidth } from "@/design-system/brand/Logo";
 import { DepthWords } from "@/components/motion/DepthWords";
 import { UiIcon, type UiIconName } from "@/design-system/icons/UiIcon";
@@ -52,11 +53,13 @@ import { Icon3D } from "@/components/ui/Icon3D";
 import { AIResponse, type AIResponseStatus } from "@/components/ui/AIResponse";
 import { AnswerMarkdown } from "./AnswerMarkdown";
 import { plainAnswer } from "@/lib/text/answer-markdown";
-import { LiveIsland } from "@/components/ui/LiveIsland";
+import { ActionSheet, type ActionSheetRow } from "@/components/ui/ActionSheet";
+import { useDictation } from "./use-dictation";
 import "./assistant-answer.css";
 import "@/app/css/home.css";
 import "@/app/css/catalogue.css";
 import "@/app/css/list-views.css";
+import "./assistant-chat.css";
 
 /**
  * Vallo AI, to its governing image (`docs/design/references/BF49B814`).
@@ -66,7 +69,16 @@ import "@/app/css/list-views.css";
  * time and the ticks, the assistant's glass on the left with the concierge
  * object beside it), the real catalogue results as two-up cards inside the
  * thread, the thinking pill while the model works, the suggestion chips on a
- * rail above the composer, and the composer with the assistant's `bot` glyph in its well.
+ * rail above the composer, and the composer.
+ *
+ * SINCE 15 NOVEMBER 2026 IT READS LIKE THE CHAT APPS PEOPLE KNOW (the
+ * founder's ChatGPT screenshots, taken as a pattern and drawn in Vallo's own
+ * blue): answers are words on the page with a quiet icon row under them
+ * (copy, read aloud, share, more), the member's message is a blue bubble on
+ * the right, the composer is one floating pill (plus for the suggestions,
+ * the words, a microphone only where the browser can take dictation, and a
+ * round send that becomes Stop), and a round arrow brings a reader who has
+ * scrolled up back to the newest words. Styles: `assistant-chat.css`.
  *
  * WHAT IS REAL, because every control on this screen does its thing:
  *
@@ -278,7 +290,19 @@ export function AssistantChat({
     synth.speak(utterance);
   }, [speakingId]);
   const [awayFromEnd, setAwayFromEnd] = useState(false);
+  /* The same fact for the effects, which must not re-run on every scroll. */
+  const awayRef = useRef(false);
+  /* The next growth of the thread scrolls to the end whatever the reader was
+     doing: a question just sent, or another conversation opened. */
+  const forceEndRef = useRef(true);
   const answerWords = t.answer;
+  const router = useRouter();
+  /* The starter questions over the composer: open on a new chat, folded
+     away once a conversation is going, and brought back with the plus. */
+  const [chipsOpen, setChipsOpen] = useState(true);
+  /* The More sheet of one answer, hung from the button that opened it. */
+  const [moreFor, setMoreFor] = useState<string | null>(null);
+  const moreAnchorRef = useRef<HTMLElement | null>(null);
 
   // A question can arrive from anywhere on the platform via ?q=, e.g. the home
   // banner's quick-ask bar. It seeds the composer after mount, never auto-sends.
@@ -321,7 +345,10 @@ export function AssistantChat({
     /* A conversation left for ten minutes stays in history; the screen opens on
        a fresh chat, the way the other assistants do. A seeded preview keeps its
        own. */
-    if (latest && (seed || Date.now() - latest.updatedAt < FRESH_AFTER_MS[stored.freshAfter])) setActiveId(latest.id);
+    if (latest && (seed || Date.now() - latest.updatedAt < FRESH_AFTER_MS[stored.freshAfter])) {
+      setActiveId(latest.id);
+      setChipsOpen(false);
+    }
     if (seed?.thinking && latest) setStreamingThread(latest.id);
     setHydrated(true);
   }, [seed]);
@@ -358,11 +385,48 @@ export function AssistantChat({
   const messages = active?.messages ?? [];
   const streamingHere = streamingThread !== null && streamingThread === activeId;
 
-  /* Keep the newest bubble in view as the thread grows or switches. */
+  /* Keep the newest words in view as the thread grows, unless the reader has
+     scrolled up to read something earlier: then the thread stays where they
+     are and the round arrow over the composer takes them back down. A new
+     question or another conversation always lands at the end. */
+  const shownThread = useRef<string | null>(null);
   useEffect(() => {
     const el = scrollerRef.current;
-    if (el) el.scrollTo({ top: el.scrollHeight });
+    if (!el) return;
+    if (shownThread.current !== activeId) {
+      shownThread.current = activeId;
+      forceEndRef.current = true;
+    }
+    if (forceEndRef.current || !awayRef.current) {
+      el.scrollTo({ top: el.scrollHeight });
+      awayRef.current = false;
+      setAwayFromEnd(false);
+    }
+    forceEndRef.current = false;
   }, [messages, streamingHere, activeId]);
+
+  const scrollToLatest = useCallback(() => {
+    const el = scrollerRef.current;
+    if (!el) return;
+    const still =
+      typeof window !== "undefined" &&
+      (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ||
+        /^(calm|off)$/.test(document.documentElement.dataset.motion ?? ""));
+    el.scrollTo({ top: el.scrollHeight, behavior: still ? "auto" : "smooth" });
+  }, []);
+
+  /* Dictation, where the browser can turn speech into words itself. What is
+     heard is added after whatever was already typed, and nothing is sent
+     until the member presses Send. */
+  const dictationBase = useRef("");
+  const dictation = useDictation({
+    onText: (spoken) => {
+      const base = dictationBase.current;
+      setDraft(base && spoken ? `${base} ${spoken}` : base || spoken);
+    },
+    onRefused: () => banner.error(answerWords.micBlocked),
+  });
+  const stopDictation = dictation.stop;
 
   /* Abort any in-flight stream on navigation away from the page. */
   useEffect(() => {
@@ -597,6 +661,9 @@ export function AssistantChat({
         return;
       }
       setDraft("");
+      stopDictation();
+      setChipsOpen(false);
+      forceEndRef.current = true;
 
       const userMessage: Message = { id: makeId(), role: "user", text, at: Date.now() };
       let targetId: string;
@@ -632,7 +699,7 @@ export function AssistantChat({
 
       void runAssistant(targetId, history, serverId);
     },
-    [activeId, threads, runAssistant, consent],
+    [activeId, threads, runAssistant, consent, stopDictation],
   );
 
 
@@ -654,12 +721,14 @@ export function AssistantChat({
 
   const selectThread = (id: string) => {
     setActiveId(id);
+    setChipsOpen(false);
     closeHistory();
     inputRef.current?.focus();
   };
 
   const newChat = () => {
     setActiveId(null);
+    setChipsOpen(true);
     closeHistory();
     inputRef.current?.focus();
   };
@@ -685,6 +754,10 @@ export function AssistantChat({
 
 
   const empty = hydrated && messages.length === 0;
+  /* Read aloud is offered only where the phone has a voice. Answers appear
+     after the device's threads are read, so this never differs from the
+     server's HTML. */
+  const canSpeak = hydrated && typeof window !== "undefined" && "speechSynthesis" in window;
   const lastMessage = messages[messages.length - 1];
   const showThinking =
     streamingHere &&
@@ -705,10 +778,61 @@ export function AssistantChat({
     />
   );
 
+  const handOff = () =>
+    saveHandoff(buildHandoff(messages.map((m) => ({ role: m.role, text: m.text })), draft));
+
+  /* The More sheet's rows for the answer it was opened on. */
+  const moreIndex = moreFor ? messages.findIndex((m) => m.id === moreFor) : -1;
+  const canAskAgain =
+    moreIndex >= 0 &&
+    moreIndex === messages.length - 1 &&
+    messages[moreIndex - 1]?.role === "user" &&
+    !streamingHere;
+  const moreRows: ActionSheetRow[] = [
+    ...(canAskAgain && activeId && moreFor
+      ? [
+          {
+            id: "again",
+            label: answerWords.askAgain,
+            hint: answerWords.askAgainHint,
+            icon: "repost-loop" as const,
+            onSelect: () => retry(activeId, moreFor),
+          },
+        ]
+      : []),
+    {
+      id: "person",
+      label: PERSON_WORDS.label,
+      hint: PERSON_WORDS.hint,
+      icon: "headset",
+      chevron: true,
+      onSelect: () => {
+        handOff();
+        router.push("/assistant/person");
+      },
+    },
+  ];
+
   /* History (on a phone) and settings: in the surface's own bar on
      `/assistant`, beside the name pair inside a workspace. */
   const barActions = (
     <div className="nf-ai__bar-actions">
+      {/* GRADE 1 (P1.4, R70): a person, always one tap away and never
+          behind a failed answer. What the member was asking goes with them
+          (`lib/assistant/handoff.ts`), so the support team starts from it;
+          Back returns here. In the bar, so it is there on every screen of
+          the conversation without a line of its own under the composer. */}
+      <ButtonLink
+        href="/assistant/person"
+        variant="icon"
+        leadingIcon="headset"
+        aria-label={PERSON_WORDS.label}
+        title={PERSON_WORDS.hint}
+        data-testid="assistant-talk-to-person"
+        onClick={handOff}
+      >
+        <span className="sr-only">{PERSON_WORDS.label}</span>
+      </ButtonLink>
       <Button
         variant="icon"
         leadingIcon="history"
@@ -729,29 +853,6 @@ export function AssistantChat({
 
   return (
     <div className="nf-assistant px-md pb-[max(1rem,env(safe-area-inset-bottom))] sm:px-lg lg:px-xl">
-      {/* An answer that is still streaming while the reader has scrolled up
-          through the thread: a status island that says so and takes them
-          back to it. It exists only while that is true (a real stream, a
-          real scroll position), carries no progress it does not have, and
-          sits below the header, never over the dock. */}
-      {streamingHere && awayFromEnd ? (
-        <LiveIsland
-          label={answerWords.answerLabel}
-          title={answerWords.islandTitle}
-          detail={answerWords.islandDetail}
-          icon="bot"
-          action={{
-            label: answerWords.islandOpen,
-            onClick: () => {
-              const el = scrollerRef.current;
-              if (el) el.scrollTo({ top: el.scrollHeight });
-            },
-          }}
-          expandLabel={answerWords.expand}
-          collapseLabel={answerWords.collapse}
-          data-testid="assistant-island"
-        />
-      ) : null}
       {/* --------------------------------------------------------- header */}
       {/* On `/assistant` the route is immersive, so this bar is the whole
           chrome: back, the lockup, history on a phone, settings; then the
@@ -780,10 +881,17 @@ export function AssistantChat({
             </Link>
             {barActions}
           </div>
-          <div className="nf-ai__ident">
-            <h1 className="nf-ai__title">{copy.title}</h1>
-            <p className="nf-ai__sub">{copy.sub}</p>
-          </div>
+          {/* The name pair greets a new chat. Once a conversation is going
+              the thread has the room, as in the chat apps people know; the
+              page keeps its name for a screen reader either way. */}
+          {empty || !hydrated ? (
+            <div className="nf-ai__ident">
+              <h1 className="nf-ai__title">{copy.title}</h1>
+              <p className="nf-ai__sub">{copy.sub}</p>
+            </div>
+          ) : (
+            <h1 className="sr-only">{copy.title}</h1>
+          )}
         </>
       )}
 
@@ -808,7 +916,9 @@ export function AssistantChat({
             aria-label="Conversation"
             onScroll={(e) => {
               const el = e.currentTarget;
-              setAwayFromEnd(el.scrollHeight - el.scrollTop - el.clientHeight > 160);
+              const away = el.scrollHeight - el.scrollTop - el.clientHeight > 160;
+              awayRef.current = away;
+              setAwayFromEnd(away);
             }}
           >
             <ChatWatermark hidden={!empty} />
@@ -902,6 +1012,10 @@ export function AssistantChat({
                 <div key={m.id} className="nf-rise flex flex-col gap-xs">
                   {m.text.trim() && (
                     <div className="nf-ai__turn">
+                      {/* The answer is words on the page, as in the chat apps
+                          people know: no card, no name over it on screen. It is
+                          still announced as Vallo AI's (the article's name).
+                          Stop lives in the composer, where Send was. */}
                       <AIResponse
                         className="nf-ai-answer"
                         status={status}
@@ -912,64 +1026,71 @@ export function AssistantChat({
                           stopped: answerWords.statusStopped,
                           error: answerWords.statusError,
                         }}
-                        stopLabel={answerWords.stop}
-                        onStop={() => abortRef.current?.abort()}
                         {...(m.error ? { errorMessage: m.text } : {})}
-                        actions={[
-                          {
-                            id: "copy",
-                            label: copiedId === m.id ? answerWords.copied : answerWords.copy,
-                            icon: copiedId === m.id ? "check" : "clipboard-list",
-                            onSelect: () => {
-                              void navigator.clipboard
-                                ?.writeText(plainAnswer(m.text))
-                                .then(() => {
-                                  setCopiedId(m.id);
-                                  banner.quick(answerWords.copied);
-                                  window.setTimeout(() => setCopiedId((id) => (id === m.id ? null : id)), 1600);
-                                })
-                                .catch(() => undefined);
-                            },
-                          },
-                          /* Read on this phone, by the phone's own voice. Offered only where
-                             the phone can do it, so the button never does nothing. */
-                          ...(typeof window !== "undefined" && "speechSynthesis" in window
-                            ? [
-                                {
-                                  id: "read",
-                                  label: speakingId === m.id ? answerWords.stopReading : answerWords.readAloud,
-                                  icon: "volume" as const,
-                                  onSelect: () => readAloud(m.id, m.text),
-                                },
-                              ]
-                            : []),
-                          {
-                            id: "share",
-                            label: answerWords.share,
-                            icon: "share",
-                            onSelect: () => {
-                              const words = plainAnswer(m.text);
-                              if (typeof navigator !== "undefined" && typeof navigator.share === "function") {
-                                void navigator.share({ text: words }).catch(() => undefined);
-                                return;
-                              }
-                              void navigator.clipboard
-                                ?.writeText(words)
-                                .then(() => banner.quick(answerWords.copied))
-                                .catch(() => undefined);
-                            },
-                          },
-                        ]}
                         data-testid="assistant-answer"
                       >
                         {m.error ? null : <AnswerMarkdown text={m.text} streaming={thisStreaming} />}
                         {status === "stopped" ? (
                           <span className="nf-ai-answer__stopped">{answerWords.stoppedNote}</span>
                         ) : null}
-                        {stamp ? <span className="nf-ai__stamp nf-numeric">{stamp}</span> : null}
                       </AIResponse>
                     </div>
                   )}
+                  {/* THE QUIET ROW UNDER A FINISHED ANSWER: icons only, each
+                      named and titled, each doing its thing. No thumbs: nothing
+                      would receive them. */}
+                  {(status === "done" || status === "stopped") && m.text.trim() ? (
+                    <div className="nf-ai-acts" role="group" aria-label={answerWords.actionsLabel}>
+                      <ActButton
+                        icon={copiedId === m.id ? "check" : "clipboard-list"}
+                        label={copiedId === m.id ? answerWords.copied : answerWords.copy}
+                        onClick={() => {
+                          void navigator.clipboard
+                            ?.writeText(plainAnswer(m.text))
+                            .then(() => {
+                              setCopiedId(m.id);
+                              banner.quick(answerWords.copied);
+                              window.setTimeout(() => setCopiedId((id) => (id === m.id ? null : id)), 1600);
+                            })
+                            .catch(() => undefined);
+                        }}
+                      />
+                      {/* Read on this phone, by the phone's own voice. Offered
+                          only where the phone can do it. */}
+                      {canSpeak ? (
+                        <ActButton
+                          icon="volume"
+                          label={speakingId === m.id ? answerWords.stopReading : answerWords.readAloud}
+                          pressed={speakingId === m.id}
+                          onClick={() => readAloud(m.id, m.text)}
+                        />
+                      ) : null}
+                      <ActButton
+                        icon="share"
+                        label={answerWords.share}
+                        onClick={() => {
+                          const words = plainAnswer(m.text);
+                          if (typeof navigator !== "undefined" && typeof navigator.share === "function") {
+                            void navigator.share({ text: words }).catch(() => undefined);
+                            return;
+                          }
+                          void navigator.clipboard
+                            ?.writeText(words)
+                            .then(() => banner.quick(answerWords.copied))
+                            .catch(() => undefined);
+                        }}
+                      />
+                      <ActButton
+                        icon="more"
+                        label={answerWords.more}
+                        expanded={moreFor === m.id}
+                        onClick={(el) => {
+                          moreAnchorRef.current = el;
+                          setMoreFor(m.id);
+                        }}
+                      />
+                    </div>
+                  ) : null}
                   {m.error && activeId && m.text.trim() && (
                     <Button
                       variant="secondary"
@@ -1031,89 +1152,137 @@ export function AssistantChat({
                     stopped: answerWords.statusStopped,
                     error: answerWords.statusError,
                   }}
-                  stopLabel={answerWords.stop}
-                  onStop={() => abortRef.current?.abort()}
                   data-testid="assistant-thinking"
                 />
               </div>
             )}
           </div>
 
-          {/* ---------------------------------------------- suggestions */}
-          <div className="nf-ai__chips" role="group" aria-label="Suggested questions">
-            {starters.map((s, i) => (
+          {/* ------------------------------------------------------- dock */}
+          <div className="nf-ai__dock">
+            {/* BACK TO THE NEWEST, while the reader has scrolled up away from
+                it. Gone at the end of the thread. While an answer is still
+                arriving it says so, so nobody misses it. */}
+            {awayFromEnd && messages.length > 0 ? (
               <button
-                key={s.text}
                 type="button"
-                onClick={() => send(s.text)}
-                disabled={streamingHere}
-                className={`nf-ai__chip nf-tap ${empty ? "nf-rise-seq" : ""}`}
-                style={empty ? ({ "--nf-rise-i": i + 2 } as React.CSSProperties) : undefined}
+                className="nf-ai__latest nf-tap"
+                aria-label={streamingHere ? `${answerWords.islandTitle}. ${answerWords.latest}` : answerWords.latest}
+                title={answerWords.latest}
+                data-streaming={streamingHere || undefined}
+                data-testid="assistant-latest"
+                onClick={scrollToLatest}
               >
-                <UiIcon name={s.icon} size={20} />
-                {/* The label is its own element so it can clamp. A bare text
-                    node inside the flex row had nothing to clamp ON, which is
-                    why a long starter was cut by the rail rather than ended
-                    by an ellipsis (R1 A4). */}
-                <span className="nf-ai__chip-label">{s.text}</span>
+                <UiIcon name="arrow-down" size={20} />
               </button>
-            ))}
-          </div>
+            ) : null}
 
-          {/* ----------------------------------------------------- composer */}
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              send(draft);
-            }}
-            className="nf-ai__composer"
-          >
-            <label htmlFor="assistant-input" className="sr-only">
-              Message Vallo AI
-            </label>
-            <div className="nf-ai__well">
-              <UiIcon name="bot" size={20} />
-              <input
-                id="assistant-input"
-                ref={inputRef}
-                type="text"
-                value={draft}
-                onChange={(e) => setDraft(e.target.value)}
-                placeholder={copy.placeholder}
-                autoComplete="off"
-                enterKeyHint="send"
-                className="nf-ai__input"
-              />
-            </div>
-            <Button
-              type="submit"
-              variant="primary"
-              size="lg"
-              iconOnly
-              leadingIcon="arrow-up"
-              aria-label="Send message"
-              disabled={!draft.trim()}
-              className="nf-ai__send"
-            />
-          </form>
-          {/* GRADE 1 (P1.4, R70): a person, always one tap away and never
-              behind a failed answer. What the member was asking goes with
-              them (`lib/assistant/handoff.ts`), so the support team starts
-              from it; Back returns here. */}
-          <div className="nf-ai__person">
-            <ButtonLink
-              href="/assistant/person"
-              variant="quiet"
-              size="sm"
-              leadingIcon="headset"
-              title={PERSON_WORDS.hint}
-              data-testid="assistant-talk-to-person"
-              onClick={() =>
-                saveHandoff(buildHandoff(messages.map((m) => ({ role: m.role, text: m.text })), draft))
-              }
+            {/* ---------------------------------------------- suggestions */}
+            {chipsOpen ? (
+              <div id="assistant-suggestions" className="nf-ai__chips" role="group" aria-label={answerWords.suggestions}>
+                {starters.map((s, i) => (
+                  <button
+                    key={s.text}
+                    type="button"
+                    onClick={() => send(s.text)}
+                    disabled={streamingHere}
+                    className={`nf-ai__chip nf-tap ${empty ? "nf-rise-seq" : ""}`}
+                    style={empty ? ({ "--nf-rise-i": i + 2 } as React.CSSProperties) : undefined}
+                  >
+                    <UiIcon name={s.icon} size={20} />
+                    {/* The label is its own element so it can clamp. A bare text
+                        node inside the flex row had nothing to clamp ON, which is
+                        why a long starter was cut by the rail rather than ended
+                        by an ellipsis (R1 A4). */}
+                    <span className="nf-ai__chip-label">{s.text}</span>
+                  </button>
+                ))}
+              </div>
+            ) : null}
+
+            {/* ----------------------------------------------------- composer */}
+            {/* One floating pill: the plus that brings the suggested questions
+                back, the words, the microphone where the browser can take
+                dictation, and the round send that becomes Stop while an
+                answer is arriving. */}
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                send(draft);
+              }}
+              className="nf-ai__composer"
             >
-              {PERSON_WORDS.label}
-            </ButtonLink>
+              <button
+                type="button"
+                className="nf-ai__tool nf-tap"
+                aria-label={answerWords.suggestions}
+                title={answerWords.suggestions}
+                aria-expanded={chipsOpen}
+                {...(chipsOpen ? { "aria-controls": "assistant-suggestions" } : {})}
+                onClick={() => setChipsOpen((open) => !open)}
+                data-testid="assistant-suggest-toggle"
+              >
+                <UiIcon name="plus" size={22} />
+              </button>
+              <label htmlFor="assistant-input" className="sr-only">
+                Message Vallo AI
+              </label>
+              <div className="nf-ai__well">
+                <input
+                  id="assistant-input"
+                  ref={inputRef}
+                  type="text"
+                  value={draft}
+                  onChange={(e) => setDraft(e.target.value)}
+                  placeholder={copy.placeholder}
+                  autoComplete="off"
+                  enterKeyHint="send"
+                  className="nf-ai__input"
+                />
+              </div>
+              {dictation.supported ? (
+                <button
+                  type="button"
+                  className="nf-ai__tool nf-ai__mic nf-tap"
+                  aria-label={answerWords.dictate}
+                  title={dictation.listening ? answerWords.stopDictating : answerWords.dictate}
+                  aria-pressed={dictation.listening}
+                  data-testid="assistant-dictate"
+                  onClick={() => {
+                    if (!dictation.listening) dictationBase.current = draft.trim();
+                    dictation.toggle();
+                  }}
+                >
+                  <UiIcon name={dictation.listening ? "mic-off" : "mic"} size={22} />
+                </button>
+              ) : null}
+              {streamingHere ? (
+                <Button
+                  type="button"
+                  variant="primary"
+                  size="lg"
+                  iconOnly
+                  aria-label={answerWords.stopAnswer}
+                  title={answerWords.stopAnswer}
+                  onClick={() => abortRef.current?.abort()}
+                  className="nf-ai__send nf-ai__send--stop"
+                  data-testid="assistant-stop"
+                >
+                  <span className="nf-ai__stop-mark" aria-hidden="true" />
+                </Button>
+              ) : (
+                <Button
+                  type="submit"
+                  variant="primary"
+                  size="lg"
+                  iconOnly
+                  leadingIcon="arrow-up"
+                  aria-label={answerWords.send}
+                  disabled={!draft.trim()}
+                  className="nf-ai__send"
+                />
+              )}
+            </form>
           </div>
           {privateAccess ? (
             <p className="nf-ai__note" data-testid="ai-private-banner">
@@ -1125,6 +1294,20 @@ export function AssistantChat({
           </p>
         </section>
       </div>
+
+      {/* MORE, for one answer: ask the same question again (the newest answer
+          only, by the same retry the failed answer uses), and the way to a
+          person with this conversation. */}
+      <ActionSheet
+        open={moreFor !== null}
+        onOpenChange={(open) => {
+          if (!open) setMoreFor(null);
+        }}
+        title={answerWords.moreTitle}
+        anchor={moreAnchorRef}
+        testId="assistant-more"
+        rows={moreRows}
+      />
 
       <AssistantSettingsSheet
         open={settingsOpen}
@@ -1270,5 +1453,37 @@ function ThreadListingCard({
         </span>
       </Link>
     </article>
+  );
+}
+
+/**
+ * One of the quiet icons under an answer: a 44px target round a small glyph,
+ * named for a screen reader and titled for a pointer.
+ */
+function ActButton({
+  icon,
+  label,
+  onClick,
+  pressed,
+  expanded,
+}: {
+  icon: UiIconName;
+  label: string;
+  onClick: (el: HTMLButtonElement) => void;
+  pressed?: boolean;
+  expanded?: boolean;
+}) {
+  return (
+    <button
+      type="button"
+      className="nf-ai-acts__btn nf-tap"
+      aria-label={label}
+      title={label}
+      {...(pressed !== undefined ? { "aria-pressed": pressed } : {})}
+      {...(expanded !== undefined ? { "aria-haspopup": "dialog" as const, "aria-expanded": expanded } : {})}
+      onClick={(e) => onClick(e.currentTarget)}
+    >
+      <UiIcon name={icon} size={18} />
+    </button>
   );
 }

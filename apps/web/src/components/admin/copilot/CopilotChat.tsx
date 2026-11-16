@@ -34,7 +34,7 @@ function ago(iso: string, now: number): string {
   const hours = Math.round(minutes / 60);
   if (hours < 24) return `${hours} h ago`;
   const days = Math.round(hours / 24);
-  return days < 7 ? `${days} d ago` : new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "short" });
+  return days < 7 ? `${days} d ago` : new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "short", timeZone: "Africa/Lagos" });
 }
 
 function deskLabel(desk: string): string {

@@ -83,8 +83,26 @@ export function tidyStreaming(text: string): string {
   return lines.join("\n");
 }
 
+/**
+ * No em dash reaches a member. After a step's number it becomes a colon
+ * ("Step 2: Complete the setup"); anywhere else a comma, with the spaces
+ * around it tidied so the words do not read "Step 2 ,  pay".
+ */
+function withoutEmDashes(text: string): string {
+  return text
+    .replace(new RegExp(`(\\bstep[ \\t]+\\d+)[ \\t]*${EM_DASH}[ \\t]*`, "gi"), "$1: ")
+    .replace(new RegExp(`[ \\t]*${EM_DASH}[ \\t]*`, "g"), ", ");
+}
+
+/**
+ * A short line that names a step and nothing else ("Step 2: Complete the
+ * voice setup", bold or not) opens that step's section, the way a heading
+ * would. A long line or a full sentence stays a paragraph.
+ */
+const STEP_LINE = /^\s*(?:\*\*)?(step\s+\d+\s*[:.)-]\s*[^*\n]{1,64}?)(?:\*\*)?\s*$/i;
+
 export function parseAnswer(source: string, options: { streaming?: boolean } = {}): AnswerBlock[] {
-  const text = (options.streaming ? tidyStreaming(source) : source).replaceAll(EM_DASH, ", ").replace(/\r/g, "");
+  const text = withoutEmDashes(options.streaming ? tidyStreaming(source) : source).replace(/\r/g, "");
   const lines = text.split("\n");
   const blocks: AnswerBlock[] = [];
   let paragraph: string[] = [];
@@ -165,6 +183,13 @@ export function parseAnswer(source: string, options: { streaming?: boolean } = {
     if (boldLine) {
       flush();
       blocks.push({ kind: "h", level: 3, text: (boldLine[1] ?? "").replace(/:\s*$/, "") });
+      continue;
+    }
+
+    const step = STEP_LINE.exec(line);
+    if (step && !/[.!?]$/.test((step[1] ?? "").trim())) {
+      flush();
+      blocks.push({ kind: "h", level: 3, text: (step[1] ?? "").trim().replace(/^(step\s+\d+)\s*[:.)-]\s*/i, "$1: ") });
       continue;
     }
 

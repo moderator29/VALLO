@@ -16,6 +16,8 @@ import { PERSON } from "../../_fixtures/people";
  * photograph a card that has one. The seed is never written to the device.
  */
 const NOW = Date.now();
+/* Written the way the model often writes a step, to show it is drawn without one. */
+const DASH = String.fromCharCode(0x2014);
 const at = (minutesAgo: number) => NOW - minutesAgo * 60_000;
 
 const RESULTS: AssistantListingItem[] = [
@@ -102,6 +104,8 @@ const RICH: Thread = {
         "",
         "## How to start",
         "",
+        `Step 1 ${DASH} Find the place`,
+        "",
         "1. Open **Stays** or **Property** and set where and when.",
         "2. Message the lister and book a viewing inside Vallo.",
         "3. Agree and pay in the app, never outside it.",
@@ -111,6 +115,9 @@ const RICH: Thread = {
         "| Property | Rent, buy, land, shops |",
         "| Stays | Shortlets and hotels |",
         "",
+        "**My verdict:**",
+        "Start with Stays if you need a bed this week; Property if you are moving.",
+        "",
         "> Never pay anyone outside Vallo. A real lister never asks you to.",
         "",
         "See [Stays](/stays) to start looking.",
@@ -119,15 +126,44 @@ const RICH: Thread = {
   ],
 };
 
+/* `?view=choice`: viewing times as the choice card (radio rows and one
+   Continue), under a short answer. */
+const CHOICE: Thread = {
+  ...THREAD,
+  id: "preview-thread-choice",
+  messages: [
+    { id: "c1", role: "user", text: "Can I see the Lekki flat this week?", at: at(3) },
+    {
+      id: "c2",
+      role: "assistant",
+      at: at(2),
+      text: "Yes. These are the lister's open times this week. Pick one and I will set it up for you to confirm.",
+      blocks: [
+        {
+          type: "slots",
+          listingId: "00000000-0000-4000-8000-0000000000a2",
+          title: "2 Bedroom Apartment, Lekki Phase 1",
+          slots: [
+            { slotAt: "2026-11-17T09:00:00Z", label: "Tue 17 Nov, 10:00" },
+            { slotAt: "2026-11-18T13:00:00Z", label: "Wed 18 Nov, 14:00" },
+            { slotAt: "2026-11-20T10:00:00Z", label: "Fri 20 Nov, 11:00" },
+          ],
+        },
+      ],
+    },
+  ],
+};
+
 export default async function AssistantPreview({ searchParams }: { searchParams: Promise<{ view?: string }> }) {
   const locale = await getLocale();
-  const rich = (await searchParams).view === "rich";
+  const view = (await searchParams).view;
+  const rich = view === "rich";
   return (
     <main id="main" className="flex h-dvh min-w-0 flex-col overflow-hidden">
       <AssistantChat
         locale={locale}
         viewer={{ initials: PERSON.name.slice(0, 1), avatarUrl: PERSON.avatarUrl }}
-        seed={rich ? { threads: [RICH] } : { threads: [THREAD], thinking: true }}
+        seed={rich ? { threads: [RICH] } : view === "choice" ? { threads: [CHOICE] } : { threads: [THREAD], thinking: true }}
         t={assistantCopyOf(getDictionary(locale))}
       />
     </main>

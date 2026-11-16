@@ -57,6 +57,19 @@ describe("an answer, read as the model wrote it", () => {
 
   it("never writes an em dash into what a member reads", () => {
     expect(JSON.stringify(parseAnswer(`Step 2 ${String.fromCharCode(0x2014)} pay`))).not.toContain(String.fromCharCode(0x2014));
+    expect(parseAnswer(`Cheap${String.fromCharCode(0x2014)}and close to work.`)).toEqual([{ kind: "p", text: "Cheap, and close to work." }]);
+  });
+
+  it("opens a section for a short step line, with its dash turned into a colon", () => {
+    const dash = String.fromCharCode(0x2014);
+    expect(parseAnswer(`Step 2 ${dash} Complete the voice setup\nOpen settings first.`)).toEqual([
+      { kind: "h", level: 3, text: "Step 2: Complete the voice setup" },
+      { kind: "p", text: "Open settings first." },
+    ]);
+    expect(parseAnswer(`**Step 3 ${dash} Pay inside Vallo**`)).toEqual([{ kind: "h", level: 3, text: "Step 3: Pay inside Vallo" }]);
+    expect(parseAnswer("**The correction:**")).toEqual([{ kind: "h", level: 3, text: "The correction" }]);
+    /* A full sentence that happens to start with a step stays a paragraph. */
+    expect(parseAnswer("Step 1: open the app.")[0]?.kind).toBe("p");
   });
 });
 

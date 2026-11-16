@@ -77,7 +77,10 @@ describe.skipIf(!hasBrowser && !process.env.CI)("assistant blocks", () => {
     });
     try {
       await page.getByRole("button", { name: "Request viewing" }).click();
-      await page.getByRole("button", { name: "Tue 10 Nov, 10:00" }).click();
+      /* The times are a choice card: tick one, then Continue. */
+      expect(await page.getByRole("button", { name: "Continue" }).isDisabled()).toBe(true);
+      await page.getByRole("radio", { name: "Tue 10 Nov, 10:00" }).check();
+      await page.getByRole("button", { name: "Continue" }).click();
       expect(await page.getByText("Nothing is booked until you confirm.").isVisible()).toBe(true);
       expect(await page.getByText("Booked and confirmed").count()).toBe(0);
       await page.getByRole("button", { name: "Confirm viewing" }).click();

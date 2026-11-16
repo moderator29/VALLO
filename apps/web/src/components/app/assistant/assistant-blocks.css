@@ -1,5 +1,5 @@
 @layer components {
-  /* THE ASSISTANT'S INTERACTIVE BLOCKS: cards on a rail, times as chips, money as rows. */
+  /* THE ASSISTANT'S INTERACTIVE BLOCKS: cards on a rail, times as a choice card, money as rows. */
   .nf-aib {
     display: grid;
     gap: var(--nf-space-sm);
@@ -151,28 +151,72 @@
     box-shadow: var(--nf-act-shadow);
     color: var(--nf-act-on);
   }
-  .nf-aib__chips {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--nf-space-xs);
+  /* A CHOICE CARD: the question in bold, one radio row per option, and one
+     full-width Continue. The rows are whole-row targets; the ticked one has
+     a filled Vallo blue dot and a lit edge. */
+  .nf-aib__choice {
+    gap: var(--nf-space-sm);
+    border-radius: var(--nf-radius-xl);
   }
-  .nf-aib__chip {
-    min-block-size: 2.75rem;
-    padding-inline: var(--nf-space-md);
-    border: var(--nf-border-width) solid var(--nf-act-well-edge);
-    border-radius: var(--nf-radius-control);
-    background: var(--nf-act-well);
+  .nf-aib__choice-q {
+    margin: 0;
+    font-size: var(--nf-text-body-lg);
+    font-weight: 700;
+    line-height: 1.3;
     color: var(--nf-content-primary);
-    font: inherit;
-    font-size: var(--nf-text-body-sm);
+  }
+  .nf-aib__choice .nf-aib__sub {
+    margin-block-start: calc(-1 * var(--nf-space-xs));
+  }
+  .nf-aib__options {
+    display: grid;
+    gap: var(--nf-space-2xs);
+  }
+  .nf-aib__option {
+    display: flex;
+    align-items: center;
+    gap: var(--nf-space-sm);
+    min-block-size: 3rem;
+    padding: var(--nf-space-xs) var(--nf-space-sm);
+    border: var(--nf-border-width) solid var(--nf-border-subtle);
+    border-radius: var(--nf-radius-md);
+    color: var(--nf-content-primary);
+    font-size: var(--nf-text-body);
     cursor: pointer;
+    transition:
+      border-color var(--nf-duration-fast) var(--nf-ease-standard),
+      background-color var(--nf-duration-fast) var(--nf-ease-standard);
   }
-  .nf-aib__chip--on {
-    background: var(--nf-act-fill);
-    color: var(--nf-act-on);
+  .nf-aib__option:has(.nf-aib__radio:checked) {
+    border-color: var(--nf-brand-edge-strong);
+    background: color-mix(in oklab, var(--nf-brand-primary) 10%, transparent);
   }
-  .nf-aib__chip:disabled {
+  .nf-aib__option:has(.nf-aib__radio:disabled) {
     cursor: default;
+  }
+  .nf-aib__radio {
+    flex: none;
+    appearance: none;
+    inline-size: 1.25rem;
+    block-size: 1.25rem;
+    margin: 0;
+    border: var(--nf-border-width-strong) solid var(--nf-border-strong);
+    border-radius: var(--nf-radius-circle);
+    background: transparent;
+    cursor: inherit;
+  }
+  .nf-aib__radio:checked {
+    border-color: var(--nf-brand-primary);
+    background: radial-gradient(circle, var(--nf-brand-primary) 0 42%, transparent 46%);
+  }
+  .nf-aib__radio:focus-visible {
+    outline: var(--nf-focus-ring-width) solid var(--nf-focus-ring);
+    outline-offset: var(--nf-focus-ring-offset);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .nf-aib__option {
+      transition: none;
+    }
   }
   .nf-aib__status {
     margin: 0;

@@ -3,7 +3,8 @@
 import { banner } from "@/lib/ui/toast";
 import Image from "next/image";
 import Link from "next/link";
-import { useCallback, useState } from "react";
+import { useCallback, useId, useState } from "react";
+import { Button } from "@/components/ui/Button";
 import {
   assistantDecide,
   assistantListingPhotos,
@@ -180,8 +181,12 @@ function SlotsBlock({
   runner: Runner;
   onProposed: (block: AssistantBlock[]) => void;
 }) {
+  /* `chosen` is the radio the member has ticked; `picked` is the time sent to
+     the server with Continue, and holds the card still while it is checked. */
+  const [chosen, setChosen] = useState<string | null>(null);
   const [picked, setPicked] = useState<string | null>(null);
   const [status, setStatus] = useStatus();
+  const ids = useId();
   const choose = async (slot: AssistantSlot) => {
     setPicked(slot.slotAt);
     setStatus({ tone: "busy", text: "Checking that time is still open..." });
@@ -233,33 +238,51 @@ function SlotsBlock({
     ]);
   };
   void runner;
+  const question = questionFor(moveFrom);
+  const chosenSlot = slots.find((s) => s.slotAt === chosen);
+  /* A CHOICE CARD (the ChatGPT reference, in Vallo's tokens): the question in
+     bold, one radio row per open time, and one full-width Continue that sends
+     the ticked time to the same server check a tap on a time used to. */
   return (
-    <section className="nf-aib__panel" aria-label={`Viewing times for ${title}`}>
-      <header className="nf-aib__head">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={GLYPH.slots} alt="" width={28} height={28} className="nf-aib__glyph" />
-        <div>
-          <h3 className="nf-aib__title">{moveFrom ? "Pick a new time" : "Pick a viewing time"}</h3>
-          <p className="nf-aib__sub">{title}</p>
-        </div>
-      </header>
-      <div className="nf-aib__chips" role="group" aria-label="Open times">
+    <section className="nf-aib__panel nf-aib__choice" aria-labelledby={`${ids}-q`}>
+      <h3 id={`${ids}-q`} className="nf-aib__choice-q">
+        {question}
+      </h3>
+      <p className="nf-aib__sub">{title}</p>
+      <div className="nf-aib__options" role="radiogroup" aria-labelledby={`${ids}-q`}>
         {slots.map((s) => (
-          <button
-            key={s.slotAt}
-            type="button"
-            className={`nf-aib__chip${picked === s.slotAt ? " nf-aib__chip--on" : ""}`}
-            aria-pressed={picked === s.slotAt}
-            disabled={picked !== null}
-            onClick={() => void choose(s)}
-          >
-            {s.label}
-          </button>
+          <label key={s.slotAt} className="nf-aib__option">
+            <input
+              type="radio"
+              name={`${ids}-slot`}
+              value={s.slotAt}
+              checked={chosen === s.slotAt}
+              disabled={picked !== null}
+              onChange={() => setChosen(s.slotAt)}
+              className="nf-aib__radio"
+            />
+            <span>{s.label}</span>
+          </label>
         ))}
       </div>
+      <Button
+        variant="primary"
+        shape="pill"
+        full
+        disabled={!chosenSlot || picked !== null}
+        onClick={() => {
+          if (chosenSlot) void choose(chosenSlot);
+        }}
+      >
+        {picked !== null ? "Checking..." : "Continue"}
+      </Button>
       <StatusLine status={status} />
     </section>
   );
+}
+
+function questionFor(moveFrom: string | undefined): string {
+  return moveFrom ? "Pick a new time" : "Pick a viewing time";
 }
 
 /* ----------------------------------------------------------------- summary */

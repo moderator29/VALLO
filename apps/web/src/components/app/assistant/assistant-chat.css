@@ -1,0 +1,206 @@
+/*
+ * THE ASSISTANT AS A CHAT APP (the founder, 15 November 2026, after the
+ * ChatGPT reference: "clean and lovely in our way, that people find
+ * attractive"). The pattern, in Vallo's own blue and tokens:
+ *
+ *   - the answer is words on the page, full width, with no card and no name
+ *     over it on screen (it is still announced as Vallo AI's);
+ *   - the member's own message is a rounded Vallo blue bubble on the right;
+ *   - under a finished answer, a quiet row of small icons;
+ *   - the composer is one floating pill: plus, the words, the microphone
+ *     where the browser can take dictation, and the round blue send that
+ *     becomes Stop while an answer arrives;
+ *   - a round arrow over the composer takes the reader back to the newest
+ *     words when they have scrolled up.
+ *
+ * Icons keep whatever colour the icon system gives them: nothing here sets
+ * the colour of a glyph.
+ */
+@layer components {
+  /* ------------------------------------------------------------ the thread */
+
+  /* Room between turns, and no rule under the bar: the bar is the chrome. */
+  .nf-assistant .nf-ai__thread {
+    gap: var(--nf-space-lg);
+    padding-block: var(--nf-space-xs) var(--nf-space-xl);
+    border-top-color: transparent;
+  }
+
+  /* THE MEMBER'S MESSAGE: Vallo blue, white words, rounded all round, at
+     most four fifths of the thread. */
+  .nf-assistant .nf-ai__turn--mine .nf-ai__bubble--mine {
+    max-width: 80%;
+    padding: var(--nf-space-xs) var(--nf-space-md);
+    border: 0;
+    border-radius: var(--nf-radius-xl);
+    background: var(--nf-brand-primary);
+    box-shadow: none;
+    color: var(--nf-content-on-brand);
+    font-size: var(--nf-text-body);
+    line-height: 1.45;
+  }
+
+  /* THE ANSWER'S NAME stays for a screen reader (the article is named Vallo
+     AI) and leaves the screen while there are words to read. Thinking keeps
+     its orb and word; a failed answer keeps its warning. */
+  .nf-assistant .nf-ai.nf-ai-answer:is([data-status="done"], [data-status="streaming"], [data-status="stopped"]) .nf-ai__head {
+    position: absolute;
+    inline-size: 1px;
+    block-size: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+  .nf-assistant .nf-ai.nf-ai-answer[data-status="thinking"] .nf-ai__head > :first-child {
+    display: grid;
+  }
+  .nf-assistant .nf-ai.nf-ai-answer[data-status="thinking"] .nf-ai__head {
+    gap: var(--nf-space-xs);
+  }
+
+  /* ------------------------------------------------- the row under an answer */
+
+  .nf-ai-acts {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    /* The first glyph lines up with the answer's first letter. */
+    margin-block-start: calc(-1 * var(--nf-space-xs));
+    margin-inline-start: calc(-1 * var(--nf-space-xs));
+  }
+  .nf-ai-acts__btn {
+    display: inline-grid;
+    place-items: center;
+    inline-size: 2.75rem;
+    block-size: 2.75rem;
+    border-radius: var(--nf-radius-circle);
+    background: transparent;
+    opacity: 0.78;
+    transition:
+      background-color var(--nf-duration-fast) var(--nf-ease-standard),
+      opacity var(--nf-duration-fast) var(--nf-ease-standard);
+  }
+  @media (hover: hover) {
+    .nf-ai-acts__btn:hover {
+      opacity: 1;
+      background: color-mix(in oklab, var(--nf-brand-primary) 10%, transparent);
+    }
+  }
+  .nf-ai-acts__btn:focus-visible {
+    opacity: 1;
+    outline: var(--nf-focus-ring-width) solid var(--nf-focus-ring);
+    outline-offset: calc(-1 * var(--nf-focus-ring-width));
+  }
+  .nf-ai-acts__btn:is([aria-pressed="true"], [aria-expanded="true"]) {
+    opacity: 1;
+    background: color-mix(in oklab, var(--nf-brand-primary) 16%, transparent);
+  }
+
+  /* --------------------------------------------------------------- the dock */
+
+  .nf-assistant .nf-ai__dock {
+    position: relative;
+  }
+  .nf-assistant .nf-ai__dock .nf-ai__chips {
+    padding-block: var(--nf-space-xs) 0;
+  }
+
+  /* Back to the newest words: a round arrow just over the composer. */
+  .nf-ai__latest {
+    position: absolute;
+    z-index: 3;
+    inset-block-end: calc(100% + var(--nf-space-sm));
+    inset-inline-start: 50%;
+    display: grid;
+    place-items: center;
+    inline-size: 2.75rem;
+    block-size: 2.75rem;
+    translate: -50% 0;
+    border: var(--nf-border-width) solid var(--nf-btn-glass-edge);
+    border-radius: var(--nf-radius-circle);
+    background: var(--nf-surface-elevated);
+    box-shadow: var(--nf-float-shadow);
+    animation: nf-ai-latest-in var(--nf-duration-fast) var(--nf-ease-entrance) both;
+  }
+  /* While an answer is still arriving, the edge says so in Vallo blue. */
+  .nf-ai__latest[data-streaming] {
+    border-color: var(--nf-brand-edge-strong);
+  }
+  .nf-ai__latest:focus-visible {
+    outline: var(--nf-focus-ring-width) solid var(--nf-focus-ring);
+    outline-offset: var(--nf-focus-ring-offset);
+  }
+  @keyframes nf-ai-latest-in {
+    from {
+      opacity: 0;
+      transform: translateY(0.5rem);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .nf-ai__latest,
+    .nf-ai-acts__btn {
+      animation: none;
+      transition: none;
+    }
+  }
+  :root:is([data-motion="calm"], [data-motion="off"]) .nf-ai__latest {
+    animation: none;
+  }
+
+  /* The line under the pill: one quiet sentence, close to it. */
+  .nf-assistant .nf-ai__note {
+    margin-block-start: var(--nf-space-2xs);
+  }
+}
+
+/*
+ * THE PILL. Unlayered, and one class more specific than `input-bar.css`
+ * (also unlayered, the platform's chat bar), so the assistant's bar keeps that
+ * bar's glass, edge and shadow and only adds its own tools.
+ */
+:root .nf-assistant .nf-ai__composer.nf-ai__composer {
+  gap: var(--nf-space-3xs);
+  min-block-size: 3.25rem;
+  margin-block-start: var(--nf-space-xs);
+  padding: var(--nf-space-3xs);
+}
+:root .nf-assistant .nf-ai__composer.nf-ai__composer .nf-ai__well {
+  padding-inline: var(--nf-space-3xs);
+}
+/* The plus and the microphone: round, quiet, the 44pt floor. */
+:root .nf-assistant .nf-ai__composer .nf-ai__tool {
+  display: inline-grid;
+  flex-shrink: 0;
+  place-items: center;
+  inline-size: 2.75rem;
+  block-size: 2.75rem;
+  border-radius: var(--nf-radius-circle);
+  background: transparent;
+  transition: background-color var(--nf-duration-fast) var(--nf-ease-standard);
+}
+@media (hover: hover) {
+  :root .nf-assistant .nf-ai__composer .nf-ai__tool:hover {
+    background: color-mix(in oklab, var(--nf-brand-primary) 10%, transparent);
+  }
+}
+:root .nf-assistant .nf-ai__composer .nf-ai__tool:focus-visible {
+  outline: var(--nf-focus-ring-width) solid var(--nf-focus-ring);
+  outline-offset: calc(-1 * var(--nf-focus-ring-width));
+}
+/* Open suggestions, and a microphone that is listening, are lit. */
+:root .nf-assistant .nf-ai__composer .nf-ai__tool:is([aria-expanded="true"], [aria-pressed="true"]) {
+  background: color-mix(in oklab, var(--nf-brand-primary) 18%, transparent);
+}
+/* Stop: the same blue disc as Send, with a small rounded square in it. */
+:root .nf-assistant .nf-ai__composer .nf-ai__stop-mark {
+  display: block;
+  inline-size: 0.875rem;
+  block-size: 0.875rem;
+  border-radius: var(--nf-radius-xs);
+  background: currentColor;
+}
+@media (prefers-reduced-motion: reduce) {
+  :root .nf-assistant .nf-ai__composer .nf-ai__tool {
+    transition: none;
+  }
+}
