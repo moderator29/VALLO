@@ -1187,7 +1187,18 @@
     --nf-nav-glyph: 24px;
     /* A chevron's ink begins 9/24 of the way into its square. */
     --nf-nav-ink-inset: calc(var(--nf-nav-glyph) * 0.375);
-    margin-inline-start: calc(var(--nf-nav-ink-inset) * -1);
+    /* NO PULL (the founder, 15 November 2026, for the second time: "the go
+       back button is too close to the edge of the page as you can see").
+       The rule used to drag the control out by the glyph's ink inset so the
+       ink landed on the page's text line, 16px. Measured, that is exactly
+       what it did. He can see it and he does not want it: at 16px the
+       chevron reads as pressed against the screen edge, because unlike a
+       letter it has no side bearing and its point is the leftmost ink on the
+       screen. So the 44px box now starts at the gutter and the ink falls
+       where the glyph puts it, 9px further in at a 24px chevron. The title
+       beside it in a bar, and under it on a stacked header, keep their own
+       16px; the chevron sits inside that line rather than on it, which is
+       what he is asking for and what every phone's own back does. */
     justify-items: start;
   }
   .nf-back-plain {
@@ -1218,7 +1229,7 @@
   .nf-bar-back {
     --nf-nav-glyph: 24px;
     --nf-nav-ink-inset: calc(var(--nf-nav-glyph) * 0.375);
-    margin-inline-start: calc(var(--nf-nav-ink-inset) * -1);
+    /* The app bar's back takes the same air as every other: no pull. */
     justify-items: start;
     border-radius: var(--nf-radius-control);
     color: var(--nf-content-primary);
