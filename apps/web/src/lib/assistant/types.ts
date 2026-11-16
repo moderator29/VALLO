@@ -1,3 +1,4 @@
+import type { CopilotForm } from "@/lib/chat/question-cards";
 /**
  * Assistant wire types.
  *
@@ -101,6 +102,8 @@ export type AssistantStreamEvent =
     }
   /** A swipeable strip of one listing's real photos. */
   | { type: "photos"; listingId: string; title: string; urls: string[] }
+  /** A question card (`ask_form`, 16 November 2026): choices to tap and one button; the answers come back as the member's next message. */
+  | { type: "form"; form: CopilotForm }
   | { type: "thread"; id: string }
   | { type: "error"; message: string }
   | { type: "done" };

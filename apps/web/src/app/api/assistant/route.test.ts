@@ -328,6 +328,7 @@ describe("one search round", () => {
       "compare_listings",
       "area_intel",
       "find_screen",
+      "ask_form",
       "get_listing_photos",
       "get_listing_details",
     ]);

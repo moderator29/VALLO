@@ -1,4 +1,5 @@
 import { areaIntelTool } from "./area-intel";
+import { askFormTool } from "./ask-form";
 import { compareListingsTool } from "./compare-listings";
 import { findScreenTool } from "./find-screen";
 import { searchListingsTool } from "./search-listings";
@@ -31,6 +32,8 @@ export const TOOL_REGISTRY: readonly AssistantTool[] = [
   compareListingsTool,
   areaIntelTool,
   findScreenTool,
+  /* Public: a card of questions to tap when two or more details are needed (16 November 2026). */
+  askFormTool,
   /* Public: the real pictures and details of one place. */
   getListingPhotosTool,
   getListingDetailsTool,

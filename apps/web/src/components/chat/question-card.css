@@ -1,0 +1,227 @@
+/*
+ * THE QUESTION CARD (components/chat/QuestionCard.tsx), shared by the
+ * console copilot and the member assistant: questions as choices to tap and
+ * one button. Tokens only, both themes.
+ */
+@layer components {
+  /* A QUESTION CARD: a chat's questions as choices to tap, one button. */
+  .nf-cform {
+    display: grid;
+    gap: var(--nf-space-sm);
+    padding: var(--nf-space-md);
+    border: var(--nf-border-width) solid var(--nf-brand-edge-soft);
+    border-radius: var(--nf-radius-card);
+    background: var(--nf-surface-elevated);
+  }
+
+  .nf-cform[data-status="skipped"] {
+    opacity: 0.7;
+  }
+
+  .nf-cform__title {
+    margin: 0;
+    color: var(--nf-content-primary);
+    font-size: var(--nf-text-body-lg);
+    font-weight: 700;
+  }
+
+  .nf-cform__intro {
+    margin: calc(-1 * var(--nf-space-2xs)) 0 0;
+    color: var(--nf-content-secondary);
+    font-size: var(--nf-text-body-sm);
+  }
+
+  .nf-cform__q {
+    display: grid;
+    gap: var(--nf-space-xs);
+    min-width: 0;
+    margin: 0;
+    padding: var(--nf-space-sm) 0 0;
+    border: 0;
+    border-block-start: var(--nf-border-width) solid var(--nf-divider);
+  }
+
+  .nf-cform__q[data-first] {
+    padding-block-start: 0;
+    border-block-start: 0;
+  }
+
+  .nf-cform__label {
+    padding: 0;
+    margin-block-end: var(--nf-space-2xs);
+    color: var(--nf-content-primary);
+    font-size: var(--nf-text-body);
+    font-weight: 700;
+  }
+
+  .nf-cform__optional {
+    color: var(--nf-content-secondary);
+    font-weight: 400;
+  }
+
+  .nf-cform__opts {
+    display: grid;
+    gap: 2px;
+  }
+
+  .nf-cform__opt {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: var(--nf-space-sm);
+    min-height: 48px;
+    padding-inline: var(--nf-space-2xs);
+    border-radius: var(--nf-radius-md);
+    color: var(--nf-content-primary);
+    font-size: var(--nf-text-body);
+    cursor: pointer;
+  }
+
+  .nf-cform__opt:hover {
+    background: color-mix(in oklab, var(--nf-brand-primary) 8%, transparent);
+  }
+
+  .nf-cform__opt > input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .nf-cform__mark {
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: 24px;
+    height: 24px;
+    border: 2px solid var(--nf-border-strong);
+    border-radius: var(--nf-radius-circle);
+    color: var(--nf-content-on-brand);
+  }
+
+  .nf-cform__mark[data-kind="multi"] {
+    border-radius: var(--nf-radius-xs);
+  }
+
+  .nf-cform__opt[data-on] .nf-cform__mark {
+    border-color: var(--nf-brand-primary);
+    background: var(--nf-gradient-brand-ink);
+  }
+
+  .nf-cform__opt[data-on] .nf-cform__mark[data-kind="single"]::after {
+    content: "";
+    width: 8px;
+    height: 8px;
+    border-radius: var(--nf-radius-circle);
+    background: var(--nf-content-on-brand);
+  }
+
+  .nf-cform__opt:has(input:focus-visible) {
+    outline: var(--nf-focus-ring-width) solid var(--nf-focus-ring);
+    outline-offset: var(--nf-focus-ring-offset);
+  }
+
+  .nf-cform__text {
+    width: 100%;
+  }
+
+  .nf-cform__seg-wrap {
+    display: grid;
+    gap: var(--nf-space-2xs);
+  }
+
+  .nf-cform__seg {
+    display: grid;
+    grid-auto-columns: minmax(0, 1fr);
+    grid-auto-flow: column;
+    gap: var(--nf-space-2xs);
+  }
+
+  .nf-cform__segbtn {
+    min-height: 48px;
+    border: var(--nf-border-width) solid var(--nf-border-subtle);
+    border-radius: var(--nf-radius-control);
+    background: var(--nf-surface-raised);
+    color: var(--nf-content-primary);
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .nf-cform__segbtn[aria-checked="true"] {
+    border-color: var(--nf-brand-primary);
+    background: color-mix(in oklab, var(--nf-brand-primary) 18%, var(--nf-surface-raised));
+  }
+
+  .nf-cform__segbtn:focus-visible,
+  .nf-cform__submit:focus-visible,
+  .nf-cform__skip:focus-visible {
+    outline: var(--nf-focus-ring-width) solid var(--nf-focus-ring);
+    outline-offset: var(--nf-focus-ring-offset);
+  }
+
+  .nf-cform__ends {
+    display: flex;
+    justify-content: space-between;
+    color: var(--nf-content-secondary);
+    font-size: var(--nf-text-caption);
+  }
+
+  .nf-cform__need {
+    margin: 0;
+    color: var(--nf-state-error);
+    font-size: var(--nf-text-body-sm);
+  }
+
+  .nf-cform__answer {
+    margin: 0;
+    color: var(--nf-content-primary);
+    font-weight: 600;
+  }
+
+  .nf-cform__foot {
+    display: grid;
+    gap: var(--nf-space-2xs);
+    margin-block-start: var(--nf-space-xs);
+  }
+
+  .nf-cform__submit {
+    min-height: 52px;
+    border: 0;
+    border-radius: var(--nf-radius-pill);
+    background: var(--nf-gradient-brand-ink);
+    color: var(--nf-content-on-brand);
+    font-size: var(--nf-text-body);
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .nf-cform__submit:disabled {
+    opacity: 0.5;
+    cursor: default;
+  }
+
+  .nf-cform__skip {
+    justify-self: center;
+    min-height: 44px;
+    padding-inline: var(--nf-space-md);
+    border: 0;
+    background: none;
+    color: var(--nf-content-secondary);
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .nf-cform__done {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--nf-space-2xs);
+    margin: 0;
+    color: var(--nf-content-secondary);
+    font-size: var(--nf-text-caption);
+    font-weight: 600;
+  }
+
+  .nf-cform__done > svg {
+    color: var(--nf-brand-secondary);
+  }
+
+}

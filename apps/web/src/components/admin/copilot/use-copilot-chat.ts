@@ -5,6 +5,7 @@ import { banner } from "@/lib/ui/toast";
 import type { Destination } from "@/lib/admin/copilot/destinations";
 import type { CopilotProposal } from "@/lib/admin/copilot/tools/types";
 import { answersToMessage, type CopilotForm, type FormAnswers } from "@/lib/admin/copilot/forms";
+import type { QuestionCardState } from "@/components/chat/QuestionCard";
 
 /**
  * The copilot's conversation state, shared by the desk sheet and the full
@@ -31,7 +32,7 @@ export type Turn = {
 };
 
 /** A question card and its fate: still open, sent with these answers, or skipped. */
-export type FormState = { form: CopilotForm; status: "open" | "sent" | "skipped"; answers?: FormAnswers };
+export type FormState = QuestionCardState;
 
 /**
  * THE PERSON'S OWN COPILOT SETTINGS (16 November 2026), kept on this device:

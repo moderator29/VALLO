@@ -1,5 +1,7 @@
 "use client";
 
+import { QuestionCard, type QuestionCardState } from "@/components/chat/QuestionCard";
+import { answersToMessage, type CopilotForm } from "@/lib/chat/question-cards";
 import { banner } from "@/lib/ui/toast";
 import Image from "next/image";
 import Link from "next/link";
@@ -37,7 +39,7 @@ import "./assistant-blocks.css";
 
 export type AssistantBlock = Extract<
   AssistantStreamEvent,
-  { type: "cards" | "actions" | "slots" | "summary" | "payment_review" | "photos" }
+  { type: "cards" | "actions" | "slots" | "summary" | "payment_review" | "photos" | "form" }
 >;
 
 type Status = { tone: "ok" | "error" | "busy"; text: string } | null;
@@ -445,7 +447,29 @@ function PhotosBlock({ title, urls }: { title: string; urls: string[] }) {
 
 /* ------------------------------------------------------------------- the lot */
 
-export function AssistantBlocks({ blocks, onAsk }: { blocks: AssistantBlock[]; onAsk: (prompt: string) => void }) {
+/**
+ * A QUESTION CARD in the member's chat (the founder's ChatGPT reference, 16
+ * November 2026): the assistant's questions as choices to tap and one
+ * button; the answers go as the member's next message. Once the
+ * conversation has moved on, an unanswered card is set aside.
+ */
+function FormBlock({ form, onAsk, settled }: { form: CopilotForm; onAsk: (prompt: string) => void; settled: boolean }) {
+  const [state, setState] = useState<QuestionCardState>({ form, status: "open" });
+  const shown: QuestionCardState = state.status === "open" && settled ? { ...state, status: "skipped" } : state;
+  return (
+    <QuestionCard
+      state={shown}
+      busy={false}
+      onSubmit={(answers) => {
+        setState({ form, status: "sent", answers });
+        onAsk(answersToMessage(form, answers));
+      }}
+      onSkip={() => setState({ form, status: "skipped" })}
+    />
+  );
+}
+
+export function AssistantBlocks({ blocks, onAsk, settled = false }: { blocks: AssistantBlock[]; onAsk: (prompt: string) => void; settled?: boolean }) {
   const [extra, setExtra] = useState<AssistantBlock[]>([]);
   const [busy, setBusy] = useState<string | null>(null);
   const [status, setStatus] = useStatus();
@@ -540,6 +564,8 @@ export function AssistantBlocks({ blocks, onAsk }: { blocks: AssistantBlock[]; o
                 </ul>
               </section>
             );
+          case "form":
+            return <FormBlock key={key} form={b.form} onAsk={onAsk} settled={settled} />;
           case "actions":
             return <Buttons key={key} actions={b.items} runner={runner} saved={saved} />;
           case "slots":
@@ -572,6 +598,7 @@ export function AssistantBlocks({ blocks, onAsk }: { blocks: AssistantBlock[]; o
 export function isBlockEvent(event: AssistantStreamEvent): event is AssistantBlock {
   return (
     event.type === "cards" ||
+    event.type === "form" ||
     event.type === "actions" ||
     event.type === "slots" ||
     event.type === "summary" ||

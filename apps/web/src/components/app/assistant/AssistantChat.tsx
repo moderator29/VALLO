@@ -1127,7 +1127,7 @@ export function AssistantChat({
                       Retry
                     </Button>
                   )}
-                  {m.blocks && m.blocks.length > 0 && <AssistantBlocks blocks={m.blocks} onAsk={(prompt) => send(prompt)} />}
+                  {m.blocks && m.blocks.length > 0 && <AssistantBlocks blocks={m.blocks} onAsk={(prompt) => send(prompt)} settled={m.id !== lastMessage?.id} />}
                   {/* NEXT QUESTIONS, under the newest finished answer only (the
                       ChatGPT reference): each is sent exactly as it reads. */}
                   {status === "done" && m.id === lastMessage?.id && m.text.trim() ? (
