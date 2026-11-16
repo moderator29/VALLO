@@ -26,6 +26,9 @@ import { ROOMMATES_ROUTES } from "@/lib/features/roommates/model";
  * with a clean monochrome icon, one line and a short line under it.
  *
  *   Post to story    the existing story composer (`/stories/new`)
+ *   VALLO Intelligence  search and discover across Vallo (`/intelligence`),
+ *                    added DIRECTLY BELOW Post to story by the founder on 16
+ *                    November 2026; public, so no sign-up door
  *   Post to feed     the existing post composer for Around (`/around?compose=1`)
  *   List a property  the existing listing route for the person's side (the
  *                    agent wizard for an agent, the side's chooser otherwise);
@@ -101,13 +104,20 @@ export function CreateDock({
    */
   const door = (href: string) => (signedIn ? href : withNext("/sign-up", href));
   const more = t.homeV2;
+  /* VALLO Intelligence (the founder, 16 November 2026): DIRECTLY BELOW "Post
+     to story", or first when there is no story to post to. Searching needs no
+     account, so it never goes through the sign-up door. */
+  const intelligence = t.intelligenceEntry
+    ? [{ id: "intelligence", href: "/intelligence", title: t.intelligenceEntry.createDock, sub: t.intelligenceEntry.createDockSub, icon: "spark" as const }]
+    : [];
   const top: { id: string; href: string; title: string; sub: string; icon: UiIconName }[] = [
     ...(socialOn
       ? [
           { id: "story", href: door("/stories/new"), title: more.createStory, sub: more.createStorySub, icon: "picture" as const },
+          ...intelligence,
           { id: "post", href: door("/around?compose=1"), title: more.createPost, sub: more.createPostSub, icon: "pencil" as const },
         ]
-      : []),
+      : intelligence),
     stays
       ? { id: "stay", href: door(isHost ? "/host/rooms" : listHref), title: more.createStay, sub: more.createStaySub, icon: "bed" }
       : { id: "list", href: door(listHref), title: more.createList, sub: more.createListSub, icon: "house" },
@@ -153,8 +163,8 @@ export function CreateDock({
         open={open}
         onOpenChange={setOpen}
         title={copy.title}
-        /* Up to five rows with a short line each and a title: one detent that holds them. */
-        detents={[0.72]}
+        /* Up to six rows with a short line each and a title: one detent that holds them. */
+        detents={[0.8]}
         closeLabel={t.pickers.close}
       >
         <RowList inset={false} className="nf-create-sheet" data-testid="create-options">

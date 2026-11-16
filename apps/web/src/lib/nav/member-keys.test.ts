@@ -31,6 +31,15 @@ describe("desktop keyboard layer (B17)", () => {
     expect(decideKey({ key: "k", now, alt: true })).toBeNull();
   });
 
+  it("opens VALLO Intelligence on Cmd+K or Ctrl+K, even from a field, and not with Alt", () => {
+    expect(decideKey({ key: "k", now, meta: true })).toEqual({ type: "intelligence" });
+    expect(decideKey({ key: "K", now, ctrl: true })).toEqual({ type: "intelligence" });
+    expect(decideKey({ key: "k", now, ctrl: true, inField: true })).toEqual({ type: "intelligence" });
+    expect(decideKey({ key: "k", now, ctrl: true, alt: true })).toBeNull();
+    /* A bare k still walks the rows. */
+    expect(decideKey({ key: "k", now })).toEqual({ type: "move", dir: -1 });
+  });
+
   it("moves through rows and stops at the ends", () => {
     expect(nextIndex(-1, 1, 5)).toBe(0);
     expect(nextIndex(-1, -1, 5)).toBe(4);

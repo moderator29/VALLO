@@ -41,6 +41,10 @@ export type ShellDictionary = Pick<Dictionary, "a11y" | "common" | "nav" | "side
   /* Optional: a fixture that hands the shell a whole Dictionary has no such
      key, and the shell then simply draws no Roommates row. */
   roommatesEntry?: Pick<Dictionary["roommates"]["entryX"], "nav" | "createDock" | "createDockSub">;
+  /** VALLO Intelligence's side-nav row and its Create sheet option (16 November 2026). */
+  /* Optional for the same reason as `roommatesEntry`: a fixture handing the
+     shell a whole Dictionary draws no Intelligence row. */
+  intelligenceEntry?: Pick<Dictionary["intelligence"]["entry"], "nav" | "createDock" | "createDockSub">;
   /** "Report a problem", the support home's own words, for the More menu on every screen. */
   experienceInbox: { support: { home: Pick<Dictionary["experienceInbox"]["support"]["home"], "reportProblem"> } };
 };
@@ -107,6 +111,7 @@ export function shellDictionary(t: Dictionary): ShellDictionary {
     /* Under its own key, not `roommates`, so the shell's import graph never
        reads (and the agent nav's slice never carries) the whole namespace. */
     roommatesEntry: { nav: t.roommates.entryX.nav, createDock: t.roommates.entryX.createDock, createDockSub: t.roommates.entryX.createDockSub },
+    intelligenceEntry: { nav: t.intelligence.entry.nav, createDock: t.intelligence.entry.createDock, createDockSub: t.intelligence.entry.createDockSub },
     homeV2: Object.fromEntries(CREATE_KEYS.map((key) => [key, t.homeV2[key]])) as ShellDictionary["homeV2"],
   };
   cache.set(t, shell);

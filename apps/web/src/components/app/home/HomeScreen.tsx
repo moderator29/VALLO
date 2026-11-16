@@ -9,6 +9,7 @@ import { withNext } from "@/lib/auth/next-link";
 import { CategoryRow, type HomeCategory } from "@/components/app/home/CategoryRow";
 import { FeaturedBand } from "@/components/app/home/FeaturedBand";
 import { HomeHero } from "@/components/app/home/HomeHero";
+import { IntelLauncher } from "@/components/app/intelligence/IntelLauncher";
 import { LookedAtRecently } from "@/components/app/home/LookedAtRecently";
 import { HomeFigure, type HomeLeadFigure } from "@/components/app/home/HomeFigure";
 import { SpaceTypeRow } from "@/components/app/home/SpaceTypeRow";
@@ -306,6 +307,18 @@ export function HomeScreen({
       {/* ------------------------------------------------ 2. the categories */}
       <CategoryRow categories={categories} label={t.home.markets.label} variant="plates" />
       </HeroBand>
+
+      {/* ------------------------------------------- VALLO Intelligence */}
+      {/* The founder, 16 November 2026: a refined launcher under the greeting
+          card that opens the one search across Vallo, caret in the field. A
+          link styled as the field, so a tap on Home raises no keyboard over
+          the hero; the hero's own field still searches the marketplace. */}
+      <IntelLauncher
+        label={t.intelligence.launcher.label}
+        hint={t.intelligence.launcher.hint}
+        examples={t.intelligence.examples}
+        className="mt-md"
+      />
 
       {/* ------------------------------------------------- just listed */}
       {/* The newest listings, real ones first, as a small sideways row high on

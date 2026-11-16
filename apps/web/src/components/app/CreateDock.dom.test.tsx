@@ -69,13 +69,13 @@ async function optionsOf(page: import("playwright-core").Page) {
 }
 
 describe.skipIf(!hasBrowser && !process.env.CI)("CreateDock", () => {
-  it("offers story, feed and list in that order on the property side, then the booking row, and no workspace row", async () => {
+  it("offers story, Intelligence, feed and list in that order on the property side, then the booking row, and no workspace row", async () => {
     const { page, close } = await mountInBrowser({ entry: entry({ isHost: false }) });
     try {
       const options = await optionsOf(page);
-      expect(options.map((o) => o.id)).toEqual(["create-story", "create-post", "create-list", "create-viewing", "create-roommate"]);
-      expect(options.map((o) => o.text)).toEqual(["Post to story", "Post to feed", "List a property", "Book a viewing", "Find a roommate or share a room"]);
-      expect(options.map((o) => o.href)).toEqual(["/stories/new", "/around?compose=1", "/profile/setup", "/search", "/roommates/new"]);
+      expect(options.map((o) => o.id)).toEqual(["create-story", "create-intelligence", "create-post", "create-list", "create-viewing", "create-roommate"]);
+      expect(options.map((o) => o.text)).toEqual(["Post to story", "VALLO Intelligence", "Post to feed", "List a property", "Book a viewing", "Find a roommate or share a room"]);
+      expect(options.map((o) => o.href)).toEqual(["/stories/new", "/intelligence", "/around?compose=1", "/profile/setup", "/search", "/roommates/new"]);
       /* Clean: one icon, one line and a short line under it; no chevron. */
       for (const option of options) {
         expect(option.icons, option.text).toBe(1);
@@ -88,10 +88,10 @@ describe.skipIf(!hasBrowser && !process.env.CI)("CreateDock", () => {
     }
   });
 
-  it("gives a host on the property side the same five, not a sixth", async () => {
+  it("gives a host on the property side the same six, not a seventh", async () => {
     const { page, close } = await mountInBrowser({ entry: entry({ isHost: true }) });
     try {
-      expect((await optionsOf(page)).length).toBe(5);
+      expect((await optionsOf(page)).length).toBe(6);
     } finally {
       await close();
     }
@@ -101,33 +101,52 @@ describe.skipIf(!hasBrowser && !process.env.CI)("CreateDock", () => {
     const { page, close } = await mountInBrowser({ entry: entry({ isHost: true, side: "stays" }) });
     try {
       const options = await optionsOf(page);
-      expect(options.map((o) => o.text)).toEqual(["Post to story", "Post to feed", "Create a stay listing", "Book a stay"]);
-      expect(options.map((o) => o.href)).toEqual(["/stories/new", "/around?compose=1", "/host/rooms", "/stays/search"]);
+      expect(options.map((o) => o.text)).toEqual(["Post to story", "VALLO Intelligence", "Post to feed", "Create a stay listing", "Book a stay"]);
+      expect(options.map((o) => o.href)).toEqual(["/stories/new", "/intelligence", "/around?compose=1", "/host/rooms", "/stays/search"]);
     } finally {
       await close();
     }
   });
 
-  it("hides the two post options when the social switch is off, and keeps List and the booking row", async () => {
+  it("hides the two post options when the social switch is off, and keeps Intelligence (first), List and the booking row", async () => {
     const { page, close } = await mountInBrowser({ entry: entry({ isHost: false, socialOn: false }) });
     try {
-      expect((await optionsOf(page)).map((o) => o.id)).toEqual(["create-list", "create-viewing", "create-roommate"]);
+      expect((await optionsOf(page)).map((o) => o.id)).toEqual(["create-intelligence", "create-list", "create-viewing", "create-roommate"]);
     } finally {
       await close();
     }
   });
 
-  it("sends a guest through the sign-up door and back, and booking stays public", async () => {
+  it("sends a guest through the sign-up door and back, and booking and Intelligence stay public", async () => {
     const { page, close } = await mountInBrowser({ entry: entry({ isHost: false, signedIn: false }) });
     try {
       const options = await optionsOf(page);
       expect(options.map((o) => o.href)).toEqual([
         "/sign-up?next=%2Fstories%2Fnew",
+        "/intelligence",
         "/sign-up?next=%2Faround%3Fcompose%3D1",
         "/sign-up?next=%2Fprofile%2Fsetup",
         "/search",
         "/sign-up?next=%2Froommates%2Fnew",
       ]);
+    } finally {
+      await close();
+    }
+  });
+
+  it("puts VALLO Intelligence DIRECTLY below Post to story, with the spark and its short line (the founder, 16 November 2026)", async () => {
+    const { page, close } = await mountInBrowser({ entry: entry({ isHost: false }) });
+    try {
+      const options = await optionsOf(page);
+      const story = options.findIndex((o) => o.id === "create-story");
+      expect(story).toBeGreaterThanOrEqual(0);
+      expect(options[story + 1]).toMatchObject({
+        id: "create-intelligence",
+        href: "/intelligence",
+        text: "VALLO Intelligence",
+        sub: "Search and discover across Vallo",
+        icons: 1,
+      });
     } finally {
       await close();
     }

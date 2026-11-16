@@ -77,7 +77,7 @@ export const COVERAGE: readonly CoverageGroup[] = [
     "/settings/invite/how-it-works", "/settings/invite/referrals", "/settings/invite/referrals/[id]", "/r", "/r/[code]",
   ] },
   /* ------------------------------------------------------------------ finding */
-  { doc: D("finding-a-place"), routes: ["/search", "/stays", "/stays/search"] },
+  { doc: D("finding-a-place"), routes: ["/search", "/stays", "/stays/search", "/intelligence"] },
   { doc: D("understanding-a-listing"), routes: ["/listing/[id]", "/listing/[id]/trust", "/stay/[id]", "/areas/[state]/[area]"] },
   { doc: D("saved-and-compare"), routes: ["/saved", "/saved/searches", "/compare"] },
   { doc: D("price-check"), routes: ["/price", "/price/area/[id]"] },

@@ -82,6 +82,8 @@ import { chargebacksEn } from "./chargebacks.en";
 import { circleEn } from "./circle.en";
 /* Vallo Roommates: roommate discovery and shared homes. */
 import { roommatesEn } from "./roommates.en";
+/* VALLO Intelligence: the one search and discovery screen (16 November 2026). */
+import { intelligenceEn } from "./intelligence.en";
 import { shareCardEn } from "./share.en";
 import { interestsHintsEn, interestsMarketsEn } from "./interests.en";
 /* The social layer (SW11): posts, stories, areas, the bot, profiles. */
@@ -7508,6 +7510,8 @@ export const en = {
   circleCopy: circleEn,
   /* Vallo Roommates. */
   roommates: roommatesEn,
+  /* VALLO Intelligence (16 November 2026). English only; the others fall back. */
+  intelligence: intelligenceEn,
   /* The share composer card (9 November 2026). */
   shareCard: shareCardEn,
   /* The /pro page (SW11). */

@@ -79,6 +79,16 @@ export function MemberKeys() {
           else router.push("/search");
           return;
         }
+        case "intelligence": {
+          event.preventDefault();
+          /* On the screen itself, the caret goes to its field; anywhere else, it opens. */
+          const own = document.querySelector<HTMLInputElement>("[data-intel-field]");
+          if (own) {
+            own.focus();
+            own.select();
+          } else router.push("/intelligence?focus=1");
+          return;
+        }
         case "help":
           event.preventDefault();
           setHelp(true);

@@ -184,6 +184,21 @@ export function buildNav({
   ];
 
   /*
+   * VALLO INTELLIGENCE, NEAR THE TOP (the founder, 16 November 2026). The one
+   * search across everything Vallo holds, with its spark. Its own section,
+   * not the docked group, so a phone's drawer shows it as its first row
+   * (the dock repeats Home, Search and Feed, and hides that group) and the
+   * desktop rail shows it right under them. Open to a visitor as well: the
+   * screen reads public kinds without an account.
+   */
+  if (t.intelligenceEntry) {
+    sections.push({
+      heading: null,
+      items: [{ href: "/intelligence", label: t.intelligenceEntry.nav, icon: "spark" }],
+    });
+  }
+
+  /*
    * VALLO ROOMMATES IS ITS OWN PRODUCT AREA (founder, 10 November 2026). It was
    * one row at the end of the docked group, which a phone hides (the dock
    * repeats that group), so on a phone it had no row at all. It is its own

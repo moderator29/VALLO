@@ -1,0 +1,830 @@
+/*
+ * VALLO INTELLIGENCE (16 November 2026): the search and discovery screen,
+ * its field and suggestions, the results per kind, the compact Intelligence
+ * panel and the launcher on Home.
+ *
+ * Editorial and spare: one column, generous air, hairlines rather than
+ * boxes, and the brand's own navy and blue glass (the material of the Create
+ * sheet's rows and the action sheet's card), never a black slab. Every
+ * colour, radius, size, shadow and duration is a token, so Paper (light)
+ * reads as well as night. Motion is short, runs once, and is off for a
+ * reader who asked for less.
+ */
+@layer components {
+  /* ============================================================ the page */
+  .nf-intel {
+    display: grid;
+    gap: var(--nf-space-md);
+    inline-size: 100%;
+    max-inline-size: 48rem;
+    margin-inline: auto;
+    padding-block: var(--nf-space-xs) calc(var(--nf-space-3xl) + env(safe-area-inset-bottom, 0px));
+    animation: nf-intel-rise var(--nf-duration-base) var(--nf-ease-entrance) both;
+  }
+  .nf-intel > * {
+    min-inline-size: 0;
+  }
+
+  .nf-intel-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--nf-space-sm);
+    min-block-size: 2.75rem;
+  }
+  .nf-intel-top__brand {
+    display: inline-flex;
+    align-items: center;
+    opacity: 0.9;
+  }
+  .nf-intel-top__word {
+    block-size: 0.9375rem;
+    inline-size: auto;
+  }
+
+  /* The "Intelligence" control: the spark and the word on the brand's blue glass. */
+  .nf-intel-spark {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--nf-space-2xs);
+    min-block-size: 2.75rem;
+    padding-inline: var(--nf-space-sm);
+    border: var(--nf-border-width) solid color-mix(in oklab, var(--nf-brand-primary) 32%, var(--nf-tier-card-edge));
+    border-radius: var(--nf-radius-control);
+    background: color-mix(in oklab, var(--nf-brand-primary) 12%, transparent);
+    color: var(--nf-content-link);
+    font-size: var(--nf-text-body-sm);
+    font-weight: 600;
+    cursor: pointer;
+    transition:
+      background-color var(--nf-duration-fast) var(--nf-ease-standard),
+      scale var(--nf-duration-press) var(--nf-ease-press);
+  }
+  .nf-intel-spark:active {
+    scale: var(--nf-press-scale);
+  }
+  @media (hover: hover) {
+    .nf-intel-spark:hover {
+      background: color-mix(in oklab, var(--nf-brand-primary) 20%, transparent);
+    }
+  }
+  .nf-intel-spark:focus-visible {
+    outline: var(--nf-focus-ring-width) solid var(--nf-focus-ring);
+    outline-offset: var(--nf-focus-ring-offset);
+  }
+
+  .nf-intel-hero {
+    display: grid;
+    gap: var(--nf-space-2xs);
+    margin-block-start: var(--nf-space-lg);
+  }
+  .nf-intel-hero__title {
+    margin: 0;
+    color: var(--nf-content-primary);
+    font-family: var(--nf-font-display);
+    font-size: var(--nf-text-h0);
+    font-weight: 700;
+    letter-spacing: -0.025em;
+    line-height: 1.08;
+    text-wrap: balance;
+  }
+  .nf-intel-hero__lede {
+    margin: 0;
+    color: var(--nf-content-muted);
+    font-size: var(--nf-text-body);
+    line-height: 1.45;
+  }
+
+  /* ============================================================ the field */
+  .nf-intel-combo {
+    display: grid;
+    gap: var(--nf-space-xs);
+    /* Lifted to the top on a touch screen as the list opens; clears the bar. */
+    scroll-margin-block-start: calc(var(--nf-space-md) + env(safe-area-inset-top, 0px));
+  }
+  .nf-intel-field {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: var(--nf-space-xs);
+    block-size: 3.75rem;
+    padding-inline: var(--nf-space-md) var(--nf-space-2xs);
+    border: var(--nf-border-width) solid color-mix(in oklab, var(--nf-brand-primary) 28%, var(--nf-tier-card-edge));
+    border-radius: var(--nf-radius-xl);
+    background: color-mix(in oklab, var(--nf-brand-primary) 7%, var(--nf-surface-primary));
+    box-shadow: var(--nf-elevation-raised);
+    scroll-margin-block-start: calc(var(--nf-space-md) + env(safe-area-inset-top, 0px));
+  }
+  .nf-intel-field__glyph {
+    flex: none;
+    color: var(--nf-content-link);
+  }
+  .nf-intel-field__slot {
+    position: relative;
+    display: flex;
+    flex: 1;
+    align-items: center;
+    align-self: stretch;
+    min-inline-size: 0;
+  }
+  .nf-intel-field__input {
+    inline-size: 100%;
+    block-size: 100%;
+    min-inline-size: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--nf-content-primary);
+    /* 16px or more: an iPhone zooms into any field set smaller. */
+    font-size: max(1rem, var(--nf-text-body-lg));
+    caret-color: var(--nf-brand-primary);
+  }
+  .nf-intel-field__hint {
+    position: absolute;
+    inset-inline: 0;
+    overflow: hidden;
+    color: var(--nf-content-muted);
+    font-size: max(1rem, var(--nf-text-body-lg));
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    pointer-events: none;
+    animation: nf-intel-fade var(--nf-duration-slow) var(--nf-ease-entrance) both;
+  }
+  .nf-intel-kbd {
+    flex: none;
+    padding: var(--nf-space-3xs) var(--nf-space-xs);
+    border: var(--nf-border-width) solid var(--nf-card-border);
+    border-radius: var(--nf-radius-xs);
+    color: var(--nf-content-muted);
+    font-family: inherit;
+    font-size: var(--nf-text-caption);
+    font-weight: 600;
+    line-height: 1.4;
+  }
+  @media (pointer: coarse) {
+    .nf-intel-kbd {
+      display: none;
+    }
+  }
+  .nf-intel-clear,
+  .nf-intel-go {
+    display: grid;
+    flex: none;
+    place-items: center;
+    inline-size: 2.75rem;
+    block-size: 2.75rem;
+    padding: 0;
+    border: 0;
+    border-radius: var(--nf-radius-circle);
+    cursor: pointer;
+    transition:
+      background-color var(--nf-duration-fast) var(--nf-ease-standard),
+      scale var(--nf-duration-press) var(--nf-ease-press);
+  }
+  .nf-intel-clear {
+    background: transparent;
+    color: var(--nf-content-muted);
+  }
+  .nf-intel-go {
+    background: var(--nf-brand-primary);
+    color: var(--nf-content-on-brand);
+  }
+  .nf-intel-clear:active,
+  .nf-intel-go:active {
+    scale: var(--nf-press-scale);
+  }
+  @media (hover: hover) {
+    .nf-intel-clear:hover {
+      background: var(--nf-brand-tint-1);
+    }
+    .nf-intel-go:hover {
+      background: var(--nf-brand-primary-strong);
+    }
+  }
+  .nf-intel-clear:focus-visible,
+  .nf-intel-go:focus-visible {
+    outline: var(--nf-focus-ring-width) solid var(--nf-focus-ring);
+    outline-offset: var(--nf-focus-ring-offset);
+  }
+
+  /* ------------------------------------------------------ the suggestions */
+  .nf-intel-suggest {
+    display: grid;
+    gap: var(--nf-space-2xs);
+    padding: var(--nf-space-xs);
+    border: var(--nf-border-width) solid color-mix(in oklab, var(--nf-brand-primary) 30%, var(--nf-tier-card-edge));
+    border-radius: var(--nf-radius-card);
+    background: color-mix(in oklab, var(--nf-brand-primary) 9%, var(--nf-surface-raised));
+    box-shadow: var(--nf-elevation-floating);
+    animation: nf-intel-drop var(--nf-duration-fast) var(--nf-ease-entrance) both;
+  }
+  .nf-intel-suggest[hidden] {
+    display: none;
+  }
+  .nf-intel-suggest__group {
+    display: grid;
+  }
+  .nf-intel-suggest__group > .nf-intel-overline {
+    padding: var(--nf-space-xs) var(--nf-space-sm) var(--nf-space-3xs);
+  }
+  .nf-intel-suggest__dym {
+    margin: 0;
+    padding: var(--nf-space-xs) var(--nf-space-sm) 0;
+    color: var(--nf-content-secondary);
+    font-size: var(--nf-text-body-sm);
+  }
+  .nf-intel-option {
+    display: flex;
+    align-items: center;
+    gap: var(--nf-space-sm);
+    min-block-size: 3rem;
+    padding: var(--nf-space-2xs) var(--nf-space-sm);
+    border-radius: var(--nf-radius-control);
+    color: var(--nf-content-primary);
+    cursor: pointer;
+    transition: background-color var(--nf-duration-instant) var(--nf-ease-standard);
+  }
+  .nf-intel-option[aria-selected="true"] {
+    background: color-mix(in oklab, var(--nf-brand-primary) 16%, transparent);
+  }
+  .nf-intel-option__icon {
+    display: grid;
+    flex: none;
+    place-items: center;
+    inline-size: 2.25rem;
+    block-size: 2.25rem;
+    border-radius: var(--nf-radius-sm);
+    background: color-mix(in oklab, var(--nf-brand-primary) 10%, transparent);
+    color: var(--nf-content-link);
+  }
+  .nf-intel-option__thumb {
+    flex: none;
+    inline-size: 2.5rem;
+    block-size: 2.5rem;
+    border-radius: var(--nf-radius-sm);
+    object-fit: cover;
+    background: var(--nf-surface-inset);
+  }
+  .nf-intel-option__text {
+    display: grid;
+    flex: 1;
+    min-inline-size: 0;
+  }
+  .nf-intel-option__label {
+    overflow: hidden;
+    font-size: var(--nf-text-body);
+    font-weight: 600;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .nf-intel-option__hint {
+    color: var(--nf-content-muted);
+    font-size: var(--nf-text-caption);
+  }
+  .nf-intel-option__go {
+    flex: none;
+    color: var(--nf-content-muted);
+  }
+
+  /* ===================================================== chips and heads */
+  .nf-intel-cats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--nf-space-xs);
+  }
+  /* A sideways row on a phone, edge to edge, never a second line. */
+  @media (max-width: 39.999rem) {
+    .nf-intel-cats {
+      flex-wrap: nowrap;
+      margin-inline: calc(var(--nf-pad-shell) * -1);
+      padding-inline: var(--nf-pad-shell);
+      overflow-x: auto;
+      overscroll-behavior-x: contain;
+      scrollbar-width: none;
+    }
+    .nf-intel-cats::-webkit-scrollbar {
+      display: none;
+    }
+    .nf-intel-cats > * {
+      flex: none;
+    }
+  }
+  .nf-intel-chiprow {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--nf-space-xs);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .nf-intel-chip {
+    gap: var(--nf-space-2xs);
+    max-inline-size: 100%;
+    white-space: nowrap;
+  }
+  .nf-intel-chip > span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .nf-intel-rule {
+    margin: var(--nf-space-2xs) 0;
+    border: 0;
+    border-block-start: var(--nf-border-width) solid var(--nf-panel-hair);
+  }
+
+  .nf-intel-overline {
+    margin: 0;
+    color: var(--nf-content-muted);
+    font-size: var(--nf-text-overline);
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    line-height: 1.3;
+    text-transform: uppercase;
+  }
+  .nf-intel-hintline {
+    margin: var(--nf-space-3xs) 0 0;
+    color: var(--nf-content-muted);
+    font-size: var(--nf-text-caption);
+  }
+  .nf-intel-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--nf-space-sm);
+    min-block-size: 2.75rem;
+  }
+  .nf-intel-textbtn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--nf-space-2xs);
+    min-block-size: 2.75rem;
+    min-inline-size: 2.75rem;
+    padding-inline: var(--nf-space-xs);
+    border: 0;
+    border-radius: var(--nf-radius-control);
+    background: none;
+    color: var(--nf-content-secondary);
+    font-size: var(--nf-text-body-sm);
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+  }
+  .nf-intel-textbtn--lit {
+    color: var(--nf-content-link);
+  }
+  @media (hover: hover) {
+    .nf-intel-textbtn:hover {
+      background: var(--nf-brand-tint-1);
+    }
+  }
+  .nf-intel-textbtn:focus-visible {
+    outline: var(--nf-focus-ring-width) solid var(--nf-focus-ring);
+    outline-offset: -2px;
+  }
+
+  /* ======================================================= the empty page */
+  .nf-intel-discover {
+    display: grid;
+    gap: var(--nf-space-xl);
+  }
+  .nf-intel-section {
+    display: grid;
+    gap: var(--nf-space-xs);
+    animation: nf-intel-rise var(--nf-duration-base) var(--nf-ease-entrance) both;
+  }
+  .nf-intel-skelrail {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--nf-space-sm);
+  }
+
+  .nf-intel-recent {
+    display: grid;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .nf-intel-recent__item {
+    display: flex;
+    align-items: center;
+    gap: var(--nf-space-2xs);
+    border-block-end: var(--nf-border-width) solid var(--nf-panel-hair);
+  }
+  .nf-intel-recent__run {
+    display: flex;
+    flex: 1;
+    align-items: center;
+    gap: var(--nf-space-sm);
+    min-inline-size: 0;
+    min-block-size: 3rem;
+    color: var(--nf-content-secondary);
+    text-decoration: none;
+  }
+  .nf-intel-recent__q {
+    overflow: hidden;
+    color: var(--nf-content-primary);
+    font-size: var(--nf-text-body);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .nf-intel-recent__x {
+    display: grid;
+    flex: none;
+    place-items: center;
+    inline-size: 2.75rem;
+    block-size: 2.75rem;
+    border: 0;
+    border-radius: var(--nf-radius-circle);
+    background: none;
+    color: var(--nf-content-muted);
+    cursor: pointer;
+  }
+  @media (hover: hover) {
+    .nf-intel-recent__x:hover {
+      background: var(--nf-brand-tint-1);
+    }
+  }
+
+  /* ================================================================ rows */
+  .nf-intel-rows {
+    display: grid;
+    gap: var(--nf-space-2xs);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .nf-intel-row {
+    display: grid;
+    border: var(--nf-border-width) solid color-mix(in oklab, var(--nf-brand-primary) 16%, var(--nf-card-border));
+    border-radius: var(--nf-radius-xl);
+    background: var(--nf-surface-primary);
+    transition: background-color var(--nf-duration-fast) var(--nf-ease-standard);
+  }
+  /* Suggested for you: list rows on the page itself, no card around each. */
+  .nf-intel-rows--flush .nf-intel-row {
+    border-color: transparent;
+    background: transparent;
+  }
+  @media (hover: hover) {
+    .nf-intel-row:hover {
+      background: color-mix(in oklab, var(--nf-brand-primary) 7%, var(--nf-surface-primary));
+    }
+    .nf-intel-rows--flush .nf-intel-row:hover {
+      background: color-mix(in oklab, var(--nf-brand-primary) 8%, transparent);
+    }
+  }
+  .nf-intel-row__link {
+    display: flex;
+    align-items: center;
+    gap: var(--nf-space-sm);
+    min-block-size: 4rem;
+    padding: var(--nf-space-xs) var(--nf-space-sm);
+    border-radius: var(--nf-radius-xl);
+    color: var(--nf-content-primary);
+    text-decoration: none;
+  }
+  .nf-intel-rows--flush .nf-intel-row__link {
+    padding-inline: var(--nf-space-2xs);
+  }
+  .nf-intel-row__link:focus-visible {
+    outline: var(--nf-focus-ring-width) solid var(--nf-focus-ring);
+    outline-offset: -2px;
+  }
+  .nf-intel-tile {
+    display: grid;
+    flex: none;
+    place-items: center;
+    inline-size: 2.75rem;
+    block-size: 2.75rem;
+    border-radius: var(--nf-radius-control);
+    background: color-mix(in oklab, var(--nf-brand-primary) 12%, transparent);
+    color: var(--nf-content-link);
+  }
+  .nf-intel-row__thumb {
+    display: block;
+    flex: none;
+    overflow: hidden;
+    inline-size: 3.5rem;
+    block-size: 3.5rem;
+    border-radius: var(--nf-radius-control);
+    background: var(--nf-surface-inset);
+  }
+  .nf-intel-row__thumb img {
+    inline-size: 100%;
+    block-size: 100%;
+    object-fit: cover;
+  }
+  .nf-intel-row__text {
+    display: grid;
+    flex: 1;
+    gap: var(--nf-space-3xs);
+    min-inline-size: 0;
+  }
+  .nf-intel-row__over {
+    color: var(--nf-content-link);
+    font-size: var(--nf-text-overline);
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .nf-intel-row__title {
+    display: flex;
+    align-items: center;
+    gap: var(--nf-space-2xs);
+    min-inline-size: 0;
+  }
+  .nf-intel-row__name {
+    overflow: hidden;
+    font-size: var(--nf-text-body);
+    font-weight: 700;
+    line-height: 1.3;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .nf-intel-row__tick {
+    flex: none;
+    color: var(--nf-content-link);
+  }
+  .nf-intel-row__sub,
+  .nf-intel-row__meta {
+    overflow: hidden;
+    color: var(--nf-content-muted);
+    font-size: var(--nf-text-caption);
+    line-height: 1.35;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .nf-intel-row__why {
+    color: var(--nf-content-link);
+    font-size: var(--nf-text-caption);
+    line-height: 1.35;
+  }
+  .nf-intel-row__chevron {
+    flex: none;
+    color: var(--nf-content-muted);
+  }
+  .nf-intel-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--nf-space-xs);
+    padding: 0 var(--nf-space-sm) var(--nf-space-sm);
+  }
+  .nf-intel-row--skeleton .nf-intel-row__link {
+    pointer-events: none;
+  }
+
+  /* People: the app's own rows; the list keeps the page's rhythm. */
+  .nf-intel-people {
+    gap: var(--nf-space-xs);
+  }
+
+  /* ============================================================ results */
+  .nf-intel-results {
+    display: grid;
+    gap: var(--nf-space-md);
+  }
+  .nf-intel-understood {
+    display: grid;
+    gap: var(--nf-space-xs);
+  }
+  .nf-intel-understood__acts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--nf-space-2xs);
+    margin-inline-start: calc(var(--nf-space-xs) * -1);
+  }
+  .nf-intel-understood__acts--alone {
+    justify-content: flex-end;
+    margin: 0;
+  }
+  .nf-intel-dym {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--nf-space-2xs) var(--nf-space-xs);
+    margin: 0;
+    padding: var(--nf-space-xs) var(--nf-space-sm);
+    border-radius: var(--nf-radius-card);
+    background: color-mix(in oklab, var(--nf-brand-primary) 8%, transparent);
+    color: var(--nf-content-primary);
+    font-size: var(--nf-text-body-sm);
+  }
+  .nf-intel-clarify {
+    display: grid;
+    gap: var(--nf-space-xs);
+    padding: var(--nf-space-md);
+    border: var(--nf-border-width) solid color-mix(in oklab, var(--nf-brand-primary) 30%, var(--nf-tier-card-edge));
+    border-radius: var(--nf-radius-card);
+    background: color-mix(in oklab, var(--nf-brand-primary) 10%, transparent);
+  }
+  .nf-intel-clarify__q {
+    margin: 0;
+    color: var(--nf-content-primary);
+    font-size: var(--nf-text-body-lg);
+    font-weight: 700;
+    line-height: 1.35;
+  }
+  .nf-intel-tabs {
+    margin-inline: calc(var(--nf-space-2xs) * -1);
+  }
+  .nf-intel-note {
+    display: flex;
+    align-items: center;
+    gap: var(--nf-space-xs);
+    margin: 0;
+    color: var(--nf-content-muted);
+    font-size: var(--nf-text-body-sm);
+  }
+  .nf-intel-groups {
+    display: grid;
+    gap: var(--nf-space-xl);
+  }
+  .nf-intel-group {
+    display: grid;
+    gap: var(--nf-space-xs);
+  }
+  .nf-intel-cards {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--nf-space-md);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  @media (min-width: 40rem) {
+    .nf-intel-cards {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  .nf-intel-nophoto {
+    display: grid;
+    place-items: center;
+    inline-size: 100%;
+    block-size: 100%;
+    background: color-mix(in oklab, var(--nf-brand-primary) 10%, var(--nf-surface-inset));
+    color: var(--nf-content-link);
+  }
+  .nf-intel-seeall {
+    justify-self: start;
+  }
+  .nf-intel-more {
+    padding-block-start: var(--nf-space-xs);
+  }
+  .nf-intel-empty__acts {
+    display: grid;
+    gap: var(--nf-space-sm);
+  }
+  .nf-intel-fade {
+    animation: nf-intel-fade var(--nf-duration-base) var(--nf-ease-entrance) both;
+  }
+  .nf-intel-rail {
+    margin-block-start: var(--nf-space-2xs);
+  }
+
+  /* ========================================================= the drawer */
+  .nf-intel-filters {
+    display: grid;
+    gap: var(--nf-space-lg);
+    padding-block: var(--nf-space-xs) var(--nf-space-lg);
+  }
+  .nf-intel-filters__pair {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--nf-space-sm);
+  }
+  .nf-intel-check {
+    display: flex;
+    align-items: center;
+    gap: var(--nf-space-sm);
+    min-block-size: 2.75rem;
+    color: var(--nf-content-primary);
+    font-size: var(--nf-text-body);
+    cursor: pointer;
+  }
+  .nf-intel-check input {
+    inline-size: 1.25rem;
+    block-size: 1.25rem;
+    accent-color: var(--nf-brand-primary);
+  }
+
+  /* ====================================================== the panel */
+  .nf-intel-assist {
+    display: grid;
+    gap: var(--nf-space-md);
+    padding-block-end: var(--nf-space-md);
+  }
+  /* The action sheet's card: the sheet's navy seen through a brand glass. */
+  .nf-intel-assist__card {
+    margin: 0;
+    padding: 0;
+    overflow: clip;
+    list-style: none;
+    border: var(--nf-border-width) solid color-mix(in oklab, var(--nf-brand-primary) 30%, var(--nf-tier-card-edge));
+    border-radius: var(--nf-radius-card);
+    background: color-mix(in oklab, var(--nf-brand-primary) 10%, transparent);
+  }
+  .nf-intel-assist__card > li + li {
+    border-block-start: var(--nf-border-width) solid var(--nf-panel-hair);
+  }
+  .nf-intel-assist__row {
+    color: var(--nf-content-primary);
+    text-decoration: none;
+  }
+  @media (hover: hover) {
+    .nf-intel-assist__row:hover {
+      background: color-mix(in oklab, var(--nf-brand-primary) 10%, transparent);
+    }
+  }
+  .nf-intel-assist__row:focus-visible {
+    outline: var(--nf-focus-ring-width) solid var(--nf-focus-ring);
+    outline-offset: -2px;
+  }
+  .nf-intel-assist__tries {
+    display: grid;
+    gap: var(--nf-space-xs);
+  }
+
+  /* ===================================================== the launcher */
+  .nf-intel-launch {
+    display: flex;
+    align-items: center;
+    gap: var(--nf-space-sm);
+    min-block-size: 3.5rem;
+    padding-inline: var(--nf-space-md) var(--nf-space-xs);
+    border: var(--nf-border-width) solid color-mix(in oklab, var(--nf-brand-primary) 28%, var(--nf-tier-card-edge));
+    border-radius: var(--nf-radius-xl);
+    background: color-mix(in oklab, var(--nf-brand-primary) 7%, var(--nf-surface-primary));
+    box-shadow: var(--nf-elevation-raised);
+    color: var(--nf-content-muted);
+    text-decoration: none;
+    transition: scale var(--nf-duration-press) var(--nf-ease-press);
+  }
+  .nf-intel-launch:active {
+    scale: var(--nf-press-scale);
+  }
+  .nf-intel-launch:focus-visible {
+    outline: var(--nf-focus-ring-width) solid var(--nf-focus-ring);
+    outline-offset: var(--nf-focus-ring-offset);
+  }
+  .nf-intel-launch__glyph {
+    flex: none;
+    color: var(--nf-content-link);
+  }
+  .nf-intel-launch__hint {
+    flex: 1;
+    min-inline-size: 0;
+    overflow: hidden;
+    font-size: var(--nf-text-body);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    animation: nf-intel-fade var(--nf-duration-slow) var(--nf-ease-entrance) both;
+  }
+  .nf-intel-launch__mark {
+    display: grid;
+    flex: none;
+    place-items: center;
+    inline-size: 2.5rem;
+    block-size: 2.5rem;
+    border-radius: var(--nf-radius-circle);
+    background: color-mix(in oklab, var(--nf-brand-primary) 14%, transparent);
+    color: var(--nf-content-link);
+  }
+
+  /* ============================================================ motion */
+  @keyframes nf-intel-rise {
+    from {
+      opacity: 0;
+      transform: translate3d(0, 8px, 0);
+    }
+  }
+  @keyframes nf-intel-fade {
+    from {
+      opacity: 0;
+    }
+  }
+  @keyframes nf-intel-drop {
+    from {
+      opacity: 0;
+      transform: translate3d(0, -4px, 0);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .nf-intel,
+    .nf-intel-section,
+    .nf-intel-field__hint,
+    .nf-intel-suggest,
+    .nf-intel-fade,
+    .nf-intel-launch__hint {
+      animation: none;
+    }
+  }
+  :root[data-motion="off"] :is(.nf-intel, .nf-intel-section, .nf-intel-field__hint, .nf-intel-suggest, .nf-intel-fade, .nf-intel-launch__hint) {
+    animation: none;
+  }
+  :root[data-motion="calm"] :is(.nf-intel, .nf-intel-section, .nf-intel-suggest) {
+    animation-name: nf-intel-fade;
+  }
+}

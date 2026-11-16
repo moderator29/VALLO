@@ -1,0 +1,443 @@
+"use client";
+
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
+import type { Locale } from "@vallo/i18n/core";
+import { UiIcon } from "@/design-system/icons/UiIcon";
+import { LogoWordmark, wordmarkWidth } from "@/design-system/brand/Logo";
+import { banner } from "@/lib/ui/toast";
+import {
+  INTEL_PATH,
+  IntelFetchError,
+  clearRecentSearches,
+  fetchDiscover,
+  fetchSearch,
+  intelHref,
+  parseIntelUrl,
+  removeRecentSearch,
+  searchKey,
+  sendIntelEvent,
+  withFilters,
+  withoutFilters,
+  type IntelUrlState,
+} from "@/lib/intelligence/client";
+import type { DiscoverResponse, IntelligenceResult, IntelligenceTab, SearchResponse, Suggestion } from "@/lib/intelligence/contract";
+import { IntelField } from "./IntelField";
+import { IntelDiscover, type DiscoverView } from "./IntelDiscover";
+import { IntelResults, type SearchView } from "./IntelResults";
+import { IntelFilters } from "./IntelFilters";
+import { IntelAssist } from "./IntelAssist";
+import { understoodChips, type IntelligenceCopy } from "./model";
+import { useOnline } from "./use-intel";
+import "./intelligence.css";
+
+/**
+ * WHAT A VISIT KEPT, FOR THE WAY BACK. Module state, so it lives exactly as
+ * long as this tab's app does: open a result, press Back, and the same
+ * results draw at once at the same scroll, with no wait and no second read.
+ * Nothing is stored on the device. Written only in the browser (effects and
+ * handlers), so the server never shares it between people.
+ */
+type Kept = { data: SearchResponse; more: IntelligenceResult[]; next?: string; scrollY?: number };
+const KEPT = new Map<string, Kept>();
+const KEPT_MAX = 12;
+let keptDiscover: DiscoverResponse | null = null;
+
+function keep(key: string, value: Kept) {
+  KEPT.delete(key);
+  KEPT.set(key, value);
+  while (KEPT.size > KEPT_MAX) KEPT.delete(KEPT.keys().next().value!);
+}
+
+/** The analytics route is live (POST /api/intelligence/event); flip off to silence it. */
+const EVENTS_LIVE = true;
+
+const CATEGORY_TABS = ["property", "stay", "restaurant", "roommate", "person"] as const satisfies readonly IntelligenceTab[];
+
+/**
+ * VALLO INTELLIGENCE, THE SCREEN (the founder's direction, 16 November 2026).
+ *
+ * One wide field over everything Vallo holds. Empty, it is a quiet discovery
+ * page; typing, a grouped list of suggestions; submitted, the results with
+ * what was understood, per kind. Built against `lib/intelligence/contract.ts`
+ * only, through `lib/intelligence/client.ts`.
+ *
+ * The address is the state (`client.ts` says how), changed with the History
+ * API so a refinement costs no server round trip, and read back on Back.
+ */
+export function IntelligenceScreen({
+  copy,
+  locale,
+  signedIn,
+  initial,
+  focusOnOpen = false,
+}: {
+  copy: IntelligenceCopy;
+  locale: Locale;
+  signedIn: boolean;
+  initial: IntelUrlState;
+  /** Arrived from a search launcher (Home, Cmd/Ctrl+K): the caret goes straight to the field. */
+  focusOnOpen?: boolean;
+}) {
+  const router = useRouter();
+  const [url, setUrl] = useState<IntelUrlState>(initial);
+  const [input, setInput] = useState(initial.q);
+  const inputRef = useRef<HTMLInputElement | null>(null);
+  const online = useOnline();
+  const [assistOpen, setAssistOpen] = useState(false);
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const key = searchKey(url);
+  const keyRef = useRef(key);
+  useEffect(() => {
+    keyRef.current = key;
+  }, [key]);
+
+  /* -------------------------------------------------------- the address */
+  const navigate = useCallback((next: IntelUrlState, options: { replace?: boolean } = {}) => {
+    const href = intelHref(next);
+    try {
+      if (options.replace) window.history.replaceState(null, "", href);
+      else window.history.pushState(null, "", href);
+    } catch {
+      /* A sandboxed frame: the screen still changes. */
+    }
+    setUrl((prev) => {
+      if (prev.q !== next.q) window.scrollTo({ top: 0 });
+      return next;
+    });
+    setInput(next.q);
+  }, []);
+
+  /* A server render with other words (a link to /intelligence from elsewhere):
+     adopted while rendering, React's pattern for state that follows a prop. */
+  const initialKey = searchKey(initial);
+  const [adopted, setAdopted] = useState(initialKey);
+  if (initialKey !== adopted) {
+    setAdopted(initialKey);
+    setUrl(initial);
+    setInput(initial.q);
+  }
+
+  /* Back and Forward through the searches this screen pushed. */
+  useEffect(() => {
+    const onPop = () => {
+      if (window.location.pathname !== INTEL_PATH) return;
+      const next = parseIntelUrl(new URLSearchParams(window.location.search));
+      setUrl(next);
+      setInput(next.q);
+    };
+    window.addEventListener("popstate", onPop);
+    return () => window.removeEventListener("popstate", onPop);
+  }, []);
+
+  /* Arrived from a launcher: drop `focus=1` from the address so Back and a reload do not refocus. */
+  useEffect(() => {
+    if (!focusOnOpen) return;
+    try {
+      window.history.replaceState(null, "", intelHref(parseIntelUrl(new URLSearchParams(window.location.search))));
+    } catch {
+      /* Nothing to tidy. */
+    }
+  }, [focusOnOpen]);
+
+  /* Cmd/Ctrl+K on this screen puts the caret in the field. */
+  useEffect(() => {
+    const onKey = (event: KeyboardEvent) => {
+      if (event.defaultPrevented || event.altKey || !(event.metaKey || event.ctrlKey) || event.key.toLowerCase() !== "k") return;
+      event.preventDefault();
+      inputRef.current?.focus();
+      inputRef.current?.select();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
+
+  /* ------------------------------------------------------- the empty page */
+  const [discover, setDiscover] = useState<DiscoverView>(() => (keptDiscover ? { status: "ready", data: keptDiscover } : { status: "loading" }));
+  const discoverTick = useRef(0);
+  useEffect(() => {
+    if (url.q || keptDiscover) return;
+    const controller = new AbortController();
+    const mine = ++discoverTick.current;
+    fetchDiscover(controller.signal)
+      .then((data) => {
+        if (mine !== discoverTick.current) return;
+        keptDiscover = data;
+        setDiscover({ status: "ready", data });
+      })
+      .catch((error: unknown) => {
+        if ((error as { name?: string })?.name === "AbortError" || mine !== discoverTick.current) return;
+        setDiscover({ status: "unavailable" });
+      });
+    return () => controller.abort();
+  }, [url.q]);
+
+  /* ------------------------------------------------------------ results */
+  /* The last answer, for the search it answered. What is on screen is derived
+     from it, the visit's keep and the connection, so a newer search never
+     shows an older answer. */
+  const [answer, setAnswer] = useState<{ key: string; view: SearchView } | null>(null);
+  const searchSeq = useRef(0);
+  const searchController = useRef<AbortController | null>(null);
+  /* The search the person just submitted: its first read says so (`submit=1`). */
+  const submitted = useRef<string | null>(null);
+  const [retry, setRetry] = useState(0);
+  const kept = url.q ? KEPT.get(key) : undefined;
+  const view: SearchView =
+    answer && answer.key === key && !(answer.view.status === "offline" && online)
+      ? answer.view
+      : kept
+        ? { status: "ready", data: kept.data, more: kept.more, next: kept.next, loadingMore: false }
+        : !online
+          ? { status: "offline" }
+          : { status: "loading" };
+
+  useEffect(() => {
+    const state = parseIntelUrl(new URLSearchParams(key));
+    if (!state.q) {
+      searchSeq.current += 1;
+      searchController.current?.abort();
+      return;
+    }
+    const keptNow = KEPT.get(key);
+    if (keptNow) {
+      /* Back from a result: the same results, at the same place. */
+      if (keptNow.scrollY !== undefined) {
+        const y = keptNow.scrollY;
+        keptNow.scrollY = undefined;
+        window.requestAnimationFrame(() => window.scrollTo({ top: y }));
+      }
+      return;
+    }
+    if (!online) return;
+    searchController.current?.abort();
+    const controller = new AbortController();
+    searchController.current = controller;
+    const mine = ++searchSeq.current;
+    const submit = submitted.current === key;
+    submitted.current = null;
+    fetchSearch(state, undefined, controller.signal, { submit })
+      .then((data) => {
+        if (mine !== searchSeq.current) return;
+        keep(key, { data, more: [], next: data.next });
+        setAnswer({ key, view: { status: "ready", data, more: [], next: data.next, loadingMore: false } });
+      })
+      .catch((error: unknown) => {
+        if (mine !== searchSeq.current || (error as { name?: string })?.name === "AbortError") return;
+        setAnswer({ key, view: { status: error instanceof IntelFetchError && error.offline ? "offline" : "error" } });
+      });
+  }, [key, retry, online]);
+
+  const onRetry = () => {
+    KEPT.delete(key);
+    setAnswer(null);
+    setRetry((n) => n + 1);
+  };
+
+  const onShowMore = () => {
+    if (view.status !== "ready" || !view.next || view.loadingMore) return;
+    const startedFor = key;
+    const cursor = view.next;
+    const base = view;
+    setAnswer({ key, view: { ...base, loadingMore: true } });
+    fetchSearch(url, cursor)
+      .then((page) => {
+        if (keyRef.current !== startedFor) return;
+        const seen = new Set([...base.data.results, ...base.more].map((r) => r.key));
+        const more = [...base.more, ...page.results.filter((r) => !seen.has(r.key))];
+        keep(startedFor, { data: base.data, more, next: page.next });
+        setAnswer({ key: startedFor, view: { ...base, more, next: page.next, loadingMore: false } });
+      })
+      .catch(() => {
+        if (keyRef.current !== startedFor) return;
+        setAnswer({ key: startedFor, view: { ...base, loadingMore: false } });
+        banner.error(copy.errorTitle);
+      });
+  };
+
+  /* --------------------------------------------------------------- acts */
+  const runQuery = useCallback(
+    (q: string) => {
+      const next: IntelUrlState = { q, tab: url.tab, filters: {}, drop: [] };
+      submitted.current = searchKey(next);
+      navigate(next);
+      try {
+        if (window.matchMedia("(pointer: coarse)").matches) inputRef.current?.blur();
+      } catch {
+        /* Keep the caret. */
+      }
+    },
+    [navigate, url.tab],
+  );
+
+  const onPick = (suggestion: Suggestion) => {
+    if (suggestion.href) {
+      if (suggestion.href.startsWith(`${INTEL_PATH}?`)) {
+        navigate(parseIntelUrl(new URLSearchParams(suggestion.href.slice(INTEL_PATH.length + 1))));
+      } else {
+        router.push(suggestion.href);
+      }
+      return;
+    }
+    if (suggestion.query) runQuery(suggestion.query);
+  };
+
+  const onOpen = (result: IntelligenceResult, position: number) => {
+    const kept = KEPT.get(key);
+    if (kept) kept.scrollY = window.scrollY;
+    if (EVENTS_LIVE) sendIntelEvent({ event: "click", q: url.q, tab: url.tab, kind: result.kind, position });
+  };
+
+  const onRemoveRecent = (q: string) => {
+    if (discover.status !== "ready") return;
+    const before = discover.data;
+    const after = { ...before, recent: before.recent.filter((r) => r.query !== q) };
+    keptDiscover = after;
+    setDiscover({ status: "ready", data: after });
+    void removeRecentSearch(q).then((ok) => {
+      if (ok) return;
+      keptDiscover = before;
+      setDiscover({ status: "ready", data: before });
+      banner.error(copy.recent.removeFailed);
+    });
+  };
+
+  const onClearRecent = () => {
+    if (discover.status !== "ready") return;
+    const before = discover.data;
+    const after = { ...before, recent: [] };
+    keptDiscover = after;
+    setDiscover({ status: "ready", data: after });
+    void clearRecentSearches().then((ok) => {
+      if (ok) {
+        banner.success(copy.recent.cleared);
+        return;
+      }
+      keptDiscover = before;
+      setDiscover({ status: "ready", data: before });
+      banner.error(copy.recent.removeFailed);
+    });
+  };
+
+  const chooseCategory = (tab: IntelligenceTab) => {
+    const next: IntelUrlState = { ...url, tab: url.tab === tab ? "all" : tab };
+    navigate(next, { replace: !url.q });
+    if (!url.q) inputRef.current?.focus({ preventScroll: true });
+  };
+
+  /* ------------------------------------------------------------ drawing */
+  const empty = !url.q;
+  const data = view.status === "ready" ? view.data : null;
+  const chips = useMemo(() => (data ? understoodChips(data.understood, copy, locale, url.tab) : []), [data, copy, locale, url.tab]);
+  const examples = copy.examples;
+  const drawerCurrent = { ...(data?.understood ?? {}), ...url.filters };
+
+  return (
+    <div className="nf-intel" data-state={empty ? "empty" : "results"} data-testid="intel-screen">
+      <header className="nf-intel-top">
+        <span className="nf-intel-top__brand">
+          <LogoWordmark width={wordmarkWidth(15)} height={15} className="nf-intel-top__word" />
+          <span className="sr-only">{copy.wordmark}</span>
+        </span>
+        <button
+          type="button"
+          className="nf-intel-spark"
+          aria-haspopup="dialog"
+          aria-expanded={assistOpen}
+          aria-label={copy.assist.openLabel}
+          onClick={() => setAssistOpen(true)}
+          data-testid="intel-assist-open"
+        >
+          <UiIcon name="spark" size={18} />
+          <span>{copy.assist.open}</span>
+        </button>
+      </header>
+
+      {empty ? (
+        <div className="nf-intel-hero">
+          <h1 className="nf-intel-hero__title">{copy.title}</h1>
+          <p className="nf-intel-hero__lede">{copy.lede}</p>
+        </div>
+      ) : (
+        <h1 className="sr-only">{copy.name}</h1>
+      )}
+
+      <IntelField
+        copy={copy}
+        value={input}
+        onValueChange={setInput}
+        onSubmit={runQuery}
+        onPick={onPick}
+        tab={url.tab}
+        inputRef={inputRef}
+        examples={examples}
+        autoFocus={focusOnOpen}
+      />
+
+      {empty ? (
+        <div className="nf-intel-cats" role="group" aria-label={copy.categoriesLabel} data-testid="intel-categories">
+          {CATEGORY_TABS.map((tab) => (
+            <button
+              key={tab}
+              type="button"
+              className={`nf-chip nf-intel-chip${url.tab === tab ? " nf-chip--active" : ""}`}
+              aria-pressed={url.tab === tab}
+              onClick={() => chooseCategory(tab)}
+              data-testid={`intel-cat-${tab}`}
+            >
+              {copy.categories[tab]}
+            </button>
+          ))}
+        </div>
+      ) : null}
+
+      <hr className="nf-intel-rule" />
+
+      {empty ? (
+        <IntelDiscover
+          view={discover}
+          copy={copy}
+          locale={locale}
+          signedIn={signedIn}
+          url={url}
+          runQuery={runQuery}
+          onRemoveRecent={onRemoveRecent}
+          onClearRecent={onClearRecent}
+        />
+      ) : (
+        <IntelResults
+          url={url}
+          view={view}
+          copy={copy}
+          locale={locale}
+          signedIn={signedIn}
+          navigate={navigate}
+          onShowMore={onShowMore}
+          onRetry={onRetry}
+          onOpenFilters={() => setFiltersOpen(true)}
+          onOpen={onOpen}
+        />
+      )}
+
+      <IntelFilters
+        open={filtersOpen}
+        onOpenChange={setFiltersOpen}
+        tab={url.tab}
+        current={drawerCurrent}
+        copy={copy}
+        onApply={(set, cleared) => navigate(withFilters(withoutFilters(url, cleared.filter((k) => drawerCurrent[k] !== undefined)), set))}
+      />
+      <IntelAssist
+        open={assistOpen}
+        onOpenChange={setAssistOpen}
+        copy={copy}
+        q={url.q}
+        chips={chips}
+        results={data ? [...data.results, ...(data.groups ?? []).flatMap((g) => g.results)] : []}
+        place={data?.understood.place}
+        alternatives={data?.alternatives}
+        runQuery={runQuery}
+      />
+    </div>
+  );
+}

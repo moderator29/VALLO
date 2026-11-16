@@ -6,6 +6,8 @@
  *   j / k    next / previous row (inbox rows, search results)
  *   s        save the focused listing
  *   ?        the cheat sheet
+ *   Cmd/Ctrl+K   VALLO Intelligence (the one search across Vallo); the
+ *            single chord here, and it works from inside a field too
  *
  * Esc is left to each sheet, which already closes on it. Nothing here fires
  * while typing in a field, with a modifier held (so the browser's own
@@ -13,6 +15,7 @@
  */
 export type KeyAction =
   | { type: "search" }
+  | { type: "intelligence" }
   | { type: "go"; href: string }
   | { type: "move"; dir: 1 | -1 }
   | { type: "save" }
@@ -42,6 +45,10 @@ export type KeyInput = {
 };
 
 export function decideKey(input: KeyInput): KeyAction | null {
+  /* Cmd+K on a Mac, Ctrl+K elsewhere: the one chord, so it is decided before
+     the "no modifier" rule below. It works from a field because a search
+     launcher is exactly what somebody reaches for from inside a form. */
+  if ((input.meta || input.ctrl) && !input.alt && input.key.toLowerCase() === "k") return { type: "intelligence" };
   if (input.inField || input.ctrl || input.meta || input.alt) return null;
   const key = input.key;
   const gOpen = input.pendingGAt != null && input.now - input.pendingGAt <= G_WINDOW_MS;
@@ -77,6 +84,7 @@ export function nextIndex(current: number, dir: 1 | -1, count: number): number {
 /** The cheat sheet's rows, in order. */
 export const KEY_HELP: ReadonlyArray<{ keys: string; what: string }> = [
   { keys: "/", what: "Search" },
+  { keys: "Ctrl+K", what: "VALLO Intelligence (Cmd+K on a Mac)" },
   { keys: "g h", what: "Go to Home" },
   { keys: "g s", what: "Go to Search" },
   { keys: "g m", what: "Go to Messages" },

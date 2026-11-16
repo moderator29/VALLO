@@ -36,6 +36,9 @@ export const PUBLIC_CATALOGUE_SEGMENTS: ReadonlySet<string> = new Set([
   "restaurant",
   /* The compare page: published listings side by side, from ids in the address. */
   "compare",
+  /* VALLO Intelligence: the one search over the same public catalogue (and the
+     other public kinds); a visitor's results come from the anonymous reader. */
+  "intelligence",
 ]);
 
 /** How many catalogue pages one address may open signed out per window. */
@@ -51,9 +54,20 @@ export function publicCatalogueEnabled(
 /**
  * The one data route those pages call from the browser: the map's pins in a
  * bounding box. It carries its own per-address limit (`map_bounds`), and it
- * returns what the catalogue pages already show. No other API route opens.
+ * returns what the catalogue pages already show. VALLO Intelligence's four
+ * reads open with it (below); no other API route opens.
  */
-export const PUBLIC_CATALOGUE_API_PATHS: ReadonlySet<string> = new Set(["/api/map/listings"]);
+export const PUBLIC_CATALOGUE_API_PATHS: ReadonlySet<string> = new Set([
+  "/api/map/listings",
+  /* VALLO Intelligence's reads for a visitor: the engine reads them through
+     the anonymous, cookie-free client (public kinds only), each route has its
+     own limiter, and the click beacon keeps no id. The member's own recent
+     searches (`/api/intelligence/recent`) stay closed. */
+  "/api/intelligence/suggest",
+  "/api/intelligence/search",
+  "/api/intelligence/discover",
+  "/api/intelligence/event",
+]);
 
 /** Is this a page the switch opens? Matched on the first segment. */
 export function isPublicCataloguePath(path: string): boolean {
