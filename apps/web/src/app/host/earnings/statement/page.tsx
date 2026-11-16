@@ -10,8 +10,6 @@ import { ButtonLink } from "@/components/ui/Button";
 import { HostShell } from "@/components/host/HostShell";
 import { HOST_STATEMENT_SIGNED_OUT_BODY } from "@/lib/money/copy";
 import { StatementView } from "@/components/host/StatementView";
-import { HostInnerNav } from "@/components/host/HostInnerNav";
-import { hostInnerNavCopy } from "@/components/host/host-inner-nav";
 
 export async function generateMetadata(): Promise<Metadata> {
   return { title: getDictionary(await getLocale()).experienceHost.statement.metaTitle, robots: { index: false, follow: false } };
@@ -68,7 +66,6 @@ export default async function HostStatementPage({
 
   return (
     <HostShell fallback="/host/earnings" wide>
-      <HostInnerNav active="statements" {...hostInnerNavCopy(getDictionary(locale))} />
       <StatementView
         month={month}
         thisMonth={thisMonth}

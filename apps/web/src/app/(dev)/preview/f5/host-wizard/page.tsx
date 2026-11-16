@@ -12,7 +12,7 @@ export default async function PreviewHostWizard() {
   const locale = await getLocale();
   const t = getDictionary(locale);
   return (
-    <HostShell logoLabel={t.a11y.logoHome}>
+    <HostShell logoLabel={t.a11y.logoHome} fallback="/host" chromeBack={false}>
       <HostWizard
         initial={{ ...emptyHostDraft(), hostType: "business", kind: "hotel" }}
         userId={PERSON.id}

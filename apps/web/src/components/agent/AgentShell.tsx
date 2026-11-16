@@ -120,7 +120,15 @@ export async function AgentShell({
             unreadLabel: t.a11y.notificationsUnread,
             unread: unreadNotifications,
           }}
-        />
+        >
+          {/* R3-08: the desk's second level, as the bar's own second row below
+              lg, the same scrolling chip row the host console draws, so it is
+              sticky with the bar. Not on an open conversation (it owns the
+              height) or on a flow a person should finish (the listing wizard). */}
+          {immersive || flow ? null : (
+            <AgentInnerNav {...agentInnerNavCopy(t)} active={agentInnerPageFor(active)} />
+          )}
+        </WorkspaceHeader>
 
         {immersive ? (
           <div className="flex min-h-0 flex-1 flex-col">{children}</div>
@@ -130,11 +138,6 @@ export async function AgentShell({
               docked ? "pb-lg" : "pb-[calc(2.5rem+env(safe-area-inset-bottom))]"
             }`}
           >
-            {/* R3-08: the desk's second level on every agent page that is not
-                an open conversation. An immersive page (a thread, the
-                assistant) gives its whole height to the conversation and keeps
-                its own head, so it draws none. */}
-            <AgentInnerNav {...agentInnerNavCopy(t)} active={agentInnerPageFor(active)} />
             {/* SCUML item 20: until a lister has answered the PEP question. */}
             {profile && <PepBanner />}
             {children}

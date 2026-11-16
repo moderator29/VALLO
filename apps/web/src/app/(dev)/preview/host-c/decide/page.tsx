@@ -24,7 +24,7 @@ export default async function PreviewHostDecide({
           })(),
         ];
   return (
-    <HostShell fallback="/preview/host-c" wide>
+    <HostShell fallback="/preview/host-c" wide chromeBack={false} nav>
       <DecideView rows={sortByDeadline(rows, now)} now={now} locale="en" unreadable={false} />
     </HostShell>
   );

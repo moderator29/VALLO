@@ -1,6 +1,7 @@
 import { getDictionary } from "@vallo/i18n";
 import { getLocale } from "@/lib/locale";
 import { HostShell } from "@/components/host/HostShell";
+import { PageFrame } from "@/components/app/PageFrame";
 import { HotelDashboard } from "@/components/host/dashboard/HotelDashboard";
 import { RestaurantSummary } from "@/components/host/dashboard/RestaurantSummary";
 import { buildRestaurantFigures } from "@/components/host/dashboard/restaurant-figures";
@@ -59,7 +60,8 @@ export default async function PreviewHospitality({
     const today = hostToday({ now: DESK_NOW, rooms: null, tables: null, unread: 3, businesses: BUSINESSES, draft: null });
     const figures = buildRestaurantFigures({ board: deskFixture(), now: DESK_NOW, week: WEEK_ROWS, noShowsMonth: 3 });
     return (
-      <HostShell logoLabel={t.a11y.logoHome} fallback="/host" wide>
+      <HostShell logoLabel={t.a11y.logoHome} fallback="/host" wide chromeBack={false} nav>
+        <PageFrame title={t.hostNav.overview} back={false} width="wide">
         <HostStandingBody
           businesses={BUSINESSES}
           draft={null}
@@ -73,12 +75,19 @@ export default async function PreviewHospitality({
             </>
           }
         />
+        </PageFrame>
       </HostShell>
     );
   }
 
   return (
-    <HostShell logoLabel={t.a11y.logoHome} fallback="/host" wide>
+    <HostShell logoLabel={t.a11y.logoHome} fallback="/host" wide chromeBack={false} nav>
+      <PageFrame
+        title={view === "restaurant" || view === "restaurant-empty" ? t.hostNav.overview : t.experienceHost.bookings.title}
+        back={view === "hotel"}
+        fallback="/host"
+        width="wide"
+      >
       {view === "restaurant" || view === "restaurant-empty" ? (
         <RestaurantSummary
           figures={buildRestaurantFigures({
@@ -92,11 +101,6 @@ export default async function PreviewHospitality({
         />
       ) : (
         <div className="nf-dash">
-          {view === "hotel" ? (
-            <div>
-              <h1 className="nf-h2">{t.experienceHost.bookings.title}</h1>
-            </div>
-          ) : null}
           <HotelDashboard
             read={view === "hotel-empty" ? emptyHotelRead() : hotelRead({ marks })}
             locale={locale}
@@ -105,6 +109,7 @@ export default async function PreviewHospitality({
           />
         </div>
       )}
+      </PageFrame>
     </HostShell>
   );
 }

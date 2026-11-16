@@ -196,7 +196,12 @@ export function PhotoManager({
       <p className="nf-caption mt-inline">{w.coverNote.replace("{max}", String(MAX_BUSINESS_PHOTOS))}</p>
 
       {photos.length > 0 && (
-        <ul className="mt-group grid grid-cols-2 gap-row sm:grid-cols-3">
+        <ul
+          /* One photograph to a row on a phone: two to a row left each
+             tile 157px wide, and its "Move earlier" and "Move later" pair
+             ran out of the card and off the screen. */
+          className="mt-group grid grid-cols-1 gap-row min-[30rem]:grid-cols-2 sm:grid-cols-3"
+        >
           {shown.map((photo, index) => (
             <li
               key={photo.id}
@@ -231,7 +236,7 @@ export function PhotoManager({
                 width={400}
                 height={300}
                 sizes="(min-width: 640px) 200px, 45vw"
-                className="h-32 w-full rounded-md border border-[var(--nf-border-subtle)] object-cover"
+                className="h-48 w-full rounded-md border border-[var(--nf-border-subtle)] object-cover min-[30rem]:h-32"
               />
               {/* STACKED, NOT A ROW. At 390 two of these sit side by side and
                   a label beside a control has about 80px to live in: the

@@ -1,7 +1,9 @@
 "use client";
 
+import { useRef } from "react";
 import { usePathname } from "next/navigation";
 import { Chip, ChipRow } from "@/components/ui/Chip";
+import { useActiveChipInView } from "@/components/workspace/use-active-chip-in-view";
 import { hostNavActive, hostNavItems, type HostNavLabels } from "./host-nav-model";
 
 /**
@@ -17,8 +19,13 @@ import { hostNavActive, hostNavItems, type HostNavLabels } from "./host-nav-mode
 export function HostNav({ labels }: { labels: HostNavLabels }) {
   const label = labels.workspace;
   const active = hostNavActive(usePathname());
+  /* A page late in the row (Settings, Earnings) is scrolled into view, so the
+     lit chip is always one a phone can see. */
+  const ref = useRef<HTMLElement | null>(null);
+  useActiveChipInView(ref, active);
   return (
     <nav
+      ref={ref}
       aria-label={label}
       className="px-gutter pb-xs lg:hidden"
       /* The rail bleeds by the same gutter this nav is padded with. */

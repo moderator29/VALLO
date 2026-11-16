@@ -11,7 +11,7 @@ export default async function PreviewAgentSettings() {
   const locale: Locale = await getLocale();
   const t = getDictionary(locale);
   return (
-    <AgentShell t={t} locale={locale} active="/agent/settings" profile={AGENT_PROFILE}>
+    <AgentShell t={t} locale={locale} active="/agent/settings" profile={AGENT_PROFILE} chromeBack={false}>
       <AgentSettingsBody
         t={t}
         agent={AGENT_PROFILE}

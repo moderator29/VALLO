@@ -33,7 +33,7 @@ export default async function PreviewRestaurantDesk({
   const locale = await getLocale();
   const t = getDictionary(locale);
   return (
-    <HostShell logoLabel={t.a11y.logoHome} fallback="/host" wide>
+    <HostShell logoLabel={t.a11y.logoHome} fallback="/host" wide chromeBack={false} nav>
       <HostTablesBody
         copy={t.hostWorkspace}
         words={t.experienceHost}

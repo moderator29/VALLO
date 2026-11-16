@@ -247,7 +247,9 @@ function LineCard({
             {line.kind === "reversal" ? ` · ${sv.refundReversal}` : ""}
           </p>
         </div>
-        <p className="nf-decide__title nf-numeric">{formatMoney(line.shareMinor, locale)}</p>
+        {/* Never broken at the minus: a reversal read "-" on one line and
+            the amount on the next at phone width. */}
+        <p className="nf-decide__title nf-numeric shrink-0 whitespace-nowrap">{formatMoney(line.shareMinor, locale)}</p>
       </div>
       <dl className="nf-stmt-line__split">
         <dt>{sv.colGuestPaid}</dt>

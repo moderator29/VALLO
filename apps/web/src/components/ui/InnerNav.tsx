@@ -27,11 +27,13 @@ import { SPRING_SETTLE, clamp, springFor, useDrive } from "./ported-motion";
  * analytics, support.
  *
  * WHERE IT IS MOUNTED TODAY (R3-08): the admin desks' sections
- * (`app/admin/_components/DeskSections.tsx`); the host desk's five inner pages
- * (`components/host/HostInnerNav.tsx`); every agent page that is not an open
- * conversation, through `AgentShell` (`components/agent/AgentInnerNav.tsx`);
- * the settings screens (`components/app/account/SettingsInnerNav.tsx`); and a
- * space's detail sections (`components/app/listing/ListingSectionTabs.tsx`).
+ * (`app/admin/_components/DeskSections.tsx`); the settings screens
+ * (`components/app/account/SettingsInnerNav.tsx`); and a space's detail
+ * sections (`components/app/listing/ListingSectionTabs.tsx`). The host and
+ * agent consoles left it on 16 November 2026 (the workspace phone pass): each
+ * already carries its pages as a sticky row of chips under the workspace bar
+ * (`components/host/HostNav.tsx`, `components/agent/AgentInnerNav.tsx`), and a
+ * second menu toggle above every page title read as scattered.
  *
  * WHERE IT MUST NEVER GO: the primary dock and the side navigation. They are
  * settled by D28 (the dock keeps its slots, the side nav keeps its structure) and

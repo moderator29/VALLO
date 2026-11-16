@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { ButtonLink } from "@/components/ui/Button";
 import { getDictionary, type Locale } from "@vallo/i18n";
 import type { HotelDeskRead } from "@/lib/host/tape-chart-read";
 import { buildHotelModel } from "@/lib/host/front-desk-model";
@@ -65,11 +65,19 @@ export function HotelDashboard({
           <TapeChart chart={chart} words={words.tape} locale={locale} truncated={read.truncated ? read.stays.length : 0} />
         </div>
       ) : (
-        <p className="nf-dash__lede">
-          <Link href="/host/bookings" className="nf-link-quiet nf-tap" data-testid="open-calendar">
-            {words.hotel.calendarLink}
-          </Link>
-        </p>
+        /* A real button rather than a quiet link floating between the front
+           desk and whatever comes next: the one way from the home's cut of the
+           desk into the whole calendar (workspace phone pass). */
+        <ButtonLink
+          href="/host/bookings"
+          variant="secondary"
+          leadingIcon="calendar-check"
+          arrow
+          className="justify-self-start"
+          data-testid="open-calendar"
+        >
+          {words.hotel.calendarLink}
+        </ButtonLink>
       )}
     </div>
   );

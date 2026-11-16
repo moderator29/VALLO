@@ -1,6 +1,7 @@
 import { getDictionary } from "@vallo/i18n";
 import { getLocale } from "@/lib/locale";
 import { HostShell } from "@/components/host/HostShell";
+import { PageFrame } from "@/components/app/PageFrame";
 import { HostStandingBody } from "@/app/host/HostStandingBody";
 import { DeskFigure } from "@/components/workspace/DeskFigure";
 import { emptyHostDraft } from "@/lib/host/onboarding";
@@ -55,7 +56,8 @@ export default async function PreviewHostLanding() {
     draft: null,
   });
   return (
-    <HostShell logoLabel={t.a11y.logoHome} wide>
+    <HostShell logoLabel={t.a11y.logoHome} wide chromeBack={false} nav>
+      <PageFrame title={t.hostNav.overview} back={false} width="wide">
       <HostStandingBody
         figure={<DeskFigure rows={bookingRows} kind="bookings" t={t} locale={locale} now={now} />}
         businesses={[
@@ -100,6 +102,7 @@ export default async function PreviewHostLanding() {
         today={today}
         t={t}
       />
+      </PageFrame>
     </HostShell>
   );
 }

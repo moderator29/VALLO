@@ -66,16 +66,22 @@ export function AgentScreenSkeleton({
             <Skeleton circle width="2.5rem" className="hidden shrink-0 sm:block" />
             <Skeleton width="9rem" height="1rem" radius="sm" className="max-w-[40%]" />
           </div>
+          {/* The desk's chip row (`AgentInnerNav`), the bar's second row below
+              lg, held here so the page does not drop by a row when it lands.
+              The same placeholder the host skeleton draws for `HostNav`. */}
+          {inner ? (
+            <div aria-hidden="true" className="flex gap-xs overflow-hidden px-gutter pb-xs lg:hidden">
+              {Array.from({ length: 4 }, (_, i) => (
+                <Skeleton key={i} width="6rem" height="2.25rem" radius="pill" className="shrink-0" />
+              ))}
+            </div>
+          ) : null}
         </header>
 
         <LoadingShell
           label={label}
           className={`px-md pt-lg sm:px-5 md:px-xl md:pt-7 lg:pb-10 ${inner ? "pb-lg" : "pb-[calc(2.5rem+env(safe-area-inset-bottom))]"}`}
         >
-          {/* The inner navigation's 44px toggle, which AgentShell draws above
-              every page (R3-08): held here so the title does not drop by a row
-              when the page lands. */}
-          {inner ? <Skeleton circle width="2.75rem" className="mb-xs" /> : null}
           {children}
         </LoadingShell>
       </main>

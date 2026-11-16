@@ -19,10 +19,11 @@ export default async function LoadingHostPhotos() {
         <Skeleton width="55%" height="1.125rem" radius="sm" />
         <Skeleton className="mt-xs" height="0.875rem" radius="sm" />
         <Skeleton className="mt-2xs" width="80%" height="0.875rem" radius="sm" />
-        <div className="mt-md grid grid-cols-2 gap-sm">
+        {/* The same one-to-a-row grid the photographs arrive in on a phone. */}
+        <div className="mt-md grid grid-cols-1 gap-sm min-[30rem]:grid-cols-2">
           {Array.from({ length: 2 }, (_, i) => (
             <div key={i} className="grid gap-xs">
-              <Skeleton height="8rem" radius="lg" />
+              <Skeleton height="12rem" radius="lg" />
               <Skeleton width="50%" height="0.75rem" radius="sm" />
               <Skeleton height="2.75rem" radius="pill" />
             </div>

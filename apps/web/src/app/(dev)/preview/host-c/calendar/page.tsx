@@ -15,7 +15,7 @@ export default async function PreviewHostCalendar({
   const rows = calendarRows(today);
   const month = typeof p.month === "string" ? p.month : today.slice(0, 7);
   return (
-    <HostShell fallback="/preview/host-c" wide>
+    <HostShell fallback="/preview/host-c" wide chromeBack={false} nav>
       <PageHeader variant="large" back={false} title="Calendar" subtitle="Example: Marina Court Hotel" />
       <RateCalendar
           key={month}

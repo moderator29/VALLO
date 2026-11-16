@@ -14,8 +14,6 @@ import { ListGroup, ListRow } from "@/components/ui/ListGroup";
 import { IconPlate, ICON_PLATE_GLYPH } from "@/components/ui/IconPlate";
 import { UiIcon } from "@/design-system/icons/UiIcon";
 import { monthsWithLines } from "@/lib/host/statement";
-import { HostInnerNav } from "@/components/host/HostInnerNav";
-import { hostInnerNavCopy } from "@/components/host/host-inner-nav";
 import { readMyChargebackHold } from "@/lib/money/chargeback-hold";
 import { ChargebackHoldNotice } from "@/components/money/ChargebackHoldNotice";
 
@@ -56,7 +54,6 @@ export default async function HostEarningsPage({
     /* The body's page frame carries the one way back; the bar keeps the
        host's destinations. */
     <HostShell logoLabel={t.a11y.logoHome} fallback="/host" chromeBack={false} nav>
-      <HostInnerNav active="earnings" {...hostInnerNavCopy(t)} />
       <PageFrame title={t.experienceHost.earnings.title} fallback="/host">
         <p className={`mb-block ${TYPE.body}`}>{PAYOUT_ANSWER}</p>
         {/* Chargebacks: the payout rule, said calmly, only when it applies. */}

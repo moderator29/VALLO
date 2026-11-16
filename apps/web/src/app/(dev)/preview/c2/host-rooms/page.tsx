@@ -17,7 +17,7 @@ export default async function PreviewC2HostRooms() {
   const locale = await getLocale();
   const t = getDictionary(locale);
   return (
-    <HostShell logoLabel={t.a11y.logoHome} fallback="/host">
+    <HostShell logoLabel={t.a11y.logoHome} fallback="/host" chromeBack={false} nav>
       <HostRoomsBody
         businesses={[C2_HOTEL]}
         chosen={C2_HOTEL}

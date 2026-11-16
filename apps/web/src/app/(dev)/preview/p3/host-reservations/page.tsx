@@ -13,7 +13,7 @@ export const dynamic = "force-dynamic";
 export default async function PreviewHostReservations() {
   const t = getDictionary(await getLocale());
   return (
-    <HostShell logoLabel={t.a11y.logoHome} fallback="/host">
+    <HostShell logoLabel={t.a11y.logoHome} fallback="/host" chromeBack={false} nav>
       <HostTablesBody board={P3_TABLE_BOARD} />
     </HostShell>
   );

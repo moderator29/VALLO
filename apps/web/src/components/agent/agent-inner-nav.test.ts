@@ -36,11 +36,13 @@ describe("the agent desk's inner navigation", () => {
     expect(agentInnerPageFor("/agent/list")).toBeNull();
   });
 
-  it("is mounted by the shell every agent page draws, outside the immersive branch", () => {
+  it("is mounted by the shell as the bar's second row, off on a conversation and on a flow", () => {
     const shell = readFileSync(join(__dirname, "AgentShell.tsx"), "utf8");
     const mount = shell.indexOf("<AgentInnerNav");
     expect(mount).toBeGreaterThan(-1);
-    expect(shell.lastIndexOf("immersive ?", mount)).toBeGreaterThan(-1);
-    expect(shell.slice(shell.lastIndexOf("immersive ?", mount), mount)).toContain(") : (");
+    /* Inside the workspace bar, so it is sticky with it (as the host's row). */
+    expect(shell.lastIndexOf("<WorkspaceHeader", mount)).toBeGreaterThan(-1);
+    expect(shell.indexOf("</WorkspaceHeader>", mount)).toBeGreaterThan(mount);
+    expect(shell.slice(shell.lastIndexOf("{immersive || flow ? null : (", mount), mount)).toContain("? null : (");
   });
 });

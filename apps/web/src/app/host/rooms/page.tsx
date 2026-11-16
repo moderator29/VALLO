@@ -7,8 +7,6 @@ import { authHref, returnHref } from "@/components/auth/auth-intent";
 import { EmptyState } from "@/components/app/Screen";
 import { ButtonLink } from "@/components/ui/Button";
 import { HostShell } from "@/components/host/HostShell";
-import { HostInnerNav } from "@/components/host/HostInnerNav";
-import { hostInnerNavCopy } from "@/components/host/host-inner-nav";
 import { HostRoomsBody } from "./HostRoomsBody";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -78,7 +76,6 @@ export default async function HostRoomsPage({
     /* The body's page frame carries the one way back; the bar keeps the
        host's destinations. */
     <HostShell logoLabel={t.a11y.logoHome} fallback="/host" chromeBack={false} nav>
-      <HostInnerNav active="rooms" {...hostInnerNavCopy(t)} />
       <HostRoomsBody
         copy={t.hostWorkspace}
         words={t.experienceHost.rooms}

@@ -12,8 +12,6 @@ import { HostShell } from "@/components/host/HostShell";
 import { DecideView, type DecideRowData } from "@/components/host/DecideView";
 import { readHostTableBoard } from "../reservations/board";
 import "../host-desk.css";
-import { HostInnerNav } from "@/components/host/HostInnerNav";
-import { hostInnerNavCopy } from "@/components/host/host-inner-nav";
 
 export async function generateMetadata(): Promise<Metadata> {
   return { title: getDictionary(await getLocale()).experienceHost.decide.metaTitle, robots: { index: false, follow: false } };
@@ -97,7 +95,6 @@ export default async function HostDecidePage() {
     /* The view's page frame carries the one way back; the bar keeps the
        host's destinations. */
     <HostShell fallback="/host" wide chromeBack={false} nav>
-      <HostInnerNav active="decide" {...hostInnerNavCopy(getDictionary(locale))} />
       <DecideView rows={sorted} now={now} locale={locale} unreadable={unreadable} />
     </HostShell>
   );

@@ -1,6 +1,7 @@
 import { getDictionary } from "@vallo/i18n";
 import { getLocale } from "@/lib/locale";
 import { HostShell } from "@/components/host/HostShell";
+import { PageFrame } from "@/components/app/PageFrame";
 import { HostStandingBody } from "@/app/host/HostStandingBody";
 import { hostToday } from "@/app/host/today";
 
@@ -16,8 +17,10 @@ export default async function PreviewHostEmpty() {
   const t = getDictionary(locale);
   const today = hostToday({ now: new Date(), rooms: null, tables: null, unread: 0, businesses: [], draft: null });
   return (
-    <HostShell logoLabel={t.a11y.logoHome} wide>
+    <HostShell logoLabel={t.a11y.logoHome} wide chromeBack={false} nav>
+      <PageFrame title={t.hostNav.overview} back={false} width="wide">
       <HostStandingBody businesses={[]} draft={null} locale={locale} today={today} t={t} />
+      </PageFrame>
     </HostShell>
   );
 }

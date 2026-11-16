@@ -671,3 +671,97 @@
     white-space: nowrap;
   }
 }
+
+/* ------------------------------------------------ THE PHONE PASS (16 November 2026)
+
+   The founder's ask for the consoles: one calm, well-rhythmed mobile product,
+   the same flow as the member app's inner pages, not pieces scattered round
+   the page. These rules hold the agent console (`.nf-agent`) and the host
+   console (`.nf-host`) to the page frame's rhythm at phone widths. Layout
+   only: every colour, radius and shadow is a token or the shared layer's. */
+@layer components {
+  /* THE FRAME'S COLUMN NEVER GROWS PAST THE SCREEN. `.nf-g1page__body` is a
+     grid with no column template, so its one implicit column sized itself to
+     the widest unbreakable row inside it: on Bookings a decision card's
+     button pair measured 444px on a 393px phone, and the card ran off the
+     right edge with its total and its second button cut. One flexible
+     column that may shrink to nothing keeps every section inside the
+     gutter. */
+  .nf-agent .nf-g1page__body,
+  .nf-host .nf-g1page__body {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  /* TAB WORDS KEEP THEIR WIDTH. An underline tab sets `min-inline-size:
+     2.75rem` for the touch floor, which also replaces the flex item's
+     automatic minimum, so in a row narrower than its tabs each tab shrank
+     below its own words: on Bookings "Requests 1" was drawn in a 66px box,
+     the centred word spilled out of both sides and the first tab read
+     "equests". A tab never shrinks; the row scrolls instead, as it was
+     built to. */
+  .nf-agent .nf-utabs__tab,
+  .nf-host .nf-utabs__tab {
+    flex: none;
+  }
+
+  /* ONE PAGE HEAD ON A PHONE. The frame's large head (`PageFrame`, the
+     member app's inner pages) puts the way back, the title and its line,
+     and the page's actions on one wrapping row. In a console the actions are
+     real buttons ("Start a listing", "Switch to personal account"), so on a
+     phone they squeezed the title's line into a third of the width, or
+     dropped to a line of their own against the far edge. Below 40rem the
+     head is two columns: the way back, then the title, its line and, under
+     them on their own row, the actions, all on one left edge. Pages without
+     a way back (the dashboards) keep the same edge, because the first column
+     is empty and takes no room. */
+  @media (max-width: 39.999rem) {
+    .nf-agent .nf-ph-large__row,
+    .nf-host .nf-ph-large__row {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr);
+      column-gap: 0;
+      row-gap: var(--nf-space-sm);
+      align-items: start;
+    }
+    .nf-agent .nf-ph-large__row > :not(.nf-ph-large__text, .nf-ph-large__actions),
+    .nf-host .nf-ph-large__row > :not(.nf-ph-large__text, .nf-ph-large__actions) {
+      grid-column: 1;
+      margin-inline-end: var(--nf-space-sm);
+    }
+    .nf-agent :is(.nf-ph-large__text, .nf-ph-large__actions),
+    .nf-host :is(.nf-ph-large__text, .nf-ph-large__actions) {
+      grid-column: 2;
+      min-inline-size: 0;
+    }
+    .nf-agent .nf-ph-large__actions,
+    .nf-host .nf-ph-large__actions {
+      flex-wrap: wrap;
+      justify-self: start;
+      margin: 0;
+    }
+    /* The one exception: the dashboard's Switch to personal account sits
+       OPPOSITE the title, as the founder asked (15 November 2026). It is
+       compact, the title is one short word, so the two share the line. */
+    .nf-agent .nf-ph-large__row:has(.nf-switch-personal),
+    .nf-host .nf-ph-large__row:has(.nf-switch-personal) {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .nf-agent .nf-ph-large__row:has(.nf-switch-personal) .nf-ph-large__actions,
+    .nf-host .nf-ph-large__row:has(.nf-switch-personal) .nf-ph-large__actions {
+      flex: none;
+      flex-wrap: nowrap;
+    }
+  }
+
+  /* NO HALF-EMPTY ROW OF TILES. The home's figure tiles are two to a row on
+     a phone; when the reads leave an odd number (a host with no rooms has
+     only "Unread messages"), the last one sat in the left half with an empty
+     hole beside it. It takes the whole row instead. */
+  @media (max-width: 63.999rem) {
+    .nf-desk-kpis > :last-child:nth-child(odd) {
+      grid-column: 1 / -1;
+    }
+  }
+}

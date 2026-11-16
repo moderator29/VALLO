@@ -9,7 +9,7 @@ export const dynamic = "force-dynamic";
 export default async function PreviewHostSettings() {
   const t = getDictionary(await getLocale());
   return (
-    <HostShell fallback="/host">
+    <HostShell fallback="/host" chromeBack={false} nav>
       <HostSettingsBody
         t={t}
         notifications={{ bookings: true, messages: true, wallet: true, marketing: false }}

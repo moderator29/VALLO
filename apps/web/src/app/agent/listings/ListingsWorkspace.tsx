@@ -884,10 +884,18 @@ export function ListingsWorkspace({
     anchor.current = id;
   };
   const plan = planBulk(listings, selected);
+  /* What the groups below actually draw: not a listing closed here, not a
+     draft on its way out. */
+  const shownCount = listings.filter((l) => !(l.id in closed) && !pending.includes(l.id)).length;
 
   return (
     <div className="space-y-7">
-      <div className="flex justify-end">
+      {/* The list's own toolbar: what is here at the left, the way to act on
+          several at the right, so "Select" is never a word floating alone. */}
+      <div className="flex items-center justify-between gap-sm">
+        <p className="nf-body-sm text-[var(--nf-content-muted)]" data-testid="listings-count">
+          <span className="nf-numeric">{shownCount}</span> {shownCount === 1 ? "listing" : "listings"}
+        </p>
         <Button
           type="button"
           variant="quiet"

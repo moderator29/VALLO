@@ -14,8 +14,6 @@ import { ButtonLink } from "@/components/ui/Button";
 import { HostShell } from "@/components/host/HostShell";
 import { RateCalendar } from "@/components/host/calendar/RateCalendar";
 import "../host-desk.css";
-import { HostInnerNav } from "@/components/host/HostInnerNav";
-import { hostInnerNavCopy } from "@/components/host/host-inner-nav";
 
 export async function generateMetadata(): Promise<Metadata> {
   return { title: getDictionary(await getLocale()).experienceHost.calendar.title, robots: { index: false, follow: false } };
@@ -99,7 +97,6 @@ export default async function HostCalendarPage({
     /* The frame's header carries the one way back (Grade 1 page frame); the
        bar keeps the host's destinations. */
     <HostShell fallback="/host" wide chromeBack={false} nav>
-      <HostInnerNav active="calendar" {...hostInnerNavCopy(getDictionary(locale))} />
       <PageFrame
         title={words.title}
         subtitle={accommodation.name}

@@ -32,7 +32,7 @@ const VENUE = {
 export default async function PreviewHostPhotos() {
   const t = getDictionary(await getLocale());
   return (
-    <HostShell logoLabel={t.a11y.logoHome} fallback="/host">
+    <HostShell logoLabel={t.a11y.logoHome} fallback="/host" chromeBack={false} nav>
       <HostPhotosBody
         userId="00000000-0000-4000-8000-0000000p3010"
         businesses={[VENUE]}

@@ -1,45 +1,67 @@
 "use client";
 
-import { InnerNav, type InnerNavItem } from "@/components/ui/InnerNav";
+import { useRef } from "react";
+import { Chip, ChipRow } from "@/components/ui/Chip";
+import type { UiIconName } from "@/design-system/icons/UiIcon";
+import { useActiveChipInView } from "@/components/workspace/use-active-chip-in-view";
 import type { AgentInnerPage } from "./agent-inner-nav";
 
 /**
- * THE AGENT DESK'S PAGES, ONE PULL AWAY (R3-08; D25; COMPONENT_LIBRARY "Glass
- * navigation": "the host and agent workspaces").
+ * THE AGENT DESK'S PAGES, ONE TAP AWAY (R3-08; workspace phone pass, 16
+ * November 2026).
  *
- * The same second level the host desk has (`HostInnerNav`), drawn by
- * `AgentShell` above every agent page that is not an open conversation, so an
- * agent moves between the desk's queues (listings, inspections, bookings,
- * messages, reviews) and its money pages without walking back through the
- * dashboard or opening the drawer. It never replaces the rail, the drawer or
- * the dock (D28): it is the second level, and it carries the desk's queues
- * only, not the account rows the rail also holds.
+ * One scrolling row of link chips under the workspace bar, the same row the
+ * host console draws (`HostNav`), so the two consoles move the same way: the
+ * desk's queues (listings, inspections, bookings, messages, reviews) and its
+ * money pages, without walking back through the dashboard or opening the
+ * drawer. `AgentShell` hands it to `WorkspaceHeader` as the bar's second row,
+ * so it is sticky with the bar and never scrolls out of reach.
  *
- * A thin client wrapper so the server shell passes plain words; the pull, the
- * spring, the haptic and the keyboard are `InnerNav`'s.
+ * WHY NOT THE PULL MENU ANY MORE. It was a hamburger on its own line above
+ * every page title, a second menu button a thumb-width under the bar's own
+ * drawer toggle, and it hid the very destinations a phone needs to see. The
+ * founder's ask for the consoles (16 November 2026) was one calm product, not
+ * pieces scattered round the page; a visible row of the pages, with the
+ * current one lit and scrolled into view, is that. It never replaces the rail,
+ * the drawer or the dock (D28): it is the second level, and it carries the
+ * desk's pages only, not the account rows the rail also holds.
  */
 export function AgentInnerNav({
   pages,
   active,
   label,
-  toggleLabel,
 }: {
-  pages: readonly { id: AgentInnerPage; label: string; href: string; icon: InnerNavItem["icon"] }[];
+  pages: readonly { id: AgentInnerPage; label: string; href: string; icon: UiIconName | undefined }[];
   active: AgentInnerPage | null;
   label: string;
-  toggleLabel: string;
+  /** Still handed over by `agentInnerNavCopy`; a row of links has no toggle to name. */
+  toggleLabel?: string;
 }) {
-  const items: InnerNavItem[] = pages.map((page) => ({
-    id: page.id,
-    label: page.label,
-    href: page.href,
-    ...(page.icon ? { icon: page.icon } : {}),
-  }));
+  const ref = useRef<HTMLElement | null>(null);
+  useActiveChipInView(ref, active);
   return (
-    /* On its own line above the page's title, at the leading edge where the
-       panel opens, so the title stays the subject (as on the host desk). */
-    <div className="mb-xs lg:hidden" data-testid="agent-inner-nav">
-      <InnerNav label={label} toggleLabel={toggleLabel} items={items} {...(active ? { activeId: active } : {})} />
-    </div>
+    <nav
+      ref={ref}
+      aria-label={label}
+      className="px-gutter pb-xs lg:hidden"
+      data-testid="agent-inner-nav"
+      /* The rail bleeds by the same gutter this nav is padded with. */
+      style={{ "--nf-chiprow-bleed": "var(--nf-pad-shell)" } as React.CSSProperties}
+    >
+      <ChipRow label={label}>
+        {pages.map((page) => (
+          <Chip
+            key={page.id}
+            behaviour="link"
+            href={page.href}
+            {...(page.icon ? { icon: page.icon } : {})}
+            size="sm"
+            selected={page.id === active}
+          >
+            {page.label}
+          </Chip>
+        ))}
+      </ChipRow>
+    </nav>
   );
 }
