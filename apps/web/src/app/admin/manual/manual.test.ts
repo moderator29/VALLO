@@ -48,12 +48,40 @@ function served(path: string): boolean {
   });
 }
 
-async function render(view: string): Promise<string> {
-  return renderClient(`
+/*
+ * ONE BUNDLE FOR THE WHOLE SUITE (16 November 2026). Each render used to
+ * bundle and import the whole manual afresh, about 7.5 MB a time, some fifty
+ * times; an imported module is never freed, so the suite ran CI's test worker
+ * out of memory ("Worker exited unexpectedly"). The manual is now bundled
+ * once, and every page is rendered from that one module, each page once.
+ */
+type ManualBundle = { chapter: (slug: string) => string; index: () => string };
+let bundle: Promise<ManualBundle> | null = null;
+const rendered = new Map<string, string>();
+
+function manualBundle(): Promise<ManualBundle> {
+  bundle ??= renderClient(`
+    import { createElement } from "react";
     import { renderToStaticMarkup } from "react-dom/server";
     import { ManualChapterView, ManualIndexView } from "@/app/admin/manual/_chapters/views";
-    export const html = () => renderToStaticMarkup(${view});
-  `);
+    const api = {
+      chapter: (slug) => renderToStaticMarkup(createElement(ManualChapterView, { slug })),
+      index: () => renderToStaticMarkup(createElement(ManualIndexView)),
+    };
+    export const html = () => api;
+  `) as unknown as Promise<ManualBundle>;
+  return bundle;
+}
+
+async function render(view: string): Promise<string> {
+  const cached = rendered.get(view);
+  if (cached !== undefined) return cached;
+  const api = await manualBundle();
+  const slug = /^<ManualChapterView slug="([^"]+)" \/>$/.exec(view)?.[1];
+  if (!slug && view !== "<ManualIndexView />") throw new Error(`render: unknown view ${view}`);
+  const html = slug ? api.chapter(slug) : api.index();
+  rendered.set(view, html);
+  return html;
 }
 
 function textOf(html: string): string {

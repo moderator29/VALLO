@@ -179,7 +179,7 @@ export const CFO: RoleWords = {
           . Every export is recorded.
         </>,
         <>Record what was sent, to whom, and when.</>,
-        <>Tell the CEO where an auditor's question suggests a control is missing rather than a number wrong.</>,
+        <>Tell the CEO where an auditor&rsquo;s question suggests a control is missing rather than a number wrong.</>,
       ],
     },
   ],
