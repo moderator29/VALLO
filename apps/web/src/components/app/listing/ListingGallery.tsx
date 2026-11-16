@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useCallback, useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore } from "react";
 import { UiIcon, type UiIconName } from "@/design-system/icons/UiIcon";
 import { BackControl } from "@/components/ui/BackControl";
+import { BarBack } from "@/components/app/BarBack";
 import { useClientCopy } from "@/lib/i18n/client-copy";
 import { ListingActions } from "./ListingActions";
 import type { SavePlaceTarget } from "@/components/app/SaveControl";
@@ -479,38 +480,39 @@ export function ListingGallery({
         aria-hidden="true"
       />
 
-      {/* `nf-safe-top` is padding rather than an offset, so the glass controls
-          clear the notch while the photography still runs behind it. */}
-      <div ref={heroBack} className="nf-safe-top pointer-events-none absolute left-3 top-3 z-20 sm:left-4 sm:top-4">
-        <BackControl
-          fallback={backFallback}
-          surface="round"
-          /* Section 17's round header button (gap audit UIUX-13). The hero
-             is a night island, so `data-theme="light"` re-runs the paper
-             tokens on the button itself: a white circle by day, the raised
-             night surface at night. Share, save and the photo arrows too.
-             It wears `nf-icon-btn nf-icon-btn--round`, which is what draws
-             that circle and what share, compare and save beside it already
-             wear. Without it this control was a bare glyph on a photograph
-             while its three siblings sat on solid discs: on a dark picture
-             there was nothing to see and nothing to aim at, which is what
-             the founder photographed on 15 November. `detail-m.css` has said
-             the hero's back wears this class since the gap audit; only the
-             markup had not.
+      {/*
+        THE BACK IS NOT ON THE PHOTOGRAPH (the founder, 16 November 2026:
+        "don't make the go back button be inside the image container ... it
+        should be outside the container but beside not sit on top").
 
-             `ml-0 justify-items-center` take the edge rule back off THIS
-             control, and only this one. That rule lines a bare glyph's ink
-             up with the page's text, which is right on a page header and is
-             what the founder asked for on 14 November. On a photograph it is
-             wrong: here the DISC is the visible edge, so the disc sits on the
-             gutter beside its three siblings and the chevron centres inside
-             it. Utilities beat the components layer where `.nf-nav-edge`
-             lives, so these two win without touching any other back control
-             on the platform. */
-          data-theme="light"
-          className="nf-icon-btn nf-icon-btn--round ml-0 justify-items-center pointer-events-auto transition-transform active:scale-90 motion-reduce:transition-none"
-        />
-      </div>
+        It used to be absolutely placed inside this section, over the picture.
+        While it was a bare chevron that read as chrome floating above the
+        photograph; once it took the same disc as share, compare and save it
+        read as a button sitting INSIDE the image card, which is what he
+        photographed. So it leaves the card altogether and goes to the app
+        bar's lead slot, on the row above, beside the menu. `BarBack` is the
+        platform's own way of doing that and the page headers already use it,
+        so this control now sits where every other back on a phone sits.
+
+        Share, compare and save stay on the photograph: they act on the
+        picture, and he did not ask for them to move.
+
+        `heroBack` still marks the spot the control used to hold, because the
+        floating back on the stay and restaurant faces watches it to know when
+        the photograph has scrolled away. It paints nothing.
+      */}
+      <div ref={heroBack} aria-hidden="true" className="pointer-events-none absolute left-3 top-3 h-11 w-11" />
+      <BarBack
+        title={title}
+        back={
+          <BackControl
+            fallback={backFallback}
+            surface="bare"
+            className="nf-bar-back"
+            data-testid="listing-bar-back"
+          />
+        }
+      />
 
       <ListingActions
         listingId={listingId}
