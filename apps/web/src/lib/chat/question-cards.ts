@@ -1,5 +1,3 @@
-import { z } from "zod";
-
 /**
  * QUESTION CARDS, FOR EVERY CHAT ON VALLO (the founder, 16 November 2026,
  * from a ChatGPT screenshot: "add stuff like this, all these options, submit
@@ -14,52 +12,48 @@ import { z } from "zod";
  * ("Show me the tickets", "Draft the reply"). The answers go back as the
  * person's next message, in plain words, and the card locks showing them.
  *
- * Pure: the schema the server checks a card against (the tool's input and
- * again before it is sent to the browser), and how answers become words.
+ * Pure and browser-safe: the card's shapes and how answers become words. The
+ * schema the server checks a card against is `question-cards.schema.ts`.
  */
 
 export const FIELD_KINDS = ["single", "multi", "yesno", "scale", "text", "number", "date"] as const;
 export type FieldKind = (typeof FIELD_KINDS)[number];
 
-const slug = z.string().regex(/^[a-z][a-z0-9_]{0,31}$/);
-const words = (max: number) => z.string().trim().min(1).max(max);
+/**
+ * One question on a card. The server checks every card against the schema in
+ * `question-cards.schema.ts` (zod stays on the server: it is about 85 KB in a
+ * browser's first load); the browser only needs these shapes.
+ */
+export interface FormField {
+  id: string;
+  label: string;
+  kind: FieldKind;
+  /** For single and multi: two to eight choices. */
+  options?: string[];
+  /** single and multi: add an "Other" choice with a short text box. */
+  other?: boolean;
+  /** A choice (single), choices (multi), "yes"/"no", a number or a date to start from. */
+  initial?: string | string[] | number;
+  placeholder?: string;
+  required?: boolean;
+  /** number: the bounds. scale is always 1 to 5. */
+  min?: number;
+  max?: number;
+  /** scale: the words under 1 and under 5. */
+  lowLabel?: string;
+  highLabel?: string;
+}
 
-export const formFieldSchema = z
-  .object({
-    id: slug,
-    label: words(120),
-    kind: z.enum(FIELD_KINDS),
-    /** For single and multi: two to eight choices. */
-    options: z.array(words(60)).min(2).max(8).optional(),
-    /** single and multi: add an "Other" choice with a short text box. */
-    other: z.boolean().optional(),
-    /** A choice (single), choices (multi), "yes"/"no", a number or a date to start from. */
-    initial: z.union([z.string().max(60), z.array(z.string().max(60)).max(8), z.number()]).optional(),
-    placeholder: z.string().trim().max(80).optional(),
-    required: z.boolean().optional(),
-    /** number: the bounds. scale is always 1 to 5. */
-    min: z.number().optional(),
-    max: z.number().optional(),
-    /** scale: the words under 1 and under 5. */
-    lowLabel: z.string().trim().max(30).optional(),
-    highLabel: z.string().trim().max(30).optional(),
-  })
-  .refine((f) => !(f.kind === "single" || f.kind === "multi") || (f.options && f.options.length >= 2), { message: "A choice needs at least two options." })
-  .refine((f) => !(f.options && new Set(f.options.map((o) => o.toLowerCase())).size !== f.options.length), { message: "Choices must differ." });
-
-export const copilotFormSchema = z
-  .object({
-    title: z.string().trim().max(80).optional(),
-    /** One line under the title, if it helps. */
-    intro: z.string().trim().max(200).optional(),
-    fields: z.array(formFieldSchema).min(1).max(5),
-    /** The button's own words: what happens when it is pressed. */
-    submit: words(40),
-  })
-  .refine((f) => new Set(f.fields.map((x) => x.id)).size === f.fields.length, { message: "Each question needs its own id." });
-
-export type FormField = z.infer<typeof formFieldSchema>;
-export type CopilotForm = z.infer<typeof copilotFormSchema> & { id: string };
+/** A card as checked by `copilotFormSchema`, with the id the server gives it. */
+export interface CopilotForm {
+  id: string;
+  title?: string;
+  /** One line under the title, if it helps. */
+  intro?: string;
+  fields: FormField[];
+  /** The button's own words: what happens when it is pressed. */
+  submit: string;
+}
 
 /** What the person chose, by field id: one choice, several, a number, or words. */
 export type FormAnswers = Record<string, string | string[] | number | null>;

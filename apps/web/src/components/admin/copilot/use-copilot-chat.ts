@@ -43,6 +43,8 @@ export type FormState = QuestionCardState;
 export type CopilotSettings = { style: "short" | "balanced" | "detailed"; showSteps: boolean; saveHistory: boolean; enterSends: boolean };
 export const DEFAULT_SETTINGS: CopilotSettings = { style: "balanced", showSteps: true, saveHistory: true, enterSends: true };
 const SETTINGS_KEY = "vallo.copilot.settings.v1";
+/** The saved thread id for one copilot (`vallo.copilot.*` in lib/consent/inventory.ts). */
+const threadKeyFor = (key: string) => `${key}.thread`;
 
 export function readSettings(): CopilotSettings {
   try {
@@ -97,7 +99,7 @@ const newId = () => `t${Date.now().toString(36)}${(counter++).toString(36)}`;
 
 function readThreadId(key: string): string | null {
   try {
-    const id = window.sessionStorage.getItem(`${key}.thread`);
+    const id = window.sessionStorage.getItem(threadKeyFor(key));
     return id && /^[0-9a-f-]{36}$/i.test(id) ? id : null;
   } catch {
     return null;
@@ -106,8 +108,8 @@ function readThreadId(key: string): string | null {
 
 function writeThreadId(key: string, id: string | null) {
   try {
-    if (id) window.sessionStorage.setItem(`${key}.thread`, id);
-    else window.sessionStorage.removeItem(`${key}.thread`);
+    if (id) window.sessionStorage.setItem(threadKeyFor(key), id);
+    else window.sessionStorage.removeItem(threadKeyFor(key));
   } catch {
     /* Storage can be blocked; the chat works without it. */
   }

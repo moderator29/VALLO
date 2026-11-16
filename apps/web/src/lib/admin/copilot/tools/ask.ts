@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { STAFF_SCOPES } from "@/lib/admin/guard";
-import { copilotFormSchema } from "../forms";
+import { copilotFormSchema } from "../forms.schema";
 import { defineTool } from "./types";
 
 /**

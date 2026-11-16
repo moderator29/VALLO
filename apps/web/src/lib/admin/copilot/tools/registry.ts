@@ -32,7 +32,8 @@ import { SUPPORT_TOOLS } from "./support";
 import { TRUST_TOOLS } from "./trust";
 import { WAYFINDING_TOOLS } from "./wayfinding";
 import type { CopilotProposal, CopilotTool, CopilotViewer, ProposalDraft, ToolCtx } from "./types";
-import { copilotFormSchema, type CopilotForm } from "../forms";
+import { copilotFormSchema } from "../forms.schema";
+import type { CopilotForm } from "../forms";
 import { ASK_TOOLS } from "./ask";
 
 /**

@@ -246,6 +246,10 @@ export const unitsEn = {
   followUps: { one: "1 follow-up", other: "{count} follow-ups" },
   contacts: { one: "1 contact", other: "{count} contacts" },
   escalations: { one: "1 escalation", other: "{count} escalations" },
+  /* VALLO Intelligence: a person's real follower count on a result (16 November 2026). */
+  followers: { one: "1 follower", other: "{count} followers" },
+  /* The console copilot: the steps it took to answer (16 November 2026). */
+  steps: { one: "1 step", other: "{count} steps" },
   guaranteeClaimsOpen: {
     one: "1 Guarantee claim made before it retired still open",
     other: "{count} Guarantee claims made before it retired still open",

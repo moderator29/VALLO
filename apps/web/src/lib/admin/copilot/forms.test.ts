@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { answersToMessage, copilotFormSchema, initialAnswers, missingAnswer } from "./forms";
+import { answersToMessage, initialAnswers, missingAnswer } from "./forms";
+import { copilotFormSchema } from "./forms.schema";
 
 const card = {
   title: "Which tickets",

@@ -2,6 +2,7 @@
 
 import { useId, useState } from "react";
 import { UiIcon } from "@/design-system/icons/UiIcon";
+import { FieldProblem } from "@/components/ui/FieldProblem";
 import { answerWords, initialAnswers, missingAnswer, type CopilotForm, type FormAnswers, type FormField } from "@/lib/chat/question-cards";
 import "./question-card.css";
 
@@ -48,7 +49,7 @@ function Field({ field, value, onChange, otherText, onOther, disabled }: { field
           );
         })}
         {field.other && chosen.includes(OTHER) ? (
-          <input className="nf-field nf-cform__text" value={otherText} onChange={(e) => onOther(e.target.value)} placeholder="Say which" maxLength={60} disabled={disabled} aria-label={`${field.label}, other`} />
+          <input className="nf-field nf-cform__text" autoComplete="off" autoCapitalize="sentences" enterKeyHint="done" value={otherText} onChange={(e) => onOther(e.target.value)} placeholder="Say which" maxLength={60} disabled={disabled} aria-label={`${field.label}, other`} />
         ) : null}
       </div>
     );
@@ -105,7 +106,8 @@ export function QuestionCard({ state, onSubmit, onSkip, busy }: { state: Questio
   const { form, status } = state;
   const [answers, setAnswers] = useState<FormAnswers>(() => initialAnswers(form));
   const [others, setOthers] = useState<Record<string, string>>({});
-  const [tried, setTried] = useState(false);
+  const [tried, setTried] = useState(0);
+  const uid = useId();
   const locked = status !== "open";
 
   /* "Other" becomes the person's own words in the answers sent. */
@@ -142,7 +144,7 @@ export function QuestionCard({ state, onSubmit, onSkip, busy }: { state: Questio
               disabled={locked}
             />
           )}
-          {tried && missing?.id === field.id && !locked ? <p className="nf-cform__need" role="alert">Answer this one first.</p> : null}
+          {tried > 0 && missing?.id === field.id && !locked ? <FieldProblem id={`${uid}-${field.id}-need`} message="Answer this one first." when={tried} /> : null}
         </fieldset>
       ))}
       {status === "open" ? (
@@ -153,7 +155,7 @@ export function QuestionCard({ state, onSubmit, onSkip, busy }: { state: Questio
             disabled={busy}
             data-testid="copilot-form-submit"
             onClick={() => {
-              setTried(true);
+              setTried((n) => n + 1);
               if (!missing) onSubmit(resolved);
             }}
           >

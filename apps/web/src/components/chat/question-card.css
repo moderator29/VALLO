@@ -165,11 +165,6 @@
     font-size: var(--nf-text-caption);
   }
 
-  .nf-cform__need {
-    margin: 0;
-    color: var(--nf-state-error);
-    font-size: var(--nf-text-body-sm);
-  }
 
   .nf-cform__answer {
     margin: 0;

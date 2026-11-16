@@ -3,7 +3,7 @@
 import { DuplicateListing } from "./DuplicateListing";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { type Dictionary, type Locale, formatMoneyGlance } from "@vallo/i18n/core";
+import { countOf, type Dictionary, type Locale, formatMoneyGlance } from "@vallo/i18n/core";
 import { fill } from "../_copy";
 import {
   deleteListing,
@@ -894,7 +894,7 @@ export function ListingsWorkspace({
           several at the right, so "Select" is never a word floating alone. */}
       <div className="flex items-center justify-between gap-sm">
         <p className="nf-body-sm text-[var(--nf-content-muted)]" data-testid="listings-count">
-          <span className="nf-numeric">{shownCount}</span> {shownCount === 1 ? "listing" : "listings"}
+          <span className="nf-numeric">{countOf(shownCount, "listings", locale)}</span>
         </p>
         <Button
           type="button"

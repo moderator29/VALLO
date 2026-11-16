@@ -1,5 +1,6 @@
 "use client";
 
+import { countOf } from "@vallo/i18n/core";
 import { useEffect, useId, useMemo, useRef, useState, type KeyboardEvent } from "react";
 import { UiIcon } from "@/design-system/icons/UiIcon";
 import { banner } from "@/lib/ui/toast";
@@ -467,7 +468,7 @@ export function CopilotChat({
                             <label className="sr-only" htmlFor={`rename-${thread.id}`}>
                               New name
                             </label>
-                            <input id={`rename-${thread.id}`} value={renaming.title} maxLength={120} autoFocus onChange={(e) => setRenaming({ id: thread.id, title: e.target.value })} onKeyDown={(e) => e.key === "Escape" && setRenaming(null)} />
+                            <input id={`rename-${thread.id}`} autoComplete="off" autoCapitalize="sentences" enterKeyHint="done" value={renaming.title} maxLength={120} autoFocus onChange={(e) => setRenaming({ id: thread.id, title: e.target.value })} onKeyDown={(e) => e.key === "Escape" && setRenaming(null)} />
                             <button type="submit" className="nf-copilot-history__icon nf-tap" aria-label="Save the name">
                               <UiIcon name="check" size={18} weight="lean" />
                             </button>
@@ -622,7 +623,7 @@ export function CopilotChat({
                             <details className="nf-copilot-steps">
                               <summary>
                                 <UiIcon name="clipboard-list" size={14} weight="lean" />
-                                {steps.length === 1 ? "One step" : `${steps.length} steps`}
+                                {countOf(steps.length, "steps")}
                               </summary>
                               <ol>
                                 {steps.map((step) => (

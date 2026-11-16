@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { z } from "zod";
-import { copilotFormSchema } from "@/lib/chat/question-cards";
+import { copilotFormSchema } from "@/lib/chat/question-cards.schema";
 import { defineTool, TOOL_FRAMES } from "./types";
 
 /**

@@ -12,7 +12,8 @@
  * still waiting is shown as expired: it can be asked for again, never pressed.
  */
 
-import { copilotFormSchema, type CopilotForm } from "./forms";
+import { copilotFormSchema } from "./forms.schema";
+import type { CopilotForm } from "./forms";
 
 export const MAX_STORED_TURNS = 80;
 export const MAX_TURN_TEXT = 8000;
