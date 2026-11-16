@@ -436,18 +436,29 @@ async function worker(queue) {
            * pulse) is not waited for, or a page with one would never be
            * measured at all.
            */
-          await page.evaluate(async () => {
-            const deadline = Date.now() + 1_200;
-            for (;;) {
-              const running = document.getAnimations().filter((a) => {
-                if (a.playState !== "running") return false;
-                const timing = a.effect?.getComputedTiming?.();
-                return !timing || timing.iterations !== Infinity;
-              });
-              if (running.length === 0 || Date.now() > deadline) return;
-              await new Promise((resolve) => setTimeout(resolve, 100));
-            }
-          });
+          /*
+           * AND IT TOLERATES THE PAGE LEAVING UNDER IT. A route that sends
+           * the browser on after it paints (`/offline`, `/pro`, `/circle/new`
+           * and six others) destroys this context mid-wait, which threw and
+           * failed the job: twenty of 644 could never be measured, and the
+           * runner looped on them for good. The page moving is not an error,
+           * it is the page arriving somewhere else, and the read below lets
+           * it land and measures what it finds.
+           */
+          await page
+            .evaluate(async () => {
+              const deadline = Date.now() + 1_200;
+              for (;;) {
+                const running = document.getAnimations().filter((a) => {
+                  if (a.playState !== "running") return false;
+                  const timing = a.effect?.getComputedTiming?.();
+                  return !timing || timing.iterations !== Infinity;
+                });
+                if (running.length === 0 || Date.now() > deadline) return;
+                await new Promise((resolve) => setTimeout(resolve, 100));
+              }
+            })
+            .catch(() => {});
           return r;
         })(),
         new Promise((_, reject) => setTimeout(() => reject(new Error("did not settle in 35s")), 35_000)),

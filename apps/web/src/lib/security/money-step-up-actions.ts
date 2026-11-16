@@ -216,7 +216,10 @@ export async function finishEnrol(input: unknown): Promise<ActionResult<null>> {
   if (session.state !== "signed-in" || !a) return fail("failed");
   const result = await enrolKey(a, { userId: session.user.id, ...parsed.data });
   if (result !== "ok") return fail(result);
+  /* The group lives on its own page now (D25), and the row that summarises it
+     is still on /settings/privacy: both are stale after a change. */
   revalidatePath("/settings/privacy");
+  revalidatePath("/settings/privacy/money-lock");
   return ok(null);
 }
 
@@ -235,5 +238,6 @@ export async function removeMoneyCredential(input: unknown): Promise<ActionResul
   const { error } = await (a as any).from("money_credentials").delete().eq("id", parsed.data.id).eq("user_id", session.user.id);
   if (error) return fail("failed");
   revalidatePath("/settings/privacy");
+  revalidatePath("/settings/privacy/money-lock");
   return ok(null);
 }

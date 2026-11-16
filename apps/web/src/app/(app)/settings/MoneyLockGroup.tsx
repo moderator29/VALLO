@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type FormEvent } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { formatDate, plural, type Locale } from "@vallo/i18n/core";
 import { useScopedCopy } from "@/lib/i18n/copy-scope";
@@ -9,12 +9,15 @@ import { Sheet } from "@/components/ui/Sheet";
 import { Button } from "@/components/ui/Button";
 import { TextField } from "@/components/ui/Field";
 import { useMoneyStepUp } from "@/components/app/money/MoneyStepUp";
-import { beginEnrol, finishEnrol, removeMoneyCredential, sendFallbackCode } from "@/lib/security/money-step-up-actions";
+import {
+  beginEnrol,
+  finishEnrol,
+  removeMoneyCredential,
+  sendFallbackCode,
+  stepUpStatus,
+} from "@/lib/security/money-step-up-actions";
 import { createPlatformKey, platformLockAvailable } from "@/lib/security/webauthn-client";
-import { rememberDeviceKey } from "@/lib/platform/device-keys";
-
-/** English, like the other words added before a native speaker has read them. */
-const ARMED_WORDS = "Your password is right. Now tap below and look at your phone, or touch the sensor.";
+import { deviceKeyState, forgetDeviceKeysOutside, rememberDeviceKey, type DeviceKeyState } from "@/lib/platform/device-keys";
 import type { MoneyCredentialList } from "@/lib/security/money-step-up";
 import { MONEY_LOCK_BODY, MONEY_LOCK_DONE, MONEY_LOCK_REMOVED } from "@/lib/money/copy";
 import { useSafeTransition } from "@/lib/ui/use-safe-transition";
@@ -34,13 +37,63 @@ import { banner } from "@/lib/ui/toast";
  * could not be read and that the lock still works; an empty list offers the
  * enrolment; a browser that cannot ask the phone's lock says so and offers
  * nothing it cannot do.
+ *
+ * ---------------------------------------------------------------------------
+ * REBUILT 14 NOVEMBER 2026, from the founder's own screenshot and his words:
+ * "wtf is this it's not working it's not even asking to set it ... it's not
+ * flow steps ... pages to enter to turn off and turn it on again flow".
+ *
+ * THREE FAULTS, ALL OF THEM ON THIS SCREEN.
+ *
+ * 1. THE SCREEN CONTRADICTED ITSELF. The enrolment row rendered for any
+ *    readable list, with no question about whether THIS phone was already one
+ *    of the phones in it, and every row read "This phone" whatever device its
+ *    key was made on (`label` is always null). So his screen said "Money is
+ *    locked with 1 phone / This phone / Added 1 Oct 2026" and, directly under
+ *    it, "Add this phone". Both at once, and at most one of them true.
+ *
+ *    The phone's own record of the keys it made is `lib/platform/device-keys.ts`,
+ *    and the account's key ids come from `stepUpStatus()`, which every money
+ *    screen already reads. Together they answer the question the screen was
+ *    never asking. A phone that already locks the money is not offered the
+ *    enrolment; it is told so, offered the way off, and told how another phone
+ *    is added (on that phone: a phone can only add itself).
+ *
+ * 2. THE SECOND TAP WAS MISLABELLED. Both buttons read "Add this phone", so
+ *    the tap that checked the password looked like it had done nothing, and
+ *    the one tap that actually asks the phone for Face ID was never made. The
+ *    two taps STAY, for the reason at `setArmed` below, and they are now two
+ *    numbered steps whose words differ: step one checks the password, step two
+ *    is "Use Face ID or fingerprint" and says what is about to happen. The
+ *    hardcoded English const that explained the second button is gone; the
+ *    words are `moneyLock.stepTwo*` in the dictionary.
+ *
+ * 3. THE DISABLED ROW SAID NOTHING. `supported` starts null, so the row was
+ *    dead and grey while the capability probe ran and dead for ever if it came
+ *    back false, with no sentence either way. It now says which of the two it
+ *    is.
+ *
+ * And the round trip (fault 1's other half): removing a phone never told this
+ * phone it no longer held a key, because the settings list carries the row id
+ * and never the credential id. So after a removal the add row stayed hidden
+ * and the passcode screen went on offering a Face ID unlock that could only
+ * fail. The ids are re-read after every change and `forgetDeviceKeysOutside`
+ * drops what the account no longer has.
  */
 export function MoneyLockGroup({ list, locale }: { list: MoneyCredentialList; locale: Locale }) {
   const copy = useScopedCopy("moneyLock");
   const router = useRouter();
   const lock = useMoneyStepUp();
   const [supported, setSupported] = useState<boolean | null>(null);
+  /** The key ids the account holds; null until read, and null when unreadable. */
+  const [accountKeys, setAccountKeys] = useState<readonly string[] | null>(null);
+  /** Whether THIS phone holds one of them; null until read. */
+  const [here, setHere] = useState<DeviceKeyState | null>(null);
   const [enrolling, setEnrolling] = useState(false);
+  /** The phone a removal is being explained for, before any proof is asked. */
+  const [turningOff, setTurningOff] = useState<string | null>(null);
+  /** Removed this session: the server has said so and the page has not been drawn again yet. */
+  const [removedIds, setRemovedIds] = useState<string[]>([]);
   const [password, setPassword] = useState("");
   const [code, setCode] = useState("");
   const [codeSent, setCodeSent] = useState(false);
@@ -53,15 +106,31 @@ export function MoneyLockGroup({ list, locale }: { list: MoneyCredentialList; lo
   const [confirming, setConfirming] = useState(false);
   const [pending, start] = useSafeTransition();
 
+  /**
+   * Which keys the account holds, and whether this phone holds one of them.
+   * Read on arrival and after every change, because both answers move: an
+   * enrolment adds this phone's key and a removal takes one away, and the
+   * screen must not go on describing the state before it.
+   */
+  const readKeys = useCallback(async () => {
+    const status = await stepUpStatus().catch(() => null);
+    const ids = status ? status.credentialIds : null;
+    /* Unreadable: nothing is dropped, and the question falls back to this
+       phone's own record, which still offers the set-up when it has none. */
+    setHere(ids ? forgetDeviceKeysOutside(ids) : deviceKeyState());
+    setAccountKeys(ids);
+  }, []);
+
   useEffect(() => {
     let live = true;
     void platformLockAvailable().then((can) => {
       if (live) setSupported(can);
     });
+    void readKeys();
     return () => {
       live = false;
     };
-  }, []);
+  }, [readKeys]);
 
   /* Signed out, or the lock is not deployed on this database: nothing to offer. */
   if (list.state === "signed-out" || list.state === "not-deployed") return null;
@@ -104,7 +173,8 @@ export function MoneyLockGroup({ list, locale }: { list: MoneyCredentialList; lo
          * tap that asked for it, and the password check above is a server
          * round trip that can spend that permission on a phone network: the
          * Face ID sheet never rose. So the proof is checked here, and the
-         * next tap, on its own button, goes straight to the phone.
+         * next tap, on its own button with its own words, goes straight to
+         * the phone.
          */
         setArmed(begun.data);
         setEnrolling(true);
@@ -113,7 +183,8 @@ export function MoneyLockGroup({ list, locale }: { list: MoneyCredentialList; lo
       }
     });
 
-  /* The second tap: the phone makes its key at once, inside the tap. */
+  /* The second tap: the phone makes its key at once, inside the tap. Nothing
+     is awaited before `createPlatformKey`, which is the whole point of it. */
   const confirmKey = async () => {
     const begun = armed;
     if (!begun || confirming) return;
@@ -125,7 +196,10 @@ export function MoneyLockGroup({ list, locale }: { list: MoneyCredentialList; lo
         email: begun.email,
         rpId: begun.rpId,
         rpName: "Vallo",
-        exclude: [],
+        /* The keys the account already holds. The phone's OWN system sheet
+           then refuses a second key for a phone that already has one, which
+           is the last word on the duplicate this screen used to invite. */
+        exclude: [...(accountKeys ?? [])],
       });
       if (!made) {
         banner.error(copy.rejected);
@@ -146,6 +220,9 @@ export function MoneyLockGroup({ list, locale }: { list: MoneyCredentialList; lo
       setPassword("");
       setCode("");
       banner.success(MONEY_LOCK_DONE);
+      /* Before the refresh lands: this phone now locks the money, so the
+         screen stops offering to add it in the same breath. */
+      await readKeys();
       router.refresh();
     } catch (error) {
       if (!tapFailedOffline(error)) throw error;
@@ -154,9 +231,11 @@ export function MoneyLockGroup({ list, locale }: { list: MoneyCredentialList; lo
     }
   };
 
-  const remove = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    const id = String(new FormData(event.currentTarget).get("id") ?? "");
+  /** The turn-off sheet has been read and confirmed: now the proof, then the removal. */
+  const remove = (id: string) => {
+    /* The explanation closes first: the proof opens its own sheet, and two
+       stacked sheets is not a flow. */
+    setTurningOff(null);
     start(async () => {
       try {
         /* Removing a phone asks for a proof for exactly that. */
@@ -167,7 +246,11 @@ export function MoneyLockGroup({ list, locale }: { list: MoneyCredentialList; lo
           banner.error(done.error === "rejected" ? (staff ? copy.staffKeyOnly : copy.rejected) : copy.failed);
           return;
         }
+        setRemovedIds((ids) => (ids.includes(id) ? ids : [...ids, id]));
         banner.success(MONEY_LOCK_REMOVED);
+        /* The phone forgets a key the account no longer has, so the set-up is
+           offered again here and on the passcode screen. */
+        await readKeys();
         router.refresh();
       } catch (error) {
         if (!tapFailedOffline(error)) throw error;
@@ -175,36 +258,74 @@ export function MoneyLockGroup({ list, locale }: { list: MoneyCredentialList; lo
     });
   };
 
-  const rows = list.state === "ok" ? list.rows : [];
+  const rows = (list.state === "ok" ? list.rows : []).filter((row) => !removedIds.includes(row.id));
+  /* The ids are the fresher answer: after an enrolment or a removal they have
+     changed and this page's server render has not caught up yet. */
+  const keyCount = accountKeys ? accountKeys.length : rows.length;
+  const locked = keyCount > 0;
+  /** This phone is one of the phones that lock the money. */
+  const enrolledHere = locked && here === "has";
+  /**
+   * This phone is KNOWN not to be one of them. `unknown` is not that: a phone
+   * whose storage was cleared holds no record and the screen must not claim
+   * either way, so it says nothing and still offers the set-up, which is the
+   * standing rule in `lib/platform/device-keys.ts`. The ceremony's own
+   * `excludeCredentials` is what refuses a duplicate in that case.
+   */
+  const knownNotHere = locked && here === "none";
+  /** The account holds keys and the record has not been read yet. */
+  const checkingHere = locked && here === null;
   const groupNote = list.state === "unreadable" ? copy.settingsUnknown : MONEY_LOCK_BODY;
+  const enrolSub = checkingHere || supported === null ? copy.settingsChecking : supported === false ? copy.settingsUnsupported : copy.settingsEnrolSteps;
+  const step = armed ? 2 : 1;
+  const stepLine = copy.stepCount.replace("{step}", String(step)).replace("{total}", "2");
+  const stepTitle = armed ? copy.stepTwoTitle : byCode || (staff && !staffHasKey) ? copy.stepOneTitleCode : copy.stepOneTitle;
+  const proofAction = byCode || (staff && !staffHasKey) ? copy.stepOneActionCode : copy.stepOneAction;
 
   return (
     <SettingsGroup label={copy.settingsTitle} note={<span>{groupNote}</span>}>
-      {rows.length > 0 && (
+      {locked && (
         /* Its own label, not the group's. The heading above already says
            "Lock money with this phone"; repeating it here said nothing. */
-        <RowValue icon="key" label={copy.settingsCountLabel} value={copy.settingsEnrolled.replace("{count}", plural(rows.length, copy.phones, locale))} testId="money-lock-count" />
+        <RowValue icon="key" label={copy.settingsCountLabel} value={copy.settingsEnrolled.replace("{count}", plural(keyCount, copy.phones, locale))} testId="money-lock-count" />
+      )}
+      {(enrolledHere || knownNotHere) && (
+        /* WHERE THIS PHONE STANDS, SAID ONCE. Everything below follows from
+           it, and nothing below contradicts it. */
+        <RowValue
+          icon="phone"
+          label={copy.thisPhoneLabel}
+          sub={enrolledHere ? copy.thisPhoneOnBody : copy.thisPhoneOffBody}
+          value={enrolledHere ? copy.thisPhoneOn : copy.thisPhoneOff}
+          testId="money-lock-this-phone"
+        />
       )}
       {rows.map((row) => (
-        <form key={row.id} onSubmit={remove} data-testid="money-lock-phone">
-          <input type="hidden" name="id" value={row.id} />
-          <RowSubmit
-            label={row.label ?? copy.thisPhone}
-            /* Two sentences, joined as two. A bare space ran them together as
-               "Added 1 Oct 2026 Removing a phone asks for the same proof as
-               sending money." */
-            sub={`${copy.added.replace("{when}", formatDate(new Date(row.createdAt), locale, { day: "numeric", month: "short", year: "numeric", timeZone: "Africa/Lagos" }))}. ${copy.settingsRemoveNeedsProof}`}
-            action={copy.settingsRemove}
-            disabled={pending}
-          />
-        </form>
+        <RowButton
+          key={row.id}
+          icon="key"
+          danger
+          /* A row is named for the phone it is, not for the phone reading it:
+             only one phone can be "This phone", and only when this phone is
+             the one key the account holds. */
+          label={enrolledHere && rows.length === 1 ? (row.label ?? copy.thisPhone) : (row.label ?? copy.aPhone)}
+          /* Two sentences, joined as two. A bare space ran them together as
+             "Added 1 Oct 2026 Removing a phone asks for the same proof as
+             sending money." */
+          sub={`${copy.added.replace("{when}", formatDate(new Date(row.createdAt), locale, { day: "numeric", month: "short", year: "numeric", timeZone: "Africa/Lagos" }))}. ${copy.settingsRemoveNeedsProof}`}
+          value={copy.settingsRemove}
+          chevron={false}
+          disabled={pending}
+          onClick={() => setTurningOff(row.id)}
+          testId="money-lock-phone"
+        />
       ))}
-      {list.state === "ok" && (
+      {list.state === "ok" && !enrolledHere && (
         <RowButton
           icon="key"
           label={copy.settingsEnrol}
-          sub={supported === false ? copy.settingsUnsupported : copy.settingsPasswordFirst}
-          disabled={supported !== true || pending}
+          sub={enrolSub}
+          disabled={supported !== true || checkingHere || pending}
           onClick={() => {
             if (staffHasKey) enrol();
             else setEnrolling(true);
@@ -212,24 +333,68 @@ export function MoneyLockGroup({ list, locale }: { list: MoneyCredentialList; lo
           testId="money-lock-enrol"
         />
       )}
+      {enrolledHere && (
+        /* The honest answer to "add another phone": not this button, that
+           phone. A phone can only enrol itself. */
+        <RowValue icon="phone" label={copy.anotherPhoneLabel} sub={copy.anotherPhoneBody} testId="money-lock-another-phone" />
+      )}
       {lock.sheet}
+      <Sheet
+        open={turningOff !== null}
+        onOpenChange={(open) => {
+          if (pending) return;
+          if (!open) setTurningOff(null);
+        }}
+        title={copy.offTitle}
+        description={copy.offBody}
+        detents={[0.6]}
+      >
+        <div className="space-y-row" data-testid="money-lock-off">
+          <p className="nf-body text-[var(--nf-content-secondary)]">{copy.offKeeps}</p>
+          {rows.length === 1 && <p className="nf-body text-[var(--nf-content-secondary)]">{copy.offLast}</p>}
+          <p className="nf-caption text-[var(--nf-content-muted)]">{copy.settingsRemoveNeedsProof}</p>
+          <Button
+            type="button"
+            variant="danger"
+            full
+            loading={pending}
+            disabled={pending}
+            onClick={() => {
+              if (turningOff) remove(turningOff);
+            }}
+            data-testid="money-lock-off-confirm"
+          >
+            {copy.offConfirm}
+          </Button>
+          <Button type="button" variant="ghost" full disabled={pending} onClick={() => setTurningOff(null)}>
+            {copy.offKeep}
+          </Button>
+        </div>
+      </Sheet>
       <Sheet
         open={enrolling}
         onOpenChange={(open) => {
           if (pending || confirming) return;
           setEnrolling(open);
           if (!open) setArmed(null);
-        }} title={copy.settingsTitle} detents={[0.6]}>
+        }}
+        title={stepTitle}
+        description={armed ? copy.stepTwoBody : copy.stepOneBody}
+        detents={[0.6]}
+      >
         <div className="space-y-row">
+          <p className="nf-caption text-[var(--nf-content-muted)]" data-testid="money-lock-step">
+            {stepLine}
+          </p>
           {armed ? (
             <>
-              <p className="nf-body text-[var(--nf-content-secondary)]">{ARMED_WORDS}</p>
               <Button type="button" variant="primary" full loading={confirming} disabled={confirming} onClick={() => void confirmKey()} data-testid="money-lock-confirm-key">
-                {copy.settingsEnrol}
+                {copy.stepTwoAction}
               </Button>
+              {confirming && <p className="nf-body text-[var(--nf-content-secondary)]">{copy.stepTwoWaiting}</p>}
             </>
           ) : (
-            <p className="nf-body text-[var(--nf-content-secondary)]">{staff ? copy.staffFirstKey : copy.settingsPasswordFirst}</p>
+            <p className="nf-body text-[var(--nf-content-secondary)]">{staff && !staffHasKey ? copy.staffFirstKey : copy.stepOneNext}</p>
           )}
           {armed ? null : staff ? (
             <>
@@ -258,8 +423,9 @@ export function MoneyLockGroup({ list, locale }: { list: MoneyCredentialList; lo
                     loading={pending}
                     disabled={pending || code.trim().length === 0 || (staffNeedsPassword && password.length === 0)}
                     onClick={enrol}
+                    data-testid="money-lock-check-proof"
                   >
-                    {copy.settingsEnrol}
+                    {proofAction}
                   </Button>
                 </>
               ) : (
@@ -316,8 +482,16 @@ export function MoneyLockGroup({ list, locale }: { list: MoneyCredentialList; lo
                 value={password}
                 onChange={(event) => setPassword(event.target.value)}
               />
-              <Button type="button" variant="primary" full loading={pending} disabled={pending || password.trim().length === 0} onClick={enrol}>
-                {copy.settingsEnrol}
+              <Button
+                type="button"
+                variant="primary"
+                full
+                loading={pending}
+                disabled={pending || password.trim().length === 0}
+                onClick={enrol}
+                data-testid="money-lock-check-proof"
+              >
+                {proofAction}
               </Button>
             </>
           )}
@@ -336,18 +510,5 @@ export function MoneyLockGroup({ list, locale }: { list: MoneyCredentialList; lo
         </div>
       </Sheet>
     </SettingsGroup>
-  );
-}
-
-/** A settings row that submits its own small form. */
-function RowSubmit({ label, sub, action, disabled }: { label: string; sub: string; action: string; disabled: boolean }) {
-  return (
-    <button type="submit" className="nf-srow nf-srow--danger" disabled={disabled}>
-      <span className="nf-srow__body">
-        <span className="nf-srow__label">{label}</span>
-        <span className="nf-srow__sub">{sub}</span>
-      </span>
-      <span className="nf-srow__value">{action}</span>
-    </button>
   );
 }
