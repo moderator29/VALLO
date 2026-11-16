@@ -61,7 +61,7 @@ const REVIEW: Desk[] = [
 const MONEY: Desk[] = [
   { href: "/admin/money", name: "Money", icon: "coins", what: "Cautions, refunds to the card, the refund clock, the reconciliation job, and the record of the retired Vallo Guarantee.", who: "Finance (rulings on cautions and old claims: Guarantee claims)" },
   { href: "/admin/payments", name: "Payments", icon: "wallet", what: "Every payment attempt and how it ended. The health panel and the saved card lookup are admins only.", who: "Finance" },
-  { href: "/admin/arrangements", name: "Arrangements", icon: "shield-check", what: "Every payment held by a licensed bank through the payment partner, with the partner's state beside Vallo's. Read only. That rail is switched off today, so expect it to be empty.", who: "Finance, Agreement approval" },
+  { href: "/admin/arrangements", name: "Protected payments", icon: "shield-check", what: "Every payment held by a licensed bank through the payment partner, with the partner's state beside Vallo's. Read only. That rail is switched off today, so expect it to be empty.", who: "Finance, Agreement approval" },
   { href: "/admin/chargebacks", name: "Chargebacks", icon: "credit-card", what: "Disputes a payer raised with their bank: open, move through their states, add notes.", who: "Finance" },
   { href: "/admin/fees", name: "Fees", icon: "receipt", what: "The fee rates in force. Lowering a rate is any admin; raising one is a super admin.", who: "Finance to read; admins to change" },
   { href: "/admin/referrals", name: "Referrals", icon: "hand-coins", what: "Referral rewards owed, the monthly budget, and the referrals and payouts a person decides.", who: "Admins" },
@@ -148,7 +148,7 @@ export const DESKS: ManualBody = {
     "A desk that asks for no access area is open to admins and super admins only.",
     "Where a desk is open to several areas, each person sees only the part their area allows, and the database decides it.",
     "The decision controls live on each desk. The Unified queue routes you there and can take an item or decide in bulk through the same controls.",
-    "A payment held by a licensed bank is built and switched off today. Its read-only desk is Arrangements, under Money.",
+    "A payment held by a licensed bank is built and switched off today. Its read-only desk is Protected payments, under Money.",
     "On a phone the menu button opens the whole menu, and Search the console finds a desk or a reference.",
   ],
   sections: [

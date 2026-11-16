@@ -80,7 +80,7 @@ const DESK_WORK: DocTableRow[] = [
     cells: {
       work: "Take or resolve a risk alert",
       who: "Operations",
-      card: "I have this marks the alert as yours. Resolve alert closes it with your note. The Alerts desk closes an alert for an admin only, so for a member of staff without an admin role the card is refused, as the desk would refuse it.",
+      card: "I have this marks the alert as yours. Resolve alert closes it with your note. Anybody with Operations access may take or resolve an alert, on the desk or on the card.",
     },
   },
   {

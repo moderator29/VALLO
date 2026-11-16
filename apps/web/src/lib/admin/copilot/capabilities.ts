@@ -125,7 +125,7 @@ export const COPILOT_CAPABILITIES: readonly DeskCapability[] = [
     desk: "Operations",
     scopes: ["operations"],
     href: "/admin/operations",
-    can: ["Read open alerts, job health, visits and bookings", "Take an alert or resolve it with a note, on a card you press (admins and the super admin)"],
+    can: ["Read open alerts, job health, visits and bookings", "Take an alert or resolve it with a note, on a card you press"],
     prompts: ["Any critical alerts open?", "Is any scheduled job stale?", "How many bookings are in stay now?"],
   },
   {

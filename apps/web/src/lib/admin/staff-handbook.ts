@@ -8,7 +8,11 @@
  *
  * Client-safe: data only.
  */
-export const STAFF_HANDBOOK_VERSION = "2026-09-25";
+/* 16 November 2026: the two copilot rules below (the founder: "they should
+   accept them as rules"). Bumped with private.staff_handbook_version() in
+   supabase/migrations/pending/staff_handbook_copilot_2026-11-16.sql, run
+   right after this deploy is live. */
+export const STAFF_HANDBOOK_VERSION = "2026-11-16";
 
 export const STAFF_HANDBOOK: { heading: string; points: string[] }[] = [
   {
@@ -35,6 +39,13 @@ export const STAFF_HANDBOOK: { heading: string; points: string[] }[] = [
       "Write your reason in plain words. The member reads it exactly as you wrote it.",
       "If you know a person in a case, or have any interest in it, do not decide it. Leave it for somebody else and say why in the notes. On agreements and Guarantee claims the database already refuses a decision by a party to them.",
       "When you are unsure, escalate to the founder rather than guessing. A slower right answer is better than a quick wrong one.",
+    ],
+  },
+  {
+    heading: "Working with the AI copilot",
+    points: [
+      "A card you press in the copilot is your decision, exactly as if you had made it on the desk yourself. Read its preview before you press it, and dismiss it if anything is wrong. Pressing it is recorded in the audit log under your name.",
+      "Never paste an ID number, a bank account or card number, a password or a document into the copilot. Link the record instead and let the copilot read it from the desk.",
     ],
   },
   {

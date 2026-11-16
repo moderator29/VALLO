@@ -159,7 +159,9 @@ export async function resolveRiskAlert(input: {
   alertId: string;
   notes?: string;
 }): Promise<ActionResult<null>> {
-  const access = await requireAdmin();
+  /* Operations staff work the alerts desk too (the founder, 16 November
+     2026): an Operations grant opens taking and resolving an alert. */
+  const access = await requireAdmin("operations");
   if (access.state !== "admin") return fail(adminRefusal(access));
 
   const parsed = validate(resolveRiskAlertSchema, input);
@@ -223,7 +225,9 @@ export async function resolveRiskAlert(input: {
  * silently.
  */
 export async function acknowledgeRiskAlert(input: { alertId: string }): Promise<ActionResult<null>> {
-  const access = await requireAdmin();
+  /* Operations staff work the alerts desk too (the founder, 16 November
+     2026): an Operations grant opens taking and resolving an alert. */
+  const access = await requireAdmin("operations");
   if (access.state !== "admin") return fail(adminRefusal(access));
 
   const parsed = validate(acknowledgeRiskAlertSchema, input);
