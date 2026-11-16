@@ -1,3 +1,6 @@
+-- SUPERSEDED on 16 November 2026 by staff_handbook_copilot_2026-11-16.sql. DO NOT RUN:
+-- it would move the handbook version back to 2026-11-11 and lock staff out.
+--
 -- OPTIONAL, NOT APPLIED. Run ONLY if you want every staff member to re-read the
 -- handbook after the 11 November 2026 wording change to the Money section
 -- ("Licensed payment partners hold payments and escrow ...").

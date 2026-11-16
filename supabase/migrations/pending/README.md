@@ -18,6 +18,13 @@ records it in `APPLIED.txt`.
 >    16 November 2026: each staff member's own conversations, owner-only,
 >    kept 90 days. Until it runs, the copilot keeps a conversation for the
 >    browser session only and its History panel says so.)
+> 2. `staff_handbook_copilot_2026-11-16.sql` (the staff handbook's version
+>    moves to 2026-11-16 for the two copilot rules staff now accept). RUN IT
+>    ONLY RIGHT AFTER the push to main is live, never before: run early, the
+>    database asks for a version the live app does not write yet and staff
+>    cannot accept the handbook. It supersedes
+>    `staff_handbook_reack_2026-11-11.sql`, which was never run and must not
+>    be run now (it would move the version back to 2026-11-11).
 >
 > The revenue sweep file of 15 November was run by the founder the same day
 > and checked live.
