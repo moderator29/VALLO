@@ -91,9 +91,9 @@ export function MobileMenu({
                 type="button"
                 aria-label={closeLabel}
                 onClick={() => setOpen(false)}
-                className="nf-icon-btn nf-press h-9 w-9"
+                className="nf-icon-btn nf-press"
               >
-                <UiIcon name="close" size={16} />
+                <UiIcon name="close" size={20} />
               </button>
             </div>
 

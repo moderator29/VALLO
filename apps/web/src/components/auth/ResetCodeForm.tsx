@@ -112,7 +112,7 @@ export function ResetCodeForm({
 
       <p className="nf-auth__links">
         <Link href="/forgot-password" className="nf-tap nf-auth__aside">
-          <UiIcon name="arrow-left" size={16} />
+          <UiIcon name="chevron-left" size={16} />
           {t.auth.resetCodeAskAgain}
         </Link>
       </p>

@@ -10,6 +10,13 @@ export type HelpArticle = {
   category: string;
   q: string;
   a: string;
+  /**
+   * Where the answer lives, when it is not a help answer that can be opened
+   * in place. A Docs chapter, a Guide or a legal page is a page, so a row
+   * that carries one is a door rather than a disclosure (14 November 2026,
+   * the help centre pass).
+   */
+  href?: string;
 };
 
 /** Lower-case and fold accents, so "Yoruba" finds "Yorùbá". */

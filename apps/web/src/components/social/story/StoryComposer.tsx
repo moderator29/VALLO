@@ -269,7 +269,7 @@ export function StoryComposer({
         aria-label="Close"
         onClick={() => router.back()}
       >
-        <UiIcon name="close" size={22} />
+        <UiIcon name="close" size={20} />
       </button>
 
       {/*

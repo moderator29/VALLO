@@ -78,7 +78,6 @@ export function SystemMoment({
       {...(onHome ? { onHome } : {})}
       inset={inset}
       aside={aside}
-      plate={<Image src="/brand/photos/bg-blue-wave.jpg" alt="" fill sizes="100vw" priority />}
       brand={
         <>
           <Image

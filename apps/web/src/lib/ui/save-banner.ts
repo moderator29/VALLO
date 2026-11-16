@@ -17,6 +17,13 @@ export const SAVE_WORDS = {
   saved: "Saved. It is in Saved.",
   savedDevice: "Saved on this device. It is in Saved.",
   removed: "Removed from Saved.",
+  /* The quick pill's short words for a HEART (founder, 14 November 2026,
+     handoff 6.1): the heart itself stays under the thumb as the inverse, so
+     the pill carries no Undo and the words carry no destination sentence.
+     Collections and the story keep the sentences above, with Undo. */
+  quickSaved: "Saved",
+  quickSavedDevice: "Saved on this device",
+  quickRemoved: "Removed from Saved",
   undoneSave: "Save removed.",
   undoneRemove: "Saved again. It is in Saved.",
   searchSaved: "Search saved. It is in Saved, under Searches.",

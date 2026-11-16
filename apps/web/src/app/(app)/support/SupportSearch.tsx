@@ -3,6 +3,7 @@
 import { useId, useMemo, useRef, useState } from "react";
 import type { KeyboardEvent } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { plural, type Dictionary } from "@vallo/i18n/core";
 import { Button } from "@/components/ui/Button";
 import { UiIcon } from "@/design-system/icons/UiIcon";
@@ -43,6 +44,7 @@ export function SupportSearch({
   const [active, setActive] = useState(0);
   const [openQ, setOpenQ] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
+  const router = useRouter();
   const listId = useId();
   const searching = query.trim().length > 0;
   const results = useMemo(() => searchHelpArticles(articles, query), [articles, query]);
@@ -66,7 +68,12 @@ export function SupportSearch({
     } else if (event.key === "Enter") {
       event.preventDefault();
       const row = shown[current];
-      if (row) setOpenQ((q) => (q === row.q ? null : row.q));
+      if (!row) return;
+      /* A chapter, a guide or a legal page is a page: Enter opens it. Only a
+         help answer opens in place, because only a help answer is short
+         enough to read inside a row. */
+      if (row.href) router.push(row.href);
+      else setOpenQ((q) => (q === row.q ? null : row.q));
     } else if (event.key === "Escape" && query) {
       event.preventDefault();
       setQuery("");
@@ -136,29 +143,50 @@ export function SupportSearch({
               const open = openQ === article.q;
               return (
                 <li key={article.q} role="presentation" className="nf-palette__item">
-                  <div
-                    id={optionId(index)}
-                    role="option"
-                    aria-selected={index === current}
-                    tabIndex={-1}
-                    className="nf-palette__row"
-                    data-active={index === current || undefined}
-                    onMouseMove={() => setActive(index)}
-                    onClick={() => {
-                      setActive(index);
-                      setOpenQ(open ? null : article.q);
-                    }}
-                  >
-                    <span className="nf-palette__plate" aria-hidden="true">
-                      <UiIcon name="info" size={16} />
-                    </span>
-                    <span className="nf-palette__q">{article.q}</span>
-                    <UiIcon
-                      name={open ? "chevron-down" : "chevron-right"}
-                      size={16}
-                      className="nf-palette__enter"
-                    />
-                  </div>
+                  {article.href ? (
+                    <Link
+                      href={article.href}
+                      id={optionId(index)}
+                      role="option"
+                      aria-selected={index === current}
+                      tabIndex={-1}
+                      className="nf-palette__row"
+                      data-active={index === current || undefined}
+                      data-testid="support-row-page"
+                      onMouseMove={() => setActive(index)}
+                      onClick={() => setActive(index)}
+                    >
+                      <span className="nf-palette__plate" aria-hidden="true">
+                        <UiIcon name="file-text" size={16} />
+                      </span>
+                      <span className="nf-palette__q">{article.q}</span>
+                      <UiIcon name="chevron-right" size={16} className="nf-palette__enter" />
+                    </Link>
+                  ) : (
+                    <div
+                      id={optionId(index)}
+                      role="option"
+                      aria-selected={index === current}
+                      tabIndex={-1}
+                      className="nf-palette__row"
+                      data-active={index === current || undefined}
+                      onMouseMove={() => setActive(index)}
+                      onClick={() => {
+                        setActive(index);
+                        setOpenQ(open ? null : article.q);
+                      }}
+                    >
+                      <span className="nf-palette__plate" aria-hidden="true">
+                        <UiIcon name="info" size={16} />
+                      </span>
+                      <span className="nf-palette__q">{article.q}</span>
+                      <UiIcon
+                        name={open ? "chevron-down" : "chevron-right"}
+                        size={16}
+                        className="nf-palette__enter"
+                      />
+                    </div>
+                  )}
                 </li>
               );
             })}

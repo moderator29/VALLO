@@ -201,7 +201,7 @@ export function PersonHandoff({ signedIn, openTickets }: { signedIn: boolean; op
       )}
 
       <Link href="/assistant" className="nf-person__back nf-body-sm" data-testid="person-back">
-        <UiIcon name="arrow-left" size={16} />
+        <UiIcon name="chevron-left" size={16} />
         {WORDS.back}
       </Link>
     </div>

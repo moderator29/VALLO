@@ -146,7 +146,7 @@ export function NewGroupFlow({ live, schools, prefill }: { live: boolean; school
         <div className="grid gap-md">
           <div className="nf-rmb-field">
             <label htmlFor="rm-ng-name">{C.name}</label>
-            <input id="rm-ng-name" value={d.name} maxLength={LIMITS.groupNameMax} placeholder={C.namePlaceholder} {...field("name")} onChange={(e) => set({ name: e.target.value })} />
+            <input id="rm-ng-name" inputMode="text" autoCapitalize="words" autoCorrect="off" spellCheck={false} enterKeyHint="next" value={d.name} maxLength={LIMITS.groupNameMax} placeholder={C.namePlaceholder} {...field("name")} onChange={(e) => set({ name: e.target.value })} />
             {problem("name")}
           </div>
           <div className="nf-rmb-field">
@@ -204,7 +204,7 @@ export function NewGroupFlow({ live, schools, prefill }: { live: boolean; school
             </div>
             <div className="nf-rmb-field">
               <label htmlFor="rm-ng-city">{C.city}</label>
-              <input id="rm-ng-city" value={d.city} maxLength={60} placeholder={C.cityPlaceholder} {...field("city")} onChange={(e) => set({ city: e.target.value })} />
+              <input id="rm-ng-city" inputMode="text" autoCapitalize="words" autoCorrect="off" spellCheck={false} enterKeyHint="next" value={d.city} maxLength={60} placeholder={C.cityPlaceholder} {...field("city")} onChange={(e) => set({ city: e.target.value })} />
               {problem("city")}
             </div>
           </div>

@@ -65,6 +65,50 @@
     pointer-events: none;
     background: var(--nf-surface-canvas);
   }
+  /*
+   * THE PLATE IS A BACKGROUND, NOT A PAINTED IMAGE (measured 14 November
+   * 2026).
+   *
+   * It used to be a `next/image` with `priority`, which preloaded the 828
+   * wide file ahead of everything else on the screen. On a system moment the
+   * content is a small card of words, so that decorative photograph became
+   * the LARGEST CONTENTFUL PAINT: measured at 4,428 ms on a mid-range phone
+   * profile, and it was the whole of the listing page's 4.8 second baseline,
+   * because a listing id that does not resolve renders this screen.
+   *
+   * The atmosphere is kept exactly: the same photograph, the same scrim
+   * above it, the same CSS aurora under it when the file cannot load (which
+   * on the offline screen is the normal first visit). What changes is that
+   * it is painted as a background rather than raced to the front of the
+   * queue as content, and that a phone is served the 640 twin at 7KB
+   * instead of a 25KB file resized to 828.
+   *
+   * This is the treatment `app/css/ambient.css` already gives the same
+   * photograph in `.nf-aurora--plate`, written once more here because a
+   * system screen cannot mount that section's markup: WebP by type with the
+   * JPEG as its fallback, a plain `url()` first for a browser with neither,
+   * the 640 twin below 640, and nothing at all under `prefers-reduced-data`.
+   */
+  .nf-system__plate--art {
+    background-image: url("/brand/photos/bg-blue-wave.jpg");
+    background-image: image-set(
+      url("/brand/photos/bg-blue-wave.webp") type("image/webp"),
+      url("/brand/photos/bg-blue-wave.jpg") type("image/jpeg")
+    );
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+  }
+  @media (max-width: 640px) {
+    .nf-system__plate--art {
+      background-image: url("/brand/photos/bg-blue-wave-640.jpg");
+    }
+  }
+  @media (prefers-reduced-data: reduce) {
+    .nf-system__plate--art {
+      background-image: none;
+    }
+  }
   .nf-system__plate img {
     position: absolute;
     inset: 0;

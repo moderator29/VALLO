@@ -44,7 +44,7 @@ export function DismissiblePromo({ storageKey, closeLabel, children }: { storage
           setState("hidden");
         }}
       >
-        <UiIcon name="close" size={18} />
+        <UiIcon name="close" size={20} />
       </button>
     </div>
   );

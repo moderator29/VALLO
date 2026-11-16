@@ -202,6 +202,7 @@ export function ProposeDeduction({
             maxLength={500}
             value={note}
             onChange={(e) => setNote(e.target.value)}
+            inputMode="text" autoCapitalize="sentences"
           />
         )}
       </Field>
@@ -319,7 +320,7 @@ export function RecordReturn({
       </Field>
       <Field label={copy.returnReference}>
         {(control) => (
-          <input {...control} className="nf-field" maxLength={100} value={reference} onChange={(e) => setReference(e.target.value)} />
+          <input {...control} className="nf-field" maxLength={100} value={reference} onChange={(e) => setReference(e.target.value)} inputMode="text" autoCapitalize="sentences" />
         )}
       </Field>
       <Button type="submit" variant="primary" full loading={pending} disabled={pending || amount.trim().length === 0}>
@@ -350,7 +351,7 @@ export function ContestReturn({ tenancyId, returnId, copy }: { tenancyId: string
       }}
     >
       <Field label={copy.contestNote}>
-        {(control) => <input {...control} className="nf-field" maxLength={1000} value={note} onChange={(e) => setNote(e.target.value)} />}
+        {(control) => <input {...control} className="nf-field" maxLength={1000} value={note} onChange={(e) => setNote(e.target.value)} inputMode="text" autoCapitalize="sentences" />}
       </Field>
       <Button type="submit" size="sm" variant="secondary" loading={pending} disabled={pending || note.trim().length < 5}>
         {copy.contestSubmit}

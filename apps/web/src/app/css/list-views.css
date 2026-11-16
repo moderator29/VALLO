@@ -359,6 +359,31 @@
   .nf-card-photos::-webkit-scrollbar {
     display: none;
   }
+  /*
+   * THE PHOTOGRAPH SETTLES IN (the founder's brief, section 6, "a premium
+   * property card image reveal"; 14 November 2026).
+   *
+   * The platform's skeleton-to-content register, applied to a card's
+   * photograph: a 160ms crossfade on `glide`, opacity only, over the well the
+   * card already draws. No layout moves, so a list's CLS is untouched, and
+   * the card's own 520ms entrance is left alone: one thing moves at a time
+   * (principle 1 and the founder's motion script, 2b).
+   *
+   * `data-reveal` is written by `CardPhotos` only on a photograph that can
+   * actually snap in: never on the eager one, which is the page's largest
+   * paint and must not begin at zero opacity, and never on one the browser
+   * already had. `data-shown` arrives on decode.
+   *
+   * Under reduced motion, Calm and Off the duration token is 1ms, so the
+   * photograph simply appears: no branch of its own is needed (section 0).
+   */
+  img[data-reveal] {
+    opacity: 0;
+    transition: opacity var(--nf-duration-fast) var(--nf-ease-standard);
+  }
+  img[data-reveal][data-shown="true"] {
+    opacity: 1;
+  }
   .nf-card-photos__slide {
     position: relative;
     flex: 0 0 100%;

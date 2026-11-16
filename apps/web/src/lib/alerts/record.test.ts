@@ -7,6 +7,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
  */
 
 const inserted: unknown[] = [];
+const gteColumns: string[] = [];
 let insertError: { code: string; message: string } | null = null;
 let existing: { id: string } | null = null;
 let throwOnClient = false;
@@ -22,7 +23,10 @@ vi.mock("../supabase/admin", () => ({
       select: () => lookup,
       eq: () => lookup,
       is: () => lookup,
-      gte: () => lookup,
+      gte: (column: string) => {
+        gteColumns.push(column);
+        return lookup;
+      },
       order: () => lookup,
       limit: () => lookup,
       maybeSingle: async () => ({ data: existing, error: null }),
@@ -79,6 +83,7 @@ describe("alertTitle and alertDescription", () => {
 describe("recordAlert", () => {
   beforeEach(() => {
     inserted.length = 0;
+    gteColumns.length = 0;
     insertError = null;
     existing = null;
     throwOnClient = false;
@@ -108,6 +113,15 @@ describe("recordAlert", () => {
     const out = await recordAlert({ kind: "cron.no_show", severity: "warning", detail: {} });
     expect(out).toEqual({ ok: true, id: "alert-open", deduplicated: true });
     expect(inserted).toHaveLength(0);
+  });
+
+  it("measures the fold window against last_seen_at, so a repeating fault stays one row", async () => {
+    /* BR-03: against created_at the open row ages out of the window while the
+       fault repeats, and a daily fault opens a fresh row every other day. The
+       fold refreshes last_seen_at, so that column keeps the row in the window. */
+    existing = { id: "alert-open" };
+    await recordAlert({ kind: "cron.no_show", severity: "warning", detail: {} });
+    expect(gteColumns).toEqual(["last_seen_at"]);
   });
 
   it("never throws: an insert error is returned", async () => {

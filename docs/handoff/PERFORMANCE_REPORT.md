@@ -458,3 +458,127 @@ agent page) and PromotedSlot's ListingCard. Live /sign-in measured 220 KB
 gzipped of document, 681 KB of flight, 670 KB of it `t` (flight.py, live
 main). `scripts/check-flight-props.mjs` is its running twin over real
 flight payloads (`BASE_URL=... node scripts/check-flight-props.mjs`).
+
+---
+
+# CORRECTION TO THE BASELINE BELOW (14 November 2026, later the same day)
+
+**Read this before the table.** The baseline below was measured in a sandbox
+with NO Supabase credentials (`apps/web/.env` does not exist here; only
+`.env.example` does). So every page that needs data rendered its no-data
+state, and one row is worse than that:
+
+- **The "listing page" row is not a listing page.** The id in the URL does
+  not resolve without a database, so that measurement is of the NOT-FOUND
+  system screen. Its 4.81 s and its "decorative background is the largest
+  paint" are true of that screen and of nothing else. The conclusion drawn
+  from it, that a listing's own photograph should be promoted, cannot be
+  tested here at all: there is no photograph on a screen with no listing.
+- **Search, stays and restaurants** rendered their empty states for the same
+  reason, not because the platform has no restaurants.
+- **Landing and help** carry no data and are unaffected. Their numbers stand.
+- **The CLS finding stands in full**, because a layout shift caused by a
+  script hiding a header after hydration does not depend on data. It was
+  measured, traced to `BarBack`, fixed and measured again: 0.239 to 0.022.
+
+**What is still true and still useful from the run:** the app shell ships
+about 637 KB of JavaScript to a screen that shows one card of words, and the
+last of 44 script files lands at 5.5 seconds on this profile. That is the
+platform's floor on every route and it is measurable without any data at all.
+It is the number to attack.
+
+**What has to be measured again, with credentials, before anyone trusts a
+row:** the listing page, search, stays and restaurants. Until then the only
+honest statement about a real listing page's speed is that nobody has
+measured it.
+
+This correction is kept rather than the numbers quietly edited, because the
+first version of this table was reported to the founder.
+
+---
+
+# THE UPGRADE BASELINE: CORE WEB VITALS, MEASURED (14 November 2026)
+
+Phase 1 of the next-generation upgrade asks for a measured baseline before
+anything is optimised. This is it. Read the warning at the top of this file
+first: this is Chromium on a server, not a phone. It says how much work each
+page asks for.
+
+**How.** A production build (`next build`) served by `next start`, driven by
+Playwright at 390 x 844, device pixel ratio 2, with Chrome DevTools Protocol
+throttling: CPU 4x slower and the network at 1.6 Mbps down with 150 ms of
+latency, which is a mid-range Android on a fair Nigerian 4G. LCP and CLS come
+from the browser's own PerformanceObserver, buffered, read 3.5 seconds after
+load. Transfer sizes are `transferSize` from the Resource Timing API, so they
+are what crossed the wire, compressed.
+
+**What was measured.** Only pages a signed-out person reaches. The signed-in
+pages (home, the inbox, a thread, the feed, the agent dashboard, the console)
+need the QA member or the preview harness and are the next run.
+
+| Page | LCP | CLS | TTFB | JS | Images | Fonts | Requests |
+|---|---|---|---|---|---|---|---|
+| Landing `/` | 2,668 ms | 0 | 55 ms | 352 KB | 172 KB | 42 KB | 64 |
+| Search `/search` | 1,708 ms | 0 | 93 ms | (not read) | 10 KB | - | 124 |
+| Listing `/listing/[id]` | 4,808 ms | 0 | 55 ms | 559 KB | 6 KB | 50 KB | 86 |
+| Stays `/stays` | 3,136 ms | 0.017 | 52 ms | 480 KB | 63 KB | 49 KB | 118 |
+| Restaurants `/restaurants` | 2,252 ms | **0.239** | 35 ms | 446 KB | 14 KB | 41 KB | 108 |
+| Help `/help` | 2,352 ms | 0 | 77 ms | (not read) | 0 | - | 55 |
+
+Against the brief's targets (LCP 2.5 s or better, CLS 0.1 or lower):
+
+- **Search and Help pass.** Search at 1.7 s is the fastest page on the
+  platform, which is worth knowing before anyone "optimises" it.
+- **The listing page fails worst, at 4.8 s.** Its LCP element is not the
+  listing's own photograph: it is `/brand/photos/bg-blue-wave.jpg`, a
+  decorative background, fetched at 828 px. The page also ships the most
+  JavaScript of any route measured, 559 KB. Two separate things to fix, and
+  the first is nearly free.
+- **Stays fails at 3.1 s**, LCP `/brand/scenes/hotel.jpg`, again artwork
+  rather than content.
+- **Landing is just over at 2.67 s**, LCP its hero photograph, which is the
+  right element: this one is a weight and priority question, not a wrong
+  element.
+- **Restaurants fails CLS badly at 0.239**, which is the single worst number
+  in the table and is NOT about restaurants. See below.
+- TTFB is excellent everywhere (35 to 93 ms): the server and the database are
+  not the problem on these pages. The problem is what the browser is asked to
+  do after the bytes arrive.
+
+## The 0.239 shift, traced to its cause
+
+Worth writing down in full, because the cause was not where it looked.
+
+The shift is one event at about 1.3 seconds, and it moves the page up 53 px
+and its header's title left 48 px. It is not fonts: blocking every web font
+leaves the number at exactly 0.239. It is not the skeleton, and it is not the
+empty state's entrance, which animates only opacity and transform.
+
+It is `components/app/BarBack.tsx`, added on 13 November for the founder's
+"one bar on a phone, like X, Instagram and Facebook". It moves a page
+header's back control and title into the app bar, and it does so in a
+`useEffect`, setting `data-page-back` on `<html>`. Every rule that hides the
+page's own copy hung on that attribute. So on a phone, every page with a
+header painted a 44 px back control and a full-size title, and about 1.3
+seconds later both vanished and everything below jumped up.
+
+The condition is knowable before any script runs: `.nf-app-shell` is server
+rendered and always draws the bar, and `PageHeader` always renders `BarBack`.
+So the rules now name the shell instead of waiting for the attribute
+(`app/css/chrome.css`). The attribute is kept beside it for any surface that
+sets it another way.
+
+What it costs: a phone reader with JavaScript off now sees no visible page
+title inside the member shell, because the bar's copy is portalled by script.
+The `h1` stays in the document for a screen reader. The founder was told.
+
+## What this baseline says to do next, in order
+
+1. The listing page's LCP element: stop a decorative background being the
+   largest paint, and give the listing's own first photograph priority.
+2. The listing page's 559 KB of JavaScript, the heaviest route measured.
+3. Stays, the same LCP question as the listing page.
+4. The landing hero's weight and priority, to pull 2.67 s under 2.5 s.
+5. Then re-measure, on the same profile, and put the after beside the before.
+
+Nothing above should be called fixed until the same measurement is run again.

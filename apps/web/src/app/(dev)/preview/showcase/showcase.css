@@ -1,0 +1,137 @@
+/*
+ * DISCOVER VALLO, a proposal (the founder's brief, section 11; 14 November
+ * 2026). It lives beside the preview page that draws it, so nothing of it
+ * reaches a visitor before he has seen it and said yes.
+ *
+ * The whole sheet is tokens: no colour, size, radius or duration is written
+ * as a number here that the platform does not already own. One idea per row,
+ * generous space above the title, the field quiet and the content lit
+ * (PREMIUM-STANDARD, the governing level; CRAFT_DOCTRINE section 4).
+ */
+@layer components {
+  .nf-showcase {
+    display: grid;
+    gap: var(--nf-space-lg);
+    padding-block: var(--nf-space-2xl) var(--nf-space-3xl);
+    padding-inline: var(--nf-space-md);
+    max-inline-size: 48rem;
+    margin-inline: auto;
+  }
+  /* Room to be impressed above the title, which is the cheapest premium
+     signal there is and the one most often skipped. */
+  .nf-showcase__head {
+    display: grid;
+    gap: var(--nf-space-xs);
+    padding-block-start: var(--nf-space-lg);
+  }
+  .nf-showcase__eyebrow {
+    font-size: var(--nf-text-overline);
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--nf-brand-primary);
+  }
+  .nf-showcase__title {
+    font-size: var(--nf-text-h1);
+    font-family: var(--nf-font-display);
+    line-height: 1.15;
+    color: var(--nf-content-primary);
+    /* The browser balances the break rather than leaving a word alone on the
+       last line. Seen at 1440, where the lede orphaned "of it." */
+    text-wrap: balance;
+  }
+  .nf-showcase__lede {
+    font-size: var(--nf-text-body-lg);
+    line-height: 1.5;
+    color: var(--nf-content-secondary);
+    max-inline-size: 34rem;
+    text-wrap: pretty;
+  }
+
+  .nf-showcase__list {
+    display: grid;
+    gap: var(--nf-space-sm);
+  }
+  /* The row: glyph, words, door. On a phone the door drops under the words
+     and stretches, so it is a thumb-sized target rather than a link squeezed
+     into a corner. */
+  .nf-showcase__row {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: var(--nf-space-sm);
+    align-items: start;
+    padding: var(--nf-space-md);
+  }
+  .nf-showcase__mark {
+    display: grid;
+    place-items: center;
+    inline-size: 2.75rem;
+    block-size: 2.75rem;
+    border-radius: var(--nf-radius-md);
+    background: var(--nf-surface-inset);
+    color: var(--nf-brand-primary);
+  }
+  .nf-showcase__text {
+    display: grid;
+    gap: var(--nf-space-3xs);
+    min-inline-size: 0;
+  }
+  .nf-showcase__for {
+    font-size: var(--nf-text-caption);
+    font-weight: 600;
+    color: var(--nf-content-muted);
+  }
+  .nf-showcase__name {
+    font-size: var(--nf-text-h4);
+    line-height: 1.25;
+    color: var(--nf-content-primary);
+  }
+  .nf-showcase__body {
+    font-size: var(--nf-text-body-sm);
+    line-height: 1.5;
+    color: var(--nf-content-secondary);
+  }
+  .nf-showcase__door {
+    grid-column: 2;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--nf-space-3xs);
+    min-block-size: 2.75rem;
+    padding-inline: var(--nf-space-md);
+    border: var(--nf-border-width) solid var(--nf-border-default);
+    border-radius: var(--nf-radius-control);
+    color: var(--nf-content-primary);
+    font-size: var(--nf-text-body-sm);
+    font-weight: 600;
+  }
+  .nf-showcase__door:active {
+    background: var(--nf-surface-inset);
+  }
+  .nf-showcase__door:focus-visible {
+    outline: 2px solid var(--nf-focus-ring);
+    outline-offset: 2px;
+  }
+
+  .nf-showcase__close {
+    padding: var(--nf-space-md);
+  }
+  .nf-showcase__closeLine {
+    font-size: var(--nf-text-body-sm);
+    line-height: 1.5;
+    color: var(--nf-content-secondary);
+  }
+
+  /* From the reading width up, the glyph, the words and the door share one
+     line: there is room, and a row that wraps on a monitor reads as a phone
+     layout somebody forgot to finish. */
+  @media (min-width: 48rem) {
+    .nf-showcase__row {
+      grid-template-columns: auto 1fr auto;
+      align-items: center;
+    }
+    .nf-showcase__door {
+      grid-column: auto;
+    }
+  }
+}

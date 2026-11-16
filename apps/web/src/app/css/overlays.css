@@ -255,6 +255,19 @@
     padding-bottom: env(safe-area-inset-bottom, 0px);
     touch-action: none;
   }
+  /*
+   * NOTHING IMPORTANT UNDER THE KEYBOARD (founder, 14 November 2026, handoff
+   * 6.4 item 4). A sheet that asks a question keeps its field and its primary
+   * button above the keys: `resize: "native"` shrinks the web view, so a
+   * sheet pinned to the bottom already re-resolves there, but the safe-area
+   * reservation goes stale (there is no home indicator above a keyboard) and
+   * leaves 34 points of dead air between the sheet's button and the keys.
+   * The same rule `app/css/chrome.css` applies to the dock and the pinned
+   * action bar. Inert unless a native shell has a keyboard up.
+   */
+  :root[data-keyboard="open"] .nf-sheet {
+    padding-bottom: var(--nf-space-0);
+  }
   .nf-sheet[data-open="true"] {
     transform: translateY(var(--nf-sheet-y, 0px));
     transition: transform var(--nf-duration-slow) var(--nf-ease-entrance);

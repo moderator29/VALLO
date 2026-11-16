@@ -86,15 +86,51 @@ export async function reauthenticate(
         password: proof.password ?? "",
       });
       if (error || !data.user) return false;
-      return data.user.id === user.id;
+      const proved = data.user.id === user.id;
+      await endProofSession(client);
+      return proved;
     }
 
     const code = (proof.emailCode ?? "").trim();
     if (code.length === 0) return false;
     const { data, error } = await client.auth.verifyOtp({ email, token: code, type: "email" });
     if (error || !data.user) return false;
-    return data.user.id === user.id;
+    const proved = data.user.id === user.id;
+    await endProofSession(client);
+    return proved;
   } catch {
     return false;
+  }
+}
+
+/**
+ * THE PROOF'S OWN SESSION IS CLOSED BEHIND IT (14 November 2026).
+ *
+ * Checking a password means signing in with it: there is no other way to ask
+ * the auth service "is this the right password". That sign-in opens a real
+ * session, and this module never closed it, so every money step-up, every
+ * console entry and every account-deletion check left one open for ever.
+ * MEASURED ON LIVE on 14 November: 146 sessions with the user agent `node`,
+ * 133 of them untouched for over thirty days, inside a total of 720 sessions
+ * that have never expired, for 22 people.
+ *
+ * A session that nobody can use and nobody closes is still a credential
+ * sitting in a table, and the count only ever grows.
+ *
+ * `scope: "local"` is deliberate and the only safe choice: it revokes THIS
+ * session and no other. The default, `global`, would revoke every session the
+ * person has, so proving your password to release a payout would sign you out
+ * of your phone, your laptop and the app you are standing in.
+ *
+ * It never changes the verdict. The password was right or it was not before
+ * this runs, and a logout that fails (the service briefly unreachable) must
+ * not turn a correct password into a refusal.
+ */
+async function endProofSession(client: ReturnType<typeof detachedClient>): Promise<void> {
+  try {
+    await client.auth.signOut({ scope: "local" });
+  } catch {
+    /* The proof stands. A session left behind is tidied by the auth service's
+       own expiry once a time-box is set (see docs/DB_NOTES.md). */
   }
 }

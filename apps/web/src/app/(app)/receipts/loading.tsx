@@ -40,7 +40,7 @@ export default function LoadingReceipts() {
             <label htmlFor="nf-vault-q-wait" className="nf-body-sm font-semibold text-[var(--nf-content-secondary)]">
               {RECEIPTS_SEARCH_LABEL}
             </label>
-            <input id="nf-vault-q-wait" type="search" placeholder={RECEIPTS_SEARCH_HINT} className="nf-field" readOnly tabIndex={-1} />
+            <input id="nf-vault-q-wait" type="search" placeholder={RECEIPTS_SEARCH_HINT} className="nf-field" readOnly tabIndex={-1} inputMode="search" enterKeyHint="search" autoCorrect="off" spellCheck={false} />
           </div>
           <div className="flex flex-wrap gap-inline">
             {(["all", "payment", "refund"] as const).map((k) => (

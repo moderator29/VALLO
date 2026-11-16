@@ -52,6 +52,24 @@ function openChannel(build: (supabase: BrowserClient) => Channel): () => void {
 
 export type CallNudge = { callId: string; state: CallState | null; version: number | null };
 
+/**
+ * What the invites channel's status callback does, as a pure rule so a test
+ * can pin the one that matters: once a reopen is under way, every further
+ * status from the SAME channel is ignored. removeChannel makes realtime-js
+ * fire the callback again with CLOSED, synchronously, so without this the
+ * CLOSED handler called removeChannel which fired CLOSED which called
+ * removeChannel, until the stack overflowed (BR-20: 69 crash rows on live).
+ */
+export function invitesStatusPlan(
+  status: string,
+  state: { closed: boolean; reopening: boolean },
+): "live" | "reopen" | "ignore" {
+  if (state.closed || state.reopening) return "ignore";
+  if (status === "SUBSCRIBED") return "live";
+  if (status === "CHANNEL_ERROR" || status === "TIMED_OUT" || status === "CLOSED") return "reopen";
+  return "ignore";
+}
+
 function nudgeFrom(row: unknown, idKey: "id" | "call_id"): CallNudge | null {
   if (!row || typeof row !== "object") return null;
   const r = row as Record<string, unknown>;
@@ -135,6 +153,9 @@ export function useIncomingCalls(userId: string | null, onNudge: (nudge: CallNud
             /* No session to apply: the poll still looks for the ring. */
           }
           if (closed) return;
+          /* Once per channel: `invitesStatusPlan` explains the recursion this
+             guard ends. The fresh channel the reopen builds starts anew. */
+          let reopening = false;
           const channel = supabase
             .channel(ownChannelName(`call-invites-${userId}`))
             .on(
@@ -146,17 +167,18 @@ export function useIncomingCalls(userId: string | null, onNudge: (nudge: CallNud
               },
             )
             .subscribe((status) => {
-              if (status === "SUBSCRIBED") {
+              const plan = invitesStatusPlan(status, { closed, reopening });
+              if (plan === "live") {
                 retry = 0;
                 incomingChannelLive = true;
                 return;
               }
-              if (closed) return;
-              if (status === "CHANNEL_ERROR" || status === "TIMED_OUT" || status === "CLOSED") {
+              if (plan === "reopen") {
+                reopening = true;
                 incomingChannelLive = false;
-                void supabase.removeChannel(channel);
                 if (timer !== null) window.clearTimeout(timer);
                 timer = window.setTimeout(open, Math.min(30_000, 1_000 * 2 ** retry++));
+                void supabase.removeChannel(channel);
               }
             });
           opened = { supabase, channel };

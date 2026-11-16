@@ -461,6 +461,78 @@ export const platformEn = {
     settingsUnknown: "We could not read which phones lock your money just now. Try again in a moment.",
     settingsRemoveNeedsProof: "Removing a phone asks for the same proof as sending money.",
     added: "Added {when}",
+    /* A ROW LABEL IS A VERB, and it names the phone it acts on only when it
+       can. Every row read "This phone" whatever device the key was made on
+       (`label` is always null), which is half of why the screen contradicted
+       itself (the founder, 14 November 2026, from his own screenshot of
+       "Money is locked with 1 phone" sitting directly above "Add this
+       phone"). `settingsRemove` is used when this phone is the one key the
+       account holds, which is the only time that can be said. */
+    settingsRemoveOther: "Remove a phone you added",
+
+    /* -------------------------------------------------------------------
+       THE TWO TAPS, SAID AS TWO STEPS (the founder, 14 November 2026: "it's
+       not flow steps frontend not really cool").
+
+       Adding this phone is one flow with two taps, and the split is not
+       cosmetic: WebKit makes a passkey only inside the tap that asked for
+       it, and checking the password is a server round trip that spends that
+       tap on a phone network. So the proof is step one and the phone's own
+       lock is step two. Both buttons used to read "Add this phone", so the
+       second tap looked like the first one had done nothing, and the Face ID
+       sheet was never asked for. Step two now says what it is and the button
+       says what it does.
+       ------------------------------------------------------------------- */
+    stepCount: "Step {step} of {total}",
+    stepOneTitle: "First, your password",
+    stepOneTitleCode: "First, the code we emailed you",
+    stepOneBody:
+      "This proves it is you before this phone is added, so somebody holding your unlocked phone cannot add their own face.",
+    stepOneNext: "Then this phone will ask for Face ID or your fingerprint.",
+    stepOneAction: "Check my password",
+    stepOneActionCode: "Check my code",
+    stepTwoTitle: "Now Face ID or your fingerprint",
+    stepTwoBody:
+      "Your password is right. Tap below, then look at your phone or hold the fingerprint sensor. Vallo never sees your face or your fingerprint, only that this phone answered.",
+    stepTwoAction: "Use Face ID or fingerprint",
+    stepTwoWaiting: "Waiting for this phone to answer.",
+
+    /* -------------------------------------------------------------------
+       ONE STATE AT A TIME. The screen may say this phone locks the money, or
+       offer to add this phone, never both in the same breath.
+       ------------------------------------------------------------------- */
+    thisPhoneOn: "On",
+    thisPhoneOff: "Not added",
+    thisPhoneOnBody:
+      "Face ID or your fingerprint is asked on this phone before the account your money is paid into changes.",
+    thisPhoneOffBody:
+      "The phones below lock your money and this one is not among them. Add it below and it will ask for its own Face ID or fingerprint.",
+    anotherPhoneLabel: "Lock money with another phone",
+    anotherPhoneBody:
+      "A phone can only add itself. Open Vallo on the other phone, come to this screen there, and add it from that phone.",
+    settingsEnrolSteps: "Two steps: your password, then Face ID or your fingerprint.",
+    /* The row was disabled and grey while this was being read, and said
+       nothing at all about why (the founder: "it's not even asking to set
+       it"). A control that cannot be tapped says why it cannot. */
+    settingsChecking: "Checking whether this phone can use Face ID or a fingerprint.",
+
+    /* -------------------------------------------------------------------
+       TURNING IT OFF (the founder, 14 November 2026: "pages to enter to turn
+       off and turn it on again flow"). Removing a phone was a red row that
+       went straight to a proof sheet, with nothing in between saying what
+       stops. The proof itself is unchanged: removing a phone asks for the
+       same proof as changing where your money is paid.
+       ------------------------------------------------------------------- */
+    offTitle: "Turn this phone's lock off",
+    offBody:
+      "Vallo will stop asking this phone for Face ID or a fingerprint before the account your money is paid into changes.",
+    offKeeps:
+      "Your Vallo password and your passcode do not change, and you stay signed in. You can add this phone again at any time.",
+    offLast:
+      "This is the only phone that locks your money, so after this your password alone will change where your money is paid.",
+    offConfirm: "Turn it off",
+    offKeep: "Keep it on",
+
     /* A staff account's keys also open the Vallo console, so a password alone never adds or removes one. */
     staffFirstKey:
       "This is a staff account, so setting up its first key takes your password and a code we email you.",

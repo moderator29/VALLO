@@ -1625,3 +1625,28 @@
     animation: none;
   }
 }
+
+/* PASTE A CODE IN ONE TAP (founder, 14 November 2026). A quiet word under the
+   cells, not a second primary: the keyboard's own one-time-code suggestion is
+   still the fastest way in, and this is for the person who copied the code
+   from an email. A 44px target by its padding, as every control here. */
+.nf-code__paste {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--nf-space-3xs);
+  align-self: start;
+  margin-block-start: var(--nf-space-2xs);
+  padding: var(--nf-space-2xs) var(--nf-space-xs);
+  margin-inline-start: calc(var(--nf-space-xs) * -1);
+  border-radius: var(--nf-radius-sm);
+  color: var(--nf-content-link);
+  font-size: var(--nf-text-body-sm);
+  font-weight: 600;
+}
+.nf-code__paste:active {
+  background: var(--nf-surface-inset);
+}
+.nf-code__paste:focus-visible {
+  outline: 2px solid var(--nf-focus-ring);
+  outline-offset: 2px;
+}

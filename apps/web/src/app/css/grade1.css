@@ -243,7 +243,6 @@
     animation: none;
   }
 }
-
 /*
  * THE QUICK PILL (`banner.quick`, `ToastHost`; the founder, 14 November 2026,
  * with WhatsApp's "Message copied" as the reference). A tick and a few words
@@ -296,10 +295,19 @@
 .nf-quick {
   display: inline-flex;
   align-items: center;
-  gap: var(--nf-space-xs);
-  max-inline-size: min(22rem, 100%);
-  padding: var(--nf-space-xs) var(--nf-space-md) var(--nf-space-xs) var(--nf-space-sm);
-  border-radius: var(--nf-radius-lg);
+  /* A CAPSULE, AND SMALL (the founder, 14 November 2026, on the first build:
+     "make them smaller and also a pill shape not rectangle shape", holding up
+     WhatsApp's "Message copied"). `--nf-radius-pill` on a thing that is not a
+     control: the shape law reserves the capsule for controls so a capsule
+     reads as "selectable", and nothing here is selectable or even takes the
+     pointer, so the reading holds. Small enough to sit under a thumb without
+     covering the row it confirms. */
+  gap: var(--nf-space-2xs);
+  min-block-size: 1.75rem;
+  max-inline-size: min(17rem, 100%);
+  padding-block: 0;
+  padding-inline: var(--nf-space-xs) var(--nf-space-sm);
+  border-radius: var(--nf-radius-pill);
   border: var(--nf-border-width) solid var(--nf-border-default);
   background: var(--nf-surface-elevated);
   color: var(--nf-content-primary);
@@ -328,18 +336,23 @@
 }
 /* The tick in its ring, in the success ink. */
 .nf-quick__mark {
+  /* THE GLYPH DRAWS ITS OWN RING (the founder, 14 November 2026: "make it
+     exactly the one in the escrow pay ... it's same as the WhatsApp ss", and
+     on the first build, "why would the image 2 have another outer beautiful
+     art and the approved one have only a tick"). So no border and no plate
+     here: a CSS circle around a loose tick never quite centres and never
+     matches its stroke. The colour is the page's own ink, not a green that
+     belongs to no other part of Vallo. */
   flex-shrink: 0;
   display: inline-grid;
   place-items: center;
-  inline-size: 1.25rem;
-  block-size: 1.25rem;
-  border-radius: var(--nf-radius-circle);
-  border: 1.5px solid var(--nf-state-success);
-  color: var(--nf-state-success);
+  inline-size: 1.0625rem;
+  block-size: 1.0625rem;
+  color: var(--nf-content-primary);
 }
 .nf-quick__text {
   min-inline-size: 0;
-  font-size: var(--nf-text-body-sm);
+  font-size: var(--nf-text-caption);
   font-weight: 600;
   line-height: 1.35;
   overflow-wrap: break-word;

@@ -36,7 +36,13 @@ export function SystemFrame({
   /** A failure screen's own handling of the lockup's click (`lib/offline/escape.ts`): a client caller only. */
   onHome?: MouseEventHandler<HTMLAnchorElement>;
   inset: boolean;
-  plate: ReactNode;
+  /**
+   * The artwork behind the screen. Left out, the frame paints the plate as a
+   * CSS background, which is what every screen but the offline one wants:
+   * the offline screen passes its own precached `<img>`, because a service
+   * worker keeps that file and a CSS background cannot be precached by it.
+   */
+  plate?: ReactNode;
   brand: ReactNode;
   children: ReactNode;
   aside?: ReactNode;
@@ -47,7 +53,11 @@ export function SystemFrame({
     /* A night stage in both themes, like the auth screen: the podium and the
        aurora are night artwork (light mode reintroduced 25 September 2026). */
     <Stage id={inset ? undefined : "main"} className={stageClass} data-theme="dark">
-      <div className="nf-system__plate" aria-hidden="true">
+      {/* The plate is drawn as a BACKGROUND when no node is passed (measured
+          14 November 2026: as a priority image it became the screen's largest
+          contentful paint). `app/css/system.css` carries the photograph, its
+          WebP twin, the 640 file for a phone and the reduced-data rule. */}
+      <div className={plate ? "nf-system__plate" : "nf-system__plate nf-system__plate--art"} aria-hidden="true">
         {plate}
       </div>
       <div className="nf-aurora" aria-hidden="true" />

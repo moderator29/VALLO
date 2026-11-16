@@ -1144,11 +1144,64 @@
   .nf-app-header__lead {
     display: contents;
   }
-  /* The in-page back (BackControl `round`): no plate, the primary ink, a
-     quiet tint under the finger, and the 44pt target pulled out by half its
-     slack so the 20px glyph starts on the content edge. */
+  /*
+   * ============================================================= THE EDGE RULE
+   * WHERE A BARE NAVIGATION CONTROL RESTS, AS ARITHMETIC (the founder, 14
+   * November 2026: "this go back button are too close to the end of the page
+   * like no space maybe it's arrow icon so you know look into that too").
+   *
+   * Both of his rulings are true and they are about different boxes. On 13
+   * November the control was "too big and too far from the edge", and it was
+   * pulled outward by half its slack (-12px), which put the 44px BOX 4px from
+   * the screen at a 16px gutter. On 14 November that box reads as having no
+   * space at all. Meanwhile the GLYPH inside it sat at 20.2px, further in
+   * than the title text below it at 16px, so nothing lined up either.
+   *
+   * So the resting place is decided by the glyph's INK against the page's
+   * text, and the box follows. A chevron is drawn from x=9 to x=15 in a 24
+   * unit square, so at a 20px glyph its ink starts 7.5px inside its own box
+   * (20 * 9/24). Pulling the control out by exactly that much puts the ink
+   * on the gutter: the chevron, the title under it and every row below share
+   * one vertical line, and the 44px target keeps 8.5px of air at the screen
+   * edge instead of 4.
+   *
+   * Measured at 390 (gutter 16px): box 4 -> 8.5px from the edge, ink
+   * 20.2 -> 16.0px, which is the text. At 1440 (gutter 32px) the same
+   * arithmetic puts the ink on 32px. Nothing here is a magic number: change
+   * the glyph size or the gutter and both follow.
+   *
+   * `justify-items: start` is what makes the ink, not the box, the thing
+   * being placed; the component's own `place-items-center` centres it
+   * otherwise.
+   */
+  /*
+   * The arithmetic itself, on its own class, because the edge rule belongs to
+   * EVERY back control and not only to the one with a tint. It was on
+   * `.nf-back-plain` alone for an hour on 14 November, and measuring proved
+   * why that is not enough: `/help`, `/guides` and `/docs` draw the `bare`
+   * surface, so their chevron's ink sat at 35.5px while their text sat at 16,
+   * which is the very drift the founder was pointing at. Both surfaces carry
+   * this now, so one piece of arithmetic places every back control.
+   */
+  .nf-nav-edge {
+    --nf-nav-glyph: 24px;
+    /* A chevron's ink begins 9/24 of the way into its square. */
+    --nf-nav-ink-inset: calc(var(--nf-nav-glyph) * 0.375);
+    /* NO PULL (the founder, 15 November 2026, for the second time: "the go
+       back button is too close to the edge of the page as you can see").
+       The rule used to drag the control out by the glyph's ink inset so the
+       ink landed on the page's text line, 16px. Measured, that is exactly
+       what it did. He can see it and he does not want it: at 16px the
+       chevron reads as pressed against the screen edge, because unlike a
+       letter it has no side bearing and its point is the leftmost ink on the
+       screen. So the 44px box now starts at the gutter and the ink falls
+       where the glyph puts it, 9px further in at a 24px chevron. The title
+       beside it in a bar, and under it on a stacked header, keep their own
+       16px; the chevron sits inside that line rather than on it, which is
+       what he is asking for and what every phone's own back does. */
+    justify-items: start;
+  }
   .nf-back-plain {
-    margin-inline-start: -0.75rem;
     border-radius: var(--nf-radius-control);
     color: var(--nf-content-primary);
     transition: background-color var(--nf-duration-fast) var(--nf-ease-standard);
@@ -1170,8 +1223,14 @@
       transition: none;
     }
   }
+  /* The app bar's back takes the same rule: the ink on the gutter, the box
+     following it. It used to be pulled a whole 16px, which put its box hard
+     against the screen edge. */
   .nf-bar-back {
-    margin-inline-start: calc(var(--nf-space-md) * -1);
+    --nf-nav-glyph: 24px;
+    --nf-nav-ink-inset: calc(var(--nf-nav-glyph) * 0.375);
+    /* The app bar's back takes the same air as every other: no pull. */
+    justify-items: start;
     border-radius: var(--nf-radius-control);
     color: var(--nf-content-primary);
   }
@@ -1198,12 +1257,40 @@
       order: 99;
       margin-inline: 0 calc(var(--nf-space-2xs) * -1);
     }
-    /* !important because the control carries Tailwind's inline-grid, and the
-       utilities layer outranks this one for a normal declaration. */
-    :root[data-page-back] :is(.nf-ph-large__row, .nf-ph-row) > [data-nav-back] {
+    /*
+     * THE PAGE'S OWN BACK AND TITLE STEP ASIDE FROM THE FIRST PAINT, NOT AFTER
+     * HYDRATION (BR-23, measured 14 November 2026).
+     *
+     * These three rules used to hang on `:root[data-page-back]`, which
+     * `BarBack` sets in a `useEffect`. So every phone page painted a 44px back
+     * control and a full-size title, and about 1.3 seconds later both
+     * vanished: the header lost 53px of height and everything below jumped up.
+     * Measured on `/restaurants` with a 4x CPU slowdown: CLS 0.239, against
+     * the brief's target of 0.1 or lower, and the same jump is on every phone
+     * page that draws a header.
+     *
+     * The condition is known before any script runs, so it is written as one:
+     * `.nf-app-shell` is the member shell, server rendered, and it always
+     * draws the bar with its lead slot (AppShell), while `PageHeader` always
+     * renders `BarBack`. So inside the shell, below 64rem, the page's copy is
+     * never the one on screen, and reserving space for it is the defect.
+     * Outside the shell (the agent and host workspaces, a preview with no
+     * bar) the rules do not apply and the page header draws its own back, as
+     * it always did.
+     *
+     * WHAT THIS COSTS: a phone reader with JavaScript off now sees no visible
+     * page title inside the member shell, because the bar's copy is portalled
+     * by script. The `h1` stays in the document for a screen reader, which is
+     * what the clip below is for. Told to the founder on 14 November.
+     *
+     * `[data-page-back]` is kept beside the shell selector so a surface that
+     * sets the flag another way still obeys, and !important because the
+     * control carries Tailwind's inline-grid, which outranks this layer.
+     */
+    :is(.nf-app-shell, :root[data-page-back]) :is(.nf-ph-large__row, .nf-ph-row) > [data-nav-back] {
       display: none !important;
     }
-    :root[data-page-back] :is(.nf-ph-large__title, .nf-ph-row__title) {
+    :is(.nf-app-shell, :root[data-page-back]) :is(.nf-ph-large__title, .nf-ph-row__title) {
       position: absolute;
       width: 1px;
       height: 1px;
@@ -1211,7 +1298,7 @@
       clip-path: inset(50%);
       white-space: nowrap;
     }
-    :root[data-page-back] .nf-ph-large {
+    :is(.nf-app-shell, :root[data-page-back]) .nf-ph-large {
       margin-block-start: 0;
     }
   }

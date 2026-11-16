@@ -186,6 +186,70 @@ this table at the end of every round.
 | M8 | Motion and performance from the baseline (7, phase 6) | Agent | Queued |
 | M9 | Final QA, security probes and the second audit (7, phase 7) | The agent that did not build it | Queued |
 
+## 14 November 2026, later: the new session takes over (lead plus two agents)
+
+The branch is `claude/wonderful-lovelace-wk1b1v` (main took everything at
+`4baa05fb`; the old audit branch is gone from the remote). The queue with the
+eight stages moved to `WORK_QUEUE.md`, rewritten. The register is
+`BUG_REGISTER.md` (new). The Supabase audit's live baseline opened in
+`docs/DB_NOTES.md`.
+
+Verified on live: `staff_desks_only_2026-11-14.sql` applied and correct, both
+position holders acknowledged the handbook, desks open.
+
+Lead shipped (commit ids in `git log`): the alert fold measured against
+`last_seen_at` with a test (`17bde0ab`); the incoming-calls realtime
+recursion fix with a test (`1094b98f`, 69 crash rows on live); the audit
+baseline (`70453708`); the insert-limit backstop file (`ae230b0b`). Pending
+SQL for the founder, all tested twice on the local stub:
+`alerts_cleanup_2026-11-14.sql`, `scoped_staff_listing_doors_2026-11-14.sql`
+(unblocks the BD Director's listings desk reads),
+`insert_limits_bookings_inspections_briefs_2026-11-14.sql`.
+
+The previous session's small-works agents landed nothing; S1 to S6 restarted
+from zero in this session. Agent INPUT is on S1 (the pill; partial store work
+recovered), Agent SHEETS on S3 (CountTabs). The container was fresh: one
+`npm ci` at the root, agents told never to install.
+
+## 14 November, late: the founder's own asks of the evening
+
+All gated (whole-project typecheck, production build, both CSS gates, the em
+dash gate, lint, the touched suites) before each commit.
+
+| What | Commit | Note |
+|---|---|---|
+| The confirmation pill, count tabs, paste, the action sheet | `967721ce`, `148a1968`, `10e5c515`, `7e0407f0` | The four small works of section 6, finished |
+| The keyboard pass | `03578827` | Found and fixed Enter sending on a phone |
+| Back is a chevron, every back and close control on the page's line | `f11d35c4`, `70455692` | His two rulings reconciled by aligning the glyph's ink with the text gutter |
+| The banner: brand rail, circled mark, capsule, small type, a processing tone | `2c7d7deb`, `c102125a`, `55e097a3` | Three passes, each after he looked at a screenshot and said what was wrong |
+| Motion | `acfd1ea4` | Nine of the brief's ten already existed; one gap built |
+| The showcase proposal | `137befa7` | Behind the harness, five doors not seventeen, waiting on his word |
+| THE SITE ROOT OPENS ON VALLO | `5d6cb242` and `883105f8` | Both carry a WIP label because they were checkpointed mid-build; the work in them is finished and gated. The full reasoning is below, since the commit messages do not carry it |
+
+**The site root, properly described.** The proxy REWRITES `/` to the discovery
+screen rather than redirecting, so the address stays `vallospaces.com` and the
+search screen remains the one implementation: nothing was copied. The page
+learns it is the front door from a request header the proxy sets and scrubs
+from any client that sends one, as the locale and viewer headers already
+work, and on that stamp alone it adds the footer and the root's structured
+data. One condition in `lib/site/front-door.ts`: signed in goes to `/home`;
+signed out with the catalogue open gets the discovery screen at `/`; signed
+out with the catalogue CLOSED keeps the landing page, because a stranger
+cannot be shown a shut catalogue. It reads the session cookie, not a verified
+session, deliberately: that decision sits above the auth block and a front
+door must not break when auth is unreachable. The landing page is not
+deleted; it lives at `/tour`, one implementation shared by both routes.
+Measured: no sideways scroll at 390 or 1440 in either theme, layout shift
+0.000, the footer's last row 198px above the dock from the shell's own
+clearance. Two defects were found only by looking at the screenshots: a back
+control on a page with nowhere to go back to, and the dock vanishing because
+the shell reads a path a rewrite leaves as `/`.
+
+**What the founder still has to decide**: whether the showcase lives at a
+public address, inside the app, or both; whether the back chevron should sit
+further in than the text line it now aligns to; and the five pending SQL
+files plus the auth session time-box setting.
+
 **File ownership while S1 to S6 run.** INPUT: `lib/ui/toast.ts`,
 `components/ui/ToastHost.tsx`, every composer (the thread's `ThreadView.tsx`
 and `components/app/messages/*`, the support composer, the feed composer),

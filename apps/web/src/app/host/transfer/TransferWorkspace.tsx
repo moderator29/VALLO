@@ -312,6 +312,7 @@ function BusinessRow({
             maxLength={400}
             value={note}
             onChange={(event) => setNote(event.target.value)}
+          inputMode="text" autoCapitalize="sentences"
           />
           <div className="mt-md grid gap-sm sm:grid-cols-2">
             <Button variant="secondary" full onClick={() => setOpen(false)}>

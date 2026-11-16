@@ -115,6 +115,11 @@ export const passcodeEn = {
   turnOff: "Turn off passcode",
   turnOffTitle: "Turn off your passcode",
   turnOffBody: "Enter your current passcode. Vallo will then open without one on this account.",
+  /* WHAT STILL STANDS, said on the way out (14 November 2026, the same round
+     as the money lock's own turn-off screen): a member turning one lock off
+     should not have to guess whether they have just turned everything off. */
+  turnOffKeeps:
+    "Your Vallo password and the lock on your money do not change, and you stay signed in. You can turn the passcode on again here at any time.",
   turnOffWithKey: "Use Face ID or fingerprint",
   turnOffCancel: "Keep my passcode",
   turnedOff: "Passcode turned off. Vallo opens without it now, and you can turn it on again here any time.",

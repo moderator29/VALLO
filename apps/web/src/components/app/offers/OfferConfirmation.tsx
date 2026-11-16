@@ -5,6 +5,7 @@ import { OfferFigures, Receipt, SectionHead } from "./OfferParts";
 import { formatWhen, proposedDate } from "@/lib/offers/format";
 import { NOTHING_CHARGED, NO_MONEY_TAKEN, PAYMENT_LABEL, WHAT_HAPPENS_NEXT_BUYER, holderLine, offerChip } from "@/lib/offers/words";
 import { dealRoomHref } from "@/lib/offers/routes";
+import { HelpLink } from "@/components/site/support/HelpLink";
 import type { DealRoom } from "@/lib/offers/types";
 import "./offers.css";
 
@@ -56,6 +57,11 @@ export function OfferConfirmation({ room }: { room: DealRoom }) {
         <p className="nf-body-sm text-[var(--nf-content-muted)]">
           {NOTHING_CHARGED} {NO_MONEY_TAKEN}
         </p>
+        {/* THE LINK AT THE MOMENT OF DOUBT. A buyer who has just sent an
+            offer has no idea what the seller can do next, and this is the
+            screen where that question forms. The chapter answers it in
+            full; the list above is the short version. */}
+        <HelpLink to="offers" />
       </section>
       <div className="grid gap-sm sm:grid-cols-2">
         <ButtonLink href={dealRoomHref(offer.id)} variant="primary" size="lg" full data-testid="view-deal-room">

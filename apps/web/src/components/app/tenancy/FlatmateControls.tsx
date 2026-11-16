@@ -313,7 +313,7 @@ export function CancelSplit({ tenancyId, copy }: { tenancyId: string; copy: Copy
     >
       <p className="nf-body-sm text-[var(--nf-content-secondary)]">{copy.cancelHelp}</p>
       <Field label={copy.cancelNote}>
-        {(control) => <input {...control} className="nf-field" maxLength={500} value={note} onChange={(e) => setNote(e.target.value)} />}
+        {(control) => <input {...control} className="nf-field" maxLength={500} value={note} onChange={(e) => setNote(e.target.value)} inputMode="text" autoCapitalize="sentences" />}
       </Field>
       <Button type="submit" variant="secondary" full loading={pending} disabled={pending}>
         {copy.cancelSplit}

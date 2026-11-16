@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useCallback, useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore } from "react";
 import { UiIcon, type UiIconName } from "@/design-system/icons/UiIcon";
 import { BackControl } from "@/components/ui/BackControl";
+import { BarBack } from "@/components/app/BarBack";
 import { useClientCopy } from "@/lib/i18n/client-copy";
 import { ListingActions } from "./ListingActions";
 import type { SavePlaceTarget } from "@/components/app/SaveControl";
@@ -479,20 +480,39 @@ export function ListingGallery({
         aria-hidden="true"
       />
 
-      {/* `nf-safe-top` is padding rather than an offset, so the glass controls
-          clear the notch while the photography still runs behind it. */}
-      <div ref={heroBack} className="nf-safe-top pointer-events-none absolute left-3 top-3 z-20 sm:left-4 sm:top-4">
-        <BackControl
-          fallback={backFallback}
-          surface="round"
-          /* Section 17's round header button (gap audit UIUX-13). The hero
-             is a night island, so `data-theme="light"` re-runs the paper
-             tokens on the button itself: a white circle by day, the raised
-             night surface at night. Share, save and the photo arrows too. */
-          data-theme="light"
-          className="pointer-events-auto transition-transform active:scale-90 motion-reduce:transition-none"
-        />
-      </div>
+      {/*
+        THE BACK IS NOT ON THE PHOTOGRAPH (the founder, 16 November 2026:
+        "don't make the go back button be inside the image container ... it
+        should be outside the container but beside not sit on top").
+
+        It used to be absolutely placed inside this section, over the picture.
+        While it was a bare chevron that read as chrome floating above the
+        photograph; once it took the same disc as share, compare and save it
+        read as a button sitting INSIDE the image card, which is what he
+        photographed. So it leaves the card altogether and goes to the app
+        bar's lead slot, on the row above, beside the menu. `BarBack` is the
+        platform's own way of doing that and the page headers already use it,
+        so this control now sits where every other back on a phone sits.
+
+        Share, compare and save stay on the photograph: they act on the
+        picture, and he did not ask for them to move.
+
+        `heroBack` still marks the spot the control used to hold, because the
+        floating back on the stay and restaurant faces watches it to know when
+        the photograph has scrolled away. It paints nothing.
+      */}
+      <div ref={heroBack} aria-hidden="true" className="pointer-events-none absolute left-3 top-3 h-11 w-11" />
+      <BarBack
+        title={title}
+        back={
+          <BackControl
+            fallback={backFallback}
+            surface="bare"
+            className="nf-bar-back"
+            data-testid="listing-bar-back"
+          />
+        }
+      />
 
       <ListingActions
         listingId={listingId}

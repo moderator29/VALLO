@@ -76,7 +76,7 @@ export function ForgotPasswordForm({ t }: { t: Dictionary }) {
 
       <p className="nf-auth__links">
         <Link href="/sign-in" className="nf-tap nf-auth__aside">
-          <UiIcon name="arrow-left" size={16} />
+          <UiIcon name="chevron-left" size={16} />
           {t.common.signIn}
         </Link>
       </p>

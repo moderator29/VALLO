@@ -125,6 +125,11 @@ export function TurnOffPasscode({
         {copy.turnOffTitle}
       </h2>
       <p className="nf-passcode-settings__note">{copy.turnOffBody}</p>
+      {/* What still stands, so turning one lock off does not read as turning
+          everything off (14 November 2026). */}
+      <p className="nf-passcode-settings__note" data-testid="passcode-off-keeps">
+        {copy.turnOffKeeps}
+      </p>
       {passkey ? (
         <button type="button" className="nf-btn nf-btn--primary w-full" disabled={busy} onClick={() => void withKey()} data-testid="passcode-off-key">
           {copy.turnOffWithKey}

@@ -15,7 +15,7 @@ import { banner, currentToast } from "@/lib/ui/toast";
  * the first note to ask in a tick wins and the rest wait for the person to
  * fix that one. The banner's own queue would otherwise show the last.
  *
- *   <input aria-invalid={error ? true : undefined} aria-describedby={error ? "x-error" : undefined} />
+ *   <input aria-invalid={error ? true : undefined} aria-describedby={error ? "x-error" : undefined} inputMode="text" autoCapitalize="sentences" />
  *   <FieldProblem id="x-error" message={error} />
  */
 

@@ -783,13 +783,31 @@ async function heldReasons(listingId: string): Promise<string[]> {
     }
     const { data: listing } = await admin.from("listings").select("listing_role").eq("id", listingId).maybeSingle();
     if (listing && (listing.listing_role === "agent" || listing.listing_role === "firm")) {
+      /*
+       * THE SAME RULE THE DATABASE ENFORCES, NOT A LOOSER ONE (14 November
+       * 2026). `private.listing_has_live_mandate` is what actually decides,
+       * through the `listing_supply_proof_gate` trigger, and it asks for
+       * three things: approved, NOT superseded, and NOT expired. This copy
+       * asked only for approved, so a listing whose mandate had lapsed or
+       * been replaced passed here and was then refused by the database with
+       * a raw SCUML error, and the lister was told "one step left" with the
+       * mandate missing from the list of what to do. Three implementations
+       * of one rule is survey B's B-13; until one SQL function serves all
+       * three, this one is kept word for word in step with the trigger.
+       *
+       * Lagos time, because the expiry date is a Nigerian calendar date and
+       * the database compares it in `Africa/Lagos`.
+       */
+      const todayInLagos = new Date().toLocaleDateString("en-CA", { timeZone: "Africa/Lagos" });
       const { count } = await admin
         .from("listing_mandates")
         .select("id", { count: "exact", head: true })
         .eq("listing_id", listingId)
-        .eq("review_status", "approved");
+        .eq("review_status", "approved")
+        .is("superseded_at", null)
+        .or(`expires_on.is.null,expires_on.gte.${todayInLagos}`);
       if (!count) {
-        reasons.push("An agent or firm listing needs the owner's written mandate filed and approved.");
+        reasons.push("An agent or firm listing needs the owner's written mandate filed, approved and still in date.");
       }
     }
   } catch {

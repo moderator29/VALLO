@@ -79,7 +79,17 @@ const SEVERITY: Record<AlertSeverity, DbSeverity> = {
    hours after its last run, often a few seconds more, so a strict day let
    every run open a fresh copy: "Store: readiness, red" stood at 25 open
    alerts for one unchanged fault. Two spare hours fold a daily repeat into
-   the alert already open. */
+   the alert already open.
+
+   The window is measured against `last_seen_at`, never `created_at`
+   (BR-03, 14 November 2026): a fold refreshes `last_seen_at`, so an open
+   alert whose fault keeps repeating stays inside the window for ever and
+   stays ONE row. Measured against `created_at`, the open row aged out of
+   the window two days after it was opened, so a daily fault folded once and
+   then opened a fresh row every other day: "Store: readiness, red" had
+   piled up 29 open rows by 14 November with the last-seen column already
+   live. A fault that goes quiet for more than the window and then returns
+   still opens a fresh row, which is right: that is new news. */
 const DEDUP_WINDOW_MS = 26 * 60 * 60 * 1_000;
 
 const MAX_STRING = 200;
@@ -203,7 +213,7 @@ export async function recordAlert(input: AlertInput): Promise<AlertOutcome> {
         .select("id")
         .eq("status", "open")
         .eq("title", title)
-        .gte("created_at", new Date(Date.now() - DEDUP_WINDOW_MS).toISOString())
+        .gte("last_seen_at", new Date(Date.now() - DEDUP_WINDOW_MS).toISOString())
         .order("created_at", { ascending: false })
         .limit(1);
       lookup = entityId === null ? lookup.is("entity_id", null) : lookup.eq("entity_id", entityId);

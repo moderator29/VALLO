@@ -369,7 +369,7 @@ export function InnerNav({
             <UiIcon name="menu" size={24} />
           </span>
           <span ref={closeRef} className="nf-innernav__glyph nf-innernav__glyph--close">
-            <UiIcon name="close" size={24} />
+            <UiIcon name="close" size={20} />
           </span>
         </button>
         {currentLabel ? <span className="nf-innernav__current">{currentLabel}</span> : null}

@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { deviceKeyState, forgetDeviceKey, noteDeviceKeyFailed, rememberDeviceKey } from "./device-keys";
+import { deviceKeyState, forgetDeviceKey, forgetDeviceKeysOutside, noteDeviceKeyFailed, rememberDeviceKey } from "./device-keys";
 
 describe("which Face ID keys this phone holds", () => {
   beforeEach(() => {
@@ -39,6 +39,30 @@ describe("which Face ID keys this phone holds", () => {
     expect(deviceKeyState()).toBe("has");
     forgetDeviceKey("k1");
     expect(deviceKeyState(["k1"])).toBe("unknown");
+  });
+
+  /*
+   * THE ON AND OFF ROUND TRIP (14 November 2026). Removing this phone's key in
+   * Settings could not call `forgetDeviceKey`, because the settings list
+   * carries the row id and never the credential id. So the record went on
+   * saying `has` and the set-up was never offered again.
+   */
+  it("a key the account no longer holds is dropped, and this phone is then known to hold none", () => {
+    rememberDeviceKey("k1");
+    expect(forgetDeviceKeysOutside([])).toBe("none");
+    expect(deviceKeyState()).toBe("none");
+  });
+
+  it("a phone that still holds one of the account's keys keeps it", () => {
+    rememberDeviceKey("k1");
+    rememberDeviceKey("k2");
+    expect(forgetDeviceKeysOutside(["k2"])).toBe("has");
+    expect(deviceKeyState(["k2"])).toBe("has");
+  });
+
+  it("a phone with no record is left alone: nothing to drop, nothing claimed", () => {
+    expect(forgetDeviceKeysOutside(["k1"])).toBe("unknown");
+    expect(deviceKeyState()).toBe("unknown");
   });
 
   it("a refused storage reads as unknown and never throws", () => {

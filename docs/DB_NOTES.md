@@ -126,3 +126,228 @@ drop table if exists public.renter_passports;
 ```
 
    Then regenerate `database.types.ts`. `public.record_vnin_check` stays: it is still called.
+
+## THE SUPABASE AUDIT (begun 14 November 2026, reads only; the deliverable the follow-up brief asks for)
+
+Everything below was read from live on 14 November 2026. Changes are never
+made from a session: each is a SQL file in `supabase/migrations/pending` the
+founder runs. This section grows as the audit proceeds.
+
+### The instance today
+
+Nano compute, eu-west-1, database about 132 MB, 30 profiles, 774 applied
+migrations. The 13 November disk IO exhaustion (statement timeouts 14:00 to
+22:22 UTC, every pg_cron failure in that window is "job startup timeout") has
+not recurred since the Nano relief files ran. 45 active pg_cron jobs, all
+green since.
+
+### Advisor counts (14 November, after the 13 to 14 November fixes)
+
+| Advisor | Level | Count | Movement since 7 Nov |
+|---|---|---|---|
+| multiple_permissive_policies | WARN | 398 | 393 before; hosts were merged but `accommodations` (20), `businesses` (20), `listings` (20), `listing_access` (16), `inspection_requests` (15) still lead. THE hot-path cost on a Nano: every search row evaluates every permissive policy |
+| unused_index | INFO | 374 on 196 tables | 347 before; meaningless at 30 profiles, re-read at launch traffic. Do not drop yet |
+| unindexed_foreign_keys | INFO | 90 | 20 before; the roommates, circle and moderation waves landed unindexed FK columns. Most are audit columns (`*_by`); index only those with join traffic |
+| anon-executable definer functions | WARN | 40 | 29 before; the new ones are roommates and circle public reads. `record_funnel_event` is still the one anon WRITE (survey B-16) |
+| authenticated-executable definer functions | WARN | 464 | RPC-first design, expected; inventory for private-only helpers stands |
+| rls_enabled_no_policy | INFO | 122 | Deny-all server-only tables, deliberate |
+| auth_leaked_password_protection | WARN | GONE | Was 1; no longer reported |
+
+### The top statements (pg_stat_statements since the 13 Nov 10:09 reset; the window spans the crisis and the fixes, so re-read after a clean day)
+
+| Statement | Calls | Total | Mean |
+|---|---|---|---|
+| realtime WAL reader (`list_changes`) | 71,081 | 756 s | 10.6 ms |
+| `shell_context()` | 670 | 373 s | 557 ms (includes pre-fix calls; the security definer rewrite ran 14 Nov; REMEASURE) |
+| listings catalogue selects (three shapes) | about 1,900 | 404 s | 120 to 258 ms (the app-side catalogue cache landed 14 Nov; REMEASURE) |
+| `my_unread_counts()` | 1,001 | 119 s | 118 ms |
+| realtime subscription catalogue poll | 480 | 128 s | 267 ms |
+| `my_invite_step()` | 321 | 77 s | 239 ms |
+| `ai_assistant_state()` | 323 | 61 s | 188 ms |
+| `passcode_status()` | 908 | 81 s | 89 ms |
+
+### Realtime
+
+The `supabase_realtime` publication holds exactly five tables
+(`calls`, `call_participants`, `messages`, `message_reactions`,
+`notifications`) and the app subscribes to all five: nothing is published for
+nobody. The WAL reader is still the heaviest statement by total time; the
+next lever is fewer concurrent channels, not the publication. Note
+`lib/messages/unread-live.ts` subscribes to ALL message changes unfiltered
+(RLS trims per subscriber, the WAL work does not shrink).
+
+### Storage
+
+23 buckets. Size, public flags, transformation use and whether photos are
+served at drawn size: still to read (M3).
+
+### Found and fixed on 14 November
+
+- The alert fold measured its window against `created_at` so daily faults
+  piled up open rows (29 for store readiness): fixed in code (`17bde0ab`),
+  pile cleared by `alerts_cleanup_2026-11-14.sql` (pending).
+- Scoped staff were refused by `private.is_staff()` database guards the
+  moment the admin role came off them: `scoped_staff_listing_doors_2026-11-14.sql`
+  (pending) opens the two listings-desk functions to the `listing_approval`
+  scope. Money, STR, referral and person-file doors stay admin-only.
+- The incoming-calls realtime channel recursed to a stack overflow when its
+  socket dropped (69 live crash rows): fixed in code (`1094b98f`).
+
+### Still to audit (M3)
+
+Query plans as the calling role on the hot functions after a clean day of
+stats; the one live-only migration version (774 live vs 773 files); cron
+schedules one by one (several hourly purges could be daily); storage and
+egress; auth sessions left by `reauthenticate` and the console password door;
+the permissive-policy merges on `listings`, `accommodations`, `businesses`
+with EXPLAIN before and after, delivered as a draft SQL file; whether the
+Vercel reconcile cron should fold into pg_cron's; instance size judgement
+last, with evidence and a price only if the data forces it.
+
+### The hot functions, measured as a real member (14 November 2026)
+
+The statement table's means span the 13 November crisis AND the fixes, so
+they overstate everything. These are measured now, inside a rolled-back
+transaction, as `authenticated` with a real member's claims, which is what a
+signed-in page load actually does.
+
+| Function | Historical mean | Measured today | Buffers | What it is |
+|---|---|---|---|---|
+| `shell_context()` | 538.7 ms | **28.1 ms** | 2,010 | The signed-in shell, every page |
+| `my_unread_counts()` | 110.7 ms | **46.1 ms** | 818 | The bell and the inbox badge |
+| `passcode_status()` | 84.9 ms | **17.6 ms** | 289 | The lock state |
+| `my_invite_step()` | 229.0 ms | **14.9 ms** | 945 | The invite card |
+
+**The work done on 13 and 14 November was worth it**: `shell_context` is 19
+times faster than its historical mean, `my_invite_step` 15 times. Nothing
+here is a crisis any more.
+
+What is left to say honestly: those four together are about 107 ms of
+database time and about 4,000 buffer touches on a signed-in page load, and
+they are four separate round trips. The next lever is fewer round trips, not
+faster functions, and that is an application change (one read that answers
+the shell, the counts, the lock and the invite step together), not a database
+one. `my_unread_counts` is now the worst of the four and is the one to look
+at first if a single number must be improved.
+
+### Policy evaluation is NOT the bottleneck today (measured, 14 November)
+
+Survey B's D-02 assumed the 398 multiple-permissive-policy warnings were
+costing the hot read path. Measured on `listings` as `anon`, warm: 0.47 ms
+execution for the catalogue query. The first run read 9.18 ms, which is a
+cold cache, not policy cost. By comparison the same query with RLS bypassed
+is 1.43 ms cold.
+
+What IS measurable and repeatable is **planning time of 3 to 5 ms** on every
+`listings` query, touching about 800 buffers to plan. The cause is the
+table's shape: 39 indexes, 66 constraints, 105 columns and 31 triggers. A
+merge of the permissive policies is therefore a lower priority than the
+survey assumed, and it is written as a draft rather than a pending file
+because it is security on the hottest table.
+
+A separate check found **no redundant indexes anywhere in `public`**: not one
+index is a prefix of another. The indexing is disciplined, so the 374
+"unused" indexes are purpose-built and simply have no traffic at 30
+profiles. Do not drop them before launch traffic; dropping them is also how
+the planning cost above would come down, which is a trade to make with real
+data, not now.
+
+### Storage is not a cost lever (measured, 14 November)
+
+23 buckets, 35 objects, **15 MB in all**. The largest is `agent-documents`
+at 6.8 MB. Image transformations do not go through Supabase at all: the app
+serves through Next's optimiser, so the egress question belongs to image
+delivery in the performance report, not here. The one-day optimised-image
+cache floor is a deliberate moderation choice (a photograph taken down must
+stop being served within a day) and is correctly documented in
+`apps/web/next.config.ts`. Leave it.
+
+### The ninety unindexed foreign keys, read properly (14 November 2026)
+
+The advisor lists 90. Read against live, almost all are on tables with no
+rows, and none duplicates another index. So most are not worth an index yet.
+
+Thirteen are different, and the difference is a product flow rather than a
+guess: each is `ON DELETE CASCADE` pointing at `auth.users` or
+`public.profiles`. Deleting an account makes Postgres find the child rows to
+cascade, and with no index it reads the whole child table to do it, once per
+table, inside the deletion's transaction. Vallo deletes accounts (a member
+flow and a console desk). All thirteen tables are the newest on the platform
+(the roommates and Circle waves of 8 and 9 November) and are empty today,
+which is why an index on them is instant now and will not be later.
+
+Delivered as `supabase/migrations/pending/cascade_fk_indexes_2026-11-14.sql`.
+The audit columns (`*_decided_by`, `*_granted_by`, `*_updated_by`) are
+deliberately left alone: written once, read by a desk at human speed.
+
+### 720 sessions that never end (read from live, 14 November 2026)
+
+`auth.sessions` holds 720 rows and **every one is still open**, for 22
+people, the oldest opened on 11 August. 597 have not been touched in thirty
+days. By user agent: 330 from the test browser (315 idle over thirty days),
+154 from real iPhones, and **146 from `node`**.
+
+The 146 are ours. Checking a password means signing in with it, and
+`lib/account-deletion/reauthenticate.ts` did that for every money step-up,
+every console entry and every deletion check without ever signing out. Fixed
+in code on this branch: the proof now signs out with `scope: "local"`, which
+revokes that one session and no other (the default would sign the person out
+of every device, which is why the scope is spelled out and tested).
+
+Two things remain, and they are the founder's:
+
+1. **The setting, which is the real fix.** Supabase Auth can time-box a
+   session and end an idle one by itself. Dashboard, Authentication,
+   Sessions: a time-box and an inactivity timeout. With those set, GoTrue
+   does this for ever and no SQL is needed again. A session that never
+   expires is a credential that never expires, and 315 of ours belong to a
+   test browser.
+2. **The ones already there**, as a draft because it signs people out:
+   `supabase/drafts/stale_auth_sessions_2026-11-14.sql` ends sessions idle
+   for more than thirty days by setting `not_after`, which is how GoTrue
+   marks a session finished, rather than deleting rows.
+
+### Can the current plan carry Vallo? (the answer the follow-up brief asks for, 14 November 2026)
+
+**Today: yes, with room, and the evidence says the recent work is why.**
+
+Read from live on 14 November:
+
+| What | Reading |
+|---|---|
+| Database size | 118 MB |
+| Connections in use | 22 of 60 (11 of them PostgREST, idle) |
+| Total execution time recorded since the 13 Nov reset | 5,591 seconds, and that window CONTAINS the crisis |
+| Cron fleet, 7 days | about 2 percent of one core, all 45 jobs green since the 13 Nov fixes |
+| Storage | 15 MB across 23 buckets |
+| The four hot signed-in functions | 107 ms of database time between them, down from an 963 ms historical total |
+
+**What actually went wrong on 13 November was not size.** It was disk IO
+budget exhaustion, caused by a cron history table nobody had ever purged
+(183,960 rows from August), two jobs running every minute, and
+`shell_context()` evaluating row security on seven tables on every signed-in
+page load. All three are fixed, and the statement table still carries their
+old cost in its averages, which is why those averages overstate everything
+today.
+
+**So the honest recommendation is: do not buy a bigger instance yet.** There
+is no measurement that says the Nano is the limit. The levers that remain are
+all free:
+
+1. Fewer round trips on a signed-in page load (four separate reads that could
+   be one), which is an application change.
+2. The realtime WAL reader, still the heaviest statement by total time, which
+   is about how many channels are open, not about the publication (all five
+   published tables are subscribed, so nothing is published for nobody).
+3. Image delivery, which is bytes to a phone rather than database work.
+
+**What WOULD force a bigger instance**, so it can be watched for rather than
+guessed at: sustained CPU near the top on a quiet database; the disk IO
+balance falling again when no cron backlog explains it; or connections
+approaching 60 as real members arrive. None of those is true today.
+
+**If it does become necessary**, it is a spend and therefore a recommendation
+with a price for the three founders to decide, never an action from a
+session. The next size up from Nano is Micro. Anybody pricing it should read
+the current figure from the Supabase dashboard on the day rather than trust a
+number written here, because it changes.

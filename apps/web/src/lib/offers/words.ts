@@ -68,9 +68,16 @@ export function offerChip(row: Pick<OfferRow, "state" | "turn" | "viewerSide">):
   }
 }
 
-export const STATE_FILTER_LABEL: Record<OfferState | "all" | "awaiting_you", string> = {
+export const STATE_FILTER_LABEL: Record<
+  OfferState | "all" | "awaiting_you" | "waiting_them" | "closed",
+  string
+> = {
   all: "All",
-  awaiting_you: "Awaiting you",
+  awaiting_you: "Waiting on you",
+  /* The founder's count tab row (14 November 2026): whose turn it is, said
+     the way a person would say it, and the four ending states as one word. */
+  waiting_them: "Waiting on them",
+  closed: "Closed",
   open: "Open",
   agreed: "Terms agreed",
   declined: "Declined",

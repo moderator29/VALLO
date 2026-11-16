@@ -67,6 +67,34 @@ export function rememberDeviceKey(credentialId: string): void {
   write({ ids: [credentialId, ...record.ids.filter((id) => id !== credentialId)].slice(0, 20), fails: 0, none: false });
 }
 
+/**
+ * THE ACCOUNT'S KEYS AS THEY STAND NOW: anything this phone remembers that
+ * the account no longer holds is dropped (the on and off round trip, 14
+ * November 2026, the founder: "pages to enter to turn off and turn it on
+ * again flow").
+ *
+ * Removing this phone's key in Settings left this record saying `has`,
+ * because the settings list carries the row's id and never the credential id,
+ * so nothing could call `forgetDeviceKey`. Every screen that reads this went
+ * on offering an unlock the phone could no longer answer, and the money lock
+ * went on hiding the enrolment it should have offered again. Pass the ids the
+ * account holds (`stepUpStatus().credentialIds`) and this phone's record
+ * catches up. Returns the state after.
+ *
+ * Nothing is dropped on an unreadable list: the caller passes ids or does not
+ * call this at all.
+ */
+export function forgetDeviceKeysOutside(accountIds: readonly string[]): DeviceKeyState {
+  const record = read();
+  if (!record) return "unknown";
+  const kept = record.ids.filter((id) => accountIds.includes(id));
+  if (kept.length === record.ids.length) return deviceKeyState(accountIds);
+  /* Every key this phone made is gone from the account. That is a fact, not a
+     failed ceremony, so it is `none` at once rather than after two failures. */
+  write({ ids: kept, fails: 0, none: kept.length === 0 });
+  return kept.length > 0 ? "has" : "none";
+}
+
 /** The key was removed from the account. */
 export function forgetDeviceKey(credentialId: string): void {
   const record = read();

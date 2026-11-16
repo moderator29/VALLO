@@ -2095,3 +2095,34 @@
     }
   }
 }
+
+@layer components {
+  /*
+   * THE COMPOSER RIDES THE KEYBOARD (founder, 14 November 2026: "I need
+   * keyboard high clean for our platform", handoff 6.4 item 3).
+   *
+   * `resize: "native"` shrinks the web view to the space above the keys, so a
+   * docked composer already lands on the keyboard. What it does not fix is the
+   * SAFE AREA going stale: `env(safe-area-inset-bottom)` still describes the
+   * home indicator at the bottom of the DEVICE, and with the keyboard up the
+   * bottom of the view is the top of the keyboard, where no home indicator
+   * exists. Left in, it is 34 points of dead air between the field and the
+   * keys, which is the gap the founder means by a composer that does not sit
+   * on the keyboard. `app/css/chrome.css` already does exactly this for the
+   * dock and the pinned action bar; this is the same rule for every composer
+   * on the platform (member thread, agent, host, support).
+   *
+   * Inert everywhere but a native shell with a keyboard up: `data-keyboard` is
+   * set by `lib/native/keyboard.ts` and by nothing else.
+   */
+  :root[data-keyboard="open"] .nf-composer.nf-composer,
+  :root[data-keyboard="open"] .nf-composer {
+    padding-bottom: var(--nf-space-xs);
+  }
+  /* The paste chip and the reply strip ride with it, so nothing between the
+     thread and the keys keeps a reservation that is no longer there. */
+  :root[data-keyboard="open"] .nf-paste,
+  :root[data-keyboard="open"] .nf-composer__pending {
+    margin-block-end: var(--nf-space-2xs);
+  }
+}

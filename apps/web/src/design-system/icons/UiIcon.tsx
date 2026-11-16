@@ -64,6 +64,7 @@ export type UiIconName =
   | "verified-badge"
   | "location"
   | "chevron-down"
+  | "chevron-left"
   | "arrow-right"
   | "arrow-left"
   | "home"
@@ -193,6 +194,8 @@ export type UiIconName =
   | "hourglass"
   | "circle-check"
   | "circle-x"
+  | "circle-alert"
+  | "circle-info"
   | "clipboard-list"
   | "square-check"
   /* The feed's repost as a LEVEL loop (the feed image), beside `repost`. */
@@ -529,9 +532,17 @@ const PATHS: Record<UiIconName, React.ReactNode> = {
       <path d="M9 3v18" />
     </>
   ),
-  // [chevron-right] [chevron-down]
+  // [chevron-right] [chevron-down] [chevron-left]
   "chevron-right": <path d="m9 18 6-6-6-6" />,
   "chevron-down": <path d="m6 9 6 6 6-6" />,
+  /* [chevron-left]: the exact mirror of `chevron-right` about x=12, so the
+     pair is one shape pointing two ways and a row that goes back and forward
+     cannot drift into two different glyphs. It is the back control's glyph
+     since 14 November 2026 (the founder, with an App Store screenshot: "our
+     go back icon ... it's like arrow instead of this greater sign <"). The
+     arrow (`arrow-left`) stays exactly as it was, because a link that moves
+     forward and a carousel step are arrows and are not navigation. */
+  "chevron-left": <path d="m15 18-6-6 6-6" />,
   /* [shield-minus]: an agent stopped from trading. The same shield as
      `verified` to the unit, with a bar where the tick goes, so the two read
      as one judgement pointing opposite ways. */
@@ -1391,6 +1402,26 @@ const PATHS: Record<UiIconName, React.ReactNode> = {
     <>
       <circle cx="12" cy="12" r="10" />
       <path d="m16 9-5.5 5.5L8 12" />
+    </>
+  ),
+  /* [circle-alert] and [circle-info]: the same ring as [circle-check], so a
+     banner's mark is one drawn glyph in every tone rather than a border in
+     the stylesheet with a loose glyph inside it (the founder's reference, 14
+     November 2026: one circled mark, as the apps he held up draw it). */
+  // [circle-alert]
+  "circle-alert": (
+    <>
+      <circle cx="12" cy="12" r="10" />
+      <path d="M12 8v4" />
+      <path d="M12 16h.01" />
+    </>
+  ),
+  // [circle-info]
+  "circle-info": (
+    <>
+      <circle cx="12" cy="12" r="10" />
+      <path d="M12 16v-4" />
+      <path d="M12 8h.01" />
     </>
   ),
   // [circle-x]

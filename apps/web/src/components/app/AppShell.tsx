@@ -89,6 +89,26 @@ function bellOn(pathname: string, socialOn: boolean): boolean {
   return BELL_PATHS.has(pathname) || (!socialOn && pathname === "/agreements");
 }
 
+/**
+ * THE COMPOSE PENCIL, ON TWO AREAS ONLY (the founder, 15 November 2026:
+ * "remove this pencil icon in every area apart from VALLO roommate and feed
+ * area ... cause it's looking spammy").
+ *
+ * It used to sit on every screen that shows the dock, which put a Create
+ * button on a money setting, a saved list and a plans page, where there is
+ * nothing to compose. Writing a post or a room ad is the only thing that
+ * pencil opens, so it belongs where that is the thing people come to do:
+ * the feed (Circle) and roommates, and their inner pages.
+ */
+function composeOn(pathname: string): boolean {
+  return (
+    pathname === CIRCLE_ROUTE ||
+    pathname.startsWith(`${CIRCLE_ROUTE}/`) ||
+    pathname === "/roommates" ||
+    pathname.startsWith("/roommates/")
+  );
+}
+
 export function AppShell({
   t,
   side = "property",
@@ -428,12 +448,12 @@ export function AppShell({
               </span>
             )}
             <SignedOutActions t={t} className="ms-auto" />
-            {signedIn && (bellOn(pathname ?? "", socialOn) || (!immersive && showsTabBar(active))) && (
+            {signedIn && (bellOn(pathname ?? "", socialOn) || (!immersive && showsTabBar(active) && composeOn(pathname ?? ""))) && (
               /* `ms-auto` on the group: on a signed-in header
                  `SignedOutActions` renders null, so this is the first item
                  after the brand and it is the one that has to push right. */
               <div className="ms-auto flex items-center gap-inline-tight">
-                {!immersive && showsTabBar(active) && (
+                {!immersive && showsTabBar(active) && composeOn(pathname ?? "") && (
                   /* CREATE, FROM THE HEADER (29 October 2026). The round "+"
                      at the dock's end is gone; this opens the same Create
                      sheet (post, story, list a place, book). A pencil, the
