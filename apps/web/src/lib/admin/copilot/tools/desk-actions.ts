@@ -172,6 +172,10 @@ export const riskAlertStep = defineTool({
     "Acknowledge a risk alert (say you have it) or resolve it with a short note of what was done (by alert id from get_operations_overview). Nothing changes until the person presses the button on the card.",
   kind: "propose",
   scopes: ["operations"],
+  /* The alert desk's own actions answer only to an admin (requireAdmin with
+     no scope), so an Operations member's card would always be refused. It is
+     offered to those it can work for. */
+  allow: (v) => v.isAdmin || v.isSuperAdmin,
   status: "Preparing the alert step",
   input: z.object({ alertId: z.string().regex(UUID_RE), step: z.enum(["acknowledge", "resolve"]), notes: z.string().trim().max(2000).optional() }),
   handler: async (input, ctx) => {

@@ -53,7 +53,7 @@ export default async function AdminCopilotPage() {
           storageKey="vallo.copilot.v2.page"
           variant="page"
         />
-        <CopilotCapabilities desks={desks} />
+        <CopilotCapabilities desks={desks} superAdmin={viewer.isSuperAdmin} />
       </div>
     </div>
   );

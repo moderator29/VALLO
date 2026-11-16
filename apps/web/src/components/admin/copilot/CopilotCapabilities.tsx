@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { COPILOT_LIMITS, type DeskCapability } from "@/lib/admin/copilot/capabilities";
+import { COPILOT_LIMITS, SUPER_ADMIN_COPILOT_LIMITS, type DeskCapability } from "@/lib/admin/copilot/capabilities";
 import "./admin-copilot.css";
 
 /** Ask the page's conversation something, from outside it. The chat listens for this event. */
@@ -12,7 +12,7 @@ export const COPILOT_ASK_EVENT = "vallo:copilot-ask";
  * conversation, and the limits stated plainly. It lists only the desks the
  * person holds; the server decides that and passes the list in.
  */
-export function CopilotCapabilities({ desks }: { desks: readonly DeskCapability[] }) {
+export function CopilotCapabilities({ desks, superAdmin = false }: { desks: readonly DeskCapability[]; superAdmin?: boolean }) {
   const ask = (prompt: string) => window.dispatchEvent(new CustomEvent(COPILOT_ASK_EVENT, { detail: prompt }));
   return (
     <aside className="nf-copilot-can" aria-labelledby="copilot-can-title" data-testid="copilot-capabilities">
@@ -47,7 +47,7 @@ export function CopilotCapabilities({ desks }: { desks: readonly DeskCapability[
           What I will not do
         </h2>
         <ul className="nf-copilot-limits">
-          {COPILOT_LIMITS.map((line) => (
+          {(superAdmin ? SUPER_ADMIN_COPILOT_LIMITS : COPILOT_LIMITS).map((line) => (
             <li key={line}>{line}</li>
           ))}
         </ul>

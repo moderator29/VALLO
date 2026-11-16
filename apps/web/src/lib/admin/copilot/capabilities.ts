@@ -20,6 +20,21 @@ export const COPILOT_LIMITS: readonly string[] = [
   "Every change I suggest appears as a card first. Nothing happens until you press Confirm, and it is recorded in the audit log as made through the copilot.",
 ];
 
+/**
+ * What the copilot will not do, as the SUPER ADMIN reads it (16 November
+ * 2026). Their copilot has hands for decisions, restrictions, switches,
+ * staff access and booking refunds, each a card they press, so the staff
+ * list above would be untrue to them.
+ */
+export const SUPER_ADMIN_COPILOT_LIMITS: readonly string[] = [
+  "I never act on my own: every change is a card with a preview, and it happens only when you press it. The ones hard to take back ask you to type a word first.",
+  "I never move money out: no payouts, no transfers, no company payments. Those need all three founders. A booking refund is a card you press, through the payment partner.",
+  "I never delete or destroy a record.",
+  "I never message a member on my own. A reply reaches them only when you press Send on the card.",
+  "I propose a decision, a restriction, a switch or an access change only when you ask for it, and only on facts I have read, never a guess.",
+  "Every change I make is recorded in the audit log as made through the copilot.",
+];
+
 export type DeskCapability = {
   key: string;
   desk: string;
@@ -110,7 +125,7 @@ export const COPILOT_CAPABILITIES: readonly DeskCapability[] = [
     desk: "Operations",
     scopes: ["operations"],
     href: "/admin/operations",
-    can: ["Read open alerts, job health, visits and bookings", "Take an alert or resolve it with a note, on a card you press"],
+    can: ["Read open alerts, job health, visits and bookings", "Take an alert or resolve it with a note, on a card you press (admins and the super admin)"],
     prompts: ["Any critical alerts open?", "Is any scheduled job stale?", "How many bookings are in stay now?"],
   },
   {
