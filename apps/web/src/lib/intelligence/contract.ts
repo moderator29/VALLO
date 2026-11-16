@@ -94,7 +94,11 @@ export interface IntelligenceResult {
   place?: string;
   bedrooms?: number;
   verified?: boolean;
-  /** Followers, members, listings: a real count from the record. */
+  /**
+   * Followers, members, listings: a real count from the record. `noun` is a
+   * `UnitNoun` key of `@vallo/i18n` ("followers", "members", "replies",
+   * "listings"), so the screen prints it with `countOf(value, noun, locale)`.
+   */
   count?: { value: number; noun: string };
   /** Why this matched, in a few words, from the filters: "2 bedrooms · Lekki · under ₦5m". */
   why?: string;
@@ -140,6 +144,13 @@ export interface SearchResponse {
   alternatives?: { label: string; query?: string; href?: string }[];
   /** Something partly failed (one source down); results from the others still shown. */
   partial?: boolean;
+  /**
+   * Added by the engine (backward compatible): the words as typed found
+   * nothing, so the results are for the spelling fix, and the screen says so
+   * ("Showing results for restaurants in Victoria Island. Search instead for
+   * resturants in VI"). Absent whenever the results are for the words as typed.
+   */
+  showing?: { query: string; insteadOf: string };
   /** Server time spent, for the analytics desk. */
   tookMs: number;
 }

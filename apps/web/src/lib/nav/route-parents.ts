@@ -540,6 +540,7 @@ export const ROUTE_PARENTS: Readonly<Record<string, ParentRoute>> = {
   "/admin/field-speed": "/admin/operations",
   "/admin/payments": "/admin",
   /* Chargebacks: the finance desk, and one case. */
+  "/admin/search": "/admin/analytics",
   "/admin/chargebacks": "/admin",
   /* Protected payments: the read-only arrangement operations desk (BUILD 7.11). */
   "/admin/arrangements": "/admin",
@@ -857,6 +858,11 @@ export const NON_NAVIGABLE: Readonly<Record<string, string>> = {
   "/api/funnel": "the first-party funnel beacon (A6); answers 204, not a page.",
   "/api/listing-view": "the listing view beacon (listing stats); answers 204, not a page.",
   "/api/listing-share": "the listing share beacon (listing stats); answers 204, not a page.",
+  "/api/intelligence/suggest": "JSON typed-ahead suggestions for VALLO Intelligence.",
+  "/api/intelligence/search": "JSON results for VALLO Intelligence.",
+  "/api/intelligence/discover": "JSON for the empty VALLO Intelligence screen.",
+  "/api/intelligence/event": "the VALLO Intelligence click beacon; answers 204, not a page.",
+  "/api/intelligence/recent": "JSON read and delete of the member's own recent searches.",
   "/api/auth/sms-hook": "Supabase Auth's Send SMS hook (A2), Standard Webhooks signature; delivers a phone code, not a page.",
   "/join/[code]": "an invite link: keeps the code in a cookie and goes on to the sign-up door, which shows the one onboarding first (A5, 7 October 2026); a redirect, not a page.",
   "/join/[code]/start": "the old invite door's address, the same hand-off as /join/[code] (A5); a redirect, not a page.",

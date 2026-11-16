@@ -323,6 +323,7 @@ const NAMES: Readonly<Record<string, string>> = {
   "/admin/account-recovery": "Account recovery",
   "/admin/field-speed": "Field speed",
   "/admin/blocked-terms": "Blocked terms",
+  "/admin/search": "Search",
   "/admin/weight-withheld": "Withheld weight",
   "/admin/call-usage": "Call usage",
   "/admin/crashes": "Crash log",

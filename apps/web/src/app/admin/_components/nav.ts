@@ -324,6 +324,8 @@ export const ADMIN_PRIMARY: AdminDestination[] = [
       { key: "listing-analytics", scopes: ["analyst"], door: "staff", href: "/admin/analytics/listings", icon: ui("eye"), label: "Listings" },
       /* V-80: how fast the app is on the phones people use. */
       { key: "field-speed", scopes: ["analyst", "technical"], door: "staff", href: "/admin/field-speed", icon: ui("bolt"), label: "Field speed" },
+      /* VALLO Intelligence (16 November 2026): what people search for, as aggregates, and the search aliases. */
+      { key: "search-analytics", scopes: ["analyst", "content", "marketing"], door: "staff", href: "/admin/search", icon: ui("search"), label: "Search" },
     ],
   },
 ];
@@ -429,7 +431,7 @@ export const ADMIN_GROUPS: AdminGroup[] = [
       { key: "compliance", label: "Compliance", items: pick("compliance") },
     ],
   },
-  { key: "g-intelligence", label: "Intelligence", icon: glyph("bars"), sections: [{ key: "intelligence", label: null, items: pick("analytics", "listing-analytics", "front-door", "field-speed", "trust", "account-deletions", "audit") }] },
+  { key: "g-intelligence", label: "Intelligence", icon: glyph("bars"), sections: [{ key: "intelligence", label: null, items: pick("analytics", "listing-analytics", "front-door", "field-speed", "search-analytics", "trust", "account-deletions", "audit") }] },
   { key: "g-knowledge", label: "Knowledge Centre", icon: ui("document"), sections: [{ key: "knowledge", label: null, items: pick("handbook", "manual", "doc-feedback") }] },
   { key: "g-settings", label: "Settings", icon: ui("settings-gear"), sections: [{ key: "settings", label: null, items: pick("settings", "control", "switches", "reference", "examples", "help") }] },
 ];
