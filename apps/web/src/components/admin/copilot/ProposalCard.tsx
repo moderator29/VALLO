@@ -7,8 +7,10 @@ import type { ProposalState } from "./use-copilot-chat";
 
 /**
  * A SUGGESTED CHANGE, drawn as a card. It says in plain words what will
- * happen, shows the fields it will use, and offers Confirm, Edit in the desk
- * and Dismiss. Nothing has happened until Confirm is pressed. A draft (a
+ * happen, shows the fields it will use and, when somebody else will read
+ * words (a reply to a member, a note the raiser reads), shows them exactly as
+ * they will arrive. Then its own button ("Send reply", "Resolve alert"), Edit
+ * in the desk and Dismiss. Nothing has happened until that button is pressed. A draft (a
  * ticket reply or a case note) has no Confirm: it shows the text to copy.
  */
 export function ProposalCard({
@@ -53,6 +55,12 @@ export function ProposalCard({
         </dl>
       ) : null}
       {isDraft && text ? <pre className="nf-copilot-card__draft">{text}</pre> : null}
+      {proposal.preview ? (
+        <figure className="nf-copilot-card__preview" data-testid="copilot-proposal-preview">
+          <figcaption>{proposal.preview.heading}</figcaption>
+          <blockquote>{proposal.preview.text}</blockquote>
+        </figure>
+      ) : null}
 
       {status === "done" ? (
         <p className="nf-copilot-card__outcome" data-testid="copilot-proposal-done">
@@ -73,7 +81,7 @@ export function ProposalCard({
             </Button>
           ) : (
             <Button type="button" variant="primary" size="sm" onClick={onConfirm} disabled={status === "confirming" || status === "failed"} data-testid="copilot-confirm">
-              {status === "confirming" ? "Working..." : "Confirm"}
+              {status === "confirming" ? "Working..." : (proposal.confirmLabel ?? "Confirm")}
             </Button>
           )}
           <Link href={proposal.deskHref} className="nf-btn nf-btn--glass nf-btn--sm" onClick={onNavigate}>

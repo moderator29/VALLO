@@ -15,7 +15,7 @@ export const COPILOT_LIMITS: readonly string[] = [
   "I never approve or reject a listing, an identity check, an agreement or an appeal.",
   "I never grant or revoke anyone's staff access. The COO can ask me to leave a recommendation for the super admin, and that is a note, not a change.",
   "I never delete or destroy a record.",
-  "I never send a message to a member. I can draft a reply for you to read, change and send yourself.",
+  "I never send a message to a member on my own. I can write a reply to a support ticket and show it to you word for word; it reaches the member only when you press Send on the card.",
   "For any of those I set out the facts, say what I would weigh, and link you to the exact item on the desk where you decide.",
   "Every change I suggest appears as a card first. Nothing happens until you press Confirm, and it is recorded in the audit log as made through the copilot.",
 ];
@@ -38,7 +38,7 @@ export const COPILOT_CAPABILITIES: readonly DeskCapability[] = [
     desk: "My Desk",
     scopes: [],
     href: "/admin/my-desk",
-    can: ["Read your tasks, overdue items and announcements", "Read the escalations waiting on you and the ones you raised, and say how to escalate (you press Escalate yourself)", "Add a task to your own list or comment on one", "Answer how-to questions from the staff manual"],
+    can: ["Read your tasks, overdue items and announcements", "Read the escalations waiting on you and the ones you raised, and say how to escalate", "Mark an escalation seen, add a note, ask the raiser, resolve, decline or reopen it, on a card you press", "Add a task to your own list or comment on one", "Answer how-to questions from the staff manual"],
     prompts: ["What needs me first today?", "What is waiting on me?", "How do I escalate this?", "Add a task to follow up on the oldest ticket tomorrow"],
   },
   {
@@ -62,7 +62,7 @@ export const COPILOT_CAPABILITIES: readonly DeskCapability[] = [
     desk: "Reports and moderation",
     scopes: ["moderation"],
     href: "/admin/queue",
-    can: ["Count open reports by category and held content", "List the oldest open reports and held items"],
+    can: ["Count open reports by category and held content", "List the oldest open reports and held items", "Read open message flags and clear or escalate one, on a card you press"],
     prompts: ["What is older than 24 hours in moderation?", "Summarise the open reports by category"],
   },
   {
@@ -78,7 +78,7 @@ export const COPILOT_CAPABILITIES: readonly DeskCapability[] = [
     desk: "Support",
     scopes: ["support"],
     href: "/admin/support",
-    can: ["Count tickets by lane and past promised time", "Read a ticket thread", "Draft a reply for you to edit and send"],
+    can: ["Count tickets by lane and past promised time", "Read a ticket thread", "Write a reply and show it to you word for word; it goes to the member when you press Send reply", "Resolve, reopen or close a ticket, on a card you press"],
     prompts: ["Draft a reply to the oldest ticket", "Which tickets are past their promised time?", "Summarise ticket threads waiting on us"],
   },
   {
@@ -110,7 +110,7 @@ export const COPILOT_CAPABILITIES: readonly DeskCapability[] = [
     desk: "Operations",
     scopes: ["operations"],
     href: "/admin/operations",
-    can: ["Read open alerts, job health, visits and bookings"],
+    can: ["Read open alerts, job health, visits and bookings", "Take an alert or resolve it with a note, on a card you press"],
     prompts: ["Any critical alerts open?", "Is any scheduled job stale?", "How many bookings are in stay now?"],
   },
   {
@@ -205,7 +205,7 @@ const STARTERS: Partial<Record<StaffScope, readonly string[]>> = {
   listing_approval: ["What needs me first today?", "Summarise the oldest waiting listings"],
   kyc_review: ["What needs me first today?", "Who has waited longest for verification?"],
   moderation: ["What needs me first today?", "What is older than 24 hours?"],
-  support: ["What needs me first today?", "Summarise the oldest waiting tickets", "Draft a reply to the oldest ticket"],
+  support: ["What needs me first today?", "Summarise the oldest waiting tickets", "Reply to the oldest ticket"],
   agreements: ["What needs me first today?", "What is the oldest agreement waiting?"],
   finance: ["What needs me first today?", "Is reconciliation clean?", "Which chargebacks are due soonest?"],
   compliance: ["What needs me first today?", "What is overdue in compliance?"],
@@ -234,6 +234,7 @@ export const SUPER_ADMIN_STARTERS: readonly string[] = [
   "What SQL still has to run?",
   "Who has access to what?",
   "What changed this week?",
+  "What escalations are waiting on me?",
 ];
 
 /** Starter chips for a desk. The super admin gets their own, whatever desk they are on. */

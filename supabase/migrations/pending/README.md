@@ -14,8 +14,13 @@ records it in `APPLIED.txt`.
 > `tomi_business_development_2026-11-15.sql`, all three confirmed live. What
 > is left waiting:
 >
-> 1. `revenue_sweep_2026-11-15.sql` (Vallo's own earnings: recorded when a
->    protected payment is released, and the daily sweep to Vallo's bank)
+> 1. `copilot_threads_2026-11-16.sql` (the console copilot's chat history,
+>    16 November 2026: each staff member's own conversations, owner-only,
+>    kept 90 days. Until it runs, the copilot keeps a conversation for the
+>    browser session only and its History panel says so.)
+>
+> The revenue sweep file of 15 November was run by the founder the same day
+> and checked live.
 >
 > Rows below that still say NOT APPLIED were written before that check and
 > are out of date. The destructive files (`rt01`, `rt02`) and the newsletter

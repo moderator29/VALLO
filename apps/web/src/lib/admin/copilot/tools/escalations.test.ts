@@ -104,6 +104,8 @@ describe("what it hands back", () => {
     expect(listEscalations.mock.calls.map((c) => c[0]).sort()).toEqual(["for_me", "mine"]);
     expect(data.waitingOnYou).toMatchObject({ total: 2, overdue: 1 });
     expect(data.waitingOnYou.items[0]).toEqual({
+      /* The id, so escalation_step can act on it (16 November 2026). */
+      id: "10000000-0000-4000-8000-000000000001",
       reference: "ESC-000041",
       title: "The same selfie on two accounts",
       kind: "Identity or fraud",

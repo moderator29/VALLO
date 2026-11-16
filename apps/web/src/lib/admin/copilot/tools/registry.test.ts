@@ -190,8 +190,10 @@ describe("no tool exists for a forbidden action", () => {
       "draft_creative_brief", "draft_marketing_report_reading", "draft_content_outline", "draft_staff_announcement_text", "draft_incident_update", "draft_status_page_text",
       "draft_post_incident_review", "draft_canned_reply", "draft_coaching_note", "draft_policy_note",
     ];
+    /* The desk work behind a button (16 November 2026, the founder: "it should always show a confirm button, to reply to users or resolve stuff"): each reads the item first and shows a preview; the desk's own action runs only on the press. */
+    const deskWork = ["reply_to_ticket", "set_ticket_status", "escalation_step", "risk_alert_step", "review_message_flag"];
     expect(proposers).toEqual(
-      ["add_bd_prospect", "add_task_comment", "create_my_task", "create_social_draft", "draft_case_note", "draft_ticket_reply", "log_bd_activity", "post_announcement", "raise_escalation", "recommend_staff_access", ...staffDeskDrafts].sort(),
+      ["add_bd_prospect", "add_task_comment", "create_my_task", "create_social_draft", "draft_case_note", "draft_ticket_reply", "log_bd_activity", "post_announcement", "raise_escalation", "recommend_staff_access", ...deskWork, ...staffDeskDrafts].sort(),
     );
   });
 

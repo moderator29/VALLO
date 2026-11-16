@@ -46,6 +46,13 @@ export type CopilotProposal = {
   mode: "act" | "draft";
   /** The real desk page where the person can make the same change by hand. */
   deskHref: string;
+  /**
+   * The words exactly as somebody else will read them (a reply to a member, a
+   * closing note the raiser reads), drawn as a preview above the button.
+   */
+  preview?: { heading: string; text: string };
+  /** The button's own words ("Send reply", "Resolve alert"); "Confirm" when absent. */
+  confirmLabel?: string;
   /** The signed token Confirm sends back. Absent for a draft. */
   token?: string;
   expiresAt: string;
@@ -83,7 +90,12 @@ export type ProposalAction =
   | { kind: "log_bd_activity"; input: { prospectId: string; kind: "contact" | "follow_up" | "note"; body: string; outcome: string } }
   | { kind: "create_social_draft"; input: { platform: string; category: string; format: string; slot: string; campaign: string; caption: string; plannedAt: string } }
   | { kind: "recommend_staff_access"; input: { aboutName: string; recommendedPositionOrScope: string; reason: string } }
-  | { kind: "post_announcement"; input: { title: string; body: string; audience: string; pinned: boolean } };
+  | { kind: "post_announcement"; input: { title: string; body: string; audience: string; pinned: boolean } }
+  | { kind: "send_ticket_reply"; input: { ticketId: string; body: string; then: "keep" | "resolve" } }
+  | { kind: "set_ticket_status"; input: { ticketId: string; status: "open" | "pending" | "resolved" | "closed"; note: string } }
+  | { kind: "escalation_step"; input: { escalationId: string; step: "acknowledge" | "comment" | "ask_raiser" | "resolve" | "decline" | "reopen"; note: string } }
+  | { kind: "risk_alert_step"; input: { alertId: string; step: "acknowledge" | "resolve"; notes: string } }
+  | { kind: "review_message_flag"; input: { flagId: string; resolution: "cleared" | "escalated" } };
 
 export type CopilotTool = {
   name: string;

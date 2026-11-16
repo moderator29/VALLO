@@ -21,8 +21,13 @@ import { CATEGORIES, FORMATS, PLATFORMS, SLOTS } from "@/lib/admin/social-media/
  * so a changed argument can never reach a desk action unchecked. The desk
  * actions then apply their own checks on top.
  *
- * The list is closed on purpose: it holds no money, no member-facing message,
- * no decision, no access grant and no deletion.
+ * The list is closed on purpose: it holds no money, no decision on a listing,
+ * an identity or an appeal, no access grant and no deletion. Since 16
+ * November 2026 (the founder: "it should always show a confirm button for you
+ * to click, to reply to users or resolve stuff") it holds the desk work a
+ * person does by hand all day: a reply on a support ticket, a ticket's status,
+ * a step on an escalation, a risk alert, a message flag. Each is shown in full
+ * on a card first and runs only when the person presses its button.
  */
 
 const uuid = z.string().regex(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i);
@@ -81,6 +86,30 @@ export const postAnnouncementInput = z.object({
   pinned: z.boolean().default(false),
 });
 
+/* ------------------------------------------------- desk work (16 November) */
+
+export const TICKET_THEN = ["keep", "resolve"] as const;
+export const sendTicketReplyInput = z.object({
+  ticketId: uuid,
+  body: z.string().trim().min(2).max(4000),
+  then: z.enum(TICKET_THEN).default("keep"),
+});
+
+export const TICKET_STATUSES = ["open", "pending", "resolved", "closed"] as const;
+export const setTicketStatusInput = z
+  .object({ ticketId: uuid, status: z.enum(TICKET_STATUSES), note: optText(1000) })
+  .refine((v) => v.status !== "closed" || v.note.length >= 8, { message: "Say what was done, in at least eight characters, to close a ticket.", path: ["note"] });
+
+/** The escalation steps a person may take through the copilot. Assigning and rerouting stay on the desk. */
+export const COPILOT_ESCALATION_STEPS = ["acknowledge", "comment", "ask_raiser", "resolve", "decline", "reopen"] as const;
+export const escalationStepInput = z.object({ escalationId: uuid, step: z.enum(COPILOT_ESCALATION_STEPS), note: optText(4000) });
+
+export const ALERT_STEPS = ["acknowledge", "resolve"] as const;
+export const riskAlertStepInput = z.object({ alertId: uuid, step: z.enum(ALERT_STEPS), notes: optText(2000) });
+
+export const FLAG_RESOLUTIONS = ["cleared", "escalated"] as const;
+export const messageFlagInput = z.object({ flagId: uuid, resolution: z.enum(FLAG_RESOLUTIONS) });
+
 /** The closed set of action kinds the act route can run, with the schema that guards each. */
 export const ACTION_SCHEMAS = {
   create_my_task: createMyTaskInput,
@@ -91,6 +120,11 @@ export const ACTION_SCHEMAS = {
   create_social_draft: createSocialDraftInput,
   recommend_staff_access: recommendStaffAccessInput,
   post_announcement: postAnnouncementInput,
+  send_ticket_reply: sendTicketReplyInput,
+  set_ticket_status: setTicketStatusInput,
+  escalation_step: escalationStepInput,
+  risk_alert_step: riskAlertStepInput,
+  review_message_flag: messageFlagInput,
 } as const;
 
 export type ActionKind = keyof typeof ACTION_SCHEMAS;

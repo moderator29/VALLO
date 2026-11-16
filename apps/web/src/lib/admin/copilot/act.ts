@@ -1,5 +1,8 @@
 import "server-only";
+import { acknowledgeRiskAlert, resolveRiskAlert, reviewMessageFlag, setTicketStatus } from "@/lib/admin/actions";
 import { addProspect, logActivity } from "@/lib/admin/business-development/actions";
+import { actOnEscalation } from "@/lib/admin/escalations/actions";
+import { sendSupportReply } from "@/lib/admin/support-workbench-actions";
 import { writeAudit } from "@/lib/admin/audit";
 import { addTaskComment, createTask, postAnnouncement } from "@/lib/admin/my-desk/actions";
 import { raiseEscalation, recommendStaffAccess } from "@/lib/admin/overview/actions";
@@ -39,6 +42,11 @@ const PAGE: Record<ActionKind, string> = {
   create_social_draft: "/admin/social-media",
   recommend_staff_access: "/admin/overview",
   post_announcement: "/admin/my-desk/announcements",
+  send_ticket_reply: "/admin/support",
+  set_ticket_status: "/admin/support",
+  escalation_step: "/admin/escalations",
+  risk_alert_step: "/admin/alerts",
+  review_message_flag: "/admin/queue",
 };
 
 const SUCCESS: Record<ActionKind, string> = {
@@ -50,7 +58,27 @@ const SUCCESS: Record<ActionKind, string> = {
   create_social_draft: "Draft post saved. Nothing has been posted.",
   recommend_staff_access: "Recommendation left for the super admin. No access has changed.",
   post_announcement: "Announcement posted to staff.",
+  send_ticket_reply: "Reply sent. The member sees it on their ticket and gets a notification.",
+  set_ticket_status: "Ticket status changed.",
+  escalation_step: "Done on the escalation.",
+  risk_alert_step: "Alert updated.",
+  review_message_flag: "Flag reviewed.",
 };
+
+/** The exact item when the action names one (a ticket opens on itself), else the desk. */
+function itemHref(kind: ActionKind, action: ProposalAction): string {
+  const input = action.input as Record<string, unknown>;
+  const id = (key: string) => (typeof input[key] === "string" && /^[0-9a-f-]{36}$/i.test(input[key] as string) ? (input[key] as string) : null);
+  if (kind === "send_ticket_reply" || kind === "set_ticket_status") {
+    const ticket = id("ticketId");
+    if (ticket) return `/admin/support?ticket=${ticket}`;
+  }
+  if (kind === "escalation_step") {
+    const esc = id("escalationId");
+    if (esc) return `/admin/escalations/${esc}`;
+  }
+  return PAGE[kind];
+}
 
 /** Runs the desk's own server action for one validated action. */
 export async function executeAction(action: ProposalAction): Promise<Done> {
@@ -87,6 +115,35 @@ export async function executeAction(action: ProposalAction): Promise<Done> {
     case "post_announcement":
       result = await postAnnouncement(ACTION_SCHEMAS.post_announcement.parse(action.input));
       break;
+    case "send_ticket_reply": {
+      const d = ACTION_SCHEMAS.send_ticket_reply.parse(action.input);
+      const sent = await sendSupportReply({ ticketId: d.ticketId, body: d.body, then: d.then });
+      if (sent.ok && d.then === "resolve") return { ok: true, message: "Reply sent and the ticket is resolved." };
+      result = sent;
+      break;
+    }
+    case "set_ticket_status": {
+      const d = ACTION_SCHEMAS.set_ticket_status.parse(action.input);
+      result = await setTicketStatus({ ticketId: d.ticketId, status: d.status, ...(d.note ? { note: d.note } : {}) });
+      break;
+    }
+    case "escalation_step": {
+      const d = ACTION_SCHEMAS.escalation_step.parse(action.input);
+      result = await actOnEscalation({ id: d.escalationId, action: d.step, body: d.note || null });
+      break;
+    }
+    case "risk_alert_step": {
+      const d = ACTION_SCHEMAS.risk_alert_step.parse(action.input);
+      result = d.step === "resolve" ? await resolveRiskAlert({ alertId: d.alertId, ...(d.notes ? { notes: d.notes } : {}) }) : await acknowledgeRiskAlert({ alertId: d.alertId });
+      if (result.ok) return { ok: true, message: d.step === "resolve" ? "Alert resolved." : "Alert marked as yours." };
+      break;
+    }
+    case "review_message_flag": {
+      const d = ACTION_SCHEMAS.review_message_flag.parse(action.input);
+      result = await reviewMessageFlag({ flagId: d.flagId, resolution: d.resolution });
+      if (result.ok) return { ok: true, message: d.resolution === "cleared" ? "Flag cleared. The message stays as it was." : "Flag escalated for a closer look." };
+      break;
+    }
     default:
       return { ok: false, message: "That kind of change is not something the copilot can do." };
   }
@@ -236,7 +293,7 @@ export async function confirmProposal(input: { token: unknown; viewer: CopilotVi
 
   const outcome = await (deps.execute ?? executeAction)(body.a);
   const audited = await (deps.audit ?? auditRow)({ actorId: input.viewer.userId, tool: body.t, kind, nonce: body.n, ok: outcome.ok, summary: body.summary });
-  const href = PAGE[kind];
+  const href = itemHref(kind, body.a);
   if (!outcome.ok) return { status: 200, body: { ok: false, code: "failed", message: outcome.message, href } };
   return {
     status: 200,

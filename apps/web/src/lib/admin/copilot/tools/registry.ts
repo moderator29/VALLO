@@ -14,6 +14,7 @@ import { CONTROL_ROOM_TOOLS } from "./control-room";
 import { COO_TOOLS } from "./coo";
 import { HANDBOOK_TOOLS } from "./handbook";
 import { DELETION_REASON_TOOLS } from "./deletion-reasons";
+import { DESK_ACTION_TOOLS } from "./desk-actions";
 import { ESCALATION_TOOLS } from "./escalations";
 import { FINANCE_TOOLS } from "./finance";
 import { KYC_TOOLS } from "./kyc";
@@ -58,6 +59,8 @@ export const COPILOT_TOOLS: readonly CopilotTool[] = [
   ...STAFF_DESK_TOOLS,
   ...DELETION_REASON_TOOLS,
   ...COO_TOOLS,
+  /* Desk work behind a button (16 November 2026): replies, statuses, escalation steps, alerts, flags. */
+  ...DESK_ACTION_TOOLS,
   /* The control room (15 November 2026): a super admin only. */
   ...CONTROL_ROOM_TOOLS,
   /* The platform, the staff and the audit trail (16 November 2026): a super admin only. */

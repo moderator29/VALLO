@@ -18,6 +18,8 @@ import { listEscalations } from "@/lib/admin/escalations/read";
 import { JOB_DESCRIPTIONS } from "@/lib/admin/staff-positions";
 import type { StaffAccess } from "@/lib/admin/guard";
 import { WaitingOnYou } from "./escalations/WaitingOnYou";
+import { AdminCopilot } from "@/components/admin/copilot/AdminCopilot";
+import { starterPromptsFor } from "@/lib/admin/copilot/capabilities";
 
 export const dynamic = "force-dynamic";
 
@@ -105,6 +107,15 @@ export default async function AdminOverviewPage({
         </div>
       ) : null}
       <OverviewView
+        headAction={
+          <AdminCopilot
+            scope={null}
+            deskName="Console"
+            launch="inline"
+            greeting="Hello. Ask me what needs you first today, or pick a question below."
+            starters={starterPromptsFor(null, { isSuperAdmin: operator.isSuperAdmin })}
+          />
+        }
         locale={locale}
         now={now}
         range={range}

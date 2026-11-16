@@ -25,6 +25,9 @@ export type Turn = {
   destinations?: Destination[];
 };
 export type ToolLine = { id: string; label: string };
+export type ThreadSummary = { id: string; title: string; desk: string; updatedAt: string };
+/** "unknown" until the first save or list answers; "off" when the console has no history table yet. */
+export type HistoryState = "unknown" | "on" | "off";
 
 const MAX_TURNS = 40;
 
@@ -38,6 +41,29 @@ type StreamEvent =
 
 let counter = 0;
 const newId = () => `t${Date.now().toString(36)}${(counter++).toString(36)}`;
+
+function readThreadId(key: string): string | null {
+  try {
+    const id = window.sessionStorage.getItem(`${key}.thread`);
+    return id && /^[0-9a-f-]{36}$/i.test(id) ? id : null;
+  } catch {
+    return null;
+  }
+}
+
+function writeThreadId(key: string, id: string | null) {
+  try {
+    if (id) window.sessionStorage.setItem(`${key}.thread`, id);
+    else window.sessionStorage.removeItem(`${key}.thread`);
+  } catch {
+    /* Storage can be blocked; the chat works without it. */
+  }
+}
+
+/** What is saved: the conversation without a single confirm token in it. */
+function forStore(turns: Turn[]) {
+  return turns.map((t) => ({ ...t, proposals: t.proposals.map(({ proposal, ...rest }) => ({ ...rest, proposal: { ...proposal, token: undefined } })) }));
+}
 
 function readStored(key: string): Turn[] {
   try {
@@ -67,13 +93,25 @@ export function useCopilotChat({ storageKey, scope, deskName, context }: { stora
   const [pending, setPending] = useState(false);
   const [tool, setTool] = useState<ToolLine | null>(null);
   const [restored, setRestored] = useState(false);
+  const [threadId, setThreadId] = useState<string | null>(null);
+  const [history, setHistory] = useState<HistoryState>("unknown");
+  const [threads, setThreads] = useState<ThreadSummary[]>([]);
+  const [listing, setListing] = useState<"idle" | "loading" | "ready" | "failed">("idle");
   const abortRef = useRef<AbortController | null>(null);
   const turnsRef = useRef<Turn[]>([]);
   turnsRef.current = turns;
+  const threadRef = useRef<string | null>(null);
+  threadRef.current = threadId;
+  /** The last conversation the server holds, so an unchanged one is not sent again. */
+  const savedSig = useRef<string>("");
 
   useEffect(() => {
     const stored = readStored(storageKey);
-    if (stored.length) setTurns(stored);
+    if (stored.length) {
+      setTurns(stored);
+      savedSig.current = JSON.stringify(forStore(stored));
+    }
+    setThreadId(readThreadId(storageKey));
     setRestored(true);
     return () => abortRef.current?.abort();
   }, [storageKey]);
@@ -81,6 +119,41 @@ export function useCopilotChat({ storageKey, scope, deskName, context }: { stora
   useEffect(() => {
     if (restored && !pending) writeStored(storageKey, turns);
   }, [turns, restored, pending, storageKey]);
+
+  /* SAVE TO HISTORY: after every answer, every confirmed or dismissed card.
+     A short wait so a burst of changes is one save; nothing while an answer
+     is still being written. */
+  useEffect(() => {
+    if (!restored || pending || history === "off" || turns.length === 0) return;
+    const body = forStore(turns);
+    const sig = JSON.stringify(body);
+    if (sig === savedSig.current) return;
+    const timer = window.setTimeout(async () => {
+      try {
+        const res = await fetch("/api/admin/copilot/threads", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ id: threadRef.current, desk: scope ?? deskName, turns: body }),
+        });
+        const out = (await res.json().catch(() => null)) as { ok?: boolean; id?: string; state?: string } | null;
+        if (out?.state === "not_set_up") {
+          setHistory("off");
+          return;
+        }
+        if (res.ok && out?.ok && typeof out.id === "string") {
+          savedSig.current = sig;
+          setHistory("on");
+          if (out.id !== threadRef.current) {
+            setThreadId(out.id);
+            writeThreadId(storageKey, out.id);
+          }
+        }
+      } catch {
+        /* Offline or the console is busy: the next answer saves it. */
+      }
+    }, 700);
+    return () => window.clearTimeout(timer);
+  }, [turns, pending, restored, history, scope, deskName, storageKey]);
 
   const patchLast = useCallback((fn: (turn: Turn) => Turn) => {
     setTurns((all) => {
@@ -202,6 +275,9 @@ export function useCopilotChat({ storageKey, scope, deskName, context }: { stora
     setTurns([]);
     setPending(false);
     setTool(null);
+    setThreadId(null);
+    savedSig.current = "";
+    writeThreadId(storageKey, null);
     try {
       window.sessionStorage.removeItem(storageKey);
     } catch {
@@ -209,5 +285,73 @@ export function useCopilotChat({ storageKey, scope, deskName, context }: { stora
     }
   }, [storageKey]);
 
-  return { turns, pending, tool, send, confirm, dismiss, newChat };
+  /** The person's saved conversations, newest first. */
+  const loadThreads = useCallback(async (): Promise<void> => {
+    setListing("loading");
+    try {
+      const res = await fetch("/api/admin/copilot/threads", { cache: "no-store" });
+      const out = (await res.json().catch(() => null)) as { ok?: boolean; state?: string; threads?: ThreadSummary[] } | null;
+      if (out?.state === "not_set_up") {
+        setHistory("off");
+        setListing("ready");
+        return;
+      }
+      if (res.ok && out?.ok && Array.isArray(out.threads)) {
+        setHistory("on");
+        setThreads(out.threads);
+        setListing("ready");
+        return;
+      }
+      setListing("failed");
+    } catch {
+      setListing("failed");
+    }
+  }, []);
+
+  /** Open a saved conversation in place of this one. */
+  const openThread = useCallback(
+    async (id: string): Promise<boolean> => {
+      if (pending) return false;
+      try {
+        const res = await fetch(`/api/admin/copilot/threads/${encodeURIComponent(id)}`, { cache: "no-store" });
+        const out = (await res.json().catch(() => null)) as { ok?: boolean; thread?: { id: string; turns: Turn[] } } | null;
+        if (!res.ok || !out?.ok || !out.thread) {
+          banner.error("That conversation could not be opened just now.");
+          return false;
+        }
+        const loaded = out.thread.turns.map((t) => ({ ...t, proposals: Array.isArray(t.proposals) ? t.proposals : [], destinations: Array.isArray(t.destinations) ? t.destinations : [] }));
+        abortRef.current?.abort();
+        savedSig.current = JSON.stringify(forStore(loaded));
+        setTurns(loaded);
+        setThreadId(out.thread.id);
+        writeThreadId(storageKey, out.thread.id);
+        return true;
+      } catch {
+        banner.error("Could not reach the console just now.");
+        return false;
+      }
+    },
+    [pending, storageKey],
+  );
+
+  /** Delete a saved conversation. The one on screen starts afresh if it was that one. */
+  const deleteThread = useCallback(
+    async (id: string): Promise<void> => {
+      try {
+        const res = await fetch(`/api/admin/copilot/threads/${encodeURIComponent(id)}`, { method: "DELETE" });
+        if (!res.ok) {
+          banner.error("That conversation could not be deleted just now.");
+          return;
+        }
+        setThreads((all) => all.filter((t) => t.id !== id));
+        if (threadRef.current === id) newChat();
+        banner.quick("Conversation deleted");
+      } catch {
+        banner.error("Could not reach the console just now.");
+      }
+    },
+    [newChat],
+  );
+
+  return { turns, pending, tool, send, confirm, dismiss, newChat, threadId, history, threads, listing, loadThreads, openThread, deleteThread };
 }

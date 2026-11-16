@@ -23,8 +23,10 @@ export function AdminCopilot({
   context,
   greeting,
   starters,
+  launch = "float",
 }: {
-  scope: StaffScope;
+  /** The desk's scope; null on the console's front page, where it answers across every desk the person holds. */
+  scope: StaffScope | null;
   /** Kept for the callers that already pass it; the server reads the real position. */
   position?: StaffPosition | null;
   deskName: string;
@@ -32,22 +34,44 @@ export function AdminCopilot({
   greeting?: string;
   /** Starter chips; the shared set for the scope when omitted. */
   starters?: readonly string[];
+  /**
+   * "float": the round button in the corner (every desk). "inline": a labelled
+   * button that sits in the page's own header, opposite its title (the
+   * console's front page, the founder, 16 November 2026: "the AI copilot
+   * button opposite the Console overview text").
+   */
+  launch?: "float" | "inline";
 }) {
   const [open, setOpen] = useState(false);
-  const launch = useRef<HTMLButtonElement>(null);
+  const launchRef = useRef<HTMLButtonElement>(null);
+  const wasOpen = useRef(false);
 
   useEffect(() => {
-    if (!open) launch.current?.focus({ preventScroll: true });
+    /* Focus goes back to the button only after the sheet was open, never on the first paint. */
+    if (!open && wasOpen.current) launchRef.current?.focus({ preventScroll: true });
+    wasOpen.current = open;
   }, [open]);
 
   return (
     <>
-      <button ref={launch} type="button" className="nf-copilot-launch nf-tap" onClick={() => setOpen(true)} aria-haspopup="dialog" data-testid="admin-copilot-launch">
-        <UiIcon name="bot" size={22} weight="lean" />
-        <span className="sr-only">Open the {deskName} assistant</span>
-      </button>
+      {launch === "inline" ? (
+        <button ref={launchRef} type="button" className="nf-copilot-inline nf-tap" onClick={() => setOpen(true)} aria-haspopup="dialog" data-testid="admin-copilot-launch">
+          <span className="nf-copilot-inline__mark" aria-hidden="true">
+            <UiIcon name="bot" size={18} weight="lean" />
+          </span>
+          <span className="nf-copilot-inline__words">
+            <span className="nf-copilot-inline__lead">Ask the</span>
+            <span className="nf-copilot-inline__main">AI copilot</span>
+          </span>
+        </button>
+      ) : (
+        <button ref={launchRef} type="button" className="nf-copilot-launch nf-tap" onClick={() => setOpen(true)} aria-haspopup="dialog" data-testid="admin-copilot-launch">
+          <UiIcon name="bot" size={22} weight="lean" />
+          <span className="sr-only">Open the {deskName} assistant</span>
+        </button>
+      )}
       <Sheet open={open} onOpenChange={setOpen} title={`${deskName} assistant`} closeLabel="Close" testId="admin-copilot-sheet" fullPage sideOnWide>
-        <CopilotChat scope={scope} deskName={deskName} context={context ?? null} {...(greeting ? { greeting } : {})} starters={starters ?? starterPromptsFor(scope)} storageKey={`vallo.copilot.v2.${scope}`} autoFocus onNavigate={() => setOpen(false)} />
+        <CopilotChat scope={scope} deskName={deskName} context={context ?? null} {...(greeting ? { greeting } : {})} starters={starters ?? starterPromptsFor(scope)} storageKey={`vallo.copilot.v2.${scope ?? "console"}`} autoFocus onNavigate={() => setOpen(false)} />
       </Sheet>
     </>
   );

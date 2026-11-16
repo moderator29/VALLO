@@ -3,6 +3,7 @@ import { getDictionary } from "@vallo/i18n";
 import { AdminFrame } from "@/app/admin/_components/AdminFrame";
 import { BackButton } from "@/components/site/BackButton";
 import { OverviewView } from "@/app/admin/_components/OverviewView";
+import { AdminCopilot } from "@/components/admin/copilot/AdminCopilot";
 import { safeDesk } from "@/app/admin/_components/entry";
 import { ALERTS, BY_ROLE, COLLECTED, COUNTS, LIVE_COUNTS, EMPTY_BY_ROLE, EMPTY_COLLECTED, EMPTY_PULSE, EMPTY_SUPPLY, IDENTITY, JOBS, NOW, PULSE, REAL_ALERTS, SUPPLY } from "../fixtures";
 
@@ -24,6 +25,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ s
       back={<BackButton fallback="/admin" className="nf-admin-back" />}
     >
       <OverviewView
+        headAction={<AdminCopilot scope={null} deskName="Console" launch="inline" starters={["What needs me first today?", "Reply to the oldest support ticket", "Resolve the newest risk alert"]} />}
         locale="en"
         now={NOW}
         range="12m"

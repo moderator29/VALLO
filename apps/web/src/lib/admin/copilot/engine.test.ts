@@ -36,7 +36,8 @@ describe("the admin copilot's system prompt", () => {
     expect(prompt).toMatch(/never move money/i);
     expect(prompt).toMatch(/never restrict, suspend or ban/i);
     expect(prompt).toMatch(/never approve or reject/i);
-    expect(prompt).toMatch(/never send a message to a member/i);
+    expect(prompt).toMatch(/never send a message to a member on my own/i);
+    expect(prompt).toMatch(/only when you press Send on the card/i);
     expect(prompt).toContain("Vallo Guarantee is retired");
     expect(HARD_LIMITS_LINE).toContain("no tool for any of these");
   });

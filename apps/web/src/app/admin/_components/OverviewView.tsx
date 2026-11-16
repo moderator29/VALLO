@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { formatDate, formatMoney, formatNumber, getDictionary, type Locale } from "@vallo/i18n";
 import { tx } from "@/app/admin/_components/shell-text";
 import { AreaTimeChart } from "@/components/agent/charts/AreaTimeChart";
@@ -66,6 +67,8 @@ function HeadingTo({ href, copy, shell }: { href: string; copy: { headingTo: str
  * both periods behind it.
  */
 export type OverviewProps = {
+  /** Drawn opposite the page title: the console copilot's button on the real page. */
+  headAction?: ReactNode;
   locale: Locale;
   now: number;
   range: CollectedRange;
@@ -234,7 +237,7 @@ export function OverviewView(props: OverviewProps) {
     <div className="nf-admin-stack">
       {/* The console's one header (`PageHead`, AD-01): the overview opens on
           the same title every desk does. It was a screen-reader-only h1. */}
-      <PageHead title={c.title} />
+      <PageHead title={c.title} action={props.headAction} />
       {props.headingTo && <HeadingTo href={props.headingTo} copy={shell.entry} shell={shell} />}
       {/* The overview's first answer: what is waiting on a person, as figures. */}
       <QueueFigures t={getDictionary(locale)} locale={locale} counts={props.queue ?? null} />

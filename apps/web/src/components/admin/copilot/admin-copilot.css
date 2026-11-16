@@ -15,6 +15,60 @@
     box-shadow: var(--nf-float-shadow);
   }
 
+  /* THE INLINE LAUNCH (16 November 2026): opposite a page's title, two lines
+     like the workspace's Switch to personal account, the mark on the brand
+     ink. At least 44px tall; it never wraps its own words. */
+  .nf-copilot-inline {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--nf-space-xs);
+    flex: none;
+    min-height: 48px;
+    padding: var(--nf-space-2xs) var(--nf-space-md) var(--nf-space-2xs) var(--nf-space-2xs);
+    border: var(--nf-border-width) solid var(--nf-brand-edge-soft);
+    border-radius: var(--nf-radius-pill);
+    background: color-mix(in oklab, var(--nf-brand-primary) 12%, var(--nf-surface-elevated));
+    color: var(--nf-content-primary);
+    text-align: start;
+    cursor: pointer;
+  }
+
+  .nf-copilot-inline:hover {
+    border-color: var(--nf-brand-primary);
+  }
+
+  .nf-copilot-inline:focus-visible {
+    outline: var(--nf-focus-ring-width) solid var(--nf-focus-ring);
+    outline-offset: var(--nf-focus-ring-offset);
+  }
+
+  .nf-copilot-inline__mark {
+    display: grid;
+    place-items: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: var(--nf-radius-circle);
+    background: var(--nf-gradient-brand-ink);
+    color: var(--nf-content-on-brand);
+  }
+
+  .nf-copilot-inline__words {
+    display: grid;
+    line-height: 1.2;
+    white-space: nowrap;
+  }
+
+  .nf-copilot-inline__lead {
+    color: var(--nf-content-secondary);
+    font-size: var(--nf-text-caption);
+  }
+
+  .nf-copilot-inline__main {
+    color: var(--nf-content-link);
+    font-size: var(--nf-text-body-sm);
+    font-weight: 700;
+  }
+
   /* The conversation: a column that fills its container, the composer pinned to the bottom. */
   .nf-copilot {
     display: flex;
@@ -27,54 +81,155 @@
     min-height: calc(100dvh - 14rem);
   }
 
+  /* THE BAR (16 November 2026): History on the left, New chat on the right,
+     a quiet line between them while it works or once it is saved. */
   .nf-copilot__bar {
-    display: flex;
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
     align-items: center;
-    justify-content: space-between;
-    gap: var(--nf-space-sm);
+    gap: var(--nf-space-xs);
+    padding-block: var(--nf-space-2xs);
+    /* No band behind it: the two buttons float over the answer, each on its
+       own solid plate, as a phone chat's top buttons do. */
+    pointer-events: none;
+  }
+
+  .nf-copilot__bar > * {
+    pointer-events: auto;
+  }
+
+  .nf-copilot-barbtn {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--nf-space-2xs);
+    min-height: 44px;
+    padding-inline: var(--nf-space-sm);
+    border: var(--nf-border-width) solid var(--nf-brand-edge-soft);
+    border-radius: var(--nf-radius-pill);
+    background: color-mix(in oklab, var(--nf-brand-primary) 14%, var(--nf-surface-elevated));
+    color: var(--nf-content-primary);
+    font-size: var(--nf-text-body-sm);
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .nf-copilot-barbtn > svg {
+    color: var(--nf-brand-secondary);
+  }
+
+  .nf-copilot-barbtn:disabled {
+    color: var(--nf-content-muted);
+    cursor: default;
+  }
+
+  .nf-copilot-barbtn:focus-visible,
+  .nf-copilot-act:focus-visible,
+  .nf-copilot-send:focus-visible,
+  .nf-copilot-history__open:focus-visible,
+  .nf-copilot-history__delete:focus-visible {
+    outline: var(--nf-focus-ring-width) solid var(--nf-focus-ring);
+    outline-offset: var(--nf-focus-ring-offset);
   }
 
   .nf-copilot__hint {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--nf-space-2xs);
+    min-width: 0;
     margin: 0;
     color: var(--nf-content-secondary);
     font-size: var(--nf-text-caption);
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .nf-copilot-dot {
+    width: 8px;
+    height: 8px;
+    flex: none;
+    border-radius: var(--nf-radius-circle);
+    background: var(--nf-brand-primary);
+    animation: nf-copilot-pulse 1.2s var(--nf-ease-standard) infinite;
   }
 
   .nf-copilot-thread {
     display: grid;
     flex: 1;
     align-content: start;
-    gap: var(--nf-space-sm);
+    gap: var(--nf-space-lg);
     min-height: 12rem;
+    padding-block: var(--nf-space-sm);
   }
 
+  /* An empty conversation: the mark, a greeting, what it can do, and the
+     questions to start from, each a whole-row tap. */
   .nf-copilot-empty {
     display: grid;
-    gap: var(--nf-space-md);
+    justify-items: start;
+    gap: var(--nf-space-sm);
+    padding-block-start: var(--nf-space-md);
+  }
+
+  .nf-copilot-empty__mark {
+    display: grid;
+    place-items: center;
+    width: 3rem;
+    height: 3rem;
+    border-radius: var(--nf-radius-circle);
+    background: var(--nf-gradient-brand-ink);
+    color: var(--nf-content-on-brand);
   }
 
   .nf-copilot-greeting {
     margin: 0;
+    color: var(--nf-content-primary);
+    font-size: var(--nf-text-h4);
+    font-weight: 700;
+    line-height: 1.3;
+    letter-spacing: -0.01em;
+  }
+
+  .nf-copilot-empty__can {
+    margin: 0;
     color: var(--nf-content-secondary);
     font-size: var(--nf-text-body-sm);
+    line-height: 1.5;
   }
 
   .nf-copilot-chips {
-    display: flex;
-    flex-wrap: wrap;
+    display: grid;
     gap: var(--nf-space-xs);
+    width: 100%;
+    margin-block-start: var(--nf-space-xs);
   }
 
   .nf-copilot-chip {
-    min-height: 44px;
-    padding: var(--nf-space-xs) var(--nf-space-sm);
-    border: var(--nf-border-width) solid var(--nf-border-subtle);
-    border-radius: var(--nf-radius-control);
-    background: var(--nf-surface-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--nf-space-sm);
+    width: 100%;
+    min-height: 52px;
+    padding: var(--nf-space-xs) var(--nf-space-md);
+    border: var(--nf-border-width) solid var(--nf-brand-edge-soft);
+    border-radius: var(--nf-radius-card-sm);
+    background: color-mix(in oklab, var(--nf-brand-primary) 8%, var(--nf-surface-elevated));
     color: var(--nf-content-primary);
     font-size: var(--nf-text-body-sm);
+    font-weight: 600;
     text-align: start;
     cursor: pointer;
+  }
+
+  .nf-copilot-chip > svg {
+    flex: none;
+    color: var(--nf-brand-secondary);
   }
 
   .nf-copilot-chip:hover:not(:disabled) {
@@ -94,24 +249,25 @@
 
   .nf-copilot-turn {
     margin: 0;
-    padding: var(--nf-space-sm) var(--nf-space-md);
-    border-radius: var(--nf-radius-card-sm);
-    font-size: var(--nf-text-body-sm);
-    line-height: 1.5;
-    max-width: 92%;
+    font-size: var(--nf-text-body);
+    line-height: 1.6;
     overflow-wrap: break-word;
   }
 
+  /* Your question: a Vallo-blue bubble on the right. */
   .nf-copilot-turn[data-role="user"] {
     justify-self: end;
-    background: var(--nf-brand-tint-1);
-    color: var(--nf-content-primary);
+    max-width: 85%;
+    padding: var(--nf-space-sm) var(--nf-space-md);
+    border-radius: var(--nf-radius-card) var(--nf-radius-card) var(--nf-radius-xs) var(--nf-radius-card);
+    background: var(--nf-brand-primary);
+    color: var(--nf-content-on-brand);
     white-space: pre-wrap;
   }
 
+  /* The answer: on the page itself, full width, as a chat answer reads. */
   .nf-copilot-turn[data-role="assistant"] {
-    justify-self: start;
-    background: var(--nf-surface-inset);
+    justify-self: stretch;
     color: var(--nf-content-primary);
   }
 
@@ -218,13 +374,30 @@
     color: var(--nf-content-secondary);
   }
 
+  /* The base reset takes every list's marker away; an answer's lists name
+     theirs, in Vallo blue (the founder's screenshot of 16 November: the
+     items had no bullets and ran into each other). */
   .nf-copilot-md ul,
   .nf-copilot-md ol {
-    padding-inline-start: var(--nf-space-lg);
+    padding-inline-start: 1.35rem;
+    list-style: disc outside;
+  }
+
+  .nf-copilot-md ol {
+    list-style-type: decimal;
+  }
+
+  .nf-copilot-md li {
+    padding-inline-start: var(--nf-space-3xs);
+  }
+
+  .nf-copilot-md li::marker {
+    color: var(--nf-brand-secondary);
+    font-weight: 700;
   }
 
   .nf-copilot-md li + li {
-    margin-top: var(--nf-space-3xs);
+    margin-top: var(--nf-space-2xs);
   }
 
   .nf-copilot-md code {
@@ -234,16 +407,135 @@
     font-size: 0.92em;
   }
 
-  .nf-copilot-copy {
+  /* Under each answer: a quiet row of actions. */
+  .nf-copilot-acts {
+    display: flex;
+    gap: var(--nf-space-2xs);
     margin-top: var(--nf-space-xs);
-    min-height: 32px;
-    padding: 0;
+  }
+
+  .nf-copilot-act {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--nf-space-2xs);
+    min-height: 40px;
+    padding-inline: var(--nf-space-xs);
     border: 0;
+    border-radius: var(--nf-radius-pill);
     background: none;
     color: var(--nf-content-secondary);
     font-size: var(--nf-text-caption);
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .nf-copilot-act > svg {
+    color: var(--nf-brand-secondary);
+  }
+
+  .nf-copilot-act:hover {
+    background: var(--nf-brand-tint-1);
+  }
+
+  /* HISTORY: every conversation, newest first, to open again or delete. */
+  .nf-copilot-history {
+    display: grid;
+    flex: 1;
+    align-content: start;
+    gap: var(--nf-space-sm);
+    min-height: 12rem;
+    padding-block: var(--nf-space-sm);
+  }
+
+  .nf-copilot-history__title {
+    margin: 0;
+    color: var(--nf-content-primary);
+    font-size: var(--nf-text-body-lg);
+    font-weight: 700;
+  }
+
+  .nf-copilot-history__note {
+    margin: 0;
+    color: var(--nf-content-secondary);
+    font-size: var(--nf-text-body-sm);
+  }
+
+  .nf-copilot-history__retry {
+    min-height: 44px;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--nf-content-link);
+    font: inherit;
+    font-weight: 600;
     text-decoration: underline;
     cursor: pointer;
+  }
+
+  .nf-copilot-history__list {
+    display: grid;
+    gap: var(--nf-space-2xs);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .nf-copilot-history__item {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    border: var(--nf-border-width) solid var(--nf-border-subtle);
+    border-radius: var(--nf-radius-card-sm);
+    background: var(--nf-surface-elevated);
+  }
+
+  .nf-copilot-history__item[data-current] {
+    border-color: var(--nf-brand-edge-soft);
+    background: color-mix(in oklab, var(--nf-brand-primary) 10%, var(--nf-surface-elevated));
+  }
+
+  .nf-copilot-history__open {
+    display: grid;
+    gap: 2px;
+    min-width: 0;
+    min-height: 56px;
+    padding: var(--nf-space-xs) var(--nf-space-md);
+    border: 0;
+    background: none;
+    text-align: start;
+    cursor: pointer;
+  }
+
+  .nf-copilot-history__name {
+    overflow: hidden;
+    color: var(--nf-content-primary);
+    font-size: var(--nf-text-body-sm);
+    font-weight: 600;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  .nf-copilot-history__meta {
+    color: var(--nf-content-secondary);
+    font-size: var(--nf-text-caption);
+  }
+
+  .nf-copilot-history__delete {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    margin-inline-end: var(--nf-space-2xs);
+    border: 0;
+    border-radius: var(--nf-radius-circle);
+    background: none;
+    color: var(--nf-content-secondary);
+    cursor: pointer;
+  }
+
+  .nf-copilot-history__delete:hover {
+    background: var(--nf-state-error-surface);
+    color: var(--nf-state-error);
   }
 
   .nf-copilot-status {
@@ -387,6 +679,31 @@
     overflow-wrap: break-word;
   }
 
+  /* The words exactly as somebody else will read them. */
+  .nf-copilot-card__preview {
+    display: grid;
+    gap: var(--nf-space-2xs);
+    margin: 0;
+  }
+
+  .nf-copilot-card__preview figcaption {
+    color: var(--nf-content-secondary);
+    font-size: var(--nf-text-caption);
+    font-weight: 600;
+  }
+
+  .nf-copilot-card__preview blockquote {
+    margin: 0;
+    padding: var(--nf-space-sm) var(--nf-space-md);
+    border-inline-start: 3px solid var(--nf-brand-primary);
+    border-radius: var(--nf-radius-xs);
+    background: var(--nf-surface-inset);
+    color: var(--nf-content-primary);
+    white-space: pre-wrap;
+    overflow-wrap: break-word;
+    line-height: 1.55;
+  }
+
   .nf-copilot-card__actions {
     display: flex;
     flex-wrap: wrap;
@@ -399,27 +716,64 @@
     color: var(--nf-content-secondary);
   }
 
-  /* The composer stays at the bottom of whatever scrolls. */
+  /* THE COMPOSER: a floating pill at the bottom of whatever scrolls, the
+     field growing as you write and a round Vallo-blue send button. */
   .nf-copilot-form {
     position: sticky;
     bottom: 0;
     display: flex;
     align-items: flex-end;
-    gap: var(--nf-space-sm);
-    padding-block: var(--nf-space-sm) calc(var(--nf-space-xs) + env(safe-area-inset-bottom, 0px));
-    background: var(--nf-surface-elevated);
-  }
-
-  .nf-copilot-form .nf-field {
-    flex: 1;
+    gap: var(--nf-space-xs);
+    margin-block-start: auto;
+    padding: var(--nf-space-2xs) var(--nf-space-2xs) var(--nf-space-2xs) var(--nf-space-md);
+    margin-block-end: calc(var(--nf-space-xs) + env(safe-area-inset-bottom, 0px));
+    border: var(--nf-border-width) solid var(--nf-brand-edge-soft);
+    border-radius: 1.75rem;
+    background: var(--nf-tier-island-fill);
+    -webkit-backdrop-filter: blur(var(--nf-tier-island-blur));
+    backdrop-filter: blur(var(--nf-tier-island-blur));
+    box-shadow: var(--nf-float-shadow);
   }
 
   .nf-copilot-input {
+    flex: 1;
+    min-width: 0;
     min-height: 44px;
-    max-height: 9rem;
-    resize: none;
-    field-sizing: content;
+    max-height: 10.5rem;
+    padding-block: 0.7rem;
+    border: 0;
+    background: none;
+    color: var(--nf-content-primary);
+    font-size: var(--nf-text-body);
     line-height: 1.4;
+    resize: none;
+    outline: none;
+  }
+
+  .nf-copilot-input::placeholder {
+    color: var(--nf-content-muted);
+  }
+
+  .nf-copilot-form:focus-within {
+    border-color: var(--nf-brand-primary);
+  }
+
+  .nf-copilot-send {
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: 44px;
+    height: 44px;
+    border: 0;
+    border-radius: var(--nf-radius-circle);
+    background: var(--nf-gradient-brand-ink);
+    color: var(--nf-content-on-brand);
+    cursor: pointer;
+  }
+
+  .nf-copilot-send:disabled {
+    opacity: 0.45;
+    cursor: default;
   }
 
   /* The capabilities panel on the full page. */

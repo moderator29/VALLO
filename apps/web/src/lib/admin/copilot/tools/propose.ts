@@ -23,8 +23,9 @@ import { defineTool, type ProposalDraft, type ToolResult } from "./types";
  *
  * There is deliberately NO tool for money movement, refunds, payouts,
  * restricting or banning a member, approving or rejecting anything, granting
- * or revoking access, deleting a record or sending a message to a member
- * (`copilot-limits.test.ts` holds that line).
+ * or revoking access or deleting a record. A reply to a member goes only
+ * through `reply_to_ticket` (`lib/admin/copilot/tools/desk-actions.ts`), on a card the person
+ * sends themselves.
  */
 
 const done = (summary: string, draft: ProposalDraft): ToolResult => ({
@@ -204,7 +205,7 @@ const draftText = z.string().trim().min(1).max(3000);
 export const draftTicketReply = defineTool({
   name: "draft_ticket_reply",
   description:
-    "Draft a reply to a support ticket (by ticket id) for the agent to read, edit and send themselves from the support desk. This does NOT send anything. Write it warm and plain, never promise an outcome another desk decides, and use the house money wording.",
+    "Draft a reply to a support ticket (by ticket id) as text to copy, only when the person asks for a draft rather than a reply. When they want to answer the member, use reply_to_ticket instead: it shows the reply and sends it when they press Send. This does NOT send anything. Write it warm and plain, never promise an outcome another desk decides, and use the house money wording.",
   kind: "propose",
   scopes: ["support"],
   status: "Drafting a reply",

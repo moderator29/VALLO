@@ -54,6 +54,7 @@ export const HOW_TO_ESCALATE = {
 function line(row: EscalationRow, now: number) {
   const clock = clockOf(row, now);
   return {
+    id: row.id,
     reference: row.reference,
     title: clip(row.title, 120),
     kind: CATEGORY_LABEL[row.category].name,
@@ -111,7 +112,7 @@ export const getEscalations = defineTool({
         howToEscalate: HOW_TO_ESCALATE,
         page: "/admin/escalations",
       },
-      note: "A part that is null could not be read; say so rather than guess. Give each escalation's link. You cannot raise, answer or close an escalation: point to the Escalate button or the record.",
+      note: "A part that is null could not be read; say so rather than guess. Give each escalation's link. To act on one (mark seen, note, ask the raiser, resolve, decline, reopen) use escalation_step with its id: it puts a card on screen and nothing changes until they press it. To raise a new one use raise_escalation or point to the Escalate button.",
     };
   },
 });
