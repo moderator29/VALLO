@@ -8,6 +8,7 @@ import { resolveCopilotViewer } from "@/lib/admin/copilot/viewer";
 import { requestSignal } from "@/lib/ai/upstream-deadline";
 import { consume, subjectForUser } from "@/lib/security/rate-limit";
 import { isSameOriginRequest } from "@/lib/security/request-origin";
+import { protectedRailLive } from "@/lib/money/rail-live";
 
 /**
  * THE ADMIN COPILOT ROUTE, shared by every desk and the full page (v2).
@@ -68,6 +69,8 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
   const tools = toolsForViewer(viewer);
   const signal = requestSignal(request.signal);
+  /* Escrow is read from the live switch on every request (lib/money/escrow-prompt.ts). */
+  const escrowLive = await protectedRailLive().catch(() => false);
 
   const stream = new ReadableStream<Uint8Array>({
     async start(controller) {
@@ -86,6 +89,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
             message,
             tools,
             now: Date.now(),
+            escrowLive,
             ...((ANSWER_STYLES as readonly string[]).includes(body.style ?? "") ? { style: body.style as AnswerStyle } : {}),
           },
           signal,

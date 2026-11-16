@@ -17,7 +17,7 @@
  */
 import {
   DIRECT_RAIL_STANDING,
-  ESCROW_NOT_OFFERED,
+  ESCROW_HOW_IT_WORKS,
   LEGACY_GUARANTEE_CLAIM,
   NO_CUSTODY_SENTENCE,
   NO_INSPECTION_FEE,
@@ -87,7 +87,7 @@ export const SUPPORT_FAQ: FaqEntry[] = [
       /* The id stays `wallet`, the word members type. The answer says the
          narrower true thing (A9): no balance holds a payment, and the Rewards
          Balance is separate. "Nothing to withdraw" was untrue beside it. */
-      `${NO_PAYMENT_BALANCE} ${NO_CUSTODY_SENTENCE} ${ESCROW_NOT_OFFERED} ${REWARDS_BALANCE_SEPARATE} Refunds go back to the card or account you paid with.`,
+      `${NO_PAYMENT_BALANCE} ${NO_CUSTODY_SENTENCE} ${ESCROW_HOW_IT_WORKS} ${REWARDS_BALANCE_SEPARATE} Refunds go back to the card or account you paid with.`,
   },
   {
     id: "guarantee",

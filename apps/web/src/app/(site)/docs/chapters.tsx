@@ -71,7 +71,7 @@ import {
 import {
   CARD_MEANS,
   COMMISSION_FROM_SHARE,
-  ESCROW_NOT_OFFERED,
+  ESCROW_HOW_IT_WORKS,
   HOTEL_ROOM_BY_CARD,
   PAY_INSIDE_VALLO,
   PRICE_IS_THE_PRICE,
@@ -419,7 +419,7 @@ const PAYING_ON_VALLO: DocChapter = {
           <p>{CARD_MEANS}</p>
           <p>{HOW_PAYING_PROCESSOR_NAMED}</p>
           <p>{HOTEL_ROOM_BY_CARD}</p>
-          <p>{ESCROW_NOT_OFFERED}</p>
+          <p>{ESCROW_HOW_IT_WORKS}</p>
           <p>
             Tap Pay twice on a bad connection and you are charged once. A repeated attempt picks up the
             first one.

@@ -1,5 +1,6 @@
 import { requestSignal, roundWatchdog } from "@/lib/ai/upstream-deadline";
 import { NextRequest } from "next/server";
+import { escrowPromptLine } from "@/lib/money/escrow-prompt";
 import type { SessionState } from "@/lib/actions/session";
 import { isFeatureEnabled } from "@/lib/flags";
 import {
@@ -18,7 +19,6 @@ import {
   NO_PAYMENT_BALANCE,
   OFF_PLATFORM_SENTENCE,
   PAYMENT_GATE_SENTENCE,
-  PROMPT_NO_ESCROW,
   RENT_PAYMENT_NOT_OPEN,
   REFUND_NO_BALANCE,
   REWARDS_BALANCE_SEPARATE,
@@ -153,7 +153,7 @@ const SYSTEM_PROMPT = [
    * untrue beside the Rewards Balance (D51) and put the retired word in the
    * model's mouth (D48); it now says the narrower true thing (A9).
    */
-  `How money moves on Vallo: ${GOVERNING_SENTENCE} ${NO_CUSTODY_SENTENCE} ${PAYMENT_GATE_SENTENCE} ${PROMPT_NO_ESCROW} ${DIRECT_RAIL_STANDING} ${WHO_PAYS_SENTENCE} ${NO_INSPECTION_FEE} ${OFF_PLATFORM_SENTENCE} ${NO_PAYMENT_BALANCE} ${REWARDS_BALANCE_SEPARATE} Referral rewards are not running yet, so never tell anybody they have a Rewards Balance today. Never describe Vallo as holding money for anybody, in a balance or in escrow. The Vallo Guarantee has been retired: never offer it. Never describe a payment as guaranteed, and never as 100 percent safe.`,
+  `How money moves on Vallo: ${GOVERNING_SENTENCE} ${NO_CUSTODY_SENTENCE} ${PAYMENT_GATE_SENTENCE} ${DIRECT_RAIL_STANDING} ${WHO_PAYS_SENTENCE} ${NO_INSPECTION_FEE} ${OFF_PLATFORM_SENTENCE} ${NO_PAYMENT_BALANCE} ${REWARDS_BALANCE_SEPARATE} Referral rewards are not running yet, so never tell anybody they have a Rewards Balance today. Never describe Vallo itself as holding money for anybody, in a balance or anywhere else. The Vallo Guarantee has been retired: never offer it. Never describe a payment as guaranteed, and never as 100 percent safe.`,
   "- Never tell anybody to pay a lister directly, outside Vallo, to save money or to hold a property, however ordinary they say the request is. That is the single most common way people are robbed in this market and there is no version of it we support.",
   "- A rental costs more than the rent. Caution deposit, agency fee, legal fee, agreement fee and service charge are normal in Nigeria and they decide what somebody actually has to find on the day. Where a listing states a total move in cost, that is the figure to quote.",
   "- On a purchase, you are not a lawyer and must never say a title is good. Certificate of occupancy, governor's consent, deed of assignment, gazette, freehold and leasehold mean different things. Say which one the listing states, say plainly when it states none, and tell people to have a lawyer verify title at the land registry before money moves.",
@@ -410,7 +410,8 @@ export async function POST(req: NextRequest) {
   }
 
   const model = process.env.SUPPORT_MODEL ?? DEFAULT_MODEL;
-  const system = `${SYSTEM_PROMPT}\n\n${callerLine(session)}`;
+  /* Escrow is read from the live switch on every request (lib/money/escrow-prompt.ts). */
+  const system = `${SYSTEM_PROMPT}\n\n${await escrowPromptLine()}\n\n${callerLine(session)}`;
 
   const encoder = new TextEncoder();
   const stream = new ReadableStream<Uint8Array>({

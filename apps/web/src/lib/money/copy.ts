@@ -1361,8 +1361,14 @@ export const STAYS_PAID_BY_CARD = "Shortlets and hotel rooms are paid by card, t
 /** Rule 3: how each kind of deal is paid (sweep item 28, which replaced the escrow-or-card choice). */
 export const HOW_EACH_DEAL_IS_PAID = `${STAYS_PAID_BY_CARD} ${RENT_PAYMENT_NOT_OPEN}`;
 
-/** Where an answer needs to say it (sweep item 29). */
-export const ESCROW_NOT_OFFERED = "Vallo does not offer escrow.";
+/**
+ * Escrow, said true whether the rail is on or off (the founder, 16 November
+ * 2026: Vallo uses escrow; the old line, "Vallo does not offer escrow.", was
+ * written while it was paused and read as Vallo never using it). Names nobody:
+ * the provider and the custodian are named only in protected-wording.ts.
+ */
+export const ESCROW_HOW_IT_WORKS =
+  "Where a payment screen offers escrow, a licensed bank holds the money through Vallo's licensed escrow partner, never Vallo, until it is released to the lister. Where it does not, you pay by card.";
 
 /** What paying by card does. */
 export const CARD_MEANS =
@@ -1404,17 +1410,13 @@ export const NEWSLETTER_SALE_LINE = `Property for sale with the title stated up 
 export const CAUTION_DEPOSIT_LABEL = "Caution deposit (returnable under your agreement)";
 
 /* -------------------------------------------------------------------------- */
-/* THE ASSISTANT AND SUPPORT PROMPTS (sweep item 57, rule (i))                */
+/* THE ASSISTANT AND SUPPORT PROMPTS: ESCROW                                  */
 /* -------------------------------------------------------------------------- */
 
-/**
- * Added to both prompts so the model never offers what is switched off. Rule
- * (i) asked for "Escrow and protected payment are not offered on Vallo. Never
- * offer them."; the claims gate (lib/trust/claims.ts) reads that "protected" as
- * an unbacked claim, so the lead's wording of 9 November 2026 says the same
- * thing without the claim word.
- */
-export const PROMPT_NO_ESCROW = "Vallo does not offer escrow or payment held by a bank. Never offer them.";
+/* PROMPT_NO_ESCROW ("Vallo does not offer escrow or payment held by a bank.
+   Never offer them.") was retired on 16 November 2026: it made the assistant
+   tell a member Vallo does not use escrow. Every prompt now reads its escrow
+   line from the live switch: lib/money/escrow-prompt.ts. */
 
 /* -------------------------------------------------------------------------- */
 /* MONEY SENTENCES KEPT AS DICTIONARY KEYS (rule (d), 9 November 2026)        */

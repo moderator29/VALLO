@@ -5,6 +5,7 @@ import { getListingRepository } from "@/lib/listings/repository";
 import { parseAssistantWorkspace, WORKSPACE_FRAMES } from "@/lib/assistant/workspace";
 import { isSameOriginRequest } from "@/lib/security/request-origin";
 import { NextRequest } from "next/server";
+import { escrowPromptLine } from "@/lib/money/escrow-prompt";
 import { isFeatureEnabled } from "@/lib/flags";
 import { supplyPrimer } from "@/lib/supply/roles";
 import {
@@ -15,7 +16,6 @@ import {
   NO_PAYMENT_BALANCE,
   OFF_PLATFORM_SENTENCE,
   PAYMENT_GATE_SENTENCE,
-  PROMPT_NO_ESCROW,
   RENT_PAYMENT_NOT_OPEN,
   REWARDS_BALANCE_SEPARATE,
   WHO_PAYS_SENTENCE,
@@ -127,7 +127,7 @@ const SYSTEM_PROMPT = [
    * untrue beside the Rewards Balance (D51) and put the retired word in the
    * model's mouth (D48); it now says the narrower true thing (A9).
    */
-  `How money moves on Vallo: ${GOVERNING_SENTENCE} ${NO_CUSTODY_SENTENCE} ${PAYMENT_GATE_SENTENCE} ${PROMPT_NO_ESCROW} ${DIRECT_RAIL_STANDING} ${WHO_PAYS_SENTENCE} ${NO_INSPECTION_FEE} ${OFF_PLATFORM_SENTENCE} ${NO_PAYMENT_BALANCE} ${REWARDS_BALANCE_SEPARATE} Referral rewards are not running yet, so never tell anybody they have a Rewards Balance today. Never describe Vallo as holding money for anybody, in a balance or in escrow. The Vallo Guarantee has been retired: never offer it. Never describe a payment as guaranteed, and never as 100 percent safe.`,
+  `How money moves on Vallo: ${GOVERNING_SENTENCE} ${NO_CUSTODY_SENTENCE} ${PAYMENT_GATE_SENTENCE} ${DIRECT_RAIL_STANDING} ${WHO_PAYS_SENTENCE} ${NO_INSPECTION_FEE} ${OFF_PLATFORM_SENTENCE} ${NO_PAYMENT_BALANCE} ${REWARDS_BALANCE_SEPARATE} Referral rewards are not running yet, so never tell anybody they have a Rewards Balance today. Never describe Vallo itself as holding money for anybody, in a balance or anywhere else. The Vallo Guarantee has been retired: never offer it. Never describe a payment as guaranteed, and never as 100 percent safe.`,
   /*
    * THE LADDER IS NO LONGER TYPED OUT HERE, AND THAT IS THE WHOLE FIX.
    *
@@ -500,7 +500,9 @@ export async function POST(req: NextRequest) {
   const frame: ToolFrame = workspace ?? "consumer";
   /* The person's own style settings, by key (`lib/assistant/prefs.ts`). */
   const style = styleLines(parsePrefs(record.prefs));
-  const baseSystem = `${workspace ? `${SYSTEM_PROMPT}\n\n${WORKSPACE_FRAMES[workspace].system}` : SYSTEM_PROMPT}\n\n${style}`;
+  /* Escrow is read from the live switch on every request (lib/money/escrow-prompt.ts). */
+  const escrowLine = await escrowPromptLine();
+  const baseSystem = `${workspace ? `${SYSTEM_PROMPT}\n\n${WORKSPACE_FRAMES[workspace].system}` : SYSTEM_PROMPT}\n\n${escrowLine}\n\n${style}`;
 
   const apiKey = process.env.ANTHROPIC_API_KEY ?? "";
   if (!apiKey) {

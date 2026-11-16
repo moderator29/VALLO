@@ -1,6 +1,7 @@
 import "server-only";
 import { roundWatchdog } from "@/lib/ai/upstream-deadline";
-import { CARD_RAIL_MOVES, GOVERNING_SENTENCE, PROMPT_NO_ESCROW, REFUND_ROUTE } from "@/lib/money/copy";
+import { CARD_RAIL_MOVES, GOVERNING_SENTENCE, REFUND_ROUTE } from "@/lib/money/copy";
+import { escrowPromptLineFor } from "@/lib/money/escrow-prompt";
 import { UNTRUSTED_TOOL_LINE } from "@/lib/assistant/untrusted";
 import { COPILOT_LIMITS } from "./capabilities";
 import { DESTINATION_SYNTAX, MAX_DESTINATIONS, type Destination } from "./destinations";
@@ -56,6 +57,8 @@ export type AdminCopilotRequest = {
   now: number;
   /** The person's own setting for how long answers run (the copilot's Settings panel). */
   style?: AnswerStyle;
+  /** Escrow live right now (the route reads it); absent reads as off. */
+  escrowLive?: boolean;
 };
 
 /** How long the person wants answers (16 November 2026, the copilot's Settings panel). */
@@ -89,7 +92,7 @@ export const HOUSE_RULES: string[] = [
   "For 'where do I do this', 'where is that screen' or 'which desk handles this', call where_do_i_go and answer from the desks it returns, then offer the best one as a destination.",
   "For 'what does my handbook say', 'what am I responsible for' or 'what may I decide', call get_my_handbook and answer from their own handbook, naming the section.",
   "Never write anything a member of the public might see without first telling the staff member whom to ask before it goes out (their lead, for anything that reads as a company statement). Drafts you write are for the staff member to read and change.",
-  `House money wording, to use whenever money comes up: ${CARD_RAIL_MOVES} ${REFUND_ROUTE} ${GOVERNING_SENTENCE} ${PROMPT_NO_ESCROW} The Vallo Guarantee is retired: never offer it, promise it or describe it as live; if it comes up, say it was retired and that any claim made before then is still decided on the Money desk.`,
+  `House money wording, to use whenever money comes up: ${CARD_RAIL_MOVES} ${REFUND_ROUTE} ${GOVERNING_SENTENCE} The Vallo Guarantee is retired: never offer it, promise it or describe it as live; if it comes up, say it was retired and that any claim made before then is still decided on the Money desk.`,
   UNTRUSTED_TOOL_LINE,
 ];
 
@@ -129,10 +132,12 @@ export type PromptInput = Pick<AdminCopilotRequest, "positionTitle" | "roleSumma
   tools?: readonly Pick<CopilotTool, "name" | "kind">[];
   now?: number;
   style?: AnswerStyle;
+  /** Whether escrow payment is live right now (lib/money/escrow-prompt.ts); absent reads as off. */
+  escrowLive?: boolean;
 };
 
 export function buildAdminSystemPrompt(req: PromptInput): string {
-  const lines = [...HOUSE_RULES, req.isSuperAdmin ? SUPER_ADMIN_LIMITS_LINE : HARD_LIMITS_LINE];
+  const lines = [...HOUSE_RULES, escrowPromptLineFor(req.escrowLive === true), req.isSuperAdmin ? SUPER_ADMIN_LIMITS_LINE : HARD_LIMITS_LINE];
   if (req.isSuperAdmin) lines.push(...SUPER_ADMIN_RULES);
   lines.push(`The staff member you are speaking with is named ${req.viewerFirstName}.`);
   lines.push(
@@ -296,6 +301,7 @@ export async function* streamAdminCopilot(
     tools: req.tools,
     now: req.now,
     ...(req.style ? { style: req.style } : {}),
+    escrowLive: req.escrowLive === true,
   });
   const definitions = toolDefinitions(req.tools);
   /* Every destination the tools handed back this turn, by address. The client

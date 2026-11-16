@@ -110,7 +110,6 @@ const REPLACEMENTS: (keyof typeof copy)[] = [
   "CARD_SHARE_WHEN_CLEARS",
   "PAYMENT_METHODS_ANSWER",
   "NEWSLETTER_SALE_LINE",
-  "PROMPT_NO_ESCROW",
   "CHARGEBACK_HOLD_MEANS",
   "CHARGEBACK_LOST_BODY",
   "CHARGEBACK_REOWED_BODY",
@@ -330,10 +329,12 @@ describe("the founder's exact words (9 November 2026)", () => {
     }
   });
 
-  /* Rule (i)'s words carried "protected", which the claims gate refuses as an
-     unbacked claim; the lead's rewording (9 November 2026) says the same. */
-  it("rule (i): the prompts' line", () => {
-    expect(copy.PROMPT_NO_ESCROW).toBe("Vallo does not offer escrow or payment held by a bank. Never offer them.");
+  /* Rule (i)'s line (PROMPT_NO_ESCROW) was retired on 16 November 2026: the
+     founder's ruling is that Vallo uses escrow. The prompts read the escrow
+     line from the live switch (lib/money/escrow-prompt.ts, its own test). */
+  it("rule (i): no prompt line says Vallo does not offer escrow", () => {
+    expect((copy as Record<string, unknown>).PROMPT_NO_ESCROW).toBeUndefined();
+    expect(copy.ESCROW_HOW_IT_WORKS).not.toMatch(/does not (offer|use) escrow/i);
   });
 
   it("rule (j): the governing sentence protects nothing and names no processor", () => {
