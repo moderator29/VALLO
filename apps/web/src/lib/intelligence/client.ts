@@ -253,19 +253,43 @@ function isOffline(): boolean {
   return typeof navigator !== "undefined" && navigator.onLine === false;
 }
 
+/**
+ * How long a read may take before it is a failure. A dead connection can
+ * leave a request open for minutes, and the screen's skeleton waited with it:
+ * past this the screen says so and offers Retry instead.
+ */
+export const INTEL_FETCH_TIMEOUT_MS = 15_000;
+
 async function getJson<T>(url: string, signal?: AbortSignal): Promise<T> {
-  let response: Response;
+  /* The caller's own abort (a newer search) stays an AbortError, which the
+     screens ignore; running out of time is a failure they show. */
+  const own = new AbortController();
+  let timedOut = false;
+  const timer = setTimeout(() => {
+    timedOut = true;
+    own.abort();
+  }, INTEL_FETCH_TIMEOUT_MS);
+  const forward = () => own.abort();
+  if (signal?.aborted) own.abort();
+  else signal?.addEventListener("abort", forward, { once: true });
   try {
-    response = await fetch(url, { signal, headers: { accept: "application/json" }, credentials: "same-origin" });
-  } catch (error) {
-    if ((error as { name?: string })?.name === "AbortError") throw error;
-    throw new IntelFetchError(0, isOffline());
-  }
-  if (!response.ok) throw new IntelFetchError(response.status, false);
-  try {
-    return (await response.json()) as T;
-  } catch {
-    throw new IntelFetchError(response.status, false);
+    let response: Response;
+    try {
+      response = await fetch(url, { signal: own.signal, headers: { accept: "application/json" }, credentials: "same-origin" });
+    } catch (error) {
+      if ((error as { name?: string })?.name === "AbortError" && !timedOut) throw error;
+      throw new IntelFetchError(0, isOffline());
+    }
+    if (!response.ok) throw new IntelFetchError(response.status, false);
+    try {
+      return (await response.json()) as T;
+    } catch (error) {
+      if ((error as { name?: string })?.name === "AbortError" && !timedOut) throw error;
+      throw new IntelFetchError(response.status, false);
+    }
+  } finally {
+    clearTimeout(timer);
+    signal?.removeEventListener("abort", forward);
   }
 }
 

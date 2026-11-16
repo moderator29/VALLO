@@ -309,8 +309,30 @@ export function draftOf(u: Partial<Understood>): Draft {
   };
 }
 
-export const digits = (value: string) => value.replace(/[^\d]/g, "").slice(0, 12);
+/** The digits of a typed amount, without leading zeros or separators: "₦1,500,000" is "1500000". */
+export const digits = (value: string) => value.replace(/[^\d]/g, "").replace(/^0+(?=\d)/, "").slice(0, 12);
 const whole = (value: string): number | undefined => (/^\d+$/.test(value) && Number(value) > 0 ? Number(value) : undefined);
+
+/** The most an amount, and a party, can be: what the address keeps (`parseIntelUrl`). */
+const PRICE_CEILING = 100_000_000_000;
+const GUEST_CEILING = 30;
+
+/** An amount as it is read, grouped in the reader's own way ("1,500,000"), from its digits. */
+export function groupedAmount(raw: string, locale: Locale): string {
+  const d = digits(raw);
+  return d ? formatNumber(Number(d), locale) : "";
+}
+
+/** Where the caret goes in grouped text so that `count` digits sit before it. */
+export function caretAfterDigits(text: string, count: number): number {
+  if (count <= 0) return 0;
+  let seen = 0;
+  for (let i = 0; i < text.length; i += 1) {
+    if (/\d/.test(text[i]!)) seen += 1;
+    if (seen === count) return i + 1;
+  }
+  return text.length;
+}
 
 /** The drawer's answers as filters to set and filters to take away. */
 export function filtersOfDraft(draft: Draft, fields: readonly FilterKey[]): { set: IntelFilters; cleared: FilterKey[] } {
@@ -321,15 +343,23 @@ export function filtersOfDraft(draft: Draft, fields: readonly FilterKey[]): { se
     if (value === undefined) cleared.push(key);
     else set[key] = value;
   };
+  const cap = (n: number | undefined, ceiling: number) => (n === undefined ? undefined : Math.min(n, ceiling));
+  let min = cap(whole(draft.minPrice), PRICE_CEILING);
+  let max = cap(whole(draft.maxPrice), PRICE_CEILING);
+  /* Lowest over highest is a slip of the thumb, not a search for nothing: the two change places. */
+  if (min !== undefined && max !== undefined && min > max) [min, max] = [max, min];
+  /* A stay that ends before it starts keeps its start, not its end. */
+  const checkIn = draft.checkIn || undefined;
+  const checkOut = draft.checkOut && (!checkIn || draft.checkOut > checkIn) ? draft.checkOut : undefined;
   put("intent", draft.intent || undefined);
   put("place", draft.place.trim() || undefined);
   put("bedrooms", whole(draft.bedrooms));
-  put("minPrice", whole(draft.minPrice));
-  put("maxPrice", whole(draft.maxPrice));
+  put("minPrice", min);
+  put("maxPrice", max);
   put("furnished", draft.furnished ? true : undefined);
-  put("checkIn", draft.checkIn || undefined);
-  put("checkOut", draft.checkOut || undefined);
-  put("guests", whole(draft.guests));
+  put("checkIn", checkIn);
+  put("checkOut", checkOut);
+  put("guests", cap(whole(draft.guests), GUEST_CEILING));
   return { set, cleared };
 }
 

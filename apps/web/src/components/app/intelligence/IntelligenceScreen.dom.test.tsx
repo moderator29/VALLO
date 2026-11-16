@@ -171,8 +171,12 @@ describe.skipIf(!hasBrowser && !process.env.CI)("VALLO Intelligence", () => {
       await field.press("ArrowUp");
       expect((await state()).active).toBe(s.ids[2]);
 
-      /* A pointer moves the active option too. */
-      await page.getByTestId("intel-option").nth(1).hover();
+      /* A mouse that moves over an option makes it the active one. */
+      {
+        const box = (await page.getByTestId("intel-option").nth(1).boundingBox())!;
+        await page.mouse.move(box.x + 20, box.y + box.height / 2);
+        await page.mouse.move(box.x + 30, box.y + box.height / 2, { steps: 2 });
+      }
       expect((await state()).selected).toEqual(["false", "true", "false"]);
 
       /* Escape closes the list and keeps the words; a second Escape clears them. */
@@ -182,13 +186,14 @@ describe.skipIf(!hasBrowser && !process.env.CI)("VALLO Intelligence", () => {
       await field.press("Escape");
       expect(await field.inputValue()).toBe("");
 
-      /* Enter on a "Go to" suggestion opens its screen. */
+      /* Enter on a "Go to" suggestion opens its screen, in the place of the
+         suggestions' own history entry, so Back from it returns to the words. */
       await page.mouse.move(0, 0);
       await field.fill("lekki");
       await page.getByTestId("intel-option").first().waitFor();
       await field.press("ArrowUp");
       await field.press("Enter");
-      expect(await page.evaluate(() => (window as unknown as { __router: { calls: unknown[][] } }).__router.calls)).toEqual([["push", "/saved"]]);
+      expect(await page.evaluate(() => (window as unknown as { __router: { calls: unknown[][] } }).__router.calls)).toEqual([["replace", "/saved"]]);
 
       /* Enter on an active query suggestion runs it as a search. */
       await field.fill("lekki 2");
@@ -439,10 +444,11 @@ describe.skipIf(!hasBrowser && !process.env.CI)("VALLO Intelligence", () => {
       expect(params.get("guests")).toBe("2");
       expect(params.get("in")).toMatch(/^\d{4}-\d{2}-\d{2}$/);
       expect(params.get("out")! > params.get("in")!).toBe(true);
-      /* Back: the category's page again, then its own back control brings the home. */
+      /* Back: the category's page again, then the screen's back control brings the home. */
       await page.goBack();
       await page.getByTestId("intel-cathead").waitFor();
-      await page.getByTestId("intel-category-back").click();
+      expect(await page.getByTestId("intel-back").getAttribute("aria-label")).toBe("Back to everything on Vallo");
+      await page.getByTestId("intel-back").click();
       await page.getByTestId("intel-explore").waitFor();
       expect(new URL(page.url()).searchParams.get("tab")).toBeNull();
     } finally {

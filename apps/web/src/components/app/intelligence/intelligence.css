@@ -34,6 +34,20 @@
     gap: var(--nf-space-sm);
     min-block-size: 2.75rem;
   }
+  .nf-intel-top__lead {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--nf-space-xs);
+    min-inline-size: 0;
+  }
+  /* On a phone inside the app the back rides the app's own bar (`BarBack`),
+     from the first paint, so the page never draws a second one (chrome.css
+     does the same for every page header). From 64rem it leads this row. */
+  @media (max-width: 63.999rem) {
+    .nf-app-shell .nf-intel-top__lead > [data-nav-back] {
+      display: none !important;
+    }
+  }
   .nf-intel-top__brand {
     display: inline-flex;
     align-items: center;
@@ -190,6 +204,7 @@
 
   /* ============================================================ the field */
   .nf-intel-combo {
+    position: relative;
     display: grid;
     gap: var(--nf-space-xs);
     /* Lifted to the top on a touch screen as the list opens; clears the bar. */
@@ -321,9 +336,21 @@
   }
 
   /* ------------------------------------------------------ the suggestions */
+  /* Over the page, not in its flow: nothing under the field jumps as the list
+     opens. Never taller than what is left above the keyboard
+     (`--nf-intel-suggest-max`, measured from the visual viewport in
+     `IntelField`); past that it scrolls inside itself. */
   .nf-intel-suggest {
+    position: absolute;
+    z-index: 1;
+    inset-inline: 0;
+    inset-block-start: calc(100% + var(--nf-space-xs));
     display: grid;
+    align-content: start;
     gap: var(--nf-space-2xs);
+    max-block-size: var(--nf-intel-suggest-max, 60vh);
+    overflow-y: auto;
+    overscroll-behavior: contain;
     padding: var(--nf-space-xs);
     border: var(--nf-border-width) solid color-mix(in oklab, var(--nf-brand-primary) 30%, var(--nf-tier-card-edge));
     border-radius: var(--nf-radius-card);
@@ -835,6 +862,18 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: var(--nf-space-sm);
   }
+  /* iOS draws a date field at its own intrinsic width and centres its value:
+     here it fills its half of the row and reads from the start like the rest. */
+  .nf-intel-filters input[type="date"] {
+    min-inline-size: 0;
+    inline-size: 100%;
+    -webkit-appearance: none;
+    appearance: none;
+    text-align: start;
+  }
+  .nf-intel-filters input[type="date"]::-webkit-date-and-time-value {
+    text-align: start;
+  }
   .nf-intel-check {
     display: flex;
     align-items: center;
@@ -1307,6 +1346,14 @@
       inset-block-start: calc(env(safe-area-inset-top, 0px) + var(--nf-header-height) + var(--nf-space-xs));
     }
   }
+  /* A member on a wide screen has no app bar (the rail carries navigation,
+     AppShell's `lg:hidden`): the field sticks to the top itself, rather than
+     a bar's height below it with the page showing through the gap. */
+  @media (min-width: 64rem) {
+    .nf-intel[data-signed-in] .nf-intel-dock {
+      inset-block-start: calc(env(safe-area-inset-top, 0px) + var(--nf-space-xs));
+    }
+  }
   /* A band of the page's own ground behind the condensed field, so what
      scrolls under it fades out rather than showing round its edges. */
   .nf-intel-dock::before {
@@ -1323,8 +1370,11 @@
   .nf-intel-dock[data-condensed]::before {
     opacity: 1;
   }
+  /* Shorter, on the same footprint: the margins give back what the height
+     takes, so nothing under the dock jumps as it condenses. */
   .nf-intel-dock[data-condensed] .nf-intel-field {
     block-size: 3.25rem;
+    margin-block: 0.25rem;
     background: color-mix(in oklab, var(--nf-surface-primary) 84%, transparent);
     -webkit-backdrop-filter: blur(var(--nf-glass-blur-strong)) saturate(var(--nf-glass-saturate));
     backdrop-filter: blur(var(--nf-glass-blur-strong)) saturate(var(--nf-glass-saturate));
@@ -1477,32 +1527,6 @@
     display: grid;
     gap: var(--nf-space-xs);
     margin-block-start: var(--nf-space-xs);
-  }
-  .nf-intel-back {
-    display: inline-flex;
-    order: -1;
-    align-items: center;
-    justify-self: start;
-    gap: var(--nf-space-2xs);
-    min-block-size: 2.75rem;
-    min-inline-size: 2.75rem;
-    padding-inline: var(--nf-space-2xs) var(--nf-space-sm);
-    border: 0;
-    border-radius: var(--nf-radius-control);
-    background: none;
-    color: var(--nf-content-link);
-    font-size: var(--nf-text-body-sm);
-    font-weight: 600;
-    cursor: pointer;
-  }
-  @media (hover: hover) {
-    .nf-intel-back:hover {
-      background: var(--nf-brand-tint-1);
-    }
-  }
-  .nf-intel-back:focus-visible {
-    outline: var(--nf-focus-ring-width) solid var(--nf-focus-ring);
-    outline-offset: -2px;
   }
   /* The tile, grown: the same glass, with the brand's light gathering at its corner. */
   .nf-intel-cathead {

@@ -13,6 +13,7 @@ import {
 } from "@/lib/intelligence/client";
 import { understand } from "@/lib/intelligence/understand";
 import { shouldAskModel } from "@/lib/intelligence/model";
+import { backTargetOf, isHome, ownState, parentOf, readIntelEntry } from "./intel-history";
 import {
   assistRows,
   CHIP_ICON,
@@ -31,7 +32,10 @@ import {
   whyParts,
   wordOrigin,
   biggerBudget,
+  caretAfterDigits,
   dayOf,
+  digits,
+  groupedAmount,
   forYouReasonText,
   lagosToday,
   refineChips,
@@ -181,6 +185,57 @@ describe("the small decisions", () => {
       cleared: ["bedrooms", "minPrice", "furnished"],
     });
     expect(filtersOfDraft(draft, FILTER_FIELDS.restaurant)).toEqual({ set: { place: "Yaba" }, cleared: [] });
+  });
+  it("never sends a search for nothing: lowest over highest change places, a stay ends after it starts, a party is capped", () => {
+    const base = { intent: "" as const, place: "", bedrooms: "", minPrice: "", maxPrice: "", furnished: false, checkIn: "", checkOut: "", guests: "" };
+    expect(filtersOfDraft({ ...base, minPrice: "5000000", maxPrice: "900000" }, FILTER_FIELDS.property).set).toEqual({ minPrice: 900_000, maxPrice: 5_000_000 });
+    const stay = filtersOfDraft({ ...base, checkIn: "2026-12-12", checkOut: "2026-12-10", guests: "99" }, FILTER_FIELDS.stay);
+    expect(stay.set).toEqual({ checkIn: "2026-12-12", guests: 30 });
+    expect(stay.cleared).toContain("checkOut");
+    /* A price past what the address keeps is held at it, not dropped on reload. */
+    expect(filtersOfDraft({ ...base, maxPrice: "999999999999" }, FILTER_FIELDS.property).set).toEqual({ maxPrice: 100_000_000_000 });
+  });
+
+  it("reads an amount as typed with separators and keeps the caret after the same digits", () => {
+    expect(digits("₦1,500,000")).toBe("1500000");
+    expect(digits("0005")).toBe("5");
+    expect(digits("abc")).toBe("");
+    expect(groupedAmount("1500000", "en")).toBe("1,500,000");
+    expect(groupedAmount("", "en")).toBe("");
+    /* "1,|500,000": one digit before the caret. */
+    expect(caretAfterDigits("1,500,000", 1)).toBe(1);
+    expect(caretAfterDigits("1,500,000", 2)).toBe(3);
+    expect(caretAfterDigits("1,500,000", 0)).toBe(0);
+    expect(caretAfterDigits("1,500,000", 99)).toBe(9);
+  });
+});
+
+describe("the screen's own history entries", () => {
+  const search = parseIntelUrl(new URLSearchParams("q=lekki&tab=property"));
+  const category = parseIntelUrl(new URLSearchParams("tab=stay"));
+  it("knows its home, and sends a search or a category with nothing behind it home", () => {
+    expect(isHome(EMPTY_STATE)).toBe(true);
+    expect(isHome(category)).toBe(false);
+    expect(parentOf(search)).toEqual(EMPTY_STATE);
+    expect(parentOf(category)).toEqual(EMPTY_STATE);
+    expect(parentOf(EMPTY_STATE)).toBeNull();
+  });
+  it("reads its own stamp and nothing else, and keeps an entry's other keys but never Next's", () => {
+    expect(readIntelEntry({ nfIntel: { from: "/intelligence?q=a" } })).toEqual({ from: "/intelligence?q=a" });
+    expect(readIntelEntry({ nfIntel: { from: "/intelligence", suggest: true } })).toEqual({ from: "/intelligence", suggest: true });
+    expect(readIntelEntry({ nfIntel: { from: "https://elsewhere.test/" } })).toBeNull();
+    expect(readIntelEntry(null)).toBeNull();
+    expect(ownState({ __NA: true, __PRIVATE_NEXTJS_INTERNALS_TREE: {}, nfSeq: 4, nfSheet: ["a"] }, { nfIntel: { from: "/intelligence" } })).toEqual({
+      nfSeq: 4,
+      nfSheet: ["a"],
+      nfIntel: { from: "/intelligence" },
+    });
+  });
+  it("names where the back goes: a search, a category's page or the home", () => {
+    expect(backTargetOf({ from: "/intelligence?q=lekki" }, search)).toEqual({ kind: "search" });
+    expect(backTargetOf({ from: "/intelligence?tab=property" }, search)).toEqual({ kind: "category", tab: "property" });
+    expect(backTargetOf({ from: "/intelligence" }, search)).toEqual({ kind: "home" });
+    expect(backTargetOf(null, search)).toEqual({ kind: "home" });
   });
 });
 

@@ -30,8 +30,9 @@ function files(dir: string): string[] {
 /* A constant whose name says it is a cookie or a storage key, with a Vallo-shaped value. */
 const KEY_CONSTANT = /const\s+([A-Z][A-Z0-9_]*(?:COOKIE|_KEY))\s*(?::\s*string)?\s*=\s*["'`]((?:nf|vallo)[-_.:a-zA-Z0-9]*)["'`]/g;
 
-/* Values that are keys of something else, not browser storage. */
-const NOT_STORAGE = new Set(["nfSeq", "nfStep", "nfGsSlide", "nfUnsaved", "nf_history_seq"]);
+/* Values that are keys of something else, not browser storage (`nfIntel`, like
+   `nfStep`, is a key inside `history.state`: VALLO Intelligence's own steps). */
+const NOT_STORAGE = new Set(["nfSeq", "nfStep", "nfGsSlide", "nfUnsaved", "nf_history_seq", "nfIntel"]);
 
 describe("the inventory covers what the code stores", () => {
   it("names every cookie and storage key constant in the source", () => {

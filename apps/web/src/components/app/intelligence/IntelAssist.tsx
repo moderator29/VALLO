@@ -1,6 +1,9 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import type { MouseEvent } from "react";
+import { whenSheetsClosed } from "@/lib/ui/use-sheet-history";
 import { UiIcon } from "@/design-system/icons/UiIcon";
 import { Sheet } from "@/components/ui/Sheet";
 import type { IntelligenceResult, SearchResponse } from "@/lib/intelligence/contract";
@@ -35,6 +38,19 @@ export function IntelAssist({
   runQuery: (q: string) => void;
 }) {
   const a = copy.assist;
+  const router = useRouter();
+  /* The panel's own history entry comes off first, then the step is taken:
+     otherwise its spent entry stayed behind and Back from what was opened
+     needed a second, dead press before it moved. */
+  const after = (step: () => void) => {
+    onOpenChange(false);
+    whenSheetsClosed(step);
+  };
+  const openRow = (href: string) => (event: MouseEvent<HTMLAnchorElement>) => {
+    if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return;
+    event.preventDefault();
+    after(() => router.push(href));
+  };
   const rows = assistRows({ q, chips, results, place, copy });
   const tries = (alternatives ?? []).filter((alt) => alt.query).slice(0, 4);
   return (
@@ -43,7 +59,7 @@ export function IntelAssist({
         <ul className="nf-intel-assist__card" role="list" data-testid="intel-assist-rows">
           {rows.map((row) => (
             <li key={row.id}>
-              <Link href={row.href} className="nf-create-sheet__option nf-intel-assist__row" onClick={() => onOpenChange(false)} data-testid={`intel-assist-${row.id}`}>
+              <Link href={row.href} className="nf-create-sheet__option nf-intel-assist__row" onClick={openRow(row.href)} data-testid={`intel-assist-${row.id}`}>
                 <span className="nf-create-sheet__icon" aria-hidden="true">
                   <UiIcon name={row.icon} size={20} />
                 </span>
@@ -64,10 +80,7 @@ export function IntelAssist({
                   <button
                     type="button"
                     className="nf-chip nf-intel-chip"
-                    onClick={() => {
-                      onOpenChange(false);
-                      runQuery(alt.query!);
-                    }}
+                    onClick={() => after(() => runQuery(alt.query!))}
                   >
                     {alt.label}
                   </button>

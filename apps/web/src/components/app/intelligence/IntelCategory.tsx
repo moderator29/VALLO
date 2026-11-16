@@ -43,19 +43,21 @@ import {
  * that kind and the newest of them. When a side has no real places yet the
  * page says so plainly, with what to do next, and draws no empty card.
  * Everything chosen here becomes an ordinary search address, so Back works.
+ * The way back to the discovery home is the screen's own back control (the
+ * app's `BackControl`, on the app's bar on a phone), not a second one here.
+ * What was picked is kept for the visit, so Back from the homes it showed
+ * returns to the same choices.
  */
 export function IntelCategory({
   tab,
   view,
   copy,
   locale,
-  onBack,
 }: {
   tab: ExploreTab;
   view: DiscoverView;
   copy: IntelligenceCopy;
   locale: Locale;
-  onBack: () => void;
 }) {
   const data = view.status === "ready" ? view.data : null;
   const facts = factsFor(data?.categories, tab);
@@ -74,10 +76,6 @@ export function IntelCategory({
           {line ? <span className="nf-intel-tilecard__line nf-numeric">{line}</span> : null}
         </span>
       </div>
-      <button type="button" className="nf-intel-back" aria-label={copy.category.backLabel} onClick={onBack} data-testid="intel-category-back">
-        <UiIcon name="chevron-left" size={20} />
-        <span>{copy.category.back}</span>
-      </button>
     </div>
   );
 }
@@ -204,10 +202,10 @@ function ListingSide({
         </h2>
         <p className="nf-intel-waiting__body">{words.body}</p>
         <div className="nf-intel-waiting__acts">
-          <ButtonLink href={links.act} variant="primary" size="sm" data-testid="intel-waiting-act">
+          <ButtonLink href={links.act} variant="primary" data-testid="intel-waiting-act">
             {words.act}
           </ButtonLink>
-          <ButtonLink href={links.lister} variant="secondary" size="sm" data-testid="intel-waiting-lister">
+          <ButtonLink href={links.lister} variant="secondary" data-testid="intel-waiting-lister">
             {words.lister}
           </ButtonLink>
         </div>
@@ -309,11 +307,27 @@ function Pick({ on, onClick, children, testId }: { on: boolean; onClick: () => v
   );
 }
 
+/* What was picked on each category's page, for this visit (module state, browser only):
+   Back from the results it asked for lands on the same choices, not on the defaults. */
+const PICKED: {
+  property: { market: "rent" | "buy"; beds: number | null; max: number | null };
+  stay: { when: "tonight" | "weekend" | "nextWeekend" | null; guests: number | null };
+} = { property: { market: "rent", beds: null, max: null }, stay: { when: null, guests: null } };
+
+/** Kept for the visit, and handed back for the page's own state. */
+function remember<S extends keyof typeof PICKED, K extends keyof (typeof PICKED)[S]>(side: S, key: K, value: (typeof PICKED)[S][K]) {
+  PICKED[side][key] = value;
+  return value;
+}
+
 function PropertyPicks({ copy, locale, url, onSearch }: { copy: IntelligenceCopy; locale: Locale; url: IntelUrlState; onSearch: (next: IntelUrlState) => void }) {
   const c = copy.category.property;
-  const [market, setMarket] = useState<"rent" | "buy">("rent");
-  const [beds, setBeds] = useState<number | null>(null);
-  const [max, setMax] = useState<number | null>(null);
+  const [market, setMarketState] = useState<"rent" | "buy">(() => PICKED.property.market);
+  const [beds, setBedsState] = useState<number | null>(() => PICKED.property.beds);
+  const [max, setMaxState] = useState<number | null>(() => PICKED.property.max);
+  const setMarket = (v: "rent" | "buy") => setMarketState(remember("property", "market", v));
+  const setBeds = (v: number | null) => setBedsState(remember("property", "beds", v));
+  const setMax = (v: number | null) => setMaxState(remember("property", "max", v));
   const budgets = BUDGET_PICKS[market];
   return (
     <section className="nf-intel-picks" aria-label={copy.explore.tiles.property.title} data-testid="intel-property-picks">
@@ -378,8 +392,10 @@ function PropertyPicks({ copy, locale, url, onSearch }: { copy: IntelligenceCopy
 
 function StayPicks({ copy, locale, url, onSearch }: { copy: IntelligenceCopy; locale: Locale; url: IntelUrlState; onSearch: (next: IntelUrlState) => void }) {
   const c = copy.category.stay;
-  const [when, setWhen] = useState<"tonight" | "weekend" | "nextWeekend" | null>(null);
-  const [guests, setGuests] = useState<number | null>(null);
+  const [when, setWhenState] = useState<"tonight" | "weekend" | "nextWeekend" | null>(() => PICKED.stay.when);
+  const [guests, setGuestsState] = useState<number | null>(() => PICKED.stay.guests);
+  const setWhen = (v: "tonight" | "weekend" | "nextWeekend" | null) => setWhenState(remember("stay", "when", v));
+  const setGuests = (v: number | null) => setGuestsState(remember("stay", "guests", v));
   /* Read once per visit to the page: the Lagos calendar, not the device's. */
   const [windows] = useState(() => stayWindows(lagosToday()));
   return (

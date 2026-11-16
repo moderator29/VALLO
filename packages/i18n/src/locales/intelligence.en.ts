@@ -58,6 +58,14 @@ export const intelligenceEn = {
   /* The pill over the tab bar on a phone. */
   askPill: "Ask VALLO Intelligence",
 
+  /* The back control, by what it returns to (the one on the app's bar on a phone). */
+  back: {
+    toHome: "Back to VALLO Intelligence",
+    toCategory: "Back to {category}",
+    toSearch: "Back to your last search",
+    closeSuggestions: "Close the suggestions",
+  },
+
   /* The field. */
   fieldLabel: "Search VALLO",
   /* Rotating examples in the empty field. Examples, not promises. */
@@ -158,7 +166,6 @@ export const intelligenceEn = {
 
   /* A category's own page, opened from its tile. */
   category: {
-    back: "All of Vallo",
     backLabel: "Back to everything on Vallo",
     /* The rotating example in the field while a category is open. */
     examples: {

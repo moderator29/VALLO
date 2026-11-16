@@ -151,7 +151,7 @@ const LOOSEN_LABEL: Record<Loosenable, (u: Understood) => string> = {
   addedSince: () => "Listed any time",
   listingKinds: () => "Every kind of place",
   intent: (u) => (u.intent === "buy" ? "To rent as well" : u.intent === "rent" ? "For sale as well" : "Any market"),
-  text: (u) => `Without "${u.text}"`,
+  text: (u) => `Without “${u.text}”`,
 };
 
 export async function runSearch(input: SearchInput, deps: EngineDeps): Promise<SearchResponse> {
