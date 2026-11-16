@@ -253,6 +253,14 @@ export const TECHNICAL: ManualBody = {
             <li>&ldquo;Draft an update for the open incident: bookings are slow, we are investigating, next update in an hour.&rdquo;</li>
             <li>&ldquo;Draft status page wording for the same incident. Do not name a cause.&rdquo;</li>
           </ul>
+          <p>
+            Type / in the message box for quick commands such as /today. How cards, history and settings work, and
+            what the copilot never does, is in{" "}
+            <Link href="/admin/manual/copilot" className={A}>
+              The AI copilot
+            </Link>
+            .
+          </p>
         </>
       ),
     },

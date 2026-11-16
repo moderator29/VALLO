@@ -34,7 +34,10 @@ import { A, type ManualBody } from "./parts";
  *
  * Read from the published member documents (`app/(site)/docs`), the fee
  * schedule (`lib/money/fee-schedule.ts`, imported here so a figure cannot
- * drift), and the live switches, on 15 November 2026. Where a feature is
+ * drift), and the live switches, on 15 November 2026. On 16 November 2026
+ * the held payment's fee and Vallo's own earnings sweep were added
+ * (`fee-schedule.ts`, `lib/cron/jobs/revenue-sweep.ts`, the Control room's
+ * earnings panel). Where a feature is
  * built but not open, this chapter says so plainly. When the product
  * changes, this chapter changes with it.
  */
@@ -858,6 +861,33 @@ export const PRODUCT_GUIDE: ManualBody = {
               paid by the processor in the same transaction as the payment.
             </li>
           </ul>
+          <h3 className="nf-h4">The held payment, and Vallo&apos;s own earnings</h3>
+          <p>
+            When a payment held by a licensed bank is used, it costs about {FEE_PERCENT.rentTotal}% in total: Vallo&apos;s{" "}
+            {FEE_PERCENT.vallo}% and the payment partner&apos;s own fee of about {FEE_PERCENT.rentPartner}%. Quote it that
+            way, as two parts and an approximate total, and send the{" "}
+            <Link href="/docs/what-vallo-costs" className={A}>
+              What Vallo costs
+            </Link>{" "}
+            page rather than a figure from memory. Vallo&apos;s {FEE_PERCENT.vallo}% is sent with each payment itself, so
+            the share that applied is on the record of that one payment. The partner&apos;s fee is the partner&apos;s, and it
+            never passes through Vallo.
+          </p>
+          <p>
+            Vallo&apos;s share lands in Vallo&apos;s own wallet at the payment partner. It is Vallo&apos;s money, never a
+            member&apos;s: a lister is paid straight to their own bank when a payment is released. Once a day a sweep moves
+            Vallo&apos;s share to Vallo&apos;s own bank account, one payout at a time. It does nothing until its switch is on
+            and the destination bank account is set, so until then the money stays in the wallet. The super admin reads where
+            it stands in the{" "}
+            <Link href="/admin/control" className={A}>
+              Control room
+            </Link>
+            , under Vallo&apos;s own earnings.
+          </p>
+          <DocCallout tone="note" title="Who answers about the sweep">
+            Vallo&apos;s own earnings and the sweep are for Finance and the super admin. If anybody else is asked about
+            them, say it is Vallo&apos;s own money and never a member&apos;s, and pass the question to Finance.
+          </DocCallout>
           <h3 className="nf-h4">Two things that are free and are often doubted</h3>
           <p>
             {NO_INSPECTION_FEE} {PRIVATE_FEE_NOTE}

@@ -64,7 +64,7 @@ const DESKS_AND_ACCESS: ManualPage = {
   title: "Desks, access and what is logged",
   summary: "How access works, what unlocks a desk, the roles, and why every action is on the record.",
   icon: "shield-lock",
-  updated: UPDATED,
+  updated: "2026-11-16",
   desks: [
     { href: "/admin", label: "Console home" },
     { href: "/admin/handbook", label: "Staff handbook" },
@@ -74,6 +74,8 @@ const DESKS_AND_ACCESS: ManualPage = {
     { href: "/admin/audit", label: "Audit log" },
     { href: "/admin/oversight", label: "Team oversight" },
     { href: "/admin/queue", label: "Queue" },
+    { href: "/admin/escalations", label: "Escalations" },
+    { href: "/admin/copilot", label: "Copilot" },
   ],
   glance: [
     "You see and act on only the desks named in your access. The database refuses the rest.",
@@ -123,7 +125,8 @@ const DESKS_AND_ACCESS: ManualPage = {
       heading: "Finding a person, a booking or a reference",
       body: (
         <p>
-          Press Ctrl K (Cmd K on a Mac) anywhere in the console and paste whatever the caller read out. The lookup
+          Press Ctrl K (Cmd K on a Mac) anywhere in the console, or the search button in the bar on a phone, and paste
+          whatever the caller read out. The lookup
           searches every desk <em>you</em> may open and names the ones it skipped. For a member, open the person file: it
           gathers what the decision needs in one place instead of nine desks.
         </p>
@@ -158,12 +161,22 @@ const DESKS_AND_ACCESS: ManualPage = {
         <>
           <p>
             Do not guess. If you know the person in a case or have any interest in it, do not decide it: leave it for
-            someone else and say why in the notes. If it needs a senior decision, escalate to the founder.
+            someone else and say why in the notes. If it needs a senior decision, press <strong>Escalate</strong> at the
+            top of any admin page. It goes to the right team with a response time, and moves up to the COO and then the
+            super admin if nobody answers in time. What waits on you is on{" "}
+            <Link href="/admin/escalations" className={A}>Escalations</Link>. The whole procedure is{" "}
+            <Link href="/admin/manual/escalation" className={A}>Escalation and out of hours</Link>.
+          </p>
+          <p>
+            The AI copilot, the round button on every desk, can answer how-to questions from the manual and do desk work
+            for you on a card you press. Nothing happens until you press the card&apos;s own button, and it is recorded
+            under your name. See <Link href="/admin/manual/copilot" className={A}>The AI copilot</Link>.
           </p>
           <DocCallout kind="note" title="Out of hours">
             <p>
-              No out-of-hours rota is written into the platform. Until one is, raise anything urgent with the founder
-              directly; the support promise on urgent tickets is four hours (see the support desk page).
+              No out-of-hours rota is written into the platform. Until one is, raise anything urgent as an urgent
+              escalation, which also tells the super admin at once; the support promise on urgent tickets is four hours
+              (see the support desk page).
             </p>
           </DocCallout>
         </>

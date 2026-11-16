@@ -283,6 +283,14 @@ export const SUPPORT_LEAD: ManualBody = {
             <li>&ldquo;Draft a canned reply for a member whose deposit has not shown yet. Warm, plain, no promises.&rdquo;</li>
             <li>&ldquo;Draft a coaching note: first replies are long and slow. Offer a shorter structure.&rdquo;</li>
           </ul>
+          <p>
+            Type / in the message box for quick commands such as /today. How cards, history and settings work, and
+            what the copilot never does, is in{" "}
+            <Link href="/admin/manual/copilot" className={A}>
+              The AI copilot
+            </Link>
+            .
+          </p>
         </>
       ),
     },

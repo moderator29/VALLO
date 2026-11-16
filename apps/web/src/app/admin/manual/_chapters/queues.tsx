@@ -142,6 +142,23 @@ export const QUEUES: ManualBody = {
               eight characters. The applicant reads it.
             </li>
           </ul>
+          <p>
+            <strong>When an ID looks wrong</strong>, use the panel called Cross-checks on the person&apos;s row before you
+            decide. It says whether the same ID number, the same file or a very similar picture is on another account,
+            looks for signs an image was edited, checks a passport&apos;s bottom lines and their check digits, compares
+            the name with the bank details, and gives a by-eye list of what a real one looks like. A line marked Stop
+            means do not approve. None of it proves an ID is genuine. If you still doubt it, send it back asking for a
+            different government ID without saying what you suspect, and escalate to Trust and Safety from the same
+            panel. The steps are in the{" "}
+            <Link href="/admin/kyc/guide#forged" className={A}>
+              reviewer guide
+            </Link>{" "}
+            and in{" "}
+            <Link href="/admin/manual/business-development#forged-id" className={A}>
+              Before you escalate a possible fake ID
+            </Link>
+            . Never type an ID number, a name or a date of birth into any outside website or app.
+          </p>
           <p>You cannot decide your own document, check or application. The desk and the database both refuse it.</p>
           <ScreenshotSlot desk="the Verification desk with a person open" />
         </>
@@ -243,6 +260,16 @@ export const QUEUES: ManualBody = {
             compliance matter, hand it to Safety and say why.
           </p>
           <p>Keys: j and k move between tickets, n opens the next one nobody holds, r replies, m opens saved replies, ? lists them all.</p>
+          <p>
+            The copilot on this desk can write a reply for you. Type /reply, or ask &quot;Reply to the oldest
+            ticket&quot;. It shows the reply word for word on a card, and it reaches the member only when you press Send
+            reply (or Send and resolve). Read it as if you wrote it, because your name is on it. It can also resolve,
+            reopen or close a ticket on a card; closing still needs a note. See{" "}
+            <Link href="/admin/manual/copilot" className={A}>
+              The AI copilot
+            </Link>
+            .
+          </p>
           <ScreenshotSlot desk="the Support desk with a ticket open" />
         </>
       ),

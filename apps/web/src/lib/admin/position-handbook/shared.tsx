@@ -180,7 +180,9 @@ export function escalation(role: RoleWords, escalate: readonly string[]): Handbo
           <Link href="/admin/escalations" className={A}>
             Escalations
           </Link>
-          . The whole procedure is{" "}
+          , with a count beside it in the menu. The super admin and the COO also see what waits on them as Waiting
+          on you on the console&apos;s front page. Your copilot can mark an escalation as seen, add a note, ask the
+          raiser, resolve, decline or reopen it, each on a card you press. The whole procedure is{" "}
           <Link href="/admin/manual/escalation" className={A}>
             chapter 6 of the staff manual
           </Link>

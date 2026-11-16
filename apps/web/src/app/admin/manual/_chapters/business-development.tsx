@@ -178,6 +178,15 @@ export const BUSINESS_DEVELOPMENT: ManualBody = {
             Keep the pipeline here, not in a separate tool. The figures on this desk, your weekly report and the
             assistant on this desk read this table, so a prospect kept elsewhere is counted nowhere.
           </DocCallout>
+          <p>
+            The copilot on this desk can add a prospect or log a contact, a follow-up or a note for you. Ask it in plain
+            words, for example &quot;Add a prospect: a landlord in Lekki&quot;. It shows a card with what it will save,
+            and nothing is saved until you press the card&apos;s button. See{" "}
+            <Link href="/admin/manual/copilot" className={A}>
+              The AI copilot
+            </Link>
+            .
+          </p>
         </>
       ),
     },

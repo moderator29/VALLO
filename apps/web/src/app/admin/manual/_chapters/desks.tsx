@@ -39,7 +39,10 @@ const OVERVIEW: Desk[] = [
   { href: "/admin", name: "Overview", icon: "home", what: "What is waiting on a person and how the platform is doing. A staff member sees their own desks here.", who: "Everybody with console access" },
   { href: "/admin/queue", name: "Unified queue", icon: "panel-left", what: "Listings, applications, reports, support tickets, message flags and held content in one list, ordered by when each is due. Each tab shows only what your areas decide.", who: "Any queue area; each tab by its own area" },
   { href: "/admin/lookup", name: "Lookup", icon: "search", what: "Paste a reference, an id or an email and find the record. Each part of the answer asks for its own area.", who: "Each section by its own area" },
-  { href: "/admin/escalations", name: "Escalations", icon: "alert-triangle", what: "Anything a colleague cannot or may not decide, sent to the people who can, with one owner and a response time. The Escalate button on every desk raises one.", who: "Everybody with console access" },
+  { href: "/admin/escalations", name: "Escalations", icon: "alert-triangle", what: "Anything a colleague cannot or may not decide, sent to the people who can, with one owner and a response time. The Escalate button on every desk raises one. The count beside it is what is waiting on you.", who: "Everybody with console access" },
+  { href: "/admin/overview", name: "COO overview", icon: "trending-up", what: "The COO's desk: escalations with the COO, staff access recommendations for the super admin, and the backlog across desks.", who: "The COO (Operations)" },
+  { href: "/admin/my-desk", name: "My desk", icon: "user", what: "Your own page: who you are here, what needs you today, your tasks, announcements and your weekly report.", who: "Everybody with console access" },
+  { href: "/admin/copilot", name: "Copilot", icon: "bot", what: "The AI copilot on a page of its own, with what it can do for you desk by desk. The same copilot opens from the round button on every desk.", who: "Everybody with console access" },
 ];
 
 const REVIEW: Desk[] = [
@@ -58,7 +61,7 @@ const REVIEW: Desk[] = [
 const MONEY: Desk[] = [
   { href: "/admin/money", name: "Money", icon: "coins", what: "Cautions, refunds to the card, the refund clock, the reconciliation job, and the record of the retired Vallo Guarantee.", who: "Finance (rulings on cautions and old claims: Guarantee claims)" },
   { href: "/admin/payments", name: "Payments", icon: "wallet", what: "Every payment attempt and how it ended. The health panel and the saved card lookup are admins only.", who: "Finance" },
-  { href: "/admin/arrangements", name: "Arrangements", icon: "shield-check", what: "Every payment on the bank-held rail, with the provider's state beside Vallo's. Read only. That rail is switched off, so expect it to be empty.", who: "Finance" },
+  { href: "/admin/arrangements", name: "Arrangements", icon: "shield-check", what: "Every payment held by a licensed bank through the payment partner, with the partner's state beside Vallo's. Read only. That rail is switched off today, so expect it to be empty.", who: "Finance, Agreement approval" },
   { href: "/admin/chargebacks", name: "Chargebacks", icon: "credit-card", what: "Disputes a payer raised with their bank: open, move through their states, add notes.", who: "Finance" },
   { href: "/admin/fees", name: "Fees", icon: "receipt", what: "The fee rates in force. Lowering a rate is any admin; raising one is a super admin.", who: "Finance to read; admins to change" },
   { href: "/admin/referrals", name: "Referrals", icon: "hand-coins", what: "Referral rewards owed, the monthly budget, and the referrals and payouts a person decides.", who: "Admins" },
@@ -126,6 +129,14 @@ function DeskTable({ caption, desks }: { caption: string; desks: Desk[] }) {
   return <DocTable caption={caption} columns={COLUMNS} rows={rows(desks)} />;
 }
 
+const FINDING: DocTableRow[] = [
+  { id: "rail", cells: { where: "The menu (an admin)", what: "On a wide screen the rail down the left lists every desk your access opens, in groups, with a count where work is waiting. On a phone the menu button at the top left opens the same full menu over the page, every group your access opens, each desk with its one line. A dot on the button means work is waiting. Choosing a desk, Escape or a tap outside closes it." } },
+  { id: "staff", cells: { where: "The staff frame (a member of staff)", what: "My desk, Console, Handbook, Your role, Staff manual and Help and support, a button for each desk your access opens, and under them Everything your access opens: every desk your areas open, in the console's own groups. A desk you cannot open is not listed." } },
+  { id: "search", cells: { where: "Search the console (an admin)", what: "Press Ctrl K, or Cmd K on a Mac, from anywhere. On a phone, press the search button in the bar; it opens full size. Type a desk's name and press Enter to go there, or paste a reference to look it up across the desks you may open, or search people or the Unified queue. It lists only desks your access opens, and it never acts on a record." } },
+  { id: "escalate", cells: { where: "The Escalate button", what: "At the top of every admin page, for whatever you cannot or may not decide. See chapter 6." } },
+  { id: "copilot", cells: { where: "The copilot button", what: "The round button at the corner of every desk, and Ask the AI copilot on the console's front page. See chapter 18." } },
+];
+
 export const DESKS: ManualBody = {
   intro: (
     <p>
@@ -137,9 +148,42 @@ export const DESKS: ManualBody = {
     "A desk that asks for no access area is open to admins and super admins only.",
     "Where a desk is open to several areas, each person sees only the part their area allows, and the database decides it.",
     "The decision controls live on each desk. The Unified queue routes you there and can take an item or decide in bulk through the same controls.",
-    "Escrow is not offered on Vallo and there is no escrow desk.",
+    "A payment held by a licensed bank is built and switched off today. Its read-only desk is Arrangements, under Money.",
+    "On a phone the menu button opens the whole menu, and Search the console finds a desk or a reference.",
   ],
   sections: [
+    {
+      id: "finding-your-way",
+      title: "Finding your way: the menu, search and your phone",
+      body: (
+        <>
+          <p>
+            Everything below works the same on a computer and a phone. What you see depends on whether you are an admin
+            or a member of staff.
+          </p>
+          <DocTable
+            caption="The ways round the console"
+            columns={[
+              { key: "where", label: "Where" },
+              { key: "what", label: "What it does" },
+            ]}
+            rows={FINDING}
+          />
+          <p>
+            Every desk asks the database again when it opens, so typing the address of a desk you do not hold gets the
+            same refusal as pressing a button you cannot see. The{" "}
+            <Link href="/admin/manual/escalation" className={A}>
+              Escalate button
+            </Link>{" "}
+            and{" "}
+            <Link href="/admin/manual/copilot" className={A}>
+              the copilot
+            </Link>{" "}
+            have chapters of their own.
+          </p>
+        </>
+      ),
+    },
     {
       id: "overview",
       title: "Overview, the queue and lookup",
@@ -164,8 +208,14 @@ export const DESKS: ManualBody = {
           <DocCallout tone="note" title="What is true about money today">
             Vallo never holds customer money. Stays and hotel rooms pay by card through Paystack, and the
             lister&apos;s share goes to their bank in the same transaction. A restaurant table is free to book. Payment for rentals is not open on Vallo.
-            Sales are never paid on Vallo. A refund goes back to the card or account that paid. Never describe a wallet,
-            a balance or escrow to anybody.
+            Sales are never paid on Vallo. A refund goes back to the card or account that paid. A payment held by a
+            licensed bank is built and switched off today: never describe it, a wallet or a balance to a member as
+            something they can use. Vallo&apos;s own earnings and the daily sweep to Vallo&apos;s bank are for Finance and
+            the super admin; see{" "}
+            <Link href="/admin/manual/product-guide#the-money-in-full" className={A}>
+              The money in full
+            </Link>
+            .
           </DocCallout>
         </>
       ),

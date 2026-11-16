@@ -2,6 +2,7 @@ import type { ManualSlug } from "@/lib/admin/manual/chapters";
 import { ACCESS } from "./access";
 import { BUSINESS_DEVELOPMENT } from "./business-development";
 import { CONTENT } from "./content";
+import { COPILOT } from "./copilot";
 import { MARKETING } from "./marketing";
 import { SUPPORT_LEAD } from "./support-lead";
 import { TECHNICAL } from "./technical";
@@ -37,4 +38,5 @@ export const MANUAL_BODIES: Record<ManualSlug, ManualBody> = {
   "product-guide": PRODUCT_GUIDE,
   "onboarding-a-lister": ONBOARDING_A_LISTER,
   "onboarding-a-member": ONBOARDING_A_MEMBER,
+  copilot: COPILOT,
 };

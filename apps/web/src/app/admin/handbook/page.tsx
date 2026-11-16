@@ -42,9 +42,26 @@ export default async function HandbookPage() {
       ))}
       <Panel title="The staff manual">
         <p className="nf-body">
-          What each desk is for and how to work it.{" "}
-          <Link href="/admin/handbook/manual" className="font-semibold text-[var(--nf-content-link)] hover:underline">
+          What each desk is for and how to work it, chapter by chapter, kept up to date with the console.{" "}
+          <Link href="/admin/manual" className="font-semibold text-[var(--nf-content-link)] hover:underline">
             Open the staff manual
+          </Link>
+          . The shorter desk guides are{" "}
+          <Link href="/admin/handbook/manual" className="font-semibold text-[var(--nf-content-link)] hover:underline">
+            here
+          </Link>
+          . Where any of these and the rules above disagree, the rules above are what you agreed to.
+        </p>
+      </Panel>
+      <Panel title="Working with the AI copilot">
+        <p className="nf-body">
+          This is a guide to a tool, not a new rule. The rules above apply to everything you do through it. Open it from
+          the round button on any desk. It reads only what your access opens. Every change it offers is a card with a
+          preview and its own button, and nothing happens until you press it. A card you press is your decision, recorded
+          in the audit log under your name as done through the copilot. Never paste an ID number, a bank detail or a card
+          number into it.{" "}
+          <Link href="/admin/manual/copilot" className="font-semibold text-[var(--nf-content-link)] hover:underline">
+            How the copilot works
           </Link>
           .
         </p>

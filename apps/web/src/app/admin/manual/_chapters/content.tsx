@@ -255,6 +255,14 @@ export const CONTENT: ManualBody = {
             <li>&ldquo;Draft an outline for a help article on how deposits work. Plain words, no promises.&rdquo;</li>
             <li>&ldquo;Draft a short staff announcement that the new deposits article is live.&rdquo;</li>
           </ul>
+          <p>
+            Type / in the message box for quick commands such as /today. How cards, history and settings work, and
+            what the copilot never does, is in{" "}
+            <Link href="/admin/manual/copilot" className={A}>
+              The AI copilot
+            </Link>
+            .
+          </p>
         </>
       ),
     },

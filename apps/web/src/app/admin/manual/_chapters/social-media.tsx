@@ -117,6 +117,14 @@ export const SOCIAL_MEDIA: ManualBody = {
             The desk does not stop a person approving a post they wrote. For anything about fees, money, a named person
             or a partner, ask a colleague or the COO to read it and approve it rather than approving your own.
           </DocCallout>
+          <p>
+            The copilot on this desk can save a draft post on the calendar for you, on a card you press. It saves a
+            draft only: nothing is posted and nothing is sent for approval. See{" "}
+            <Link href="/admin/manual/copilot" className={A}>
+              The AI copilot
+            </Link>
+            .
+          </p>
         </>
       ),
     },

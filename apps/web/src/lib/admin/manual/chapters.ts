@@ -20,9 +20,9 @@ import type { StaffScope } from "@/lib/admin/guard";
  */
 
 /** The day the chapters were last read against the code. */
-export const MANUAL_UPDATED = "2026-11-15";
+export const MANUAL_UPDATED = "2026-11-16";
 
-export const MANUAL_SLUGS = ["access", "desks", "queues", "decisions", "records", "escalation", "my-desk", "weekly-report", "marketing", "content", "technical", "support-lead", "business-development", "social-media", "product-guide", "onboarding-a-lister", "onboarding-a-member"] as const;
+export const MANUAL_SLUGS = ["access", "desks", "queues", "decisions", "records", "escalation", "my-desk", "weekly-report", "marketing", "content", "technical", "support-lead", "business-development", "social-media", "product-guide", "onboarding-a-lister", "onboarding-a-member", "copilot"] as const;
 export type ManualSlug = (typeof MANUAL_SLUGS)[number];
 
 export type ManualChapter = {
@@ -156,6 +156,16 @@ export const MANUAL_CHAPTERS: readonly ManualChapter[] = [
     title: "Onboarding a member",
     icon: "user-check",
     description: "What a new member does and sees from sign up to their first booking, what Vallo asks them for and when, and what staff can see and do about each part of it.",
+  },
+  /* The copilot (the founder, 16 November 2026): every desk has one, it does
+     desk work on cards a person presses, and it has history, settings and
+     quick commands. Added at the end so no earlier chapter number moves. */
+  {
+    slug: "copilot",
+    number: 18,
+    title: "The AI copilot",
+    icon: "bot",
+    description: "Opening it, reading an answer, quick commands, history and settings, how a card works, the desk work it can do, the super admin's powers, and what it never does.",
   },
 ];
 

@@ -296,6 +296,14 @@ export const MARKETING: ManualBody = {
             <li>&ldquo;Draft a creative brief for a student rooms push in January. Tone warm and plain.&rdquo;</li>
           </ul>
           <p>
+            Type / in the message box for quick commands such as /today. How cards, history and settings work, and
+            what the copilot never does, is in{" "}
+            <Link href="/admin/manual/copilot" className={A}>
+              The AI copilot
+            </Link>
+            .
+          </p>
+          <p>
             If the Copilot says a figure is not available, believe it, and write the same in your report.
           </p>
         </>

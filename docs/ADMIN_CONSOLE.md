@@ -278,9 +278,11 @@ device the field shows the shortcut, Ctrl K or Cmd K.
 Command K opens one box over every desk, from anywhere in the console; on a
 phone the bar shows a search button for it instead of the field. It only
 routes: every row is a link to a desk or to a search, and the search itself runs
-on the desk it lands on, under that desk's own access check. A desk your
-account cannot open is still listed, and opening it answers with the refusal
-that desk always gave.
+on the desk it lands on, under that desk's own access check. Since 15 November
+2026 it lists only the desks your account can open, filtered the same way the
+rail is (`palette.ts`, `canOpen`). On a phone it opens full size: it is drawn on
+the page itself, not inside the frosted bar, which used to clip it to the bar's
+height (fixed 16 November 2026).
 
 - **Desks.** Up to eight, each with its glyph, its name, one line saying what it
   is for, how many are waiting on it (the rail's badge figure) and, where the
@@ -316,6 +318,10 @@ drawer slides in from the left as a dialog: the Vallo mark and a close button
 at the head, a line saying how many are waiting across the console, the same
 rows as the rail with each desk's one line under its name and the open
 section's desks beneath it, All desks, and Settings with your name at the foot.
+It is drawn on the page itself, not inside the frosted bar (a box with a
+backdrop filter traps its fixed children, which is why the menu once seemed to
+open nothing on a phone; fixed 15 November 2026), and it lists every group the
+person's access opens.
 It closes when you choose a destination, on Escape and on a tap on the scrim;
 the page does not scroll behind it, Tab stays inside it and focus returns to the
 menu button.
@@ -1821,12 +1827,79 @@ and is NOT APPLIED: until the founder runs it every screen below says
   email carries the reference, the urgency and the due time only. The member
   is never told anything through this path.
 - **Where else it shows.** A count on the Escalations row of the rail, a
-  "Waiting on you" card on the overview for the super admin and the COO, and
-  "Escalations with the COO" at the top of the COO desk. The older board on the
+  "Waiting on you" card on the overview for the super admin and the COO,
+  "Escalations with the COO" at the top of the COO desk, and the escalation
+  line in the Control room's "Waiting on you" (section 15.26). The copilot can
+  take a step on an escalation on a card the person presses: mark as seen, add
+  a note, ask the raiser, resolve, decline or reopen (section 15.27). The older board on the
   COO desk (`coo_escalations`, 10 November) is unchanged.
 - **Written down.** Every action is a line on the record's own timeline, which
   cannot be edited or removed, and a line in the audit log
   (`staff_escalation.*`).
+
+### 15.26 Control room (Settings > Control room, `/admin/control`)
+
+Added 15 November 2026. The super admin's own page, and it only reads. In
+order: **Waiting on you** (one line per kind of work waiting on the super
+admin, each a link: escalations, staff access recommendations and the rest,
+`lib/admin/control/read.ts`), who can read Vallo, **Database setup** (which
+pending SQL files are in place, read from the database itself), the main
+switches and what each position means, the services connected (presence only,
+never a value) and, once the revenue sweep SQL is in, **Vallo's own earnings**:
+what is still at the payment partner, what was moved to the bank in the last
+30 days, and the last sweep. That money is Vallo's own share of a held payment,
+never a member's; the daily `revenue-sweep` job (section 13) moves it only
+while `payments_escrowpay_sweep_on` is on and the destination
+(`ESCROWPAY_SWEEP_PAYOUT_ACCOUNT_ID`) is set, so until then it stays at the
+partner. Finance and the super admin answer questions about it.
+
+### 15.27 The AI copilot (My Desk > Copilot, `/admin/copilot`, and on every desk)
+
+Rebuilt 15 and 16 November 2026. Staff read the full account in the staff
+manual, chapter 18 (`/admin/manual/copilot`). The code is
+`components/admin/copilot/**` and `lib/admin/copilot/**`.
+
+- **Where it opens.** The round button at the corner of every desk, the "Ask
+  the AI copilot" button opposite the Console overview title on `/admin`, and
+  its own page. It opens once the person has acknowledged the handbook, and
+  reads only what their access opens.
+- **The chat.** Answers in short bullets with a button to the desk it read;
+  Copy, and Ask again on the newest; Send becomes Stop while it writes; the
+  steps it took are folded under each answer; two or three next questions
+  under the newest (`follow-ups.ts`).
+- **Quick commands.** Type "/" (`commands.ts`). The server answers which
+  commands a person sees from the console door; each sees only their own
+  desks', and the Platform group is the super admin's.
+- **History.** Saved to the person's own account after each answer
+  (`public.copilot_threads`, `supabase/migrations/pending/copilot_threads_2026-11-16.sql`,
+  NOT APPLIED). Owner only, not even the super admin; deleted 90 days after the
+  last message by `private.copilot_threads_cleanup()`, which is not scheduled
+  yet. Until the SQL runs the History panel says saved history is off and a
+  conversation lasts the browser session. A confirm token is never stored.
+- **Settings.** Answer length (short, balanced, detailed), show steps, save
+  history, Enter sends. Kept on the device.
+- **Cards.** Every change is a signed proposal (`proposals.ts`): for one
+  person, 15 minutes, single use (`act.ts` claims the nonce). The card shows a
+  preview and its own button; nothing runs until it is pressed. Changes that
+  are hard to undo need a typed word, sealed in the token and compared on the
+  server: SEND, APPROVE, REFUSE, REMOVE, ON or OFF, RESTRICT, GRANT, REVOKE,
+  REFUND. Pressing runs the desk's own server action with its own checks, and
+  one audit row (`copilot.act`, `detail.via = "copilot"`) records it.
+- **Desk work on cards** (`tools/desk-actions.ts`, `tools/propose.ts`): ticket
+  replies (shown word for word, sent only on Send reply), ticket status
+  (closing needs a note), escalation steps, risk alerts (the action itself
+  still needs an admin), message flags, own tasks and comments, announcements
+  (COO and admins), the COO board and access recommendations, business
+  development prospects and activity, social drafts; draft-only text for
+  support, Trust and Safety, marketing, content, technical and the support
+  lead.
+- **The super admin's hands** (`tools/super-admin.ts`): decide listings, agent
+  applications and identity checks; release or remove held content; switches;
+  restrict and lift; grant and revoke staff access (never their own); refund a
+  booking.
+- **Never** (`capabilities.ts` `COPILOT_LIMITS`, `engine.ts`): no payouts,
+  transfers or company payments (which need all three founders), no deletion,
+  and no message to a member unless the person presses Send.
 
 ## 16. Everyday procedures
 

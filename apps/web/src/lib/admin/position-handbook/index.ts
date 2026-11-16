@@ -54,7 +54,7 @@ import type { HandbookBody, RoleWords } from "./types";
  */
 
 /** The day the handbooks were last read against the console's code. */
-export const POSITION_HANDBOOK_UPDATED = "2026-11-15";
+export const POSITION_HANDBOOK_UPDATED = "2026-11-16";
 
 /** Each position's own words. Every position in `STAFF_POSITIONS` has one. */
 const ROLE_WORDS: Record<StaffPosition, RoleWords> = {

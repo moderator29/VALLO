@@ -132,6 +132,10 @@ export const DECISIONS: ManualBody = {
               <strong>When you are unsure, do not guess.</strong> Escalate. A slower right answer is better than a quick
               wrong one.
             </li>
+            <li>
+              <strong>A copilot card you press is your decision.</strong> It runs the desk&apos;s own action under the same
+              rules as this table, and it is recorded under your name. It never opens a decision your area does not.
+            </li>
           </ul>
           <DocCallout tone="note" title="One confirmation when the console opens">
             The console asks for your account password when it opens and again after twelve hours. No desk asks for it again

@@ -20,7 +20,9 @@ import { plural } from "@vallo/i18n/core";
 
 /**
  * Chapter 6, rewritten on 15 November 2026 for escalations on every admin
- * desk. Read from the rules themselves (`lib/admin/escalations/types.ts`: the
+ * desk, and on 16 November 2026 for where they show up (`app/admin/page.tsx`
+ * and `app/admin/escalations/WaitingOnYou.tsx`, the Control room's Waiting on you, the
+ * copilot's `escalation_step` card). Read from the rules themselves (`lib/admin/escalations/types.ts`: the
  * routing table, the response times and the overdue window are drawn here
  * from that data, so the tables cannot drift from what the console does),
  * the database functions (`supabase/migrations/pending/staff_escalations_2026-11-15.sql`),
@@ -80,6 +82,8 @@ export const ESCALATION: ManualBody = {
     "It goes to one team with a response time. If nobody answers in time it moves up: the team, then the COO, then the super admin.",
     "Never tell a member you suspect them, and never paste an ID number, a bank detail or a document. The link carries the record.",
     "You are told when it is seen, when a question is asked, and when it is resolved or declined.",
+    "What waits on you shows on Escalations, as a count in the menu, and for the super admin and the COO as Waiting on you on the console's front page.",
+    "The copilot can take a step on an escalation for you, on a card you press.",
     "Who answers out of hours is not written down yet. It is marked below for the founder to name.",
   ],
   sections: [
@@ -239,6 +243,59 @@ export const ESCALATION: ManualBody = {
             escalation you raised yourself. Every step is on the record&apos;s timeline, which cannot be edited, and in
             the audit log with your name.
           </p>
+        </>
+      ),
+    },
+    {
+      id: "where-it-shows",
+      title: "Where escalations show up",
+      body: (
+        <>
+          <p>You do not have to go looking. What is waiting on you is put in front of you in these places:</p>
+          <ul role="list">
+            <li>
+              <strong>Every desk.</strong> The Escalate button is at the top of every admin page, and the Escalations
+              link in the menu carries a count of what is waiting on you.
+            </li>
+            <li>
+              <strong>
+                <Link href="/admin/escalations" className={A}>
+                  Escalations
+                </Link>
+              </strong>
+              . Three tabs: Waiting on me, Raised by me, and All, which the COO and the super admin see. Overdue rows
+              come first.
+            </li>
+            <li>
+              <strong>The console&apos;s front page.</strong> The super admin and the COO see a Waiting on you card with
+              the three that have waited longest and a link to the rest.
+            </li>
+            <li>
+              <strong>The COO desk.</strong>{" "}
+              <Link href="/admin/overview" className={A}>
+                COO overview
+              </Link>{" "}
+              shows the escalations with the COO at the top.
+            </li>
+            <li>
+              <strong>The super admin&apos;s inbox.</strong> The{" "}
+              <Link href="/admin/control" className={A}>
+                Control room
+              </Link>{" "}
+              opens on Waiting on you: everything across the platform that needs the super admin, each line a link to
+              the work it counts. Everything that reaches the top of the ladder lands there.
+            </li>
+            <li>
+              <strong>The copilot.</strong> Ask &quot;What is waiting on me?&quot;, or type /escalations. It can mark
+              one as seen, add a note, ask the raiser, resolve, decline or reopen, each on a card that shows the note as
+              the raiser will read it and runs only when you press it. Taking an escalation, sending it to another team
+              and giving it to somebody are done on its own page. See{" "}
+              <Link href="/admin/manual/copilot" className={A}>
+                The AI copilot
+              </Link>
+              .
+            </li>
+          </ul>
         </>
       ),
     },

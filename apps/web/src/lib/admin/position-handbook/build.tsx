@@ -336,13 +336,40 @@ function yourCopilot(position: StaffPosition, role: RoleWords): HandbookSection 
     body: (
       <>
         <p>
-          A copilot button sits at the corner of every desk, and it has a page of its own at{" "}
+          A round copilot button sits at the corner of every desk, and it has a page of its own at{" "}
           <Link href="/admin/copilot" className={A}>
             Copilot
           </Link>
           . It knows your position, your access areas, the figures on your desks and this handbook word for word. Ask
           it in plain words. It reads only what you may read: a desk you do not hold is closed to it as it is to you.
         </p>
+        <h3 className={H3}>How to work with it</h3>
+        <ul role="list">
+          <li>
+            Answers come in short bullets, with a button to the desk where you act. Under each answer are Copy and Ask
+            again, the steps it took (folded), and two or three next questions. Press Stop to end an answer while it is
+            being written.
+          </li>
+          <li>Type / in the message box for quick commands. You see only the ones for your own desks.</li>
+          <li>
+            History keeps your conversations on your own account for 90 days. Nobody else can read them. Settings
+            change how long answers run, whether the steps show, whether conversations are saved and whether Enter
+            sends.
+          </li>
+          <li>
+            Every change is a card with a preview and its own button, such as Send reply or Mark as seen. Nothing
+            happens until you press it. A change that is hard to undo asks you to type a word first. A card lasts
+            fifteen minutes, works once and only for you, and runs the desk&apos;s own action with the desk&apos;s own
+            rules. It is recorded in the audit log as done through the copilot, under your name.
+          </li>
+          <li>
+            A card you press is your decision. Read the preview as if you had written it. The whole of it is{" "}
+            <Link href="/admin/manual/copilot" className={A}>
+              chapter 18 of the staff manual
+            </Link>
+            .
+          </li>
+        </ul>
         <h3 className={H3}>What it can do for this position</h3>
         <DocTable
           caption="What the copilot can do on this position's desks"

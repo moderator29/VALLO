@@ -82,8 +82,21 @@ export const MY_DESK: ManualBody = {
           </ul>
           <p>
             The copilot button sits at the corner of the page. Open it and ask in plain words, for example &quot;What
-            should I do first today?&quot; or &quot;Where do I record a refund?&quot; It knows your position and the
-            figures on this page. It does not make decisions for you.
+            should I do first today?&quot; or &quot;Where do I record a refund?&quot;, or type /today. It knows your
+            position and the figures on this page. It can add a task to your list or take a step on an escalation, each
+            on a card that does nothing until you press it. It does not make decisions for you. Everything it can do is
+            in{" "}
+            <Link href="/admin/manual/copilot" className={A}>
+              The AI copilot
+            </Link>
+            .
+          </p>
+          <p>
+            Escalations waiting on you are on{" "}
+            <Link href="/admin/escalations" className={A}>
+              Escalations
+            </Link>
+            , with a count beside the link in the menu.
           </p>
         </>
       ),
