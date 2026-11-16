@@ -62,82 +62,87 @@ Neither touches `app/admin`. The lead works only in files neither holds
 
 ---
 
-# THE BOARD, 15 November 2026
+# THE BOARD, 16 November 2026
 
-Two workers at a time plus the lead, never in the same file. Nothing is Done
-until it was run and seen.
+## THE CONSISTENCY AUDIT IS DONE
 
-## THE DIVERGENCE, READ THIS FIRST
+644 page loads measured, 0 failed: 161 routes at 390 and 1440, dark and
+light. **637 of the 640 judged rows match every rule.** Zero sideways
+overflow anywhere. Zero back-control faults across the 521 rows that draw
+one. Zero controls under 44 by 44 on touch, after one fix.
 
-A second session has been working today on branch
-`claude/rentme-v2-platform-audit-xuvg0a`. It built, independently, the same
-four small works this branch built (quick pill, paste tray, count tabs,
-action sheet, keyboard walk: `791a7f9b`, `e4a07f61`) and the website root
-work (`7ea3f5fd`, `78e38414`, `28eb6022`: no landing page at the root, the
-foot under the listings, social icons in their real brand colours).
+THE FINDING WAS THE SWEEP, NOT THE PAGES. Its first complete run called 509
+of 640 rows failures. Every one was the measurement, in six ways, each now
+fixed and each written up in the document's 4.2 with what it cost. The worst
+two: a pseudo-element hit area is not a child node, so `.nf-tap::after` and
+`.nf-btn--sm::before` were invisible to it and the whole 44px floor read as
+broken; and headless Chromium reports a fine pointer at 390px, so it took
+the mouse branch of a rule that only applies to touch. A sweep that cannot
+see how this platform grows a target would have sent somebody rebuilding
+what is already right.
 
-The founder ruled on the website half: delete this branch's version. Done in
-`67487736`, which reverts `5d6cb242` and `883105f8` and undoes the landing
-rename, so that branch's version merges clean.
+ONE PRODUCT FIX. The assistant composer's field was 40.8px beside a send
+disc that was given the 44pt floor on 11 November. One composer, two
+controls, one of them short. It now reads the same rung as the disc, so they
+cannot disagree again.
 
-The rest is unresolved. A trial merge, thrown away, conflicts in 43 files,
-almost all of them the doubled work. The lead's recommendation to the
-founder: merge that branch in and keep its count tabs, action sheet, paste
-and keyboard work at each conflict, keep this branch's banner and pill
-styling on top since that is the look he signed off. It needs the other
-session to stop pushing first. Waiting on his word.
+LEFT ALONE, EACH WITH ITS REASON IN SECTION 7: the styleguide's nested card
+at 14px in dark and 18px in light (a real asymmetry, and a decision for the
+founder rather than a thing to invent a rule for), the stays tile at the
+control radius by its own stated law, and prose links, which cannot take a
+44px hit area without covering the lines above and below.
 
-## DONE AND PUSHED ON THIS BRANCH
+A BOOKKEEPING ERROR OF THE LEAD'S. Commit `60b4659a3` is titled for the Face
+ID work and also carries this audit: the sweep, the composer fix and the 534
+lines of document. `git add -A` swept a second agent's files into a commit
+whose message describes only the first. The history is wrong about what that
+commit contains and this paragraph is the correction, since main is not
+rewritten.
+
+## FACE ID AND THE MONEY LOCK: DONE
+
+`60b4659a3`. The screen no longer offers to add a phone it has just said is
+already added; the Face ID step is its own numbered step with its own words;
+turning it off is a screen that says what stops and what does not; and
+"Remove this phone" is no longer dead code. That last one was a React 19
+Action entanglement: the tap opened a sheet and then waited for that same
+sheet to be answered. It broke only for people who had actually enrolled,
+which is why no earlier test saw it, and the same shape was in Add bank
+account, the payout accounts and the host wizard. Proven load-bearing: the
+lead removed the fix and both new tests hung, then passed with it restored.
+
+## DONE AND ON MAIN
 
 | What | Commit |
 |---|---|
-| The four small works: pill, paste, count tabs, action sheet | `967721ce` `148a1968` `10e5c515` `7e0407f0` |
-| The keyboard pass, and Enter no longer sends on a phone | `03578827` |
-| Back is a chevron, every back and close control on the page's line | `f11d35c4` `70455692` |
-| The banner: capsule, small type, brand rail, one circled mark per tone, a processing tone, both marks at one size and stroke | `2c7d7deb` `c102125a` `55e097a3` `3facb325` |
-| Motion: nine of ten already existed, one gap built | `acfd1ea4` |
-| The database audit, measured, with five SQL files for him | `17bde0ab` `531d0549` `713c013a` `05b42fb6` `f168f32e` |
-| Bugs found and fixed: a realtime crash loop, a mandate rule drift, an unwatched cron job, a 0.239 layout shift | `1094b98f` `d5d08b36` `dbf89b3b` |
-| The in-app help search reads the whole centre, not the FAQ alone | `b22c1aa6` |
-| The site root rebuild, removed as a duplicate | `67487736` |
+| The merge of both branches, 44 files decided one by one | `7fdef9aa` `637541b6` |
+| The listing hero's back: a disc, then out of the photograph into the bar | `26f17ab2` `1b89d293` |
+| The banner reverted to the platform's own, back chevron to 24px | `a0ae49a8` |
+| The back control's air, and the pencil scoped to feed and roommates | `fc91c397` |
+| Face ID, the money lock, and the consistency audit | `60b4659a3` |
+| The database: five files applied and verified, three filed as migrations | `163ef982` |
 
-The four small works and the keyboard pass are duplicates of that other
-branch's own. They were built before this branch knew it existed.
+## WAITING ON THE FOUNDER
 
-## WAITING ON THE FOUNDER (nothing is blocked behind these)
-
-1. Which way the two branches join. The lead's recommendation is above.
-2. Four SQL files to run, in order: scoped staff doors (unblocks the BD
-   Director's listings desk, failing now), alerts cleanup, insert limits,
-   cascade indexes. Plus one draft (stale sessions) that signs people out.
-3. Supabase dashboard: Authentication, Sessions. No session time limit is set
-   at all, which is why 720 of them are still open.
-4. Where the showcase lives: a public address, inside the app, or both.
-5. Whether the back chevron should sit further in than the text line.
-
-## NOW
-
-| Who | Task | Done when |
-|---|---|---|
-| Lead | Hold until the founder rules on the merge, since broad edits now would deepen 43 conflicts | His word |
-
-Both agents have stopped. The consistency sweep's table (M5) is unfinished:
-its script and the back-and-close half are committed, the full 161-route run
-was killed by the five-hour limit before it wrote its JSON.
+1. `register_applied_migrations_2026-11-15.sql`, so a rebuilt database is
+   today's and not 9 November's.
+2. Supabase dashboard, Authentication, Sessions: no time limit is set, which
+   is why 720 sessions had piled up.
+3. Whether Face ID actually rises on his iPhone. Nothing here can prove it.
+4. The styleguide's nested card: 14px at night and 18px by day, on purpose or
+   not.
+5. Where the showcase lives.
 
 ## NEXT, IN ORDER
 
-1. The merge, once he rules.
-2. The consistency sweep's table, resumed: the run needs to write its rows as
-   it goes rather than only at the end.
-3. The signed-in performance baseline, on the harness, since this sandbox has
-   no database credentials (the correction at the top of the performance
-   report explains why the first listing-page number was wrong).
-4. The console: the restricted staff frame, desk tables on a phone, then the
-   founder command centre as a proposal with screenshots.
-5. Public areas not yet swept: stays, restaurants, roommates, feed and Circle,
-   profile and account.
-6. The second audit, by whichever worker did not build the thing.
+1. The signed-in performance baseline, on the harness.
+2. The console: the restricted staff frame, desk tables on a phone, then the
+   founder command centre as a proposal.
+3. Public areas not yet swept: stays, restaurants, roommates, feed, Circle,
+   profile, account.
+4. The second audit, by whoever did not build the thing.
+5. Retire the superseded SQL files and rewrite the pending README from the
+   triage, so the folder stops lying about itself.
 
 ---
 
