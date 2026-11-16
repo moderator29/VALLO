@@ -89,7 +89,7 @@ function filled(v: FormAnswers[string]): boolean {
 /** The first question still missing a required answer, or null when the card can be sent. */
 export function missingAnswer(form: Pick<CopilotForm, "fields">, answers: FormAnswers): FormField | null {
   for (const f of form.fields) {
-    const v = answers[f.id];
+    const v = answers[f.id] ?? null;
     if (f.required !== false && !filled(v)) return f;
     if (f.kind === "number" && typeof v === "number") {
       if ((f.min !== undefined && v < f.min) || (f.max !== undefined && v > f.max)) return f;
@@ -109,6 +109,6 @@ export function answerWords(f: FormField, v: FormAnswers[string]): string {
 
 /** The answers as the person's next message: the card's title, then one line per question. */
 export function answersToMessage(form: Pick<CopilotForm, "title" | "fields">, answers: FormAnswers): string {
-  const lines = form.fields.map((f) => `- ${f.label.replace(/[?:]\s*$/, "")}: ${answerWords(f, answers[f.id])}`);
+  const lines = form.fields.map((f) => `- ${f.label.replace(/[?:]\s*$/, "")}: ${answerWords(f, answers[f.id] ?? null)}`);
   return [form.title ? `${form.title}:` : "My answers:", ...lines].join("\n");
 }

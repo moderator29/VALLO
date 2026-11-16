@@ -3221,6 +3221,20 @@
       margin-bottom: var(--nf-space-md);
       scroll-padding-inline: var(--nf-space-lg);
     }
+    /* THE TAB ROW STAYS IN REACH on a long queue (the founder, 16 November
+       2026): pinned under the console bar while the rows scroll. Only the
+       tabs: the search scrolls away so the screen keeps its room. No frosted
+       filter here, so nothing opened inside it can be clipped. */
+    .nf-admin-tabs {
+      position: sticky;
+      top: calc(3.75rem + env(safe-area-inset-top, 0px));
+      z-index: 5;
+      background: var(--nf-surface-canvas);
+    }
+    /* Inside an opened row the status is said once, by the row above. */
+    .nf-admin-row[open] .nf-admin-flag__status {
+      display: none;
+    }
     .nf-admin-tab {
       padding-inline: var(--nf-space-sm);
     }

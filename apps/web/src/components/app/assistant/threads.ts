@@ -23,7 +23,7 @@ export type Message = {
    * review) for this turn. In memory only: they hold money figures and offers
    * that were true at one moment, so `saveThreads` never writes them down.
    */
-  blocks?: Extract<AssistantStreamEvent, { type: "cards" | "actions" | "slots" | "summary" | "payment_review" | "photos" }>[];
+  blocks?: Extract<AssistantStreamEvent, { type: "cards" | "actions" | "slots" | "summary" | "payment_review" | "photos" | "form" }>[];
   /** The turn failed and the bubble should offer a retry. */
   error?: boolean;
   /** The person stopped this answer (or sent again) while it streamed. What arrived is kept. */

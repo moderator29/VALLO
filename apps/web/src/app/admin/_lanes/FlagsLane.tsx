@@ -99,7 +99,11 @@ function FlagCard({
   return (
     <li className="nf-panel nf-panel--card nf-admin-card p-md sm:p-lg">
       <div className="flex flex-wrap items-center gap-xs">
-        <ui.StatusChip status={flag.status} />
+        {/* The row above already shows this status; inside an opened row on
+            a phone it is said once (the founder, 16 November 2026). */}
+        <span className="nf-admin-flag__status">
+          <ui.StatusChip status={flag.status} />
+        </span>
         <ui.StatusChip label={copy.reason[flag.reason]} tone="neutral" />
         {flag.status === "open" && (
           <ui.StatusChip
