@@ -161,7 +161,7 @@ export function ActionSheet({
           className="nf-acts-sheet"
           testId={testId}
           footer={
-            <Button variant="secondary" size="lg" full onClick={close} data-testid={`${testId}-done`}>
+            <Button variant="secondary" size="lg" full className="nf-acts__done" onClick={close} data-testid={`${testId}-done`}>
               {doneLabel}
             </Button>
           }

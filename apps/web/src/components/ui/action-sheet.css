@@ -26,10 +26,11 @@
     overflow: clip;
     border: var(--nf-border-width) solid color-mix(in oklab, var(--nf-brand-primary) 30%, var(--nf-tier-card-edge));
     border-radius: var(--nf-radius-card);
-    background:
-      linear-gradient(180deg, color-mix(in oklab, var(--nf-brand-primary) 12%, transparent), transparent 70%),
-      var(--nf-surface-primary);
-    box-shadow: var(--nf-card-shadow);
+    /* 16 November 2026, the founder again: still black on the live sheet. The
+       wash sat on the black page surface, so the card read black under a
+       tint. The card is now the sheet's own navy seen through a brand glass,
+       the material of the Create sheet's rows, with no black underneath. */
+    background: color-mix(in oklab, var(--nf-brand-primary) 10%, transparent);
   }
 
   /* ------------------------------------------------------- the header card */
@@ -321,6 +322,12 @@
      sheet's footer, a full-width button of its own. */
   .nf-sheet.nf-acts-sheet .nf-sheet__body {
     padding-block-end: var(--nf-space-sm);
+  }
+  /* Done is on the brand too: the same glass as the cards, a brand edge, not
+     a black slab under them. */
+  .nf-sheet.nf-acts-sheet .nf-acts__done {
+    border-color: color-mix(in oklab, var(--nf-brand-primary) 55%, transparent);
+    background: color-mix(in oklab, var(--nf-brand-primary) 14%, transparent);
   }
 
   /* UNDER REDUCED MOTION THE SHEET FADES. Every sheet stops sliding there

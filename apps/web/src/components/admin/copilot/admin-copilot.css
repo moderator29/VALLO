@@ -791,10 +791,6 @@
     color: var(--nf-content-muted);
   }
 
-  .nf-copilot-form:focus-within {
-    border-color: var(--nf-brand-primary);
-  }
-
   .nf-copilot-send {
     display: grid;
     place-items: center;
@@ -1137,9 +1133,6 @@
     outline: none;
   }
 
-  .nf-copilot-history__search:focus-within {
-    border-color: var(--nf-brand-primary);
-  }
 
   .nf-copilot-history__tools {
     display: flex;
