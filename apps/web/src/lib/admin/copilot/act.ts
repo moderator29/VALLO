@@ -1,5 +1,10 @@
 import "server-only";
-import { acknowledgeRiskAlert, resolveRiskAlert, reviewMessageFlag, setTicketStatus } from "@/lib/admin/actions";
+import { acknowledgeRiskAlert, resolveRiskAlert, reviewAgentApplication, reviewListingOnce, reviewMessageFlag, setTicketStatus, toggleFeatureFlag } from "@/lib/admin/actions";
+import { refundBookingAsAdmin } from "@/lib/admin/bookings-actions";
+import { liftRestriction, restrictMember } from "@/lib/admin/cases/actions";
+import { decideIdentityCheck } from "@/lib/admin/identity-check-actions";
+import { decideHeldItem } from "@/lib/admin/moderation-actions";
+import { grantStaff, revokeStaff } from "@/lib/admin/staff-actions";
 import { addProspect, logActivity } from "@/lib/admin/business-development/actions";
 import { actOnEscalation } from "@/lib/admin/escalations/actions";
 import { sendSupportReply } from "@/lib/admin/support-workbench-actions";
@@ -47,6 +52,16 @@ const PAGE: Record<ActionKind, string> = {
   escalation_step: "/admin/escalations",
   risk_alert_step: "/admin/alerts",
   review_message_flag: "/admin/queue",
+  review_listing: "/admin/listings",
+  review_agent_application: "/admin/agents",
+  decide_identity_check: "/admin/kyc",
+  set_switch: "/admin/control",
+  restrict_member: "/admin/trust",
+  lift_restriction: "/admin/trust",
+  grant_staff: "/admin/staff",
+  revoke_staff: "/admin/staff",
+  refund_booking: "/admin/bookings",
+  decide_held_item: "/admin/queue",
 };
 
 const SUCCESS: Record<ActionKind, string> = {
@@ -63,6 +78,16 @@ const SUCCESS: Record<ActionKind, string> = {
   escalation_step: "Done on the escalation.",
   risk_alert_step: "Alert updated.",
   review_message_flag: "Flag reviewed.",
+  review_listing: "Listing decided. The lister has been told.",
+  review_agent_application: "Application decided. The applicant has been told.",
+  decide_identity_check: "Identity check decided.",
+  set_switch: "Switch changed.",
+  restrict_member: "Restriction applied and recorded.",
+  lift_restriction: "Restriction lifted.",
+  grant_staff: "Access granted.",
+  revoke_staff: "Access taken away.",
+  refund_booking: "Refund sent through the payment partner.",
+  decide_held_item: "Held item decided.",
 };
 
 /** The exact item when the action names one (a ticket opens on itself), else the desk. */
@@ -142,6 +167,44 @@ export async function executeAction(action: ProposalAction): Promise<Done> {
       const d = ACTION_SCHEMAS.review_message_flag.parse(action.input);
       result = await reviewMessageFlag({ flagId: d.flagId, resolution: d.resolution });
       if (result.ok) return { ok: true, message: d.resolution === "cleared" ? "Flag cleared. The message stays as it was." : "Flag escalated for a closer look." };
+      break;
+    }
+    case "review_listing":
+      result = await reviewListingOnce(ACTION_SCHEMAS.review_listing.parse(action.input));
+      break;
+    case "review_agent_application":
+      result = await reviewAgentApplication(ACTION_SCHEMAS.review_agent_application.parse(action.input));
+      break;
+    case "decide_identity_check": {
+      const d = ACTION_SCHEMAS.decide_identity_check.parse(action.input);
+      result = await decideIdentityCheck({ checkId: d.checkId, approve: d.approve, ...(d.reason ? { reason: d.reason } : {}) });
+      break;
+    }
+    case "set_switch":
+      result = await toggleFeatureFlag(ACTION_SCHEMAS.set_switch.parse(action.input));
+      break;
+    case "restrict_member":
+      result = await restrictMember(ACTION_SCHEMAS.restrict_member.parse(action.input));
+      break;
+    case "lift_restriction":
+      result = await liftRestriction(ACTION_SCHEMAS.lift_restriction.parse(action.input));
+      break;
+    case "grant_staff": {
+      const d = ACTION_SCHEMAS.grant_staff.parse(action.input);
+      result = await grantStaff({ email: d.email, scopes: d.scopes, position: d.position || null, ...(d.note ? { note: d.note } : {}) });
+      break;
+    }
+    case "revoke_staff":
+      result = await revokeStaff(ACTION_SCHEMAS.revoke_staff.parse(action.input));
+      break;
+    case "refund_booking": {
+      const d = ACTION_SCHEMAS.refund_booking.parse(action.input);
+      result = await refundBookingAsAdmin({ bookingId: d.bookingId, amountMinor: d.amountMinor, reason: d.reason, note: d.note });
+      break;
+    }
+    case "decide_held_item": {
+      const d = ACTION_SCHEMAS.decide_held_item.parse(action.input);
+      result = await decideHeldItem({ target: d.target, id: d.id, decision: d.decision, ...(d.reason ? { reason: d.reason } : {}) });
       break;
     }
     default:
@@ -263,7 +326,13 @@ async function auditRow(entry: { actorId: string; tool: string; kind: string; no
   }
 }
 
-export async function confirmProposal(input: { token: unknown; viewer: CopilotViewer; now: number }, deps: ActDeps = {}): Promise<ActOutcome> {
+/** The typed word matches the sealed one: trimmed, any case. */
+export function typedMatches(sealed: string | undefined, typed: unknown): boolean {
+  if (!sealed) return true;
+  return typeof typed === "string" && typed.trim().toLowerCase() === sealed.trim().toLowerCase();
+}
+
+export async function confirmProposal(input: { token: unknown; viewer: CopilotViewer; now: number; typed?: unknown }, deps: ActDeps = {}): Promise<ActOutcome> {
   const key = deps.key === undefined ? proposalKey() : deps.key;
   if (!key) return { status: 503, body: { ok: false, code: "unavailable", message: "Confirming is not available on this server just now. Make the change on the desk." } };
 
@@ -281,6 +350,11 @@ export async function confirmProposal(input: { token: unknown; viewer: CopilotVi
   const kind = body.a?.kind as ActionKind | undefined;
   if (!kind || !(kind in ACTION_SCHEMAS) || !ACTION_SCHEMAS[kind].safeParse(body.a.input).success) {
     return { status: 400, body: { ok: false, code: "invalid", message: "That suggestion could not be checked. Ask me again." } };
+  }
+  /* A change that is hard to take back runs only once its word is typed.
+     Checked before the claim, so a mistyped word does not use the card up. */
+  if (!typedMatches(body.cw, input.typed)) {
+    return { status: 400, body: { ok: false, code: "invalid", message: `Type ${body.cw} exactly to confirm. Nothing was changed.` } };
   }
   // The claim comes BEFORE the action. If it cannot be recorded the action does not run.
   let claimed: ClaimResult | boolean;

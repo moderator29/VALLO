@@ -29,6 +29,11 @@ export type ProposalBody = {
   a: ProposalAction;
   label: string;
   summary: string;
+  /**
+   * A word the person must type before the change runs, for the changes
+   * that are hard to take back (16 November 2026). Checked on the server.
+   */
+  cw?: string;
   /** Epoch milliseconds. */
   exp: number;
 };

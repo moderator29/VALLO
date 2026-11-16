@@ -180,6 +180,7 @@ export const COPILOT_CAPABILITIES: readonly DeskCapability[] = [
       "Read the control room: what is waiting on you, which database files are still to run, and which services are connected",
       "Read who holds staff access, who has acknowledged the handbook, who has been active and which teams have nobody on them",
       "Read the audit trail in plain words: who did what and when, with the desk each record lives on",
+      "Do what you do from the panel, on a card you press: approve, reject or send back a listing, an agent application or an identity check; release or remove held content; turn a switch on or off; restrict a member or lift it; grant or take away staff access; refund a booking. The ones hard to take back ask you to type a word first",
     ],
     prompts: ["What needs me today?", "What is waiting across the platform?", "What SQL still has to run?", "Who has access to what?", "What changed this week?"],
   },

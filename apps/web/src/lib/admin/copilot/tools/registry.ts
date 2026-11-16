@@ -15,6 +15,7 @@ import { COO_TOOLS } from "./coo";
 import { HANDBOOK_TOOLS } from "./handbook";
 import { DELETION_REASON_TOOLS } from "./deletion-reasons";
 import { DESK_ACTION_TOOLS } from "./desk-actions";
+import { SUPER_ADMIN_TOOLS } from "./super-admin";
 import { ESCALATION_TOOLS } from "./escalations";
 import { FINANCE_TOOLS } from "./finance";
 import { KYC_TOOLS } from "./kyc";
@@ -61,6 +62,8 @@ export const COPILOT_TOOLS: readonly CopilotTool[] = [
   ...COO_TOOLS,
   /* Desk work behind a button (16 November 2026): replies, statuses, escalation steps, alerts, flags. */
   ...DESK_ACTION_TOOLS,
+  /* The super admin's own hands (16 November 2026): theirs alone, each behind a preview and, where hard to undo, a typed word. */
+  ...SUPER_ADMIN_TOOLS,
   /* The control room (15 November 2026): a super admin only. */
   ...CONTROL_ROOM_TOOLS,
   /* The platform, the staff and the audit trail (16 November 2026): a super admin only. */
@@ -77,7 +80,10 @@ export const FORBIDDEN_TOOL_NAME =
   /(refund|payout|pay_|_pay\b|transfer|withdraw|restrict|suspend|\bban|ban_|approve|reject|decide|grant|revoke|delete|destroy|remove|erase|send_message|message_member|notify_member|resolve|close_case)/i;
 
 export function isOfferable(tool: CopilotTool, viewer: CopilotViewer): boolean {
-  if (FORBIDDEN_TOOL_NAME.test(tool.name)) return false;
+  /* The super admin's own tools (`lib/admin/copilot/tools/super-admin.ts`) are theirs alone. A
+     forbidden name is offered only on such a tool, and only to them. */
+  if (tool.superAdminOnly && !viewer.isSuperAdmin) return false;
+  if (FORBIDDEN_TOOL_NAME.test(tool.name) && !(tool.superAdminOnly && viewer.isSuperAdmin)) return false;
   if (!holdsAny(viewer, tool.scopes)) return false;
   if (tool.allow && !tool.allow(viewer)) return false;
   return true;
@@ -169,6 +175,6 @@ export function finalizeProposal(tool: string, draft: ProposalDraft, ctx: ToolCt
   if (draft.mode === "draft" || !action) return { ...card, id: randomUUID(), tool, mode: "draft", expiresAt };
   const key = proposalKey();
   if (!key) return null;
-  const { token, body } = sealProposal(key, { u: ctx.viewer.userId, t: tool, a: action, label: card.label, summary: card.summary }, ctx.now);
+  const { token, body } = sealProposal(key, { u: ctx.viewer.userId, t: tool, a: action, label: card.label, summary: card.summary, ...(card.confirmWord ? { cw: card.confirmWord } : {}) }, ctx.now);
   return { ...card, id: body.n, tool, token, expiresAt };
 }

@@ -212,3 +212,29 @@ describe("strict single use: the database claim", () => {
     expect(isMissingRelation(null)).toBe(false);
   });
 });
+
+describe("the super admin's hands (16 November 2026)", () => {
+  const boss: CopilotViewer = { userId: "u1", firstName: "Ada", isAdmin: true, isSuperAdmin: true, scopes: [], position: null };
+  const refund: ProposalAction = { kind: "refund_booking", input: { bookingId: "11111111-1111-1111-1111-111111111111", amountMinor: 500000, reason: "goodwill", note: "" } };
+  const sealRefund = (cw?: string) => sealProposal(key, { u: "u1", t: "refund_booking", a: refund, label: "Refund", summary: "Refund", ...(cw ? { cw } : {}) }, NOW).token;
+  const runTyped = (token: string, typed: unknown, v: CopilotViewer = boss) => confirmProposal({ token, viewer: v, now: NOW + 60_000, typed }, { key, claim, execute, audit });
+
+  it("runs only once the sealed word is typed, any case, and a mistyped word does not use the card up", async () => {
+    const token = sealRefund("REFUND");
+    const wrong = await runTyped(token, "refnd");
+    expect(wrong.status).toBe(400);
+    expect(wrong.body.message).toContain("Type REFUND");
+    const missing = await runTyped(token, undefined);
+    expect(missing.status).toBe(400);
+    expect(execute).not.toHaveBeenCalled();
+    const right = await runTyped(token, "  refund ");
+    expect(right.status).toBe(200);
+    expect(execute).toHaveBeenCalledTimes(1);
+  });
+
+  it("refuses the super admin's tools to an admin who is not the super admin, even with the word", async () => {
+    const out = await runTyped(sealRefund("REFUND"), "REFUND", { ...boss, isSuperAdmin: false });
+    expect(out.status).toBe(403);
+    expect(execute).not.toHaveBeenCalled();
+  });
+});

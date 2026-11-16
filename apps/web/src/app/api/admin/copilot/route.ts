@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { STAFF_SCOPES, type StaffScope } from "@/lib/admin/guard";
-import { streamAdminCopilot, type AdminCopilotTurn } from "@/lib/admin/copilot/engine";
+import { ANSWER_STYLES, streamAdminCopilot, type AdminCopilotTurn, type AnswerStyle } from "@/lib/admin/copilot/engine";
 import { cleanHistory } from "@/lib/admin/copilot/history";
 import { toolsForViewer } from "@/lib/admin/copilot/tools/registry";
 import { holds } from "@/lib/admin/copilot/tools/common";
@@ -32,6 +32,8 @@ type Body = {
   context?: string | null;
   history?: AdminCopilotTurn[];
   message?: string;
+  /** The person's answer-length setting; anything else is ignored. */
+  style?: string;
 };
 
 function isStaffScope(value: string): value is StaffScope {
@@ -84,6 +86,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
             message,
             tools,
             now: Date.now(),
+            ...((ANSWER_STYLES as readonly string[]).includes(body.style ?? "") ? { style: body.style as AnswerStyle } : {}),
           },
           signal,
         )) {

@@ -23,7 +23,43 @@ export type Turn = {
   proposals: ProposalState[];
   /** The pages the tools offered this turn. Only these are drawn as buttons. */
   destinations?: Destination[];
+  /** What the copilot read or prepared for this answer, by tool name and by its plain label. */
+  tools?: { name: string; label: string }[];
 };
+
+/**
+ * THE PERSON'S OWN COPILOT SETTINGS (16 November 2026), kept on this device:
+ * how long answers run, whether the steps it took are shown under each
+ * answer, whether conversations are saved to History, and whether Enter
+ * sends (on a phone keyboard many people want Enter for a new line).
+ */
+export type CopilotSettings = { style: "short" | "balanced" | "detailed"; showSteps: boolean; saveHistory: boolean; enterSends: boolean };
+export const DEFAULT_SETTINGS: CopilotSettings = { style: "balanced", showSteps: true, saveHistory: true, enterSends: true };
+const SETTINGS_KEY = "vallo.copilot.settings.v1";
+
+export function readSettings(): CopilotSettings {
+  try {
+    const raw = window.localStorage.getItem(SETTINGS_KEY);
+    if (!raw) return DEFAULT_SETTINGS;
+    const v = JSON.parse(raw) as Partial<CopilotSettings>;
+    return {
+      style: v.style === "short" || v.style === "detailed" ? v.style : "balanced",
+      showSteps: v.showSteps !== false,
+      saveHistory: v.saveHistory !== false,
+      enterSends: v.enterSends !== false,
+    };
+  } catch {
+    return DEFAULT_SETTINGS;
+  }
+}
+
+export function writeSettings(next: CopilotSettings): void {
+  try {
+    window.localStorage.setItem(SETTINGS_KEY, JSON.stringify(next));
+  } catch {
+    /* Blocked storage: the setting holds for this visit. */
+  }
+}
 export type ToolLine = { id: string; label: string };
 export type ThreadSummary = { id: string; title: string; desk: string; updatedAt: string };
 /** "unknown" until the first save or list answers; "off" when the console has no history table yet. */
@@ -73,7 +109,7 @@ function readStored(key: string): Turn[] {
     return Array.isArray(parsed)
       ? parsed
           .filter((t) => t && (t.role === "user" || t.role === "assistant") && typeof t.text === "string")
-          .map((t) => ({ ...t, proposals: Array.isArray(t.proposals) ? t.proposals : [], destinations: Array.isArray(t.destinations) ? t.destinations : [] }))
+          .map((t) => ({ ...t, proposals: Array.isArray(t.proposals) ? t.proposals : [], destinations: Array.isArray(t.destinations) ? t.destinations : [], tools: Array.isArray(t.tools) ? t.tools : [] }))
       : [];
   } catch {
     return [];
@@ -88,7 +124,7 @@ function writeStored(key: string, turns: Turn[]) {
   }
 }
 
-export function useCopilotChat({ storageKey, scope, deskName, context }: { storageKey: string; scope: string | null; deskName: string; context: string | null }) {
+export function useCopilotChat({ storageKey, scope, deskName, context, settings = DEFAULT_SETTINGS }: { storageKey: string; scope: string | null; deskName: string; context: string | null; settings?: CopilotSettings }) {
   const [turns, setTurns] = useState<Turn[]>([]);
   const [pending, setPending] = useState(false);
   const [tool, setTool] = useState<ToolLine | null>(null);
@@ -124,7 +160,7 @@ export function useCopilotChat({ storageKey, scope, deskName, context }: { stora
      A short wait so a burst of changes is one save; nothing while an answer
      is still being written. */
   useEffect(() => {
-    if (!restored || pending || history === "off" || turns.length === 0) return;
+    if (!restored || pending || history === "off" || !settings.saveHistory || turns.length === 0) return;
     const body = forStore(turns);
     const sig = JSON.stringify(body);
     if (sig === savedSig.current) return;
@@ -153,7 +189,7 @@ export function useCopilotChat({ storageKey, scope, deskName, context }: { stora
       }
     }, 700);
     return () => window.clearTimeout(timer);
-  }, [turns, pending, restored, history, scope, deskName, storageKey]);
+  }, [turns, pending, restored, history, scope, deskName, storageKey, settings.saveHistory]);
 
   const patchLast = useCallback((fn: (turn: Turn) => Turn) => {
     setTurns((all) => {
@@ -169,7 +205,7 @@ export function useCopilotChat({ storageKey, scope, deskName, context }: { stora
       const message = raw.trim();
       if (!message || pending) return;
       const history = turnsRef.current.filter((t) => t.text.trim()).map((t) => ({ role: t.role, text: t.text }));
-      setTurns((t) => [...t, { id: newId(), role: "user", text: message, proposals: [] }, { id: newId(), role: "assistant", text: "", proposals: [], destinations: [] }]);
+      setTurns((t) => [...t, { id: newId(), role: "user", text: message, proposals: [] }, { id: newId(), role: "assistant", text: "", proposals: [], destinations: [], tools: [] }]);
       setPending(true);
       setTool(null);
       const controller = new AbortController();
@@ -178,7 +214,7 @@ export function useCopilotChat({ storageKey, scope, deskName, context }: { stora
         const res = await fetch("/api/admin/copilot", {
           method: "POST",
           headers: { "content-type": "application/json" },
-          body: JSON.stringify({ scope, deskName, context, history, message }),
+          body: JSON.stringify({ scope, deskName, context, history, message, style: settings.style }),
           signal: controller.signal,
         });
         if (!res.ok || !res.body) {
@@ -210,6 +246,10 @@ export function useCopilotChat({ storageKey, scope, deskName, context }: { stora
               patchLast((t) => ({ ...t, text: t.text + event.text }));
             } else if (event.type === "tool") {
               setTool(event.phase === "start" ? { id: event.id, label: event.label } : null);
+              if (event.phase === "done") {
+                const step = { name: String(event.name ?? ""), label: String(event.label ?? "") };
+                patchLast((t) => ((t.tools ?? []).some((x) => x.name === step.name) ? t : { ...t, tools: [...(t.tools ?? []), step] }));
+              }
             } else if (event.type === "proposal") {
               patchLast((t) => ({ ...t, proposals: [...t.proposals, { proposal: event.proposal, status: "pending" }] }));
             } else if (event.type === "destinations") {
@@ -233,22 +273,43 @@ export function useCopilotChat({ storageKey, scope, deskName, context }: { stora
         setTool(null);
       }
     },
-    [pending, scope, deskName, context, patchLast],
+    [pending, scope, deskName, context, patchLast, settings.style],
   );
+
+  /** Stop the answer being written. What has arrived stays on screen. */
+  const stop = useCallback(() => {
+    abortRef.current?.abort();
+    setPending(false);
+    setTool(null);
+    patchLast((t) => (t.text ? t : { ...t, text: "Stopped. Ask again whenever you are ready." }));
+  }, [patchLast]);
+
+  /** Ask the last question again: the last answer is replaced by a new one. */
+  const askAgain = useCallback(() => {
+    if (pending) return;
+    const all = turnsRef.current;
+    let lastUser = -1;
+    for (let i = all.length - 1; i >= 0; i -= 1) if (all[i]!.role === "user") { lastUser = i; break; }
+    if (lastUser < 0) return;
+    const question = all[lastUser]!.text;
+    turnsRef.current = all.slice(0, lastUser);
+    setTurns(all.slice(0, lastUser));
+    void send(question);
+  }, [pending, send]);
 
   const setProposal = useCallback((id: string, patch: Partial<ProposalState>) => {
     setTurns((all) => all.map((t) => ({ ...t, proposals: t.proposals.map((p) => (p.proposal.id === id ? { ...p, ...patch } : p)) })));
   }, []);
 
   const confirm = useCallback(
-    async (proposal: CopilotProposal) => {
+    async (proposal: CopilotProposal, typed?: string) => {
       if (!proposal.token) return;
       setProposal(proposal.id, { status: "confirming" });
       try {
         const res = await fetch("/api/admin/copilot/act", {
           method: "POST",
           headers: { "content-type": "application/json" },
-          body: JSON.stringify({ token: proposal.token }),
+          body: JSON.stringify({ token: proposal.token, ...(typed ? { typed } : {}) }),
         });
         const body = (await res.json().catch(() => null)) as { ok?: boolean; message?: string; href?: string; code?: string } | null;
         const message = body?.message ?? "That did not go through. Try again, or make the change on the desk.";
@@ -257,7 +318,9 @@ export function useCopilotChat({ storageKey, scope, deskName, context }: { stora
           setProposal(proposal.id, { status: "done", message, ...(body.href ? { href: body.href } : {}) });
         } else {
           banner.error(message);
-          setProposal(proposal.id, { status: body?.code === "expired" ? "expired" : "failed", message });
+          /* A mistyped word leaves the card as it was, to type again. */
+          const retry = body?.code === "invalid" && Boolean(proposal.confirmWord);
+          setProposal(proposal.id, { status: retry ? "pending" : body?.code === "expired" ? "expired" : "failed", message });
         }
       } catch {
         const message = "Could not reach the console just now. Nothing was changed. Try again.";
@@ -353,5 +416,5 @@ export function useCopilotChat({ storageKey, scope, deskName, context }: { stora
     [newChat],
   );
 
-  return { turns, pending, tool, send, confirm, dismiss, newChat, threadId, history, threads, listing, loadThreads, openThread, deleteThread };
+  return { turns, pending, tool, send, stop, askAgain, confirm, dismiss, newChat, threadId, history, threads, listing, loadThreads, openThread, deleteThread };
 }

@@ -18,8 +18,11 @@ export const dynamic = "force-dynamic";
 export async function POST(request: NextRequest): Promise<NextResponse> {
   if (!isSameOriginRequest(request)) return NextResponse.json({ ok: false, message: "That request did not come from the console." }, { status: 403 });
   let token: unknown;
+  let typed: unknown;
   try {
-    token = ((await request.json()) as { token?: unknown }).token;
+    const parsed = (await request.json()) as { token?: unknown; typed?: unknown };
+    token = parsed.token;
+    typed = parsed.typed;
   } catch {
     return NextResponse.json({ ok: false, message: "That request could not be read." }, { status: 400 });
   }
@@ -27,6 +30,6 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
   if (resolved.state !== "ok") return NextResponse.json({ ok: false, message: "Sign in to the console again to confirm this." }, { status: resolved.state === "unconfigured" ? 503 : 403 });
   const limited = await consume({ bucket: "admin_copilot_act", subject: subjectForUser(resolved.viewer.userId), limit: 30, windowSeconds: 3600 });
   if (!limited.allowed) return NextResponse.json({ ok: false, message: "That is a lot of changes in a short time. Wait a little and try again." }, { status: 429 });
-  const outcome = await confirmProposal({ token, viewer: resolved.viewer, now: Date.now() });
+  const outcome = await confirmProposal({ token, viewer: resolved.viewer, now: Date.now(), typed });
   return NextResponse.json(outcome.body, { status: outcome.status, headers: { "cache-control": "no-store" } });
 }

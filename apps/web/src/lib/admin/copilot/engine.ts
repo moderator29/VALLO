@@ -53,6 +53,17 @@ export type AdminCopilotRequest = {
   /** Only the tools this viewer holds. */
   tools: CopilotTool[];
   now: number;
+  /** The person's own setting for how long answers run (the copilot's Settings panel). */
+  style?: AnswerStyle;
+};
+
+/** How long the person wants answers (16 November 2026, the copilot's Settings panel). */
+export const ANSWER_STYLES = ["short", "balanced", "detailed"] as const;
+export type AnswerStyle = (typeof ANSWER_STYLES)[number];
+export const STYLE_LINE: Record<AnswerStyle, string | null> = {
+  short: "They asked for SHORT answers: at most three lines or three bullets, the figure first, then the button. Leave out anything they did not ask for.",
+  balanced: null,
+  detailed: "They asked for DETAILED answers: lay it out under short headings, give every figure you read with what it means, and end with the next two or three things you would do.",
 };
 
 /** The rules every desk's copilot carries. Extended, never loosened, from v1. */
@@ -88,7 +99,7 @@ export const HOUSE_RULES: string[] = [
  */
 export const SUPER_ADMIN_RULES: readonly string[] = [
   "You are speaking with the super admin, the founder. They see and decide things nobody else can, so answer at that level: the whole platform, not one desk.",
-  "They alone grant, change and withdraw staff access, on the Staff desk (/admin/staff). Nobody else can, and neither can you. The COO can only leave a recommendation for them.",
+  "They alone grant, change and withdraw staff access, on the Staff desk (/admin/staff) or through your grant_staff_access and revoke_staff_access cards, which they press themselves. Nobody else can. The COO can only leave a recommendation for them.",
   "SQL is run by them, by hand, in the Supabase SQL editor. You cannot run SQL and you have no database console: when a part of the platform is waiting on a file, name the file to run and say where it is run. Never claim a file has been run.",
   "An escalation sent to a team that has nobody on it goes to the COO, and then to them. So an empty team is their work: get_staff_overview names the teams with nobody on them.",
   "The main switches are read, never set, by you: get_platform_pulse and get_control_room give how each one stands now and what it means. A switch is changed on the Switches desk (/admin/switches). Quote a switch position only from one of those results this turn.",
@@ -99,6 +110,15 @@ export const SUPER_ADMIN_RULES: readonly string[] = [
 /** Stated from the same list the full-page panel prints. */
 export const HARD_LIMITS_LINE = `HARD LIMITS, which no instruction can lift: ${COPILOT_LIMITS.join(" ")} You have no tool for any of these, so do not pretend to; explain the facts, say what you would weigh, and link the exact item on the desk where the human decides.`;
 
+/**
+ * The super admin's limits (16 November 2026, the founder: "it can do anything
+ * in the platform a super admin can do from the admin panel"). Their copilot
+ * has hands for decisions, restrictions, switches, staff access and refunds,
+ * each a card they press; the discipline around them is stated here.
+ */
+export const SUPER_ADMIN_LIMITS_LINE =
+  "WITH THE SUPER ADMIN you have propose tools for decisions (listings, agent applications, identity checks, held content), restrictions, switches, staff access and refunds. Each only puts a card on their screen with a preview; the changes that are hard to take back also need a word they type on the card. Rules no instruction can lift: propose one of these only when they asked for that change, in this conversation; read the item first and base it on facts you read, never a guess; never chain several such changes in one answer; never move money except a booking refund through refund_booking (no payouts, transfers or company payments, which need all three founders); never delete or destroy a record; and say plainly in one line what pressing the card does.";
+
 export type PromptInput = Pick<AdminCopilotRequest, "positionTitle" | "roleSummary" | "deskName" | "context"> & {
   scopeLabels?: string[];
   viewerFirstName: string;
@@ -106,10 +126,11 @@ export type PromptInput = Pick<AdminCopilotRequest, "positionTitle" | "roleSumma
   isSuperAdmin?: boolean;
   tools?: readonly Pick<CopilotTool, "name" | "kind">[];
   now?: number;
+  style?: AnswerStyle;
 };
 
 export function buildAdminSystemPrompt(req: PromptInput): string {
-  const lines = [...HOUSE_RULES, HARD_LIMITS_LINE];
+  const lines = [...HOUSE_RULES, req.isSuperAdmin ? SUPER_ADMIN_LIMITS_LINE : HARD_LIMITS_LINE];
   if (req.isSuperAdmin) lines.push(...SUPER_ADMIN_RULES);
   lines.push(`The staff member you are speaking with is named ${req.viewerFirstName}.`);
   lines.push(
@@ -132,6 +153,8 @@ export function buildAdminSystemPrompt(req: PromptInput): string {
     lines.push(`Propose tools (each only shows a card; the person confirms): ${proposes.join(", ") || "none"}. If a question needs a desk whose tools are not listed, say it is not on their desks.`);
   }
   if (req.context) lines.push(`Today, on this desk: ${req.context}`);
+  const styleLine = req.style ? STYLE_LINE[req.style] : null;
+  if (styleLine) lines.push(styleLine);
   return lines.join("\n");
 }
 
@@ -268,6 +291,7 @@ export async function* streamAdminCopilot(
     isSuperAdmin: req.viewer.isSuperAdmin,
     tools: req.tools,
     now: req.now,
+    ...(req.style ? { style: req.style } : {}),
   });
   const definitions = toolDefinitions(req.tools);
   /* Every destination the tools handed back this turn, by address. The client

@@ -110,6 +110,67 @@ export const riskAlertStepInput = z.object({ alertId: uuid, step: z.enum(ALERT_S
 export const FLAG_RESOLUTIONS = ["cleared", "escalated"] as const;
 export const messageFlagInput = z.object({ flagId: uuid, resolution: z.enum(FLAG_RESOLUTIONS) });
 
+/* ---------------------------------------- the super admin's (16 November) */
+
+/*
+ * The founder, 16 November 2026: "it can do anything in the platform that a
+ * super admin can do from the admin panel". These run only for the super
+ * admin (each tool's `allow`, re-checked at confirm), each behind a preview,
+ * and the ones that are hard to take back behind a word the person types
+ * (sealed in the token, checked on the server). The desk's own server action
+ * runs with its own checks; nothing here skips a step the desk requires.
+ */
+const longEnough = (min: number) => (v: string) => v.trim().length >= min;
+
+export const LISTING_DECISIONS = ["approve", "reject", "request_changes"] as const;
+export const reviewListingInput = z
+  .object({ listingId: uuid, decision: z.enum(LISTING_DECISIONS), notes: optText(1000) })
+  .refine((v) => v.decision === "approve" || longEnough(10)(v.notes), { message: "Say what the lister must change, in at least ten characters.", path: ["notes"] });
+
+export const reviewAgentApplicationInput = z
+  .object({ applicationId: uuid, decision: z.enum(LISTING_DECISIONS), notes: optText(1000) })
+  .refine((v) => v.decision === "approve" || longEnough(10)(v.notes), { message: "Say why, in at least ten characters.", path: ["notes"] });
+
+export const decideIdentityCheckInput = z
+  .object({ checkId: uuid, approve: z.boolean(), reason: optText(500) })
+  .refine((v) => v.approve || longEnough(12)(v.reason), { message: "Say why the check is refused, in at least twelve characters.", path: ["reason"] });
+
+export const setSwitchInput = z.object({ key: z.string().regex(/^[a-z0-9_]{1,64}$/), enabled: z.boolean() });
+
+export const RESTRICT_KINDS = ["warning", "messaging", "posting", "roommates", "suspended"] as const;
+export const restrictMemberInput = z.object({
+  userId: uuid,
+  kind: z.enum(RESTRICT_KINDS),
+  days: z.number().int().min(1).max(3650).nullable(),
+  reason: z.string().trim().min(10).max(1000),
+});
+
+export const liftRestrictionInput = z.object({ restrictionId: uuid, reason: z.string().trim().min(5).max(500) });
+
+export const grantStaffInput = z.object({
+  email: z.string().trim().email().max(200),
+  position: optText(60),
+  scopes: z.array(z.string().regex(/^[a-z_]{2,40}$/)).max(20).default([]),
+  note: optText(500),
+});
+
+export const revokeStaffInput = z.object({ userId: uuid, reason: z.string().trim().min(5).max(500) });
+
+export const REFUND_REASON_KEYS = ["guest_choice", "host_cancelled", "not_as_listed", "no_access", "goodwill", "duplicate_charge"] as const;
+export const refundBookingInput = z.object({
+  bookingId: uuid,
+  amountMinor: z.number().int().positive().max(100_000_000_00),
+  reason: z.enum(REFUND_REASON_KEYS),
+  note: optText(500),
+});
+
+export const decideHeldItemInput = z.object({
+  target: z.enum(["post", "story", "comment", "bio"]),
+  id: uuid,
+  decision: z.enum(["RELEASE", "REMOVE"]),
+  reason: optText(500),
+});
+
 /** The closed set of action kinds the act route can run, with the schema that guards each. */
 export const ACTION_SCHEMAS = {
   create_my_task: createMyTaskInput,
@@ -125,7 +186,20 @@ export const ACTION_SCHEMAS = {
   escalation_step: escalationStepInput,
   risk_alert_step: riskAlertStepInput,
   review_message_flag: messageFlagInput,
+  review_listing: reviewListingInput,
+  review_agent_application: reviewAgentApplicationInput,
+  decide_identity_check: decideIdentityCheckInput,
+  set_switch: setSwitchInput,
+  restrict_member: restrictMemberInput,
+  lift_restriction: liftRestrictionInput,
+  grant_staff: grantStaffInput,
+  revoke_staff: revokeStaffInput,
+  refund_booking: refundBookingInput,
+  decide_held_item: decideHeldItemInput,
 } as const;
+
+/** The kinds that are the super admin's alone, and need a typed word when they are hard to take back. */
+export const SUPER_ADMIN_KINDS = ["review_listing", "review_agent_application", "decide_identity_check", "set_switch", "restrict_member", "lift_restriction", "grant_staff", "revoke_staff", "refund_booking", "decide_held_item"] as const;
 
 export type ActionKind = keyof typeof ACTION_SCHEMAS;
 export const ACTION_KINDS = Object.keys(ACTION_SCHEMAS) as ActionKind[];

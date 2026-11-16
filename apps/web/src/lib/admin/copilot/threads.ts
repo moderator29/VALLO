@@ -40,6 +40,8 @@ export type StoredTurn = {
   text: string;
   proposals: StoredProposal[];
   destinations: { label: string; href: string }[];
+  /** What the copilot read for this answer, for the steps line and the next questions. */
+  tools?: { name: string; label: string }[];
 };
 
 export type ThreadSummary = { id: string; title: string; desk: string; updatedAt: string };
@@ -114,8 +116,14 @@ export function cleanTurns(raw: unknown, { loading = false }: { loading?: boolea
           .slice(0, 8)
           .map((d) => ({ label: d.label.slice(0, 80), href: d.href }))
       : [];
+    const tools = Array.isArray(t.tools)
+      ? t.tools
+          .filter((x): x is { name: string; label: string } => isObj(x) && typeof x.name === "string" && /^[a-z_]{1,60}$/.test(x.name) && typeof x.label === "string")
+          .slice(0, 12)
+          .map((x) => ({ name: x.name, label: x.label.slice(0, 80) }))
+      : [];
     if (!text && proposals.length === 0) continue;
-    out.push({ id: str(t.id, 40) || `s${out.length}`, role: t.role, text, proposals, destinations });
+    out.push({ id: str(t.id, 40) || `s${out.length}`, role: t.role, text, proposals, destinations, ...(tools.length ? { tools } : {}) });
   }
   return out;
 }

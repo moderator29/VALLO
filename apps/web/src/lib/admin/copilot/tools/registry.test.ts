@@ -47,7 +47,7 @@ describe("the registry offers only the tools a viewer holds", () => {
     /* Every tool but the super admin's own: the control room, the platform
        pulse, the staff overview and the audit trail in plain words. */
     const superAdminOnly = ["get_control_room", "get_platform_pulse", "get_staff_overview", "get_what_changed"];
-    expect(COPILOT_TOOLS.filter((t) => !superAdminOnly.includes(t.name)).every((t) => offered.includes(t.name))).toBe(true);
+    expect(COPILOT_TOOLS.filter((t) => !superAdminOnly.includes(t.name) && !t.superAdminOnly).every((t) => offered.includes(t.name))).toBe(true);
     for (const name of superAdminOnly) expect(offered, name).not.toContain(name);
     const superAdmin = viewer({ isAdmin: true, isSuperAdmin: true, scopes: STAFF_SCOPES, position: null });
     expect(COPILOT_TOOLS.every((t) => names(superAdmin).includes(t.name))).toBe(true);
@@ -179,8 +179,10 @@ describe("results are capped and redacted", () => {
 });
 
 describe("no tool exists for a forbidden action", () => {
-  it("has no tool whose name moves money, decides, restricts, grants, deletes or messages a member", () => {
-    for (const tool of COPILOT_TOOLS) expect(tool.name, tool.name).not.toMatch(FORBIDDEN_TOOL_NAME);
+  it("has no tool whose name moves money, decides, restricts, grants, deletes or messages a member, except the super admin's own", () => {
+    for (const tool of COPILOT_TOOLS.filter((t) => !t.superAdminOnly)) expect(tool.name, tool.name).not.toMatch(FORBIDDEN_TOOL_NAME);
+    /* Even the super admin's hands never move money out, delete, or message a member on their own. */
+    for (const tool of COPILOT_TOOLS) expect(tool.name, tool.name).not.toMatch(/payout|transfer|withdraw|delete|destroy|erase|send_message|message_member|notify_member/);
   });
 
   it("has exactly the propose tools the brief names, and drafts are never executable", () => {
@@ -192,9 +194,21 @@ describe("no tool exists for a forbidden action", () => {
     ];
     /* The desk work behind a button (16 November 2026, the founder: "it should always show a confirm button, to reply to users or resolve stuff"): each reads the item first and shows a preview; the desk's own action runs only on the press. */
     const deskWork = ["reply_to_ticket", "set_ticket_status", "escalation_step", "risk_alert_step", "review_message_flag"];
+    /* The super admin's own hands (16 November 2026): every one marked theirs alone. */
+    const superAdmin = ["decide_listing", "decide_agent_application", "decide_identity_check", "set_switch", "restrict_member", "lift_restriction", "grant_staff_access", "revoke_staff_access", "refund_booking", "decide_held_item"];
     expect(proposers).toEqual(
-      ["add_bd_prospect", "add_task_comment", "create_my_task", "create_social_draft", "draft_case_note", "draft_ticket_reply", "log_bd_activity", "post_announcement", "raise_escalation", "recommend_staff_access", ...deskWork, ...staffDeskDrafts].sort(),
+      ["add_bd_prospect", "add_task_comment", "create_my_task", "create_social_draft", "draft_case_note", "draft_ticket_reply", "log_bd_activity", "post_announcement", "raise_escalation", "recommend_staff_access", ...deskWork, ...superAdmin, ...staffDeskDrafts].sort(),
     );
+    for (const name of superAdmin) expect(COPILOT_TOOLS.find((t) => t.name === name)?.superAdminOnly, name).toBe(true);
+  });
+
+  it("offers the super admin's hands to the super admin and to nobody else, not even a full admin", () => {
+    const superNames = COPILOT_TOOLS.filter((t) => t.superAdminOnly).map((t) => t.name);
+    expect(superNames.length).toBeGreaterThan(5);
+    const admin = names(viewer({ isAdmin: true, scopes: STAFF_SCOPES }));
+    for (const n of superNames) expect(admin, n).not.toContain(n);
+    const boss = names(viewer({ isAdmin: true, isSuperAdmin: true, scopes: STAFF_SCOPES }));
+    for (const n of superNames) expect(boss, n).toContain(n);
   });
 
   it("would not offer a badly named tool even if one were registered", async () => {

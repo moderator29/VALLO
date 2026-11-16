@@ -76,10 +76,12 @@ describe("the desk work the copilot can confirm", () => {
     expect(ACTION_SCHEMAS.escalation_step.safeParse({ escalationId: ticket, step: "reroute", note: "x" }).success).toBe(false);
   });
 
-  it("holds no money, no decision and no access kind", () => {
+  it("every decision, money or access kind is the super admin's alone", async () => {
+    const { SUPER_ADMIN_KINDS } = await import("./action-schemas");
     const kinds = Object.keys(ACTION_SCHEMAS);
-    for (const banned of ["refund", "payout", "ban", "approve", "reject", "grant", "revoke", "delete"]) {
-      expect(kinds.some((k) => k.includes(banned)), banned).toBe(false);
+    for (const banned of ["refund", "payout", "transfer", "restrict", "approve", "reject", "grant", "revoke", "decide", "delete"]) {
+      for (const k of kinds.filter((x) => x.includes(banned))) expect(SUPER_ADMIN_KINDS as readonly string[], k).toContain(k);
     }
+    expect(kinds.some((k) => /payout|transfer|delete|destroy/.test(k))).toBe(false);
   });
 });

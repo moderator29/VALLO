@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useId, useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { banner } from "@/lib/ui/toast";
 import type { ProposalState } from "./use-copilot-chat";
@@ -20,11 +21,15 @@ export function ProposalCard({
   onNavigate,
 }: {
   state: ProposalState;
-  onConfirm: () => void;
+  onConfirm: (typed?: string) => void;
   onDismiss: () => void;
   onNavigate?: () => void;
 }) {
   const { proposal, status } = state;
+  const [typed, setTyped] = useState("");
+  const typedId = useId();
+  const needsWord = Boolean(proposal.confirmWord) && proposal.mode === "act";
+  const wordOk = !needsWord || typed.trim().toLowerCase() === (proposal.confirmWord ?? "").trim().toLowerCase();
   const isDraft = proposal.mode === "draft";
   const text = typeof proposal.args.text === "string" ? proposal.args.text : null;
   const fields = Object.entries(proposal.args).filter(([key, value]) => value !== null && value !== "" && !(isDraft && key === "text"));
@@ -74,13 +79,31 @@ export function ProposalCard({
       ) : status === "expired" ? (
         <p className="nf-copilot-card__outcome">This suggestion expired. Ask again, or make the change on the desk.</p>
       ) : (
+        <>
+        {needsWord && status !== "confirming" ? (
+          <div className="nf-copilot-card__word">
+            <label htmlFor={typedId}>
+              This is hard to take back. Type <strong>{proposal.confirmWord}</strong> to confirm.
+            </label>
+            <input
+              id={typedId}
+              className="nf-field nf-copilot-card__wordinput"
+              value={typed}
+              onChange={(e) => setTyped(e.target.value)}
+              autoComplete="off"
+              autoCapitalize="characters"
+              spellCheck={false}
+              data-testid="copilot-confirm-word"
+            />
+          </div>
+        ) : null}
         <div className="nf-copilot-card__actions">
           {isDraft ? (
             <Button type="button" variant="primary" size="sm" onClick={() => void copy()}>
               Copy draft
             </Button>
           ) : (
-            <Button type="button" variant="primary" size="sm" onClick={onConfirm} disabled={status === "confirming" || status === "failed"} data-testid="copilot-confirm">
+            <Button type="button" variant={needsWord ? "danger" : "primary"} size="sm" onClick={() => onConfirm(needsWord ? typed : undefined)} disabled={status === "confirming" || status === "failed" || !wordOk} data-testid="copilot-confirm">
               {status === "confirming" ? "Working..." : (proposal.confirmLabel ?? "Confirm")}
             </Button>
           )}
@@ -91,6 +114,7 @@ export function ProposalCard({
             Dismiss
           </Button>
         </div>
+        </>
       )}
       {status === "failed" && state.message ? <p className="nf-copilot-card__outcome">{state.message} You can make the change on the desk instead.</p> : null}
     </section>

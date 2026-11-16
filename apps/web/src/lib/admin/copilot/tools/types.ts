@@ -53,6 +53,11 @@ export type CopilotProposal = {
   preview?: { heading: string; text: string };
   /** The button's own words ("Send reply", "Resolve alert"); "Confirm" when absent. */
   confirmLabel?: string;
+  /**
+   * For a change that is hard to take back: the word the person types before
+   * the button wakes. Sealed in the token and checked again on the server.
+   */
+  confirmWord?: string;
   /** The signed token Confirm sends back. Absent for a draft. */
   token?: string;
   expiresAt: string;
@@ -95,7 +100,17 @@ export type ProposalAction =
   | { kind: "set_ticket_status"; input: { ticketId: string; status: "open" | "pending" | "resolved" | "closed"; note: string } }
   | { kind: "escalation_step"; input: { escalationId: string; step: "acknowledge" | "comment" | "ask_raiser" | "resolve" | "decline" | "reopen"; note: string } }
   | { kind: "risk_alert_step"; input: { alertId: string; step: "acknowledge" | "resolve"; notes: string } }
-  | { kind: "review_message_flag"; input: { flagId: string; resolution: "cleared" | "escalated" } };
+  | { kind: "review_message_flag"; input: { flagId: string; resolution: "cleared" | "escalated" } }
+  | { kind: "review_listing"; input: { listingId: string; decision: "approve" | "reject" | "request_changes"; notes: string } }
+  | { kind: "review_agent_application"; input: { applicationId: string; decision: "approve" | "reject" | "request_changes"; notes: string } }
+  | { kind: "decide_identity_check"; input: { checkId: string; approve: boolean; reason: string } }
+  | { kind: "set_switch"; input: { key: string; enabled: boolean } }
+  | { kind: "restrict_member"; input: { userId: string; kind: "warning" | "messaging" | "posting" | "roommates" | "suspended"; days: number | null; reason: string } }
+  | { kind: "lift_restriction"; input: { restrictionId: string; reason: string } }
+  | { kind: "grant_staff"; input: { email: string; position: string; scopes: string[]; note: string } }
+  | { kind: "revoke_staff"; input: { userId: string; reason: string } }
+  | { kind: "refund_booking"; input: { bookingId: string; amountMinor: number; reason: "guest_choice" | "host_cancelled" | "not_as_listed" | "no_access" | "goodwill" | "duplicate_charge"; note: string } }
+  | { kind: "decide_held_item"; input: { target: "post" | "story" | "comment" | "bio"; id: string; decision: "RELEASE" | "REMOVE"; reason: string } };
 
 export type CopilotTool = {
   name: string;
@@ -105,6 +120,12 @@ export type CopilotTool = {
   scopes: readonly StaffScope[];
   /** A further rule on top of the scopes (for example the COO position). */
   allow?: (viewer: CopilotViewer) => boolean;
+  /**
+   * The super admin's own hands (16 November 2026): offered to the super
+   * admin and nobody else, whatever their scopes. Only a tool marked so may
+   * carry a name the registry otherwise refuses (decide, restrict, refund).
+   */
+  superAdminOnly?: true;
   /** The status line the person sees while the tool runs. */
   status: string;
   input: z.ZodType;
@@ -117,6 +138,7 @@ export function defineTool<S extends z.ZodType>(def: {
   kind: "read" | "propose";
   scopes: readonly StaffScope[];
   allow?: (viewer: CopilotViewer) => boolean;
+  superAdminOnly?: true;
   status: string;
   input: S;
   handler: (input: z.infer<S>, ctx: ToolCtx) => Promise<ToolResult>;
