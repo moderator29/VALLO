@@ -2,7 +2,7 @@ import Link from "next/link";
 import type { Dictionary } from "@vallo/i18n";
 import type { MyBusiness, MyBusinessLadder } from "@/lib/host/queries";
 import type { ResolvedProfileSettings } from "@/lib/profile/model";
-import { Row, RowList, Section, Stack, TYPE } from "@/components/app/Screen";
+import { Row, RowList, Stack, TYPE } from "@/components/app/Screen";
 import { ButtonLink } from "@/components/ui/Button";
 import { StatusPill, toneForStatus } from "@/components/ui/StatusPill";
 import { UiIcon } from "@/design-system/icons/UiIcon";
@@ -34,7 +34,8 @@ export function HostSettingsBody({
     /* The Grade 1 page frame: the large title with Back and its line. */
     <PageFrame title={page.title} subtitle={page.sub} fallback="/host">
       <Stack>
-        <Section title={t.hostWorkspace.settings.businessesTitle}>
+        <section className="nf-sgroup" aria-label={t.hostWorkspace.settings.businessesTitle}>
+          <h2 className="nf-sgroup__label" aria-hidden="true">{t.hostWorkspace.settings.businessesTitle}</h2>
           {businesses.length === 0 ? (
             <div className="nf-panel nf-panel--card p-panel">
               <p className={TYPE.rowMeta}>{t.hostWorkspace.nothingYet.settings}</p>
@@ -90,10 +91,11 @@ export function HostSettingsBody({
               ))}
             </RowList>
           )}
-        </Section>
+        </section>
 
         {ladders.some(Boolean) ? (
-          <Section title={t.experienceFeatures.trustTiers.selector}>
+          <section className="nf-sgroup" aria-label={t.experienceFeatures.trustTiers.selector}>
+          <h2 className="nf-sgroup__label" aria-hidden="true">{t.experienceFeatures.trustTiers.selector}</h2>
             <div className="grid gap-lg">
               {ladders.map((ladder) =>
                 ladder ? (
@@ -104,7 +106,7 @@ export function HostSettingsBody({
                 ) : null,
               )}
             </div>
-          </Section>
+          </section>
         ) : null}
 
         {notifications ? (
@@ -115,6 +117,10 @@ export function HostSettingsBody({
           </div>
         )}
 
+        {/* One heading style on the page (the founder, 16 November 2026): every
+            group named by the same quiet label the member's Settings uses. */}
+        <section className="nf-sgroup" aria-label={page.assistantTitle}>
+        <h2 className="nf-sgroup__label" aria-hidden="true">{page.assistantTitle}</h2>
         <Link href="/host/assistant" className="nf-panel nf-panel--card nf-host-choice">
           <span className="nf-host-choice__mark" aria-hidden="true">
             <UiIcon name="bot" size={24} />
@@ -125,16 +131,19 @@ export function HostSettingsBody({
           </span>
           <UiIcon name="chevron-right" size={20} className="shrink-0 text-[var(--nf-content-muted)]" />
         </Link>
+        </section>
 
+        <section className="nf-sgroup" aria-label={page.elseLabel}>
+        <h2 className="nf-sgroup__label" aria-hidden="true">{page.elseLabel}</h2>
         <div className="nf-panel nf-panel--card block p-panel">
-          <p className="nf-overline">{page.elseLabel}</p>
-          <p className="mt-sm text-[length:var(--nf-text-body-sm)] leading-relaxed text-[var(--nf-content-secondary)]">
+          <p className="text-[length:var(--nf-text-body-sm)] leading-relaxed text-[var(--nf-content-secondary)]">
             {page.elseBody}
           </p>
           <Link href="/settings" className="nf-btn nf-btn--glass nf-btn--sm mt-md">
             {page.elseOpen}
           </Link>
         </div>
+        </section>
       </Stack>
     </PageFrame>
   );

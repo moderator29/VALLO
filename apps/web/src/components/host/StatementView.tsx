@@ -20,6 +20,12 @@ import { UiIcon } from "@/design-system/icons/UiIcon";
 import { PrintButton } from "@/components/host/PrintButton";
 import "@/app/host/host-desk.css";
 
+/** "Oct" for "2026-10", in the reader's language, read in Lagos. */
+function shortMonth(month: string, tag: string): string {
+  const d = new Date(`${month}-15T12:00:00Z`);
+  return Number.isNaN(d.getTime()) ? month : d.toLocaleDateString(tag, { month: "short", timeZone: "Africa/Lagos" });
+}
+
 /**
  * ONE MONTH'S PAYOUT STATEMENT, DRAWN (C9). Read only: the page reads the
  * lines, this draws them, and the preview harness draws it from fixtures.
@@ -61,17 +67,25 @@ export function StatementView({
       />
 
       <div className="mt-md grid gap-md">
-        <nav className="nf-rcal__monthbar nf-stmt-noprint" aria-label={sv.otherMonths}>
-          <Link href={`/host/earnings/statement?month=${prev}`} className="nf-btn nf-btn--surface nf-btn--icon nf-btn--round" aria-label={sv.previousMonth}>
-            <UiIcon name="arrow-left" size={20} />
+        {/* THE MONTH, AS A SWITCHER (the founder, 16 November 2026): a round
+            arrow on its own beside the title read as a second back button.
+            One pill now: the month before, by name, this month, and the
+            month after while it has happened. */}
+        <nav className="nf-stmt-months nf-stmt-noprint" aria-label={sv.otherMonths}>
+          <Link href={`/host/earnings/statement?month=${prev}`} className="nf-stmt-months__step nf-tap" aria-label={sv.previousMonth}>
+            <UiIcon name="chevron-right" size={18} className="nf-stmt-months__back" />
+            <span>{shortMonth(prev, tag)}</span>
           </Link>
-          <p className="nf-rcal__month">{title}</p>
+          <p className="nf-stmt-months__now" aria-current="page">
+            {title}
+          </p>
           {next <= thisMonth ? (
-            <Link href={`/host/earnings/statement?month=${next}`} className="nf-btn nf-btn--surface nf-btn--icon nf-btn--round" aria-label={sv.nextMonth}>
-              <UiIcon name="arrow-right" size={20} />
+            <Link href={`/host/earnings/statement?month=${next}`} className="nf-stmt-months__step nf-tap" aria-label={sv.nextMonth}>
+              <span>{shortMonth(next, tag)}</span>
+              <UiIcon name="chevron-right" size={18} />
             </Link>
           ) : (
-            <span className="nf-rcal__monthbar-gap" aria-hidden="true" />
+            <span className="nf-stmt-months__step" aria-hidden="true" data-empty />
           )}
         </nav>
 

@@ -771,6 +771,56 @@
   }
 
   /* --------------------------------------------------------- statements */
+  /* THE STATEMENT'S MONTH SWITCHER: one pill, the month before by name,
+     this month, the month after. Not a lone round arrow, which read as a
+     second back button beside the title. */
+  .nf-stmt-months {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    align-items: center;
+    gap: var(--nf-space-2xs);
+    padding: var(--nf-space-3xs);
+    border: var(--nf-border-width) solid var(--nf-brand-edge-soft);
+    border-radius: var(--nf-radius-pill);
+    background: var(--nf-surface-elevated);
+  }
+  .nf-stmt-months__step {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--nf-space-2xs);
+    min-height: 44px;
+    padding-inline: var(--nf-space-sm);
+    border-radius: var(--nf-radius-pill);
+    color: var(--nf-content-link);
+    font-size: var(--nf-text-body-sm);
+    font-weight: 600;
+    text-decoration: none;
+  }
+  .nf-stmt-months__step:first-child {
+    justify-self: start;
+  }
+  .nf-stmt-months__step:last-child {
+    justify-self: end;
+  }
+  .nf-stmt-months__step:hover {
+    background: color-mix(in oklab, var(--nf-brand-primary) 10%, transparent);
+  }
+  .nf-stmt-months__step:focus-visible {
+    outline: var(--nf-focus-ring-width) solid var(--nf-focus-ring);
+    outline-offset: var(--nf-focus-ring-offset);
+  }
+  .nf-stmt-months__back {
+    transform: scaleX(-1);
+  }
+  .nf-stmt-months__now {
+    margin: 0;
+    padding-inline: var(--nf-space-md);
+    color: var(--nf-content-primary);
+    font-weight: 700;
+    text-align: center;
+    white-space: nowrap;
+  }
+
   .nf-stmt-table {
     width: 100%;
     border-collapse: collapse;

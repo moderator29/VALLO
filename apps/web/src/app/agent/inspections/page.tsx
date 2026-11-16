@@ -4,7 +4,8 @@ import { getLocale } from "@/lib/locale";
 import { AgentShell } from "@/components/agent/AgentShell";
 import { agentProfileFrom, getAgentContext } from "@/lib/agent/listings-queries";
 import { readInspectionsForLister, readNoShowsFor } from "@/lib/inspections/queries";
-import { InspectionHero, InspectionSheet } from "@/components/app/inspections/InspectionSheet";
+import { InspectionSheet } from "@/components/app/inspections/InspectionSheet";
+import { PageFrame } from "@/components/app/PageFrame";
 import { InspectionsLive } from "@/components/app/inspections/InspectionsLive";
 import { EmptyState, TYPE } from "@/components/app/Screen";
 import { resolveSession } from "@/lib/actions/session";
@@ -213,13 +214,11 @@ export default async function AgentInspectionsPage() {
       active="/agent/inspections"
       profile={agentProfileFrom(context.agent)}
     >
+      {/* The plain page head every console page wears (the founder, 16
+          November 2026: one look across the console). The illustrated hero
+          stays on the member's own inspection screens. */}
+      <PageFrame title="Inspections" subtitle="Check the property, confirm the details, submit your report." fallback="/agent/dashboard" width="wide">
       <div className="nf-console">
-        {/* F6A8A482 as the lister sees it: the console shell draws the way
-            back, so the hero here carries the title and the house only. */}
-        <InspectionHero
-          back={false}
-          sub="Check the property, confirm details, submit your report."
-        />
         <InspectionsLive userId={userId} />
 
         <VisitCalendar
@@ -237,6 +236,7 @@ export default async function AgentInspectionsPage() {
           }
         />
       </div>
+      </PageFrame>
     </AgentShell>
   );
 }
