@@ -18,6 +18,11 @@ export const hostWorkspaceEn = {
     startTitle: "Become a host",
     startBody:
       "Ten short steps at most, saved as you go. A person on our team reads it, and the badge only ever means a human was checked.",
+    /** Under "Add another business" while an application is still open. */
+    oneApplicationAtATime:
+      "One application at a time. Once the one in progress is approved, your next business starts here.",
+    /** Under "Add another business" when nothing is open. */
+    addAnotherBusinessSub: "A second hotel, a restaurant or more apartments, each with its own application.",
   },
   apply: {
     signedOutTitle: "Sign in to become a host",
@@ -206,6 +211,8 @@ export const hostWorkspaceEn = {
     start: "Start",
     startApplication: "Start an application",
     continueApplication: "Continue the application",
+    /** The host home's main door once a business is on the account and nothing is open. */
+    addAnotherBusiness: "Add another business",
     openApplication: "Open the application",
     checkCalendar: "Check the calendar",
   },

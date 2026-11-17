@@ -69,8 +69,15 @@ export function HostStandingBody({
              FILL IN A FORM. `/host/start` draws the three stays doors of
              GOVERNING-09; a host with an application already open goes
              straight back to it, because the question has been answered. */
+          /* SEVERAL BUSINESSES ON ONE ACCOUNT. A host whose businesses are all
+             past review is not starting anything: they are adding their next
+             one, and the same chooser opens a fresh application for it. */
           <ButtonLink href={open ? "/host/apply" : "/profile/setup?side=stays"} variant="primary">
-            {open ? t.hostWorkspace.doors.continueApplication : t.hostWorkspace.doors.startApplication}
+            {open
+              ? t.hostWorkspace.doors.continueApplication
+              : businesses.length > 0
+                ? t.hostWorkspace.doors.addAnotherBusiness
+                : t.hostWorkspace.doors.startApplication}
           </ButtonLink>
         }
       />
@@ -138,6 +145,7 @@ export function HostStandingBody({
                           /* Unboxed: the fold is already the container, so the
                              businesses are rows on it with hairlines between
                              them, not a card inside the card (pass 3). */
+                          <>
                           <RowList inset={false}>
                             {businesses.map((business) => (
                               <Row key={business.id} className="flex-col items-stretch gap-xs py-md">
@@ -247,6 +255,29 @@ export function HostStandingBody({
                               </Row>
                             ))}
                           </RowList>
+                          {/*
+                            THE NEXT BUSINESS, AT THE FOOT OF THE LIST OF THE
+                            ONES ALREADY HERE. One account carries a hotel and a
+                            restaurant, or two hotels, each with its own
+                            application. One application is open at a time, so
+                            while one is, this row says so and leads back to it
+                            rather than looking like a door that is shut.
+                          */}
+                          <ListGroup bare>
+                            <ListRow
+                              href={open ? "/host/apply" : "/profile/setup?side=stays"}
+                              data-testid="host-add-business"
+                              leading={
+                                <IconPlate size="sm" tone="brand">
+                                  <UiIcon name="plus" size={20} />
+                                </IconPlate>
+                              }
+                              title={t.hostWorkspace.doors.addAnotherBusiness}
+                              sub={open ? t.hostWorkspace.home.oneApplicationAtATime : t.hostWorkspace.home.addAnotherBusinessSub}
+                              chevron
+                            />
+                          </ListGroup>
+                          </>
                       ),
                     },
                   ]
