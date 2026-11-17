@@ -119,6 +119,19 @@
 -- the two insert-only tables (incident updates, QA reviews) are append-only.
 -- This probe reads the live database, so it fails until step 2 is applied.
 --
+-- 16 November 2026: copilot_threads idu, from
+-- pending/copilot_threads_2026-11-16.sql (applied live the same day). A staff
+-- member's own copilot conversations, behind copilot_threads_own_insert,
+-- _own_update and _own_delete (all `to authenticated`, `user_id = (select
+-- auth.uid())`), checked against pg_policies on the live database before being
+-- written down. This was the probe's only failure on 16 November. The same
+-- day's pending/intelligence_search_2026-11-16.sql adds no write grant to
+-- declare: search_events and search_aliases grant nothing to anon or
+-- authenticated (definer functions write them), search_recent grants
+-- authenticated SELECT only (behind search_recent_select_own) and is written
+-- through search_recent_remember / _forget / _clear, and
+-- private.search_event_salt is outside the public schema this probe reads.
+--
 do $$
 declare
   member constant uuid := '957b3bd2-cce3-425d-bba9-5cd876ca3d62';
@@ -182,6 +195,7 @@ begin
       ('conversation_prefs', 'idu'),
       ('conversations', 'i'),
       ('coo_escalations', 'iu'),
+      ('copilot_threads', 'idu'),
       ('event_attendees', 'idu'),
       ('events', 'idu'),
       ('feature_flags', 'idu'),
