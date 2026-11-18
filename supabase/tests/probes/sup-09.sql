@@ -22,30 +22,30 @@ do $$
 declare
   member constant uuid := '957b3bd2-cce3-425d-bba9-5cd876ca3d62';   -- tenant A
   admin  constant uuid := '03f3dd52-ea28-4852-9abe-e5b0a67c2a43';   -- tenant B
-  lister constant uuid := 'e0000000-0000-4000-8000-000000000001';
-  home   constant uuid := 'ed000000-0000-4000-8000-000000000002';
+  lister constant uuid := gen_random_uuid();   -- host, filed below
+  lister_agent uuid;
+  home constant uuid := gen_random_uuid();
   lagos date := (now() at time zone 'Africa/Lagos')::date;
   insp_a uuid; insp_b uuid; insp_b2 uuid; insp_a2 uuid; insp_b3 uuid;
   ag_a uuid; ag_b uuid; ag_a2 uuid;
   r jsonb; bk_a uuid; bk_b uuid; bk_a2 uuid; n bigint; st text;
 begin
-  -- 17 October 2026: on the live database the example collection's agents row
-  -- (e0000000-...-0002) no longer belongs to the example lister: every probe
-  -- that made the QA member an agent hit agents_user_id_key, an inspection by
-  -- the QA member on an example listing was refused by
-  -- inspection_requests_parties_differ, a stay they booked there drew no
-  -- agreement (the host was the guest), and the example payout account
-  -- answered payee_not_set_up for the example lister. The fixture gives the
-  -- row back to the example lister and points the listings this probe uses
-  -- at it, for this transaction only, so the two parties are the people the
-  -- probe was written for. Nothing asserted below changes. Rolled back.
-  update public.agents set user_id = 'e0000000-0000-4000-8000-000000000001'
-   where id = 'e0000000-0000-4000-8000-000000000002'
-     and user_id is distinct from 'e0000000-0000-4000-8000-000000000001'
-     and not exists (select 1 from public.agents x where x.user_id = 'e0000000-0000-4000-8000-000000000001');
-  update public.listings set agent_id = 'e0000000-0000-4000-8000-000000000002'
-   where id in ('ed000000-0000-4000-8000-000000000002')
-     and agent_id is distinct from 'e0000000-0000-4000-8000-000000000002';
+  -- 16 November 2026: the example collection is gone from the live database (the
+  -- Vallo Examples user e0000000-...-0001, its listings, hotels and threads; the
+  -- agent row e0000000-...-0002 now belongs to a real account), and the founder
+  -- does not want it back. This probe used to borrow it. It now files its own
+  -- host for this transaction: a fresh auth user (the signup trigger makes the
+  -- profile), an approved business agent, and fresh listings with the same facts
+  -- as the example rows it borrowed: a two bedroom flat to rent in Lekki Phase 1
+  -- (home). All of it is rolled back with the probe. Nothing asserted below
+  -- changes.
+  insert into auth.users (id, instance_id, aud, role, email, raw_app_meta_data, raw_user_meta_data, created_at, updated_at)
+  values (lister, '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated',
+          'probe-sup-09-host-' || lister || '@example.invalid', '{}', '{}', now(), now());
+  insert into public.agents (user_id, display_name, type, status) values (lister, 'Probe sup-09 host', 'business', 'APPROVED')
+  returning id into lister_agent;
+  insert into public.listings (id, agent_id, status, title, description, property_type, state_code, city, area, latitude, longitude, bedrooms, bathrooms, toilets, furnished, listing_intent, rent_amount_minor, rent_period, caution_deposit_minor, service_charge_minor, service_charge_period, agency_fee_minor, legal_fee_minor, agreement_fee_minor, total_move_in_cost_minor, minimum_tenancy_months, listing_role)
+  values (home, lister_agent, 'DRAFT', 'Probe Two bedroom flat in Lekki Phase 1', 'Ground floor with its own entrance and a small yard. Unfurnished, borehole to an overhead tank.', 'apartment', 'LA', 'Lagos', 'Lekki Phase 1', 6.4389, 3.4685, 2, 2, 3, 'unfurnished', 'rent', 550000000, 'year', 110000000, 30000000, 'year', 55000000, 55000000, 27500000, 797500000, 12, 'agent');
   -- 7 October 2026 (D68d, D77): an agreement approved by the system (no
   -- decided_by) is payable only while no risk signal fires for it. This probe
   -- is about the payment, not the review, so its fixture deals are ordinary
