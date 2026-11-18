@@ -28,7 +28,13 @@ declare
                          and r.window_start = to_timestamp(floor(extract(epoch from now()) / 86400) * 86400)), 0))
   $q$;
 begin
-  select id into convo from public.conversations where guest_id = member or agent_id = member limit 1;
+  -- 16 November 2026: the threads this probe wrote into were on example
+  -- listings, which are gone from the live database with the rest of the
+  -- example collection. The member's thread is filed here instead, written as
+  -- the service writes it (the QA admin as the counterpart, no listing), for
+  -- this transaction only. Rolled back; nothing asserted below changes.
+  insert into public.conversations (guest_id, agent_id) values (member, '03f3dd52-ea28-4852-9abe-e5b0a67c2a43')
+  returning id into convo;
   if convo is null then raise exception 'PROBE_FAIL sec-09: the member has no conversation to write into'; end if;
 
   execute format(function_room, 60, 600, 'messages', 1000, member::text) into room;
