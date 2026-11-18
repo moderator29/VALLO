@@ -76,6 +76,11 @@ async function readStayDetail(id: string): Promise<StayDetail | null> {
       sleeps: room.sleeps,
       baseRateMinor: room.base_rate_minor,
       sizeSqm: room.size_sqm,
+      /* The room's own photographs (`room_type_photos`), cover first; none
+         while the table's migration is pending, and the room looks as before. */
+      photos: [...(room.photos ?? [])]
+        .sort((a, b) => a.position - b.position)
+        .map((photo) => ({ url: accommodationPhotoUrl(photo.storage_path), alt: null })),
       ratePlans: room.rate_plans.map((plan) => ({
         id: plan.id,
         name: plan.name,

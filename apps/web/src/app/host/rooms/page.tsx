@@ -7,6 +7,7 @@ import { authHref, returnHref } from "@/components/auth/auth-intent";
 import { EmptyState } from "@/components/app/Screen";
 import { ButtonLink } from "@/components/ui/Button";
 import { HostShell } from "@/components/host/HostShell";
+import { readRoomTypePhotos } from "@/lib/stays/room-type-photos";
 import { HostRoomsBody } from "./HostRoomsBody";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -71,6 +72,19 @@ export default async function HostRoomsPage({
   const chosen = businesses.find((row) => row.id === wanted) ?? businesses[0] ?? null;
   const accommodation = chosen ? await getPrimaryAccommodation(chosen.id) : null;
   const rooms = accommodation ? await getMyRoomTypes(accommodation.id) : [];
+  /* Each room type's own photographs. `room_type_photos` arrives with a
+     pending migration; until it has run the read answers `unavailable` and
+     the photograph block is simply not drawn, with no banner. */
+  const roomPhotosRead = rooms.length > 0 ? await readRoomTypePhotos(session.supabase, rooms.map((room) => room.id)) : null;
+  const roomPhotos =
+    roomPhotosRead?.state === "ok"
+      ? Object.fromEntries(
+          rooms.map((room) => [
+            room.id,
+            (roomPhotosRead.byRoom.get(room.id) ?? []).map((photo) => ({ id: photo.id, url: photo.url })),
+          ]),
+        )
+      : null;
 
   return (
     /* The body's page frame carries the one way back; the bar keeps the
@@ -79,10 +93,13 @@ export default async function HostRoomsPage({
       <HostRoomsBody
         copy={t.hostWorkspace}
         words={t.experienceHost.rooms}
+        photoWords={t.experienceHost.photoManager.room}
         businesses={businesses}
         chosen={chosen}
         accommodation={accommodation}
         rooms={rooms}
+        roomPhotos={roomPhotos}
+        userId={session.user.id}
         locale={locale}
       />
     </HostShell>

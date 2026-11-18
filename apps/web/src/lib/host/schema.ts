@@ -250,6 +250,19 @@ export const accommodationPhotoSchema = (w: SchemaWords) => z.object({
     .max(400, w.uploadUnknown),
 });
 
+/**
+ * A photograph of one ROOM TYPE the browser has already put in the bucket
+ * (`room_type_photos`). The same shape as a property's, one level down.
+ */
+export const roomTypePhotoSchema = (w: SchemaWords) => z.object({
+  roomTypeId: z.uuid(w.roomTypeUnknown),
+  storagePath: z
+    .string()
+    .trim()
+    .min(1, w.uploadUnknown)
+    .max(400, w.uploadUnknown),
+});
+
 /** One accommodation photograph already on record, named for removal. */
 export const accommodationPhotoIdSchema = (w: SchemaWords) => z.object({
   photoId: z.uuid(w.photoUnknown),

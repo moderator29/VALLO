@@ -235,6 +235,35 @@ export function BusinessCard({
                   ))}
                 </ul>
               )}
+              {/* EACH ROOM'S OWN PHOTOGRAPHS, for the same reason as the
+                  property's: the reviewer is the last person who can see that
+                  the room in the picture is not the room being sold. */}
+              {property.roomPhotos.map((room) => (
+                <div key={room.roomTypeId} className="mt-inline" data-testid="admin-room-photos">
+                  <p className="nf-caption">
+                    {room.name} · {countOf(room.photos.length, "photos")}
+                  </p>
+                  <ul className="mt-inline-tight flex gap-inline overflow-x-auto pb-2xs">
+                    {room.photos.map((photo, index) => (
+                      <li key={photo} className="shrink-0">
+                        <RemoteImage
+                          src={photo}
+                          alt={
+                            index === 0
+                              ? `${room.name}, the photograph guests see first`
+                              : `${room.name}, photograph ${index + 1}`
+                          }
+                          loading="lazy"
+                          width={128}
+                          height={96}
+                          sizes="128px"
+                          className="h-24 w-32 rounded-md border border-[var(--nf-border-subtle)] object-cover"
+                        />
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
               {propertiesPublishable && (property.status === "APPROVED" || property.status === "DRAFT") ? (
                 <PublishControl
                   target={{ kind: "property", accommodationId: property.id }}

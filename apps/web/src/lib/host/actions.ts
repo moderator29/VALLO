@@ -31,6 +31,7 @@
  */
 
 import { z } from "zod";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { revalidatePath } from "next/cache";
 import { catalogueChanged } from "@/lib/catalogue/invalidate";
 import { withBusinessPrivate } from "../supabase/private-fields";
@@ -47,6 +48,7 @@ import { wrongBranch } from "./branch-guard";
 import { HOST_TYPE_DEFINITIONS, branchFor, documentPathBelongsTo, missingFrom, type HostType } from "./onboarding";
 import { HOST_PHOTO_BUCKET, MAX_BUSINESS_PHOTOS, nextPhotoPosition } from "./photos";
 import { MAX_NIGHTS_IN_ONE_ACT, nightsBetween } from "../stays/inventory";
+import { roomTypePhotosMissing } from "../stays/room-type-photos";
 import { readMyHostDraft } from "./queries";
 import { orderFacilities } from "./facilities";
 import {
@@ -63,6 +65,7 @@ import {
   openingHoursDraftSchema,
   roomNightsSchema,
   roomTypeDraftSchema,
+  roomTypePhotoSchema,
   serviceWindowDraftSchema,
   shortletPlaceDraftSchema,
 } from "./schema";
@@ -1053,7 +1056,7 @@ const reorderSchema = z.object({
 const REORDER_FAILED = "We could not save the new order just now. Please try again in a moment.";
 
 async function reorderPhotos(
-  fn: "reorder_accommodation_photos" | "reorder_business_photos",
+  fn: "reorder_accommodation_photos" | "reorder_business_photos" | "reorder_room_type_photos",
   input: unknown,
 ): Promise<ActionResult<null>> {
   const parsed = validate(reorderSchema, input);
@@ -1071,13 +1074,17 @@ async function reorderPhotos(
     name: string,
     args: Record<string, unknown>,
   ) => PromiseLike<{ error: unknown }>;
-  const { error } = await rpc.call(session.supabase, fn, {
-    ...(fn === "reorder_business_photos" ? { p_business: parsed.data.subjectId } : { p_accommodation: parsed.data.subjectId }),
-    p_ids: parsed.data.photoIds,
-  });
+  const subject =
+    fn === "reorder_business_photos"
+      ? { p_business: parsed.data.subjectId }
+      : fn === "reorder_room_type_photos"
+        ? { p_room_type: parsed.data.subjectId }
+        : { p_accommodation: parsed.data.subjectId };
+  const { error } = await rpc.call(session.supabase, fn, { ...subject, p_ids: parsed.data.photoIds });
   if (error) return fail(REORDER_FAILED);
 
   if (fn === "reorder_business_photos") refreshVenueSurfaces();
+  else if (fn === "reorder_room_type_photos") refreshRoomSurfaces();
   else refreshPropertySurfaces();
   return ok(null);
 }
@@ -1090,6 +1097,111 @@ export async function reorderAccommodationPhotos(input: unknown): Promise<Action
 /** Save the order of a venue's photographs; the first is the cover. */
 export async function reorderBusinessPhotos(input: unknown): Promise<ActionResult<null>> {
   return reorderPhotos("reorder_business_photos", input);
+}
+
+/** Save the order of one room type's photographs; the first is the cover. */
+export async function reorderRoomTypePhotos(input: unknown): Promise<ActionResult<null>> {
+  return reorderPhotos("reorder_room_type_photos", input);
+}
+
+/* ------------------------------------------ photographs of a room type */
+
+/**
+ * Record a photograph of one ROOM TYPE the browser has already put in the
+ * bucket (`room_type_photos`, pending migration `room_type_photos_2026-11-17`).
+ *
+ * `addAccommodationPhoto`'s rules, one level down, because a third pattern for
+ * the same act is how the three come to disagree: ownership first (the room
+ * type's property's business is the caller's, re-checked by the table's write
+ * policy through `private.my_room_type_ids()`), the uid prefix on the path,
+ * the lowest free position so the first is the cover, and the SEC-04 scrub of
+ * the stored object before any row makes it public.
+ *
+ * The table may not be on the database yet. Then the screen does not draw the
+ * photograph block at all, and a write that arrives anyway is answered with a
+ * sentence rather than a failure code.
+ */
+export async function addRoomTypePhoto(input: unknown): Promise<ActionResult<{ id: string }>> {
+  const parsed = validate(roomTypePhotoSchema(await schemaWords()), input);
+  if (!parsed.ok) return fail(parsed.error, parsed.fieldErrors);
+
+  const guarded = await ownedRoomType(parsed.data.roomTypeId);
+  if (!guarded.ok) return guarded.result;
+
+  const session = await resolveSession();
+  if (session.state !== "signed-in") return fail(SIGNED_OUT_MESSAGE);
+
+  if (!documentPathBelongsTo(session.user.id, parsed.data.storagePath)) {
+    return fail((await words()).uploadNotYoursPhoto);
+  }
+
+  /* Untyped: the generated types follow the live schema, which does not
+     carry this table until the pending migration runs. */
+  const db = session.supabase as unknown as SupabaseClient;
+  const { data: taken, error: readError } = await db
+    .from("room_type_photos")
+    .select("position")
+    .eq("room_type_id", parsed.data.roomTypeId)
+    .order("position", { ascending: true });
+  if (readError) {
+    return fail(roomTypePhotosMissing(readError) ? (await words()).roomPhotosNotReady : (await words()).serviceDown);
+  }
+
+  const position = nextPhotoPosition(((taken ?? []) as { position: number }[]).map((row) => row.position));
+  if (position === null) {
+    return fail(fill((await words()).roomPhotosFull, { max: MAX_BUSINESS_PHOTOS }));
+  }
+
+  /* SEC-04: stripped on the server before any row makes it public. */
+  const scrubbed = await scrubPublicPhoto(HOST_PHOTO_BUCKET, parsed.data.storagePath);
+  if (!scrubbed.ok) return fail(SCRUB_REFUSED_MESSAGE);
+
+  const { data, error } = await db
+    .from("room_type_photos")
+    .insert({
+      room_type_id: parsed.data.roomTypeId,
+      storage_path: parsed.data.storagePath,
+      position,
+    })
+    .select("id")
+    .single();
+  if (error || !data) {
+    if (error?.code === "42501") return fail((await words()).notYours);
+    if (error?.code === "23505") return fail((await words()).photoRace);
+    if (roomTypePhotosMissing(error)) return fail((await words()).roomPhotosNotReady);
+    return fail((await words()).photoNotAttached);
+  }
+
+  refreshRoomSurfaces();
+  return ok({ id: (data as { id: string }).id });
+}
+
+/**
+ * Take one photograph of a room type down. The row goes and the object stays,
+ * for `removeAccommodationPhoto`'s reason; RLS scopes the delete to the owner
+ * (and an admin), so somebody else's photograph does not move and the count
+ * says so.
+ */
+export async function removeRoomTypePhoto(input: unknown): Promise<ActionResult<null>> {
+  const parsed = validate(accommodationPhotoIdSchema(await schemaWords()), input);
+  if (!parsed.ok) return fail(parsed.error, parsed.fieldErrors);
+
+  const session = await resolveSession();
+  if (session.state === "unconfigured") return fail(NOT_CONFIGURED_MESSAGE);
+  if (session.state === "signed-out") return fail(SIGNED_OUT_MESSAGE);
+
+  const db = session.supabase as unknown as SupabaseClient;
+  const { error, count } = await db
+    .from("room_type_photos")
+    .delete({ count: "exact" })
+    .eq("id", parsed.data.photoId);
+  if (error) {
+    return fail(roomTypePhotosMissing(error) ? (await words()).roomPhotosNotReady : (await words()).serviceDown);
+  }
+  if (count === 0) return fail((await words()).notYours);
+
+  refreshRoomSurfaces();
+  return ok(null);
 }
 
 /* ------------------------------------------------------ nightly inventory */

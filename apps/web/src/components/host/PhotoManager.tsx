@@ -67,6 +67,7 @@ export function PhotoManager({
   add,
   remove: removeAction,
   reorder,
+  bare = false,
 }: {
   subjectId: string;
   userId: string;
@@ -86,6 +87,13 @@ export function PhotoManager({
   remove: (input: { photoId: string }) => Promise<ActionResult<null>>;
   /** Save a new order (every photograph id, cover first). Absent, the grid is fixed. */
   reorder?: (photoIds: string[]) => Promise<ActionResult<null>>;
+  /**
+   * Drawn inside a container that is already a card and already headed (a
+   * room type's fold on /host/rooms): no panel of its own, so it is not a card
+   * inside a card, and the title names the section for a screen reader
+   * instead of being a second heading under the fold's.
+   */
+  bare?: boolean;
 }) {
   const w = useHostPageCopy().photoManager.controls;
   const router = useRouter();
@@ -189,8 +197,11 @@ export function PhotoManager({
   }
 
   return (
-    <section className="nf-panel nf-panel--card block nf-host-group">
-      <h2 className="nf-host-group__title">{copy.title}</h2>
+    <section
+      className={bare ? "block nf-host-group" : "nf-panel nf-panel--card block nf-host-group"}
+      aria-label={bare ? copy.title : undefined}
+    >
+      {bare ? null : <h2 className="nf-host-group__title">{copy.title}</h2>}
       <p className="nf-host-group__note">{copy.guidance}</p>
       {reorder && photos.length > 1 ? <p className="nf-caption mt-inline">{ORDER_WORDS.hint}</p> : null}
       <p className="nf-caption mt-inline">{w.coverNote.replace("{max}", String(MAX_BUSINESS_PHOTOS))}</p>

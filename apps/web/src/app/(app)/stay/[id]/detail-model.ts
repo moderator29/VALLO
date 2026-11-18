@@ -68,6 +68,8 @@ export type StayRoomType = {
   baseRateMinor: number;
   sizeSqm: number | null;
   ratePlans: StayRatePlan[];
+  /** The room's own photographs, cover first. Absent or empty, the room is drawn without one. */
+  photos?: StayPhoto[];
 };
 
 export type StayPhoto = { url: string; alt: string | null };

@@ -70,3 +70,35 @@ describe("attaching a venue photograph", () => {
     expect(seam.insert).not.toHaveBeenCalled();
   });
 });
+
+describe("attaching a photograph of a room type", () => {
+  const ROOM = "6a1d2c3b-4e5f-4a6b-8c7d-9e0f1a2b3c4d";
+  const input = { roomTypeId: ROOM, storagePath: `${USER}/${ROOM}/a.jpg` };
+
+  it("scrubs the stored object in the public bucket before the row is written", async () => {
+    seam.scrub.mockResolvedValue({ ok: true, changed: true });
+    const { addRoomTypePhoto } = await import("./actions");
+    const result = await addRoomTypePhoto(input);
+    expect(result.ok).toBe(true);
+    expect(seam.scrub).toHaveBeenCalledWith("accommodation-photos", input.storagePath);
+    expect(seam.order).toEqual(["scrub", "insert"]);
+    expect(seam.insert).toHaveBeenCalledWith({ room_type_id: ROOM, storage_path: input.storagePath, position: 0 });
+  });
+
+  it("records nothing when the photograph could not be scrubbed", async () => {
+    seam.scrub.mockResolvedValue({ ok: false, reason: "unsupported-format" });
+    const { addRoomTypePhoto } = await import("./actions");
+    const result = await addRoomTypePhoto(input);
+    expect(result.ok).toBe(false);
+    if (!result.ok) expect(result.error).toBe("refused: not safe to publish");
+    expect(seam.insert).not.toHaveBeenCalled();
+  });
+
+  it("refuses a path outside the caller's own folder before anything is scrubbed", async () => {
+    const { addRoomTypePhoto } = await import("./actions");
+    const result = await addRoomTypePhoto({ roomTypeId: ROOM, storagePath: `someone-else/${ROOM}/a.jpg` });
+    expect(result.ok).toBe(false);
+    expect(seam.scrub).not.toHaveBeenCalled();
+    expect(seam.insert).not.toHaveBeenCalled();
+  });
+});

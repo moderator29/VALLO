@@ -270,6 +270,12 @@ export type StaySearchResult = {
 /** A room type with its plans, as the stay page shows it. */
 export type RoomTypeDetail = RoomTypeRow & {
   rate_plans: (RatePlanRow & { policy: CancellationPolicyRow | null })[];
+  /**
+   * The room type's own photographs (`room_type_photos`), cover first. Empty
+   * when it has none, and empty for every room while the pending migration
+   * that creates the table has not run.
+   */
+  photos?: { storage_path: string; position: number }[];
 };
 
 /**

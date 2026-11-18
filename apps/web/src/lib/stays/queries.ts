@@ -4,6 +4,7 @@ import { pointSelect } from "../supabase/public-point";
 
 import { isSupabaseConfigured } from "../supabase/env";
 import { staysClient, type StaysClient } from "./db";
+import { readRoomTypePhotos } from "./room-type-photos";
 import { openState } from "./hours";
 import { PAGE_SIZE } from "./filters";
 import type {
@@ -196,7 +197,7 @@ export async function getStayDetail(
     const roomTypes = roomTypesRes.data ?? [];
     const roomTypeIds = roomTypes.map((row) => row.id);
 
-    const [amenitiesRes, plansRes] = await Promise.all([
+    const [amenitiesRes, plansRes, roomPhotosRead] = await Promise.all([
       amenityIds.length > 0
         ? supabase.from("amenities").select("code, label, category").in("id", amenityIds).order("code")
         : Promise.resolve({ data: [] as { code: string; label: string; category: string }[] }),
@@ -208,6 +209,10 @@ export async function getStayDetail(
             .eq("active", true)
             .order("rate_minor", { ascending: true })
         : Promise.resolve({ data: [] as RatePlanRow[] }),
+      /* Each room's own photographs. Never a reason to fail the page, strict
+         or not: a missing table (the pending migration) or a failed read is
+         simply rooms drawn as they always were. */
+      readRoomTypePhotos(supabase, roomTypeIds),
     ]);
 
     if (options.strict && [amenitiesRes, plansRes].some((r) => "error" in r && r.error)) {
@@ -230,6 +235,13 @@ export async function getStayDetail(
 
     const room_types: RoomTypeDetail[] = roomTypes.map((room) => ({
       ...room,
+      photos:
+        roomPhotosRead.state === "ok"
+          ? (roomPhotosRead.byRoom.get(room.id) ?? []).map((photo) => ({
+              storage_path: photo.storagePath,
+              position: photo.position,
+            }))
+          : [],
       rate_plans: plans
         .filter((plan) => plan.room_type_id === room.id)
         .map((plan) => ({ ...plan, policy: policies.get(plan.cancellation_policy_id) ?? null })),

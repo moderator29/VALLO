@@ -1,10 +1,13 @@
 import Link from "next/link";
 import { countOf, getDictionary, type Dictionary, type Locale } from "@vallo/i18n";
 import type { MyAccommodation, MyBusiness, MyRoomType } from "@/lib/host/queries";
-import { EmptyState } from "@/components/app/Screen";
+import { EmptyState, Section } from "@/components/app/Screen";
 import { PageFrame } from "@/components/app/PageFrame";
 import { ButtonLink } from "@/components/ui/Button";
 import { RoomNightsEditor } from "@/components/host/RoomNightsEditor";
+import { RoomTypePhotoManager } from "@/components/host/RoomTypePhotoManager";
+import { Unfold } from "@/components/ui/Unfold";
+import { MAX_BUSINESS_PHOTOS } from "@/lib/host/photos";
 
 /**
  * The screen, apart from its reads, so the whole thing can be drawn from
@@ -15,15 +18,28 @@ export function HostRoomsBody({
   chosen,
   accommodation,
   rooms,
+  roomPhotos = null,
+  userId = null,
   locale,
   copy = getDictionary("en").hostWorkspace,
   words = getDictionary("en").experienceHost.rooms,
+  photoWords = getDictionary("en").experienceHost.photoManager.room,
 }: {
   businesses: MyBusiness[];
   chosen: MyBusiness | null;
   accommodation: MyAccommodation | null;
   rooms: MyRoomType[];
+  /**
+   * Each room type's photographs, cover first, keyed by room type id. Null
+   * when `room_type_photos` could not be read (the pending migration has not
+   * run, or the read failed): the photograph block is then not drawn at all.
+   */
+  roomPhotos?: Record<string, { id: string; url: string }[]> | null;
+  /** The signed-in host, whose uid is the first folder of every upload. */
+  userId?: string | null;
   locale: Locale;
+  /** One room's photograph words in the reader's language; English in the previews. */
+  photoWords?: Dictionary["experienceHost"]["photoManager"]["room"];
   /** The host workspace words in the reader's language; English in the previews. */
   copy?: Dictionary["hostWorkspace"];
   /** The page's own words in the reader's language; English in the previews. */
@@ -109,6 +125,40 @@ export function HostRoomsBody({
         ) : (
           <RoomNightsEditor rooms={rooms} locale={locale} />
         )}
+        {/*
+          PHOTOGRAPHS PER ROOM TYPE. One fold per room, so a hotel with five
+          room types is five rows rather than five grids, each holding the same
+          uploader the property's own photographs use (the scrub, the ten, the
+          cover first, the reorder). Not drawn while the table is not there.
+        */}
+        {rooms.length > 0 && roomPhotos && userId ? (
+          <Section
+            className="mt-section-tight"
+            title={words.photosTitle}
+            description={words.photosNote.replace("{max}", String(MAX_BUSINESS_PHOTOS))}
+          >
+            <Unfold
+              data-testid="host-room-photos"
+              items={rooms.map((room) => {
+                const photos = roomPhotos[room.id] ?? [];
+                return {
+                  id: room.id,
+                  icon: "picture" as const,
+                  title: room.name,
+                  hint:
+                    photos.length === 0
+                      ? photoWords.none
+                      : photoWords.onRecord
+                          .replace("{count}", String(photos.length))
+                          .replace("{max}", String(MAX_BUSINESS_PHOTOS)),
+                  content: (
+                    <RoomTypePhotoManager roomTypeId={room.id} roomName={room.name} userId={userId} photos={photos} />
+                  ),
+                };
+              })}
+            />
+          </Section>
+        ) : null}
       </div>
     </PageFrame>
   );

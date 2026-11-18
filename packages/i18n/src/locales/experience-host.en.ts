@@ -203,6 +203,11 @@ export const experienceHostEn = {
     noneOnSale: "{name} has {types} and no nights on sale, so a search with dates on it will not find it.",
     someOnSale: "{name} has {types}, {onSale} of them on sale.",
     addRoomType: "Add a room type",
+    /** The heading over the photographs of each room type on /host/rooms. */
+    photosTitle: "Photographs of each room",
+    /** `{max}` is a whole number. */
+    photosNote:
+      "Each room type carries its own photographs, up to {max}. The first is the one guests see beside the room on your page; a room with none shows its name and details only.",
   },
   /** What the host screens without a shaped wait of their own say while they load (C5; hostWorkspace.loadingScreens has the rest). */
   loadingScreens: {
@@ -379,6 +384,17 @@ export const experienceHostEn = {
         "The room as a guest first sees it, a table laid, the frontage so somebody can recognise it from the street, and two or three plates you are known for. A phone camera in good light beats a bad professional shoot.",
       ofSubject: "of your venue",
       fullNote: "That is {max} photographs, which is as many as a venue carries. Take one down to add another.",
+    },
+    /** One room type's photographs on /host/rooms; the fold above names the room. */
+    room: {
+      title: "Photographs of {room}",
+      guidance:
+        "The bed made up as a guest finds it, the bathroom, the view from the window, and the desk, sofa or kitchenette if this room has one. A guest choosing between two rooms compares these.",
+      ofSubject: "of this room",
+      fullNote: "That is {max} photographs, which is as many as a room type carries. Take one down to add another.",
+      /** The fold's second line when the room has photographs. `{count}` is a whole number. */
+      onRecord: "{count} of {max}",
+      none: "No photographs yet",
     },
     property: {
       title: "Photographs of the property",
@@ -651,6 +667,9 @@ export const experienceHostEn = {
         "That upload did not come from your own account, so we did not file it. Please choose the photograph again.",
       venuePhotosFull: "A venue carries up to {max} photographs. Take one down and add this in its place.",
       propertyPhotosFull: "A property carries up to {max} photographs. Take one down and add this in its place.",
+      roomPhotosFull: "A room type carries up to {max} photographs. Take one down and add this in its place.",
+      /** The room photograph table is not on the database yet (a pending migration). */
+      roomPhotosNotReady: "Photographs of each room are not open yet. Your property's own photographs still work.",
       photoRace: "That photograph landed at the same moment as another. Try it again.",
       photoNotAttached: "That photograph did not attach. Choose the file again.",
       roomsOverTotal:

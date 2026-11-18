@@ -1,12 +1,15 @@
 "use client";
 
 import type { Dictionary, Locale } from "@vallo/i18n/core";
-import { formatNumber } from "@vallo/i18n/core";
+import { countOf, formatNumber } from "@vallo/i18n/core";
+import type { ReactNode } from "react";
 import { Amount } from "@/components/ui/Amount";
 import { IconPlate, ICON_PLATE_GLYPH } from "@/components/ui/IconPlate";
 import { StatusPill } from "@/components/ui/StatusPill";
 import { UiIcon } from "@/design-system/icons/UiIcon";
 import { TYPE } from "@/components/app/Screen";
+import { RemoteImage } from "@/components/ui/RemoteImage";
+import { PhotoViewerProvider, usePhotoViewer } from "@/components/app/listing/PhotoViewer";
 import { feedback } from "@/lib/ui/feedback";
 import {
   reserveHref,
@@ -71,8 +74,17 @@ export function RoomTypes({
     <div className="nf-rooms" role={datesPicked ? "radiogroup" : undefined} aria-label={copy.roomsTitle}>
       {rooms.map((room) => {
         const fits = room.sleeps >= guests;
+        const photos = room.photos ?? [];
         return (
-          <section key={room.id} className="nf-rooms__room" aria-label={room.name}>
+          <RoomPhotos key={room.id} name={room.name} photos={photos.map((photo) => photo.url)}>
+          <section className="nf-rooms__room" aria-label={room.name}>
+            {/* THE ROOM'S OWN PHOTOGRAPHS, when it has any (`room_type_photos`):
+                the cover above the room, which opens the room's photographs in
+                the same viewer the stay's hero uses. A room with none is drawn
+                exactly as before. */}
+            {photos[0] ? (
+              <RoomCover name={room.name} cover={photos[0].url} count={photos.length} locale={locale} copy={copy} />
+            ) : null}
             <div className="nf-rooms__head">
               <IconPlate size="md">
                 <UiIcon name="bed" size={ICON_PLATE_GLYPH.md} />
@@ -86,6 +98,7 @@ export function RoomTypes({
                   {room.sizeSqm ? ` · ${formatNumber(room.sizeSqm, locale)} m²` : ""}
                 </span>
                 {room.description ? <span className={`mt-3xs block ${TYPE.rowMeta}`}>{room.description}</span> : null}
+                {photos.length > 1 ? <RoomPhotosLink count={photos.length} locale={locale} copy={copy} /> : null}
               </span>
               {!fits && <StatusPill tone="neutral">{copy.tooSmall}</StatusPill>}
             </div>
@@ -116,9 +129,73 @@ export function RoomTypes({
               </ul>
             )}
           </section>
+          </RoomPhotos>
         );
       })}
     </div>
+  );
+}
+
+/**
+ * A room's own viewer. Nested under the stay's, so inside this room "open"
+ * shows THIS room's photographs and nothing else; a room with none adds no
+ * provider, and the stay's own viewer is untouched.
+ */
+function RoomPhotos({ name, photos, children }: { name: string; photos: string[]; children: ReactNode }) {
+  if (photos.length === 0) return <>{children}</>;
+  return (
+    <PhotoViewerProvider title={name} photos={photos} hue={0} kind="hotel">
+      {children}
+    </PhotoViewerProvider>
+  );
+}
+
+function RoomCover({
+  name,
+  cover,
+  count,
+  locale,
+  copy,
+}: {
+  name: string;
+  cover: string;
+  count: number;
+  locale: Locale;
+  copy: StaysCopy;
+}) {
+  const viewer = usePhotoViewer();
+  return (
+    <button
+      type="button"
+      className="nf-tap block w-full"
+      aria-label={copy.roomPhotosOpen.replace("{photos}", countOf(count, "photos", locale)).replace("{room}", name)}
+      onClick={(event) => viewer?.open(0, event.currentTarget.getBoundingClientRect())}
+      data-testid="room-cover"
+    >
+      <RemoteImage
+        src={cover}
+        alt=""
+        width={640}
+        height={360}
+        sizes="(min-width: 768px) 480px, 92vw"
+        className="h-40 w-full rounded-md border border-[var(--nf-border-subtle)] object-cover sm:h-48"
+      />
+    </button>
+  );
+}
+
+function RoomPhotosLink({ count, locale, copy }: { count: number; locale: Locale; copy: StaysCopy }) {
+  const viewer = usePhotoViewer();
+  return (
+    <button
+      type="button"
+      className="nf-tap mt-3xs block w-fit font-semibold text-[var(--nf-content-link)] underline-offset-4 hover:underline"
+      /* No origin: a line of text is not a photograph to grow out of, so the
+         viewer fades up as it does for any opener without one. */
+      onClick={() => viewer?.open(0)}
+    >
+      {copy.roomPhotosLink.replace("{photos}", countOf(count, "photos", locale))}
+    </button>
   );
 }
 

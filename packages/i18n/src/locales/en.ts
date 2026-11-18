@@ -5100,6 +5100,9 @@ export const en = {
     reserve: "Reserve",
     noRate: "No rate yet",
     noRatesYet: "This room has no rates loaded yet. Try another room, or message the property.",
+    /** A room type's own photographs. `{photos}` is a counted phrase ("4 photos"), `{room}` the room's name. */
+    roomPhotosOpen: "See {photos} of {room}",
+    roomPhotosLink: "See {photos}",
     roomTypes: "{count} room types",
     roomTypesOne: "1 room type",
     noRoomsYet: "The rooms for this property are still being loaded.",

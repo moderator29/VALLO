@@ -43,6 +43,7 @@ import {
 } from "./queue-filter";
 import type { AdminRead } from "./queries";
 import { accommodationPhotoUrl } from "../stays/photos";
+import { readRoomTypePhotos } from "../stays/room-type-photos";
 
 type Db = SupabaseClient<Database>;
 type ListingStatus = Database["public"]["Enums"]["listing_status"];
@@ -93,6 +94,12 @@ export type BusinessPropertyView = {
   photos: string[];
   roomTypeCount: number;
   ratePlanCount: number;
+  /**
+   * Each room type's own photographs (`room_type_photos`), cover first, for
+   * the room types that have any. Empty while the pending migration that
+   * creates the table has not run.
+   */
+  roomPhotos: { roomTypeId: string; name: string; photos: string[] }[];
 };
 
 export type BusinessQueueRow = {
@@ -271,7 +278,7 @@ export async function getBusinessQueue(
         admin
           .from("accommodations")
           .select(
-            "id, business_id, name, status, latitude, longitude, accommodation_photos(id, storage_path, position), room_types(id, rate_plans(id))",
+            "id, business_id, name, status, latitude, longitude, accommodation_photos(id, storage_path, position), room_types(id, name, rate_plans(id))",
           )
           .in("business_id", ids),
         admin
@@ -317,6 +324,16 @@ export async function getBusinessQueue(
     for (const row of windows.data ?? []) {
       windowCount.set(row.business_id, (windowCount.get(row.business_id) ?? 0) + 1);
     }
+
+    /* The rooms' own photographs, one read for every property on the page.
+       `unavailable` (the table is not there yet, or the read failed) draws
+       no room photographs rather than failing the desk. */
+    const roomPhotoRead = await readRoomTypePhotos(
+      admin,
+      (accommodations.data ?? []).flatMap((row) => row.room_types.map((roomType) => roomType.id)),
+    );
+    const roomPhotosOf = (id: string): string[] =>
+      roomPhotoRead.state === "ok" ? (roomPhotoRead.byRoom.get(id) ?? []).map((photo) => photo.url) : [];
 
     const photoCount = new Map<string, number>();
     for (const row of photos.data ?? []) {
@@ -405,6 +422,9 @@ export async function getBusinessQueue(
               (total, roomType) => total + roomType.rate_plans.length,
               0,
             ),
+            roomPhotos: row.room_types
+              .map((roomType) => ({ roomTypeId: roomType.id, name: roomType.name, photos: roomPhotosOf(roomType.id) }))
+              .filter((roomType) => roomType.photos.length > 0),
           })),
         restaurant: restaurant
           ? {
