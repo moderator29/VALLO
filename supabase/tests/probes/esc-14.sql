@@ -25,10 +25,12 @@ do $$
 declare
   member constant uuid := '957b3bd2-cce3-425d-bba9-5cd876ca3d62';
   admin  constant uuid := '03f3dd52-ea28-4852-9abe-e5b0a67c2a43';
-  s1 constant uuid := 'ed000000-0000-4000-8000-000000000003';
-  s2 constant uuid := 'ed000000-0000-4000-8000-000000000037';
-  s3 constant uuid := 'ed000000-0000-4000-8000-000000000039';
-  s4 constant uuid := 'ed000000-0000-4000-8000-000000000018';
+  lister constant uuid := gen_random_uuid();   -- host, filed below
+  lister_agent uuid;
+  s1 constant uuid := gen_random_uuid();
+  s2 constant uuid := gen_random_uuid();
+  s3 constant uuid := gen_random_uuid();
+  s4 constant uuid := gen_random_uuid();
   lagos date := (now() at time zone 'Africa/Lagos')::date;
   stale uuid; legacy uuid; today uuid; today_new uuid; today_paying uuid; fresh uuid; paid uuid; paying uuid;
   stalled uuid; waiting uuid; waiting_old uuid;
@@ -38,26 +40,28 @@ declare
   c record; bid uuid; ag public.deal_agreements%rowtype; g bigint;
   r jsonb; st text; n int;
 begin
-  -- 17 October 2026: on the live database the example collection's agents row
-  -- (e0000000-...-0002) no longer belongs to the example lister: every probe
-  -- that made the QA member an agent hit agents_user_id_key, an inspection by
-  -- the QA member on an example listing was refused by
-  -- inspection_requests_parties_differ, a stay they booked there drew no
-  -- agreement (the host was the guest), and the example payout account
-  -- answered payee_not_set_up for the example lister. The fixture gives the
-  -- row back to the example lister and points the listings this probe uses
-  -- at it, for this transaction only, so the two parties are the people the
-  -- probe was written for. Nothing asserted below changes. Rolled back.
-  update public.agents set user_id = 'e0000000-0000-4000-8000-000000000001'
-   where id = 'e0000000-0000-4000-8000-000000000002'
-     and user_id is distinct from 'e0000000-0000-4000-8000-000000000001'
-     and not exists (select 1 from public.agents x where x.user_id = 'e0000000-0000-4000-8000-000000000001');
-  update public.listings set agent_id = 'e0000000-0000-4000-8000-000000000002'
-   where id in ('ed000000-0000-4000-8000-000000000003',
-                'ed000000-0000-4000-8000-000000000018',
-                'ed000000-0000-4000-8000-000000000037',
-                'ed000000-0000-4000-8000-000000000039')
-     and agent_id is distinct from 'e0000000-0000-4000-8000-000000000002';
+  -- 16 November 2026: the example collection is gone from the live database (the
+  -- Vallo Examples user e0000000-...-0001, its listings, hotels and threads; the
+  -- agent row e0000000-...-0002 now belongs to a real account), and the founder
+  -- does not want it back. This probe used to borrow it. It now files its own
+  -- host for this transaction: a fresh auth user (the signup trigger makes the
+  -- profile), an approved business agent, and fresh listings with the same facts
+  -- as the example rows it borrowed: four nightly shortlets, in Lekki, Victoria
+  -- Island, Lekki and Wuse 2 (s1 to s4). All of it is rolled back with the
+  -- probe. Nothing asserted below changes.
+  insert into auth.users (id, instance_id, aud, role, email, raw_app_meta_data, raw_user_meta_data, created_at, updated_at)
+  values (lister, '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated',
+          'probe-esc-14-host-' || lister || '@example.invalid', '{}', '{}', now(), now());
+  insert into public.agents (user_id, display_name, type, status) values (lister, 'Probe esc-14 host', 'business', 'APPROVED')
+  returning id into lister_agent;
+  insert into public.listings (id, agent_id, status, title, description, property_type, state_code, city, area, latitude, longitude, bedrooms, bathrooms, toilets, furnished, listing_intent, rate_minor, rate_period, listing_role)
+  values (s1, lister_agent, 'DRAFT', 'Probe One bedroom serviced flat, Lekki Phase 1', 'Fully furnished with an inverter that carries the flat through the night. Let by the night.', 'shortlet', 'LA', 'Lagos', 'Lekki Phase 1', 6.4472, 3.4738, 1, 1, 1, 'fully_furnished', 'rent', 8500000, 'night', 'agent');
+  insert into public.listings (id, agent_id, status, title, description, property_type, state_code, city, area, latitude, longitude, bedrooms, bathrooms, toilets, furnished, listing_intent, rate_minor, rate_period, listing_role)
+  values (s2, lister_agent, 'DRAFT', 'Probe One bedroom shortlet on Victoria Island', 'One bedroom with a kitchen, a work desk and a balcony, in a serviced block a street back from the water.', 'shortlet', 'LA', 'Lagos', 'Victoria Island', 6.4281, 3.4219, 1, 1, 1, 'fully_furnished', 'rent', 8500000, 'night', 'agent');
+  insert into public.listings (id, agent_id, status, title, description, property_type, state_code, city, area, latitude, longitude, bedrooms, bathrooms, toilets, furnished, listing_intent, rate_minor, rate_period, listing_role)
+  values (s3, lister_agent, 'DRAFT', 'Probe Two bedroom shortlet in Lekki Phase 1', 'Two bedrooms, both en suite, a living room that seats six, and twenty four hour power in the estate.', 'shortlet', 'LA', 'Lagos', 'Lekki Phase 1', 6.446, 3.4738, 2, 2, 2, 'fully_furnished', 'rent', 12000000, 'night', 'agent');
+  insert into public.listings (id, agent_id, status, title, description, property_type, state_code, city, area, latitude, longitude, bedrooms, bathrooms, toilets, furnished, listing_intent, rate_minor, rate_period, listing_role)
+  values (s4, lister_agent, 'DRAFT', 'Probe One bedroom serviced flat in Wuse 2', 'Furnished and let by the night, with a standby generator for the block.', 'shortlet', 'FC', 'Abuja', 'Wuse 2', 9.0812, 7.4668, 1, 1, 1, 'fully_furnished', 'rent', 7000000, 'night', 'agent');
   -- SCUML item 17 (live 29 Sep): an agent listing goes live only on an
   -- approved mandate. The fixture files one as the platform would.
   insert into public.listing_mandates (listing_id, kind, principal_name, review_status, reviewed_by, reviewed_at,

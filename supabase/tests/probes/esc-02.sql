@@ -16,31 +16,32 @@ do $$
 declare
   member uuid := '957b3bd2-cce3-425d-bba9-5cd876ca3d62';
   admin  uuid := '03f3dd52-ea28-4852-9abe-e5b0a67c2a43';
-  lister uuid := 'e0000000-0000-4000-8000-000000000001';
-  stay   uuid := 'ed000000-0000-4000-8000-000000000003';
-  rental uuid := 'ed000000-0000-4000-8000-000000000007';
+  lister uuid := gen_random_uuid();   -- host, filed below
+  lister_agent uuid;
+  stay   uuid := gen_random_uuid();
+  rental uuid := gen_random_uuid();
   lagos  date := (now() at time zone 'Africa/Lagos')::date;
   claims text := json_build_object('sub', '957b3bd2-cce3-425d-bba9-5cd876ca3d62', 'role', 'authenticated', 'session_id', '00000000-0000-4000-8000-00000000c0de')::text;
   bk uuid; bk2 uuid; insp uuid; r jsonb; n int; t bigint; rate bigint; ag public.deal_agreements%rowtype; g bigint;
 begin
-  -- 17 October 2026: on the live database the example collection's agents row
-  -- (e0000000-...-0002) no longer belongs to the example lister: every probe
-  -- that made the QA member an agent hit agents_user_id_key, an inspection by
-  -- the QA member on an example listing was refused by
-  -- inspection_requests_parties_differ, a stay they booked there drew no
-  -- agreement (the host was the guest), and the example payout account
-  -- answered payee_not_set_up for the example lister. The fixture gives the
-  -- row back to the example lister and points the listings this probe uses
-  -- at it, for this transaction only, so the two parties are the people the
-  -- probe was written for. Nothing asserted below changes. Rolled back.
-  update public.agents set user_id = 'e0000000-0000-4000-8000-000000000001'
-   where id = 'e0000000-0000-4000-8000-000000000002'
-     and user_id is distinct from 'e0000000-0000-4000-8000-000000000001'
-     and not exists (select 1 from public.agents x where x.user_id = 'e0000000-0000-4000-8000-000000000001');
-  update public.listings set agent_id = 'e0000000-0000-4000-8000-000000000002'
-   where id in ('ed000000-0000-4000-8000-000000000003',
-                'ed000000-0000-4000-8000-000000000007')
-     and agent_id is distinct from 'e0000000-0000-4000-8000-000000000002';
+  -- 16 November 2026: the example collection is gone from the live database (the
+  -- Vallo Examples user e0000000-...-0001, its listings, hotels and threads; the
+  -- agent row e0000000-...-0002 now belongs to a real account), and the founder
+  -- does not want it back. This probe used to borrow it. It now files its own
+  -- host for this transaction: a fresh auth user (the signup trigger makes the
+  -- profile), an approved business agent, and fresh listings with the same facts
+  -- as the example rows it borrowed: a nightly shortlet in Lekki (stay) and the
+  -- Ikoyi serviced apartment the probe turns into a yearly rental (rental). All
+  -- of it is rolled back with the probe. Nothing asserted below changes.
+  insert into auth.users (id, instance_id, aud, role, email, raw_app_meta_data, raw_user_meta_data, created_at, updated_at)
+  values (lister, '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated',
+          'probe-esc-02-host-' || lister || '@example.invalid', '{}', '{}', now(), now());
+  insert into public.agents (user_id, display_name, type, status) values (lister, 'Probe esc-02 host', 'business', 'APPROVED')
+  returning id into lister_agent;
+  insert into public.listings (id, agent_id, status, title, description, property_type, state_code, city, area, latitude, longitude, bedrooms, bathrooms, toilets, furnished, listing_intent, rate_minor, rate_period, listing_role)
+  values (stay, lister_agent, 'DRAFT', 'Probe One bedroom serviced flat, Lekki Phase 1', 'Fully furnished with an inverter that carries the flat through the night. Let by the night.', 'shortlet', 'LA', 'Lagos', 'Lekki Phase 1', 6.4472, 3.4738, 1, 1, 1, 'fully_furnished', 'rent', 8500000, 'night', 'agent');
+  insert into public.listings (id, agent_id, status, title, description, property_type, state_code, city, area, latitude, longitude, bedrooms, bathrooms, toilets, furnished, listing_intent, rate_minor, rate_period, listing_role)
+  values (rental, lister_agent, 'DRAFT', 'Probe Two bedroom serviced apartment, Ikoyi', 'By the night, fully serviced, with a gym and a pool in the building.', 'shortlet', 'LA', 'Lagos', 'Ikoyi', 6.4551, 3.4318, 2, 2, 3, 'fully_furnished', 'rent', 15000000, 'night', 'agent');
   -- 29 September: the console's second factor. An admin or a staff member
   -- holds their role only on a session that proved a security key, so this
   -- probe's session carries one for every admin and for the QA member (who
