@@ -19,6 +19,8 @@ declare
   guest constant uuid := '957b3bd2-cce3-425d-bba9-5cd876ca3d62';
   host  constant uuid := '03f3dd52-ea28-4852-9abe-e5b0a67c2a43';
   v_rental uuid; v_short uuid; v_sale uuid; v_sale_owner uuid; v_rest uuid; v_rest_owner uuid;
+  lister constant uuid := gen_random_uuid();   -- the lister, filed below
+  lister_agent uuid;
   b_rent uuid := gen_random_uuid();
   b_short uuid := gen_random_uuid();
   b_room uuid;
@@ -33,32 +35,31 @@ declare
   opts text[];
   rv jsonb;
 begin
-  -- 17 October 2026: on the live database the example collection's agents row
-  -- (e0000000-...-0002) no longer belongs to the example lister but to the QA
-  -- member, who is the payer here, so every sale listing was the payer's own
-  -- (the inspection the probe files on a sale was refused by
-  -- inspection_requests_parties_differ; the sale and the restaurant are now
-  -- picked with an owner other than the payer, as pov01 and pov04 pick theirs).
-  -- The fixture gives the row back to the example lister and
-  -- points the example sales at it, for this transaction only, so a sale with
-  -- another owner exists again. Nothing asserted below changes. Rolled back.
-  update public.agents set user_id = 'e0000000-0000-4000-8000-000000000001'
-   where id = 'e0000000-0000-4000-8000-000000000002'
-     and user_id is distinct from 'e0000000-0000-4000-8000-000000000001'
-     and not exists (select 1 from public.agents x where x.user_id = 'e0000000-0000-4000-8000-000000000001');
-  update public.listings set agent_id = 'e0000000-0000-4000-8000-000000000002'
-   where id in ('ed000000-0000-4000-8000-000000000004',
-                'ed000000-0000-4000-8000-000000000006',
-                'ed000000-0000-4000-8000-000000000012',
-                'ed000000-0000-4000-8000-000000000014')
-     and agent_id is distinct from 'e0000000-0000-4000-8000-000000000002';
-  select l.id into v_rental from public.listings l where l.property_type = 'rental' and l.listing_intent = 'rent' limit 1;
-  select l.id into v_short from public.listings l
-   where l.property_type = 'shortlet' and l.listing_intent = 'rent' and l.rate_period = 'night' limit 1;
-  select l.id, a.user_id into v_sale, v_sale_owner from public.listings l join public.agents a on a.id = l.agent_id
-   where l.listing_intent = 'sale' and a.user_id is not null and a.user_id <> guest limit 1;
-  select l.id, a.user_id into v_rest, v_rest_owner from public.listings l join public.agents a on a.id = l.agent_id
-   where l.property_type = 'restaurant' and a.user_id is not null and a.user_id <> guest limit 1;
+  -- 16 November 2026: the example collection is gone from the live database (the
+  -- Vallo Examples user e0000000-...-0001, its listings, hotels and threads; the
+  -- agent row e0000000-...-0002 now belongs to a real account), and the founder
+  -- does not want it back. This probe used to borrow it. It now files its own
+  -- host for this transaction: a fresh auth user (the signup trigger makes the
+  -- profile), an approved business agent, and fresh listings with the same facts
+  -- as the example rows it borrowed: a yearly rental in Yaba (v_rental), a
+  -- nightly shortlet in Lekki (v_short), the Lekki house for sale (v_sale) and
+  -- the restaurant in Jabi (v_rest), all listed by the one fresh lister. All of
+  -- it is rolled back with the probe. Nothing asserted below changes.
+  insert into auth.users (id, instance_id, aud, role, email, raw_app_meta_data, raw_user_meta_data, created_at, updated_at)
+  values (lister, '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated',
+          'probe-pov03-rail-resolution-honours-the-choice-host-' || lister || '@example.invalid', '{}', '{}', now(), now());
+  insert into public.agents (user_id, display_name, type, status) values (lister, 'Probe pov03-rail-resolution-honours-the-choice host', 'business', 'APPROVED')
+  returning id into lister_agent;
+  v_rental := gen_random_uuid(); v_short := gen_random_uuid(); v_sale := gen_random_uuid(); v_rest := gen_random_uuid();
+  insert into public.listings (id, agent_id, status, title, description, property_type, state_code, city, area, latitude, longitude, bedrooms, bathrooms, toilets, furnished, listing_intent, rent_amount_minor, rent_period, caution_deposit_minor, service_charge_minor, service_charge_period, agency_fee_minor, legal_fee_minor, agreement_fee_minor, total_move_in_cost_minor, minimum_tenancy_months, listing_role)
+  values (v_rental, lister_agent, 'DRAFT', 'Probe Mini flat in Yaba', 'One room, its own kitchen and bathroom, on the first floor of a small block off Commercial Avenue.', 'rental', 'LA', 'Lagos', 'Yaba', 6.5095, 3.3711, 1, 1, 1, 'unfurnished', 'rent', 120000000, 'year', 24000000, 6000000, 'year', 12000000, 12000000, 6000000, 180000000, 12, 'agent');
+  insert into public.listings (id, agent_id, status, title, description, property_type, state_code, city, area, latitude, longitude, bedrooms, bathrooms, toilets, furnished, listing_intent, rate_minor, rate_period, listing_role)
+  values (v_short, lister_agent, 'DRAFT', 'Probe One bedroom serviced flat, Lekki Phase 1', 'Fully furnished with an inverter that carries the flat through the night. Let by the night.', 'shortlet', 'LA', 'Lagos', 'Lekki Phase 1', 6.4472, 3.4738, 1, 1, 1, 'fully_furnished', 'rent', 8500000, 'night', 'agent');
+  insert into public.listings (id, agent_id, status, title, description, property_type, state_code, city, area, latitude, longitude, bedrooms, bathrooms, toilets, furnished, listing_intent, sale_price_minor, tenure, sale_status, listing_role)
+  values (v_sale, lister_agent, 'DRAFT', 'Probe Four bedroom detached house, Lekki Phase 1', 'Detached on its own plot with a boys quarters and parking for three. Certificate of Occupancy in the seller name.', 'home', 'LA', 'Lagos', 'Lekki Phase 1', 6.4415, 3.4761, 4, 4, 5, 'unfurnished', 'sale', 25000000000, 'certificate_of_occupancy', 'available', 'agent');
+  insert into public.listings (id, agent_id, status, title, description, property_type, state_code, city, area, latitude, longitude, bedrooms, bathrooms, toilets, furnished, listing_intent, rate_minor, rate_period, listing_role)
+  values (v_rest, lister_agent, 'DRAFT', 'Probe Restaurant in Jabi', 'A working restaurant with a fitted kitchen and covered outdoor seating. Priced per head.', 'restaurant', 'FC', 'Abuja', 'Jabi', 9.0714, 7.4318, 0, 2, 4, 'fully_furnished', 'rent', 1800000, 'guest', 'agent');
+  v_sale_owner := lister; v_rest_owner := lister;
   if v_rental is null or v_short is null or v_sale is null then
     raise exception 'PROBE_FAIL pov03-rail-resolution-honours-the-choice: fixtures missing (a rental, a nightly shortlet, a sale)';
   end if;
@@ -69,7 +70,8 @@ begin
          'owner', 'call_back', host, now()
     from public.listings where id in (v_rental, v_short, v_sale, v_rest) and listing_role <> 'owner'
      and not private.listing_has_live_mandate(id);
-  update public.listings set is_demo = false where id in (v_rental, v_short, v_sale, v_rest);
+  -- Live, as the example listings it replaces were (16 November 2026).
+  update public.listings set is_demo = false, status = 'PUBLISHED' where id in (v_rental, v_short, v_sale, v_rest);
 
   -- RENT: the booking a rent charge opens.
   perform set_config('vallo.rent_charge', 'true', true);

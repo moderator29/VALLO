@@ -7,6 +7,8 @@ do $$
 declare
   guest constant uuid := '957b3bd2-cce3-425d-bba9-5cd876ca3d62';
   v_sale uuid; v_owner uuid; insp uuid;
+  lister constant uuid := gen_random_uuid();   -- the seller, filed below
+  lister_agent uuid;
   ag uuid;
   pol uuid;
   refused boolean;
@@ -23,30 +25,29 @@ begin
   select id into ag from public.deal_agreements order by created_at desc limit 1;
   if ag is null then
     -- No agreement yet on this database: draw one up on a sale listing (rolled back).
-    -- 17 October 2026: on the live database the example collection's agents row
-    -- (e0000000-...-0002) no longer belongs to the example lister but to the QA
-    -- member, who is the payer here, so every sale listing was the payer's own
-    -- (the CI run of 17 October failed with "listing <NULL> has no owner").
-    -- The fixture gives the row back to the example lister and
-    -- points the example sales at it, for this transaction only, so a sale with
-    -- another owner exists again. Nothing asserted below changes. Rolled back.
-    update public.agents set user_id = 'e0000000-0000-4000-8000-000000000001'
-     where id = 'e0000000-0000-4000-8000-000000000002'
-       and user_id is distinct from 'e0000000-0000-4000-8000-000000000001'
-       and not exists (select 1 from public.agents x where x.user_id = 'e0000000-0000-4000-8000-000000000001');
-    update public.listings set agent_id = 'e0000000-0000-4000-8000-000000000002'
-     where id in ('ed000000-0000-4000-8000-000000000004',
-                  'ed000000-0000-4000-8000-000000000006',
-                  'ed000000-0000-4000-8000-000000000012',
-                  'ed000000-0000-4000-8000-000000000014')
-       and agent_id is distinct from 'e0000000-0000-4000-8000-000000000002';
-    select l.id, a.user_id into v_sale, v_owner from public.listings l join public.agents a on a.id = l.agent_id
-     where l.listing_intent = 'sale' and a.user_id is not null and a.user_id <> guest limit 1;
+    -- 16 November 2026: the example collection is gone from the live database (the
+    -- Vallo Examples user e0000000-...-0001, its listings, hotels and threads; the
+    -- agent row e0000000-...-0002 now belongs to a real account), and the founder
+    -- does not want it back. This probe used to borrow it. It now files its own
+    -- host for this transaction: a fresh auth user (the signup trigger makes the
+    -- profile), an approved business agent, and fresh listings with the same facts
+    -- as the example rows it borrowed: the Lekki house for sale (v_sale). All of
+    -- it is rolled back with the probe. Nothing asserted below changes.
+    insert into auth.users (id, instance_id, aud, role, email, raw_app_meta_data, raw_user_meta_data, created_at, updated_at)
+    values (lister, '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated',
+            'probe-pov01-payer-rail-choice-columns-host-' || lister || '@example.invalid', '{}', '{}', now(), now());
+    insert into public.agents (user_id, display_name, type, status) values (lister, 'Probe pov01-payer-rail-choice-columns host', 'business', 'APPROVED')
+    returning id into lister_agent;
+    v_sale := gen_random_uuid();
+    insert into public.listings (id, agent_id, status, title, description, property_type, state_code, city, area, latitude, longitude, bedrooms, bathrooms, toilets, furnished, listing_intent, sale_price_minor, tenure, sale_status, listing_role)
+    values (v_sale, lister_agent, 'DRAFT', 'Probe Four bedroom detached house, Lekki Phase 1', 'Detached on its own plot with a boys quarters and parking for three. Certificate of Occupancy in the seller name.', 'home', 'LA', 'Lagos', 'Lekki Phase 1', 6.4415, 3.4761, 4, 4, 5, 'unfurnished', 'sale', 25000000000, 'certificate_of_occupancy', 'available', 'agent');
+    v_owner := lister;
     insert into public.listing_mandates (listing_id, kind, principal_name, review_status, reviewed_by, reviewed_at,
            principal_relationship, principal_verified_how, principal_verified_by, principal_verified_at)
     select id, 'sale', 'Probe Principal', 'approved', v_owner, now(), 'owner', 'call_back', v_owner, now()
       from public.listings where id = v_sale and listing_role <> 'owner' and not private.listing_has_live_mandate(id);
-    update public.listings set is_demo = false where id = v_sale;
+    -- Live, as the example listings it replaces were (16 November 2026).
+    update public.listings set is_demo = false, status = 'PUBLISHED' where id = v_sale;
     insert into public.inspection_requests (listing_id, requester_id, lister_id, requested_at)
     values (v_sale, guest, v_owner, now()) returning id into insp;
     insert into public.deal_agreements (kind, listing_id, inspection_id, renter_id, owner_id, amount_minor, terms)
