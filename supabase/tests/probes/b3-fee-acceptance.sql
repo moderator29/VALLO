@@ -18,11 +18,37 @@ declare
   acc public.listing_fee_acceptances%rowtype;
   acc2 public.listing_fee_acceptances%rowtype;
   n int;
-  stay constant uuid := 'ed000000-0000-4000-8000-000000000003';
+  stay constant uuid := gen_random_uuid();
+  lister constant uuid := gen_random_uuid();   -- the stay's host, filed below
+  lister_agent uuid;
   stranger constant uuid := gen_random_uuid();
   tg name;
   tv constant text := '2026-10-06';
 begin
+  -- 16 November 2026: the example collection is gone from the live database (the
+  -- Vallo Examples user e0000000-...-0001, its listings, hotels and threads; the
+  -- agent row e0000000-...-0002 now belongs to a real account), and the founder
+  -- does not want it back. This probe used to borrow it. It now files its own
+  -- host for this transaction: a fresh auth user (the signup trigger makes the
+  -- profile), an approved business agent, and fresh listings with the same facts
+  -- as the example rows it borrowed: a nightly shortlet in Lekki (stay). All of
+  -- it is rolled back with the probe. Nothing asserted below changes.
+  insert into auth.users (id, instance_id, aud, role, email, raw_app_meta_data, raw_user_meta_data, created_at, updated_at)
+  values (lister, '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated',
+          'probe-b3-fee-acceptance-host-' || lister || '@example.invalid', '{}', '{}', now(), now());
+  insert into public.agents (user_id, display_name, type, status) values (lister, 'Probe b3-fee-acceptance host', 'business', 'APPROVED')
+  returning id into lister_agent;
+  insert into public.listings (id, agent_id, status, title, description, property_type, state_code, city, area, latitude, longitude, bedrooms, bathrooms, toilets, furnished, listing_intent, rate_minor, rate_period, listing_role)
+  values (stay, lister_agent, 'DRAFT', 'Probe One bedroom serviced flat, Lekki Phase 1', 'Fully furnished with an inverter that carries the flat through the night. Let by the night.', 'shortlet', 'LA', 'Lagos', 'Lekki Phase 1', 6.4472, 3.4738, 1, 1, 1, 'fully_furnished', 'rent', 8500000, 'night', 'agent');
+  -- Published the way the platform publishes an agent listing: on an
+  -- approved mandate (SCUML item 17), then PUBLISHED.
+  insert into public.listing_mandates (listing_id, kind, principal_name, review_status, reviewed_by, reviewed_at,
+         principal_relationship, principal_verified_how, principal_verified_by, principal_verified_at)
+  select id, 'letting', 'Probe Principal', 'approved', '03f3dd52-ea28-4852-9abe-e5b0a67c2a43', now(),
+         'owner', 'call_back', '03f3dd52-ea28-4852-9abe-e5b0a67c2a43', now()
+    from public.listings where id in (stay) and listing_role <> 'owner'
+     and not private.listing_has_live_mandate(id);
+  update public.listings set status = 'PUBLISHED', published_at = now() where id in (stay);
   -- The seeded stay (is_demo on production; the supply-proof gate lifted for this
   -- transaction only, as chargebacks.sql). The figures never read is_demo or status.
   for tg in select tgname from pg_trigger where tgrelid = 'public.listings'::regclass and tgfoid = 'private.listing_supply_proof_gate'::regproc loop

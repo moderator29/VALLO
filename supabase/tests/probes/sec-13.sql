@@ -25,7 +25,9 @@ declare
   o_new  uuid;
   o_fail uuid;
   bk     uuid;
-  stay   constant uuid := 'ed000000-0000-4000-8000-000000000003';
+  stay   constant uuid := gen_random_uuid();
+  lister constant uuid := gen_random_uuid();   -- the stay's host, filed below
+  lister_agent uuid;
   app_old uuid;
   app_m  uuid;
   due_j  jsonb;
@@ -77,6 +79,22 @@ begin
   values (agent, 'REJECTED', 'Probe Agent Earlier', 'nin', '55555555555')
   returning id into app_old;
 
+  -- 16 November 2026: the example collection is gone from the live database (the
+  -- Vallo Examples user e0000000-...-0001, its listings, hotels and threads; the
+  -- agent row e0000000-...-0002 now belongs to a real account), and the founder
+  -- does not want it back. This probe used to borrow it. It now files its own
+  -- host for this transaction: a fresh auth user (the signup trigger makes the
+  -- profile), an approved business agent, and fresh listings with the same facts
+  -- as the example rows it borrowed: a nightly shortlet in Lekki (stay), which
+  -- carries the far-future booking the refund hangs on. All of it is rolled back
+  -- with the probe. Nothing asserted below changes.
+  insert into auth.users (id, instance_id, aud, role, email, raw_app_meta_data, raw_user_meta_data, created_at, updated_at)
+  values (lister, '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated',
+          'probe-sec-13-host-' || lister || '@example.invalid', '{}', '{}', now(), now());
+  insert into public.agents (user_id, display_name, type, status) values (lister, 'Probe sec-13 host', 'business', 'APPROVED')
+  returning id into lister_agent;
+  insert into public.listings (id, agent_id, status, title, description, property_type, state_code, city, area, latitude, longitude, bedrooms, bathrooms, toilets, furnished, listing_intent, rate_minor, rate_period, listing_role)
+  values (stay, lister_agent, 'DRAFT', 'Probe One bedroom serviced flat, Lekki Phase 1', 'Fully furnished with an inverter that carries the flat through the night. Let by the night.', 'shortlet', 'LA', 'Lagos', 'Lekki Phase 1', 6.4472, 3.4738, 1, 1, 1, 'fully_furnished', 'rent', 8500000, 'night', 'agent');
   -- The rich account owes a guest a rent refund, as a lister: money the
   -- platform must not let a deletion erase. The booking it hangs on is a
   -- far-future stay on an example listing made live for this transaction

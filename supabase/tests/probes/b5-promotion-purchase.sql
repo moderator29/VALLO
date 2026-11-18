@@ -8,6 +8,8 @@ declare
   stranger constant uuid := gen_random_uuid();
   owner_id uuid;
   lid uuid;
+  lister constant uuid := gen_random_uuid();   -- the lister, filed below
+  lister_agent uuid;
   r jsonb; r2 jsonb; rm jsonb;
   ref text; ref2 text; refb text; pid uuid;
   n int; ok boolean; st text;
@@ -30,11 +32,36 @@ begin
   if not ok then raise exception 'PROBE_FAIL b5-promotion-purchase: a price row was rewritten'; end if;
 
   -- A real published listing and its lister (everything below rolls back).
+  -- 16 November 2026: the example collection is gone from the live database (the
+  -- Vallo Examples user e0000000-...-0001, its listings, hotels and threads; the
+  -- agent row e0000000-...-0002 now belongs to a real account), and the founder
+  -- does not want it back. This probe used to borrow it. It now files its own
+  -- host for this transaction: a fresh auth user (the signup trigger makes the
+  -- profile), an approved business agent, and fresh listings with the same facts
+  -- as the example rows it borrowed: a three bedroom flat to rent in Lekki Phase
+  -- 1 (lid). All of it is rolled back with the probe. Nothing asserted below
+  -- changes.
+  insert into auth.users (id, instance_id, aud, role, email, raw_app_meta_data, raw_user_meta_data, created_at, updated_at)
+  values (lister, '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated',
+          'probe-b5-promotion-purchase-host-' || lister || '@example.invalid', '{}', '{}', now(), now());
+  insert into public.agents (user_id, display_name, type, status) values (lister, 'Probe b5-promotion-purchase host', 'business', 'APPROVED')
+  returning id into lister_agent;
+  lid := gen_random_uuid();
+  insert into public.listings (id, agent_id, status, title, description, property_type, state_code, city, area, latitude, longitude, bedrooms, bathrooms, toilets, furnished, listing_intent, rent_amount_minor, rent_period, caution_deposit_minor, service_charge_minor, service_charge_period, agency_fee_minor, legal_fee_minor, agreement_fee_minor, total_move_in_cost_minor, minimum_tenancy_months, listing_role)
+  values (lid, lister_agent, 'DRAFT', 'Probe Three bedroom flat in Lekki Phase 1', 'Third floor of a six storey block on a quiet crescent. Fitted kitchen, en suite to two rooms, and a shared generator that runs to midnight.', 'apartment', 'LA', 'Lagos', 'Lekki Phase 1', 6.4441, 3.4712, 3, 3, 4, 'semi_furnished', 'rent', 850000000, 'year', 170000000, 45000000, 'year', 85000000, 85000000, 42500000, 1232500000, 12, 'agent');
+  -- Published the way the platform publishes an agent listing: on an
+  -- approved mandate (SCUML item 17), then PUBLISHED.
+  insert into public.listing_mandates (listing_id, kind, principal_name, review_status, reviewed_by, reviewed_at,
+         principal_relationship, principal_verified_how, principal_verified_by, principal_verified_at)
+  select id, 'letting', 'Probe Principal', 'approved', '03f3dd52-ea28-4852-9abe-e5b0a67c2a43', now(),
+         'owner', 'call_back', '03f3dd52-ea28-4852-9abe-e5b0a67c2a43', now()
+    from public.listings where id in (lid) and listing_role <> 'owner'
+     and not private.listing_has_live_mandate(id);
+  update public.listings set status = 'PUBLISHED', published_at = now() where id in (lid);
   select l.id, a.user_id into lid, owner_id
     from public.listings l join public.agents a on a.id = l.agent_id
-   where l.status = 'PUBLISHED'
-     and not exists (select 1 from promotion.placements pl where pl.listing_id = l.id)
-   limit 1;
+   where l.id = lid and l.status = 'PUBLISHED'
+     and not exists (select 1 from promotion.placements pl where pl.listing_id = l.id);
   if lid is null then raise exception 'PROBE_FAIL b5-promotion-purchase: no published listing to test against'; end if;
 
   -- Refusals.

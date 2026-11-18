@@ -19,6 +19,14 @@ table to the API roles, or lets a member publish their own listing.
 - It ALWAYS ends in `raise exception 'PROBE_OK <file name without .sql>'`, and
   reports a failure as `raise exception 'PROBE_FAIL <id>: <what>'`. Because it
   always raises, it always rolls back.
+- It files its own fixtures inside its transaction (a fresh auth user, which
+  the signup trigger gives a profile; an agent; a listing published on an
+  approved mandate; a business, hotel or thread) and never borrows rows that
+  happen to be on the live database. On 16 November 2026 the founder deleted
+  every example row (the Vallo Examples user, its listings, hotels and
+  threads) and 32 probes that borrowed them failed at once; they now file
+  their own. The QA member and admin above, and reference tables, are the
+  only standing rows a probe may rely on.
 - It reads grants with `has_table_privilege` / `has_column_privilege` /
   `has_function_privilege` or `pg_class.relacl`, never `information_schema`'s
   grant views, which answer only about the observing role.

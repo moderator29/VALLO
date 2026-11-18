@@ -11,6 +11,8 @@ declare
   guest constant uuid := '957b3bd2-cce3-425d-bba9-5cd876ca3d62';
   host  constant uuid := '03f3dd52-ea28-4852-9abe-e5b0a67c2a43';
   v_short uuid;
+  lister constant uuid := gen_random_uuid();   -- the shortlet's lister, filed below
+  lister_agent uuid;
   b_short uuid := gen_random_uuid();
   a_short uuid := gen_random_uuid();
   b_un uuid := gen_random_uuid();
@@ -26,8 +28,22 @@ declare
   refused boolean;
   alerts_before bigint;
 begin
-  select l.id into v_short from public.listings l
-   where l.property_type = 'shortlet' and l.listing_intent = 'rent' and l.rate_period = 'night' limit 1;
+  -- 16 November 2026: the example collection is gone from the live database (the
+  -- Vallo Examples user e0000000-...-0001, its listings, hotels and threads; the
+  -- agent row e0000000-...-0002 now belongs to a real account), and the founder
+  -- does not want it back. This probe used to borrow it. It now files its own
+  -- host for this transaction: a fresh auth user (the signup trigger makes the
+  -- profile), an approved business agent, and fresh listings with the same facts
+  -- as the example rows it borrowed: a nightly shortlet in Lekki (v_short). All
+  -- of it is rolled back with the probe. Nothing asserted below changes.
+  insert into auth.users (id, instance_id, aud, role, email, raw_app_meta_data, raw_user_meta_data, created_at, updated_at)
+  values (lister, '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated',
+          'probe-pov05-escrow-for-shortlet-stays-host-' || lister || '@example.invalid', '{}', '{}', now(), now());
+  insert into public.agents (user_id, display_name, type, status) values (lister, 'Probe pov05-escrow-for-shortlet-stays host', 'business', 'APPROVED')
+  returning id into lister_agent;
+  v_short := gen_random_uuid();
+  insert into public.listings (id, agent_id, status, title, description, property_type, state_code, city, area, latitude, longitude, bedrooms, bathrooms, toilets, furnished, listing_intent, rate_minor, rate_period, listing_role)
+  values (v_short, lister_agent, 'DRAFT', 'Probe One bedroom serviced flat, Lekki Phase 1', 'Fully furnished with an inverter that carries the flat through the night. Let by the night.', 'shortlet', 'LA', 'Lagos', 'Lekki Phase 1', 6.4472, 3.4738, 1, 1, 1, 'fully_furnished', 'rent', 8500000, 'night', 'agent');
   if v_short is null then
     raise exception 'PROBE_FAIL pov05-escrow-for-shortlet-stays: fixtures missing (a nightly shortlet)';
   end if;
@@ -35,7 +51,8 @@ begin
          principal_relationship, principal_verified_how, principal_verified_by, principal_verified_at)
   select id, 'letting', 'Probe Principal', 'approved', host, now(), 'owner', 'call_back', host, now()
     from public.listings where id = v_short and listing_role <> 'owner' and not private.listing_has_live_mandate(id);
-  update public.listings set is_demo = false where id = v_short;
+  -- Live, as the example listing it replaces was (16 November 2026).
+  update public.listings set is_demo = false, status = 'PUBLISHED' where id = v_short;
   /* The open reads private.rentals_protected_pay_on(), which since 10 November
      2026 follows payments_escrowpay_on. Both on, inside this transaction only. */
   update public.feature_flags set enabled = true where key in ('payments_protected_pay_on', 'payments_escrowpay_on');

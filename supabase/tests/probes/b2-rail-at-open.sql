@@ -19,6 +19,8 @@ declare
   v_guest uuid;
   v_hotel uuid;
   v_rental uuid;
+  lister constant uuid := gen_random_uuid();   -- the lister, filed below
+  lister_agent uuid;
   b_hotel uuid := gen_random_uuid();
   b_rental uuid := gen_random_uuid();
   r record;
@@ -31,8 +33,36 @@ declare
   refused boolean;
 begin
   select id into v_guest from auth.users order by created_at limit 1;
-  select l.id into v_hotel from public.listings l where l.property_type = 'hotel' and l.listing_intent = 'rent' limit 1;
-  select l.id into v_rental from public.listings l where l.property_type = 'rental' and l.listing_intent = 'rent' limit 1;
+  -- 16 November 2026: the example collection is gone from the live database (the
+  -- Vallo Examples user e0000000-...-0001, its listings, hotels and threads; the
+  -- agent row e0000000-...-0002 now belongs to a real account), and the founder
+  -- does not want it back. This probe used to borrow it. It now files its own
+  -- host for this transaction: a fresh auth user (the signup trigger makes the
+  -- profile), an approved business agent, and fresh listings with the same facts
+  -- as the example rows it borrowed: a guest house room in Port Harcourt listed
+  -- as a hotel and let by the night (v_hotel) and a yearly rental in Yaba
+  -- (v_rental). All of it is rolled back with the probe. Nothing asserted below
+  -- changes.
+  insert into auth.users (id, instance_id, aud, role, email, raw_app_meta_data, raw_user_meta_data, created_at, updated_at)
+  values (lister, '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated',
+          'probe-b2-rail-at-open-host-' || lister || '@example.invalid', '{}', '{}', now(), now());
+  insert into public.agents (user_id, display_name, type, status) values (lister, 'Probe b2-rail-at-open host', 'business', 'APPROVED')
+  returning id into lister_agent;
+  v_hotel := gen_random_uuid();
+  v_rental := gen_random_uuid();
+  insert into public.listings (id, agent_id, status, title, description, property_type, state_code, city, area, latitude, longitude, bedrooms, bathrooms, toilets, furnished, listing_intent, rate_minor, rate_period, listing_role)
+  values (v_hotel, lister_agent, 'DRAFT', 'Probe Guest house room in Old GRA', 'A room in a small guest house, let by the night, with a standby generator.', 'hotel', 'RI', 'Port Harcourt', 'Old GRA', 4.8109, 7.0035, 1, 1, 1, 'fully_furnished', 'rent', 4500000, 'night', 'agent');
+  insert into public.listings (id, agent_id, status, title, description, property_type, state_code, city, area, latitude, longitude, bedrooms, bathrooms, toilets, furnished, listing_intent, rent_amount_minor, rent_period, caution_deposit_minor, service_charge_minor, service_charge_period, agency_fee_minor, legal_fee_minor, agreement_fee_minor, total_move_in_cost_minor, minimum_tenancy_months, listing_role)
+  values (v_rental, lister_agent, 'DRAFT', 'Probe Mini flat in Yaba', 'One room, its own kitchen and bathroom, on the first floor of a small block off Commercial Avenue.', 'rental', 'LA', 'Lagos', 'Yaba', 6.5095, 3.3711, 1, 1, 1, 'unfurnished', 'rent', 120000000, 'year', 24000000, 6000000, 'year', 12000000, 12000000, 6000000, 180000000, 12, 'agent');
+  -- Published the way the platform publishes an agent listing: on an
+  -- approved mandate (SCUML item 17), then PUBLISHED.
+  insert into public.listing_mandates (listing_id, kind, principal_name, review_status, reviewed_by, reviewed_at,
+         principal_relationship, principal_verified_how, principal_verified_by, principal_verified_at)
+  select id, 'letting', 'Probe Principal', 'approved', '03f3dd52-ea28-4852-9abe-e5b0a67c2a43', now(),
+         'owner', 'call_back', '03f3dd52-ea28-4852-9abe-e5b0a67c2a43', now()
+    from public.listings where id in (v_hotel, v_rental) and listing_role <> 'owner'
+     and not private.listing_has_live_mandate(id);
+  update public.listings set status = 'PUBLISHED', published_at = now() where id in (v_hotel, v_rental);
   if v_guest is null or v_hotel is null or v_rental is null then
     raise exception 'PROBE_FAIL b2-rail-at-open: fixtures missing (a user, a hotel listing, a rental listing)';
   end if;

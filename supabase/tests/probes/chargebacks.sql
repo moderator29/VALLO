@@ -10,7 +10,9 @@ do $$
 declare
   lister uuid;
   member uuid := '957b3bd2-cce3-425d-bba9-5cd876ca3d62';
-  stay   uuid := 'ed000000-0000-4000-8000-000000000003';
+  stay   uuid := gen_random_uuid();
+  stay_host uuid := gen_random_uuid();   -- the stay's host, filed below
+  stay_host_agent uuid;
   lagos  date := (now() at time zone 'Africa/Lagos')::date;
   tg name;
   rate bigint;
@@ -27,6 +29,31 @@ declare
   n int;
   before_n int;
 begin
+  -- 16 November 2026: the example collection is gone from the live database (the
+  -- Vallo Examples user e0000000-...-0001, its listings, hotels and threads; the
+  -- agent row e0000000-...-0002 now belongs to a real account), and the founder
+  -- does not want it back. This probe used to borrow it. It now files its own
+  -- host for this transaction: a fresh auth user (the signup trigger makes the
+  -- profile), an approved business agent, and fresh listings with the same facts
+  -- as the example rows it borrowed: a nightly shortlet in Lekki (stay), listed
+  -- by a fresh host of its own. All of it is rolled back with the probe. Nothing
+  -- asserted below changes.
+  insert into auth.users (id, instance_id, aud, role, email, raw_app_meta_data, raw_user_meta_data, created_at, updated_at)
+  values (stay_host, '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated',
+          'probe-chargebacks-host-' || stay_host || '@example.invalid', '{}', '{}', now(), now());
+  insert into public.agents (user_id, display_name, type, status) values (stay_host, 'Probe chargebacks host', 'business', 'APPROVED')
+  returning id into stay_host_agent;
+  insert into public.listings (id, agent_id, status, title, description, property_type, state_code, city, area, latitude, longitude, bedrooms, bathrooms, toilets, furnished, listing_intent, rate_minor, rate_period, listing_role)
+  values (stay, stay_host_agent, 'DRAFT', 'Probe One bedroom serviced flat, Lekki Phase 1', 'Fully furnished with an inverter that carries the flat through the night. Let by the night.', 'shortlet', 'LA', 'Lagos', 'Lekki Phase 1', 6.4472, 3.4738, 1, 1, 1, 'fully_furnished', 'rent', 8500000, 'night', 'agent');
+  -- Published the way the platform publishes an agent listing: on an
+  -- approved mandate (SCUML item 17), then PUBLISHED.
+  insert into public.listing_mandates (listing_id, kind, principal_name, review_status, reviewed_by, reviewed_at,
+         principal_relationship, principal_verified_how, principal_verified_by, principal_verified_at)
+  select id, 'letting', 'Probe Principal', 'approved', '03f3dd52-ea28-4852-9abe-e5b0a67c2a43', now(),
+         'owner', 'call_back', '03f3dd52-ea28-4852-9abe-e5b0a67c2a43', now()
+    from public.listings where id in (stay) and listing_role <> 'owner'
+     and not private.listing_has_live_mandate(id);
+  update public.listings set status = 'PUBLISHED', published_at = now() where id in (stay);
   -- The booking fixture crypto-pay-2 uses: the seeded stay, its supply-proof
   -- gate lifted for this transaction only (everything rolls back).
   for tg in select tgname from pg_trigger where tgrelid = 'public.listings'::regclass and tgfoid = 'private.listing_supply_proof_gate'::regproc loop
