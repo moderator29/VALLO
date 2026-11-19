@@ -87,7 +87,8 @@ async function cleanScreens(browser) {
 
 /* ----------------------------------------------------------------- phones */
 
-const phones = new Phones({ res: 1 });
+/* drawn at the page's own scale, so a handset is pixel for pixel, never stretched */
+const phones = new Phones({ res: DSF });
 const cache = new Map();
 async function phoneImg(screenFile, pose, height) {
   const key = `${screenFile}:${pose}:${height}`;
@@ -97,6 +98,86 @@ async function phoneImg(screenFile, pose, height) {
     cache.set(key, { ...p, src: url(p.file) });
   }
   return cache.get(key);
+}
+/** The rows of a screen that carry words (near-white, neutral pixels), in
+    display px: a part held over the handset must not end across one of them. */
+const rowCache = new Map();
+async function screenRows(file) {
+  if (!rowCache.has(file)) {
+    const { data, info } = await sharp(file).removeAlpha().raw().toBuffer({ resolveWithObject: true });
+    const ink = [], busy = [];
+    const push = (list, y) => { const last = list[list.length - 1]; if (last && y - last[1] <= 3) last[1] = y; else list.push([y, y]); };
+    const hist = new Uint32Array(256);
+    for (let y = 0; y < info.height; y++) {
+      let n = 0, cnt = 0;
+      hist.fill(0);
+      for (let x = 40; x < info.width - 40; x++) {
+        const i = (y * info.width + x) * 3, r = data[i], g = data[i + 1], b = data[i + 2];
+        /* white and grey type alike: light, and close to neutral (the navy ground is neither) */
+        if (r + g + b > 3 * 112 && Math.max(r, g, b) - Math.min(r, g, b) < 46) n++;
+        hist[Math.round(0.2126 * r + 0.7152 * g + 0.0722 * b)]++; cnt++;
+      }
+      if (n > 4) push(ink, y);
+      /* a photo, a button, a chip or an icon: a wide spread of light across the row */
+      let acc = 0, p5 = 0, p95 = 255;
+      for (let v = 0; v < 256; v++) { acc += hist[v]; if (acc >= cnt * 0.04) { p5 = v; break; } }
+      acc = 0;
+      for (let v = 255; v >= 0; v--) { acc += hist[v]; if (acc >= cnt * 0.04) { p95 = v; break; } }
+      if (p95 - p5 > 34) push(busy, y);
+    }
+    /* A tall busy run is a photo: an edge may cross a photo (the card simply
+       sits over part of a picture), just not graze the photo's own top or
+       bottom and leave a sliver of it. Short runs are buttons, chips and icons. */
+    const merged = [];
+    for (const r of busy) { const last = merged[merged.length - 1]; if (last && r[0] - last[1] < 40) last[1] = r[1]; else merged.push([...r]); }
+    const photos = merged.filter(([a, b]) => b - a >= 220);
+    const photo = photos.flatMap(([a, b]) => [[a - 12, a + 34], [b - 34, b + 12]]);
+    const ui = merged.filter(([a, b]) => b - a < 220);
+
+    /* THE SCREEN'S STRUCTURE. Words in any colour (sky, green, grey-blue: not
+       only white), the side borders of boxes (a row with them runs through a
+       tile, a row or a card), and divider lines (a box's own top or bottom,
+       or the rule between two rows). */
+    const W0 = info.width, Hh = info.height;
+    const lum = new Float32Array(W0 * Hh);
+    for (let i = 0, j = 0; i < W0 * Hh; i++, j += 3) lum[i] = 0.2126 * data[j] + 0.7152 * data[j + 1] + 0.0722 * data[j + 2];
+    const L = (x, y) => lum[y * W0 + x];
+    const inPhoto = (y) => photos.some(([a, b]) => y >= a && y <= b);
+    const word = [], sides = new Uint8Array(Hh), line = new Uint8Array(Hh);
+    for (let y = 6; y < Hh - 6; y++) {
+      let bright = 0, lineUp = 0, lineDn = 0, runs = 0, inRun = false;
+      for (let x = 40; x < W0 - 40; x++) {
+        const v = L(x, y);
+        if (v > 95) bright++;
+        const d = v - (L(x, y - 3) + L(x, y + 3)) / 2;
+        if (d > 3.5) lineUp++; else if (d < -3.5) lineDn++;
+        const e = v - L(x - 3, y), eu = L(x, y - 6) - L(x - 3, y - 6), ed = L(x, y + 6) - L(x - 3, y + 6);
+        const edge = Math.abs(e) > 5 && Math.sign(e) === Math.sign(eu) && Math.sign(e) === Math.sign(ed) && Math.abs(eu) > 5 && Math.abs(ed) > 5;
+        if (edge && !inRun) runs++;
+        inRun = edge;
+      }
+      if (bright >= 5 && !inPhoto(y)) push(word, y);
+      sides[y] = runs;
+      line[y] = lineUp > 0.3 * (W0 - 80) || lineDn > 0.3 * (W0 - 80) ? 1 : 0;
+    }
+    rowCache.set(file, { ink: [...ink, ...word].sort((a, b) => a[0] - b[0]), busy: [...ui, ...photo], sides, line, photos });
+  }
+  return rowCache.get(file);
+}
+
+/** Where a handset sits once placed at (cx, cy): its body box, and a map from
+    display px (1320 x 2868) to post px through the screen's own corners. */
+function phoneGeom(p, cx, cy) {
+  const s = p.scale;
+  const left = cx - (p.bbox.x + p.bbox.width / 2) * s, top = cy - (p.bbox.y + p.bbox.height / 2) * s;
+  const [tl, tr, br, bl] = p.imageQuad;
+  const map = (dx, dy) => {
+    const u = dx / 1320, v = dy / 2868;
+    const x = (1 - u) * (1 - v) * tl[0] + u * (1 - v) * tr[0] + u * v * br[0] + (1 - u) * v * bl[0];
+    const y = (1 - u) * (1 - v) * tl[1] + u * (1 - v) * tr[1] + u * v * br[1] + (1 - u) * v * bl[1];
+    return [left + x * s, top + y * s];
+  };
+  return { map, body: { x0: left + p.bbox.x * s, y0: top + p.bbox.y * s, x1: left + (p.bbox.x + p.bbox.width) * s, y1: top + (p.bbox.y + p.bbox.height) * s } };
 }
 function placePhone(p, cx, cy, z = 10) {
   const w = p.width * p.scale, h = p.height * p.scale;
@@ -199,8 +280,91 @@ function stamp({ cx, cy, w, h, rot = 0, fill, edge, ink, q, a, z = 40 }) {
 async function layout(p) {
   const t = THEME[p.theme ?? "light"];
   const parts = [];
+  const meta = {};
   let headHtml = "";
   const L = p.layout;
+
+  /* THE HERO. The headline across the top; the whole handset in frame, never
+     cut by an edge; and the one part that matters held ACROSS it, at a size a
+     phone can read. The part sits over the row it came from and is wider than
+     the handset, so it covers whole rows of the screen and never slices a
+     line of it down the middle. The brand object goes in the clear space. */
+  if (L === "hero") {
+    const size = p.size ?? 96;
+    const top = p.tag ? 222 : 176;
+    headHtml = `<div class="hwrap" style="left:80px;top:${top}px;max-width:920px">${head(p.lines, { size, t })}${p.sub ? `<div class="sub hs" style="color:${t.reg}">${esc(p.sub)}</div>` : ""}</div>`;
+    const phTop = Math.round(top + p.lines.length * size * 1.04 + (p.sub ? 84 : 0) + 58);
+    const phH = p.phone.h ?? 1300 - phTop;
+    const pcx = p.phone.cx ?? 724, pcy = phTop + phH / 2;
+    const BADGE_TOP = 1250;
+    parts.push(badges(BADGE_TOP, "left", 80, 56));
+    const ph = await phoneImg(SCREEN(p.phone.screen), p.phone.pose ?? "s", phH);
+    parts.push(placePhone(ph, pcx, pcy));
+    const G = phoneGeom(ph, pcx, pcy);
+    meta.body = G.body;
+    const B = G.body, bodyW = B.x1 - B.x0, bodyH = B.y1 - B.y0;
+
+    /* THE PART'S PLACE. It stays over the row it came from (covering it, so
+       the same words are never shown twice), and its two edges must land where
+       the screen is empty: no words within a line's height, no photo, button,
+       chip or icon under the rule. Its width can flex between "covers the
+       handset with room" and the largest readable size to find that place. */
+    const l = p.lifts[0];
+    const bw = l.box[2] - l.box[0] + 32, bh = l.box[3] - l.box[1] + 32;
+    const Hof = (w) => bh * w / bw + 2 * Math.max(9, w * 0.019);
+    const rows = await screenRows(SCREEN(p.phone.screen));
+    const toD = (y) => { let a = -600, b = 3468; for (let i = 0; i < 40; i++) { const m = (a + b) / 2; if (G.map(660, m)[1] < y) a = m; else b = m; } return (a + b) / 2; };
+    const near = (list, d, pad) => list.some(([a, b]) => d >= a - pad && d <= b + pad);
+    /* an edge between two boxes, or on a box's own divider, never through a box */
+    const between = (d) => {
+      const r = Math.round(d);
+      for (let k = -14; k <= 14; k++) if (rows.line[r + k]) return true;
+      for (let k = -24; k <= 24; k += 4) if (rows.sides[r + k] > 0 && !rows.photos.some(([a, b]) => r + k >= a && r + k <= b)) return false;
+      return true;
+    };
+    const clear = (y, ip, bp) => { const d = toD(y); return d < 0 || d > 2868 || (!near(rows.ink, d, ip) && !near(rows.busy, d, bp) && (bp === 0 || between(d))); };
+    const srcTop = G.map(660, l.box[1])[1], srcBot = G.map(660, l.box[3])[1];
+    const sy = (srcTop + srcBot) / 2 + (l.dy ?? 0);
+    /* the top edge sits below the status bar, or wholly above the handset (the
+       part then rests on the handset's top); never on the headline */
+    const topMin = G.map(660, 236)[1], aboveMax = B.y0 - 6, headMin = phTop - 34, botMax = BADGE_TOP - 18;
+    const wMin = Math.max(bodyW + 60, (l.minScale ?? 0.56) * bw), wMax = Math.max(wMin, Math.min(860, (p.cardH ?? 460) * bw / bh));
+    let best = null;
+    const tiers = [[24, 10, 80, "clean"], [24, 10, 170, "clean"], [16, 6, 170, "tight"], [10, 0, 280, "loose"]];
+    for (const [ip, bp, reach, tier] of tiers) {
+      for (let w = wMax; w >= wMin - 1e-6; w -= 6) {
+        const H = Hof(w);
+        for (let sh = 0; sh <= reach; sh += 2) for (const sg of sh ? [1, -1] : [1]) {
+          const cy = sy + sg * sh, t = cy - H / 2 - 5, b = cy + H / 2 + 5;
+          if ((t < topMin && t > aboveMax) || t < headMin || b > botMax || t > srcTop - 6 || b < srcBot + 6) continue;
+          if (!clear(t, ip, bp) || !clear(b, ip, bp)) continue;
+          const score = sh + (wMax - w) * 0.3;
+          if (!best || score < best.score) best = { w, cy, H, score, tier };
+        }
+      }
+      if (best) break;
+    }
+    if (!best) { const w = wMin, H = Hof(w); best = { w, cy: Math.min(Math.max(sy, topMin + H / 2 + 5), botMax - H / 2 - 5), H, tier: "none" }; meta.slices = true; }
+    meta.tier = best.tier;
+    meta.edges = [toD(best.cy - best.H / 2 - 5), toD(best.cy + best.H / 2 + 5)].map(Math.round);
+    if (best.tier !== "clean") meta.slices = true;
+    const w = best.w, cy = best.cy, rule = Math.max(9, w * 0.019), H = best.H, Wt = w + 2 * rule;
+    let cx = (B.x0 + B.x1) / 2;
+    cx = Math.min(cx, 1036 - Wt / 2);
+    cx = Math.max(cx, 56 + Wt / 2);
+    parts.push(lift({ ...l, cx, cy, w, rot: l.rot ?? 0 }));
+    meta.lift = { x0: cx - Wt / 2, x1: cx + Wt / 2, y0: cy - H / 2, y1: cy + H / 2, scale: w / bw };
+
+    /* the object: the taller clear band beside the handset, above or below the part */
+    const [name, osz = 176, , , orot = -10] = (p.objs ?? [])[0] ?? [];
+    if (name) {
+      const xr = B.x0 - 26, xl = 84;
+      const bands = [[phTop + 6, meta.lift.y0 - 26], [meta.lift.y1 + 26, BADGE_TOP - 22]].map(([a, b]) => [a, b, b - a]);
+      const [a, b, bhh] = bands.sort((u, v) => v[2] - u[2])[0];
+      const sz = Math.min(osz, bhh - 8, xr - xl - 8);
+      if (sz >= 110) parts.push(o3(name, sz, xr - sz / 2 - 10, (a + b) / 2, orot));
+    }
+  }
 
   /* THE HANDSET, NEARLY STRAIGHT ON. `phone` is two columns: the words and the
      lifted part on the left, one big handset rising off the bottom edge on the
@@ -241,6 +405,7 @@ async function layout(p) {
     headHtml = `<div class="hwrap" style="left:80px;top:720px;max-width:430px">${head(p.lines, { size: 76, t, lh: 1.08 })}</div>`;
     const ph = await phoneImg(SCREEN(p.phone.screen), "s", p.phone.h);
     parts.push(placePhone(ph, p.phone.cx, p.phone.cy));
+    meta.body = phoneGeom(ph, p.phone.cx, p.phone.cy).body;
     parts.push(badges(1236, "left", 80, 60));
   }
 
@@ -310,13 +475,14 @@ async function layout(p) {
   }
 
   if (p.tag) parts.push(`<div class="tag ${t.white ? "w" : ""}" style="top:${px(p.tagY ?? 150)}"><i></i>${esc(p.tag)}</div>`);
-  return { t, parts, headHtml, logoOn: L !== "persona" };
+  return { t, parts, headHtml, logoOn: L !== "persona", meta };
 }
 
 /* ----------------------------------------------------------------- the page */
 
 async function compose(p) {
-  const { t, parts, headHtml, logoOn } = await layout(p);
+  const { t, parts, headHtml, logoOn, meta } = await layout(p);
+  p.__meta = meta;
   const onPhoto = p.ground === "photo";
   return `<!doctype html><html><head><meta charset="utf-8"><style>
     ${FONTS}
@@ -348,6 +514,7 @@ async function compose(p) {
     .hb b{font-weight:700;color:var(--bold);letter-spacing:-.05em}
     .caps .hb{text-transform:uppercase;letter-spacing:-.03em}
     .sub{font:500 34px/1.38 Inter;margin-top:30px;color:#fff;max-width:520px;letter-spacing:-.005em}
+    .sub.hs{margin-top:20px;max-width:900px;font:500 34px/1.3 Inter;letter-spacing:-.005em;opacity:.9}
     .sub.dark{position:absolute;color:${INK};opacity:.86;margin:0;z-index:45}
     .phone{position:absolute;max-width:none;z-index:10;filter:drop-shadow(0 44px 44px rgba(8,30,100,.30)) drop-shadow(0 10px 14px rgba(8,30,100,.18))}
     .o3{position:absolute;filter:drop-shadow(0 26px 26px rgba(8,30,100,.32));z-index:35}
@@ -419,6 +586,41 @@ async function compose(p) {
   </body></html>`;
 }
 
+/* ---------------------------------------------------------------- the audit */
+
+/* Every post is measured as drawn: nothing inside the edge margin, the words
+   clear of everything, the part never over the badges or an object, a part
+   over the handset only when it covers the handset's whole width (so it can
+   never slice a line of the screen), the whole handset in frame, and type
+   big enough to read in a feed. */
+const REPORT = [];
+const hit = (a, b, pad = 0) => a.x0 < b.x1 - pad && b.x0 < a.x1 - pad && a.y0 < b.y1 - pad && b.y0 < a.y1 - pad;
+const shrink = (r, f) => { const dx = (r.x1 - r.x0) * f, dy = (r.y1 - r.y0) * f; return { x0: r.x0 + dx, y0: r.y0 + dy, x1: r.x1 - dx, y1: r.y1 - dy }; };
+function audit(p, d) {
+  const f = [];
+  const m = p.__meta ?? {};
+  const words = [...d.head, ...d.sub, ...d.tag];
+  const objs = d.o3.map((r) => shrink(r, 0.12));
+  const edge = (r, name, inset = 40) => { if (r.x0 < inset || r.y0 < 30 || r.x1 > W - inset || r.y1 > H - 30) f.push(`${name} at the edge`); };
+  [...words, ...d.logo, ...d.url, ...d.badges, ...d.lift, ...d.slab].forEach((r, i) => edge(r, `element ${i}`));
+  objs.forEach((r) => edge(r, "object", 24));
+  if (m.body && (m.body.x0 < 16 || m.body.y0 < 16 || m.body.x1 > W - 16 || m.body.y1 > H - 16)) f.push("handset cut by the edge");
+  for (const wr of words) {
+    for (const [name, list] of [["part", d.lift], ["object", objs], ["badges", d.badges], ["container", d.slab]]) if (list.some((r) => hit(wr, r, 2))) f.push(`words under the ${name}`);
+    if (m.body && p.layout === "hero" && hit(wr, m.body, 2)) f.push("words over the handset");
+  }
+  for (const l of d.lift) {
+    if (d.badges.some((r) => hit(l, r))) f.push("part over the badges");
+    if (objs.some((r) => hit(l, r))) f.push("object over the part");
+    if (m.body && hit(l, m.body) && !(l.x0 <= m.body.x0 - 6 && l.x1 >= m.body.x1 + 6)) f.push("part slices the handset");
+  }
+  if (m.body) for (const o of objs) if (hit(o, m.body, 4)) f.push("object over the handset");
+  if (m.slices) f.push(`part edges only fit when relaxed (${m.tier})`);
+  if (m.lift && m.lift.scale < 0.55) f.push(`part too small to read (${m.lift.scale.toFixed(2)})`);
+  if (d.sizes.some((s) => s < 60)) f.push(`headline shrunk to ${Math.min(...d.sizes)}px`);
+  return [...new Set(f)];
+}
+
 /* ------------------------------------------------------------------ the run */
 
 const browser = await chromium.launch({ executablePath: "/opt/pw-browsers/chromium", args: ["--no-sandbox", "--use-angle=swiftshader", "--enable-unsafe-swiftshader", "--force-color-profile=srgb"] });
@@ -436,8 +638,13 @@ for (const p of POSTS) {
   await page.waitForTimeout(80);
   const file = join(OUT, `${String(p.n).padStart(2, "0")}-${p.slug}.png`);
   await sharp(await page.screenshot({ type: "png" })).removeAlpha().png({ compressionLevel: 9 }).toFile(file);
+  const faults = audit(p, await page.evaluate(() => {
+    const R = (sel) => [...document.querySelectorAll(sel)].map((e) => { const r = e.getBoundingClientRect(); return { x0: r.left, y0: r.top, x1: r.right, y1: r.bottom }; });
+    return { head: R(".hwrap .ln"), sub: R(".hwrap .sub"), tag: R(".tag"), logo: R(".logo"), url: R(".url"), badges: R(".badges img"), lift: R(".lift"), o3: R(".o3"), slab: R(".slab"), sizes: [...document.querySelectorAll(".hb")].map((h) => parseFloat(h.style.fontSize)) };
+  }));
+  REPORT.push({ n: p.n, slug: p.slug, faults, lift: p.__meta?.lift ?? null, body: p.__meta?.body ?? null, tier: p.__meta?.tier ?? null, edges: p.__meta?.edges ?? null });
   await page.close();
-  console.log(`post ${String(p.n).padStart(2, "0")} ${p.slug}`);
+  console.log(`post ${String(p.n).padStart(2, "0")} ${p.slug}${faults.length ? `  FAULTS: ${faults.join("; ")}` : "  clean"}`);
 }
 await browser.close();
 await phones.close();
@@ -447,3 +654,6 @@ const copy = ["# Vallo social posts, November 2026 (the upgraded platform)", "",
 for (const p of POSTS) copy.push(`## ${String(p.n).padStart(2, "0")}  ${p.slug}`, "", p.caption, "");
 writeFileSync(join(OUT, "COPY.md"), copy.join("\n"));
 console.log("captions written");
+const bad = REPORT.filter((r) => r.faults.length);
+writeFileSync(join(tmpdir(), "vallo-social-audit.json"), JSON.stringify(REPORT, null, 1));
+console.log(bad.length ? `AUDIT: ${bad.length} post(s) with faults` : `AUDIT: all ${REPORT.length} posts clean`);

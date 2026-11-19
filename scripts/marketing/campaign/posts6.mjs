@@ -29,10 +29,10 @@ const GET = "Get Vallo on the App Store and Google Play.";
 
 export const POSTS = [
   {
-    n: 1, slug: "vallo-is-live", layout: "phone", ground: "electric", theme: "electric",
-    kicker: "NOW ON IPHONE AND ANDROID", lines: ["Vallo", "is *live.*"], sub: "Real estate, done right.",
+    n: 1, slug: "vallo-is-live", layout: "hero", ground: "electric", theme: "electric",
+    tag: "Now on iPhone and Android", lines: ["Vallo is *live.*"], sub: "Real estate, done right.",
     phone: { screen: "v3-home", pose: "s" },
-    lifts: [{ id: "v3-home", box: [112, 2035, 1208, 2355], cx: 330, cy: 940, w: 520, rot: -2 }],
+    lifts: [{ id: "v3-home", box: [112, 2035, 1208, 2355] }],
     objs: [["keys", 200, 150, 1110, -12]],
     caption: `Vallo is live. 🔥
 
@@ -45,7 +45,7 @@ ${GET}
   {
     n: 2, slug: "one-account", layout: "bignum", ground: "night", theme: "night",
     num: "1", lines: ["account.", "*Every space.*"],
-    phone: { screen: "v3-home-new", pose: "s", cx: 770, cy: 850, h: 1000 },
+    phone: { screen: "v3-home-new", pose: "s", cx: 790, cy: 745, h: 900 },
     caption: `One account for every kind of space. 🔑
 
 Homes to rent or buy. Hotels and shortlets. Restaurant tables. Vallo Circle and Vallo Roommates.
@@ -57,10 +57,10 @@ ${GET}
 #Vallo #OneApp #Nigeria`,
   },
   {
-    n: 3, slug: "find-a-place-that-fits", layout: "phone", ground: "ice", theme: "light",
-    tag: "Search", lines: ["Find a", "place that", "*fits you.*"],
+    n: 3, slug: "find-a-place-that-fits", layout: "hero", ground: "ice", theme: "light",
+    tag: "Search", lines: ["Find a place", "*that fits you.*"],
     phone: { screen: "v3-search", pose: "s" },
-    lifts: [{ id: "v3-search", box: [40, 570, 1155, 715], cx: 330, cy: 930, w: 520, rot: -2 }],
+    lifts: [{ id: "v3-search", box: [40, 570, 1155, 715] }],
     objs: [["search", 200, 160, 1100, -10]],
     caption: `Search the way you think. 🔍
 
@@ -71,10 +71,10 @@ ${GET}
 #Vallo #HouseHuntingNG #FindYourPlace`,
   },
   {
-    n: 4, slug: "filter-by-what-you-need", layout: "phone", ground: "sky", theme: "light",
-    tag: "Filters", lines: ["Filter by", "*exactly*", "what you", "need."],
+    n: 4, slug: "filter-by-what-you-need", layout: "hero", cardH: 540, ground: "sky", theme: "light",
+    tag: "Filters", lines: ["Filter by exactly", "*what you need.*"],
     phone: { screen: "v3-filters", pose: "m" },
-    lifts: [{ id: "v3-filters", box: [30, 680, 1290, 1450], cx: 330, cy: 940, w: 520, rot: -2 }],
+    lifts: [{ id: "v3-filters", box: [30, 680, 1290, 1505] }],
     objs: [["price-tag", 190, 160, 1120, -10]],
     caption: `Your budget. Your bedrooms. Your bathrooms. 🎚️
 
@@ -85,10 +85,10 @@ ${GET}
 #Vallo #RentInNigeria #HouseHuntingNG`,
   },
   {
-    n: 5, slug: "whole-cost-up-front", layout: "phoneC", ground: "ivory", theme: "light",
+    n: 5, slug: "whole-cost-up-front", layout: "hero", ground: "ivory", theme: "light",
     tag: "The whole cost", lines: ["See the whole cost", "*before you call.*"],
     phone: { screen: "v3-listing-cost", pose: "s" },
-    lifts: [{ id: "v3-listing-cost", box: [42, 800, 1278, 1008], cx: 780, cy: 1010, w: 560, rot: 3 }],
+    lifts: [{ id: "v3-listing-cost", box: [42, 800, 1278, 1008] }],
     objs: [["receipt", 200, 200, 1010, -12]],
     caption: `No surprises. 💸
 
@@ -99,10 +99,10 @@ ${GET}
 #Vallo #RentInNigeria #NoSurprises`,
   },
   {
-    n: 6, slug: "one-total", layout: "phone", ground: "electric", theme: "electric",
+    n: 6, slug: "one-total", layout: "hero", ground: "electric", theme: "electric",
     tag: "Total to move in", lines: ["Every fee.", "*One total.*"],
     phone: { screen: "v3-listing-total", pose: "s" },
-    lifts: [{ id: "v3-listing-total", box: [20, 1195, 1290, 1340], cx: 340, cy: 800, w: 560, rot: -2 }],
+    lifts: [{ id: "v3-listing-total", box: [70, 1218, 1248, 1340] }],
     objs: [["pay", 190, 170, 1100, -10]],
     caption: `Every fee, added up into one number: the total to move in. 🧮
 
@@ -113,10 +113,10 @@ ${GET}
 #Vallo #RentInNigeria #RealEstateDoneRight`,
   },
   {
-    n: 7, slug: "buying-same-full-cost", layout: "phone", ground: "sunset", theme: "sunset",
-    tag: "For sale", lines: ["Buying?", "*Same full*", "*cost.*"],
+    n: 7, slug: "buying-same-full-cost", layout: "hero", ground: "sunset", theme: "sunset",
+    tag: "For sale", lines: ["Buying?", "*Same full cost.*"],
     phone: { screen: "v3-listing-sale", pose: "s" },
-    lifts: [{ id: "v3-listing-sale", box: [40, 1120, 1280, 1520], cx: 340, cy: 890, w: 540, rot: -2 }],
+    lifts: [{ id: "v3-listing-sale", box: [70, 1160, 1250, 1520] }],
     objs: [["buy", 200, 160, 1110, -10]],
     caption: `Buying, not renting? 🏠
 
@@ -127,10 +127,10 @@ ${GET}
 #Vallo #BuyAHome #NigeriaProperty`,
   },
   {
-    n: 8, slug: "split-the-total", layout: "phone", ground: "ice", theme: "light",
-    tag: "Cost splitter", lines: ["Sharing?", "*Split it,*", "person by", "person."],
+    n: 8, slug: "split-the-total", layout: "hero", cardH: 560, ground: "ice", theme: "light",
+    tag: "Cost splitter", lines: ["Sharing? *Split it,*", "person by person."],
     phone: { screen: "v3-split", pose: "m" },
-    lifts: [{ id: "v3-split", box: [40, 965, 1280, 1895], cx: 330, cy: 960, w: 520, rot: -2 }],
+    lifts: [{ id: "v3-split", box: [40, 965, 1280, 1895] }],
     objs: [["team", 190, 160, 1130, -10]],
     caption: `Moving in with friends? 👯
 
@@ -141,10 +141,10 @@ ${GET}
 #Vallo #Roommates #RentInNigeria`,
   },
   {
-    n: 9, slug: "save-compare-decide", layout: "phoneC", ground: "ivory", theme: "light",
+    n: 9, slug: "save-compare-decide", layout: "hero", ground: "ivory", theme: "light",
     tag: "Saved", lines: ["Save. Compare.", "*Decide.*"],
     phone: { screen: "v3-saved", pose: "m" },
-    lifts: [{ id: "v3-saved", box: [30, 1160, 925, 1430], cx: 790, cy: 1010, w: 480, rot: -3 }],
+    lifts: [{ id: "v3-saved", box: [30, 1160, 925, 1430] }],
     objs: [["saved-heart", 200, 190, 1000, 12]],
     caption: `Save the ones you love. Put two side by side. Then decide. ❤️
 
@@ -155,10 +155,10 @@ ${GET}
 #Vallo #HouseHuntingNG #SaveCompareDecide`,
   },
   {
-    n: 10, slug: "book-a-stay", layout: "phone", ground: "sunset", theme: "sunset",
-    tag: "Stays", lines: ["Going", "away?", "*Book a stay.*"],
+    n: 10, slug: "book-a-stay", layout: "hero", cardH: 560, ground: "sunset", theme: "sunset",
+    tag: "Stays", lines: ["Going away?", "*Book a stay.*"],
     phone: { screen: "v3-stays", pose: "s" },
-    lifts: [{ id: "v3-stays", box: [30, 1595, 1290, 2450], cx: 340, cy: 940, w: 520, rot: -2 }],
+    lifts: [{ id: "v3-stays", box: [26, 1603, 1294, 2476] }],
     objs: [["shortlet", 200, 160, 1120, -10]],
     caption: `Weekend away? 🧳
 
@@ -169,10 +169,10 @@ ${GET}
 #Vallo #Shortlets #WeekendGetaway #Nigeria`,
   },
   {
-    n: 11, slug: "see-the-room", layout: "phone", ground: "night", theme: "night",
-    tag: "Before you book", lines: ["See the", "room.", "*Check every*", "*detail.*"],
+    n: 11, slug: "see-the-room", layout: "hero", ground: "night", theme: "night",
+    tag: "Before you book", lines: ["See the room.", "*Check every detail.*"],
     phone: { screen: "v3-stay", pose: "s" },
-    lifts: [{ id: "v3-stay", box: [40, 1235, 1280, 1920], cx: 340, cy: 960, w: 520, rot: -2 }],
+    lifts: [{ id: "v3-stay", box: [70, 1266, 1248, 1792] }],
     objs: [["hotel", 200, 160, 1130, -10]],
     caption: `See the room before you book it. 🛏️
 
@@ -183,10 +183,10 @@ ${GET}
 #Vallo #Hotels #Shortlets #Lagos`,
   },
   {
-    n: 12, slug: "reserve-a-table", layout: "phone", ground: "sunset", theme: "sunset",
-    tag: "Restaurants", lines: ["Hungry?", "*Reserve a*", "*table.*"],
+    n: 12, slug: "reserve-a-table", layout: "hero", ground: "sunset", theme: "sunset",
+    tag: "Restaurants", lines: ["Hungry?", "*Reserve a table.*"],
     phone: { screen: "v3-restaurant", pose: "m" },
-    lifts: [{ id: "v3-restaurant", box: [80, 1075, 1235, 1820], cx: 340, cy: 920, w: 520, rot: -2 }],
+    lifts: [{ id: "v3-restaurant", box: [118, 1110, 1200, 1660] }],
     objs: [["restaurant", 200, 160, 1120, -10]],
     caption: `Dinner tonight? 🍽️
 
@@ -197,10 +197,10 @@ ${GET}
 #Vallo #LagosEats #AbujaEats #DinnerPlans`,
   },
   {
-    n: 13, slug: "meet-vallo-circle", layout: "phone", ground: "night", theme: "night",
-    tag: "New · Vallo Circle", lines: ["Meet", "*Vallo*", "*Circle.*"],
+    n: 13, slug: "meet-vallo-circle", layout: "hero", ground: "night", theme: "night",
+    tag: "New · Vallo Circle", lines: ["Meet", "*Vallo Circle.*"],
     phone: { screen: "v3-circle", pose: "s" },
-    lifts: [{ id: "v3-circle", box: [40, 795, 1280, 1830], cx: 340, cy: 960, w: 520, rot: -2 }],
+    lifts: [{ id: "v3-circle", box: [30, 480, 1290, 750] }],
     objs: [["local-talks", 200, 160, 1130, -10]],
     caption: `Meet Vallo Circle. 🗣️
 
@@ -211,10 +211,10 @@ Join the real estate community on Vallo.
 #ValloCircle #Vallo #Nigeria`,
   },
   {
-    n: 14, slug: "ask-about-an-area", layout: "phoneC", ground: "ice", theme: "light",
+    n: 14, slug: "ask-about-an-area", layout: "hero", cardH: 520, ground: "ice", theme: "light",
     tag: "Vallo Circle", lines: ["Ask about an area", "*before you move in.*"],
     phone: { screen: "v3-circle-explore", pose: "m" },
-    lifts: [{ id: "v3-circle-explore", box: [30, 470, 1290, 1250], cx: 790, cy: 990, w: 520, rot: -2 }],
+    lifts: [{ id: "v3-circle-explore", box: [30, 470, 1290, 1250] }],
     objs: [["map", 200, 190, 1010, -12]],
     caption: `New to the area? Ask the people who know it. 📍
 
@@ -225,10 +225,10 @@ ${GET}
 #ValloCircle #Neighbourhoods #Lagos #Abuja`,
   },
   {
-    n: 15, slug: "find-a-roommate", layout: "phone", ground: "electric", theme: "electric",
-    tag: "New · Vallo Roommates", lines: ["Find a", "*roommate.*"], sub: "Or a room to share.",
+    n: 15, slug: "find-a-roommate", layout: "hero", ground: "electric", theme: "electric",
+    tag: "New · Vallo Roommates", lines: ["Find a *roommate.*"], sub: "Or a room to share.",
     phone: { screen: "v3-roommates", pose: "s" },
-    lifts: [{ id: "v3-roommates", box: [30, 1170, 1290, 1790], cx: 340, cy: 900, w: 520, rot: -2 }],
+    lifts: [{ id: "v3-roommates", box: [30, 1170, 1290, 1790] }],
     objs: [["team", 200, 160, 1120, -10]],
     caption: `Meet Vallo Roommates. 🏠🤝
 
@@ -239,10 +239,10 @@ ${GET}
 #ValloRoommates #Roommates #Nigeria`,
   },
   {
-    n: 16, slug: "near-your-school", layout: "phone", ground: "sky", theme: "light",
-    tag: "Vallo Roommates", lines: ["Near your", "*school.*"], sub: "Schools, groups and corps members.",
+    n: 16, slug: "near-your-school", layout: "hero", ground: "sky", theme: "light",
+    tag: "Vallo Roommates", lines: ["Near your *school.*"], sub: "Schools, groups and corps members.",
     phone: { screen: "v3-schools", pose: "m" },
-    lifts: [{ id: "v3-schools", box: [42, 1377, 1278, 1947], cx: 340, cy: 960, w: 520, rot: -2 }],
+    lifts: [{ id: "v3-schools", box: [42, 1377, 1278, 1947] }],
     objs: [["explore", 190, 160, 1130, -10]],
     caption: `Students and corps members, this one is for you. 🎓
 
@@ -253,10 +253,10 @@ ${GET}
 #ValloRoommates #NYSC #CampusLife #Nigeria`,
   },
   {
-    n: 17, slug: "share-a-home-with-care", layout: "phoneC", ground: "ivory", theme: "light",
+    n: 17, slug: "share-a-home-with-care", layout: "hero", ground: "ivory", theme: "light",
     tag: "Roommate safety", lines: ["Share a home", "*with care.*"],
     phone: { screen: "v3-safety", pose: "s" },
-    lifts: [{ id: "v3-safety", box: [30, 1010, 1290, 1640], cx: 780, cy: 1000, w: 540, rot: 2 }],
+    lifts: [{ id: "v3-safety", box: [30, 1010, 1290, 1640] }],
     objs: [["checklist", 200, 200, 1010, -12]],
     caption: `Sharing a home with someone new? Read this first. ✅
 
@@ -267,10 +267,10 @@ ${GET}
 #ValloRoommates #Roommates #ShareWithCare`,
   },
   {
-    n: 18, slug: "what-a-badge-says", layout: "phone", ground: "night", theme: "night",
-    tag: "Badges", lines: ["A badge", "says", "*exactly*", "what was", "confirmed."],
+    n: 18, slug: "what-a-badge-says", layout: "hero", ground: "night", theme: "night",
+    tag: "Badges", lines: ["A badge says *exactly*", "what was confirmed."],
     phone: { screen: "v3-roommates-2", pose: "s" },
-    lifts: [{ id: "v3-roommates-2", box: [30, 1170, 1290, 1790], cx: 340, cy: 1000, w: 520, rot: -2 }],
+    lifts: [{ id: "v3-roommates-2", box: [30, 1170, 1290, 1790] }],
     objs: [["verified", 180, 160, 1160, -10]],
     caption: `A badge says exactly what was confirmed. 🏅
 
@@ -281,10 +281,10 @@ ${GET}
 #Vallo #ValloRoommates #KnowWhoYouMeet`,
   },
   {
-    n: 19, slug: "your-vallo-passport", layout: "phone", ground: "electric", theme: "electric",
-    tag: "Vallo passport", lines: ["Your", "Vallo", "*passport.*"],
+    n: 19, slug: "your-vallo-passport", layout: "hero", ground: "electric", theme: "electric",
+    tag: "Vallo passport", lines: ["Your Vallo", "*passport.*"],
     phone: { screen: "v3-passport", pose: "s" },
-    lifts: [{ id: "v3-passport", box: [30, 470, 1290, 960], cx: 340, cy: 880, w: 520, rot: -2 }],
+    lifts: [{ id: "v3-passport", box: [30, 470, 1290, 960] }],
     objs: [["id-check", 200, 160, 1110, -10]],
     caption: `Your Vallo passport: what Vallo recorded about you. 🪪
 
@@ -295,10 +295,10 @@ ${GET}
 #Vallo #ValloPassport #Trust`,
   },
   {
-    n: 20, slug: "never-holds-your-money", layout: "phoneC", ground: "sunset", theme: "sunset",
+    n: 20, slug: "never-holds-your-money", layout: "hero", ground: "sunset", theme: "sunset",
     tag: "Payments", lines: ["Vallo never", "*holds your money.*"],
     phone: { screen: "v3-payments", pose: "m" },
-    lifts: [{ id: "v3-payments", box: [40, 975, 1280, 1450], cx: 780, cy: 1000, w: 560, rot: -2 }],
+    lifts: [{ id: "v3-payments", box: [40, 975, 1280, 1450] }],
     objs: [["bank", 220, 190, 1010, -10]],
     caption: `Vallo never holds your money. 💙
 
@@ -309,10 +309,10 @@ ${GET}
 #Vallo #ClearMoney #RealEstateDoneRight`,
   },
   {
-    n: 21, slug: "ask-vallo-anything", layout: "phone", ground: "electric", theme: "electric",
+    n: 21, slug: "ask-vallo-anything", layout: "hero", ground: "electric", theme: "electric",
     tag: "AI assistant", lines: ["Ask Vallo", "*anything.*"], sub: "Always here. Ask anything.",
     phone: { screen: "v3-assistant", pose: "s" },
-    lifts: [{ id: "v3-assistant", box: [40, 2195, 760, 2370], cx: 330, cy: 880, w: 480, rot: -2 }],
+    lifts: [{ id: "v3-assistant", box: [40, 2195, 760, 2370] }],
     objs: [["assistant", 230, 170, 1080, -8]],
     caption: `Ask Vallo anything. 🤖
 
@@ -325,10 +325,10 @@ ${GET}
 #Vallo #AskVallo #AI #Nigeria`,
   },
   {
-    n: 22, slug: "price-check", layout: "phone", ground: "ice", theme: "light",
-    tag: "Price Check", lines: ["What are", "places near", "*you asking?*"],
+    n: 22, slug: "price-check", layout: "hero", ground: "ice", theme: "light",
+    tag: "Price Check", lines: ["What are places", "*near you asking?*"],
     phone: { screen: "v3-price", pose: "s" },
-    lifts: [{ id: "v3-price", box: [30, 740, 1260, 1120], cx: 330, cy: 900, w: 520, rot: -2 }],
+    lifts: [{ id: "v3-price", box: [30, 740, 1260, 1120] }],
     objs: [["price-tag", 200, 170, 1100, -12]],
     caption: `What are places near you asking? 🏷️
 
@@ -339,10 +339,10 @@ ${GET}
 #Vallo #PriceCheck #RentInNigeria`,
   },
   {
-    n: 23, slug: "list-it-yourself", layout: "phoneC", ground: "ivory", theme: "light",
+    n: 23, slug: "list-it-yourself", layout: "hero", ground: "ivory", theme: "light",
     tag: "For owners", lines: ["Own a place?", "*List it yourself.*"],
     phone: { screen: "f-host-start", pose: "s" },
-    lifts: [{ id: "f-host-start", box: [42, 2280, 1278, 2595], cx: 790, cy: 1010, w: 560, rot: -2 }],
+    lifts: [{ id: "f-host-start", box: [42, 2280, 1278, 2595] }],
     objs: [["keys", 240, 190, 1010, -14]],
     caption: `Own a place? List it yourself. 🏡
 
@@ -355,10 +355,10 @@ ${GET}
 #Vallo #ListYourProperty #Landlords #NigeriaProperty`,
   },
   {
-    n: 24, slug: "your-workspace", layout: "phone", ground: "night", theme: "night",
-    tag: "Workspace", lines: ["Your", "workspace.", "*Your day.*"],
+    n: 24, slug: "your-workspace", layout: "hero", ground: "night", theme: "night",
+    tag: "Workspace", lines: ["Your workspace.", "*Your day.*"],
     phone: { screen: "f-host-home", pose: "s" },
-    lifts: [{ id: "f-host-home", box: [40, 770, 1280, 1340], cx: 340, cy: 900, w: 520, rot: -2 }],
+    lifts: [{ id: "f-host-home", box: [74, 800, 1248, 1360] }],
     objs: [["calendar-booked", 200, 160, 1120, -10]],
     caption: `If you own, host or manage property, your account becomes a workspace. 🗂️
 
