@@ -136,9 +136,9 @@ Join the real estate community on Vallo.
 
 ## 14  ask-about-an-area
 
-New to the area? Ask the people who know it. 📍
+Which street has reliable light, and for how many hours a day? 💡
 
-Discussions, questions, areas, market insights, experts and guides, all in Vallo Circle.
+Ask the people who live there. In Vallo Circle, renters, owners, agents and professionals share what they know about homes and areas, so you can ask before you move in.
 
 Get Vallo on the App Store and Google Play.
 
@@ -238,11 +238,11 @@ Get Vallo on the App Store and Google Play.
 
 #Vallo #ListYourProperty #Landlords #NigeriaProperty
 
-## 24  your-workspace
+## 24  start-your-workspace
 
 If you own, host or manage property, your account becomes a workspace. 🗂️
 
-Today, what needs you, who is arriving, who is staying tonight, requests and messages, in one overview.
+Start with one application, saved as you go. Then your workspace shows your day: who is arriving, who is staying tonight, the requests waiting and your messages.
 
 Get Vallo on the App Store and Google Play.
 

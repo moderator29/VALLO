@@ -62,20 +62,49 @@ const SCREEN = (id) => (PATCH[id] ? join(CLEAN, `${id}.png`) : RAW(id));
    number never go on a post: those lines are redrawn as the screen's own
    words without them. Display px, 1320 x 2868. */
 const PATCH = {
-  "v3-home": [{ x: 60, y: 538, w: 670, h: 168, bg: "linear-gradient(90deg, rgb(7 37 91), rgb(8 26 66))", lines: ["Good afternoon."], size: 66, weight: 700, color: "#ffffff", lh: 1.1, pad: 66 }],
-  "v3-stays": [{ x: 28, y: 462, w: 690, h: 176, bg: "rgb(0 9 42)", lines: ["Good evening."], size: 66, weight: 700, color: "#ffffff", lh: 1.1, pad: 88 }],
-  "v3-stay": [{ x: 0, y: 266, w: 1320, h: 78, bg: "rgb(0 12 48)", lines: [], size: 10 }],
+  /* greetings: the account's own name goes, the words stay */
+  "v3-home": [{ x: 56, y: 536, w: 700, h: 156, lines: ["Good afternoon."], size: 66, weight: 700, color: "#ffffff", lh: 1.1, pad: 66 }],
+  "v3-stays": [{ x: 24, y: 474, w: 700, h: 162, lines: ["Good evening."], size: 66, weight: 700, color: "#ffffff", lh: 1.1, pad: 78 }],
+  /* a sticky "Ask Vallo AI" chip caught half under the stay's photo */
+  "v3-stay": [{ x: 0, y: 262, w: 1320, h: 86, lines: [] }],
+  /* the passport: the placeholder member and a masked number */
   "v3-passport": [
-    { x: 508, y: 1498, w: 600, h: 84, bg: "rgb(10 20 51)", lines: ["Member"], size: 58, weight: 600, color: "#ffffff", lh: 1.25, pad: 2 },
-    { x: 508, y: 1980, w: 600, h: 70, bg: "rgb(8 17 46)", lines: ["•••••••••"], size: 50, weight: 600, color: "rgb(220 228 245)", lh: 1.2, pad: 4 },
-    { x: 90, y: 2826, w: 980, h: 42, bg: "rgb(6 22 58)", lines: [], size: 10 },
+    { x: 508, y: 1498, w: 600, h: 84, lines: ["Member"], size: 58, weight: 600, color: "#ffffff", lh: 1.25, pad: 2 },
+    { x: 508, y: 1980, w: 600, h: 70, lines: ["•••••••••"], size: 50, weight: 600, color: "rgb(220 228 245)", lh: 1.2, pad: 4 },
+    { x: 90, y: 2826, w: 980, h: 42, lines: [] },
   ],
+  /* the cost splitter's header caught a tab bar sliding behind it */
+  "v3-split": [{ x: 150, y: 248, w: 366, h: 56, lines: [] }, { x: 1000, y: 248, w: 136, h: 56, lines: [] }],
+  /* the example stock's lister lines ("Paid to / Kept by Vallo Examples")
+     read as if Vallo keeps the money, which it never does */
+  "v3-listing-cost": [1250, 112, 1581, 51, 1851, 51, 2121, 51, 2390, 172].reduce((a, v, i, l) => (i % 2 ? a : [...a, { x: 80, y: v, w: 1040, h: l[i + 1], lines: [] }]), []),
+  "v3-listing-total": [{ x: 80, y: 552, w: 1040, h: 51, lines: [] }, { x: 80, y: 821, w: 1040, h: 172, lines: [] }],
+  /* the feed ends after Vallo's own two posts: the test account's post and the next member's go */
+  "v3-feed": [{ x: 0, y: 2298, w: 1320, h: 570, lines: [] }],
 };
 async function cleanScreens(browser) {
   mkdirSync(CLEAN, { recursive: true });
   const page = await browser.newPage({ viewport: { width: 1320, height: 2868 }, deviceScaleFactor: 1 });
   for (const [id, patches] of Object.entries(PATCH)) {
-    const divs = patches.map((pt) => `<div style="position:absolute;left:${pt.x}px;top:${pt.y}px;width:${pt.w}px;height:${pt.h}px;background:${pt.bg};font:${pt.weight ?? 400} ${pt.size}px/${pt.lh ?? 1.42} Inter,sans-serif;color:${pt.color ?? "#fff"};letter-spacing:-0.005em;padding-top:${pt.pad ?? 0}px">${pt.lines.map((l) => `<div style="white-space:nowrap">${l}</div>`).join("")}</div>`).join("");
+    /* each patch is filled from the screen's own pixels: column by column,
+       blended from the row just above it to the row just below, so the
+       redrawn area carries the screen's gradient and never shows as a box */
+    const { data, info } = await sharp(RAW(id)).removeAlpha().raw().toBuffer({ resolveWithObject: true });
+    const fills = [];
+    for (const pt of patches) {
+      const out = Buffer.alloc(pt.w * pt.h * 3), ya = Math.max(0, pt.y - 2), yb = pt.y + pt.h + 1 < info.height ? pt.y + pt.h + 1 : -1;
+      /* the reference rows are averaged over 21 px across, so the fill is smooth (no stripes from dithering) */
+      const refAt = (row, x) => { const c = [0, 0, 0]; let n = 0; for (let k = Math.max(0, x - 10); k <= Math.min(info.width - 1, x + 10); k++) { const i = (row * info.width + k) * 3; c[0] += data[i]; c[1] += data[i + 1]; c[2] += data[i + 2]; n++; } return c.map((v) => v / n); };
+      for (let x = 0; x < pt.w; x++) {
+        const c0 = refAt(ya, pt.x + x), c1 = yb < 0 ? c0 : refAt(yb, pt.x + x);
+        for (let y = 0; y < pt.h; y++) {
+          const u = yb < 0 ? 0 : (y + 1) / (pt.h + 1), o = (y * pt.w + x) * 3;
+          for (let c = 0; c < 3; c++) out[o + c] = Math.round(c0[c] * (1 - u) + c1[c] * u);
+        }
+      }
+      fills.push(`data:image/png;base64,${(await sharp(out, { raw: { width: pt.w, height: pt.h, channels: 3 } }).png().toBuffer()).toString("base64")}`);
+    }
+    const divs = patches.map((pt, k) => `<div style="position:absolute;left:${pt.x}px;top:${pt.y}px;width:${pt.w}px;height:${pt.h}px;background:url(${fills[k]}) 0 0/100% 100%;font:${pt.weight ?? 400} ${pt.size}px/${pt.lh ?? 1.42} Inter,sans-serif;color:${pt.color ?? "#fff"};letter-spacing:-0.005em;padding-top:${pt.pad ?? 0}px">${pt.lines.map((l) => `<div style="white-space:nowrap">${l}</div>`).join("")}</div>`).join("");
     const f = join(CLEAN, `${id}.html`);
     writeFileSync(f, `<!doctype html><html><head><meta charset="utf-8"><style>@font-face{font-family:Inter;font-weight:100 900;src:url(${INTER}) format("woff2")}*{margin:0;padding:0}body{width:1320px;height:2868px;position:relative;overflow:hidden}</style></head><body><img src="${url(RAW(id))}" style="position:absolute;left:0;top:0;width:1320px;height:2868px">${divs}</body></html>`);
     await page.goto(url(f), { waitUntil: "load" });
@@ -160,7 +189,25 @@ async function screenRows(file) {
       sides[y] = runs;
       line[y] = lineUp > 0.3 * (W0 - 80) || lineDn > 0.3 * (W0 - 80) ? 1 : 0;
     }
-    rowCache.set(file, { ink: [...ink, ...word].sort((a, b) => a[0] - b[0]), busy: [...ui, ...photo], sides, line, photos });
+
+    /* WHERE AN EDGE MAY FALL. In the gap between boxes, or on a rule that
+       runs between two rows of the same box. Never inside a box, and never in
+       the band just inside a box's own top or bottom border (its rounded
+       corners live there, where the side lines are not yet straight). */
+    const boxSide = (y) => sides[y] > 0 && !inPhoto(y);
+    const hasSides = (a, b) => { for (let y = Math.max(0, a); y <= Math.min(Hh - 1, b); y++) if (boxSide(y)) return true; return false; };
+    const allowed = new Uint8Array(Hh).fill(1);
+    for (let y = 0; y < Hh; y++) if (boxSide(y)) allowed[y] = 0;
+    const rules = [];
+    for (let y = 0; y < Hh; y++) if (line[y]) { const last = rules[rules.length - 1]; if (last && y - last[1] <= 2) last[1] = y; else rules.push([y, y]); }
+    const kind = rules.map(([a, b]) => ({ a, b, above: hasSides(a - 64, a - 20), below: hasSides(b + 20, b + 64) }));
+    for (const r of kind) {
+      if (r.above && r.below) continue;
+      if (r.below) for (let y = r.a - 2; y <= r.b + 48; y++) if (y >= 0 && y < Hh) allowed[y] = 0;
+      if (r.above) for (let y = r.a - 48; y <= r.b + 2; y++) if (y >= 0 && y < Hh) allowed[y] = 0;
+    }
+    for (const r of kind) if (r.above && r.below) for (let y = r.a - 10; y <= r.b + 10; y++) if (y >= 0 && y < Hh) allowed[y] = 1;
+    rowCache.set(file, { ink: [...ink, ...word].sort((a, b) => a[0] - b[0]), busy: [...ui, ...photo], allowed, photos });
   }
   return rowCache.get(file);
 }
@@ -187,14 +234,14 @@ function placePhone(p, cx, cy, z = 10) {
 
 /** A real component of a screen, lifted and held in one heavy rule. The rule is
     sky with a dark ring outside it, so it reads on a light ground and over a dark screen. */
-function lift({ id, box, cx, cy, w, rot = 0, z = 30 }) {
+function lift({ id, box, cx, cy, w, rot = 0, z = 30, rule: fixedRule = null }) {
   /* the part plus a breath of its own ground on every side, and the heavy
      rule drawn OUTSIDE it, so no edge of the part is ever under the frame */
   const M = 16;
   const [x0, y0, x1, y1] = [box[0] - M, box[1] - M, box[2] + M, box[3] + M];
   const k = w / (x1 - x0);
   const h = (y1 - y0) * k;
-  const rule = Math.max(9, w * 0.019);
+  const rule = fixedRule ?? Math.max(9, w * 0.019);
   return `<div class="lift" style="box-sizing:content-box;left:${px(cx - w / 2 - rule)};top:${px(cy - h / 2 - rule)};width:${px(w)};height:${px(h)};border:${px(rule)} solid ${SKY};border-radius:${px(w * 0.045 + rule)};box-shadow:0 0 0 ${px(5)} #04071C,0 44px 64px -22px rgba(8,30,100,.6);transform:rotate(${rot}deg);z-index:${z}">
     <img src="${url(SCREEN(id))}" style="left:${px(-x0 * k)};top:${px(-y0 * k)};width:${px(1320 * k)}"></div>`;
 }
@@ -311,23 +358,21 @@ async function layout(p) {
        handset with room" and the largest readable size to find that place. */
     const l = p.lifts[0];
     const bw = l.box[2] - l.box[0] + 32, bh = l.box[3] - l.box[1] + 32;
-    const Hof = (w) => bh * w / bw + 2 * Math.max(9, w * 0.019);
+    const RULE = 14;
+    const Hof = (w) => bh * w / bw + 2 * RULE;
     const rows = await screenRows(SCREEN(p.phone.screen));
     const toD = (y) => { let a = -600, b = 3468; for (let i = 0; i < 40; i++) { const m = (a + b) / 2; if (G.map(660, m)[1] < y) a = m; else b = m; } return (a + b) / 2; };
     const near = (list, d, pad) => list.some(([a, b]) => d >= a - pad && d <= b + pad);
-    /* an edge between two boxes, or on a box's own divider, never through a box */
-    const between = (d) => {
-      const r = Math.round(d);
-      for (let k = -14; k <= 14; k++) if (rows.line[r + k]) return true;
-      for (let k = -24; k <= 24; k += 4) if (rows.sides[r + k] > 0 && !rows.photos.some(([a, b]) => r + k >= a && r + k <= b)) return false;
-      return true;
-    };
-    const clear = (y, ip, bp) => { const d = toD(y); return d < 0 || d > 2868 || (!near(rows.ink, d, ip) && !near(rows.busy, d, bp) && (bp === 0 || between(d))); };
+    const fits = (d) => { const r = Math.round(d); for (let k = -3; k <= 3; k++) if (!rows.allowed[r + k]) return false; return true; };
+    /* a component the post keeps whole (a header with its body, a title with its subtitle) */
+    const kept = (d) => (l.keep ?? []).some(([a, b]) => d > a && d < b);
+    const clear = (y, ip, bp) => { const d = toD(y); return d < 0 || d > 2868 || (!near(rows.ink, d, ip) && !near(rows.busy, d, bp) && !kept(d) && (bp === 0 || fits(d))); };
     const srcTop = G.map(660, l.box[1])[1], srcBot = G.map(660, l.box[3])[1];
     const sy = (srcTop + srcBot) / 2 + (l.dy ?? 0);
     /* the top edge sits below the status bar, or wholly above the handset (the
        part then rests on the handset's top); never on the headline */
-    const topMin = G.map(660, 236)[1], aboveMax = B.y0 - 6, headMin = phTop - 34, botMax = BADGE_TOP - 18;
+    const topMin = G.map(660, 236)[1], aboveMax = B.y0 - 6, headMin = phTop - 10, botMax = BADGE_TOP - 30;
+    const cov = l.cover ? [G.map(660, l.cover[0])[1], G.map(660, l.cover[1])[1]] : null;
     const wMin = Math.max(bodyW + 60, (l.minScale ?? 0.56) * bw), wMax = Math.max(wMin, Math.min(860, (p.cardH ?? 460) * bw / bh));
     let best = null;
     const tiers = [[24, 10, 80, "clean"], [24, 10, 170, "clean"], [16, 6, 170, "tight"], [10, 0, 280, "loose"]];
@@ -337,6 +382,7 @@ async function layout(p) {
         for (let sh = 0; sh <= reach; sh += 2) for (const sg of sh ? [1, -1] : [1]) {
           const cy = sy + sg * sh, t = cy - H / 2 - 5, b = cy + H / 2 + 5;
           if ((t < topMin && t > aboveMax) || t < headMin || b > botMax || t > srcTop - 6 || b < srcBot + 6) continue;
+          if (cov && (t > cov[0] - 6 || b < cov[1] + 6)) continue;
           if (!clear(t, ip, bp) || !clear(b, ip, bp)) continue;
           const score = sh + (wMax - w) * 0.3;
           if (!best || score < best.score) best = { w, cy, H, score, tier };
@@ -348,11 +394,11 @@ async function layout(p) {
     meta.tier = best.tier;
     meta.edges = [toD(best.cy - best.H / 2 - 5), toD(best.cy + best.H / 2 + 5)].map(Math.round);
     if (best.tier !== "clean") meta.slices = true;
-    const w = best.w, cy = best.cy, rule = Math.max(9, w * 0.019), H = best.H, Wt = w + 2 * rule;
+    const w = best.w, cy = best.cy, rule = RULE, H = best.H, Wt = w + 2 * rule;
     let cx = (B.x0 + B.x1) / 2;
     cx = Math.min(cx, 1036 - Wt / 2);
     cx = Math.max(cx, 56 + Wt / 2);
-    parts.push(lift({ ...l, cx, cy, w, rot: l.rot ?? 0 }));
+    parts.push(lift({ ...l, cx, cy, w, rot: l.rot ?? 0, rule: RULE }));
     meta.lift = { x0: cx - Wt / 2, x1: cx + Wt / 2, y0: cy - H / 2, y1: cy + H / 2, scale: w / bw };
 
     /* the object: the taller clear band beside the handset, above or below the part */
@@ -362,7 +408,7 @@ async function layout(p) {
       const bands = [[phTop + 6, meta.lift.y0 - 26], [meta.lift.y1 + 26, BADGE_TOP - 22]].map(([a, b]) => [a, b, b - a]);
       const [a, b, bhh] = bands.sort((u, v) => v[2] - u[2])[0];
       const sz = Math.min(osz, bhh - 8, xr - xl - 8);
-      if (sz >= 110) parts.push(o3(name, sz, xr - sz / 2 - 10, (a + b) / 2, orot));
+      if (sz >= 140) parts.push(o3(name, sz, xr - sz / 2 - 10, (a + b) / 2, orot));
     }
   }
 
@@ -407,6 +453,7 @@ async function layout(p) {
     parts.push(placePhone(ph, p.phone.cx, p.phone.cy));
     meta.body = phoneGeom(ph, p.phone.cx, p.phone.cy).body;
     parts.push(badges(1236, "left", 80, 60));
+    for (const [n, sz, cx, cy, r] of p.objs ?? []) parts.push(o3(n, sz, cx, cy, r));
   }
 
   if (L === "stamp") {

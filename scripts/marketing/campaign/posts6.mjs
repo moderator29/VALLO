@@ -32,7 +32,7 @@ export const POSTS = [
     n: 1, slug: "vallo-is-live", layout: "hero", ground: "electric", theme: "electric",
     tag: "Now on iPhone and Android", lines: ["Vallo is *live.*"], sub: "Real estate, done right.",
     phone: { screen: "v3-home", pose: "s" },
-    lifts: [{ id: "v3-home", box: [112, 2035, 1208, 2355] }],
+    lifts: [{ id: "v3-home", box: [112, 2035, 1208, 2361] }],
     objs: [["keys", 200, 150, 1110, -12]],
     caption: `Vallo is live. 🔥
 
@@ -46,6 +46,7 @@ ${GET}
     n: 2, slug: "one-account", layout: "bignum", ground: "night", theme: "night",
     num: "1", lines: ["account.", "*Every space.*"],
     phone: { screen: "v3-home-new", pose: "s", cx: 790, cy: 745, h: 900 },
+    objs: [["keys", 230, 270, 1050, -12]],
     caption: `One account for every kind of space. 🔑
 
 Homes to rent or buy. Hotels and shortlets. Restaurant tables. Vallo Circle and Vallo Roommates.
@@ -60,7 +61,7 @@ ${GET}
     n: 3, slug: "find-a-place-that-fits", layout: "hero", ground: "ice", theme: "light",
     tag: "Search", lines: ["Find a place", "*that fits you.*"],
     phone: { screen: "v3-search", pose: "s" },
-    lifts: [{ id: "v3-search", box: [40, 570, 1155, 715] }],
+    lifts: [{ id: "v3-search", box: [40, 572, 1148, 720] }],
     objs: [["search", 200, 160, 1100, -10]],
     caption: `Search the way you think. 🔍
 
@@ -88,8 +89,8 @@ ${GET}
     n: 5, slug: "whole-cost-up-front", layout: "hero", ground: "ivory", theme: "light",
     tag: "The whole cost", lines: ["See the whole cost", "*before you call.*"],
     phone: { screen: "v3-listing-cost", pose: "s" },
-    lifts: [{ id: "v3-listing-cost", box: [42, 800, 1278, 1008] }],
-    objs: [["receipt", 200, 200, 1010, -12]],
+    lifts: [{ id: "v3-listing-cost", box: [42, 800, 1278, 1020] }],
+    objs: [["earnings", 200, 200, 1010, -12]],
     caption: `No surprises. 💸
 
 Rent. Agency fee. Legal fee. Agreement fee. The refundable caution deposit. It is all on the listing, with who keeps what, before you pick up the phone.
@@ -116,7 +117,7 @@ ${GET}
     n: 7, slug: "buying-same-full-cost", layout: "hero", ground: "sunset", theme: "sunset",
     tag: "For sale", lines: ["Buying?", "*Same full cost.*"],
     phone: { screen: "v3-listing-sale", pose: "s" },
-    lifts: [{ id: "v3-listing-sale", box: [70, 1160, 1250, 1520] }],
+    lifts: [{ id: "v3-listing-sale", box: [76, 1119, 1242, 1518] }],
     objs: [["buy", 200, 160, 1110, -10]],
     caption: `Buying, not renting? 🏠
 
@@ -130,7 +131,7 @@ ${GET}
     n: 8, slug: "split-the-total", layout: "hero", cardH: 560, ground: "ice", theme: "light",
     tag: "Cost splitter", lines: ["Sharing? *Split it,*", "person by person."],
     phone: { screen: "v3-split", pose: "m" },
-    lifts: [{ id: "v3-split", box: [40, 965, 1280, 1895] }],
+    lifts: [{ id: "v3-split", box: [40, 1281, 1280, 2069] }],
     objs: [["team", 190, 160, 1130, -10]],
     caption: `Moving in with friends? 👯
 
@@ -144,7 +145,7 @@ ${GET}
     n: 9, slug: "save-compare-decide", layout: "hero", ground: "ivory", theme: "light",
     tag: "Saved", lines: ["Save. Compare.", "*Decide.*"],
     phone: { screen: "v3-saved", pose: "m" },
-    lifts: [{ id: "v3-saved", box: [30, 1160, 925, 1430] }],
+    lifts: [{ id: "v3-saved", box: [30, 1160, 925, 1456] }],
     objs: [["saved-heart", 200, 190, 1000, 12]],
     caption: `Save the ones you love. Put two side by side. Then decide. ❤️
 
@@ -159,7 +160,7 @@ ${GET}
     tag: "Stays", lines: ["Going away?", "*Book a stay.*"],
     phone: { screen: "v3-stays", pose: "s" },
     lifts: [{ id: "v3-stays", box: [26, 1603, 1294, 2476] }],
-    objs: [["shortlet", 200, 160, 1120, -10]],
+    objs: [["calendar-booked", 200, 160, 1120, -10]],
     caption: `Weekend away? 🧳
 
 Hotels, shortlets, restaurants and local talk, side by side. Find a room, book it in a few taps, and keep it all with one account.
@@ -172,7 +173,7 @@ ${GET}
     n: 11, slug: "see-the-room", layout: "hero", ground: "night", theme: "night",
     tag: "Before you book", lines: ["See the room.", "*Check every detail.*"],
     phone: { screen: "v3-stay", pose: "s" },
-    lifts: [{ id: "v3-stay", box: [70, 1266, 1248, 1792] }],
+    lifts: [{ id: "v3-stay", box: [91, 1288, 1238, 1773] }],
     objs: [["hotel", 200, 160, 1130, -10]],
     caption: `See the room before you book it. 🛏️
 
@@ -186,7 +187,7 @@ ${GET}
     n: 12, slug: "reserve-a-table", layout: "hero", ground: "sunset", theme: "sunset",
     tag: "Restaurants", lines: ["Hungry?", "*Reserve a table.*"],
     phone: { screen: "v3-restaurant", pose: "m" },
-    lifts: [{ id: "v3-restaurant", box: [118, 1110, 1200, 1660] }],
+    lifts: [{ id: "v3-restaurant", box: [140, 1241, 1169, 1639], cover: [645, 725] }],
     objs: [["restaurant", 200, 160, 1120, -10]],
     caption: `Dinner tonight? 🍽️
 
@@ -200,7 +201,7 @@ ${GET}
     n: 13, slug: "meet-vallo-circle", layout: "hero", ground: "night", theme: "night",
     tag: "New · Vallo Circle", lines: ["Meet", "*Vallo Circle.*"],
     phone: { screen: "v3-circle", pose: "s" },
-    lifts: [{ id: "v3-circle", box: [30, 480, 1290, 750] }],
+    lifts: [{ id: "v3-circle", box: [30, 462, 1290, 750] }],
     objs: [["local-talks", 200, 160, 1130, -10]],
     caption: `Meet Vallo Circle. 🗣️
 
@@ -211,14 +212,14 @@ Join the real estate community on Vallo.
 #ValloCircle #Vallo #Nigeria`,
   },
   {
-    n: 14, slug: "ask-about-an-area", layout: "hero", cardH: 520, ground: "ice", theme: "light",
+    n: 14, slug: "ask-about-an-area", layout: "hero", ground: "ice", theme: "light",
     tag: "Vallo Circle", lines: ["Ask about an area", "*before you move in.*"],
-    phone: { screen: "v3-circle-explore", pose: "m" },
-    lifts: [{ id: "v3-circle-explore", box: [30, 470, 1290, 1250] }],
+    phone: { screen: "v3-feed", pose: "m" },
+    lifts: [{ id: "v3-feed", box: [30, 1516, 1290, 2240], keep: [[700, 1420]] }],
     objs: [["map", 200, 190, 1010, -12]],
-    caption: `New to the area? Ask the people who know it. 📍
+    caption: `Which street has reliable light, and for how many hours a day? 💡
 
-Discussions, questions, areas, market insights, experts and guides, all in Vallo Circle.
+Ask the people who live there. In Vallo Circle, renters, owners, agents and professionals share what they know about homes and areas, so you can ask before you move in.
 
 ${GET}
 
@@ -242,7 +243,7 @@ ${GET}
     n: 16, slug: "near-your-school", layout: "hero", ground: "sky", theme: "light",
     tag: "Vallo Roommates", lines: ["Near your *school.*"], sub: "Schools, groups and corps members.",
     phone: { screen: "v3-schools", pose: "m" },
-    lifts: [{ id: "v3-schools", box: [42, 1377, 1278, 1947] }],
+    lifts: [{ id: "v3-schools", box: [42, 1349, 1278, 1971], keep: [[670, 870]] }],
     objs: [["explore", 190, 160, 1130, -10]],
     caption: `Students and corps members, this one is for you. 🎓
 
@@ -255,8 +256,8 @@ ${GET}
   {
     n: 17, slug: "share-a-home-with-care", layout: "hero", ground: "ivory", theme: "light",
     tag: "Roommate safety", lines: ["Share a home", "*with care.*"],
-    phone: { screen: "v3-safety", pose: "s" },
-    lifts: [{ id: "v3-safety", box: [30, 1010, 1290, 1640] }],
+    phone: { screen: "v3-safety", pose: "s", h: 740 },
+    lifts: [{ id: "v3-safety", box: [30, 990, 1290, 1648], cover: [990, 2862] }],
     objs: [["checklist", 200, 200, 1010, -12]],
     caption: `Sharing a home with someone new? Read this first. ✅
 
@@ -268,7 +269,7 @@ ${GET}
   },
   {
     n: 18, slug: "what-a-badge-says", layout: "hero", ground: "night", theme: "night",
-    tag: "Badges", lines: ["A badge says *exactly*", "what was confirmed."],
+    tag: "Badges", lines: ["See what was", "*actually confirmed.*"],
     phone: { screen: "v3-roommates-2", pose: "s" },
     lifts: [{ id: "v3-roommates-2", box: [30, 1170, 1290, 1790] }],
     objs: [["verified", 180, 160, 1160, -10]],
@@ -284,7 +285,7 @@ ${GET}
     n: 19, slug: "your-vallo-passport", layout: "hero", ground: "electric", theme: "electric",
     tag: "Vallo passport", lines: ["Your Vallo", "*passport.*"],
     phone: { screen: "v3-passport", pose: "s" },
-    lifts: [{ id: "v3-passport", box: [30, 470, 1290, 960] }],
+    lifts: [{ id: "v3-passport", box: [30, 470, 1290, 975] }],
     objs: [["id-check", 200, 160, 1110, -10]],
     caption: `Your Vallo passport: what Vallo recorded about you. 🪪
 
@@ -310,7 +311,7 @@ ${GET}
   },
   {
     n: 21, slug: "ask-vallo-anything", layout: "hero", ground: "electric", theme: "electric",
-    tag: "AI assistant", lines: ["Ask Vallo", "*anything.*"], sub: "Always here. Ask anything.",
+    tag: "AI assistant", lines: ["Ask Vallo", "*anything.*"],
     phone: { screen: "v3-assistant", pose: "s" },
     lifts: [{ id: "v3-assistant", box: [40, 2195, 760, 2370] }],
     objs: [["assistant", 230, 170, 1080, -8]],
@@ -328,8 +329,8 @@ ${GET}
     n: 22, slug: "price-check", layout: "hero", ground: "ice", theme: "light",
     tag: "Price Check", lines: ["What are places", "*near you asking?*"],
     phone: { screen: "v3-price", pose: "s" },
-    lifts: [{ id: "v3-price", box: [30, 740, 1260, 1120] }],
-    objs: [["price-tag", 200, 170, 1100, -12]],
+    lifts: [{ id: "v3-price", box: [30, 740, 1260, 1148] }],
+    objs: [["analytics", 200, 170, 1100, -12]],
     caption: `What are places near you asking? 🏷️
 
 Tell Price Check where and what, and it tells you what similar places near there are currently advertised for. If there is not enough to be sure, it says so rather than guess.
@@ -355,14 +356,14 @@ ${GET}
 #Vallo #ListYourProperty #Landlords #NigeriaProperty`,
   },
   {
-    n: 24, slug: "your-workspace", layout: "hero", ground: "night", theme: "night",
-    tag: "Workspace", lines: ["Your workspace.", "*Your day.*"],
+    n: 24, slug: "start-your-workspace", layout: "hero", ground: "night", theme: "night",
+    tag: "Workspace", lines: ["Own, host or manage?", "*Start your workspace.*"],
     phone: { screen: "f-host-home", pose: "s" },
-    lifts: [{ id: "f-host-home", box: [74, 800, 1248, 1360] }],
+    lifts: [{ id: "f-host-home", box: [86, 836, 1234, 1354] }],
     objs: [["calendar-booked", 200, 160, 1120, -10]],
     caption: `If you own, host or manage property, your account becomes a workspace. 🗂️
 
-Today, what needs you, who is arriving, who is staying tonight, requests and messages, in one overview.
+Start with one application, saved as you go. Then your workspace shows your day: who is arriving, who is staying tonight, the requests waiting and your messages.
 
 ${GET}
 
