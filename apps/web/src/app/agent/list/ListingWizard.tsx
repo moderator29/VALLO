@@ -106,6 +106,7 @@ import {
   moneyOf,
   startStep,
   stepOfGateField,
+  stepOfSaveRefusal,
   stepsFor,
   untouchedUnread,
   valuesFrom,
@@ -302,6 +303,12 @@ export function ListingWizard({
   const [travel, setTravel] = useState<{ dir: "forward" | "back"; moved: boolean }>({ dir: "forward", moved: false });
   /** The step a Change or a Fix came from, while the lister is on an earlier one. */
   const [returnTo, setReturnTo] = useState<StepId | null>(null);
+  /**
+   * A refused save sent the lister FORWARD to the box it named (a pasted
+   * broadcast's total, say): `at` is that step, `to` the one they were
+   * heading for, and Continue on `at` takes them back there once it saves.
+   */
+  const [fixBack, setFixBack] = useState<{ at: StepId; to: StepId } | null>(null);
   const cardRef = useRef<HTMLDivElement | null>(null);
   /* The answer groups whose saved values could not be read (review 13). */
   const unread = useMemo(() => initial?.unread ?? [], [initial]);
@@ -407,6 +414,8 @@ export function ListingWizard({
   const [pending, startTransition] = useSafeTransition();
   /** Whether the last `persist` reached the server and was accepted. */
   const lastSaveOk = useRef(true);
+  /** The fields the last refused save named, so `go` can take the lister to them. */
+  const lastSaveRefused = useRef<string[]>([]);
   /** Whether the Finish step's title refusal is currently being shown. */
   const titleGateOpen = useRef(false);
   const restored = useRef(false);
@@ -751,6 +760,7 @@ export function ListingWizard({
     /* Nothing is sent below two characters. That is only a successful save
        when a stored draft already exists; with none, `go` and `send` must
        not treat the step as saved. */
+    lastSaveRefused.current = [];
     if (workingTitle.trim().length < 2) {
       lastSaveOk.current = listingId !== null;
       return listingId;
@@ -834,6 +844,7 @@ export function ListingWizard({
 
     if (!result.ok) {
       lastSaveOk.current = false;
+      lastSaveRefused.current = Object.keys(result.fieldErrors ?? {});
       setSaving(false);
       setSaveFailed(true);
       setNotice(result.error);
@@ -842,6 +853,7 @@ export function ListingWizard({
     }
 
     lastSaveOk.current = true;
+    lastSaveRefused.current = [];
     setNotice(null);
     /* Only the server's own field errors are cleared by a good save. The
        Finish step's title refusal is the client gate's, not the server's, and
@@ -882,6 +894,7 @@ export function ListingWizard({
         lastSaveOk.current = false;
         setNotice(accessResult.error);
         const accessErrors = accessResult.fieldErrors;
+        lastSaveRefused.current = Object.keys(accessErrors ?? {});
         if (accessErrors) setFieldErrors((prev) => ({ ...prev, ...accessErrors }));
       }
     } catch {
@@ -904,7 +917,10 @@ export function ListingWizard({
     if (pending) return;
     const to = steps.findIndex((s) => s.id === target);
     if (to < 0) return;
-    const forward = to > index;
+    /* Returning from a fix to where the lister was heading is a move on,
+       held by a refused save like any other, though it travels back. */
+    const resuming = fixBack !== null && fixBack.at === current.id && fixBack.to === target;
+    const forward = to > index || resuming;
 
     /* The first question is answered before anything follows from it. */
     if (forward && current.id === "kind" && !kindPicked) {
@@ -947,9 +963,24 @@ export function ListingWizard({
         if (!lastSaveOk.current && forward) {
           scrollFrameTop();
           feedback("error");
+          /* The refusal named a box on another step: go to it, rather than
+             hold the lister on a screen that cannot fix it. */
+          const fixAt = stepOfSaveRefusal(lastSaveRefused.current, steps, current.id);
+          if (fixAt) {
+            const at = steps.findIndex((s) => s.id === fixAt);
+            setTravel({ dir: at > index ? "forward" : "back", moved: true });
+            setStepId(fixAt);
+            if (at > index) {
+              setFixBack({ at: fixAt, to: resuming && fixBack ? fixBack.to : target });
+            } else {
+              setFixBack(null);
+              setReturnTo((prev) => prev ?? target);
+            }
+          }
           return;
         }
-        setTravel({ dir: forward ? "forward" : "back", moved: true });
+        setFixBack(null);
+        setTravel({ dir: to > index ? "forward" : "back", moved: true });
         setStepId(target);
         /* Arriving at (or past) the step a Change came from ends the way back. */
         setReturnTo((prev) => {
@@ -1910,6 +1941,12 @@ export function ListingWizard({
       : {
           label: WW.frame.continue,
           onClick: () => {
+            /* Back to where the lister was heading when a refused save sent
+               them forward to fix a box, else simply the next step. */
+            if (fixBack && fixBack.at === current.id) {
+              go(fixBack.to);
+              return;
+            }
             const next = steps[index + 1];
             if (next) go(next.id);
           },

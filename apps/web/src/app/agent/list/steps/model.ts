@@ -501,7 +501,7 @@ export const STEP_DEFS: readonly StepDef[] = [
   {
     id: "place",
     eyebrow: "details",
-    owns: ["unitShape", "furnished", "floor", "totalFloors", "condition"],
+    owns: ["unitShape", "ensuiteCount", "hasBq", "furnished", "floor", "totalFloors", "condition"],
     applies: (s) =>
       takesShape(s.propertyType) ||
       asksFact(s.propertyType, "furnishing") ||
@@ -514,7 +514,26 @@ export const STEP_DEFS: readonly StepDef[] = [
     owns: ["powerGrid", "powerBackup", "powerBackupHours", "waterSupply", "prepaidMeter"],
     applies: (s) => asksFact(s.propertyType, "power") || asksFact(s.propertyType, "water"),
   },
-  { id: "compound", eyebrow: "compound", owns: ["service", "flooding", "compound", "flatsInCompound"], applies: always },
+  {
+    id: "compound",
+    eyebrow: "compound",
+    /* The group names and the save's own keys inside them, so a refusal of
+       any one of them lands here (`stepOfSaveRefusal`). */
+    owns: [
+      "service",
+      "flooding",
+      "compound",
+      "flatsInCompound",
+      "parkingType",
+      "landlordOnSite",
+      "wasteDisposal",
+      "carAccess",
+      "serviceChargeCovers",
+      "serviceChargeReconciled",
+      "estateType",
+    ],
+    applies: always,
+  },
   { id: "access", eyebrow: "access", owns: ["estateName", "gateDirections", "securityPhone", "accessCode"], applies: always },
   { id: "amenities", eyebrow: "amenities", owns: ["amenities"], applies: asks("amenities") },
   {
@@ -552,6 +571,33 @@ export function stepsFor(subject: StepSubject): StepDef[] {
  */
 export function stepOfGateField(field: string, steps: readonly StepDef[]): StepId {
   return steps.find((step) => step.owns.includes(field))?.id ?? (steps.some((s) => s.id === "rooms") ? "rooms" : "describe");
+}
+
+/**
+ * WHERE A REFUSED SAVE SENDS THE LISTER (22 November 2026).
+ *
+ * Every Continue saves the whole draft, and a save the server refuses holds
+ * the lister where they are. That is right when the refused box is on the
+ * screen they are on. It was a dead end when it was not: a WhatsApp broadcast
+ * pasted on the first screen can fill a move-in total below its own parts, a
+ * bedroom count over twenty or a rent over the ceiling, and from then on every
+ * Continue on the first screen was refused for a box three screens later that
+ * the lister had no way to reach. The agent sign-up NIN, in another form.
+ *
+ * So: null (stay) when nothing was named, when the screen on show owns one of
+ * the refused fields, or when no step of this flow owns any of them;
+ * otherwise the earliest step of this flow that owns one, which is where the
+ * box and its sentence are.
+ */
+export function stepOfSaveRefusal(
+  fields: readonly string[],
+  steps: readonly StepDef[],
+  currentId: StepId,
+): StepId | null {
+  if (fields.length === 0) return null;
+  const owning = steps.filter((step) => step.id !== "check" && fields.some((field) => step.owns.includes(field)));
+  if (owning.length === 0 || owning.some((step) => step.id === currentId)) return null;
+  return owning[0]!.id;
 }
 
 /** Where a `startAt` lands: a step id when it is one this listing is asked, else a clamped index. */
