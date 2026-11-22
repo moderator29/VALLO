@@ -161,6 +161,22 @@ function registrationWords(t: Dictionary, locale: Locale): RegistrationWords {
 }
 
 /**
+ * The firm form's answers, as the desk labels them. Staff facing, English
+ * only, and kept beside the one section that draws them (22 November 2026).
+ * The team is what the applicant NAMED: nobody on it is staff or checked.
+ */
+const FIRM_WORDS = {
+  office: "Office address",
+  lasrera: "LASRERA number",
+  route: "How they show they work there",
+  routeLetter: "A signed letter from the principal (see the documents)",
+  routePrincipal: "The principal confirms them by email",
+  principalEmail: "Principal's email",
+  team: "Colleagues they named",
+  teamNone: "None named",
+} as const;
+
+/**
  * WHAT THEY REGISTERED AS, AND THE ANSWERS ONLY THAT FORM ASKS.
  *
  * Drawn only for the three registration forms (`supply_role` set). An
@@ -205,6 +221,33 @@ function RegistrationSection({
           <ui.DetailRow label={f.experience} value={band} />
           <ui.DetailRow label={f.agencyFee} value={fee(application.agencyFeeBps)} />
           <ui.DetailRow label={f.legalFee} value={fee(application.legalFeeBps)} />
+        </>
+      ) : null}
+      {role === "firm" ? (
+        <>
+          <ui.DetailRow label={FIRM_WORDS.office} value={application.businessAddress} />
+          <ui.DetailRow label={FIRM_WORDS.lasrera} value={application.lasreraNumber} />
+          <ui.DetailRow
+            label={FIRM_WORDS.route}
+            value={
+              application.associationProof === "letter"
+                ? FIRM_WORDS.routeLetter
+                : application.associationProof === "principal"
+                  ? FIRM_WORDS.routePrincipal
+                  : application.associationProof
+            }
+          />
+          {application.associationProof === "principal" ? (
+            <ui.DetailRow label={FIRM_WORDS.principalEmail} value={application.principalEmail} />
+          ) : null}
+          <ui.DetailRow
+            label={FIRM_WORDS.team}
+            value={
+              application.firmTeam.length === 0
+                ? FIRM_WORDS.teamNone
+                : application.firmTeam.map((person) => (person.email ? `${person.name} (${person.email})` : person.name)).join(", ")
+            }
+          />
         </>
       ) : null}
     </ui.DetailSection>

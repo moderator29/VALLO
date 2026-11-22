@@ -691,10 +691,34 @@ export type ApplicationView = {
   yearsExperience: string | null;
   agencyFeeBps: number | null;
   legalFeeBps: number | null;
+  /**
+   * WHAT THE FIRM FORM ASKS, WHICH THIS DESK DID NOT READ EITHER (22 November
+   * 2026). A firm that chose "have your principal confirm you" gave the
+   * principal's address and nothing else, and the desk showed neither the
+   * route nor the address, so the one thing a reviewer has to do for that
+   * route, write to the principal, could not be done from here. The office
+   * address, LASRERA number and declared colleagues were missing the same way.
+   */
+  businessAddress: string | null;
+  lasreraNumber: string | null;
+  associationProof: string | null;
+  principalEmail: string | null;
+  /** The colleagues the applicant NAMED. Nobody here is staff or checked. */
+  firmTeam: { name: string; email: string }[];
 };
 
+/** The declared team as the column holds it, keeping only well formed entries. */
+function teamFrom(raw: unknown): { name: string; email: string }[] {
+  if (!Array.isArray(raw)) return [];
+  return raw.flatMap((entry) => {
+    const row = (entry ?? {}) as { name?: unknown; email?: unknown };
+    if (typeof row.name !== "string" || row.name.trim() === "") return [];
+    return [{ name: row.name, email: typeof row.email === "string" ? row.email : "" }];
+  });
+}
+
 const APPLICATION_COLUMNS =
-  "id, reference, status, type, full_name, phone, email, residential_address, state_code, city, id_type, id_number, business_name, business_rc, bank_name, account_number, account_name, agree_terms, submitted_at, reviewed_at, review_notes, applicant_response, created_at, supply_role, ownership_document, area, years_experience, agency_fee_bps, legal_fee_bps, agent_documents ( id, kind, storage_path )";
+  "id, reference, status, type, full_name, phone, email, residential_address, state_code, city, id_type, id_number, business_name, business_rc, bank_name, account_number, account_name, agree_terms, submitted_at, reviewed_at, review_notes, applicant_response, created_at, supply_role, ownership_document, area, years_experience, agency_fee_bps, legal_fee_bps, business_address, lasrera_number, association_proof, principal_email, firm_team, agent_documents ( id, kind, storage_path )";
 
 type ApplicationRow = {
   id: string;
@@ -726,6 +750,11 @@ type ApplicationRow = {
   years_experience: string | null;
   agency_fee_bps: number | null;
   legal_fee_bps: number | null;
+  business_address: string | null;
+  lasrera_number: string | null;
+  association_proof: string | null;
+  principal_email: string | null;
+  firm_team: unknown;
   agent_documents: { id: string; kind: string; storage_path: string }[];
 };
 
@@ -796,6 +825,11 @@ function toApplicationView(
     yearsExperience: row.years_experience,
     agencyFeeBps: row.agency_fee_bps,
     legalFeeBps: row.legal_fee_bps,
+    businessAddress: row.business_address,
+    lasreraNumber: row.lasrera_number,
+    associationProof: row.association_proof,
+    principalEmail: row.principal_email,
+    firmTeam: teamFrom(row.firm_team),
   };
 }
 
