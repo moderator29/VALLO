@@ -3,7 +3,7 @@ import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { PROPERTY_TYPE_VALUES, submitRequirements, type PropertyType } from "@/lib/agent/listings-model";
 import { takesShape } from "@/lib/listings/unit-shape";
-import { STEP_DEFS, kindOf, stepsFor, type ListingKind } from "./model";
+import { STEP_DEFS, kindOf, stepOfSaveRefusal, stepsFor, type ListingKind } from "./model";
 
 /**
  * EVERY THING THE SEND GATE CAN ASK FOR IS ASKED ON A SCREEN THIS LISTING IS
@@ -105,5 +105,39 @@ describe("the owning step draws the field for the listings that are asked it", (
   it("the location step draws the state, the city and the area", () => {
     const source = step("LocationStep.tsx");
     for (const key of ['"stateCode"', '"city"', '"area"']) expect(source).toContain(key);
+  });
+});
+
+describe("a refused save lands on the step that owns the refused box", () => {
+  const flat = stepsFor({ kind: "rent", propertyType: "rental" });
+
+  it("stays when the screen on show owns the box, or nothing was named", () => {
+    expect(stepOfSaveRefusal(["totalMoveInNaira"], flat, "charges")).toBeNull();
+    expect(stepOfSaveRefusal([], flat, "kind")).toBeNull();
+    expect(stepOfSaveRefusal(["somethingNobodyOwns"], flat, "kind")).toBeNull();
+  });
+
+  it("goes to the box a broadcast filled on the first screen", () => {
+    expect(stepOfSaveRefusal(["totalMoveInNaira"], flat, "kind")).toBe("charges");
+    expect(stepOfSaveRefusal(["bedrooms"], flat, "kind")).toBe("rooms");
+    expect(stepOfSaveRefusal(["rentNaira", "totalMoveInNaira"], flat, "kind")).toBe("price");
+  });
+
+  it("goes back to an earlier box, never to the check page", () => {
+    expect(stepOfSaveRefusal(["floor"], flat, "charges")).toBe("place");
+    expect(stepOfSaveRefusal(["securityPhone"], flat, "check")).toBe("access");
+  });
+
+  it("every key the draft save can refuse has a step that owns it", () => {
+    const owned = new Set(STEP_DEFS.flatMap((s) => s.owns));
+    const source = readFileSync(join(__dirname, "../../../../lib/agent/listings-schema.ts"), "utf8");
+    const block = source.slice(source.indexOf("export const draftInputSchema"), source.indexOf("}).superRefine"));
+    const keys = [...block.matchAll(/^  ([a-zA-Z]+):/gm)].map((m) => m[1]!);
+    const exempt = new Set(["id", "intent", "propertyType", "broadcastUnconfirmed", "ratePeriod"]);
+    expect(keys.length).toBeGreaterThan(40);
+    for (const key of keys) {
+      if (exempt.has(key)) continue;
+      expect(owned.has(key), `the save can refuse "${key}" but no step owns it`).toBe(true);
+    }
   });
 });
