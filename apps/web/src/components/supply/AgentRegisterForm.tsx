@@ -146,7 +146,12 @@ export function AgentRegisterForm({
   }
 
   function blocked(): boolean {
-    if (step === 0) return fullName.trim().length < 2 || phone.trim() === "" || experience === "" || !/^\d{11}$/.test(nin.trim());
+    /* 22 November 2026: an agent could not get past screen one. The NIN was
+       checked here, but its box is on screen two (`FIELD_STEP.nin` is 1), so
+       Continue stayed greyed out with nothing on the screen to fill. Each
+       screen now waits only for the fields it draws. */
+    if (step === 0) return fullName.trim().length < 2 || phone.trim() === "" || experience === "";
+    if (step === 1) return !/^\d{11}$/.test(nin.trim());
     /*
      * SCREEN TWO IS NOT GATED ON THE UPLOADS, and that is deliberate rather
      * than an oversight. An agent standing in a compound with no ID to hand
