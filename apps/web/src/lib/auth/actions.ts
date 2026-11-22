@@ -54,6 +54,7 @@ import { claimInviteFromCookie, inviteCodeFromCookie } from "@/lib/referral/serv
 import { recordFunnelStep } from "@/lib/funnel/record";
 import { afterResponse } from "./after-response";
 import { isUnreachableAuthError } from "./unreachable";
+import { isUnconfirmedEmailError, unconfirmedVerifyHref } from "./unconfirmed";
 import type {
   AuthField,
   AuthFormState,
@@ -454,6 +455,22 @@ export async function signInWithEmail(
       return { ok: false, ...deactivatedAccountNotice() };
     }
     if (isUnreachableAuthError(error)) return { ok: false, message: w.notConnected };
+    /*
+     * NOT CONFIRMED YET: STRAIGHT TO THE CODE, NEVER A SENTENCE ABOUT A LINK
+     * (22 November 2026, `./unconfirmed.ts`). The email this platform sends is
+     * a code and nothing to click, and this used to answer "Open the link we
+     * sent you", which held a new agent and the officer onboarding him for
+     * hours. GoTrue only says "not confirmed" after the password matched, so
+     * this reveals nothing to a stranger. The address is remembered for the
+     * code screen, a fresh code is asked for (the first one lasts an hour,
+     * and the same counts as the screen's own resend meter it), and the
+     * person lands on the screen that takes it, which can send another.
+     */
+    if (isUnconfirmedEmailError(error)) {
+      await rememberPendingEmail(email);
+      await sendSignUpCode(email, landing);
+      redirect(unconfirmedVerifyHref(landing));
+    }
     return { ok: false, message: authMessage(error.message, w) };
   }
 
@@ -657,11 +674,11 @@ export async function signUpWithEmail(
    * With email confirmation switched on in Supabase there is no session yet.
    *
    * This used to end here, with "check your email, then sign in", and that
-   * sentence was the whole problem. The confirmation email carries a link AND
-   * a six digit code, and the code had nowhere to go: no screen on this
-   * platform ever asked for one. Somebody who read the code instead of tapping
-   * the link was simply stuck, and somebody who did tap the link was then told
-   * to sign in a second time for an account they had just made.
+   * sentence was the whole problem. The confirmation email is sent by the Send
+   * Email Hook (`app/api/auth/email-hook`) and it carries a CODE AND NOTHING
+   * TO CLICK, and the code had nowhere to go: no screen on this platform ever
+   * asked for one. Somebody holding only the code was simply stuck. A sign-in
+   * before confirming now lands on the same code screen (`signInWithEmail`).
    *
    * So the signup carries straight on to the code screen. The address is put
    * in a short-lived cookie rather than the URL, because an email address in a
@@ -1142,22 +1159,8 @@ export async function resendSignUpCode(
   }
   if (!emailConfigured()) return { ok: false, message: (await refusals()).notConnected };
 
-  /* One email per attempt, so this is metered like the sign-up it follows. */
-  const paced = await throttle("sign_up_resend", subjectForEmail(email), 3, 900);
+  const paced = await sendSignUpCode(email, landingAfterAuth(formData));
   if (paced) return paced;
-  /* And per connection, so one place cannot spend three mails on each of a
-     list of addresses: the same ten an hour as a password reset. */
-  const pacedIp = await throttle("sign_up_resend_ip", subjectForIp(await callerIp()), 10, 3_600);
-  if (pacedIp) return pacedIp;
-
-  const supabase = await createClient();
-  await supabase.auth.resend({
-    type: "signup",
-    email,
-    options: {
-      emailRedirectTo: `${await authOrigin()}/auth/callback?next=${encodeURIComponent(landingAfterAuth(formData))}`,
-    },
-  });
 
   await rememberPendingEmail(email);
   /* A6: a resend is a step in the funnel (never throws, never blocks on
@@ -1167,6 +1170,41 @@ export async function resendSignUpCode(
     ok: true,
     message: (await refusals()).resendSent,
   };
+}
+
+/**
+ * Ask GoTrue for a fresh sign-up code for one address, metered.
+ *
+ * Shared by the code screen's "Send me another code" and by a sign-in refused
+ * as not confirmed (`signInWithEmail`), so the two can never spend more mail
+ * between them than the one meter allows. Answers the throttle's refusal, or
+ * null when the request went to GoTrue. GoTrue's own answer is not read: an
+ * address with nothing waiting and GoTrue's own per-address spacing both mean
+ * "no new mail", and either way the newest code already sent still works.
+ */
+async function sendSignUpCode(email: string, landing: string): Promise<AuthFormState | null> {
+  /* One email per attempt, so this is metered like the sign-up it follows. */
+  const paced = await throttle("sign_up_resend", subjectForEmail(email), 3, 900);
+  if (paced) return paced;
+  /* And per connection, so one place cannot spend three mails on each of a
+     list of addresses: the same ten an hour as a password reset. */
+  const pacedIp = await throttle("sign_up_resend_ip", subjectForIp(await callerIp()), 10, 3_600);
+  if (pacedIp) return pacedIp;
+
+  try {
+    const supabase = await createClient();
+    await supabase.auth.resend({
+      type: "signup",
+      email,
+      options: {
+        emailRedirectTo: `${await authOrigin()}/auth/callback?next=${encodeURIComponent(landing)}`,
+      },
+    });
+  } catch {
+    /* A send that could not reach GoTrue leaves the screen's own resend
+       button as the way to try again. */
+  }
+  return null;
 }
 
 /**

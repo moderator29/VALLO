@@ -95,7 +95,7 @@ export const STORAGE_INVENTORY: readonly StorageItem[] = [
   { id: "host-draft", name: "nf_host_draft", kind: "localStorage", category: "necessary", purpose: "A host set-up you were filling in.", lifetime: DEVICE },
   { id: "broadcast-draft", name: "vallo_broadcast_unconfirmed*", kind: "localStorage", category: "necessary", purpose: "A listing broadcast you started and did not confirm.", lifetime: DEVICE },
   { id: "signup-draft", name: "vallo_signup_draft", kind: "sessionStorage", category: "necessary", purpose: "Your sign-up answers while you finish, so a refresh does not lose them.", lifetime: SESSION },
-  { id: "pending-email", name: "nf_pending_email", kind: "cookie", category: "necessary", purpose: "Remembers the email you are confirming while you open the link or enter the code.", lifetime: "30 minutes" },
+  { id: "pending-email", name: "nf_pending_email", kind: "cookie", category: "necessary", purpose: "Remembers the email you are confirming while you enter the code we emailed.", lifetime: "30 minutes" },
   { id: "chooser-email", name: "nf_chooser_email", kind: "cookie", category: "necessary", purpose: "Remembers the email you used when choosing how to sign in.", lifetime: "10 minutes" },
   { id: "admin-entry", name: "nf_admin_entry", kind: "cookie", category: "necessary", purpose: "Staff only: marks that a staff member entered the console on purpose.", lifetime: SESSION },
   { id: "success", name: "nf_done", kind: "cookie", category: "necessary", purpose: "Carries the confirmation of something you just did, such as a request sent, to the next screen.", lifetime: "A few minutes" },

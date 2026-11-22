@@ -322,7 +322,7 @@ export const experienceRewardsEn = {
     setupBody: "Finish setting up your profile to complete your sign-up.",
     setupAction: "Finish my profile",
     emailTitle: "One step left to finish joining",
-    emailBody: "Confirm your email address. We sent you a link and a code.",
+    emailBody: "Confirm your email address with the code we emailed you.",
     emailAction: "Open my account settings",
   },
 };

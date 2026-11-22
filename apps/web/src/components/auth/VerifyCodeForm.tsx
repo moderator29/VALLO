@@ -27,10 +27,11 @@ import {
 /**
  * The code from the confirmation email.
  *
- * This screen is the half of sign-up that never existed. The email has always
- * carried a code as well as a link, under the words "Or enter this code", and
- * there was nowhere to enter it. Somebody who read the code rather than tapping
- * the link had no way forward at all.
+ * This screen is the half of sign-up that never existed. The email carries a
+ * code and nothing to click (the Send Email Hook's `verificationCode`), and
+ * there was nowhere to enter it. It is also where a sign-in lands when the
+ * address is not confirmed yet (`lib/auth/unconfirmed.ts`), because the code
+ * is the only way to finish.
  *
  * Typing the last digit submits. Not as a flourish: the code has a known
  * length, so waiting for somebody to reach for a button after they have
@@ -56,6 +57,7 @@ export function VerifyCodeForm({
   resend,
   email,
   next,
+  fromSignIn = false,
 }: {
   t: Dictionary;
   verify: (prev: AuthFormState, formData: FormData) => Promise<AuthFormState>;
@@ -63,6 +65,9 @@ export function VerifyCodeForm({
   /** Remembered from the sign-up, empty if this was opened on another device. */
   email: string;
   next?: string | undefined;
+  /** True when a sign-in was refused because this address is not confirmed
+      yet, and sent the person here (`lib/auth/unconfirmed.ts`). */
+  fromSignIn?: boolean;
 }) {
   const a = t.authFlow;
   const [state, verifyAction, verifying] = useActionState(verify, EMPTY);
@@ -175,6 +180,14 @@ export function VerifyCodeForm({
     <div className="nf-auth__screen nf-verify">
       <div className="nf-slate-stagger">
         <h1 className="nf-auth__title">{a.enterCode}</h1>
+        {/* Why a sign-in landed here: the address is not confirmed yet, and
+            the code in the email is how to finish. Said in place, as the
+            first thing under the title, rather than as a banner that leaves. */}
+        {fromSignIn ? (
+          <p className="nf-auth__notice" role="status" data-testid="verify-unconfirmed">
+            {a.unconfirmedOnSignIn}
+          </p>
+        ) : null}
         <p className="nf-auth__sub">
           {address.length > 0 ? (
             <>
@@ -289,6 +302,9 @@ export function VerifyCodeForm({
           screen in this card uses for "the other door", and it is the reason
           that door is legible: it draws the link in `--nf-content-link` at 600.
           Colour is never the ONLY signal (rule 13). */}
+      {/* The email carries the code and nothing to click (the Send Email
+          Hook's `verificationCode`), so this line says what is true about
+          the code rather than promising a button. */}
       <p className="nf-auth__terms nf-verify__same">{a.sameEmailButton}</p>
       <p className="nf-auth__swap mt-xs">
         <Link href="/sign-in">{a.alreadyConfirmed}</Link>

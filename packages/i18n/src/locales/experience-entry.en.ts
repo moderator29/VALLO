@@ -38,7 +38,11 @@ export const experienceEntryEn = {
     notConnected: "We cannot reach accounts right now. Nothing you typed was lost. Try again in a minute.",
     tooMany: "Too many attempts just now. Try again {when}.",
     credentials: "That email and password do not match. Check both, or reset your password.",
-    unconfirmed: "Confirm your email first. Open the link we sent you, then sign in.",
+    /* The email carries a code and nothing to click (the Send Email Hook), so
+       this never mentions a link. A sign-in refused this way goes straight to
+       the code screen (`lib/auth/unconfirmed.ts`); this is the sentence for
+       any other place GoTrue answers "Email not confirmed". */
+    unconfirmed: "This email is not confirmed yet. Enter the code we emailed you to finish.",
     taken: "An account already uses that email address. Sign in instead, or reset your password.",
     rateLimited: "Too many attempts just now. Wait a minute, then try again.",
     passwordRefused: "That password was refused. Use at least 8 characters, mixing letters and numbers.",
@@ -54,16 +58,18 @@ export const experienceEntryEn = {
     codeWrong:
       "That code did not work. Type the code from your newest email; your last try is selected, so typing replaces it.",
     resendSent: "If that address is waiting on a code, a new one is on its way. It lasts an hour.",
+    /* The reset email carries a code (`passwordReset`), typed at
+       /forgot-password/code. A link is drawn only when the hook got no code. */
     resetSent:
-      "If that email has an account, a reset link is on its way. It expires in an hour, and it can only be used once.",
+      "If that email has an account, a reset code is on its way. It lasts an hour and works once.",
     resetBusy: "Too many requests just now. Wait a minute, then try again.",
     resetCodeShape: "Type the {count} digits from the reset email.",
     newPasswordMissing: "Enter a new password.",
     passwordsDiffer: "The two passwords do not match. Type the new one in both fields again.",
     resetLinkSpent:
-      "That reset link has expired or was already used. Ask for a new one and open it from the same device.",
+      "That reset has expired or was already used. Ask for a new reset code and type it on the next screen.",
     resetLinkOnly:
-      "To set a password on this account, ask for a reset link and open it within half an hour. The link is the proof it is you.",
+      "To set a password on this account, ask for a reset code and type it, then choose the password within half an hour. The code is the proof it is you.",
     currentMissing: "Enter your current password.",
     currentWrong: "That is not your current password. Check it and try again.",
   },

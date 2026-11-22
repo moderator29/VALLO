@@ -20,9 +20,11 @@ const REFUSALS: Record<string, AuthFormState> = {
     ok: false,
     message: "That email and password do not match. Check both, or reset your password.",
   },
+  /* Live, a sign-in refused as not confirmed goes straight to the code
+     screen (`lib/auth/unconfirmed.ts`); this is `refusals.unconfirmed`. */
   unconfirmed: {
     ok: false,
-    message: "Confirm your email first. Open the link we sent you, then sign in.",
+    message: "This email is not confirmed yet. Enter the code we emailed you to finish.",
   },
   throttled: { ok: false, message: "Too many attempts just now. Try again in a minute." },
   deactivated: { ok: false, ...deactivatedAccountNotice() },

@@ -345,7 +345,13 @@ export const en = {
     codeLabel: "Confirmation code",
     confirmAndGo: "Confirm and go in",
     sendAnother: "Send me another code",
-    sameEmailButton: "The same email carries a button that does this in one tap.",
+    /* Said under the code screen. The email carries the code and nothing to
+       click (the Send Email Hook), so this is about the code. */
+    sameEmailButton: "The code works on any phone or computer, not only this one.",
+    /* A sign-in refused because the address is not confirmed lands on the
+       code screen (`lib/auth/unconfirmed.ts`), and this says why. */
+    unconfirmedOnSignIn:
+      "Your email is not confirmed yet, so the password alone cannot sign you in. Type the code from the newest email we sent you and you are in. If it has expired, send a new one below.",
     alreadyConfirmed: "Already confirmed? Sign in",
     /* A4 (30 September): the code screen helps when the code does not
        come. `{s}` is whole seconds. */
@@ -405,7 +411,7 @@ export const en = {
     reference: "Reference {digest}",
     loading: "Loading",
     notices: {
-      "link-expired": "That link has expired or was already used. Sign in below, or ask for a new link.",
+      "link-expired": "That link has expired or was already used. Sign in below, or use Email me a code instead.",
       "link-invalid": "That link was incomplete. Sign in below and it will work as normal.",
       unconfigured: "We cannot reach accounts right now. Nothing you typed was lost.",
       "signed-out": "You are signed out. Sign in whenever you are ready.",
@@ -1479,8 +1485,8 @@ export const en = {
     resetSend: "Send the code",
     resetSentLead: "We sent a code to your inbox.",
     resetNotArrived: "Nothing after a few minutes? Look in spam, or ask again from the sign-in screen.",
-    resetExpiredTitle: "That link has expired",
-    resetExpiredLead: "A reset link lasts an hour and works once. Ask for a new one and open it on the same device.",
+    resetExpiredTitle: "That reset has expired",
+    resetExpiredLead: "A reset code lasts an hour and works once. Ask for a new one, or type the code from your newest reset email.",
     /* The code fallback for a reset link opened somewhere else: another
        phone, another browser, or a mail app's own browser. The code works
        on any device, where the link only works where it was asked for. */
