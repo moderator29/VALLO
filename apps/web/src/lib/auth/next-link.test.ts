@@ -35,7 +35,11 @@ describe("auth doors keep where the person was going", () => {
     expect(src("components/app/welcome/FirstRun.tsx")).toContain('withNext("/sign-up", destinationOf(next))');
     const actions = src("lib/auth/actions.ts");
     expect(actions).not.toContain('callback?next=${encodeURIComponent("/home")}');
-    expect(actions.match(/callback\?next=\$\{encodeURIComponent\(landingAfterAuth\(formData\)\)\}/g)?.length).toBe(2);
+    /* The sign-up itself, and the resend through the one metered helper
+       (`sendSignUpCode`, shared with a sign-in refused as not confirmed). */
+    expect(actions.match(/callback\?next=\$\{encodeURIComponent\(landingAfterAuth\(formData\)\)\}/g)?.length).toBe(1);
+    expect(actions).toContain("sendSignUpCode(email, landingAfterAuth(formData))");
+    expect(actions).toContain("callback?next=${encodeURIComponent(landing)}");
     expect(src("components/auth/VerifyCodeForm.tsx")).toMatch(/resendAction[\s\S]{0,200}name="next"/);
   });
 });
