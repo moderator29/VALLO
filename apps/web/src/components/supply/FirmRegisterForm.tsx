@@ -12,6 +12,7 @@ import { UiIcon } from "@/design-system/icons/UiIcon";
 import {
   ASSOCIATION_PROOFS,
   MAX_DECLARED_TEAM,
+  associationReady,
   REGISTER_STEPS,
   earliestStep,
   type AssociationProof,
@@ -132,7 +133,12 @@ export function FirmRegisterForm({
         officeAddress.trim().length < 4
       );
     }
-    if (step === 1) return proof === null;
+    /* 22 November 2026: this waited only for a route to be chosen, so a firm
+       that chose the letter and uploaded nothing, or chose the principal and
+       left the address half typed, reached Submit and was then sent back
+       here by the server. The screen now waits for the chosen route's own
+       field, by the server's own rule (`associationReady`). */
+    if (step === 1) return !associationReady(proof, principalEmail, letter?.path ?? "");
     /* The team screen never blocks. A firm with nobody added yet is the state
        every firm starts in, and the screen says so rather than refusing. It
        waits only for the two ticks (ruling 6). */
@@ -174,7 +180,7 @@ export function FirmRegisterForm({
         if (!result.ok) {
           setErrors(result.fieldErrors ?? {});
           setScreenError(result.error);
-          const walkBack = earliestStep(result.fieldErrors);
+          const walkBack = earliestStep(result.fieldErrors, "firm");
           if (walkBack !== null) setStep(walkBack);
           return;
         }

@@ -19,6 +19,7 @@ import {
   FEE_MIN_BPS,
   MAX_DECLARED_TEAM,
   OWNERSHIP_ANSWERS,
+  PRINCIPAL_EMAIL_RE,
 } from "./registration-model";
 export * from "./registration-model";
 
@@ -138,7 +139,7 @@ export const firmRegistrationSchema = z.object({
 export const firmRegistrationRefined = firmRegistrationSchema.superRefine((value, ctx) => {
   if (value.associationProof === "principal") {
     const email = value.principalEmail ?? "";
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    if (!PRINCIPAL_EMAIL_RE.test(email)) {
       ctx.addIssue({
         code: "custom",
         path: ["principalEmail"],

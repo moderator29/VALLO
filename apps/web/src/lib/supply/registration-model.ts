@@ -202,6 +202,30 @@ export function isAssociationProof(value: string | null | undefined): value is A
 /** How many colleagues one application may declare before it is a roster. */
 export const MAX_DECLARED_TEAM = 20;
 
+/**
+ * The address shape the server accepts for a principal, in one place, so the
+ * firm form's second screen and `firmRegistrationRefined` cannot disagree.
+ */
+export const PRINCIPAL_EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+/**
+ * WHAT THE FIRM'S SECOND SCREEN NEEDS BEFORE IT LETS THE PERSON ON, which is
+ * exactly what the server refuses without (22 November 2026). The screen
+ * used to wait only for a route to be chosen, so a firm that chose the letter
+ * and uploaded nothing, or chose the principal and typed a half address,
+ * walked through the team screen, ticked both boxes, pressed Submit, and only
+ * then was sent back to screen two. Each route now waits for its own field.
+ */
+export function associationReady(
+  proof: AssociationProof | null,
+  principalEmail: string,
+  letterPath: string,
+): boolean {
+  if (proof === "principal") return PRINCIPAL_EMAIL_RE.test(principalEmail.trim());
+  if (proof === "letter") return letterPath.trim() !== "";
+  return false;
+}
+
 /* ------------------------------------------------------------- the fees */
 
 /**

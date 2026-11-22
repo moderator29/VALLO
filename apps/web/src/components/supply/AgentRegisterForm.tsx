@@ -1,6 +1,7 @@
 "use client";
 
 import { PhoneField } from "@/components/app/PhoneField";
+import { normalisePhone } from "@/lib/phone";
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useBack } from "@/lib/nav/use-back";
@@ -150,7 +151,7 @@ export function AgentRegisterForm({
        checked here, but its box is on screen two (`FIELD_STEP.nin` is 1), so
        Continue stayed greyed out with nothing on the screen to fill. Each
        screen now waits only for the fields it draws. */
-    if (step === 0) return fullName.trim().length < 2 || phone.trim() === "" || experience === "";
+    if (step === 0) return fullName.trim().length < 2 || normalisePhone(phone) === null || experience === "";
     if (step === 1) return !/^\d{11}$/.test(nin.trim());
     /*
      * SCREEN TWO IS NOT GATED ON THE UPLOADS, and that is deliberate rather
@@ -189,7 +190,7 @@ export function AgentRegisterForm({
         if (!result.ok) {
           setErrors(result.fieldErrors ?? {});
           setScreenError(result.error);
-          const walkBack = earliestStep(result.fieldErrors);
+          const walkBack = earliestStep(result.fieldErrors, "agent");
           if (walkBack !== null) setStep(walkBack);
           return;
         }

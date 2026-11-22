@@ -1,6 +1,7 @@
 "use client";
 
 import { PhoneField } from "@/components/app/PhoneField";
+import { normalisePhone } from "@/lib/phone";
 import { useCallback, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useBack } from "@/lib/nav/use-back";
@@ -192,7 +193,7 @@ export function OwnerRegisterForm({
    * screen holds Continue until it is eleven digits.
    */
   function blocked(): boolean {
-    if (step === 0) return fullName.trim().length < 2 || phone.trim() === "" || !/^\d{11}$/.test(nin.trim());
+    if (step === 0) return fullName.trim().length < 2 || normalisePhone(phone) === null || !/^\d{11}$/.test(nin.trim());
     if (step === 1) return stateCode === "" || lgaCode === "";
     if (step === 2) return held === null || !acceptTerms || !acceptPay;
     return false;
