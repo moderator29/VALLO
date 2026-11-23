@@ -284,7 +284,14 @@
        smaller tier rather than the same 15px the label used to be. */
     font-size: var(--nf-text-body-sm);
     color: var(--nf-content-muted);
-    white-space: nowrap;
+    /* Whole on one line whenever the line can hold it: `flex: 0 0 auto`
+       sizes it to its full length, so it moves to a line of its own rather
+       than breaking beside the label. Only a value longer than the whole row
+       (a long email address) wraps, inside the row. It used to be `nowrap`,
+       which ran such an address past the right edge of a phone (23 November
+       2026). */
+    max-inline-size: 100%;
+    overflow-wrap: break-word;
   }
 
   /* No indent for a value that has wrapped onto its own line. CSS cannot ask
