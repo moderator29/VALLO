@@ -233,10 +233,13 @@ function Section({ title, children, testId }: { title: string; children: ReactNo
 }
 
 function Fact({ label, value }: { label: string; value: ReactNode }) {
+  /* `min-w-0` on the value: a flex item will not shrink below its longest
+     word, and an email address is one word, so a long one ran the row past
+     the right edge of a phone instead of breaking (23 November 2026). */
   return (
     <div className="flex items-baseline justify-between gap-xs border-b border-[var(--nf-border-subtle)] py-2xs last:border-b-0">
       <dt className="nf-caption text-[var(--nf-content-muted)]">{label}</dt>
-      <dd className="text-right text-[length:var(--nf-text-body-sm)] text-[var(--nf-content-primary)] break-words">{value}</dd>
+      <dd className="min-w-0 text-right text-[length:var(--nf-text-body-sm)] text-[var(--nf-content-primary)] break-words">{value}</dd>
     </div>
   );
 }
