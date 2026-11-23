@@ -34,13 +34,13 @@ export const POSTS = [
     phone: { screen: "v3-home", pose: "s" },
     lifts: [{ id: "v3-home", box: [112, 2035, 1208, 2361] }],
     objs: [["keys", 200, 150, 1110, -12]],
-    caption: `Vallo is live. 🔥
+    caption: `Vallo is live. 🎉
 
-Buy, rent, pay and list. Hotels, shortlets and restaurants. A community and roommates. One app, one account.
+Homes to rent or buy, hotels, shortlets and restaurants. One app, one account.
 
-${GET}
+Get it on the App Store and Google Play, or visit vallospaces.com
 
-#ValloIsLive #RealEstateDoneRight #Nigeria`,
+#Vallo #ValloIsLive #RealEstateDoneRight #Nigeria`,
   },
   {
     n: 2, slug: "one-account", layout: "bignum", ground: "night", theme: "night",

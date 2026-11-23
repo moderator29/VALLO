@@ -63,14 +63,14 @@ const SCREEN = (id) => (PATCH[id] ? join(CLEAN, `${id}.png`) : RAW(id));
    words without them. Display px, 1320 x 2868. */
 const PATCH = {
   /* greetings: the account's own name goes, the words stay */
-  "v3-home": [{ x: 56, y: 536, w: 700, h: 156, lines: ["Good afternoon."], size: 66, weight: 700, color: "#ffffff", lh: 1.1, pad: 66 }],
-  "v3-stays": [{ x: 24, y: 474, w: 700, h: 162, lines: ["Good evening."], size: 66, weight: 700, color: "#ffffff", lh: 1.1, pad: 78 }],
+  "v3-home": [{ x: 56, y: 536, w: 700, h: 156, lines: ["Good afternoon."], size: 66, weight: 700, color: "#ffffff", lh: 1.1, pad: 66, padL: 58 }],
+  "v3-stays": [{ x: 24, y: 474, w: 700, h: 162, lines: ["Good evening."], size: 66, weight: 700, color: "#ffffff", lh: 1.1, pad: 78, padL: 27 }],
   /* a sticky "Ask Vallo AI" chip caught half under the stay's photo */
   "v3-stay": [{ x: 0, y: 262, w: 1320, h: 86, lines: [] }],
   /* the passport: the placeholder member and a masked number */
   "v3-passport": [
-    { x: 508, y: 1498, w: 600, h: 84, lines: ["Member"], size: 58, weight: 600, color: "#ffffff", lh: 1.25, pad: 2 },
-    { x: 508, y: 1980, w: 600, h: 70, lines: ["•••••••••"], size: 50, weight: 600, color: "rgb(220 228 245)", lh: 1.2, pad: 4 },
+    { x: 508, y: 1498, w: 600, h: 84, lines: ["Member"], size: 58, weight: 600, color: "#ffffff", lh: 1.25, pad: 2, padL: 12 },
+    { x: 508, y: 1980, w: 600, h: 70, lines: ["•••••••••"], size: 50, weight: 600, color: "rgb(220 228 245)", lh: 1.2, pad: 4, padL: 12 },
     { x: 90, y: 2826, w: 980, h: 42, lines: [] },
   ],
   /* the cost splitter's header caught a tab bar sliding behind it */
@@ -104,7 +104,7 @@ async function cleanScreens(browser) {
       }
       fills.push(`data:image/png;base64,${(await sharp(out, { raw: { width: pt.w, height: pt.h, channels: 3 } }).png().toBuffer()).toString("base64")}`);
     }
-    const divs = patches.map((pt, k) => `<div style="position:absolute;left:${pt.x}px;top:${pt.y}px;width:${pt.w}px;height:${pt.h}px;background:url(${fills[k]}) 0 0/100% 100%;font:${pt.weight ?? 400} ${pt.size}px/${pt.lh ?? 1.42} Inter,sans-serif;color:${pt.color ?? "#fff"};letter-spacing:-0.005em;padding-top:${pt.pad ?? 0}px">${pt.lines.map((l) => `<div style="white-space:nowrap">${l}</div>`).join("")}</div>`).join("");
+    const divs = patches.map((pt, k) => `<div style="position:absolute;left:${pt.x}px;top:${pt.y}px;width:${pt.w}px;height:${pt.h}px;background:url(${fills[k]}) 0 0/100% 100%;font:${pt.weight ?? 400} ${pt.size}px/${pt.lh ?? 1.42} Inter,sans-serif;color:${pt.color ?? "#fff"};letter-spacing:-0.005em;box-sizing:border-box;padding:${pt.pad ?? 0}px 0 0 ${pt.padL ?? 0}px">${pt.lines.map((l) => `<div style="white-space:nowrap">${l}</div>`).join("")}</div>`).join("");
     const f = join(CLEAN, `${id}.html`);
     writeFileSync(f, `<!doctype html><html><head><meta charset="utf-8"><style>@font-face{font-family:Inter;font-weight:100 900;src:url(${INTER}) format("woff2")}*{margin:0;padding:0}body{width:1320px;height:2868px;position:relative;overflow:hidden}</style></head><body><img src="${url(RAW(id))}" style="position:absolute;left:0;top:0;width:1320px;height:2868px">${divs}</body></html>`);
     await page.goto(url(f), { waitUntil: "load" });

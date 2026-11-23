@@ -4,13 +4,13 @@ One size for every network: 1080 x 1350 (4:5), delivered at 2160 x 2700. Link: v
 
 ## 01  vallo-is-live
 
-Vallo is live. 🔥
+Vallo is live. 🎉
 
-Buy, rent, pay and list. Hotels, shortlets and restaurants. A community and roommates. One app, one account.
+Homes to rent or buy, hotels, shortlets and restaurants. One app, one account.
 
-Get Vallo on the App Store and Google Play.
+Get it on the App Store and Google Play, or visit vallospaces.com
 
-#ValloIsLive #RealEstateDoneRight #Nigeria
+#Vallo #ValloIsLive #RealEstateDoneRight #Nigeria
 
 ## 02  one-account
 
