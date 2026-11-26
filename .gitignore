@@ -83,3 +83,11 @@ docs/store/screenshots/app-store/iphone-6.5/
 # marketing: phone displays are rebuilt from docs/marketing/source by scripts/marketing/screens.mjs
 docs/marketing/screens/
 docs/marketing/video/drafts/
+
+# Screenshots dropped into the repo root from a phone. 28 of them (47 MB) were
+# committed by accident on 16 November 2026. Real artwork lives under assets/,
+# apps/web/public/ or docs/, never at the root.
+/*.png
+/*.jpg
+/*.jpeg
+/*.heic
