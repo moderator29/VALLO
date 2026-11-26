@@ -11,6 +11,7 @@ import type { SpecPair } from "@/components/app/listing/DetailAnatomy";
 import { publicRestaurantDetail } from "@/lib/catalogue/stays";
 import { hoursLabel } from "@/lib/stays/hours";
 import { listBusinessPhotos } from "@/lib/stays/business-photos";
+import { creditedPhotographers, readPhotoCredits } from "@/lib/listings/photo-credits";
 import { listSavedPlaces } from "@/lib/saved/places-actions";
 import { isSaved, savedKeySet } from "@/lib/saved/places";
 import { RESTAURANT_PLATES } from "@/components/app/stays/restaurant-plates";
@@ -314,6 +315,9 @@ export default async function RestaurantPage({ params }: { params: Promise<{ id:
     <RestaurantFace
       locale={locale}
       t={t}
+      /* Who took the gallery's photographs, where somebody else did. Empty on
+         a venue whose pictures are its own, which draws nothing. */
+      photoCredits={creditedPhotographers(venue.photos, await readPhotoCredits(venue.photos))}
       gallery={{
         listingId: venue.id,
         title: venue.title,

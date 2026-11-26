@@ -109,6 +109,9 @@ import { videoCallsOn } from "@/lib/calls/flags";
 import { findConversationForListing } from "@/lib/messages/actions";
 import { Money } from "@/components/ui/Money";
 import { StatusPill } from "@/components/ui/StatusPill";
+import { StatusBadge } from "@/components/ui/StatusBadge";
+import { PhotoCredit } from "@/components/app/listing/PhotoCredit";
+import { creditedPhotographers, readPhotoCredits } from "@/lib/listings/photo-credits";
 import { ListingPhotoGrid } from "@/components/app/listing/ListingPhotoGrid";
 import { listingMedia } from "@/components/app/listing/gallery-media";
 import { ListingUtilities } from "@/components/app/listing/ListingUtilities";
@@ -424,6 +427,7 @@ export default async function ListingDetailPage({
     ownershipSeen,
     payeeRecords,
     headersStore,
+    photoCredits,
   ] = await Promise.all([
     // Written reviews for this listing. Public by policy for a PUBLISHED
     // listing, so this read works for a signed-out visitor too.
@@ -486,6 +490,12 @@ export default async function ListingDetailPage({
     /* B-05: hoist from inline JSX so it runs with the rest. */
     isRental && !isSale ? readPayeeRecords(listing.id) : Promise.resolve(undefined),
     headers(),
+    /* Who took the gallery's photographs, where somebody else did. The
+       example collection's pictures are hotlinked from Unsplash and crediting
+       the photographer is a condition of using them. A lister's own photograph
+       has no credit row, so this comes back empty on an ordinary listing and
+       draws nothing. */
+    readPhotoCredits(listing.photos),
   ]);
   /* V-59: "Moved in for the Vallo price", the one public number from the
      tenancy reviews. Null (and no line) on every example listing. */
@@ -1111,12 +1121,52 @@ export default async function ListingDetailPage({
              lister's published badge is on "Listed by". */
         />
 
+        {/* Under the gallery, never over it: a credit is small print and an
+            obligation, not a caption. Empty on a listing whose photographs are
+            the lister's own, which is every real one. */}
+        <PhotoCredit
+          credits={creditedPhotographers(listing.photos, photoCredits)}
+          copy={sx.photoCredit}
+        />
+
                 {/* ------------------------------- 2 to 5. THE LEAD BLOCK
                     The reference's order: the status chip, the title with
                     the price opposite, the rating (only with real reviews)
                     and the place with its pin, then the fact chips. */}
                 <Section className="nf-sc-top__panel nf-rise nf-detail-lead scroll-mt-16" id="overview">
                   <div className="flex flex-wrap items-center gap-xs" data-testid="detail-status">
+                    {/*
+                      THE EXAMPLE TAG (founder, 26 November 2026: "keep it that
+                      way, with a small, clear Example tag on the listing
+                      page", in the brief that filled the catalogue with a
+                      hundred of them).
+
+                      D24 (6 October) had taken the visible wording off this
+                      page, on the reasoning that the danger was never the
+                      missing word but fabricated trust. That half stands and
+                      is untouched: `earnedTrust` still clears the badge, the
+                      dates and the rating on an example row, the panel below
+                      still explains that nothing here takes a request, and no
+                      CARD anywhere says it. What comes back is one chip, here,
+                      where the reader meets it before the price forms a
+                      belief, which is where the disclosure was argued to
+                      belong in the first place.
+
+                      Neutral tone on purpose, by the chip spec: an example is
+                      not a warning and not a promotion. One word, the agreed
+                      one, from `catalogue.card.example` so it translates with
+                      everything else.
+                    */}
+                    {isExample && (
+                      /* `StatusBadge` takes no test id of its own, so the hook
+                         for the suite goes on a wrapper rather than on a prop
+                         the component would drop on the floor. */
+                      <span data-testid="detail-example">
+                        <StatusBadge tone="example" size="sm">
+                          {t.catalogue.card.example}
+                        </StatusBadge>
+                      </span>
+                    )}
                     <StatusPill tone={market.tone} icon={market.icon} size="sm">
                       {/* Rent and sale in the reader's language. Stays, dining and
                           experiences read their market word. */}
