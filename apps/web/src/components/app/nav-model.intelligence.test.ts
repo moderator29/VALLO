@@ -20,7 +20,12 @@ describe("VALLO Intelligence in the side navigation", () => {
         expect(nav[0]!.hideWhenDocked).toBe(true);
         const section = nav[1]!;
         expect(section.hideWhenDocked, "a phone drawer must show it").toBeFalsy();
-        expect(section.items).toEqual([{ href: "/intelligence", label: "VALLO Intelligence", icon: "spark" }]);
+        /* `betaLabel` beside it since 27 November 2026: the row is marked as a
+           product area still being built, the same mark Roommates and the AI
+           Assistant carry. */
+        expect(section.items).toEqual([
+          { href: "/intelligence", label: "VALLO Intelligence", icon: "spark", betaLabel: "Beta" },
+        ]);
         expect(nav.flatMap((s) => s.items).filter((i) => i.href === "/intelligence")).toHaveLength(1);
       });
     }

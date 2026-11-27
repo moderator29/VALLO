@@ -320,7 +320,10 @@
     border-radius: var(--nf-radius-pill, 999px);
     background: color-mix(in oklab, var(--nf-content-muted) 10%, transparent);
     color: var(--nf-content-secondary);
-    font-size: 0.625rem;
+    /* The island's own small-caps size, never a one-off: nothing in this
+       navigation drops below 12px, which `nav-island.test.ts` holds the line
+       on. A 10px pill was the first thing to try it and it was wrong. */
+    font-size: var(--nf-text-overline);
     font-weight: 600;
     line-height: 1.4;
     letter-spacing: 0.02em;
