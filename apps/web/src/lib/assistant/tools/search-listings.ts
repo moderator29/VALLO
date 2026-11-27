@@ -44,13 +44,35 @@ export const LISTING_KINDS = [
 
 /**
  * Written as an instruction rather than as data, because the model has to do
- * something specific with it and "exampleOnly: true" invites paraphrase. It
- * also states the prohibition, since the tempting move from here is to
- * describe the examples helpfully. Sent as the fence's `note`, outside `data`.
+ * something specific with it and "example: true" on a row invites paraphrase.
+ * Sent as the fence's `note`, outside `data`.
+ *
+ * FOUNDER, 26 NOVEMBER 2026: the assistant finds the examples the same way
+ * VALLO Intelligence does, and says they are examples every time.
+ *
+ * What changed and why. This tool used to pass `excludeDemo: true` and hand
+ * the model nothing at all, with a note forbidding it to describe any of
+ * them. That was right while the examples were the only thing in the
+ * catalogue and the risk was a recommendation nobody could act on. It reads
+ * differently now: the search page, the map, every city page and
+ * Intelligence all show these rows, labelled, and the assistant alone
+ * answered "I found nothing" to a question whose answer is visibly on the
+ * screen beside it. Being the one surface that pretends the catalogue is bare
+ * is its own kind of dishonesty.
+ *
+ * So the rows come back, and the fence does the work the exclusion used to:
+ * the model is told, on every reply that carries one, what an example is and
+ * what it cannot do. A real listing still outranks every example (see the
+ * sort below), so an example is never shown in place of something real.
  */
-export const EXAMPLE_ONLY_NOTE =
-  "The only properties matching this search are example listings that Vallo uses to illustrate the catalogue. They do not exist and cannot be booked, inspected or paid for. Tell the person plainly that there is nothing real matching this yet, and that the places they may see while browsing are examples. Do NOT describe, name, price or recommend any of them.";
+export const EXAMPLE_NOTE =
+  "Some rows in this result are marked \"example\": true. Those are example listings Vallo publishes to show what a listing looks like while real supply is being recruited. SAY SO, in your own words, for every example you mention: it is an example, no such property is available, and it cannot be rented, booked, inspected or paid for. Never present one as available, never invite the person to book, visit or make an offer on one, and never imply Vallo has checked it. You may name it, say where it is and what it costs, because the person can see all of that on the listing itself; what you may not do is let them think it is real. Rows without the flag are real listings, and those come first.";
 
+/**
+ * Nothing real matched and nothing was shown, not even an example. Kept
+ * separate from EXAMPLE_NOTE because the honest answer here is simply that
+ * the search was too narrow.
+ */
 export const NO_MATCH_NOTE = "No listings matched. Suggest widening the search.";
 
 const input = z.object({
@@ -65,8 +87,8 @@ const input = z.object({
 export async function runListingSearch(raw: z.output<typeof input>): Promise<{
   items: AssistantListingItem[];
   forModel: Omit<AssistantListingItem, "photo">[];
-  /** True when the only rows matching this search were example listings. */
-  exampleOnly: boolean;
+  /** True when any row being handed to the model is an example listing. */
+  hasExample: boolean;
 }> {
   const repo = getListingRepository();
 
@@ -97,41 +119,35 @@ export async function runListingSearch(raw: z.output<typeof input>): Promise<{
     });
 
   /*
-   * EXAMPLE LISTINGS ARE NOT ANSWERS, AND THIS IS THE FIFTH SURFACE.
-   *
-   * The example-listing sweep sealed the sitemap, the structured data, the
-   * Open Graph card and email. It missed this one, because the assistant is
-   * not a page and nobody thinks of a chat reply as a publication. It is the
-   * worst of the five: the others show a property, this one RECOMMENDS one, in
-   * a sentence, with a naira price and a link, to somebody who asked for help.
-   *
-   * The database refuses every transaction against these rows, so a person
-   * following that recommendation reaches a wall the assistant sent them to.
+   * The same rows Intelligence reads, examples included. `excludeDemo` is
+   * deliberately not passed: see EXAMPLE_NOTE above for the reversal and the
+   * reasoning. The publication surfaces that must still exclude them do, and
+   * each says so where it does it: the sitemap and the Open Graph card
+   * through SYNDICATION_FILTER, saved-search alerts through
+   * lib/saved/search-alerts, and the assistant's own "from your saves"
+   * suggestions through lib/assistant/tools/saved, because suggesting one
+   * unasked is recommending it.
    */
-  let rows = narrow(await repo.search({ q: query, kind, excludeDemo: true }));
+  let rows = narrow(await repo.search({ q: query, kind }));
   if (rows.length === 0 && query) {
     // Free text over-restricted; keep the structured filters and drop it.
-    rows = narrow(await repo.search({ kind, excludeDemo: true }));
+    rows = narrow(await repo.search({ kind }));
   }
 
   /*
-   * Why the empty case is not simply empty.
-   *
-   * Today the catalogue is 42 example properties and no real ones, so
-   * excluding them correctly returns nothing for almost any question. "I found
-   * nothing" would be true and would also be a worse answer than the truth,
-   * because the search page visibly shows results for the same query and the
-   * assistant would look broken rather than careful.
-   *
-   * So when the exclusion is what emptied the result, say so. The model can
-   * then explain that the places shown in search are examples rather than
-   * pretending the catalogue is bare, and it never has to be trusted to
-   * remember a caveat about a row it was handed.
+   * A REAL LISTING IS NEVER PUSHED DOWN BY AN EXAMPLE, whatever either is
+   * rated. An example carries no reviews, so on rating alone it would sort
+   * below anything real anyway; stating it as the first key means that stays
+   * true if an example ever gains a rating, and means the five rows the model
+   * sees are the five best real ones before any example is offered at all.
    */
-  const exampleOnly = rows.length === 0 && narrow(await repo.search({ kind })).length > 0;
-
   const top = rows
-    .sort((a, b) => b.rating - a.rating || b.reviewCount - a.reviewCount)
+    .sort(
+      (a, b) =>
+        Number(a.isDemo) - Number(b.isDemo) ||
+        b.rating - a.rating ||
+        b.reviewCount - a.reviewCount,
+    )
     .slice(0, 5);
 
   /*
@@ -191,13 +207,13 @@ export async function runListingSearch(raw: z.output<typeof input>): Promise<{
     const photo = top[i]?.photos[0];
     return photo ? { ...entry, photo } : { ...entry };
   });
-  return { items, forModel, exampleOnly };
+  return { items, forModel, hasExample: top.some((l) => l.isDemo) };
 }
 
 export const searchListingsTool = defineTool({
   name: "search_listings",
   description:
-    "Search Vallo's catalogue of property listed by people on Vallo: rentals, property for sale, land, shops and offices, and shortlets, hotels and homes let by their owners, across Nigeria. Nothing comes from an outside feed; a result marked as an example cannot be rented, bought or booked, and you say so. Returns up to five listings with formatted naira prices, ratings and in-app links. Always call this before recommending any property.",
+    "Search Vallo's catalogue of property listed by people on Vallo: rentals, property for sale, land, shops and offices, and shortlets, hotels and homes let by their owners, across Nigeria. Nothing comes from an outside feed. Real listings come first; a row marked \"example\": true is one Vallo publishes to show what a listing looks like, cannot be rented, bought, booked or inspected, and you say so every time you mention one. Returns up to five listings with formatted naira prices, ratings and in-app links. Always call this before recommending any property.",
   input,
   inputSchema: {
     type: "object",
@@ -232,8 +248,15 @@ export const searchListingsTool = defineTool({
   mode: "read",
   workspaces: TOOL_FRAMES,
   async run(_ctx, args) {
-    const { items, forModel, exampleOnly } = await runListingSearch(args);
-    if (forModel.length > 0) return { data: forModel, listings: items };
-    return { data: { results: [] }, note: exampleOnly ? EXAMPLE_ONLY_NOTE : NO_MATCH_NOTE, listings: items };
+    const { items, forModel, hasExample } = await runListingSearch(args);
+    if (forModel.length > 0) {
+      /* The note rides along whenever an example is in the result, not only
+         when the whole result is examples: the model is never left to
+         remember a caveat about a row it was handed. */
+      return hasExample
+        ? { data: forModel, note: EXAMPLE_NOTE, listings: items }
+        : { data: forModel, listings: items };
+    }
+    return { data: { results: [] }, note: NO_MATCH_NOTE, listings: items };
   },
 });

@@ -10,6 +10,8 @@ import { ButtonLink } from "@/components/ui/Button";
 import { UiIcon, type UiIconName } from "@/design-system/icons/UiIcon";
 import { DetailGlyph } from "@/components/app/listing/DetailGlyph";
 import { ListingGallery } from "@/components/app/listing/ListingGallery";
+import { PhotoCredit } from "@/components/app/listing/PhotoCredit";
+import type { PhotoCredit as Credit } from "@/lib/listings/photo-credits";
 import { ICON, Section, Stack, TYPE } from "@/components/app/Screen";
 import { RoomTypes } from "./RoomTypes";
 import { StayDatesForm } from "./StayDatesForm";
@@ -106,7 +108,10 @@ export function StayDetailView({
   instant = false,
   arrival = null,
   door = [],
+  photoCredits = [],
 }: {
+  /** Who took the gallery's photographs, where somebody else did. */
+  photoCredits?: readonly Credit[];
   /** The declared charges at the door, for the all-in cost before booking. */
   door?: readonly DoorCharge[];
   /**
@@ -287,6 +292,9 @@ export function StayDetailView({
         place={{ kind: "accommodation", id: detail.id }}
         initialSaved={saved}
       />
+
+      {/* Under the gallery, never over it. See the component. */}
+      <PhotoCredit credits={photoCredits} copy={t.experienceDetail.photoCredit} />
 
       <div className="mx-auto max-w-2xl pb-section">
         {/* ------------------------------------------------ the headline

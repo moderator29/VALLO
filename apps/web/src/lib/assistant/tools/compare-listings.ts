@@ -3,6 +3,7 @@ import { hrefForListing, marketFactsOf } from "@/lib/listings/href";
 import { getListingRepository } from "@/lib/listings/repository";
 import type { Listing } from "@/lib/listings/types";
 import { priceLine } from "./listing-facts";
+import { EXAMPLE_NOTE } from "./search-listings";
 import { defineTool, TOOL_FRAMES } from "./types";
 
 /**
@@ -47,6 +48,9 @@ export function comparisonOf(l: Listing): Record<string, unknown> {
     rating: l.rating,
     reviewCount: l.reviewCount,
     verified: l.verified,
+    /* UX-25, and the same flag search puts on a row: an example says so, so
+       the model can say it too. */
+    ...(l.isDemo ? { example: true } : {}),
     powerGrid: u?.powerGrid ?? "unanswered",
     powerBackup: u?.powerBackup ?? "unanswered",
     waterSupply: u?.waterSupply ?? "unanswered",
@@ -79,21 +83,20 @@ export async function runCompareListings(raw: z.output<typeof input>): Promise<R
   for (const id of ids) {
     const row = await repo.byId(id).catch(() => null);
     /*
-     * The second door onto the same room, closed for the same reason.
+     * THE SECOND DOOR, AND IT IS NOT CLOSED ANY MORE.
      *
-     * Search no longer returns example listings, so in the ordinary flow the
-     * model cannot have one of these ids to compare. It takes ids as input
-     * though, and an id can arrive from a stale turn earlier in the
-     * conversation or be invented outright, so the exclusion has to live where
-     * the row is read rather than only where it is found. Reported as
-     * `found: false` rather than with a reason, because a comparison table is
-     * not the place to explain what an example listing is and the search path
-     * already does that properly.
+     * This used to report an example listing as `found: false`, on the
+     * reasoning that search never returned one so the only way an id could
+     * arrive here was a stale turn or an invention. Search returns them now
+     * (founder, 26 November 2026; see EXAMPLE_NOTE in search-listings.ts), so
+     * that premise is gone and refusing here would be the worse half of the
+     * old behaviour: the model offers a row, the person asks to compare it,
+     * and the tool answers that it does not exist. That is the same "I found
+     * nothing" the change was made to stop, one turn later.
+     *
+     * So the row comes back, carrying `example: true` exactly as the search
+     * result does, and the note below tells the model what that means.
      */
-    if (row?.isDemo) {
-      out.push({ id, found: false });
-      continue;
-    }
     out.push(row ? comparisonOf(row) : { id, found: false });
   }
   return out;
@@ -102,7 +105,7 @@ export async function runCompareListings(raw: z.output<typeof input>): Promise<R
 export const compareListingsTool = defineTool({
   name: "compare_listings",
   description:
-    "Put two to four Vallo listings side by side on the facts that decide between them: price and what period it covers, bedrooms, bathrooms, where it is, light and water, whether the lister is verified, and the rating with the number of reviews behind it. Pass the listing ids exactly as search_listings returned them. Use this whenever somebody is weighing places against each other rather than asking what is available. An id that cannot be found comes back marked not found; say so rather than leaving it out.",
+    "Put two to four Vallo listings side by side on the facts that decide between them: price and what period it covers, bedrooms, bathrooms, where it is, light and water, whether the lister is verified, and the rating with the number of reviews behind it. Pass the listing ids exactly as search_listings returned them. Use this whenever somebody is weighing places against each other rather than asking what is available. An id that cannot be found comes back marked not found; say so rather than leaving it out. A row marked \"example\": true cannot be rented, bought or booked, and you say so every time you mention it.",
   input,
   inputSchema: {
     type: "object",
@@ -121,6 +124,11 @@ export const compareListingsTool = defineTool({
   mode: "read",
   workspaces: TOOL_FRAMES,
   async run(_ctx, args) {
-    return { data: await runCompareListings(args) };
+    const rows = await runCompareListings(args);
+    /* The same fence the search tool puts up, at the same strength, because a
+       comparison table is a recommendation in a tidier shape. */
+    return rows.some((row) => row.example === true)
+      ? { data: rows, note: EXAMPLE_NOTE }
+      : { data: rows };
   },
 });

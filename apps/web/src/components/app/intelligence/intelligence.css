@@ -523,6 +523,18 @@
     gap: var(--nf-space-xs);
     animation: nf-intel-rise var(--nf-duration-base) var(--nf-ease-entrance) both;
   }
+  /* ONE COLUMN AS WIDE AS THE SCREEN, NEVER AS WIDE AS THE LONGEST LINE
+     (23 November 2026). A grid's own column is sized to its widest
+     unbreakable line, and a recent search, a popular search chip or the
+     "pick up where you left off" query is one truncated line, so a long one
+     pushed every section of the empty page past the right edge of a phone.
+     `minmax(0, 1fr)` holds each of these grids to the width it was given,
+     and the line truncates as it was always meant to. */
+  .nf-intel-section,
+  .nf-intel-recentwrap,
+  .nf-intel-recent {
+    grid-template-columns: minmax(0, 1fr);
+  }
   .nf-intel-skelrail {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));

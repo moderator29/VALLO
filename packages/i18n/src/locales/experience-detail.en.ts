@@ -120,6 +120,24 @@ export const experienceDetailEn = {
     noneAction: "Ask the lister a question",
     whoLists: "Who lists it",
   },
+  /*
+   * WHO TOOK THE PHOTOGRAPHS, where a photograph is somebody else's.
+   *
+   * The example collection is illustrated with photographs hotlinked from
+   * Unsplash, and crediting the photographer where the photograph is shown is
+   * a condition of using them, not a nicety. A lister's own photograph carries
+   * no credit row and draws nothing, so this line only ever appears under a
+   * gallery that borrowed its pictures.
+   *
+   * `{names}` is the list of photographers, already joined by the formatter
+   * in the reader's own language.
+   */
+  photoCredit: {
+    line: "Photographs by {names} on Unsplash",
+    /* The whole line is one link target on a single photographer, so the
+       label says which profile it opens. */
+    profile: "{name} on Unsplash",
+  },
   /* What a space that takes no requests says, with no label on it (D24). */
   closed: {
     body: "This space is not taking requests on Vallo. Save a search for {area} and we will tell you when a space there opens for one.",

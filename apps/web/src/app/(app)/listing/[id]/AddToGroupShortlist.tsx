@@ -45,7 +45,10 @@ export function AddToGroupShortlist({
         {words.open}
       </Button>
       <Sheet open={open} onOpenChange={setOpen} title={words.title} detents={[0.6]}>
-        <ul className="grid gap-xs">
+        {/* One column as wide as the sheet, never as wide as the longest
+            group name: a name is one truncated line, and an auto column grew
+            to it and pushed Add past the sheet's edge (23 November 2026). */}
+        <ul className="grid grid-cols-[minmax(0,1fr)] gap-xs">
           {groups.map((g) => (
             <li key={g.id} className="flex items-center justify-between gap-sm">
               <span className="min-w-0 truncate text-[length:var(--nf-text-body-sm)] font-semibold text-[var(--nf-content-primary)]">{g.name}</span>

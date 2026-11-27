@@ -168,7 +168,7 @@ export function PersonHandoff({ signedIn, openTickets }: { signedIn: boolean; op
             value={question}
             onChange={(event) => setQuestion(event.target.value)}
             maxLength={4000}
-            rows={5}
+            rows={4}
             error={errors.question}
             data-testid="person-question"
           />

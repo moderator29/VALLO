@@ -56,8 +56,16 @@
     outline: var(--nf-focus-ring-width) solid var(--nf-focus-ring);
     outline-offset: -2px;
   }
+  /* ONE COLUMN AS WIDE AS THE PANEL, NEVER AS WIDE AS THE LONGEST SEARCH
+     (23 November 2026). A grid's own column is sized to its widest
+     unbreakable line, and a recent search is one truncated line, so a long
+     one ("Lekki Phase 1, 3 beds, serviced, with a boys quarters") grew the
+     list, and every row in it, past the right edge of a phone. `minmax(0,
+     1fr)` holds the list to the panel's width and the label truncates as it
+     was always meant to. */
   .nf-recent__list {
     display: grid;
+    grid-template-columns: minmax(0, 1fr);
   }
   .nf-recent__row {
     display: flex;

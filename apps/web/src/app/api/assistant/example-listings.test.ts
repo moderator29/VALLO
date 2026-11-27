@@ -63,57 +63,103 @@ describe("the result card carries only what the row states", () => {
   });
 });
 
-describe("the assistant cannot recommend a property that does not exist", () => {
-  it("excludes example listings from every catalogue search it runs", () => {
+describe("the assistant finds the examples and says what they are", () => {
+  /*
+   * THE RULE REVERSED ON 26 NOVEMBER 2026, and the half that mattered stayed.
+   *
+   * This block used to require `excludeDemo` on every catalogue search but
+   * one, so the model never saw an example listing at all. That was right
+   * while the examples were the whole catalogue and the risk was a
+   * recommendation nobody could act on. The founder's instruction, in the
+   * brief that put a hundred examples back: the assistant finds them the same
+   * way VALLO Intelligence does, and always says they are examples, never
+   * available to rent.
+   *
+   * So the exclusion is gone and the fence replaces it. What is pinned now is
+   * the pair that makes that honest: every example row is FLAGGED, and every
+   * reply carrying one also carries the instruction saying what an example is
+   * and what it cannot do. A regression that drops the flag or the note while
+   * keeping the rows is the dangerous shape, because it puts a naira price and
+   * a link on a property that does not exist with nothing marking it.
+   *
+   * These are source constraints for the reason the header gives: the route
+   * cannot be imported here. Weaker than behaviour, far stronger than nothing,
+   * because the failure guarded against is somebody deleting the flag.
+   */
+  it("no longer hides the examples from the catalogue search", () => {
     /*
-     * Counted rather than merely present. There are two search calls, the
-     * narrow one and the widened fallback when free text over-restricts, and
-     * an exclusion on only the first would leak on exactly the queries that
-     * matter: the ones where the person's own words found nothing.
+     * Counted, not merely absent. Both search calls are checked, the narrow
+     * one and the widened fallback, because an exclusion left on either would
+     * put the assistant back to answering "I found nothing" to a question the
+     * search page beside it answers with rows.
      */
     const searches = ROUTE.match(/repo\.search\(\{[^}]*\}/g) ?? [];
-    expect(searches.length).toBeGreaterThanOrEqual(3);
-
-    const withoutExclusion = searches.filter((call) => !call.includes("excludeDemo"));
-
-    /*
-     * EXACTLY ONE, not "at most one", and the difference is the whole test.
-     *
-     * The single permitted search that sees example listings is the probe
-     * asking whether they were the ONLY match, which cannot answer that
-     * question while excluding them. Anything above one means a search that
-     * feeds a recommendation has lost its filter. Anything below one means the
-     * probe has gained an exclusion and now always reports nothing, which
-     * would silently turn the honest "these are examples" answer back into a
-     * bare "I found nothing" without failing any other assertion here.
-     */
-    expect(withoutExclusion).toHaveLength(1);
+    expect(searches.length).toBeGreaterThanOrEqual(2);
+    expect(searches.filter((call) => call.includes("excludeDemo"))).toHaveLength(0);
   });
 
-  it("refuses to compare an example listing, even given its id directly", () => {
-    // compare_listings takes ids as input, so an id can arrive from a stale
-    // turn or be invented. The exclusion has to sit where the row is read.
-    expect(ROUTE).toMatch(/row\?\.isDemo/);
+  it("flags every example row, in both tools", () => {
+    /* The flag is the whole mechanism now. Both mappers read it off the row
+       and neither writes a literal. */
+    const flags = ROUTE.match(/l\.isDemo \? \{ example: true \}/g) ?? [];
+    expect(flags).toHaveLength(2);
+    expect(ROUTE).not.toMatch(/example: false/);
   });
 
-  it("tells the model what to do when examples were the only match", () => {
-    // "I found nothing" is true and is a worse answer than the truth, because
-    // the search page visibly shows results for the same query.
-    expect(ROUTE).toContain("exampleOnly");
-    expect(ROUTE).toMatch(/example listings that Vallo uses to illustrate/);
+  it("never lets an example outrank a real listing", () => {
+    /* An example carries no reviews, so on rating alone it would sort below
+       anything real anyway. Stated as the first sort key so that stays true
+       if one ever gains a rating. */
+    expect(ROUTE).toMatch(/Number\(a\.isDemo\) - Number\(b\.isDemo\)/);
   });
 
-  it("forbids describing them rather than leaving it to the model's judgement", () => {
-    // The tempting move from "these are examples" is to describe them
-    // helpfully. The instruction has to close that door explicitly.
-    expect(ROUTE).toMatch(/Do NOT describe, name, price or recommend/);
+  it("sends the instruction with any reply that carries one", () => {
+    /* Both tools, both gated on a row actually being an example, because a
+       note on every reply trains the model to skim past it. */
+    const notes = ROUTE.match(/note: EXAMPLE_NOTE/g) ?? [];
+    expect(notes).toHaveLength(2);
+    expect(ROUTE).toMatch(/hasExample\s*\n?\s*\?/);
+    expect(ROUTE).toMatch(/some\(\(row\) => row\.example === true\)/);
+  });
+
+  it("tells the model what an example cannot do, in the note itself", () => {
+    /* The note itself contains escaped quotes (it quotes the "example" key),
+       so the literal is matched allowing for them rather than stopping at the
+       first one. */
+    const note = /export const EXAMPLE_NOTE =\s*"(?:[^"\\]|\\.)*"/.exec(ROUTE)?.[0] ?? "";
+    expect(note.length).toBeGreaterThan(0);
+    expect(note).toMatch(/example/i);
+    expect(note).toMatch(/cannot be rented, booked, inspected or paid for/);
+    expect(note).toMatch(/[Nn]ever present one as available/);
+    /* It may be named and priced, because the person can see both on the
+       listing itself; what it may not be is passed off as real. */
+    expect(note).toMatch(/what you may not do is let them think it is real/);
   });
 
   it("keeps the banned words out of anything a reader could see", () => {
-    // `agent-identity.spec.mjs` bans these in user-facing copy. "example" is
-    // the agreed word and the note above uses it.
-    const note = /The only properties matching this search[^"]*/.exec(ROUTE)?.[0] ?? "";
+    /* `agent-identity.spec.mjs` bans these in user-facing copy. "example" is
+       the agreed word and the note uses it. */
+    const note = /export const EXAMPLE_NOTE =\s*"(?:[^"\\]|\\.)*"/.exec(ROUTE)?.[0] ?? "";
     expect(note.length).toBeGreaterThan(0);
     expect(firstBannedPhrase(note, BANNED_IN_EXAMPLE_COPY)).toBeNull();
+  });
+
+  /*
+   * WHAT THE EXCLUSION USED TO PROTECT, STILL PROTECTED, SOMEWHERE ELSE.
+   *
+   * Showing an example to somebody who asked what is available is honest once
+   * it is labelled. PUSHING one at somebody who did not ask is not, and
+   * neither is putting one in something that leaves the app. Those surfaces
+   * keep their filter and this is the assertion that says so, so that
+   * "examples are allowed now" cannot spread from search to everything.
+   */
+  it("still keeps examples out of what is pushed or published", () => {
+    const read = (path: string) => readFileSync(join(process.cwd(), "src", path), "utf8");
+    /* Suggested from a member's own saves, unasked: a recommendation. */
+    expect(read("lib/assistant/tools/saved.ts")).toMatch(/excludeDemo:\s*true/);
+    /* Saved-search alerts: a push notification about a place that does not exist. */
+    expect(read("lib/saved/search-alerts.ts")).toMatch(/excludeDemo = true/);
+    /* The sitemap, the structured data and the Open Graph card. */
+    expect(read("lib/listings/syndication.ts")).toMatch(/excludeDemo:\s*true/);
   });
 });

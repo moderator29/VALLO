@@ -571,7 +571,11 @@ export function ApplyWizard({
         {/* Step 4: Documents */}
         <fieldset hidden={step !== 3} className="space-y-md">
           <Legend title={a.documents.title} sub={a.documents.body} />
-          <div className="grid gap-5 sm:grid-cols-2">
+          {/* One column as wide as the step on a phone, never as wide as a
+              long file name: a restored PDF is named in its slot on one
+              truncated line, and an auto column grew to that line and pushed
+              the step past the right edge (23 November 2026). */}
+          <div className="grid grid-cols-[minmax(0,1fr)] gap-5 sm:grid-cols-2">
             <UploadZone id="idFront" label={a.documents.idFront} hint={a.documents.chooseFile} slot={docs.idFront} onFile={onFile} />
             <UploadZone id="idBack" label={a.documents.idBack} hint={a.documents.chooseFile} slot={docs.idBack} onFile={onFile} />
             {agentType === "business" && (

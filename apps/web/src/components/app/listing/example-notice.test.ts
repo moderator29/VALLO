@@ -93,12 +93,38 @@ describe("the example listing rules", () => {
   });
 
   /*
-   * The detail pages no longer say it either (D24). What they must do instead
-   * is draw every trust signal through `earnedTrust`, the presentation-side
-   * lock that clears badge, dates and rating on an example row.
+   * THE PROPERTY DETAIL PAGE SAYS IT AGAIN, AND ONLY IT.
+   *
+   * The founder's brief of 26 November 2026, the one that put a hundred
+   * examples back in the catalogue, asks for "a small, clear Example tag on
+   * the listing page". That reverses the D24 ruling for THIS ONE SURFACE and
+   * for nothing else, so the rule is now two rules.
+   *
+   * What D24 was actually protecting is untouched and is asserted below: the
+   * page draws every trust signal through `earnedTrust`, which clears the
+   * badge, the dates and the rating on an example row, and the panel explains
+   * that nothing here takes a request. The word coming back does not undo any
+   * of that; it was the half of the disclosure a reader needs before the price
+   * forms a belief.
+   */
+  it("carries one small Example tag on the property detail page", () => {
+    const page = read("app/(app)/listing/[id]/page.tsx");
+    /* The chip, the agreed tone, drawn from the shared badge rather than from
+       a one-off span with a colour in it. */
+    expect(page).toMatch(/<StatusBadge\s+tone="example"/);
+    /* Once. A page that says it in three places is the apology for itself
+       that the owner objected to. */
+    expect(page.match(/tone="example"/g)).toHaveLength(1);
+    /* And only when the row is one. */
+    expect(page).toMatch(/isExample\s*&&/);
+  });
+
+  /*
+   * Every other detail surface still says nothing (D24). The founder named the
+   * listing page; a stay, a restaurant, the move-in block and the handoff
+   * shell were not in that brief and are left exactly as they were.
    */
   it.each([
-    "app/(app)/listing/[id]/page.tsx",
     "app/(app)/stay/[id]/StayDetailView.tsx",
     "app/(app)/restaurant/[id]/RestaurantFace.tsx",
     "components/app/listing/ListingMoveInBlock.tsx",
@@ -108,6 +134,19 @@ describe("the example listing rules", () => {
     expect(source).not.toMatch(/<ExampleNotice\b/);
     expect(source).not.toContain("nf-badge--example");
     expect(source).not.toMatch(/tone="example"/);
+  });
+
+  /*
+   * The notice COMPONENT stays gone everywhere, the detail page included. The
+   * tag is a chip in the status row; `ExampleNotice` was a panel of prose, and
+   * bringing that back is what D24 was written to stop.
+   */
+  it.each([
+    "app/(app)/listing/[id]/page.tsx",
+    "app/(app)/stay/[id]/StayDetailView.tsx",
+    "app/(app)/restaurant/[id]/RestaurantFace.tsx",
+  ])("does not bring the notice panel back on %s", (path) => {
+    expect(read(path)).not.toMatch(/<ExampleNotice\b/);
   });
 
   it("draws the listing page's trust through earnedTrust", () => {

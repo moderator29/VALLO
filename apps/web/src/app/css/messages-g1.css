@@ -477,7 +477,19 @@
   .nf-person {
     padding-block-start: var(--nf-space-md);
   }
+  /* ONE COLUMN AS WIDE AS THE SCREEN, NEVER AS WIDE AS THE LONGEST LINE
+     (23 November 2026, the founder's screenshot). A grid's own column is
+     sized to its widest unbreakable line, and a ticket topic is one truncated
+     line ("Someone asked me to pay outside Vallo"), so the open
+     conversations, the question box and Send all ran past the right edge of
+     a phone. `minmax(0, 1fr)` holds every grid on this page to the width it
+     was given, and the topic truncates as it was always meant to. */
+  .nf-person,
+  .nf-person :is(section, ul, form) {
+    grid-template-columns: minmax(0, 1fr);
+  }
   .nf-person__ticket {
+    min-inline-size: 0;
     display: flex;
     align-items: center;
     gap: var(--nf-space-sm);
