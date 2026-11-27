@@ -124,6 +124,20 @@ export function NavTree({
             <UiIcon name={item.icon} size="md" filled={current} />
           </span>
           <span className="nf-nav__label">{item.label}</span>
+          {/*
+            THE BETA MARK (the founder, 27 November 2026), on Roommates, VALLO
+            Intelligence and the AI Assistant.
+
+            Beside the label rather than after the count, because it qualifies
+            the destination and an unread count qualifies what is waiting in
+            it; and quiet rather than bright, because three lit pills down one
+            rail would read as three alerts. It is a statement of where the
+            product is, not an alarm.
+
+            Hidden with the label when the rail is collapsed to glyphs: the
+            row is a 24px icon there and a word beside it has nowhere to go.
+          */}
+          {item.betaLabel ? <span className="nf-nav__beta">{item.betaLabel}</span> : null}
           {item.badge ? <span className="nf-count-badge nf-nav__badge nf-numeric">{item.badge}</span> : null}
         </Row>
       </li>

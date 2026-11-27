@@ -197,9 +197,15 @@
     -webkit-backdrop-filter: blur(var(--nf-glass-blur-thin));
     backdrop-filter: blur(var(--nf-glass-blur-thin));
   }
-  .nf-rmw__pill:nth-child(even) {
-    margin-inline-start: 1rem;
-  }
+  /*
+   * NO ZIG-ZAG (the founder, 27 November 2026: cleaner, premium).
+   *
+   * Every second pill used to be pushed in by 1rem, which was meant to read
+   * as a scattered, informal stack and read instead as a list that had come
+   * loose from its left edge. Four claims about what the product does are a
+   * list, and a list lines up. The pills still size to their own words, so
+   * the ragged RIGHT edge keeps the informality the indent was reaching for.
+   */
   .nf-rmw__tick {
     display: grid;
     place-items: center;
@@ -971,5 +977,71 @@
     inline-size: 100%;
     block-size: 100%;
     object-fit: cover;
+  }
+}
+
+@layer components {
+  /* =========================== the artwork, with depth (27 November 2026) */
+  /*
+   * The founder: "upgrade the look entire of the image ... more next 2030 gen
+   * premium looks and cleaner looks".
+   *
+   * WHAT IT WAS. Flat fills at three tones: a far row, a mid row and two
+   * white houses, every shape the same matte colour edge to edge. It read as
+   * a 2015 flat illustration, which is exactly what it was.
+   *
+   * WHAT CHANGES, and none of it is a new shape: the same SVG gains depth.
+   * The far towers fade into the night instead of standing in it, the mid
+   * towers carry a vertical fall of light down their faces, the lit windows
+   * glow rather than simply being a brighter rectangle, the arc between the
+   * two homes is a drawn line of light, and the homes themselves pick up a
+   * rim where the light would catch them. Depth, light and air, from the
+   * tokens already here.
+   */
+  .nf-rma--sky .nf-rma__far {
+    /* Distance is haze: the far row sits back rather than sitting behind. */
+    opacity: 0.55;
+    filter: blur(0.6px);
+  }
+  .nf-rma--sky .nf-rma__tone-2 {
+    /* A face lit from above, not a flat slab. */
+    fill: url(#nf-rma-tower);
+  }
+  .nf-rma--sky .nf-rma__win--lit {
+    filter: drop-shadow(0 0 3px color-mix(in oklab, var(--nf-spark-ink) 70%, transparent));
+  }
+  .nf-rma--sky .nf-rma__arc {
+    stroke: url(#nf-rma-arc);
+    stroke-width: 2;
+    stroke-dasharray: none;
+    filter: drop-shadow(0 0 4px color-mix(in oklab, var(--nf-brand-primary) 55%, transparent));
+  }
+  .nf-rma--sky .nf-rma__dot {
+    filter: drop-shadow(0 0 4px color-mix(in oklab, var(--nf-spark-ink) 80%, transparent));
+  }
+  .nf-rma--sky .nf-rma__home path {
+    fill: url(#nf-rma-home);
+  }
+  /* The rim the light catches, and the shadow the house sits in. */
+  .nf-rma--sky .nf-rma__home {
+    filter: drop-shadow(0 6px 10px color-mix(in oklab, #000814 45%, transparent));
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .nf-rma--sky .nf-rma__far {
+      filter: none;
+    }
+  }
+}
+
+@layer components {
+  /* The stops the three gradients above read, so the artwork still answers to
+     the theme instead of carrying hard-coded colour. */
+  .nf-rma--sky {
+    --nf-rma-tower-top: color-mix(in oklab, var(--nf-brand-primary) 58%, var(--nf-surface-artwork));
+    --nf-rma-tower-foot: color-mix(in oklab, var(--nf-brand-primary) 28%, var(--nf-surface-artwork));
+    --nf-rma-arc-mid: var(--nf-spark-ink);
+    --nf-rma-arc-end: color-mix(in oklab, var(--nf-brand-primary) 60%, transparent);
+    --nf-rma-home-top: var(--nf-content-primary);
+    --nf-rma-home-foot: color-mix(in oklab, var(--nf-content-primary) 78%, var(--nf-brand-primary));
   }
 }

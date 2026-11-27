@@ -38,6 +38,31 @@ const BLOCKS: { x: number; w: number; h: number; cols: number; rows: number; see
 export function SkylineArt({ className }: { className?: string }) {
   return (
     <svg className={`nf-rma nf-rma--sky${className ? ` ${className}` : ""}`} viewBox="0 0 390 260" preserveAspectRatio="xMidYMax slice" aria-hidden="true" focusable="false">
+      {/*
+        THE LIGHT IN THE PICTURE (27 November 2026). Three gradients, and the
+        stylesheet decides which shape wears which. They are declared in
+        `currentColor` terms wherever they can be, so the artwork still
+        answers to the theme rather than carrying colours of its own: the
+        stops below are the brand's, mixed in the stylesheet.
+      */}
+      <defs>
+        {/* A tower face, lit from above and falling into the dark. */}
+        <linearGradient id="nf-rma-tower" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="var(--nf-rma-tower-top)" />
+          <stop offset="100%" stopColor="var(--nf-rma-tower-foot)" />
+        </linearGradient>
+        {/* The link between the two homes, brightest in the middle. */}
+        <linearGradient id="nf-rma-arc" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stopColor="var(--nf-rma-arc-end)" />
+          <stop offset="50%" stopColor="var(--nf-rma-arc-mid)" />
+          <stop offset="100%" stopColor="var(--nf-rma-arc-end)" />
+        </linearGradient>
+        {/* A home, with the roof catching the light the street does not. */}
+        <linearGradient id="nf-rma-home" x1="0" y1="0" x2="0.3" y2="1">
+          <stop offset="0%" stopColor="var(--nf-rma-home-top)" />
+          <stop offset="100%" stopColor="var(--nf-rma-home-foot)" />
+        </linearGradient>
+      </defs>
       <g className="nf-rma__far">
         <rect className="nf-rma__tone-1" x="-10" y="120" width="70" height="140" rx="3" />
         <rect className="nf-rma__tone-1" x="64" y="96" width="46" height="164" rx="3" />

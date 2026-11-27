@@ -2015,3 +2015,83 @@
     transform: translate3d(0, 8px, 0);
   }
 }
+
+@layer components {
+  /* ==================================== VALLO Intelligence, by day */
+  /*
+   * LESS INK IN LIGHT MODE (the founder, 27 November 2026: "too much of ink in
+   * the light mode, no much clean looks ... high end visuals important and
+   * clean").
+   *
+   * WHAT WAS HEAVY. The screen inherited the app's paper tokens unchanged, so
+   * by day it read as near-black print on a cool grey sheet: the question at
+   * `#0f1219`, 700 weight and 30px with tight tracking, four tile titles in
+   * the same ink under it, and a greeting at full brand saturation above.
+   * Five blocks of near-black inside one viewport, with the cards too close in
+   * value to the canvas to separate from it. In night that weight is the
+   * subject; by day it is a wall.
+   *
+   * WHAT THIS DOES, and it changes no size, no spacing and no layout, only
+   * value: the ink goes from near-black to a deep blue slate, the greeting
+   * comes off full saturation, and the canvas lifts towards white so the white
+   * cards read as objects sitting on paper rather than panels camouflaged
+   * against it. Contrast stays well the right side of AA on every one of them:
+   * the ink is still around 15:1 on the lifted canvas.
+   *
+   * Scoped to this screen on purpose. The same complaint may be true of other
+   * surfaces, but the tokens it would take to fix it globally are the app's
+   * and changing them here would be changing every page from inside one.
+   */
+  :root[data-theme="light"] .nf-intel {
+    /* A cleaner ground than the app's cool grey, so a white card has
+       somewhere to sit. Still a sheet, not a glare: two per cent of the
+       brand keeps it the same family as everything around it. */
+    --nf-intel-paper: color-mix(in oklab, var(--nf-brand-primary) 2%, #ffffff);
+    /* Deep blue slate rather than near-black. The hue is the brand's, so the
+       type belongs to the page instead of being printed on it. */
+    --nf-intel-ink: color-mix(in oklab, var(--nf-brand-primary) 16%, #10151f);
+    background: var(--nf-intel-paper);
+    /* The paper has to reach the bottom of the window, not stop where the
+       content does: a short screen otherwise shows the app's cooler canvas
+       below the last row as a visible seam. `align-content: start` with it,
+       because this is a grid and the spare height would otherwise be shared
+       out between the rows and pull the screen apart. */
+    min-block-size: 100dvh;
+    align-content: start;
+  }
+  :root[data-theme="light"] .nf-intel .nf-intel-hero__title,
+  :root[data-theme="light"] .nf-intel .nf-intel-tilecard__title {
+    color: var(--nf-intel-ink);
+  }
+  /*
+   * The question loses a little of its weight as well as its blackness. At
+   * 30px display, 700 against 600 is most of what makes it read as a wall,
+   * and 600 still carries a headline.
+   */
+  :root[data-theme="light"] .nf-intel .nf-intel-hero__title {
+    font-weight: 600;
+  }
+  /* Calmer than full brand blue, which at 17px bold was the loudest thing
+     above the fold and is only a greeting. */
+  :root[data-theme="light"] .nf-intel .nf-intel-hero__greet {
+    color: color-mix(in oklab, var(--nf-content-link) 78%, var(--nf-intel-ink));
+  }
+  /*
+   * The cards gain the edge they lost against a brighter ground: a hairline
+   * of the brand at low alpha and a soft, wide shadow rather than the stacked
+   * inset the dark glass uses. One object, lifted off the paper.
+   */
+  :root[data-theme="light"] .nf-intel .nf-intel-tilecard {
+    border-color: color-mix(in oklab, var(--nf-brand-primary) 14%, transparent);
+    background: #ffffff;
+    box-shadow:
+      0 1px 2px color-mix(in oklab, var(--nf-brand-primary) 6%, transparent),
+      0 8px 24px -12px color-mix(in oklab, var(--nf-brand-primary) 18%, transparent);
+  }
+  /* The glyph tile inside a card: quieter against white than it was against
+     the old wash, so the card reads title first and icon second. */
+  :root[data-theme="light"] .nf-intel .nf-intel-tilecard__icon {
+    border-color: color-mix(in oklab, var(--nf-brand-primary) 16%, transparent);
+    background: color-mix(in oklab, var(--nf-brand-primary) 8%, #ffffff);
+  }
+}

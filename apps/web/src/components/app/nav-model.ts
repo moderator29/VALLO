@@ -78,6 +78,16 @@ export type NavLeaf = {
   label: string;
   icon: UiIconName;
   badge?: number;
+  /**
+   * The word for a product area still being built in the open, already
+   * translated.
+   *
+   * The label rather than a boolean because `NavTree` takes no dictionary and
+   * threading one in for a single word would be the larger change. Set from
+   * `t.nav.beta` below, so all three rows carry the same string and a locale
+   * that translates it translates all of them at once.
+   */
+  betaLabel?: string;
 };
 
 export type NavNode = NavLeaf & {
@@ -194,7 +204,9 @@ export function buildNav({
   if (t.intelligenceEntry) {
     sections.push({
       heading: null,
-      items: [{ href: "/intelligence", label: t.intelligenceEntry.nav, icon: "spark" }],
+      items: [
+        { href: "/intelligence", label: t.intelligenceEntry.nav, icon: "spark", betaLabel: t.nav.beta },
+      ],
     });
   }
 
@@ -208,7 +220,9 @@ export function buildNav({
   if (t.roommatesEntry) {
     sections.push({
       heading: null,
-      items: [{ href: ROOMMATES_ROUTES.home, label: t.roommatesEntry.nav, icon: "house-duplex" }],
+      items: [
+        { href: ROOMMATES_ROUTES.home, label: t.roommatesEntry.nav, icon: "house-duplex", betaLabel: t.nav.beta },
+      ],
     });
   }
 
@@ -278,7 +292,7 @@ export function buildNav({
          * it could drift - every other row here reads `t.nav.*` and would
          * have followed a rename for free. (R1 finding A33.)
          */
-        { href: "/assistant", label: t.nav.aiAssistant, icon: "bot" },
+        { href: "/assistant", label: t.nav.aiAssistant, icon: "bot", betaLabel: t.nav.beta },
       ],
     });
 
@@ -507,7 +521,7 @@ export function formerTrayItems(t: ShellDictionary, signedIn: boolean, stays: bo
         { href: "/messages", label: t.nav.messages, icon: "chat-bubble" },
         { href: stays ? "/bookings?side=stays&from=stays" : "/bookings", label: t.shape.plans.title, icon: "calendar-booking" },
         { href: "/saved", label: t.nav.saved, icon: "heart" },
-        { href: "/assistant", label: t.nav.aiAssistant, icon: "bot" },
+        { href: "/assistant", label: t.nav.aiAssistant, icon: "bot", betaLabel: t.nav.beta },
         { href: "/agreements", label: t.nav.agreements, icon: "document" },
         { href: "/price", label: t.priceCheck.title, icon: "price-tag" },
         { href: "/settings", label: t.nav.settings, icon: "settings-gear" },
@@ -515,7 +529,7 @@ export function formerTrayItems(t: ShellDictionary, signedIn: boolean, stays: bo
         { href: "/support/new?kind=problem", label: t.experienceInbox.support.home.reportProblem, icon: "flag" },
       ]
     : [
-        { href: "/assistant", label: t.nav.aiAssistant, icon: "bot" },
+        { href: "/assistant", label: t.nav.aiAssistant, icon: "bot", betaLabel: t.nav.beta },
         { href: "/price", label: t.priceCheck.title, icon: "price-tag" },
         { href: "/help", label: t.nav.helpSupport, icon: "headset" },
       ];

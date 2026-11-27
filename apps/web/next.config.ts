@@ -68,6 +68,16 @@ const nextConfig: NextConfig = {
 
   experimental: {
     /*
+     * HOW THIS APP WAS LAST MOVED OFF A VULNERABLE NEXT (27 November 2026).
+     *
+     * `next build` refused to finish on 16.4.4, stopping once with
+     * SecurityFatalError and a published advisory, which also took the dev
+     * server down. The upgrade to 16.4.6 was run with `next upgrade
+     * --agent=security`, and this flag is what that asks an app to record so
+     * the tooling knows the security route was the one taken.
+     */
+    agentUpgrade: "security",
+    /*
      * THE CLIENT ROUTER KEEPS WHAT IT HAS JUST SEEN (Track M performance).
      * With the default of 0 for dynamic pages, going back to a tab you left
      * ten seconds ago fetched it again and showed its skeleton while it did.

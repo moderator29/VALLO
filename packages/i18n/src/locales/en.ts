@@ -736,6 +736,11 @@ export const en = {
     },
     helpSupport: "Help and support",
     aiAssistant: "AI Assistant",
+    /* The mark beside a navigation row for a product area still being built
+       in the open: Roommates, VALLO Intelligence and the AI Assistant. One
+       word, the same word on all three, so it reads as a state of the product
+       and not as three different experiments. */
+    beta: "Beta",
     profile: "Profile",
     settings: "Settings",
     explore: "Explore",

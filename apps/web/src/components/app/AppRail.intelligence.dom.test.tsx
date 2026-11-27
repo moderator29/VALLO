@@ -40,9 +40,17 @@ describe.skipIf(!hasBrowser && !process.env.CI)("the side navigation's Intellige
         const rows = await page.evaluate(() =>
           [...document.querySelectorAll<HTMLAnchorElement>("aside a[href]")]
             .filter((a) => a.offsetParent !== null && a.closest(".nf-nav__section"))
-            .map((a) => ({ href: a.getAttribute("href"), text: a.textContent?.trim(), icons: a.querySelectorAll("svg").length })),
+            .map((a) => ({
+              href: a.getAttribute("href"),
+              /* The row's own name, without the Beta mark beside it: that is
+                 asserted separately below, so a change to one does not read
+                 as a change to the other. */
+              text: a.querySelector(".nf-nav__label")?.textContent?.trim(),
+              beta: a.querySelector(".nf-nav__beta")?.textContent?.trim() ?? null,
+              icons: a.querySelectorAll("svg").length,
+            })),
         );
-        expect(rows[0]).toEqual({ href: "/intelligence", text: "VALLO Intelligence", icons: 1 });
+        expect(rows[0]).toEqual({ href: "/intelligence", text: "VALLO Intelligence", beta: "Beta", icons: 1 });
       } finally {
         await close();
       }
