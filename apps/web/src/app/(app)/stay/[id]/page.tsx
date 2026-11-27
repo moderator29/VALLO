@@ -24,7 +24,6 @@ import { publicStayDetail } from "@/lib/catalogue/stays";
 import { listSavedPlaces } from "@/lib/saved/places-actions";
 import { isSaved, savedKeySet } from "@/lib/saved/places";
 import { accommodationPhotoUrl } from "@/lib/stays/photos";
-import { creditedPhotographers, readPhotoCredits } from "@/lib/listings/photo-credits";
 import { siteUrl } from "@/lib/site";
 import { resolveSession } from "@/lib/actions/session";
 import ListingPage, { generateMetadata as listingMetadata } from "../../listing/[id]/page";
@@ -270,12 +269,6 @@ export default async function StayDetailPage({
       instant={instant}
       arrival={<ArrivalChargesLine listingId={null} accommodationId={detail.id} locale={locale} />}
       door={doorCharges}
-      /* Who took the gallery's photographs, where somebody else did. Empty on
-         a venue whose pictures are its own, which draws nothing. */
-      photoCredits={creditedPhotographers(
-        detail.photos.map((photo) => photo.url),
-        await readPhotoCredits(detail.photos.map((photo) => photo.url)),
-      )}
     />
     </GuideScope>
   );

@@ -110,8 +110,7 @@ import { findConversationForListing } from "@/lib/messages/actions";
 import { Money } from "@/components/ui/Money";
 import { StatusPill } from "@/components/ui/StatusPill";
 import { StatusBadge } from "@/components/ui/StatusBadge";
-import { PhotoCredit } from "@/components/app/listing/PhotoCredit";
-import { creditedPhotographers, readPhotoCredits } from "@/lib/listings/photo-credits";
+import { DetailBack } from "@/components/app/listing/DetailBack";
 import { ListingPhotoGrid } from "@/components/app/listing/ListingPhotoGrid";
 import { listingMedia } from "@/components/app/listing/gallery-media";
 import { ListingUtilities } from "@/components/app/listing/ListingUtilities";
@@ -427,7 +426,6 @@ export default async function ListingDetailPage({
     ownershipSeen,
     payeeRecords,
     headersStore,
-    photoCredits,
   ] = await Promise.all([
     // Written reviews for this listing. Public by policy for a PUBLISHED
     // listing, so this read works for a signed-out visitor too.
@@ -490,12 +488,6 @@ export default async function ListingDetailPage({
     /* B-05: hoist from inline JSX so it runs with the rest. */
     isRental && !isSale ? readPayeeRecords(listing.id) : Promise.resolve(undefined),
     headers(),
-    /* Who took the gallery's photographs, where somebody else did. The
-       example collection's pictures are hotlinked from Unsplash and crediting
-       the photographer is a condition of using them. A lister's own photograph
-       has no credit row, so this comes back empty on an ordinary listing and
-       draws nothing. */
-    readPhotoCredits(listing.photos),
   ]);
   /* V-59: "Moved in for the Vallo price", the one public number from the
      tenancy reviews. Null (and no line) on every example listing. */
@@ -1101,6 +1093,10 @@ export default async function ListingDetailPage({
           the title and the price. The floating back, share and save, Watch
           video and the photo counter stay on the photograph.
         */}
+        {/* The way back, above the card and outside it. This page has no top
+            bar to carry one: see `DetailBack`. */}
+        <DetailBack fallback="/home" />
+
         <div className="nf-sc nf-sc-top" data-testid="detail-top">
         <ListingGallery
           listingId={listing.id}
@@ -1119,14 +1115,6 @@ export default async function ListingDetailPage({
           /* The market is no longer a mark on the photograph: it is the
              status chip above the title, where the reference puts it. The
              lister's published badge is on "Listed by". */
-        />
-
-        {/* Under the gallery, never over it: a credit is small print and an
-            obligation, not a caption. Empty on a listing whose photographs are
-            the lister's own, which is every real one. */}
-        <PhotoCredit
-          credits={creditedPhotographers(listing.photos, photoCredits)}
-          copy={sx.photoCredit}
         />
 
                 {/* ------------------------------- 2 to 5. THE LEAD BLOCK

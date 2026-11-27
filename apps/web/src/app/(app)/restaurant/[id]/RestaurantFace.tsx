@@ -4,8 +4,7 @@ import { Amount } from "@/components/ui/Amount";
 import { ButtonLink } from "@/components/ui/Button";
 import { UiIcon, type UiIconName } from "@/design-system/icons/UiIcon";
 import { ListingGallery } from "@/components/app/listing/ListingGallery";
-import { PhotoCredit } from "@/components/app/listing/PhotoCredit";
-import type { PhotoCredit as Credit } from "@/lib/listings/photo-credits";
+import { DetailBack } from "@/components/app/listing/DetailBack";
 import {
   DetailAboutCard,
   DetailCapsules,
@@ -42,8 +41,6 @@ export type RestaurantFaceProps = {
   t: Dictionary;
   /** The gallery exactly as the route mounts it (photos, plates, heart). */
   gallery: ComponentProps<typeof ListingGallery>;
-  /** Who took the gallery's photographs, where somebody else did. */
-  photoCredits?: readonly Credit[];
   title: string;
   /** "Area, City", or empty when the venue gave neither. */
   where: string;
@@ -114,17 +111,15 @@ export function RestaurantFace({
   isExample = false,
   areaPoint,
   tableRules = [],
-  photoCredits = [],
 }: RestaurantFaceProps) {
   const copy = t.restaurantPage;
   const placeCopy = t.catalogue.stays.place;
   return (
     <PhotoViewerProvider title={title} photos={gallery.photos} hue={gallery.hue} kind="restaurant">
     <div className="nf-cat-surface">
+      {/* The way back: this page has no top bar either. See `DetailBack`. */}
+      <DetailBack fallback="/restaurants" />
       <ListingGallery {...gallery} />
-
-      {/* Under the gallery, never over it. See the component. */}
-      <PhotoCredit credits={photoCredits} copy={t.experienceDetail.photoCredit} />
 
       <div className="mx-auto max-w-2xl px-gutter pb-section">
         <div className={panelClass({ variant: "card", className: "nf-detail-lead relative z-10 -mt-xl block sm:-mt-2xl" })}>

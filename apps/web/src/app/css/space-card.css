@@ -546,3 +546,30 @@
     }
   }
 }
+
+/* --------------------------------------------- the way back, over the card */
+/*
+ * The row `DetailBack` draws above a photo-first detail page's card. See that
+ * component for why it exists: these three routes have no top bar, so without
+ * it the page has no way back until its sticky tabs scroll in.
+ *
+ * It is outside the card and over it, never on the photograph (the founder,
+ * 16 November). The gutter matches the page's, so the control's optical left
+ * edge lines up with the card's.
+ */
+@layer components {
+  .nf-detail-back {
+    display: flex;
+    align-items: center;
+    padding-inline: var(--nf-space-2xs);
+    padding-block-end: var(--nf-space-2xs);
+  }
+  /*
+   * Where a bar IS carrying the back, this row is the duplicate. `BarBack`
+   * sets the attribute only once it has found a lead slot to portal into, so
+   * exactly one of the two is ever on screen.
+   */
+  :root[data-page-back] .nf-detail-back {
+    display: none;
+  }
+}
